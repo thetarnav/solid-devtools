@@ -1,0 +1,49 @@
+{
+  "manifest_version": 3,
+  "name": "Solid Devtools",
+  "version": "0.0.1",
+  "version_name": "0.0.1 – Initial Version",
+  "author": "Damian Tarnawski",
+  "minimum_chrome_version": "94",
+  "devtools_page": "src/devtools_page.html",
+  "background": {
+    "service_worker": "src/background"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "file:///*",
+        "http://*/*",
+        "https://*/*",
+        "<all_urls>"
+      ],
+      "js": [
+        "src/content"
+      ]
+    }
+  ],
+  "permissions": [
+    "scripting",
+    "storage"
+  ],
+  "host_permissions": [
+    "file:///*",
+    "http://*/*",
+    "https://*/*"
+  ],
+  "action": {
+    "default_icon": {
+      "16": "src/assets/icons/solid-gray-16.png",
+      "32": "src/assets/icons/solid-gray-32.png",
+      "48": "src/assets/icons/solid-gray-48.png",
+      "128": "src/assets/icons/solid-gray-128.png"
+    },
+    "default_title": "Solid Devtools"
+  },
+  "icons": {
+    "16": "src/assets/icons/solid-normal-16.png",
+    "32": "src/assets/icons/solid-normal-32.png",
+    "48": "src/assets/icons/solid-normal-48.png",
+    "128": "src/assets/icons/solid-normal-128.png"
+  }
+}
