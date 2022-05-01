@@ -1,8 +1,6 @@
 {
   "manifest_version": 3,
   "name": "Solid Devtools",
-  "version": "0.0.1",
-  "version_name": "0.0.1 – Initial Version",
   "author": "Damian Tarnawski",
   "minimum_chrome_version": "94",
   "devtools_page": "src/devtools_page.html",

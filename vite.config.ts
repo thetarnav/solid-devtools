@@ -1,15 +1,11 @@
 import { defineConfig } from "vite"
 import solidPlugin from "vite-plugin-solid"
-// import { chromeExtension } from "vite-plugin-chrome-extension"
 import { crx } from "@crxjs/vite-plugin"
 import manifest from "./manifest.json"
+import { version } from "./package.json"
 
 export default defineConfig({
-  plugins: [
-    solidPlugin(),
-    // chromeExtension(),
-    crx({ manifest }),
-  ],
+  plugins: [solidPlugin(), crx({ manifest: { ...manifest, version } })],
   build: {
     rollupOptions: {
       input: {
