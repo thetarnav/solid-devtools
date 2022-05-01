@@ -15,4 +15,7 @@ export default defineConfig({
     target: "esnext",
     polyfillDynamicImport: false,
   },
+  optimizeDeps: {
+    entries: ["src/*.html"],
+  },
 })
