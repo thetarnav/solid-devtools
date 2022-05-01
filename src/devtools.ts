@@ -1,13 +1,11 @@
-console.log("DEVTOOOOLS")
+console.log("devtools")
 
 chrome.devtools.panels.create(
-  "Solid Devtools", // title
-  "icons/solid-normal-32.png", // icon
-  "src/index.html", // content
+  "Solid Devtools",
+  "icons/solid-normal-32.png",
+  "src/index.html",
   panel => {
+    if (chrome.runtime.lastError) console.error(chrome.runtime.lastError)
     console.log("panel", panel)
-
-    // newPanel.onShown.addListener(initialisePanel);
-    // newPanel.onHidden.addListener(unInitialisePanel);
   }
 )
