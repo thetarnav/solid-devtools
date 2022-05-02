@@ -1,0 +1,33 @@
+{
+  "npmClient": "pnpm",
+  "baseBranch": "origin/main",
+  "pipeline": {
+    "build": {
+      "dependsOn": [
+        "^build"
+      ],
+      "outputs": [
+        "dist/**"
+      ]
+    },
+    "typecheck": {
+      "cache": false
+    },
+    "deploy": {
+      "dependsOn": [
+        "build"
+      ]
+    },
+    "publish": {
+      "dependsOn": [
+        "build"
+      ]
+    },
+    "dev": {
+      "outputs": [
+        "dist/**"
+      ],
+      "cache": false
+    }
+  }
+}
