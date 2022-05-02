@@ -8,13 +8,13 @@ export default defineConfig({
   build: {
     rollupOptions: {
       input: {
-        panel: "src/index.html",
+        panel: "panel/index.html",
       },
     },
     target: "esnext",
     polyfillDynamicImport: false,
   },
   optimizeDeps: {
-    entries: ["src/**/*.html"],
+    entries: ["**/*.html"],
   },
 })
