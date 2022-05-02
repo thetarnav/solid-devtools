@@ -7,6 +7,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "test": "echo \"NOOP TEST\"",
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {

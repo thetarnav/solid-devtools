@@ -10,17 +10,27 @@
         "dist/**"
       ]
     },
+    "test": {
+      "dependsOn": [
+        "^build"
+      ],
+      "outputs": []
+    },
     "typecheck": {
       "cache": false
     },
     "deploy": {
       "dependsOn": [
-        "build"
+        "build",
+        "test",
+        "typecheck"
       ]
     },
     "publish": {
       "dependsOn": [
-        "build"
+        "build",
+        "test",
+        "typecheck"
       ]
     },
     "dev": {
