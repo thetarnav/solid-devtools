@@ -1,17 +1,17 @@
 /* @refresh reload */
 import { render } from "solid-js/web"
 
-console.log("devtools (Panel) page working")
+console.log("panel working")
 
-// bg -> devtools
+// bg -> panel
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  console.log("devtools got message", message, sender)
-  sendResponse("devtools response")
+  console.log("panel got message", message, sender)
+  sendResponse("panel response")
 })
 
-// devtools -> bg
-chrome.runtime.sendMessage("Hello from Devtools", response => {
-  console.log("Got response in Devtools", response)
+// panel -> bg
+chrome.runtime.sendMessage("Hello from panel", response => {
+  console.log("Got response in panel", response)
 })
 
 import "./index.css"

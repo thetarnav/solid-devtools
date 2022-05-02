@@ -23,17 +23,17 @@ export default defineManifest({
   host_permissions: ["file:///*", "http://*/*", "https://*/*"],
   action: {
     default_icon: {
-      "16": "icons/solid-gray-16.png",
-      "32": "icons/solid-gray-32.png",
-      "48": "icons/solid-gray-48.png",
-      "128": "icons/solid-gray-128.png",
+      "16": "public/icons/solid-gray-16.png",
+      "32": "public/icons/solid-gray-32.png",
+      "48": "public/icons/solid-gray-48.png",
+      "128": "public/icons/solid-gray-128.png",
     },
     default_title: "Solid Devtools",
   },
   icons: {
-    "16": "icons/solid-normal-16.png",
-    "32": "icons/solid-normal-32.png",
-    "48": "icons/solid-normal-48.png",
-    "128": "icons/solid-normal-128.png",
+    "16": "public/icons/solid-normal-16.png",
+    "32": "public/icons/solid-normal-32.png",
+    "48": "public/icons/solid-normal-48.png",
+    "128": "public/icons/solid-normal-128.png",
   },
 })

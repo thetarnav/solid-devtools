@@ -1,6 +1,8 @@
+import { CONTENT_PORT_NAME } from "../shared/variables"
+
 console.log("content script working")
 
-let port = chrome.runtime.connect({ name: "port-from-cs" })
+const port = chrome.runtime.connect({ name: CONTENT_PORT_NAME })
 
 // content -> bg
 port.postMessage({ greeting: "hello from content script" })
