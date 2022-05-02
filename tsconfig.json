@@ -13,6 +13,7 @@
       "vite/client",
       "@types/chrome"
     ],
-    "noEmit": true
+    "noEmit": true,
+    "isolatedModules": true
   }
 }

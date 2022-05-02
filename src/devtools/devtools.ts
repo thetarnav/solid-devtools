@@ -1,5 +1,3 @@
-console.log("devtools")
-
 chrome.devtools.panels.create(
   "Solid Devtools",
   "icons/solid-normal-32.png",
@@ -9,3 +7,5 @@ chrome.devtools.panels.create(
     console.log("panel", panel)
   }
 )
+
+export {}
