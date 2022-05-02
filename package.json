@@ -3,6 +3,7 @@
   "version": "0.0.1",
   "license": "ISC",
   "author": "Damian Tarnawski <gthetarnav@gmail.com>",
+  "contributors": [],
   "scripts": {
     "start": "vite",
     "dev": "npm run start",

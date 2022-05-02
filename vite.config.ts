@@ -1,11 +1,10 @@
 import { defineConfig } from "vite"
 import solidPlugin from "vite-plugin-solid"
 import { crx } from "@crxjs/vite-plugin"
-import manifest from "./manifest.json"
-import { version } from "./package.json"
+import manifest from "./manifest"
 
 export default defineConfig({
-  plugins: [solidPlugin(), crx({ manifest: { ...manifest, version } })],
+  plugins: [solidPlugin(), crx({ manifest })],
   build: {
     rollupOptions: {
       input: {
@@ -16,6 +15,6 @@ export default defineConfig({
     polyfillDynamicImport: false,
   },
   optimizeDeps: {
-    entries: ["src/*.html"],
+    entries: ["src/**/*.html"],
   },
 })
