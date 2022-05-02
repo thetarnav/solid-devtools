@@ -1,0 +1,19 @@
+{
+  "name": "solid-devtools",
+  "version": "0.0.1",
+  "license": "ISC",
+  "author": "Damian Tarnawski <gthetarnav@gmail.com>",
+  "contributors": [],
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "test": "turbo run test",
+    "typecheck": "turbo run typecheck"
+  },
+  "devDependencies": {
+    "typescript": "^4.6.4",
+    "turbo": "^1.2.6",
+    "@types/node": "^17.0.31"
+  },
+  "packageManager": "pnpm@6.32.11"
+}
