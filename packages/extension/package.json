@@ -1,11 +1,11 @@
 {
   "name": "solid-devtools-extension",
   "version": "0.0.1",
-  "license": "ISC",
+  "license": "MIT",
   "author": "Damian Tarnawski <gthetarnav@gmail.com>",
   "contributors": [],
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --port 3333",
     "build": "vite build",
     "test": "echo \"NOOP TEST\"",
     "typecheck": "tsc --noEmit"

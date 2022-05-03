@@ -1,14 +1,14 @@
 {
   "name": "solid-devtools",
   "version": "0.0.1",
-  "license": "ISC",
+  "license": "MIT",
   "author": "Damian Tarnawski <gthetarnav@gmail.com>",
   "contributors": [],
   "scripts": {
     "dev": "turbo run dev",
-    "build": "turbo run build",
-    "test": "turbo run test",
-    "typecheck": "turbo run typecheck"
+    "build": "turbo run build --filter=!./playgrounds/*",
+    "test": "turbo run test --filter=!./playgrounds/*",
+    "typecheck": "turbo run typecheck --filter=!./playgrounds/*"
   },
   "devDependencies": {
     "typescript": "^4.6.4",
