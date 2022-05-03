@@ -1,4 +1,4 @@
-import { CONTENT_PORT_NAME } from "../shared/variables"
+import { CONTENT_PORT_NAME } from "@/shared/variables"
 
 console.log("content script working")
 

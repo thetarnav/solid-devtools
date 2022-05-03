@@ -6,7 +6,7 @@ const App: Component = () => {
     <div class={styles.App}>
       <header class={styles.header}>
         <img
-          src="https://github.com/solidjs/solid/blob/main/assets/logo.png"
+          src="https://github.com/solidjs/solid/raw/ebdb8cdf9b0f986e7d15048a34d50a4837101c49/assets/logo.png"
           class={styles.logo}
           alt="logo"
         />

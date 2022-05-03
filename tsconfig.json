@@ -3,6 +3,11 @@
     "strict": true,
     "target": "ESNext",
     "module": "ESNext",
+    "lib": [
+      "DOM",
+      "DOM.Iterable",
+      "ESNext"
+    ],
     "moduleResolution": "node",
     "allowSyntheticDefaultImports": true,
     "resolveJsonModule": true,

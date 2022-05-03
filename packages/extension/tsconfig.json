@@ -5,5 +5,10 @@
       "vite/client",
       "@types/chrome"
     ],
-  }
+    "paths": {
+      "@/*": [
+        "./*"
+      ]
+    }
+  },
 }

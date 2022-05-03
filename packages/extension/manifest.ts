@@ -11,15 +11,20 @@ export default defineManifest({
   content_scripts: [
     {
       matches: ["<all_urls>"],
-      js: ["content/index.ts"],
+      js: ["content/on-start.ts"],
       run_at: "document_start",
+    },
+    {
+      matches: ["<all_urls>"],
+      js: ["content/on-idle.ts"],
+      run_at: "document_idle",
     },
   ],
   background: {
     service_worker: "background/index.ts",
     type: "module",
   },
-  permissions: ["scripting", "storage"],
+  permissions: ["http://*/*", "https://*/*", "file:///*", "contextMenus", "scripting", "storage"],
   host_permissions: ["file:///*", "http://*/*", "https://*/*"],
   action: {
     default_icon: {
