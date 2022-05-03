@@ -1,6 +1,10 @@
+import { postMessage } from "@/shared/utils"
+import { MESSAGE } from "@/shared/variables"
+
 console.log("REAL WORLD")
 
 const solidOnPage = window.Solid$$
-console.log("Solid on page", solidOnPage)
+
+postMessage(MESSAGE.SOLID_ON_PAGE, solidOnPage)
 
 export {}
