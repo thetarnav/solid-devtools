@@ -1,16 +1,16 @@
+import { createRuntimeMessanger } from "@/shared/utils"
 import { MESSAGE } from "@/shared/variables"
 
 console.log("devtools script working")
 
-// TODO: wrap entire messaging system with typesafe functions
-chrome.runtime.onMessage.addListener(message => {
-  if (message && message.id === MESSAGE.SOLID_ON_PAGE) {
-    if (message.payload) {
-      console.log("Solid on page – creating panel")
-      createPanel()
-    } else {
-      console.warn("Solid not on page – NOT creating panel")
-    }
+const { onRuntimeMessage, postRuntimeMessage } = createRuntimeMessanger()
+
+onRuntimeMessage(MESSAGE.SolidOnPage, solidOnPage => {
+  if (solidOnPage) {
+    console.log("Solid on page – creating panel")
+    createPanel()
+  } else {
+    console.warn("Solid not on page – NOT creating panel")
   }
 })
 
@@ -29,11 +29,11 @@ function createPanel() {
 }
 
 function onPanelShown() {
-  chrome.runtime.sendMessage("solid-panel-shown")
+  postRuntimeMessage(MESSAGE.PanelVisibility, true)
 }
 
 function onPanelHidden() {
-  chrome.runtime.sendMessage("solid-panel-hidden")
+  postRuntimeMessage(MESSAGE.PanelVisibility, false)
 }
 
 export {}

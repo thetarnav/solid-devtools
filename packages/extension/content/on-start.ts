@@ -1,18 +1,19 @@
-import { onMessage, startListeningForPostMessages } from "@/shared/utils"
+import { createPortMessanger, onWindowMessage, startListeningWindowMessages } from "@/shared/utils"
 import { DEVTOOLS_CONTENT_PORT, MESSAGE } from "@/shared/variables"
 
 console.log("content script working")
 
-startListeningForPostMessages()
-
 const port = chrome.runtime.connect({ name: DEVTOOLS_CONTENT_PORT })
 
+startListeningWindowMessages()
+const { postPortMessage, onPortMessage } = createPortMessanger(port)
+
 // content -> bg
-port.postMessage({ greeting: "hello from content script" })
+postPortMessage(MESSAGE.Hello, "hello from content script")
 
 // bg -> content
-port.onMessage.addListener(function (m) {
-  console.log("In content script, received message from background script: ", m)
+onPortMessage(MESSAGE.Hello, greeting => {
+  console.log("In content script, received a greeting:", greeting)
 })
 
 document.body.addEventListener("click", function () {
@@ -21,8 +22,8 @@ document.body.addEventListener("click", function () {
 })
 
 // TODO: add unsubscribe logic (needs to only happen once)
-onMessage(MESSAGE.SOLID_ON_PAGE, solidOnPage => {
-  port.postMessage({ id: MESSAGE.SOLID_ON_PAGE, payload: solidOnPage })
-})
+onWindowMessage(MESSAGE.SolidOnPage, solidOnPage =>
+  postPortMessage(MESSAGE.SolidOnPage, solidOnPage)
+)
 
 export {}

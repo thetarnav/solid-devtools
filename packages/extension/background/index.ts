@@ -1,12 +1,13 @@
+import { createPortMessanger, createRuntimeMessanger } from "@/shared/utils"
 import { DEVTOOLS_CONTENT_PORT, MESSAGE } from "../shared/variables"
 
 console.log("background script working")
 
-const { onConnect, onMessage, sendMessage } = chrome.runtime
+const { onRuntimeMessage, postRuntimeMessage } = createRuntimeMessanger()
 
 let port: chrome.runtime.Port | undefined
 
-onConnect.addListener(newPort => {
+chrome.runtime.onConnect.addListener(newPort => {
   if (newPort.name !== DEVTOOLS_CONTENT_PORT)
     return console.log("Ignored connection:", newPort.name)
 
@@ -15,28 +16,27 @@ onConnect.addListener(newPort => {
 
   port = newPort
 
+  const { postPortMessage, onPortMessage } = createPortMessanger(port)
+
   // bg -> content
-  port.postMessage({ greeting: "hi there content script!" })
+  postPortMessage(MESSAGE.Hello, "Hello from background script!")
 
   // content -> bg
-  port.onMessage.addListener(function (m) {
-    console.log("In background script, received message from content script", m)
+  onPortMessage(MESSAGE.Hello, greeting => console.log("BG received a Port greeting:", greeting))
 
-    // forward this to devtools.ts
-    if (m.id === MESSAGE.SOLID_ON_PAGE) {
-      sendMessage(m)
-    }
-  })
+  onPortMessage(MESSAGE.SolidOnPage, solidOnPage =>
+    postRuntimeMessage(MESSAGE.SolidOnPage, solidOnPage)
+  )
 })
 
 // panel -> bg
-onMessage.addListener((message, sender, sendResponse) => {
-  console.log("background got message", message, sender)
-  sendResponse("bg response")
+onRuntimeMessage(MESSAGE.Hello, (greeting, respond) => {
+  console.log("BG received a Runtime greeting:", greeting)
+  respond("Hi I'm BG :)")
 })
 
 // bg -> panel
-sendMessage(`hi from background`, response => {
+postRuntimeMessage(MESSAGE.Hello, "hi from background", response => {
   console.log(`background got response:`, response)
 })
 
