@@ -5,22 +5,22 @@ import manifest from "./manifest"
 import path from "path"
 
 export default defineConfig({
-  plugins: [solidPlugin(), crx({ manifest })],
-  resolve: {
-    alias: {
-      "@": path.resolve(__dirname, "."),
-    },
-  },
-  build: {
-    rollupOptions: {
-      input: {
-        panel: "panel/index.html",
-      },
-    },
-    target: "esnext",
-    polyfillDynamicImport: false,
-  },
-  optimizeDeps: {
-    entries: ["**/*.html"],
-  },
+	plugins: [solidPlugin(), crx({ manifest })],
+	resolve: {
+		alias: {
+			"@": path.resolve(__dirname, "."),
+		},
+	},
+	build: {
+		rollupOptions: {
+			input: {
+				panel: "panel/index.html",
+			},
+		},
+		target: "esnext",
+		polyfillDynamicImport: false,
+	},
+	optimizeDeps: {
+		entries: ["**/*.html"],
+	},
 })

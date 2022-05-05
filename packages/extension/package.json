@@ -1,27 +1,27 @@
 {
-  "name": "solid-devtools-extension",
-  "version": "0.0.1",
-  "license": "MIT",
-  "author": "Damian Tarnawski <gthetarnav@gmail.com>",
-  "contributors": [],
-  "scripts": {
-    "dev": "vite --port 3333",
-    "build": "npm run clean && vite build",
-    "clean": "rimraf ./dist",
-    "test": "echo \"NOOP TEST\"",
-    "typecheck": "tsc --noEmit"
-  },
-  "devDependencies": {
-    "@crxjs/vite-plugin": "^1.0.1",
-    "@types/chrome": "^0.0.183",
-    "typescript": "^4.6.4",
-    "vite": "^2.9.6",
-    "vite-plugin-solid": "^2.2.6",
-    "rimraf": "^3.0.2"
-  },
-  "dependencies": {
-    "solid-js": "^1.3.17",
-    "@solid-primitives/utils": "^1.4.0"
-  },
-  "packageManager": "pnpm@6.32.11"
+	"name": "solid-devtools-extension",
+	"version": "0.0.1",
+	"license": "MIT",
+	"author": "Damian Tarnawski <gthetarnav@gmail.com>",
+	"contributors": [],
+	"scripts": {
+		"dev": "vite --port 3333",
+		"build": "npm run clean && vite build",
+		"clean": "rimraf ./dist",
+		"test": "echo \"NOOP TEST\"",
+		"typecheck": "tsc --noEmit"
+	},
+	"devDependencies": {
+		"@crxjs/vite-plugin": "^1.0.1",
+		"@types/chrome": "^0.0.183",
+		"typescript": "^4.6.4",
+		"vite": "^2.9.6",
+		"vite-plugin-solid": "^2.2.6",
+		"rimraf": "^3.0.2"
+	},
+	"dependencies": {
+		"solid-js": "^1.3.17",
+		"@solid-primitives/utils": "^1.4.0"
+	},
+	"packageManager": "pnpm@6.32.11"
 }

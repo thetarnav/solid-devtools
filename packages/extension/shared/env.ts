@@ -6,10 +6,10 @@ export const isWindows = isBrowser && navigator.platform.indexOf("Win") === 0
 export const isMac = isBrowser && navigator.platform === "MacIntel"
 export const isLinux = isBrowser && navigator.platform.indexOf("Linux") === 0
 export const keys = {
-  ctrl: isMac ? "&#8984;" : "Ctrl",
-  shift: "Shift",
-  alt: isMac ? "&#8997;" : "Alt",
-  del: "Del",
-  enter: "Enter",
-  esc: "Esc",
+	ctrl: isMac ? "&#8984;" : "Ctrl",
+	shift: "Shift",
+	alt: isMac ? "&#8997;" : "Alt",
+	del: "Del",
+	enter: "Enter",
+	esc: "Esc",
 }

@@ -8,36 +8,36 @@ const { onRuntimeMessage, postRuntimeMessage } = createRuntimeMessanger()
 let port: chrome.runtime.Port | undefined
 
 chrome.runtime.onConnect.addListener(newPort => {
-  if (newPort.name !== DEVTOOLS_CONTENT_PORT)
-    return console.log("Ignored connection:", newPort.name)
+	if (newPort.name !== DEVTOOLS_CONTENT_PORT)
+		return console.log("Ignored connection:", newPort.name)
 
-  // refreshing was messing with this: (idk why yet)
-  // if (port) return console.log("Port already assigned.")
+	// refreshing was messing with this: (idk why yet)
+	// if (port) return console.log("Port already assigned.")
 
-  port = newPort
+	port = newPort
 
-  const { postPortMessage, onPortMessage } = createPortMessanger(port)
+	const { postPortMessage, onPortMessage } = createPortMessanger(port)
 
-  // bg -> content
-  postPortMessage(MESSAGE.Hello, "Hello from background script!")
+	// bg -> content
+	postPortMessage(MESSAGE.Hello, "Hello from background script!")
 
-  // content -> bg
-  onPortMessage(MESSAGE.Hello, greeting => console.log("BG received a Port greeting:", greeting))
+	// content -> bg
+	onPortMessage(MESSAGE.Hello, greeting => console.log("BG received a Port greeting:", greeting))
 
-  onPortMessage(MESSAGE.SolidOnPage, solidOnPage =>
-    postRuntimeMessage(MESSAGE.SolidOnPage, solidOnPage)
-  )
+	onPortMessage(MESSAGE.SolidOnPage, solidOnPage =>
+		postRuntimeMessage(MESSAGE.SolidOnPage, solidOnPage),
+	)
 })
 
 // panel -> bg
 onRuntimeMessage(MESSAGE.Hello, (greeting, respond) => {
-  console.log("BG received a Runtime greeting:", greeting)
-  respond("Hi I'm BG :)")
+	console.log("BG received a Runtime greeting:", greeting)
+	respond("Hi I'm BG :)")
 })
 
 // bg -> panel
 postRuntimeMessage(MESSAGE.Hello, "hi from background", response => {
-  console.log(`background got response:`, response)
+	console.log(`background got response:`, response)
 })
 
 export {}

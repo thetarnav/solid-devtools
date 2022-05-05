@@ -6,10 +6,10 @@ import "./index.css"
 import App from "./App"
 
 render(
-  () => (
-    <Devtools>
-      <App />
-    </Devtools>
-  ),
-  document.getElementById("root") as HTMLElement
+	() => (
+		<Devtools>
+			<App />
+		</Devtools>
+	),
+	document.getElementById("root") as HTMLElement,
 )

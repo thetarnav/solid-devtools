@@ -1,46 +1,46 @@
 {
-  "name": "solid-devtools",
-  "version": "0.0.1",
-  "description": "Runtime helpers for hooking up SolidJS application with Solid Devtools",
-  "license": "MIT",
-  "author": "Damian Tarnawski <gthetarnav@gmail.com>",
-  "contributors": [],
-  "homepage": "https://github.com/thetarnav/solid-devtools#readme",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/thetarnav/solid-devtools.git"
-  },
-  "bugs": {
-    "url": "https://github.com/thetarnav/solid-devtools/issues"
-  },
-  "keywords": [
-    "solid",
-    "devtools"
-  ],
-  "private": false,
-  "sideEffects": false,
-  "type": "module",
-  "main": "dist/index.cjs",
-  "module": "dist/index.js",
-  "types": "dist/index.d.ts",
-  "files": [
-    "dist"
-  ],
-  "scripts": {
-    "dev": "npm run build && watchlist src -- npm run build",
-    "build": "tsup",
-    "test": "echo \"NOOP TEST\"",
-    "test:watch": "watchlist src test -- npm test",
-    "typecheck": "tsc --noEmit"
-  },
-  "devDependencies": {
-    "typescript": "^4.6.4",
-    "tsup": "^5.12.7",
-    "watchlist": "^0.3.1"
-  },
-  "dependencies": {
-    "solid-js": "^1.3.17",
-    "@solid-primitives/utils": "^1.4.0"
-  },
-  "packageManager": "pnpm@6.32.11"
+	"name": "solid-devtools",
+	"version": "0.0.1",
+	"description": "Runtime helpers for hooking up SolidJS application with Solid Devtools",
+	"license": "MIT",
+	"author": "Damian Tarnawski <gthetarnav@gmail.com>",
+	"contributors": [],
+	"homepage": "https://github.com/thetarnav/solid-devtools#readme",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/thetarnav/solid-devtools.git"
+	},
+	"bugs": {
+		"url": "https://github.com/thetarnav/solid-devtools/issues"
+	},
+	"keywords": [
+		"solid",
+		"devtools"
+	],
+	"private": false,
+	"sideEffects": false,
+	"type": "module",
+	"main": "dist/index.cjs",
+	"module": "dist/index.js",
+	"types": "dist/index.d.ts",
+	"files": [
+		"dist"
+	],
+	"scripts": {
+		"dev": "npm run build && watchlist src -- npm run build",
+		"build": "tsup",
+		"test": "echo \"NOOP TEST\"",
+		"test:watch": "watchlist src test -- npm test",
+		"typecheck": "tsc --noEmit"
+	},
+	"devDependencies": {
+		"typescript": "^4.6.4",
+		"tsup": "^5.12.7",
+		"watchlist": "^0.3.1"
+	},
+	"dependencies": {
+		"solid-js": "^1.3.17",
+		"@solid-primitives/utils": "^1.4.0"
+	},
+	"packageManager": "pnpm@6.32.11"
 }

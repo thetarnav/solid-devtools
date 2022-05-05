@@ -9,8 +9,8 @@ const script = document.createElement("script")
 script.src = chrome.runtime.getURL(realWorld)
 script.type = "module"
 script.addEventListener("error", err => {
-  console.log("Real world script failed to load.")
-  console.error(err)
+	console.log("Real world script failed to load.")
+	console.error(err)
 })
 document.head.append(script)
 

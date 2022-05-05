@@ -13,17 +13,17 @@ postPortMessage(MESSAGE.Hello, "hello from content script")
 
 // bg -> content
 onPortMessage(MESSAGE.Hello, greeting => {
-  console.log("In content script, received a greeting:", greeting)
+	console.log("In content script, received a greeting:", greeting)
 })
 
 document.body.addEventListener("click", function () {
-  // content -> bg
-  port.postMessage({ greeting: "they clicked the page!" })
+	// content -> bg
+	port.postMessage({ greeting: "they clicked the page!" })
 })
 
 // TODO: add unsubscribe logic (needs to only happen once)
 onWindowMessage(MESSAGE.SolidOnPage, solidOnPage =>
-  postPortMessage(MESSAGE.SolidOnPage, solidOnPage)
+	postPortMessage(MESSAGE.SolidOnPage, solidOnPage),
 )
 
 export {}

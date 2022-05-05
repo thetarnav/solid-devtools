@@ -1,14 +1,9 @@
 {
-  "extends": "../../tsconfig.json",
-  "compilerOptions": {
-    "types": [
-      "vite/client",
-      "@types/chrome"
-    ],
-    "paths": {
-      "@/*": [
-        "./*"
-      ]
-    }
-  },
+	"extends": "../../tsconfig.json",
+	"compilerOptions": {
+		"types": ["vite/client", "@types/chrome"],
+		"paths": {
+			"@/*": ["./*"]
+		}
+	}
 }
