@@ -18,8 +18,11 @@ jobs:
           node-version: 16
           cache: pnpm
 
-      - run: pnpm install
-      - run: pnpm run format
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Format
+        run: pnpm run format
 
 			- name: Add, Commit and Push
 			  uses: EndBug/add-and-commit@v9
