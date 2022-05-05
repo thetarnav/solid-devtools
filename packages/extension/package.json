@@ -5,7 +5,7 @@
   "author": "Damian Tarnawski <gthetarnav@gmail.com>",
   "contributors": [],
   "scripts": {
-    "dev": "npm run clean && vite --port 3333",
+    "dev": "vite --port 3333",
     "build": "npm run clean && vite build",
     "clean": "rimraf ./dist",
     "test": "echo \"NOOP TEST\"",

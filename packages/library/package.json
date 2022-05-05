@@ -27,7 +27,7 @@
     "dist"
   ],
   "scripts": {
-    "dev": "watchlist src -- npm build",
+    "dev": "npm run build && watchlist src -- npm run build",
     "build": "tsup",
     "test": "echo \"NOOP TEST\"",
     "test:watch": "watchlist src test -- npm test",
