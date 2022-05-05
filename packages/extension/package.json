@@ -5,8 +5,9 @@
   "author": "Damian Tarnawski <gthetarnav@gmail.com>",
   "contributors": [],
   "scripts": {
-    "dev": "vite --port 3333",
-    "build": "vite build",
+    "dev": "npm run clean && vite --port 3333",
+    "build": "npm run clean && vite build",
+    "clean": "rimraf ./dist",
     "test": "echo \"NOOP TEST\"",
     "typecheck": "tsc --noEmit"
   },
@@ -15,7 +16,8 @@
     "@types/chrome": "^0.0.183",
     "typescript": "^4.6.4",
     "vite": "^2.9.6",
-    "vite-plugin-solid": "^2.2.6"
+    "vite-plugin-solid": "^2.2.6",
+    "rimraf": "^3.0.2"
   },
   "dependencies": {
     "solid-js": "^1.3.17",
