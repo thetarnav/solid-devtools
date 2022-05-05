@@ -12,11 +12,10 @@ jobs:
         with:
           version: 6.0.2
 
-      - name: Setup Node.js environment ${{ matrix.node-version }}
+      - name: Setup Node.js environment
         uses: actions/setup-node@v3
         with:
           node-version: 16
-          cache: pnpm
 
       - name: Install dependencies
         run: pnpm install
