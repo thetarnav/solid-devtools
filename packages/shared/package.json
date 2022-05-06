@@ -1,8 +1,8 @@
 {
-  "name": "solid-devtools-shared",
-  "version": "0.0.1",
-  "license": "MIT",
-  "author": "Damian Tarnawski <gthetarnav@gmail.com>",
-  "contributors": [],
-  "private": true
+	"name": "solid-devtools-shared",
+	"version": "0.0.1",
+	"license": "MIT",
+	"author": "Damian Tarnawski <gthetarnav@gmail.com>",
+	"contributors": [],
+	"private": true
 }

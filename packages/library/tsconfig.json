@@ -2,12 +2,8 @@
 	"extends": "../../tsconfig.json",
 	"compilerOptions": {
 		"paths": {
-			"@shared/*": [
-				"../shared/*"
-			],
-			"@/*": [
-				"./src/*"
-			],
+			"@shared/*": ["../shared/*"],
+			"@/*": ["./src/*"]
 		}
 	}
 }

@@ -1,17 +1,10 @@
 {
 	"extends": "../../tsconfig.json",
 	"compilerOptions": {
-		"types": [
-			"vite/client",
-			"@types/chrome"
-		],
+		"types": ["vite/client", "@types/chrome"],
 		"paths": {
-			"@shared/*": [
-				"../shared/*"
-			],
-			"@/*": [
-				"./*"
-			],
+			"@shared/*": ["../shared/*"],
+			"@/*": ["./*"]
 		}
 	}
 }
