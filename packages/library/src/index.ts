@@ -1,6 +1,5 @@
 import { Component, getOwner } from "solid-js"
-import { postWindowMessage } from "../../extension/shared/utils"
-import { MESSAGE } from "../../extension/shared/variables"
+import { postWindowMessage, MESSAGE } from "@shared/messanger"
 
 postWindowMessage(MESSAGE.SolidOnPage, true)
 

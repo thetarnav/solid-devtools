@@ -1,5 +1,4 @@
-import { postWindowMessage } from "@/shared/utils"
-import { MESSAGE } from "@/shared/variables"
+import { MESSAGE, postWindowMessage } from "@shared/messanger"
 
 console.log("REAL WORLD")
 

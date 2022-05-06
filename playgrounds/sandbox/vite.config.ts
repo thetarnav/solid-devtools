@@ -1,6 +1,7 @@
 import { defineConfig } from "vite"
 import solidPlugin from "vite-plugin-solid"
 import Unocss from "unocss/vite"
+import path from "path"
 
 export default defineConfig({
 	plugins: [
@@ -17,6 +18,12 @@ export default defineConfig({
 			},
 		}),
 	],
+	resolve: {
+		alias: {
+			// used inside packages/library
+			"@shared": path.resolve(__dirname, "..", "..", "packages", "shared"),
+		},
+	},
 	build: {
 		target: "esnext",
 		polyfillDynamicImport: false,

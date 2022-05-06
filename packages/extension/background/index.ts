@@ -1,5 +1,6 @@
+import { MESSAGE } from "@shared/messanger"
 import { createPortMessanger, createRuntimeMessanger } from "@/shared/utils"
-import { DEVTOOLS_CONTENT_PORT, MESSAGE } from "../shared/variables"
+import { DEVTOOLS_CONTENT_PORT } from "../shared/variables"
 
 console.log("background script working")
 
