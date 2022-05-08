@@ -11,13 +11,8 @@ export default defineManifest({
 	content_scripts: [
 		{
 			matches: ["<all_urls>"],
-			js: ["content/on-start.ts"],
+			js: ["content/content.ts"],
 			run_at: "document_start",
-		},
-		{
-			matches: ["<all_urls>"],
-			js: ["content/on-idle.ts"],
-			run_at: "document_idle",
 		},
 	],
 	background: {
