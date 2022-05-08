@@ -2,7 +2,7 @@ import { Component, getOwner } from "solid-js"
 import { postWindowMessage, MESSAGE } from "@shared/messanger"
 import { mapOwnerTree } from "./walker"
 
-postWindowMessage(MESSAGE.SolidOnPage, true)
+postWindowMessage(MESSAGE.SolidOnPage)
 
 export const Devtools: Component = props => {
 	const root = getOwner()!

@@ -12,20 +12,22 @@ export interface Message<K extends MESSAGE> {
 }
 
 export interface MessagePayloads {
-	[MESSAGE.SolidOnPage]: true
+	[MESSAGE.SolidOnPage]: void
 	[MESSAGE.Hello]: string
 	[MESSAGE.PanelVisibility]: boolean
 	[MESSAGE.SolidUpdate]: MappedOwner[]
 }
 
-export type PostMessageFn = <K extends MESSAGE>(id: K, payload: MessagePayloads[K]) => void
+export type PostMessageFn = <K extends MESSAGE>(
+	..._: [K] extends [void] ? [id: K] : [id: K, payload: MessagePayloads[K]]
+) => void
 
 export type OnMessageFn = <K extends MESSAGE>(
 	id: K,
 	handler: (payload: MessagePayloads[K]) => void,
 ) => void
 
-export const postWindowMessage: PostMessageFn = (id, payload) => {
+export const postWindowMessage: PostMessageFn = (id, payload?: any) => {
 	console.log("message posted:", MESSAGE[id], payload)
 	window.postMessage({ id, payload }, "*")
 }

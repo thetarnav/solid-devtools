@@ -25,13 +25,9 @@ chrome.runtime.onConnect.addListener(newPort => {
 	// content -> bg
 	onPortMessage(MESSAGE.Hello, greeting => console.log("BG received a Port greeting:", greeting))
 
-	onPortMessage(MESSAGE.SolidOnPage, solidOnPage =>
-		postRuntimeMessage(MESSAGE.SolidOnPage, solidOnPage),
-	)
+	onPortMessage(MESSAGE.SolidOnPage, () => postRuntimeMessage(MESSAGE.SolidOnPage, undefined))
 
-	onPortMessage(MESSAGE.SolidUpdate, graph => {
-		console.log("solid update", graph)
-	})
+	onPortMessage(MESSAGE.SolidUpdate, graph => postRuntimeMessage(MESSAGE.SolidUpdate, graph))
 })
 
 // panel -> bg

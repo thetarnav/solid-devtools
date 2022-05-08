@@ -23,9 +23,7 @@ document.body.addEventListener("click", function () {
 })
 
 // TODO: add unsubscribe logic (needs to only happen once)
-onWindowMessage(MESSAGE.SolidOnPage, solidOnPage =>
-	postPortMessage(MESSAGE.SolidOnPage, solidOnPage),
-)
+onWindowMessage(MESSAGE.SolidOnPage, () => postPortMessage(MESSAGE.SolidOnPage))
 
 onWindowMessage(MESSAGE.SolidUpdate, tree => postPortMessage(MESSAGE.SolidUpdate, tree))
 
