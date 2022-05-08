@@ -27,4 +27,6 @@ onWindowMessage(MESSAGE.SolidOnPage, solidOnPage =>
 	postPortMessage(MESSAGE.SolidOnPage, solidOnPage),
 )
 
+onWindowMessage(MESSAGE.SolidUpdate, tree => postPortMessage(MESSAGE.SolidUpdate, tree))
+
 export {}

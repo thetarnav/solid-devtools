@@ -1,21 +1,27 @@
-import { Component, createSignal } from "solid-js"
+import { Component, createSignal, createEffect, createMemo } from "solid-js"
 import styles from "./App.module.css"
 
+const Button = (props: { text: string; onClick: VoidFunction }) => {
+	const text = createMemo(() => <span>{props.text}</span>)
+	return <button onClick={props.onClick}>{text()}</button>
+}
+
 const App: Component = () => {
-	const [count, setCount] = createSignal(0)
+	const [count, setCount] = createSignal(0, { name: "count_sig" })
+
+	createEffect(
+		() => {
+			console.log(count())
+		},
+		undefined,
+		{ name: "EFFECT" },
+	)
 
 	return (
 		<div class={styles.App}>
 			<header class={styles.header}>
-				<img
-					src="https://github.com/solidjs/solid/raw/ebdb8cdf9b0f986e7d15048a34d50a4837101c49/assets/logo.png"
-					class={styles.logo}
-					alt="logo"
-				/>
-				<p>
-					Edit <code>src/App.tsx</code> and save to reload.
-				</p>
-				<button onClick={() => setCount(p => ++p)}>Count: {count()}</button>
+				<Button onClick={() => setCount(p => ++p)} text={`Count: ${count()}`} />
+				<Button onClick={() => setCount(p => ++p)} text={`Count: ${count()}`} />
 			</header>
 		</div>
 	)

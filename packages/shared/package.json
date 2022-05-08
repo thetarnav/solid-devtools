@@ -4,5 +4,8 @@
 	"license": "MIT",
 	"author": "Damian Tarnawski <gthetarnav@gmail.com>",
 	"contributors": [],
+	"dependencies": {
+		"solid-js": "^1.3.17"
+	},
 	"private": true
 }

@@ -28,6 +28,10 @@ chrome.runtime.onConnect.addListener(newPort => {
 	onPortMessage(MESSAGE.SolidOnPage, solidOnPage =>
 		postRuntimeMessage(MESSAGE.SolidOnPage, solidOnPage),
 	)
+
+	onPortMessage(MESSAGE.SolidUpdate, graph => {
+		console.log("solid update", graph)
+	})
 })
 
 // panel -> bg

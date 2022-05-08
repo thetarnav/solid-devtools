@@ -9,6 +9,7 @@ render(
 	() => (
 		<Devtools>
 			<App />
+			<App />
 		</Devtools>
 	),
 	document.getElementById("root") as HTMLElement,

@@ -7,21 +7,17 @@ const { onRuntimeMessage, postRuntimeMessage } = createRuntimeMessanger()
 
 let panel: chrome.devtools.panels.ExtensionPanel | undefined
 
-onRuntimeMessage(MESSAGE.SolidOnPage, async solidOnPage => {
-	if (solidOnPage) {
-		if (panel) return console.log("Panel already exists")
+onRuntimeMessage(MESSAGE.SolidOnPage, async () => {
+	if (panel) return console.log("Panel already exists")
 
-		console.log("Solid on page – creating panel")
-		try {
-			panel = await createPanel()
-			console.log("panel", panel)
-			panel.onShown.addListener(onPanelShown)
-			panel.onHidden.addListener(onPanelHidden)
-		} catch (error) {
-			console.error(error)
-		}
-	} else {
-		console.warn("Solid NOT on page – NOT creating panel")
+	console.log("Solid on page – creating panel")
+	try {
+		panel = await createPanel()
+		console.log("panel", panel)
+		panel.onShown.addListener(onPanelShown)
+		panel.onHidden.addListener(onPanelHidden)
+	} catch (error) {
+		console.error(error)
 	}
 })
 
