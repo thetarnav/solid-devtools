@@ -5,13 +5,15 @@ export function createPortMessanger(port: chrome.runtime.Port): {
 	onPortMessage: OnMessageFn
 } {
 	const listeners: Partial<Record<MESSAGE, ((payload: any) => void)[]>> = {}
-	port.onMessage.addListener(event => {
+	port.onMessage.addListener((event, port) => {
+		console.log("port message", port)
+
 		const id = event?.id as MESSAGE
 		if (typeof id !== "number") return
 		listeners[id]?.forEach(f => f(event.payload))
 	})
 	return {
-		postPortMessage: (id, payload) => port.postMessage({ id, payload }),
+		postPortMessage: (id, payload?: any) => port.postMessage({ id, payload }),
 		onPortMessage: (id, handler) => {
 			let arr = listeners[id]
 			if (!arr) arr = listeners[id] = []

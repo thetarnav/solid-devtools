@@ -4,6 +4,7 @@ export enum MESSAGE {
 	SolidOnPage,
 	Hello,
 	PanelVisibility,
+	ResetPanel,
 	SolidUpdate,
 }
 
@@ -15,6 +16,7 @@ export interface MessagePayloads {
 	[MESSAGE.SolidOnPage]: void
 	[MESSAGE.Hello]: string
 	[MESSAGE.PanelVisibility]: boolean
+	[MESSAGE.ResetPanel]: void
 	[MESSAGE.SolidUpdate]: MappedOwner[]
 }
 

@@ -7,15 +7,19 @@ console.log("background script working")
 const { onRuntimeMessage, postRuntimeMessage } = createRuntimeMessanger()
 
 let port: chrome.runtime.Port | undefined
+let lastDocumentId: string | undefined
 
 chrome.runtime.onConnect.addListener(newPort => {
 	if (newPort.name !== DEVTOOLS_CONTENT_PORT)
 		return console.log("Ignored connection:", newPort.name)
 
-	// refreshing was messing with this: (idk why yet)
-	// if (port) return console.log("Port already assigned.")
+	if (port) {
+		console.log(`Switching BG Ports: ${port.sender?.documentId} -> ${newPort.sender?.documentId}`)
+		postRuntimeMessage(MESSAGE.ResetPanel, undefined)
+	}
 
 	port = newPort
+	lastDocumentId = newPort.sender?.documentId
 
 	const { postPortMessage, onPortMessage } = createPortMessanger(port)
 
