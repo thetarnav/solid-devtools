@@ -1,1 +1,1 @@
-export * from "./ownerNode"
+export * from "@/ownerNode"

@@ -1,6 +1,6 @@
 import { Component, getOwner } from "solid-js"
 import { postWindowMessage, MESSAGE } from "@shared/messanger"
-import { mapOwnerTree } from "./walker"
+import { mapOwnerTree } from "@/walker"
 
 postWindowMessage(MESSAGE.SolidOnPage)
 
