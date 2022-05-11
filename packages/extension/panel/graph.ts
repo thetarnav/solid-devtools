@@ -15,11 +15,6 @@ const exports = createRoot(() => {
 
 	onRuntimeMessage(MESSAGE.ResetPanel, () => setGraphs("graphs", []))
 
-	createEffect(() => {
-		console.log("graph update")
-		console.log(graphs.graphs)
-	})
-
 	return { graphs }
 })
 export const { graphs } = exports
