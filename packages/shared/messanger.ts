@@ -32,7 +32,7 @@ export const postWindowMessage: PostMessageFn = (id, payload?: any) => {
 	window.postMessage({ id, payload }, "*")
 }
 
-const windowListeners: Partial<Record<MESSAGE, ((payload: any) => void)[]>> = {}
+const listeners: Partial<Record<MESSAGE, ((payload: any) => void)[]>> = {}
 
 export function startListeningWindowMessages() {
 	window.addEventListener(
@@ -40,14 +40,14 @@ export function startListeningWindowMessages() {
 		event => {
 			const id = event.data?.id as MESSAGE
 			if (typeof id !== "number") return
-			windowListeners[id]?.forEach(f => f(event.data.payload))
+			listeners[id]?.forEach(f => f(event.data.payload))
 		},
 		false,
 	)
 }
 
 export const onWindowMessage: OnMessageFn = (id, handler) => {
-	let arr = windowListeners[id]
-	if (!arr) arr = windowListeners[id] = []
+	let arr = listeners[id]
+	if (!arr) arr = listeners[id] = []
 	arr.push(handler)
 }

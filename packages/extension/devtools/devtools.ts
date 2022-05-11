@@ -24,7 +24,7 @@ onRuntimeMessage(MESSAGE.SolidOnPage, async () => {
 const createPanel = () =>
 	new Promise<chrome.devtools.panels.ExtensionPanel>((resolve, reject) => {
 		chrome.devtools.panels.create(
-			"Solid Devtools",
+			"Solid",
 			"assets/icons/solid-normal-32.png",
 			"panel/index.html",
 			newPanel => {

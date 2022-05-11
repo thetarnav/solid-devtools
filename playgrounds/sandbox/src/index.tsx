@@ -9,7 +9,7 @@ render(
 	() => (
 		<Devtools>
 			<App />
-			<App />
+			{/* <App /> */}
 		</Devtools>
 	),
 	document.getElementById("root") as HTMLElement,
