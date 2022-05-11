@@ -1,7 +1,7 @@
 {
-	"name": "solid-devtools",
+	"name": "solid-devtools-ui",
 	"version": "0.0.1",
-	"description": "Runtime helpers for hooking up SolidJS application with Solid Devtools",
+	"description": "UI Library for visualization of the reactive graph. Powering Solid Devtools.",
 	"license": "MIT",
 	"author": "Damian Tarnawski <gthetarnav@gmail.com>",
 	"contributors": [],
@@ -18,7 +18,7 @@
 		"devtools"
 	],
 	"private": false,
-	"sideEffects": true,
+	"sideEffects": false,
 	"type": "module",
 	"main": "dist/index.cjs",
 	"module": "dist/index.js",
@@ -36,11 +36,13 @@
 	"devDependencies": {
 		"typescript": "^4.6.4",
 		"tsup": "^5.12.7",
+		"esbuild": "^0.14.38",
+		"esbuild-plugin-solid": "^0.4.2",
 		"watchlist": "^0.3.1"
 	},
 	"dependencies": {
 		"solid-js": "^1.3.17",
-		"@solid-primitives/utils": "^1.4.0"
+		"@solid-primitives/utils": "^1.5.2"
 	},
 	"packageManager": "pnpm@6.32.11"
 }

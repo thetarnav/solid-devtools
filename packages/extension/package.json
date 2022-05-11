@@ -23,7 +23,8 @@
 	},
 	"dependencies": {
 		"@solid-primitives/utils": "^1.4.0",
-		"solid-js": "^1.3.17"
+		"solid-js": "^1.3.17",
+		"solid-devtools-ui": "0.0.1"
 	},
 	"packageManager": "pnpm@6.32.11"
 }

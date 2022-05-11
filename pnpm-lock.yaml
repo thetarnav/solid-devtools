@@ -20,6 +20,7 @@ importers:
       '@solid-primitives/utils': ^1.4.0
       '@types/chrome': ^0.0.183
       rimraf: ^3.0.2
+      solid-devtools-ui: 0.0.1
       solid-js: ^1.3.17
       typescript: ^4.6.4
       vite: ^2.9.6
@@ -28,6 +29,7 @@ importers:
       windicss: ^3.5.2
     dependencies:
       '@solid-primitives/utils': 1.4.0_solid-js@1.3.17
+      solid-devtools-ui: link:../ui
       solid-js: 1.3.17
     devDependencies:
       '@crxjs/vite-plugin': 1.0.1_vite@2.9.7
@@ -59,6 +61,25 @@ importers:
       solid-js: ^1.3.17
     dependencies:
       solid-js: 1.3.17
+
+  packages/ui:
+    specifiers:
+      '@solid-primitives/utils': ^1.5.2
+      esbuild: ^0.14.38
+      esbuild-plugin-solid: ^0.4.2
+      solid-js: ^1.3.17
+      tsup: ^5.12.7
+      typescript: ^4.6.4
+      watchlist: ^0.3.1
+    dependencies:
+      '@solid-primitives/utils': 1.5.2_solid-js@1.3.17
+      solid-js: 1.3.17
+    devDependencies:
+      esbuild: 0.14.38
+      esbuild-plugin-solid: 0.4.2_3jmwkfcyvic76rmx5lxwfpdswm
+      tsup: 5.12.7_typescript@4.6.4
+      typescript: 4.6.4
+      watchlist: 0.3.1
 
   playgrounds/sandbox:
     specifiers:
@@ -548,6 +569,14 @@ packages:
 
   /@solid-primitives/utils/1.4.0_solid-js@1.3.17:
     resolution: {integrity: sha512-VDEqiq03HSQ+n/vGWQ3Jqk1w+ONkWUNke/d/SS6Srre5EkY7280UktS+Ml6eYECst6LdHfSgsZBrq3RJxM4tfA==}
+    peerDependencies:
+      solid-js: ^1.3.1
+    dependencies:
+      solid-js: 1.3.17
+    dev: false
+
+  /@solid-primitives/utils/1.5.2_solid-js@1.3.17:
+    resolution: {integrity: sha512-dZUHjzasuqS2lDO+PQCY1+jFmtWHlaP3tUvkX1Jr06LI/Ipa2P/ZNVSvuIoqQ0Bg+Ny27LvtrXxflZNeGtptvA==}
     peerDependencies:
       solid-js: ^1.3.1
     dependencies:
@@ -1198,6 +1227,21 @@ packages:
     requiresBuild: true
     dev: true
     optional: true
+
+  /esbuild-plugin-solid/0.4.2_3jmwkfcyvic76rmx5lxwfpdswm:
+    resolution: {integrity: sha512-T5GphLoud3RumjeNYO3K9WVjWDzVKG5evlS7hUEUI0n9tiCL+CnbvJh3SSwFi3xeeXpZRrnZc1gd6FWQsVobTg==}
+    peerDependencies:
+      esbuild: '>=0.12'
+      solid-js: '>= 1.0'
+    dependencies:
+      '@babel/core': 7.17.10
+      '@babel/preset-typescript': 7.16.7_@babel+core@7.17.10
+      babel-preset-solid: 1.3.17_@babel+core@7.17.10
+      esbuild: 0.14.38
+      solid-js: 1.3.17
+    transitivePeerDependencies:
+      - supports-color
+    dev: true
 
   /esbuild-sunos-64/0.14.38:
     resolution: {integrity: sha512-2mfIoYW58gKcC3bck0j7lD3RZkqYA7MmujFYmSn9l6TiIcAMpuEvqksO+ntBgbLep/eyjpgdplF7b+4T9VJGOA==}

@@ -18,3 +18,5 @@ lerna-debug.log
 
 # VSC Settings
 .vscode/settings.json
+
+.DS_Store
