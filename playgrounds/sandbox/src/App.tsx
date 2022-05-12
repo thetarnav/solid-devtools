@@ -1,12 +1,9 @@
 import { Component, createSignal, createEffect, createMemo } from "solid-js"
+import styles from "./App.module.css"
 
 const Button = (props: { text: string; onClick: VoidFunction }) => {
 	const text = createMemo(() => <span>{props.text}</span>)
-	return (
-		<button class="px-3 py-2 bg-orange-300 rounded-2 font-medium" onClick={props.onClick}>
-			{text()}
-		</button>
-	)
+	return <button onClick={props.onClick}>{text()}</button>
 }
 
 const App: Component = () => {
@@ -21,8 +18,8 @@ const App: Component = () => {
 	)
 
 	return (
-		<div class="bg-dark w-screen min-h-screen flex flex-col items-center">
-			<header class="flex space-x-3 m-8">
+		<div class={styles.App}>
+			<header class={styles.header}>
 				<Button onClick={() => setCount(p => ++p)} text={`Count: ${count()}`} />
 				<Button onClick={() => setCount(p => ++p)} text={`Count: ${count()}`} />
 			</header>

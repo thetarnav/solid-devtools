@@ -16,9 +16,7 @@
 		"turbo": "^1.2.6",
 		"@types/node": "^17.0.31",
 		"prettier": "2.6.2",
-		"vite": "^2.9.9",
-		"@unocss/vite": "^0.33.2",
-		"@unocss/preset-wind": "^0.33.2"
+		"windicss": "^3.5.3"
 	},
 	"packageManager": "pnpm@6.32.11"
 }
