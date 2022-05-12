@@ -21,8 +21,6 @@
 	"sideEffects": false,
 	"type": "module",
 	"scripts": {
-		"dev": "npm run build && watchlist src -- npm run build",
-		"build": "rimraf ./dist && rollup -c && rimraf ./dist/source",
 		"test": "echo \"NOOP TEST\"",
 		"test:watch": "watchlist src test -- npm test",
 		"typecheck": "tsc --noEmit"
