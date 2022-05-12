@@ -1,5 +1,7 @@
-import { Component, createSignal, createEffect, createMemo } from "solid-js"
+import { Component, createSignal, createEffect, createMemo, getOwner } from "solid-js"
 import styles from "./App.module.css"
+
+import { createDevtools } from "solid-devtools-overlay"
 
 const Button = (props: { text: string; onClick: VoidFunction }) => {
 	const text = createMemo(() => <span>{props.text}</span>)
@@ -16,6 +18,8 @@ const App: Component = () => {
 		undefined,
 		{ name: "EFFECT" },
 	)
+
+	createDevtools(getOwner()!)
 
 	return (
 		<div class={styles.App}>

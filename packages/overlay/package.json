@@ -1,10 +1,12 @@
 {
-	"name": "solid-devtools",
+	"name": "solid-devtools-overlay",
 	"version": "0.0.1",
-	"description": "Runtime helpers for hooking up SolidJS application with Solid Devtools",
+	"description": "On-page Devtools Overlay for SolidJS Applications.",
 	"license": "MIT",
-	"author": "Damian Tarnawski <gthetarnav@gmail.com>",
-	"contributors": [],
+	"author": "Nikhil Saraf <nsaraf98@gmail.com>",
+	"contributors": [
+		"Damian Tarnawski <gthetarnav@gmail.com>"
+	],
 	"homepage": "https://github.com/thetarnav/solid-devtools#readme",
 	"repository": {
 		"type": "git",
@@ -36,22 +38,25 @@
 	},
 	"scripts": {
 		"dev": "pnpm run build && watchlist src -- npm run build",
-		"build": "rimraf ./dist && rollup -c && rimraf ./dist/source",
+		"build": "pnpm run clean && rollup -c && rimraf ./dist/source",
+		"clean": "rimraf ./dist",
 		"test": "echo \"NOOP TEST\"",
 		"test:watch": "watchlist src test -- pnpm run test",
 		"typecheck": "tsc --noEmit"
 	},
 	"devDependencies": {
+		"rimraf": "^3.0.2",
 		"typescript": "^4.6.4",
-		"watchlist": "^0.3.1",
 		"rollup": "^2.72.1",
 		"rollup-preset-solid": "^1.4.0",
 		"@rollup/plugin-alias": "^3.1.9",
-		"rimraf": "^3.0.2"
+		"watchlist": "^0.3.1"
 	},
 	"dependencies": {
+		"@solid-primitives/utils": "^1.5.2",
 		"solid-js": "^1.3.17",
-		"@solid-primitives/utils": "^1.4.0"
+		"solid-meta": "^0.27.3",
+		"twind": "^0.16.17"
 	},
 	"packageManager": "pnpm@6.32.11"
 }

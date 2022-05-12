@@ -16,6 +16,6 @@
 	},
 	"dependencies": {
 		"solid-js": "^1.3.17",
-		"unocss": "0.32.9"
+		"solid-devtools-overlay": "0.0.1"
 	}
 }
