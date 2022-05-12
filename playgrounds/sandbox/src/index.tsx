@@ -2,7 +2,9 @@
 import { render } from "solid-js/web"
 import { Devtools } from "../../../packages/debugger/src"
 
-import "./index.css"
+import "@unocss/reset/tailwind.css"
+import "virtual:uno.css"
+
 import App from "./App"
 
 render(

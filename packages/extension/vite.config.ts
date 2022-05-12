@@ -1,13 +1,14 @@
 import { defineConfig } from "vite"
 import solidPlugin from "vite-plugin-solid"
 import { crx } from "@crxjs/vite-plugin"
-import WindiCSS from "vite-plugin-windicss"
+import unoCSS from "@unocss/vite"
 
+import unoConfig from "../../uno.config"
 import manifest from "./manifest"
 import path from "path"
 
 export default defineConfig({
-	plugins: [solidPlugin(), crx({ manifest }), WindiCSS()],
+	plugins: [solidPlugin(), crx({ manifest }), unoCSS(unoConfig)],
 	resolve: {
 		alias: {
 			"@shared": path.resolve(__dirname, "..", "shared"),
