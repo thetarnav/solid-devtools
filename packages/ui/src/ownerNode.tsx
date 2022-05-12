@@ -13,7 +13,7 @@ export function OwnerNode(props: { owner: DeepReadonly<MappedOwner> }): JSX.Elem
 	return (
 		<div
 			ref={ref}
-			class={tw`bg-blue-200 bg-opacity-5 border-0 border-t-[1px] border-l-[1px] border-blue-900 border-opacity-30 outline-[1px] caption text-[12px] pt-1 pl-0.5`}
+			class={tw`bg-cyan-200 bg-opacity-5 border-0 border-t-[1px] border-l-[1px] border-cyan-900 border-opacity-30 outline-[1px] caption text-[12px] pt-1 pl-0.5`}
 		>
 			<div class={tw`pb-1 pr-2`}>
 				<p class={tw`italic pb-0.5`}>
