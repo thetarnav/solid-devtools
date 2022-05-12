@@ -1,23 +1,24 @@
-import { MappedOwner } from "@shared/graph"
+import { MappedOwner, OwnerType } from "@shared/graph"
 import { For, JSX, Show } from "solid-js"
 import { DeepReadonly } from "solid-js/store"
-
-import { className } from "./ownerNode.css"
+import { tw } from "./twind"
 
 export function OwnerNode(props: { owner: DeepReadonly<MappedOwner> }): JSX.Element {
 	const { name, type } = props.owner
 	const children = () => props.owner.children
+	const typeName = OwnerType[type]
 
 	let ref!: HTMLDivElement
 
 	return (
 		<div
 			ref={ref}
-			class={`${className} bg-cyan-200/10 border-0 border-t-1px border-l-1px border-cyan-900/30 outline-1px caption text-12px pt-1 pl-0.5`}
+			class={tw`bg-blue-200 bg-opacity-5 border-0 border-t-[1px] border-l-[1px] border-blue-900 border-opacity-30 outline-[1px] caption text-[12px] pt-1 pl-0.5`}
 		>
-			<div class="pb-1 pr-2">
-				<p class="italic pb-0.5">
-					{name} <span class="text-10px opacity-40">{type}</span>
+			<div class={tw`pb-1 pr-2`}>
+				<p class={tw`italic pb-0.5`}>
+					{type === OwnerType.Component ? `<${name}>` : name}{" "}
+					<span class={tw`text-[10px] opacity-40`}>{typeName}</span>
 				</p>
 				{/* <ValueNode value={value} />
 				<div class="flex space-x-1">
@@ -33,7 +34,7 @@ export function OwnerNode(props: { owner: DeepReadonly<MappedOwner> }): JSX.Elem
 				</div>
 			</Show> */}
 			<Show when={children().length}>
-				<div class="pl-4 pt-1">
+				<div class={tw`pl-4 pt-1`}>
 					<For each={children()}>{o => <OwnerNode owner={o} />}</For>
 				</div>
 			</Show>

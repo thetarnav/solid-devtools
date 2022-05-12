@@ -1,4 +1,4 @@
-import { createRuntimeMessanger } from "@/shared/utils"
+import { createRuntimeMessanger } from "../shared/utils"
 import { MESSAGE } from "@shared/messanger"
 
 console.log("devtools script working")

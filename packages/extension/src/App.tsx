@@ -1,6 +1,6 @@
 import { Component, For } from "solid-js"
 import { graphs } from "./graph"
-import { OwnerNode } from "solid-devtools-ui"
+import { OwnerNode } from "@ui"
 
 const App: Component = () => {
 	return (

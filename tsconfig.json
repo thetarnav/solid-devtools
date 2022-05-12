@@ -1,24 +1,24 @@
 {
-  "compilerOptions": {
-    "strict": true,
-    "target": "ESNext",
-    "module": "ESNext",
-    "lib": [
-      "DOM",
-      "DOM.Iterable",
-      "ESNext"
-    ],
-    "moduleResolution": "node",
-    "allowSyntheticDefaultImports": true,
-    "resolveJsonModule": true,
-    "esModuleInterop": true,
-    "jsx": "preserve",
-    "jsxImportSource": "solid-js",
-    "noEmit": true,
-    "isolatedModules": true,
-    "skipLibCheck": true,
-    "types": [
-      "node"
-    ]
-  }
+	"compilerOptions": {
+		"strict": true,
+		"target": "ESNext",
+		"module": "ESNext",
+		"lib": ["DOM", "DOM.Iterable", "ESNext"],
+		"moduleResolution": "node",
+		"allowSyntheticDefaultImports": true,
+		"resolveJsonModule": true,
+		"esModuleInterop": true,
+		"jsx": "preserve",
+		"jsxImportSource": "solid-js",
+		"noEmit": true,
+		"isolatedModules": true,
+		"skipLibCheck": true,
+		"types": ["node"],
+		"baseUrl": ".",
+		"paths": {
+			"@shared/*": ["./packages/shared/*"],
+			"@debugger": ["./packages/debugger/src/index.ts"],
+			"@ui": ["./packages/ui/src/index.tsx"]
+		}
+	}
 }

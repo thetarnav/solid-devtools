@@ -1,1 +1,3 @@
-export * from "@/ownerNode"
+export { sheet } from "./twind"
+
+export * from "./ownerNode"

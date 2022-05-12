@@ -6,4 +6,7 @@ declare global {
 			documentId: string
 		}
 	}
+	interface Document {
+		adoptedStyleSheets: CSSStyleSheet[]
+	}
 }

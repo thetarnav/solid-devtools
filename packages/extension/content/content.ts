@@ -1,6 +1,6 @@
 import { MESSAGE, onWindowMessage, startListeningWindowMessages } from "@shared/messanger"
-import { createPortMessanger } from "@/shared/utils"
-import { DEVTOOLS_CONTENT_PORT } from "@/shared/variables"
+import { createPortMessanger } from "../shared/utils"
+import { DEVTOOLS_CONTENT_PORT } from "../shared/variables"
 
 console.log("content script working")
 
