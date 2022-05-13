@@ -2,9 +2,15 @@
   <img width="100%" src="https://assets.solidjs.com/banner?type=Devtools&background=tiles&project=%20" alt="Solid Devtools">
 </p>
 
-# solid-devtools
+# Solid Devtools
 
 Reactivity Debugger & Devtools Chrome Extension for SolidJS.
+
+## Why?
+
+To change the way you write, debug and understand your SolidJS applications and reactivity within.
+
+## Resources
 
 From of the lack of proper README, here are a couple of resources and similar projects that inspire this one:
 
