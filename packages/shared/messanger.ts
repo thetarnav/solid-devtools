@@ -1,4 +1,4 @@
-import { MappedOwner } from "./graph"
+import { GraphRoot, MappedOwner } from "./graph"
 
 export enum MESSAGE {
 	SolidOnPage,
@@ -17,7 +17,7 @@ export interface MessagePayloads {
 	[MESSAGE.Hello]: string
 	[MESSAGE.PanelVisibility]: boolean
 	[MESSAGE.ResetPanel]: void
-	[MESSAGE.SolidUpdate]: MappedOwner[]
+	[MESSAGE.SolidUpdate]: GraphRoot
 }
 
 export type PostMessageFn = <K extends MESSAGE>(

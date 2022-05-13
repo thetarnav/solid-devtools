@@ -1,16 +1,14 @@
-import { Component, getOwner } from "solid-js"
+import { FlowComponent, createEffect, getOwner } from "solid-js"
 import { postWindowMessage, MESSAGE } from "@shared/messanger"
-import { mapOwnerTree } from "./walker"
+import { createGraphRoot } from "./update"
 
 postWindowMessage(MESSAGE.SolidOnPage)
 
-export const Devtools: Component = props => {
+export const Debugger: FlowComponent = props => {
 	const root = getOwner()!
-	console.log("owner in lib", root)
+	const tree = createGraphRoot(root)
 
-	setTimeout(() => {
-		const tree = mapOwnerTree(root)
-		console.log(tree)
+	createEffect(() => {
 		postWindowMessage(MESSAGE.SolidUpdate, tree)
 	})
 

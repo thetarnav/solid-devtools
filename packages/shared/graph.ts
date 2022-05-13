@@ -1,3 +1,10 @@
+export type { Owner } from "solid-js/types/reactive/signal"
+
+export interface GraphRoot {
+	id: number
+	children: MappedOwner[]
+}
+
 export interface MappedOwner {
 	name: string
 	type: OwnerType

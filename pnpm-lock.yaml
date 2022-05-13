@@ -38,6 +38,7 @@ importers:
   packages/extension:
     specifiers:
       '@crxjs/vite-plugin': ^1.0.1
+      '@solid-primitives/keyed': ^1.0.0
       '@solid-primitives/utils': ^1.5.2
       '@types/chrome': ^0.0.183
       rimraf: ^3.0.2
@@ -47,6 +48,7 @@ importers:
       vite: ^2.9.6
       vite-plugin-solid: ^2.2.6
     dependencies:
+      '@solid-primitives/keyed': 1.0.0_solid-js@1.4.0
       '@solid-primitives/utils': 1.5.2_solid-js@1.4.0
       solid-js: 1.4.0
       twind: 0.16.17_typescript@4.6.4
@@ -1489,6 +1491,14 @@ packages:
       estree-walker: 2.0.2
       picomatch: 2.3.1
     dev: true
+
+  /@solid-primitives/keyed/1.0.0_solid-js@1.4.0:
+    resolution: {integrity: sha512-9vznFq6xR1FLEcQH3S3aGZ3iWOY6EZmDEl0raNOXJxdgXnudHepcAOfx8G52bROHJ3AdPnIqv4ITIegPQOK2BA==}
+    peerDependencies:
+      solid-js: ^1.4.0
+    dependencies:
+      solid-js: 1.4.0
+    dev: false
 
   /@solid-primitives/utils/1.5.2_solid-js@1.4.0:
     resolution: {integrity: sha512-dZUHjzasuqS2lDO+PQCY1+jFmtWHlaP3tUvkX1Jr06LI/Ipa2P/ZNVSvuIoqQ0Bg+Ny27LvtrXxflZNeGtptvA==}

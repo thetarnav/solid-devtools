@@ -20,6 +20,7 @@
 		"vite-plugin-solid": "^2.2.6"
 	},
 	"dependencies": {
+		"@solid-primitives/keyed": "^1.0.0",
 		"@solid-primitives/utils": "^1.5.2",
 		"solid-js": "^1.4.0",
 		"twind": "^0.16.17"

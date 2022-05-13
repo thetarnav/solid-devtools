@@ -1,19 +1,25 @@
 import { createEffect, createRoot, createSignal } from "solid-js"
-import { createStore } from "solid-js/store"
+import { createStore, produce } from "solid-js/store"
 import { MESSAGE } from "@shared/messanger"
 import { onRuntimeMessage } from "./messanger"
-import { MappedOwner } from "@shared/graph"
+import { GraphRoot, MappedOwner } from "@shared/graph"
+
+const clear = <T>(p: T): void => {
+	for (const key in p) {
+		if (Object.prototype.hasOwnProperty.call(p, key)) {
+			delete p[key]
+		}
+	}
+}
 
 const exports = createRoot(() => {
-	const [graphs, setGraphs] = createStore<{ graphs: MappedOwner[] }>({ graphs: [] })
+	const [graphs, setGraphs] = createStore<GraphRoot[]>([])
 
-	onRuntimeMessage(MESSAGE.SolidUpdate, tree => {
-		createRoot(() => {
-			setGraphs("graphs", p => [...p, ...tree])
-		})
+	onRuntimeMessage(MESSAGE.SolidUpdate, root => {
+		setGraphs(i => i.id === root.id, root)
 	})
 
-	onRuntimeMessage(MESSAGE.ResetPanel, () => setGraphs("graphs", []))
+	onRuntimeMessage(MESSAGE.ResetPanel, () => setGraphs([]))
 
 	return { graphs }
 })
