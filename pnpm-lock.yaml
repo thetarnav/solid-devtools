@@ -17,16 +17,16 @@ importers:
   packages/debugger:
     specifiers:
       '@rollup/plugin-alias': ^3.1.9
-      '@solid-primitives/utils': ^1.4.0
+      '@solid-primitives/utils': ^1.5.2
       rimraf: ^3.0.2
       rollup: ^2.72.1
       rollup-preset-solid: ^1.4.0
-      solid-js: ^1.3.17
+      solid-js: ^1.4.0
       typescript: ^4.6.4
       watchlist: ^0.3.1
     dependencies:
-      '@solid-primitives/utils': 1.5.2_solid-js@1.3.17
-      solid-js: 1.3.17
+      '@solid-primitives/utils': 1.5.2_solid-js@1.4.0
+      solid-js: 1.4.0
     devDependencies:
       '@rollup/plugin-alias': 3.1.9_rollup@2.72.1
       rimraf: 3.0.2
@@ -38,17 +38,17 @@ importers:
   packages/extension:
     specifiers:
       '@crxjs/vite-plugin': ^1.0.1
-      '@solid-primitives/utils': ^1.4.0
+      '@solid-primitives/utils': ^1.5.2
       '@types/chrome': ^0.0.183
       rimraf: ^3.0.2
-      solid-js: ^1.3.17
+      solid-js: ^1.4.0
       twind: ^0.16.17
       typescript: ^4.6.4
       vite: ^2.9.6
       vite-plugin-solid: ^2.2.6
     dependencies:
-      '@solid-primitives/utils': 1.4.0_solid-js@1.3.17
-      solid-js: 1.3.17
+      '@solid-primitives/utils': 1.5.2_solid-js@1.4.0
+      solid-js: 1.4.0
       twind: 0.16.17_typescript@4.6.4
     devDependencies:
       '@crxjs/vite-plugin': 1.0.1_vite@2.9.7
@@ -65,15 +65,15 @@ importers:
       rimraf: ^3.0.2
       rollup: ^2.72.1
       rollup-preset-solid: ^1.4.0
-      solid-js: ^1.3.17
+      solid-js: ^1.4.0
       solid-meta: ^0.27.3
       twind: ^0.16.17
       typescript: ^4.6.4
       watchlist: ^0.3.1
     dependencies:
-      '@solid-primitives/utils': 1.5.2_solid-js@1.3.17
-      solid-js: 1.3.17
-      solid-meta: 0.27.3_solid-js@1.3.17
+      '@solid-primitives/utils': 1.5.2_solid-js@1.4.0
+      solid-js: 1.4.0
+      solid-meta: 0.27.3_solid-js@1.4.0
       twind: 0.16.17_typescript@4.6.4
     devDependencies:
       '@rollup/plugin-alias': 3.1.9_rollup@2.72.1
@@ -85,20 +85,20 @@ importers:
 
   packages/shared:
     specifiers:
-      solid-js: ^1.3.17
+      solid-js: ^1.4.0
     dependencies:
-      solid-js: 1.3.17
+      solid-js: 1.4.0
 
   packages/ui:
     specifiers:
       '@solid-primitives/utils': ^1.5.2
-      solid-js: ^1.3.17
+      solid-js: ^1.4.0
       twind: ^0.16.17
       typescript: ^4.6.4
       watchlist: ^0.3.1
     dependencies:
-      '@solid-primitives/utils': 1.5.2_solid-js@1.3.17
-      solid-js: 1.3.17
+      '@solid-primitives/utils': 1.5.2_solid-js@1.4.0
+      solid-js: 1.4.0
       twind: 0.16.17_typescript@4.6.4
     devDependencies:
       typescript: 4.6.4
@@ -107,13 +107,13 @@ importers:
   playgrounds/sandbox:
     specifiers:
       solid-devtools-overlay: 0.0.1
-      solid-js: ^1.3.17
+      solid-js: ^1.4.0
       typescript: ^4.6.4
       vite: ^2.8.7
       vite-plugin-solid: ^2.2.6
     dependencies:
       solid-devtools-overlay: link:../../packages/overlay
-      solid-js: 1.3.17
+      solid-js: 1.4.0
     devDependencies:
       typescript: 4.6.4
       vite: 2.9.7
@@ -1490,20 +1490,12 @@ packages:
       picomatch: 2.3.1
     dev: true
 
-  /@solid-primitives/utils/1.4.0_solid-js@1.3.17:
-    resolution: {integrity: sha512-VDEqiq03HSQ+n/vGWQ3Jqk1w+ONkWUNke/d/SS6Srre5EkY7280UktS+Ml6eYECst6LdHfSgsZBrq3RJxM4tfA==}
-    peerDependencies:
-      solid-js: ^1.3.1
-    dependencies:
-      solid-js: 1.3.17
-    dev: false
-
-  /@solid-primitives/utils/1.5.2_solid-js@1.3.17:
+  /@solid-primitives/utils/1.5.2_solid-js@1.4.0:
     resolution: {integrity: sha512-dZUHjzasuqS2lDO+PQCY1+jFmtWHlaP3tUvkX1Jr06LI/Ipa2P/ZNVSvuIoqQ0Bg+Ny27LvtrXxflZNeGtptvA==}
     peerDependencies:
       solid-js: ^1.3.1
     dependencies:
-      solid-js: 1.3.17
+      solid-js: 1.4.0
     dev: false
 
   /@types/chrome/0.0.183:
@@ -2626,18 +2618,18 @@ packages:
     engines: {node: '>=8'}
     dev: true
 
-  /solid-js/1.3.17:
-    resolution: {integrity: sha512-BFCosxa4hRm+LF7S+kBL5bNr4RtuZif6AaR5FdQkBpV1E6QNLAOFm4HWgEN8vL2aCWEKl384cT8Etw8ziW8aag==}
+  /solid-js/1.4.0:
+    resolution: {integrity: sha512-VV4d0JnXyBxrWntA18hYoutUNGfv/mufcJZoSUOi0+sKXES0XE2kG4f1LlnnhSU1jMAwRy9cWl/HlBv4O9odyg==}
 
-  /solid-meta/0.27.3_solid-js@1.3.17:
+  /solid-meta/0.27.3_solid-js@1.4.0:
     resolution: {integrity: sha512-XaVv0EPkoPvufzUOIMn4yOzZFnJvQPVBlpZFLc9zTFTUnb+cq/zuoWr0Sa0fEntodfVPe5j6NfvXwGE6pHQo+w==}
     peerDependencies:
       solid-js: ^1.0.0
     dependencies:
-      solid-js: 1.3.17
+      solid-js: 1.4.0
     dev: false
 
-  /solid-refresh/0.4.0_solid-js@1.3.17:
+  /solid-refresh/0.4.0_solid-js@1.4.0:
     resolution: {integrity: sha512-5XCUz845n/sHPzKK2i2G2EeV61tAmzv6SqzqhXcPaYhrgzVy7nKTQaBpKK8InKrriq9Z2JFF/mguIU00t/73xw==}
     peerDependencies:
       solid-js: ^1.3.0
@@ -2645,7 +2637,7 @@ packages:
       '@babel/generator': 7.17.10
       '@babel/helper-module-imports': 7.16.7
       '@babel/types': 7.17.10
-      solid-js: 1.3.17
+      solid-js: 1.4.0
     dev: true
 
   /source-map-js/1.0.2:
@@ -2925,8 +2917,8 @@ packages:
       '@babel/preset-typescript': 7.16.7_@babel+core@7.17.10
       babel-preset-solid: 1.3.17_@babel+core@7.17.10
       merge-anything: 5.0.2
-      solid-js: 1.3.17
-      solid-refresh: 0.4.0_solid-js@1.3.17
+      solid-js: 1.4.0
+      solid-refresh: 0.4.0_solid-js@1.4.0
       vite: 2.9.7
     transitivePeerDependencies:
       - less
