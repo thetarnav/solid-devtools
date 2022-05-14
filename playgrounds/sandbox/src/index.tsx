@@ -2,7 +2,6 @@
 import { render } from "solid-js/web"
 import { Debugger } from "../../../packages/debugger/src"
 
-import "./index.css"
 import App from "./App"
 
 render(

@@ -1,11 +1,14 @@
 import { Component, createSignal, createEffect, createMemo, getOwner, Show } from "solid-js"
-import styles from "./App.module.css"
 
 import { createDevtools } from "solid-devtools-overlay"
 
 const Button = (props: { text: string; onClick: VoidFunction }) => {
 	const text = createMemo(() => <span>{props.text}</span>)
-	return <button onClick={props.onClick}>{text()}</button>
+	return (
+		<button aria-label={props.text} onClick={props.onClick}>
+			{text()}
+		</button>
+	)
 }
 
 const App: Component = () => {

@@ -14,10 +14,10 @@ export interface MappedOwner {
 }
 
 export enum OwnerType {
-	Memo,
 	Component,
-	Computation,
+	UserEffect,
 	Effect,
+	Memo,
+	Computation,
 	Refresh,
-	Render,
 }
