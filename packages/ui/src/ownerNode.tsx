@@ -2,6 +2,16 @@ import { MappedOwner, OwnerType } from "@shared/graph"
 import { For, JSX, Show } from "solid-js"
 import { DeepReadonly } from "solid-js/store"
 import { tw } from "./twind"
+import { TransitionGroup, animateExit, animateEnter } from "@otonashixav/solid-flip"
+// import {TransitionGroup} from "solid-transition-group"
+
+export function OwnerChildren(props: { children: DeepReadonly<MappedOwner[]> }) {
+	return (
+		<TransitionGroup enter={animateEnter()} exit={animateExit()}>
+			<For each={props.children}>{o => <OwnerNode owner={o} />}</For>
+		</TransitionGroup>
+	)
+}
 
 export function OwnerNode(props: { owner: DeepReadonly<MappedOwner> }): JSX.Element {
 	const { name, type } = props.owner
@@ -13,7 +23,7 @@ export function OwnerNode(props: { owner: DeepReadonly<MappedOwner> }): JSX.Elem
 	return (
 		<div
 			ref={ref}
-			class={tw`bg-cyan-200 bg-opacity-5 border-0 border-t-[1px] border-l-[1px] border-cyan-900 border-opacity-30 outline-[1px] caption text-[12px] pt-1 pl-0.5`}
+			class={tw`bg-cyan-200 bg-opacity-5 border-0 border-t-[1px] border-l-[1px] border-cyan-900 border-opacity-30 outline-[1px] pt-1 pl-0.5`}
 		>
 			<div class={tw`pb-1 pr-2`}>
 				<p class={tw`italic pb-0.5`}>
@@ -33,11 +43,11 @@ export function OwnerNode(props: { owner: DeepReadonly<MappedOwner> }): JSX.Elem
 					</For>
 				</div>
 			</Show> */}
-			<Show when={children().length}>
-				<div class={tw`pl-4 pt-1`}>
-					<For each={children()}>{o => <OwnerNode owner={o} />}</For>
-				</div>
-			</Show>
+			{/* <Show when={children().length}> */}
+			<div class={tw`pl-4 pt-1`}>
+				<OwnerChildren children={children()} />
+			</div>
+			{/* </Show> */}
 		</div>
 	)
 }

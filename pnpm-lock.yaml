@@ -40,19 +40,23 @@ importers:
   packages/extension:
     specifiers:
       '@crxjs/vite-plugin': ^1.0.5
+      '@otonashixav/solid-flip': ^0.10.5
       '@solid-primitives/keyed': ^1.0.0
       '@solid-primitives/utils': ^1.5.2
       '@types/chrome': ^0.0.183
       rimraf: ^3.0.2
       solid-js: ^1.4.1
+      solid-transition-group: ^0.0.10
       twind: ^0.16.17
       typescript: ^4.6.4
       vite: ^2.9.9
       vite-plugin-solid: ^2.2.6
     dependencies:
+      '@otonashixav/solid-flip': 0.10.5_solid-js@1.4.1
       '@solid-primitives/keyed': 1.0.0_solid-js@1.4.1
       '@solid-primitives/utils': 1.5.2_solid-js@1.4.1
       solid-js: 1.4.1
+      solid-transition-group: 0.0.10_solid-js@1.4.1
       twind: 0.16.17_typescript@4.6.4
     devDependencies:
       '@crxjs/vite-plugin': 1.0.5_vite@2.9.9
@@ -95,14 +99,18 @@ importers:
 
   packages/ui:
     specifiers:
+      '@otonashixav/solid-flip': ^0.10.5
       '@solid-primitives/utils': ^1.5.2
       solid-js: ^1.4.1
+      solid-transition-group: ^0.0.10
       twind: ^0.16.17
       typescript: ^4.6.4
       watchlist: ^0.3.1
     dependencies:
+      '@otonashixav/solid-flip': 0.10.5_solid-js@1.4.1
       '@solid-primitives/utils': 1.5.2_solid-js@1.4.1
       solid-js: 1.4.1
+      solid-transition-group: 0.0.10_solid-js@1.4.1
       twind: 0.16.17_typescript@4.6.4
     devDependencies:
       typescript: 4.6.4
@@ -1432,6 +1440,14 @@ packages:
       fastq: 1.13.0
     dev: true
 
+  /@otonashixav/solid-flip/0.10.5_solid-js@1.4.1:
+    resolution: {integrity: sha512-Tb2n9lzuktteqm26KJ1yH9NJsY2SbgNCHWnCOAKjEWBfGfw4j31vJVG1+k11WmgP2g9YzuyS8Skr7HsFntXZWA==}
+    peerDependencies:
+      solid-js: '>=1.0.0'
+    dependencies:
+      solid-js: 1.4.1
+    dev: false
+
   /@rollup/plugin-alias/3.1.9_rollup@2.73.0:
     resolution: {integrity: sha512-QI5fsEvm9bDzt32k39wpOwZhVzRcL5ydcffUHMyLVaVaLeC70I8TJZ17F1z1eMoLu4E/UOcH9BWVkKpIKdrfiw==}
     engines: {node: '>=8.0.0'}
@@ -2655,6 +2671,14 @@ packages:
       '@babel/types': 7.17.10
       solid-js: 1.4.1
     dev: true
+
+  /solid-transition-group/0.0.10_solid-js@1.4.1:
+    resolution: {integrity: sha512-b3O9z6BUP60CG1WnTdqFuvHms0reDNYwQF+eAEEaSaoDEmiOu9+Lu7zQgWGySJjaAdSAClhmFCmx/eAjQgfIoA==}
+    peerDependencies:
+      solid-js: ^1.0.0
+    dependencies:
+      solid-js: 1.4.1
+    dev: false
 
   /source-map-js/1.0.2:
     resolution: {integrity: sha512-R0XvVJ9WusLiqTCEiGCmICCMplcCkIwwR11mOSD9CR5u+IXYdiseeEuXCVAjS54zqwkLcPNnmU4OeJ6tUrWhDw==}

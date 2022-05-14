@@ -6,8 +6,6 @@ export function createPortMessanger(port: chrome.runtime.Port): {
 } {
 	const listeners: Partial<Record<MESSAGE, ((payload: any) => void)[]>> = {}
 	port.onMessage.addListener((event, port) => {
-		console.log("port message", port)
-
 		const id = event?.id as MESSAGE
 		if (typeof id !== "number") return
 		listeners[id]?.forEach(f => f(event.payload))
