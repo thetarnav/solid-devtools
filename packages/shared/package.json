@@ -5,7 +5,7 @@
 	"author": "Damian Tarnawski <gthetarnav@gmail.com>",
 	"contributors": [],
 	"dependencies": {
-		"solid-js": "^1.4.0"
+		"solid-js": "^1.4.1"
 	},
 	"private": true
 }

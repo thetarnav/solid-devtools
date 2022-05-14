@@ -31,7 +31,7 @@
 	},
 	"dependencies": {
 		"@solid-primitives/utils": "^1.5.2",
-		"solid-js": "^1.4.0",
+		"solid-js": "^1.4.1",
 		"twind": "^0.16.17"
 	},
 	"packageManager": "pnpm@6.32.11"

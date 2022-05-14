@@ -19,7 +19,7 @@ const App: Component = () => {
 		{ name: "EFFECT" },
 	)
 
-	createDevtools(getOwner()!)
+	// createDevtools(getOwner()!)
 
 	return (
 		<div class={styles.App}>

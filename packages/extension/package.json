@@ -12,17 +12,17 @@
 		"typecheck": "tsc --noEmit"
 	},
 	"devDependencies": {
-		"@crxjs/vite-plugin": "^1.0.1",
+		"@crxjs/vite-plugin": "^1.0.5",
 		"@types/chrome": "^0.0.183",
 		"rimraf": "^3.0.2",
 		"typescript": "^4.6.4",
-		"vite": "^2.9.6",
+		"vite": "^2.9.9",
 		"vite-plugin-solid": "^2.2.6"
 	},
 	"dependencies": {
 		"@solid-primitives/keyed": "^1.0.0",
 		"@solid-primitives/utils": "^1.5.2",
-		"solid-js": "^1.4.0",
+		"solid-js": "^1.4.1",
 		"twind": "^0.16.17"
 	},
 	"packageManager": "pnpm@6.32.11"
