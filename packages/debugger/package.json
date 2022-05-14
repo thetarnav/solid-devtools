@@ -50,6 +50,7 @@
 		"watchlist": "^0.3.1"
 	},
 	"dependencies": {
+		"@solid-primitives/throttle": "^1.2.0",
 		"@solid-primitives/utils": "^1.5.2",
 		"solid-js": "^1.4.1"
 	},

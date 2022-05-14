@@ -17,6 +17,7 @@ importers:
   packages/debugger:
     specifiers:
       '@rollup/plugin-alias': ^3.1.9
+      '@solid-primitives/throttle': ^1.2.0
       '@solid-primitives/utils': ^1.5.2
       rimraf: ^3.0.2
       rollup: ^2.73.0
@@ -25,6 +26,7 @@ importers:
       typescript: ^4.6.4
       watchlist: ^0.3.1
     dependencies:
+      '@solid-primitives/throttle': 1.2.0_solid-js@1.4.1
       '@solid-primitives/utils': 1.5.2_solid-js@1.4.1
       solid-js: 1.4.1
     devDependencies:
@@ -1496,6 +1498,14 @@ packages:
     resolution: {integrity: sha512-9vznFq6xR1FLEcQH3S3aGZ3iWOY6EZmDEl0raNOXJxdgXnudHepcAOfx8G52bROHJ3AdPnIqv4ITIegPQOK2BA==}
     peerDependencies:
       solid-js: ^1.4.0
+    dependencies:
+      solid-js: 1.4.1
+    dev: false
+
+  /@solid-primitives/throttle/1.2.0_solid-js@1.4.1:
+    resolution: {integrity: sha512-qYKYEgGl/nSCF+wq7H6zFFi8s2e/woFZJkZbCbyUrtbEIvCze4xSZRr64Xi067GlBE+T/N4LZX/htJmLfwkAeg==}
+    peerDependencies:
+      solid-js: ^1.3.1
     dependencies:
       solid-js: 1.4.1
     dev: false

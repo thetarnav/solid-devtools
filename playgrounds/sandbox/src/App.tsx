@@ -1,4 +1,4 @@
-import { Component, createSignal, createEffect, createMemo, getOwner } from "solid-js"
+import { Component, createSignal, createEffect, createMemo, getOwner, Show } from "solid-js"
 import styles from "./App.module.css"
 
 import { createDevtools } from "solid-devtools-overlay"
@@ -22,11 +22,14 @@ const App: Component = () => {
 	// createDevtools(getOwner()!)
 
 	return (
-		<div class={styles.App}>
-			<header class={styles.header}>
+		<div>
+			<header>
 				<Button onClick={() => setCount(p => ++p)} text={`Count: ${count()}`} />
 				<Button onClick={() => setCount(p => ++p)} text={`Count: ${count()}`} />
 			</header>
+			<div>
+				<Show when={count() % 2 === 0}>{count()} is even!</Show>
+			</div>
 		</div>
 	)
 }
