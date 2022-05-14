@@ -5,7 +5,9 @@ export enum MESSAGE {
 	Hello,
 	PanelVisibility,
 	ResetPanel,
-	SolidUpdate,
+	GraphUpdate,
+	ComputationRun,
+	SignalUpdate,
 }
 
 export interface Message<K extends MESSAGE> {
@@ -17,7 +19,12 @@ export interface MessagePayloads {
 	[MESSAGE.Hello]: string
 	[MESSAGE.PanelVisibility]: boolean
 	[MESSAGE.ResetPanel]: void
-	[MESSAGE.SolidUpdate]: GraphRoot
+	[MESSAGE.GraphUpdate]: GraphRoot
+	[MESSAGE.ComputationRun]: number
+	[MESSAGE.SignalUpdate]: {
+		id: number
+		value: any
+	}
 }
 
 export type PostMessageFn = <K extends MESSAGE>(

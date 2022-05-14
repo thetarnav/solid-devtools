@@ -1,6 +1,6 @@
-import type { Owner } from "solid-js/types/reactive/signal"
 import { AnyFunction, AnyObject } from "@solid-primitives/utils"
-import { MappedOwner, OwnerType } from "@shared/graph"
+import { MappedOwner, OwnerType, Owner } from "@shared/graph"
+import { computationRun } from "./update"
 
 const isComponent = (o: Readonly<AnyObject>): boolean =>
 	"componentName" in o && typeof o.value === "function"
@@ -43,9 +43,25 @@ const getOwnerType = (o: Readonly<AnyObject>, parentType: OwnerType): OwnerType 
 	return OwnerType.Computation
 }
 
-function mapOwner(owner: Readonly<Owner>, parentType: OwnerType): MappedOwner {
+function listenToComputation(owner: Owner, onRun: VoidFunction) {
+	const { fn } = owner
+	owner.fn = (...a) => (fn(...a), onRun())
+}
+
+let LAST_OWNER_ID = 0
+
+function mapOwner(owner: Owner, parentType: OwnerType): MappedOwner {
+	let id: number
+	if (owner.sdtId !== undefined) {
+		id = owner.sdtId
+	} else {
+		owner.sdtId = id = LAST_OWNER_ID++
+		listenToComputation(owner, computationRun.bind(void 0, id))
+	}
+
 	const type = getOwnerType(owner, parentType)
 	const mapped: MappedOwner = {
+		id,
 		name: getOwnerName(owner),
 		type,
 		children: mapChildren(owner, type),
@@ -53,12 +69,12 @@ function mapOwner(owner: Readonly<Owner>, parentType: OwnerType): MappedOwner {
 	return mapped
 }
 
-function mapChildren(owner: Readonly<Owner>, parentType: OwnerType): MappedOwner[] {
+function mapChildren(owner: Owner, parentType: OwnerType): MappedOwner[] {
 	if (!Array.isArray(owner.owned)) return []
 	return owner.owned.map(child => mapOwner(child, parentType))
 }
 
-function mapOwnerTree(root: Readonly<Owner>): MappedOwner[] {
+function mapOwnerTree(root: Owner): MappedOwner[] {
 	return mapChildren(root, OwnerType.Component)
 }
 

@@ -95,8 +95,10 @@ importers:
 
   packages/shared:
     specifiers:
+      '@solid-primitives/utils': ^1.5.2
       solid-js: ^1.4.1
     dependencies:
+      '@solid-primitives/utils': 1.5.2_solid-js@1.4.1
       solid-js: 1.4.1
 
   packages/ui:

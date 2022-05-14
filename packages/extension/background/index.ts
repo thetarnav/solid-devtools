@@ -31,7 +31,9 @@ chrome.runtime.onConnect.addListener(newPort => {
 
 	onPortMessage(MESSAGE.SolidOnPage, () => postRuntimeMessage(MESSAGE.SolidOnPage, undefined))
 
-	onPortMessage(MESSAGE.SolidUpdate, graph => postRuntimeMessage(MESSAGE.SolidUpdate, graph))
+	onPortMessage(MESSAGE.GraphUpdate, graph => postRuntimeMessage(MESSAGE.GraphUpdate, graph))
+
+	onPortMessage(MESSAGE.ComputationRun, id => postRuntimeMessage(MESSAGE.ComputationRun, id))
 })
 
 // panel -> bg

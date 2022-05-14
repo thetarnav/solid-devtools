@@ -1,8 +1,8 @@
-import { FlowComponent, createEffect, getOwner, createRoot } from "solid-js"
+import { FlowComponent, createEffect } from "solid-js"
 import { createBranch } from "@solid-primitives/rootless"
 import { postWindowMessage, MESSAGE } from "@shared/messanger"
-import { createGraphRoot } from "./update"
-import { Owner } from "@shared/graph"
+import { createGraphRoot, makeComputationRunListener } from "./update"
+import { Owner, getOwner } from "@shared/graph"
 
 postWindowMessage(MESSAGE.SolidOnPage)
 
@@ -22,8 +22,10 @@ export const Debugger: FlowComponent = props => {
 	createBranch(() => {
 		const tree = createGraphRoot(root)
 		createEffect(() => {
-			postWindowMessage(MESSAGE.SolidUpdate, tree)
+			postWindowMessage(MESSAGE.GraphUpdate, tree)
 		})
+
+		makeComputationRunListener(id => postWindowMessage(MESSAGE.ComputationRun, id))
 	})
 
 	return props.children
