@@ -30,6 +30,7 @@
 		"watchlist": "^0.3.1"
 	},
 	"dependencies": {
+		"@motionone/solid": "^10.8.1",
 		"@otonashixav/solid-flip": "^0.10.5",
 		"@solid-primitives/utils": "^1.5.2",
 		"solid-js": "^1.4.1",
