@@ -23,6 +23,20 @@ export interface MappedOwner {
 	// parent: MappedOwner | null
 }
 
+export interface ReactiveGraphOwner {
+	readonly id: number
+	readonly name: string
+	readonly type: OwnerType
+	readonly dispose: VoidFunction
+	readonly rerun: boolean
+	children: ReactiveGraphOwner[]
+}
+
+export interface ReactiveGraphRoot {
+	readonly id: number
+	children: ReactiveGraphOwner[]
+}
+
 export enum OwnerType {
 	Component,
 	UserEffect,

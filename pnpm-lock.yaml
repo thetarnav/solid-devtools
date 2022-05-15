@@ -44,6 +44,7 @@ importers:
       '@crxjs/vite-plugin': ^1.0.5
       '@otonashixav/solid-flip': ^0.10.5
       '@solid-primitives/keyed': ^1.0.0
+      '@solid-primitives/rootless': ^1.1.0
       '@solid-primitives/utils': ^1.5.2
       '@types/chrome': ^0.0.183
       rimraf: ^3.0.2
@@ -56,6 +57,7 @@ importers:
     dependencies:
       '@otonashixav/solid-flip': 0.10.5_solid-js@1.4.1
       '@solid-primitives/keyed': 1.0.0_solid-js@1.4.1
+      '@solid-primitives/rootless': 1.1.0_solid-js@1.4.1
       '@solid-primitives/utils': 1.5.2_solid-js@1.4.1
       solid-js: 1.4.1
       solid-transition-group: 0.0.10_solid-js@1.4.1

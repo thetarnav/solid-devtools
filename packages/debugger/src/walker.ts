@@ -44,8 +44,11 @@ const getOwnerType = (o: Readonly<AnyObject>, parentType: OwnerType): OwnerType 
 }
 
 function listenToComputation(owner: Owner, onRun: VoidFunction) {
-	const { fn } = owner
-	owner.fn = (...a) => (fn(...a), onRun())
+	const fn = owner.fn.bind(owner)
+	owner.fn = (...a) => {
+		onRun()
+		return fn(...a)
+	}
 }
 
 let LAST_OWNER_ID = 0
