@@ -1,28 +1,24 @@
-import { Accessor, batch, createRoot, createSignal, onCleanup, Setter } from "solid-js"
+import { batch, createRoot, createSignal, onCleanup, Setter } from "solid-js"
 import { createStore, produce } from "solid-js/store"
-import { createBranch } from "@solid-primitives/rootless"
 import { MESSAGE } from "@shared/messanger"
 import { onRuntimeMessage } from "./messanger"
 import { MappedOwner, ReactiveGraphOwner, ReactiveGraphRoot } from "@shared/graph"
 
-// ? is "get" necessery?
-const computationRerun: Record<number, { get: Accessor<boolean>; set: Setter<boolean> }> = {}
+const dispose = (o: ReactiveGraphOwner) => o.dispose()
+const disposeAll = (list: ReactiveGraphOwner[]) => list.forEach(dispose)
+
+const computationRerun: Record<number, Setter<boolean>> = {}
 
 /**
  * maps the raw owner tree to be placed into the reactive graph store
  * this is for new branches – owners that just have been created
  */
 function mapNewOwner(owner: MappedOwner): ReactiveGraphOwner {
-	// branch will be disposed with it's parent or with dispose()
-	return createBranch(dispose => {
+	// wrap with root that will be disposed together with the rest of the tree
+	return createRoot(dispose => {
 		const [rerun, setRerun] = createSignal(false)
 		const { id } = owner
-		computationRerun[id] = {
-			get: rerun,
-			set: setRerun,
-		}
-		onCleanup(() => delete computationRerun[id])
-		return {
+		const node: ReactiveGraphOwner = {
 			...owner,
 			dispose,
 			get rerun() {
@@ -30,6 +26,10 @@ function mapNewOwner(owner: MappedOwner): ReactiveGraphOwner {
 			},
 			children: owner.children.map(mapNewOwner),
 		}
+		computationRerun[id] = setRerun
+		onCleanup(() => delete computationRerun[id])
+		onCleanup(disposeAll.bind(void 0, node.children))
+		return node
 	})
 }
 
@@ -64,7 +64,7 @@ function reconcileChildren(newChildren: MappedOwner[], children: ReactiveGraphOw
 			children[i] = mapNewOwner(newChildren[i])
 		}
 	} else {
-		children.splice(i).forEach(o => o.dispose())
+		disposeAll(children.splice(i))
 	}
 }
 
@@ -74,9 +74,7 @@ const exports = createRoot(() => {
 	onRuntimeMessage(MESSAGE.GraphUpdate, root => {
 		// reset all of the computationRerun state
 		batch(() => {
-			for (const id in computationRerun) {
-				computationRerun[id].set(false)
-			}
+			for (const id in computationRerun) computationRerun[id](false)
 		})
 
 		const index = graphs.findIndex(i => i.id === root.id)
@@ -101,7 +99,7 @@ const exports = createRoot(() => {
 
 	const handleComputationRerun = (id: number) => {
 		// ? should the children of owner that rerun be removed?
-		computationRerun[id]?.set(true)
+		computationRerun[id]?.(true)
 	}
 	onRuntimeMessage(MESSAGE.ComputationRun, handleComputationRerun)
 
