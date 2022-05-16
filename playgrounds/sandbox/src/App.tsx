@@ -1,4 +1,12 @@
-import { Component, createSignal, createEffect, createMemo, getOwner, Show } from "solid-js"
+import {
+	Component,
+	createSignal,
+	createEffect,
+	createMemo,
+	getOwner,
+	Show,
+	createComputed,
+} from "solid-js"
 
 import { createDevtools } from "solid-devtools-overlay"
 
@@ -13,6 +21,11 @@ const Button = (props: { text: string; onClick: VoidFunction }) => {
 
 const App: Component = () => {
 	const [count, setCount] = createSignal(0, { name: "count_sig" })
+	const [showEven, setShowEven] = createSignal(false)
+
+	createComputed(() => {
+		setShowEven(count() % 2 === 0)
+	})
 
 	createEffect(
 		() => {
@@ -31,7 +44,7 @@ const App: Component = () => {
 				<Button onClick={() => setCount(p => ++p)} text={`Count: ${count()}`} />
 			</header>
 			<div>
-				<Show when={count() % 2 === 0}>{count()} is even!</Show>
+				<Show when={showEven()}>{count()} is even!</Show>
 			</div>
 		</div>
 	)

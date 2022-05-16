@@ -1,13 +1,25 @@
 import { getOwner as _getOwner } from "solid-js"
-import type { Owner as _Owner } from "solid-js/types/reactive/signal"
 import { AnyFunction } from "@solid-primitives/utils"
 
-export interface Owner extends _Owner {
-	fn: AnyFunction
+export interface SolidSignal {
+	name: string
 	sdtId?: number
+	value: unknown
 }
 
-export const getOwner = _getOwner as () => Owner | null
+export interface SolidOwner {
+	name?: string
+	componentName?: string
+	sdtId?: number
+	owner: SolidOwner | null
+	owned: SolidOwner[]
+	fn: AnyFunction
+	cleanups: VoidFunction[] | null
+	context: any | null
+	sourceMap?: Record<string, SolidSignal>
+}
+
+export const getOwner = _getOwner as () => SolidOwner | null
 
 export interface GraphRoot {
 	id: number
@@ -18,9 +30,14 @@ export interface MappedOwner {
 	id: number
 	name: string
 	type: OwnerType
+	signals: MappedSignal[]
 	children: MappedOwner[]
-	// JSON doesn't support circular structures (for Port.postMessage)
-	// parent: MappedOwner | null
+}
+
+export interface MappedSignal {
+	name: string
+	id: number
+	value: any
 }
 
 export interface ReactiveGraphOwner {
@@ -39,8 +56,8 @@ export interface ReactiveGraphRoot {
 
 export enum OwnerType {
 	Component,
-	UserEffect,
 	Effect,
+	Render,
 	Memo,
 	Computation,
 	Refresh,

@@ -29,4 +29,6 @@ onWindowMessage(MESSAGE.GraphUpdate, graph => postPortMessage(MESSAGE.GraphUpdat
 
 onWindowMessage(MESSAGE.ComputationRun, id => postPortMessage(MESSAGE.ComputationRun, id))
 
+onWindowMessage(MESSAGE.SignalUpdate, payload => postPortMessage(MESSAGE.SignalUpdate, payload))
+
 export {}

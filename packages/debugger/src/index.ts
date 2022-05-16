@@ -1,14 +1,14 @@
 import { FlowComponent, createEffect } from "solid-js"
 import { createBranch } from "@solid-primitives/rootless"
 import { postWindowMessage, MESSAGE } from "@shared/messanger"
-import { createGraphRoot, makeComputationRunListener } from "./update"
-import { Owner, getOwner } from "@shared/graph"
+import { createGraphRoot, makeComputationRunListener, makeSignalUpdateListener } from "./update"
+import { SolidOwner, getOwner } from "@shared/graph"
 
 postWindowMessage(MESSAGE.SolidOnPage)
 
 /** helper to getting to an owner that you want */
-function findOwner(root: Owner, predicate: (owner: Owner) => boolean): Owner | null {
-	const queue: Owner[] = [root]
+function findOwner(root: SolidOwner, predicate: (owner: SolidOwner) => boolean): SolidOwner | null {
+	const queue: SolidOwner[] = [root]
 	for (const owner of queue) {
 		if (predicate(owner)) return owner
 		if (Array.isArray(owner.owned)) queue.push(...owner.owned)
@@ -26,6 +26,7 @@ export const Debugger: FlowComponent = props => {
 		})
 
 		makeComputationRunListener(id => postWindowMessage(MESSAGE.ComputationRun, id))
+		makeSignalUpdateListener((id, value) => postWindowMessage(MESSAGE.SignalUpdate, { id, value }))
 	})
 
 	return props.children

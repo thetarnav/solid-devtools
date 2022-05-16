@@ -1,6 +1,7 @@
 import { Accessor, createSignal, onCleanup } from "solid-js"
 import throttle from "@solid-primitives/throttle"
-import { GraphRoot, MappedOwner, Owner } from "@shared/graph"
+import { chain } from "@solid-primitives/utils"
+import { GraphRoot, MappedOwner, SolidOwner } from "@shared/graph"
 import { mapOwnerTree } from "./walker"
 
 let windowAfterUpdatePatched = false
@@ -30,9 +31,7 @@ export type ComputationRunListener = (id: number) => void
 const computationRunListeners = new Set<ComputationRunListener>()
 
 /** @internal */
-export function computationRun(id: number) {
-	computationRunListeners.forEach(f => f(id))
-}
+export const computationRun: ComputationRunListener = chain(computationRunListeners)
 
 /**
  * Runs the callback on every computation run (whenever a memo/effect/computed etc. reruns).
@@ -43,7 +42,19 @@ export function makeComputationRunListener(listener: ComputationRunListener): Vo
 	return onCleanup(() => computationRunListeners.delete(listener))
 }
 
-export function createOwnerObserver(owner: Owner, onUpdate: (tree: MappedOwner[]) => void) {
+export type SignalUpdateListener = (id: number, newValue: unknown, oldValue: unknown) => void
+
+const signalUpdateListeners = new Set<SignalUpdateListener>()
+
+/** @internal */
+export const signalUpdated: SignalUpdateListener = chain(signalUpdateListeners)
+
+export function makeSignalUpdateListener(listener: SignalUpdateListener): VoidFunction {
+	signalUpdateListeners.add(listener)
+	return onCleanup(() => signalUpdateListeners.delete(listener))
+}
+
+export function createOwnerObserver(owner: SolidOwner, onUpdate: (tree: MappedOwner[]) => void) {
 	const update = () => {
 		const tree = mapOwnerTree(owner)
 		onUpdate(tree)
@@ -54,7 +65,7 @@ export function createOwnerObserver(owner: Owner, onUpdate: (tree: MappedOwner[]
 
 let LAST_ROOT_ID = 0
 
-export function createGraphRoot(root: Owner): GraphRoot {
+export function createGraphRoot(root: SolidOwner): GraphRoot {
 	const [tree, setTree] = createSignal<MappedOwner[]>([])
 	createOwnerObserver(root, setTree)
 	return {

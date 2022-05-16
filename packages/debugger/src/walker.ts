@@ -1,6 +1,6 @@
 import { AnyFunction, AnyObject } from "@solid-primitives/utils"
-import { MappedOwner, OwnerType, Owner } from "@shared/graph"
-import { computationRun } from "./update"
+import { MappedOwner, OwnerType, SolidOwner, MappedSignal, SolidSignal } from "@shared/graph"
+import { computationRun, signalUpdated } from "./update"
 
 const isComponent = (o: Readonly<AnyObject>): boolean =>
 	"componentName" in o && typeof o.value === "function"
@@ -12,16 +12,7 @@ const fnMatchesRefresh = (fn: AnyFunction): boolean =>
 	(fn + "").replace(/[\n\t]/g, "").replace(/ +/g, " ") ===
 	"() => { const c = source(); if (c) { return untrack(() => c(props)); } return undefined; }"
 
-const fnMatchesRender = (fn: AnyFunction): boolean => {
-	const string = fn + ""
-	return (
-		string === "(current) => insertExpression(parent, accessor(), current, marker)" ||
-		string === "() => current = insertExpression(parent, array, current, marker, true)"
-	)
-}
-// previous Render type check: (o.pure === false && (!o.owned || o.value + "" === "() => current") && fnMatchesRender(o.fn))
-
-const getOwnerName = (owner: Readonly<Owner>): string => {
+const getOwnerName = (owner: Readonly<SolidOwner>): string => {
 	const { name, componentName: component } = owner
 	if (component) return component.startsWith("_Hot$$") ? component.slice(6) : component
 	return name || "(anonymous)"
@@ -37,13 +28,16 @@ const getOwnerType = (o: Readonly<AnyObject>, parentType: OwnerType): OwnerType 
 	}
 	// Effect
 	if (o.pure === false) {
-		if (o.user === true) return OwnerType.UserEffect
-		return OwnerType.Effect
+		if (o.user === true) return OwnerType.Effect
+		return OwnerType.Render
 	}
 	return OwnerType.Computation
 }
 
-function listenToComputation(owner: Owner, onRun: VoidFunction) {
+/**
+ * Wraps the fn prop of owner object to trigger handler whenever the computation is executed.
+ */
+function listenToComputation(owner: SolidOwner, onRun: VoidFunction) {
 	const fn = owner.fn.bind(owner)
 	owner.fn = (...a) => {
 		onRun()
@@ -51,14 +45,51 @@ function listenToComputation(owner: Owner, onRun: VoidFunction) {
 	}
 }
 
-let LAST_OWNER_ID = 0
+// ? maybe signal changes should trigger computation rerun,
+// ? instead of patching computation functions
 
-function mapOwner(owner: Owner, parentType: OwnerType): MappedOwner {
+// ? How does "equals" work here?
+
+// TODO figure out deffering and batching signal/computation updates - to get out of the solid way
+
+function listenToSignalUpdate(
+	signal: SolidSignal,
+	onUpdate: (newValue: any, oldValue: any) => void,
+): void {
+	let value = signal.value
+	Object.defineProperty(signal, "value", {
+		get: () => value,
+		set: newValue => (onUpdate(newValue, value), (value = newValue)),
+	})
+}
+
+let LAST_ID = 0
+
+function mapOwnerSignals(o: Readonly<SolidOwner>): MappedSignal[] {
+	const { sourceMap } = o
+	if (!sourceMap) return []
+	return Object.values(sourceMap).map(raw => {
+		let id: number
+		if (raw.sdtId !== undefined) {
+			id = raw.sdtId
+		} else {
+			raw.sdtId = id = LAST_ID++
+			listenToSignalUpdate(raw, signalUpdated.bind(void 0, id))
+		}
+		return {
+			name: raw.name,
+			id,
+			value: raw.value,
+		}
+	})
+}
+
+function mapOwner(owner: SolidOwner, parentType: OwnerType): MappedOwner {
 	let id: number
 	if (owner.sdtId !== undefined) {
 		id = owner.sdtId
 	} else {
-		owner.sdtId = id = LAST_OWNER_ID++
+		owner.sdtId = id = LAST_ID++
 		listenToComputation(owner, computationRun.bind(void 0, id))
 	}
 
@@ -67,17 +98,18 @@ function mapOwner(owner: Owner, parentType: OwnerType): MappedOwner {
 		id,
 		name: getOwnerName(owner),
 		type,
+		signals: mapOwnerSignals(owner),
 		children: mapChildren(owner, type),
 	}
 	return mapped
 }
 
-function mapChildren(owner: Owner, parentType: OwnerType): MappedOwner[] {
+function mapChildren(owner: Readonly<SolidOwner>, parentType: OwnerType): MappedOwner[] {
 	if (!Array.isArray(owner.owned)) return []
 	return owner.owned.map(child => mapOwner(child, parentType))
 }
 
-function mapOwnerTree(root: Owner): MappedOwner[] {
+function mapOwnerTree(root: SolidOwner): MappedOwner[] {
 	return mapChildren(root, OwnerType.Component)
 }
 
