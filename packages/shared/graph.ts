@@ -1,4 +1,4 @@
-import { getOwner as _getOwner } from "solid-js"
+import { getOwner as _getOwner, Setter } from "solid-js"
 import { AnyFunction } from "@solid-primitives/utils"
 
 export interface SolidSignal {
@@ -47,12 +47,21 @@ export interface ReactiveGraphOwner {
 	readonly type: OwnerType
 	readonly dispose: VoidFunction
 	readonly rerun: boolean
-	children: ReactiveGraphOwner[]
+	readonly children: ReactiveGraphOwner[]
+	readonly signals: ReactiveGraphSignal[]
+}
+
+export interface ReactiveGraphSignal {
+	readonly id: number
+	readonly name: string
+	readonly dispose?: VoidFunction
+	value: unknown
+	readonly setValue: Setter<unknown>
 }
 
 export interface ReactiveGraphRoot {
 	readonly id: number
-	children: ReactiveGraphOwner[]
+	readonly children: ReactiveGraphOwner[]
 }
 
 export enum OwnerType {

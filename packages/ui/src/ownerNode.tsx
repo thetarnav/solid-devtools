@@ -1,18 +1,9 @@
 import { ReactiveGraphOwner, OwnerType } from "@shared/graph"
 import { For, JSX, Show } from "solid-js"
 import { DeepReadonly } from "solid-js/store"
-import { colors, tw } from "./twind"
+import { colors, hexToRgb, tw } from "./twind"
 import { TransitionGroup, animateExit, animateEnter } from "@otonashixav/solid-flip"
 // import {TransitionGroup} from "solid-transition-group"
-
-function hexToRgb(hex: string, alpha?: number) {
-	var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex)
-	if (!result) return null
-	const r = parseInt(result[1], 16),
-		g = parseInt(result[2], 16),
-		b = parseInt(result[3], 16)
-	return alpha === undefined ? `rgb(${r},${g},${b})` : `rgba(${r},${g},${b}, ${alpha})`
-}
 
 const highlightRgba = hexToRgb(colors.cyan[400], 0.6)
 
@@ -27,6 +18,8 @@ export function OwnerChildren(props: { children: DeepReadonly<ReactiveGraphOwner
 export function OwnerNode(props: { owner: DeepReadonly<ReactiveGraphOwner> }): JSX.Element {
 	const { name, type } = props.owner
 	const children = () => props.owner.children
+	const signals = () => props.owner.signals
+	const rerun = () => props.owner.rerun
 	const typeName = OwnerType[type]
 
 	let ref!: HTMLDivElement
@@ -45,7 +38,7 @@ export function OwnerNode(props: { owner: DeepReadonly<ReactiveGraphOwner> }): J
 							transition-color
 						`}
 						style={{
-							"background-color": props.owner.rerun ? highlightRgba : null,
+							"background-color": rerun() ? highlightRgba : null,
 						}}
 					>
 						{type === OwnerType.Component ? `<${name}>` : name}{" "}
@@ -58,18 +51,22 @@ export function OwnerNode(props: { owner: DeepReadonly<ReactiveGraphOwner> }): J
 					<Show when={dependents}>{d => <DependencyCount n={d().length} type="dependents" />}</Show>
 				</div> */}
 			</div>
-			{/* <Show when={stateEntries.length}>
+			<Show when={signals().length}>
 				<div>
-					<For each={stateEntries}>
-						{([name, value]) => <StateNode name={name} value={value()} />}
+					<For each={signals()}>
+						{signal => (
+							<div>
+								{signal.name} — {JSON.stringify(signal.value)}
+							</div>
+						)}
 					</For>
 				</div>
-			</Show> */}
+			</Show>
 			{/* <Show when={children().length}> */}
 			<div
 				class={tw`pl-4 pt-1 transition-opacity duration-500`}
 				style={{
-					opacity: props.owner.rerun ? 0.3 : 1,
+					opacity: rerun() ? 0.3 : 1,
 				}}
 			>
 				<OwnerChildren children={children()} />

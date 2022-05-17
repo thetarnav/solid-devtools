@@ -6,6 +6,7 @@ import {
 	getOwner,
 	Show,
 	createComputed,
+	runWithOwner,
 } from "solid-js"
 
 // import { createDevtools } from "solid-devtools-overlay"
@@ -25,6 +26,14 @@ const App: Component = () => {
 
 	createComputed(() => {
 		setShowEven(count() % 2 === 0)
+	})
+
+	// add signal asynchronously
+	const owner = getOwner()!
+	setTimeout(() => {
+		runWithOwner(owner, () => {
+			createSignal("I am here too!", { name: "async" })
+		})
 	})
 
 	createEffect(
