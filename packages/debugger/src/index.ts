@@ -26,7 +26,7 @@ export const Debugger: FlowComponent = props => {
 		})
 
 		makeComputationRunListener(id => postWindowMessage(MESSAGE.ComputationRun, id))
-		makeSignalUpdateListener((id, value) => postWindowMessage(MESSAGE.SignalUpdate, { id, value }))
+		makeSignalUpdateListener(payload => postWindowMessage(MESSAGE.SignalUpdate, payload))
 	})
 
 	return props.children

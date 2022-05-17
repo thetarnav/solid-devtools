@@ -8,7 +8,7 @@ import {
 	createComputed,
 } from "solid-js"
 
-import { createDevtools } from "solid-devtools-overlay"
+// import { createDevtools } from "solid-devtools-overlay"
 
 const Button = (props: { text: string; onClick: VoidFunction }) => {
 	const text = createMemo(() => <span>{props.text}</span>)

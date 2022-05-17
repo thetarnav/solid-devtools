@@ -102,6 +102,9 @@ const exports = createRoot(() => {
 		computationRerun[id]?.(true)
 	}
 	onRuntimeMessage(MESSAGE.ComputationRun, handleComputationRerun)
+	onRuntimeMessage(MESSAGE.SignalUpdate, ({ id, value }) => {
+		console.log("Signal updated", id, value)
+	})
 
 	return { graphs }
 })

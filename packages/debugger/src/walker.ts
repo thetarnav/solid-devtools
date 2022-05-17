@@ -37,7 +37,7 @@ const getOwnerType = (o: Readonly<AnyObject>, parentType: OwnerType): OwnerType 
 /**
  * Wraps the fn prop of owner object to trigger handler whenever the computation is executed.
  */
-function listenToComputation(owner: SolidOwner, onRun: VoidFunction) {
+function observeComputation(owner: SolidOwner, onRun: VoidFunction) {
 	const fn = owner.fn.bind(owner)
 	owner.fn = (...a) => {
 		onRun()
@@ -45,14 +45,9 @@ function listenToComputation(owner: SolidOwner, onRun: VoidFunction) {
 	}
 }
 
-// ? maybe signal changes should trigger computation rerun,
-// ? instead of patching computation functions
-
-// ? How does "equals" work here?
-
 // TODO figure out deffering and batching signal/computation updates - to get out of the solid way
 
-function listenToSignalUpdate(
+function observeSignalUpdate(
 	signal: SolidSignal,
 	onUpdate: (newValue: any, oldValue: any) => void,
 ): void {
@@ -74,7 +69,7 @@ function mapOwnerSignals(o: Readonly<SolidOwner>): MappedSignal[] {
 			id = raw.sdtId
 		} else {
 			raw.sdtId = id = LAST_ID++
-			listenToSignalUpdate(raw, signalUpdated.bind(void 0, id))
+			observeSignalUpdate(raw, (value, oldValue) => signalUpdated({ id, value, oldValue }))
 		}
 		return {
 			name: raw.name,
@@ -90,7 +85,7 @@ function mapOwner(owner: SolidOwner, parentType: OwnerType): MappedOwner {
 		id = owner.sdtId
 	} else {
 		owner.sdtId = id = LAST_ID++
-		listenToComputation(owner, computationRun.bind(void 0, id))
+		observeComputation(owner, computationRun.bind(void 0, id))
 	}
 
 	const type = getOwnerType(owner, parentType)

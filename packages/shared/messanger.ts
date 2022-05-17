@@ -23,7 +23,8 @@ export interface MessagePayloads {
 	[MESSAGE.ComputationRun]: number
 	[MESSAGE.SignalUpdate]: {
 		id: number
-		value: any
+		value: unknown
+		oldValue: unknown
 	}
 }
 

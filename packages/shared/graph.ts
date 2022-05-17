@@ -5,6 +5,7 @@ export interface SolidSignal {
 	name: string
 	sdtId?: number
 	value: unknown
+	observers: SolidOwner[]
 }
 
 export interface SolidOwner {
@@ -37,7 +38,7 @@ export interface MappedOwner {
 export interface MappedSignal {
 	name: string
 	id: number
-	value: any
+	value: unknown
 }
 
 export interface ReactiveGraphOwner {

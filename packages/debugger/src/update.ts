@@ -3,6 +3,7 @@ import throttle from "@solid-primitives/throttle"
 import { chain } from "@solid-primitives/utils"
 import { GraphRoot, MappedOwner, SolidOwner } from "@shared/graph"
 import { mapOwnerTree } from "./walker"
+import { MESSAGE, MessagePayloads } from "@shared/messanger"
 
 let windowAfterUpdatePatched = false
 const graphUpdateListeners = new Set<VoidFunction>()
@@ -42,7 +43,7 @@ export function makeComputationRunListener(listener: ComputationRunListener): Vo
 	return onCleanup(() => computationRunListeners.delete(listener))
 }
 
-export type SignalUpdateListener = (id: number, newValue: unknown, oldValue: unknown) => void
+export type SignalUpdateListener = (payload: MessagePayloads[MESSAGE.SignalUpdate]) => void
 
 const signalUpdateListeners = new Set<SignalUpdateListener>()
 
