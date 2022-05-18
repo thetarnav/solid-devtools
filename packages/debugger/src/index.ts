@@ -3,6 +3,7 @@ import { createBranch } from "@solid-primitives/rootless"
 import { postWindowMessage, MESSAGE } from "@shared/messanger"
 import { createGraphRoot, makeComputationRunListener, makeSignalUpdateListener } from "./update"
 import { SolidOwner, getOwner } from "@shared/graph"
+import { makeBatchUpdateListener } from "./batchUpdates"
 
 postWindowMessage(MESSAGE.SolidOnPage)
 
@@ -25,8 +26,11 @@ export const Debugger: FlowComponent = props => {
 			postWindowMessage(MESSAGE.GraphUpdate, tree)
 		})
 
-		makeComputationRunListener(id => postWindowMessage(MESSAGE.ComputationRun, id))
+		makeComputationRunListener(id => postWindowMessage(MESSAGE.ComputationUpdate, id))
+
 		makeSignalUpdateListener(payload => postWindowMessage(MESSAGE.SignalUpdate, payload))
+
+		makeBatchUpdateListener(updates => postWindowMessage(MESSAGE.BatchedUpdate, updates))
 	})
 
 	return props.children

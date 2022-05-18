@@ -6,8 +6,9 @@ export enum MESSAGE {
 	PanelVisibility,
 	ResetPanel,
 	GraphUpdate,
-	ComputationRun,
+	ComputationUpdate,
 	SignalUpdate,
+	BatchedUpdate,
 }
 
 export interface Message<K extends MESSAGE> {
@@ -20,13 +21,37 @@ export interface MessagePayloads {
 	[MESSAGE.PanelVisibility]: boolean
 	[MESSAGE.ResetPanel]: void
 	[MESSAGE.GraphUpdate]: GraphRoot
-	[MESSAGE.ComputationRun]: number
+	[MESSAGE.ComputationUpdate]: number
 	[MESSAGE.SignalUpdate]: {
 		id: number
 		value: unknown
 		oldValue: unknown
 	}
+	[MESSAGE.BatchedUpdate]: BatchedUpdates
 }
+
+export enum UpdateType {
+	Signal,
+	Computation,
+}
+
+export interface SignalUpdatePayload {
+	id: number
+	value: unknown
+	oldValue: unknown
+}
+
+export type BatchedUpdate =
+	| {
+			type: UpdateType.Signal
+			payload: SignalUpdatePayload
+	  }
+	| {
+			type: UpdateType.Computation
+			payload: number
+	  }
+
+export type BatchedUpdates = BatchedUpdate[]
 
 export type PostMessageFn = <K extends MESSAGE>(
 	..._: [K] extends [void] ? [id: K] : [id: K, payload: MessagePayloads[K]]

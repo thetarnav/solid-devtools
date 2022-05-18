@@ -1,6 +1,7 @@
 import { AnyFunction, AnyObject } from "@solid-primitives/utils"
 import { MappedOwner, OwnerType, SolidOwner, MappedSignal, SolidSignal } from "@shared/graph"
-import { computationRun, signalUpdated } from "./update"
+import { UpdateType } from "@shared/messanger"
+import { batchUpdate } from "./batchUpdates"
 
 const isComponent = (o: Readonly<AnyObject>): boolean =>
 	"componentName" in o && typeof o.value === "function"
@@ -45,8 +46,6 @@ function observeComputation(owner: SolidOwner, onRun: VoidFunction) {
 	}
 }
 
-// TODO figure out deffering and batching signal/computation updates - to get out of the solid way
-
 function observeSignalUpdate(
 	signal: SolidSignal,
 	onUpdate: (newValue: any, oldValue: any) => void,
@@ -69,7 +68,9 @@ function mapOwnerSignals(o: Readonly<SolidOwner>): MappedSignal[] {
 			id = raw.sdtId
 		} else {
 			raw.sdtId = id = LAST_ID++
-			observeSignalUpdate(raw, (value, oldValue) => signalUpdated({ id, value, oldValue }))
+			observeSignalUpdate(raw, (value, oldValue) =>
+				batchUpdate({ type: UpdateType.Signal, payload: { id, value, oldValue } }),
+			)
 		}
 		return {
 			name: raw.name,
@@ -85,7 +86,7 @@ function mapOwner(owner: SolidOwner, parentType: OwnerType): MappedOwner {
 		id = owner.sdtId
 	} else {
 		owner.sdtId = id = LAST_ID++
-		observeComputation(owner, computationRun.bind(void 0, id))
+		observeComputation(owner, () => batchUpdate({ type: UpdateType.Computation, payload: id }))
 	}
 
 	const type = getOwnerType(owner, parentType)

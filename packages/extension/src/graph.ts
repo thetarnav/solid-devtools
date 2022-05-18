@@ -1,6 +1,6 @@
 import { batch, createRoot, createSignal, getOwner, onCleanup, Setter } from "solid-js"
 import { createStore, produce } from "solid-js/store"
-import { MESSAGE } from "@shared/messanger"
+import { UpdateType, MESSAGE } from "@shared/messanger"
 import { onRuntimeMessage } from "./messanger"
 import {
 	MappedOwner,
@@ -166,9 +166,25 @@ const exports = createRoot(() => {
 		// ? should the children of owner that rerun be removed?
 		computationRerunMap[id]?.(true)
 	}
-	onRuntimeMessage(MESSAGE.ComputationRun, handleComputationRerun)
+	onRuntimeMessage(MESSAGE.ComputationUpdate, handleComputationRerun)
 
 	onRuntimeMessage(MESSAGE.SignalUpdate, ({ id, value }) => signalUpdateMap[id]?.(value))
+
+	onRuntimeMessage(MESSAGE.BatchedUpdate, updates => {
+		console.group("Batched Updates")
+		batch(() => {
+			for (const update of updates) {
+				if (update.type === UpdateType.Signal) {
+					console.log("Signal update", update.payload.id, update.payload.value)
+					signalUpdateMap[update.payload.id]?.(update.payload.value)
+				} else {
+					console.log("Computation rerun", update.payload)
+					computationRerunMap[update.payload]?.(true)
+				}
+			}
+		})
+		console.groupEnd()
+	})
 
 	return { graphs }
 })

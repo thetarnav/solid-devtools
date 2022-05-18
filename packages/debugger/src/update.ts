@@ -1,4 +1,4 @@
-import { Accessor, createSignal, onCleanup } from "solid-js"
+import { createSignal, onCleanup } from "solid-js"
 import throttle from "@solid-primitives/throttle"
 import { chain } from "@solid-primitives/utils"
 import { GraphRoot, MappedOwner, SolidOwner } from "@shared/graph"
