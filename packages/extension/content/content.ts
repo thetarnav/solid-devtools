@@ -27,10 +27,6 @@ onWindowMessage(MESSAGE.SolidOnPage, () => postPortMessage(MESSAGE.SolidOnPage))
 
 onWindowMessage(MESSAGE.GraphUpdate, graph => postPortMessage(MESSAGE.GraphUpdate, graph))
 
-onWindowMessage(MESSAGE.ComputationUpdate, id => postPortMessage(MESSAGE.ComputationUpdate, id))
-
-onWindowMessage(MESSAGE.SignalUpdate, payload => postPortMessage(MESSAGE.SignalUpdate, payload))
-
 onWindowMessage(MESSAGE.BatchedUpdate, payload => postPortMessage(MESSAGE.BatchedUpdate, payload))
 
 export {}

@@ -1,6 +1,6 @@
 import { getOwner as _getOwner, Setter } from "solid-js"
 import { AnyFunction } from "@solid-primitives/utils"
-import { SafeValue } from "./messanger"
+import { MESSAGE, SafeValue } from "./messanger"
 
 export enum OwnerType {
 	Component,
@@ -17,15 +17,18 @@ export enum OwnerType {
 
 export interface SolidSignal {
 	name: string
-	sdtId?: number
 	value: unknown
 	observers: SolidOwner[]
+	// added by sdt:
+	sdtId?: number
+	onValueUpdate?: {
+		[rootID: number]: ValueUpdateListener
+	}
 }
 
 export interface SolidOwner {
 	name?: string
 	componentName?: string
-	sdtId?: number
 	owner: SolidOwner | null
 	owned: SolidOwner[]
 	fn: AnyFunction
@@ -34,7 +37,17 @@ export interface SolidOwner {
 	sourceMap?: Record<string, SolidSignal>
 	// every owner has a value, only for memo that value is available as a signal
 	value: unknown
+	// added by sdt:
+	sdtId?: number
+	onComputationUpdate?: {
+		[rootID: number]: VoidFunction
+	}
+	onValueUpdate?: {
+		[rootID: number]: ValueUpdateListener
+	}
 }
+
+export type ValueUpdateListener = (newValue: unknown, oldValue: unknown) => void
 
 export const getOwner = _getOwner as () => SolidOwner | null
 
@@ -54,7 +67,7 @@ export interface MappedOwner {
 	type: OwnerType
 	signals: MappedSignal[]
 	children: MappedOwner[]
-	value?: SafeValue
+	value?: MappedSignal
 }
 
 export interface MappedSignal {
@@ -76,15 +89,14 @@ export interface GraphOwner {
 	readonly rerun: boolean
 	readonly children: GraphOwner[]
 	readonly signals: GraphSignal[]
-	value?: SafeValue
+	readonly signal?: GraphSignal
 }
 
 export interface GraphSignal {
 	readonly id: number
 	readonly name: string
 	readonly dispose?: VoidFunction
-	value: SafeValue
-	readonly setValue: Setter<SafeValue>
+	readonly value: SafeValue
 }
 
 export interface GraphRoot {

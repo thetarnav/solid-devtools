@@ -8,8 +8,6 @@ export enum MESSAGE {
 	PanelVisibility,
 	ResetPanel,
 	GraphUpdate,
-	ComputationUpdate,
-	SignalUpdate,
 	BatchedUpdate,
 }
 
@@ -23,12 +21,6 @@ export interface MessagePayloads {
 	[MESSAGE.PanelVisibility]: boolean
 	[MESSAGE.ResetPanel]: void
 	[MESSAGE.GraphUpdate]: MappedRoot
-	[MESSAGE.ComputationUpdate]: number
-	[MESSAGE.SignalUpdate]: {
-		id: number
-		value: unknown
-		oldValue: unknown
-	}
 	[MESSAGE.BatchedUpdate]: BatchedUpdates
 }
 

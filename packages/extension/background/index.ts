@@ -33,10 +33,6 @@ chrome.runtime.onConnect.addListener(newPort => {
 
 	onPortMessage(MESSAGE.GraphUpdate, graph => postRuntimeMessage(MESSAGE.GraphUpdate, graph))
 
-	onPortMessage(MESSAGE.ComputationUpdate, id => postRuntimeMessage(MESSAGE.ComputationUpdate, id))
-
-	onPortMessage(MESSAGE.SignalUpdate, payload => postRuntimeMessage(MESSAGE.SignalUpdate, payload))
-
 	onPortMessage(MESSAGE.BatchedUpdate, payload =>
 		postRuntimeMessage(MESSAGE.BatchedUpdate, payload),
 	)

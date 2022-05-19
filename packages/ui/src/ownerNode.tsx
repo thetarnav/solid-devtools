@@ -46,9 +46,7 @@ export function OwnerNode(props: { owner: GraphOwner }): JSX.Element {
 					</span>
 				</p>
 
-				<Show when={type === OwnerType.Memo}>
-					<div>{props.owner.value}</div>
-				</Show>
+				<Show when={props.owner.signal}>{signal => <div>{signal.value}</div>}</Show>
 				{/* <ValueNode value={value} /> */}
 				{/* <div class="flex space-x-1">
 					<DependencyCount n={dependencies().length} type="dependencies" />

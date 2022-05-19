@@ -1,8 +1,13 @@
 import { AnyFunction, AnyObject } from "@solid-primitives/utils"
-import { MappedOwner, OwnerType, SolidOwner, MappedSignal } from "@shared/graph"
-import { SafeValue, UpdateType } from "@shared/messanger"
-import { batchUpdate } from "./batchUpdates"
+import {
+	MappedOwner,
+	OwnerType,
+	SolidOwner,
+	MappedSignal,
+	ValueUpdateListener,
+} from "@shared/graph"
 import { getSafeValue } from "./serialize"
+import { ComputationUpdateHandler, SignalUpdateHandler } from "./update"
 
 const isComponent = (o: Readonly<AnyObject>): boolean =>
 	"componentName" in o && typeof o.value === "function"
@@ -20,7 +25,7 @@ const getOwnerName = (owner: Readonly<SolidOwner>): string => {
 	return name || "(anonymous)"
 }
 
-const getOwnerType = (o: Readonly<AnyObject>, parentType: OwnerType): OwnerType => {
+const getOwnerType = (o: Readonly<AnyObject>): OwnerType => {
 	// Precompiled components do not start with "_Hot$$"
 	// we need a way to identify imported (3rd party) vs user components
 	if (isComponent(o)) return OwnerType.Component
@@ -39,90 +44,123 @@ const getOwnerType = (o: Readonly<AnyObject>, parentType: OwnerType): OwnerType 
 /**
  * Wraps the fn prop of owner object to trigger handler whenever the computation is executed.
  */
-function observeComputation(owner: SolidOwner, onRun: VoidFunction) {
+function observeComputation(owner: SolidOwner, rootId: number, onRun: VoidFunction): void {
+	// owner already patched
+	if (owner.onComputationUpdate) {
+		owner.onComputationUpdate[rootId] = onRun
+		return
+	}
+	// patch owner
+	owner.onComputationUpdate = { [rootId]: onRun }
 	const fn = owner.fn.bind(owner)
 	owner.fn = (...a) => {
-		onRun()
+		for (const listener of Object.values(owner.onComputationUpdate!)) listener()
 		return fn(...a)
 	}
 }
 
-function observeSignalUpdate(
-	signal: { value: unknown },
-	onUpdate: (newValue: any, oldValue: any) => void,
+/**
+ * Patches the owner/signal value, firing the callback on each update immediately as it happened.
+ */
+function observeValueUpdate(
+	node: { value: unknown; onSignalUpdate?: Record<number, ValueUpdateListener> },
+	rootId: number,
+	onUpdate: ValueUpdateListener,
 ): void {
-	let value = signal.value
+	// node already patched
+	if (node.onSignalUpdate) {
+		node.onSignalUpdate[rootId] = onUpdate
+		return
+	}
+	// patch node
+	node.onSignalUpdate = { [rootId]: onUpdate }
+	let value = node.value
 	let safeValue = getSafeValue(value)
-	Object.defineProperty(signal, "value", {
+	Object.defineProperty(node, "value", {
 		get: () => value,
 		set: newValue => {
-			const safe = getSafeValue(newValue)
-			onUpdate(safe, safeValue)
-			;(value = newValue), (safeValue = safe)
+			const newSafe = getSafeValue(newValue)
+			for (const listener of Object.values(node.onSignalUpdate!)) listener(newSafe, safeValue)
+			;(value = newValue), (safeValue = newSafe)
 		},
 	})
 }
 
 let LAST_ID = 0
 
-function mapOwnerSignals(o: Readonly<SolidOwner>): MappedSignal[] {
+function markNodeID(o: { sdtId?: number }): number {
+	if (o.sdtId !== undefined) return o.sdtId
+	else return (o.sdtId = LAST_ID++)
+}
+
+function createSignalNode({
+	id,
+	name,
+	value,
+}: {
+	id: number
+	name: string
+	value: unknown
+}): MappedSignal {
+	return {
+		name,
+		id,
+		value: getSafeValue(value),
+	}
+}
+
+type UpdateHandlers = {
+	rootId: number
+	onSignalUpdate: SignalUpdateHandler
+	onComputationUpdate: ComputationUpdateHandler
+}
+
+function mapOwnerSignals(
+	o: Readonly<SolidOwner>,
+	{ onSignalUpdate, rootId }: UpdateHandlers,
+): MappedSignal[] {
 	const { sourceMap } = o
 	if (!sourceMap) return []
 	return Object.values(sourceMap).map(raw => {
-		let id: number
-		if (raw.sdtId !== undefined) {
-			id = raw.sdtId
-		} else {
-			raw.sdtId = id = LAST_ID++
-			observeSignalUpdate(raw, (value, oldValue) =>
-				batchUpdate({ type: UpdateType.Signal, payload: { id, value, oldValue } }),
-			)
-		}
-		return {
-			name: raw.name,
-			id,
-			value: getSafeValue(raw.value),
-		}
+		const id = markNodeID(raw)
+		observeValueUpdate(raw, rootId, (value, oldValue) => onSignalUpdate({ id, value, oldValue }))
+		return createSignalNode({ ...raw, id })
 	})
 }
 
-function mapOwner(owner: SolidOwner, parentType: OwnerType): MappedOwner {
-	let id: number
-	if (owner.sdtId !== undefined) {
-		id = owner.sdtId
-	} else {
-		owner.sdtId = id = LAST_ID++
-		observeComputation(owner, () => batchUpdate({ type: UpdateType.Computation, payload: id }))
-	}
+function mapOwner(owner: SolidOwner, handlers: UpdateHandlers): MappedOwner {
+	const { onSignalUpdate, onComputationUpdate, rootId } = handlers
 
-	const type = getOwnerType(owner, parentType)
+	const id = markNodeID(owner)
+	const type = getOwnerType(owner)
+	const name = getOwnerName(owner)
 
-	let valueObj: { value: SafeValue } | undefined
-	if (type === OwnerType.Memo) {
-		observeSignalUpdate(owner, (value, oldValue) =>
-			batchUpdate({ type: UpdateType.Signal, payload: { id, value, oldValue } }),
-		)
+	observeComputation(owner, rootId, onComputationUpdate.bind(void 0, id))
+
+	const valueObj = (() => {
+		if (type !== OwnerType.Memo) return
+		observeValueUpdate(owner, rootId, (value, oldValue) => onSignalUpdate({ id, value, oldValue }))
 		// ? do we need to send values with the graph if they are being observer seperately?
-		valueObj = { value: getSafeValue(owner.value) }
-	}
+		return { value: createSignalNode({ id, name, value: owner.value }) }
+	})()
 
 	return {
 		id,
-		name: getOwnerName(owner),
+		name,
 		type,
-		signals: mapOwnerSignals(owner),
-		children: mapChildren(owner, type),
+		signals: mapOwnerSignals(owner, handlers),
+		children: mapChildren(owner, handlers),
 		...valueObj,
 	}
 }
 
-function mapChildren(owner: Readonly<SolidOwner>, parentType: OwnerType): MappedOwner[] {
+function mapChildren(owner: Readonly<SolidOwner>, handlers: UpdateHandlers): MappedOwner[] {
 	if (!Array.isArray(owner.owned)) return []
-	return owner.owned.map(child => mapOwner(child, parentType))
+	return owner.owned.map(child => mapOwner(child, handlers))
 }
 
-function mapOwnerTree(root: SolidOwner): MappedOwner[] {
-	return mapChildren(root, OwnerType.Component)
+function mapOwnerTree(root: SolidOwner, handlers: UpdateHandlers): MappedOwner[] {
+	return mapChildren(root, handlers)
 }
 
 export { mapOwnerTree }

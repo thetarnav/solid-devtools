@@ -1,15 +1,10 @@
+/* @refresh reload */
+
 import { batch, createRoot, createSignal, getOwner, onCleanup, Setter } from "solid-js"
 import { createStore, produce } from "solid-js/store"
 import { UpdateType, MESSAGE } from "@shared/messanger"
 import { onRuntimeMessage } from "./messanger"
-import {
-	MappedOwner,
-	MappedSignal,
-	GraphOwner,
-	GraphSignal,
-	GraphRoot,
-	OwnerType,
-} from "@shared/graph"
+import { MappedOwner, MappedSignal, GraphOwner, GraphSignal, GraphRoot } from "@shared/graph"
 
 const dispose = (o: { dispose?: VoidFunction }) => o.dispose?.()
 const disposeAll = (list: { dispose?: VoidFunction }[]) => list.forEach(dispose)
@@ -25,16 +20,21 @@ function mapNewOwner(owner: Readonly<MappedOwner>): GraphOwner {
 	// wrap with root that will be disposed together with the rest of the tree
 	return createRoot(dispose => {
 		const [rerun, setRerun] = createSignal(false)
+
 		const { id } = owner
 		const node: GraphOwner = {
-			...owner,
+			id,
+			name: owner.name,
+			type: owner.type,
 			dispose,
 			get rerun() {
 				return rerun()
 			},
 			signals: owner.signals.map(createSignalNode),
 			children: owner.children.map(mapNewOwner),
+			...(owner.value ? { signal: createSignalNode(owner.value) } : null),
 		}
+
 		computationRerunMap[id] = setRerun
 		onCleanup(() => delete computationRerunMap[id])
 		onCleanup(disposeAll.bind(void 0, node.children))
@@ -44,12 +44,6 @@ function mapNewOwner(owner: Readonly<MappedOwner>): GraphOwner {
 				delete signalUpdateMap[signal.id]
 			}
 		})
-
-		if (owner.type === OwnerType.Memo) {
-			const [value, setValue] = createSignal(owner.value)
-			signalUpdateMap[id] = setValue
-			Object.defineProperty(node, "value", { get: value })
-		}
 
 		return node
 	})
@@ -64,11 +58,11 @@ function createSignalNode(raw: Readonly<MappedSignal>): GraphSignal {
 	const [value, setValue] = createSignal(raw.value)
 	signalUpdateMap[raw.id] = setValue
 	return {
-		...raw,
+		id: raw.id,
+		name: raw.name,
 		get value() {
 			return value()
 		},
-		setValue,
 	}
 }
 
@@ -125,18 +119,7 @@ function reconcileSignals(newSignals: MappedSignal[], signals: GraphSignal[]): v
 	const length = signals.length,
 		newLength = newSignals.length
 
-	let i = 0,
-		signal: GraphSignal,
-		raw: MappedSignal
-
-	for (; i < length; i++) {
-		signal = signals[i]
-		raw = newSignals[i]
-		if (signal.id !== raw.id) throw "Signals cannot be removed from owners — only added"
-		signal.setValue(raw.value)
-	}
-
-	for (; i < newLength; i++) {
+	for (let i = length; i < newLength; i++) {
 		signals[i] = createSignalNodeAsync(newSignals[i])
 	}
 }
@@ -169,14 +152,6 @@ const exports = createRoot(() => {
 	})
 
 	onRuntimeMessage(MESSAGE.ResetPanel, () => setGraphs([]))
-
-	const handleComputationRerun = (id: number) => {
-		// ? should the children of owner that rerun be removed?
-		computationRerunMap[id]?.(true)
-	}
-	onRuntimeMessage(MESSAGE.ComputationUpdate, handleComputationRerun)
-
-	onRuntimeMessage(MESSAGE.SignalUpdate, ({ id, value }) => signalUpdateMap[id]?.(value))
 
 	onRuntimeMessage(MESSAGE.BatchedUpdate, updates => {
 		console.group("Batched Updates")

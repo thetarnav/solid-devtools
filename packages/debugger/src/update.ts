@@ -1,9 +1,12 @@
 import { createSignal, onCleanup } from "solid-js"
 import throttle from "@solid-primitives/throttle"
-import { chain } from "@solid-primitives/utils"
 import { MappedRoot, MappedOwner, SolidOwner } from "@shared/graph"
 import { mapOwnerTree } from "./walker"
-import { MESSAGE, MessagePayloads } from "@shared/messanger"
+import { SignalUpdatePayload, UpdateType } from "@shared/messanger"
+import { batchUpdate } from "./batchUpdates"
+
+export type SignalUpdateHandler = (payload: SignalUpdatePayload) => void
+export type ComputationUpdateHandler = (id: number) => void
 
 let windowAfterUpdatePatched = false
 const graphUpdateListeners = new Set<VoidFunction>()
@@ -27,37 +30,19 @@ export function makeGraphUpdateListener(onUpdate: VoidFunction): VoidFunction {
 	return onCleanup(() => graphUpdateListeners.delete(onUpdate))
 }
 
-export type ComputationRunListener = (id: number) => void
-
-const computationRunListeners = new Set<ComputationRunListener>()
-
-/** @internal */
-export const computationRun: ComputationRunListener = chain(computationRunListeners)
-
-/**
- * Runs the callback on every computation run (whenever a memo/effect/computed etc. reruns).
- * The listener is automatically cleaned-up on root dispose.
- */
-export function makeComputationRunListener(listener: ComputationRunListener): VoidFunction {
-	computationRunListeners.add(listener)
-	return onCleanup(() => computationRunListeners.delete(listener))
-}
-
-export type SignalUpdateListener = (payload: MessagePayloads[MESSAGE.SignalUpdate]) => void
-
-const signalUpdateListeners = new Set<SignalUpdateListener>()
-
-/** @internal */
-export const signalUpdated: SignalUpdateListener = chain(signalUpdateListeners)
-
-export function makeSignalUpdateListener(listener: SignalUpdateListener): VoidFunction {
-	signalUpdateListeners.add(listener)
-	return onCleanup(() => signalUpdateListeners.delete(listener))
-}
-
-export function createOwnerObserver(owner: SolidOwner, onUpdate: (tree: MappedOwner[]) => void) {
+export function createOwnerObserver(
+	owner: SolidOwner,
+	rootId: number,
+	onUpdate: (tree: MappedOwner[]) => void,
+) {
+	const onComputationUpdate: ComputationUpdateHandler = payload => {
+		batchUpdate({ type: UpdateType.Computation, payload })
+	}
+	const onSignalUpdate: SignalUpdateHandler = payload => {
+		batchUpdate({ type: UpdateType.Signal, payload })
+	}
 	const update = () => {
-		const tree = mapOwnerTree(owner)
+		const tree = mapOwnerTree(owner, { onComputationUpdate, onSignalUpdate, rootId })
 		onUpdate(tree)
 	}
 	const [throttledUpdate] = throttle(update, 300)
@@ -68,9 +53,10 @@ let LAST_ROOT_ID = 0
 
 export function createGraphRoot(root: SolidOwner): MappedRoot {
 	const [tree, setTree] = createSignal<MappedOwner[]>([])
-	createOwnerObserver(root, setTree)
+	const id = LAST_ROOT_ID++
+	createOwnerObserver(root, id, setTree)
 	return {
-		id: LAST_ROOT_ID++,
+		id,
 		get children() {
 			return tree()
 		},
