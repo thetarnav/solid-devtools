@@ -1,4 +1,6 @@
-import { GraphRoot, MappedOwner } from "./graph"
+import { MappedRoot, MappedNode } from "./graph"
+
+export type SafeValue = number | null | undefined | string | boolean
 
 export enum MESSAGE {
 	SolidOnPage,
@@ -20,7 +22,7 @@ export interface MessagePayloads {
 	[MESSAGE.Hello]: string
 	[MESSAGE.PanelVisibility]: boolean
 	[MESSAGE.ResetPanel]: void
-	[MESSAGE.GraphUpdate]: GraphRoot
+	[MESSAGE.GraphUpdate]: MappedRoot
 	[MESSAGE.ComputationUpdate]: number
 	[MESSAGE.SignalUpdate]: {
 		id: number

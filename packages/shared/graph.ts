@@ -1,5 +1,19 @@
 import { getOwner as _getOwner, Setter } from "solid-js"
 import { AnyFunction } from "@solid-primitives/utils"
+import { SafeValue } from "./messanger"
+
+export enum OwnerType {
+	Component,
+	Effect,
+	Render,
+	Memo,
+	Computation,
+	Refresh,
+}
+
+//
+// "Signal___" — owner/signals/etc. objects in the Solid's internal owner graph
+//
 
 export interface SolidSignal {
 	name: string
@@ -18,57 +32,84 @@ export interface SolidOwner {
 	cleanups: VoidFunction[] | null
 	context: any | null
 	sourceMap?: Record<string, SolidSignal>
+	// every owner has a value, only for memo that value is available as a signal
+	value: unknown
 }
 
 export const getOwner = _getOwner as () => SolidOwner | null
 
-export interface GraphRoot {
+//
+// "Mapped___" — owner/signal/etc. objects created by the solid-devtools-debugger runtime library
+// They should be JSON serialisable — to be able to send them with chrome.runtime.sendMessage
+//
+
+export interface MappedRoot {
 	id: number
-	children: MappedOwner[]
+	children: MappedNode[]
 }
 
-export interface MappedOwner {
+export interface MappedBase {
 	id: number
 	name: string
 	type: OwnerType
 	signals: MappedSignal[]
-	children: MappedOwner[]
+	children: MappedNode[]
+	value?: SafeValue
 }
+
+export interface MappedOwner extends MappedBase {
+	type: Exclude<OwnerType, OwnerType.Memo>
+}
+
+export interface MappedMemo extends MappedBase {
+	type: OwnerType.Memo
+	value: SafeValue
+}
+
+export type MappedNode = MappedOwner | MappedMemo
 
 export interface MappedSignal {
 	name: string
 	id: number
-	value: unknown
+	value: SafeValue
 }
 
-export interface ReactiveGraphOwner {
+//
+// "Graph___" — owner/signals/etc. objects handled by the devtools frontend (extension/overlay/ui packages)
+// They are meant to be "reactive" — wrapped with a store
+//
+
+export interface GraphBase {
 	readonly id: number
 	readonly name: string
 	readonly type: OwnerType
 	readonly dispose: VoidFunction
 	readonly rerun: boolean
-	readonly children: ReactiveGraphOwner[]
-	readonly signals: ReactiveGraphSignal[]
+	readonly children: GraphNode[]
+	readonly signals: GraphSignal[]
+	value?: SafeValue
 }
 
-export interface ReactiveGraphSignal {
+export interface GraphOwner extends GraphBase {
+	readonly type: Exclude<OwnerType, OwnerType.Memo>
+}
+
+export interface GraphMemo extends GraphBase {
+	readonly type: OwnerType.Memo
+	value: SafeValue
+}
+
+export type GraphNode = GraphMemo | GraphOwner
+
+export interface GraphSignal {
 	readonly id: number
 	readonly name: string
 	readonly dispose?: VoidFunction
-	value: unknown
-	readonly setValue: Setter<unknown>
+	value: SafeValue
+	readonly setValue: Setter<SafeValue>
 }
 
-export interface ReactiveGraphRoot {
+export interface GraphRoot {
 	readonly id: number
-	readonly children: ReactiveGraphOwner[]
-}
-
-export enum OwnerType {
-	Component,
-	Effect,
-	Render,
-	Memo,
-	Computation,
-	Refresh,
+	readonly children: GraphNode[]
 }

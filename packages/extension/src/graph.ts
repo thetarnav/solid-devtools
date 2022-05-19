@@ -3,11 +3,12 @@ import { createStore, produce } from "solid-js/store"
 import { UpdateType, MESSAGE } from "@shared/messanger"
 import { onRuntimeMessage } from "./messanger"
 import {
-	MappedOwner,
+	MappedNode,
 	MappedSignal,
-	ReactiveGraphOwner,
-	ReactiveGraphRoot,
-	ReactiveGraphSignal,
+	GraphNode,
+	GraphSignal,
+	GraphRoot,
+	OwnerType,
 } from "@shared/graph"
 
 const dispose = (o: { dispose?: VoidFunction }) => o.dispose?.()
@@ -20,12 +21,12 @@ const signalUpdateMap: Record<number, Setter<unknown>> = {}
  * maps the raw owner tree to be placed into the reactive graph store
  * this is for new branches – owners that just have been created
  */
-function mapNewOwner(owner: Readonly<MappedOwner>): ReactiveGraphOwner {
+function mapNewOwner(owner: Readonly<MappedNode>): GraphNode {
 	// wrap with root that will be disposed together with the rest of the tree
 	return createRoot(dispose => {
 		const [rerun, setRerun] = createSignal(false)
 		const { id } = owner
-		const node: ReactiveGraphOwner = {
+		const node: GraphNode = {
 			...owner,
 			dispose,
 			get rerun() {
@@ -43,6 +44,13 @@ function mapNewOwner(owner: Readonly<MappedOwner>): ReactiveGraphOwner {
 				delete signalUpdateMap[signal.id]
 			}
 		})
+
+		if (owner.type === OwnerType.Memo) {
+			const [value, setValue] = createSignal(owner.value)
+			signalUpdateMap[id] = setValue
+			Object.defineProperty(node, "value", { get: value })
+		}
+
 		return node
 	})
 }
@@ -51,7 +59,7 @@ function mapNewOwner(owner: Readonly<MappedOwner>): ReactiveGraphOwner {
  * Sync "createSignalNode" is meant to be used when creating new owner node,
  * when there is a reactive root that will take care of cleaning up the value signal
  */
-function createSignalNode(raw: Readonly<MappedSignal>): ReactiveGraphSignal {
+function createSignalNode(raw: Readonly<MappedSignal>): GraphSignal {
 	if (!getOwner()) throw "This should be executed under a root"
 	const [value, setValue] = createSignal(raw.value)
 	signalUpdateMap[raw.id] = setValue
@@ -68,7 +76,7 @@ function createSignalNode(raw: Readonly<MappedSignal>): ReactiveGraphSignal {
  * Async "createSignalNode" is meant to be used when reconciling the tree,
  * when there is no reactive root to take care of cleaning up the value signal
  */
-function createSignalNodeAsync(raw: Readonly<MappedSignal>): ReactiveGraphSignal {
+function createSignalNodeAsync(raw: Readonly<MappedSignal>): GraphSignal {
 	return createRoot(dispose => {
 		return {
 			...createSignalNode(raw),
@@ -81,15 +89,15 @@ function createSignalNodeAsync(raw: Readonly<MappedSignal>): ReactiveGraphSignal
  * reconciles the existing reactive owner tree,
  * looking for changes and applying them granularely.
  */
-function reconcileChildren(newChildren: MappedOwner[], children: ReactiveGraphOwner[]): void {
+function reconcileChildren(newChildren: MappedNode[], children: GraphNode[]): void {
 	const length = children.length,
 		newLength = newChildren.length,
 		childrenExtended = newLength > length
 
 	let i = 0,
 		limit = childrenExtended ? length : newLength,
-		branch: ReactiveGraphOwner,
-		owner: MappedOwner
+		branch: GraphNode,
+		owner: MappedNode
 
 	for (; i < limit; i++) {
 		branch = children[i]
@@ -113,12 +121,12 @@ function reconcileChildren(newChildren: MappedOwner[], children: ReactiveGraphOw
 	}
 }
 
-function reconcileSignals(newSignals: MappedSignal[], signals: ReactiveGraphSignal[]): void {
+function reconcileSignals(newSignals: MappedSignal[], signals: GraphSignal[]): void {
 	const length = signals.length,
 		newLength = newSignals.length
 
 	let i = 0,
-		signal: ReactiveGraphSignal,
+		signal: GraphSignal,
 		raw: MappedSignal
 
 	for (; i < length; i++) {
@@ -134,7 +142,7 @@ function reconcileSignals(newSignals: MappedSignal[], signals: ReactiveGraphSign
 }
 
 const exports = createRoot(() => {
-	const [graphs, setGraphs] = createStore<ReactiveGraphRoot[]>([])
+	const [graphs, setGraphs] = createStore<GraphRoot[]>([])
 
 	onRuntimeMessage(MESSAGE.GraphUpdate, root => {
 		// reset all of the computationRerun state

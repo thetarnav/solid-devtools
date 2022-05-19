@@ -1,7 +1,15 @@
 import { AnyFunction, AnyObject } from "@solid-primitives/utils"
-import { MappedOwner, OwnerType, SolidOwner, MappedSignal, SolidSignal } from "@shared/graph"
-import { UpdateType } from "@shared/messanger"
+import {
+	MappedNode,
+	OwnerType,
+	SolidOwner,
+	MappedSignal,
+	SolidSignal,
+	MappedBase,
+} from "@shared/graph"
+import { SafeValue, UpdateType } from "@shared/messanger"
 import { batchUpdate } from "./batchUpdates"
+import { getSafeValue } from "./serialize"
 
 const isComponent = (o: Readonly<AnyObject>): boolean =>
 	"componentName" in o && typeof o.value === "function"
@@ -47,13 +55,18 @@ function observeComputation(owner: SolidOwner, onRun: VoidFunction) {
 }
 
 function observeSignalUpdate(
-	signal: SolidSignal,
+	signal: { value: unknown },
 	onUpdate: (newValue: any, oldValue: any) => void,
 ): void {
 	let value = signal.value
+	let safeValue = getSafeValue(value)
 	Object.defineProperty(signal, "value", {
 		get: () => value,
-		set: newValue => (onUpdate(newValue, value), (value = newValue)),
+		set: newValue => {
+			const safe = getSafeValue(newValue)
+			onUpdate(safe, safeValue)
+			;(value = newValue), (safeValue = safe)
+		},
 	})
 }
 
@@ -75,12 +88,12 @@ function mapOwnerSignals(o: Readonly<SolidOwner>): MappedSignal[] {
 		return {
 			name: raw.name,
 			id,
-			value: raw.value,
+			value: getSafeValue(raw.value),
 		}
 	})
 }
 
-function mapOwner(owner: SolidOwner, parentType: OwnerType): MappedOwner {
+function mapOwner(owner: SolidOwner, parentType: OwnerType): MappedNode {
 	let id: number
 	if (owner.sdtId !== undefined) {
 		id = owner.sdtId
@@ -90,22 +103,33 @@ function mapOwner(owner: SolidOwner, parentType: OwnerType): MappedOwner {
 	}
 
 	const type = getOwnerType(owner, parentType)
-	const mapped: MappedOwner = {
+
+	let valueObj: { value: SafeValue } | undefined
+	if (type === OwnerType.Memo) {
+		observeSignalUpdate(owner, (value, oldValue) =>
+			batchUpdate({ type: UpdateType.Signal, payload: { id, value, oldValue } }),
+		)
+		// ? do we need to send values with the graph if they are being observer seperately?
+		valueObj = { value: getSafeValue(owner.value) }
+	}
+
+	const mapped: MappedBase = {
 		id,
 		name: getOwnerName(owner),
 		type,
 		signals: mapOwnerSignals(owner),
 		children: mapChildren(owner, type),
+		...valueObj,
 	}
-	return mapped
+	return mapped as MappedNode
 }
 
-function mapChildren(owner: Readonly<SolidOwner>, parentType: OwnerType): MappedOwner[] {
+function mapChildren(owner: Readonly<SolidOwner>, parentType: OwnerType): MappedNode[] {
 	if (!Array.isArray(owner.owned)) return []
 	return owner.owned.map(child => mapOwner(child, parentType))
 }
 
-function mapOwnerTree(root: SolidOwner): MappedOwner[] {
+function mapOwnerTree(root: SolidOwner): MappedNode[] {
 	return mapChildren(root, OwnerType.Component)
 }
 
