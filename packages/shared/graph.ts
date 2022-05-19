@@ -45,28 +45,17 @@ export const getOwner = _getOwner as () => SolidOwner | null
 
 export interface MappedRoot {
 	id: number
-	children: MappedNode[]
+	children: MappedOwner[]
 }
 
-export interface MappedBase {
+export interface MappedOwner {
 	id: number
 	name: string
 	type: OwnerType
 	signals: MappedSignal[]
-	children: MappedNode[]
+	children: MappedOwner[]
 	value?: SafeValue
 }
-
-export interface MappedOwner extends MappedBase {
-	type: Exclude<OwnerType, OwnerType.Memo>
-}
-
-export interface MappedMemo extends MappedBase {
-	type: OwnerType.Memo
-	value: SafeValue
-}
-
-export type MappedNode = MappedOwner | MappedMemo
 
 export interface MappedSignal {
 	name: string
@@ -79,27 +68,16 @@ export interface MappedSignal {
 // They are meant to be "reactive" — wrapped with a store
 //
 
-export interface GraphBase {
+export interface GraphOwner {
 	readonly id: number
 	readonly name: string
 	readonly type: OwnerType
 	readonly dispose: VoidFunction
 	readonly rerun: boolean
-	readonly children: GraphNode[]
+	readonly children: GraphOwner[]
 	readonly signals: GraphSignal[]
 	value?: SafeValue
 }
-
-export interface GraphOwner extends GraphBase {
-	readonly type: Exclude<OwnerType, OwnerType.Memo>
-}
-
-export interface GraphMemo extends GraphBase {
-	readonly type: OwnerType.Memo
-	value: SafeValue
-}
-
-export type GraphNode = GraphMemo | GraphOwner
 
 export interface GraphSignal {
 	readonly id: number
@@ -111,5 +89,5 @@ export interface GraphSignal {
 
 export interface GraphRoot {
 	readonly id: number
-	readonly children: GraphNode[]
+	readonly children: GraphOwner[]
 }

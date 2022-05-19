@@ -2,7 +2,7 @@ import { Component, For } from "solid-js"
 import { Key } from "@solid-primitives/keyed"
 import { graphs } from "./graph"
 import { OwnerChildren, tw } from "@ui"
-import { GraphNode } from "@shared/graph"
+import { GraphOwner } from "@shared/graph"
 
 const App: Component = () => {
 	return (
@@ -13,7 +13,7 @@ const App: Component = () => {
 			</header>
 			<div>
 				<Key each={graphs} by="id">
-					{root => <OwnerChildren children={root().children as GraphNode[]} />}
+					{root => <OwnerChildren children={root().children as GraphOwner[]} />}
 				</Key>
 			</div>
 		</>

@@ -3,9 +3,9 @@ import { createStore, produce } from "solid-js/store"
 import { UpdateType, MESSAGE } from "@shared/messanger"
 import { onRuntimeMessage } from "./messanger"
 import {
-	MappedNode,
+	MappedOwner,
 	MappedSignal,
-	GraphNode,
+	GraphOwner,
 	GraphSignal,
 	GraphRoot,
 	OwnerType,
@@ -21,12 +21,12 @@ const signalUpdateMap: Record<number, Setter<unknown>> = {}
  * maps the raw owner tree to be placed into the reactive graph store
  * this is for new branches – owners that just have been created
  */
-function mapNewOwner(owner: Readonly<MappedNode>): GraphNode {
+function mapNewOwner(owner: Readonly<MappedOwner>): GraphOwner {
 	// wrap with root that will be disposed together with the rest of the tree
 	return createRoot(dispose => {
 		const [rerun, setRerun] = createSignal(false)
 		const { id } = owner
-		const node: GraphNode = {
+		const node: GraphOwner = {
 			...owner,
 			dispose,
 			get rerun() {
@@ -89,15 +89,15 @@ function createSignalNodeAsync(raw: Readonly<MappedSignal>): GraphSignal {
  * reconciles the existing reactive owner tree,
  * looking for changes and applying them granularely.
  */
-function reconcileChildren(newChildren: MappedNode[], children: GraphNode[]): void {
+function reconcileChildren(newChildren: MappedOwner[], children: GraphOwner[]): void {
 	const length = children.length,
 		newLength = newChildren.length,
 		childrenExtended = newLength > length
 
 	let i = 0,
 		limit = childrenExtended ? length : newLength,
-		branch: GraphNode,
-		owner: MappedNode
+		branch: GraphOwner,
+		owner: MappedOwner
 
 	for (; i < limit; i++) {
 		branch = children[i]

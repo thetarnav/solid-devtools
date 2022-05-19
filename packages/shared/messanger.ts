@@ -1,4 +1,4 @@
-import { MappedRoot, MappedNode } from "./graph"
+import { MappedRoot, MappedOwner } from "./graph"
 
 export type SafeValue = number | null | undefined | string | boolean
 

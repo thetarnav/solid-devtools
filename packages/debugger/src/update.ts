@@ -1,7 +1,7 @@
 import { createSignal, onCleanup } from "solid-js"
 import throttle from "@solid-primitives/throttle"
 import { chain } from "@solid-primitives/utils"
-import { MappedRoot, MappedNode, SolidOwner } from "@shared/graph"
+import { MappedRoot, MappedOwner, SolidOwner } from "@shared/graph"
 import { mapOwnerTree } from "./walker"
 import { MESSAGE, MessagePayloads } from "@shared/messanger"
 
@@ -55,7 +55,7 @@ export function makeSignalUpdateListener(listener: SignalUpdateListener): VoidFu
 	return onCleanup(() => signalUpdateListeners.delete(listener))
 }
 
-export function createOwnerObserver(owner: SolidOwner, onUpdate: (tree: MappedNode[]) => void) {
+export function createOwnerObserver(owner: SolidOwner, onUpdate: (tree: MappedOwner[]) => void) {
 	const update = () => {
 		const tree = mapOwnerTree(owner)
 		onUpdate(tree)
@@ -67,7 +67,7 @@ export function createOwnerObserver(owner: SolidOwner, onUpdate: (tree: MappedNo
 let LAST_ROOT_ID = 0
 
 export function createGraphRoot(root: SolidOwner): MappedRoot {
-	const [tree, setTree] = createSignal<MappedNode[]>([])
+	const [tree, setTree] = createSignal<MappedOwner[]>([])
 	createOwnerObserver(root, setTree)
 	return {
 		id: LAST_ROOT_ID++,

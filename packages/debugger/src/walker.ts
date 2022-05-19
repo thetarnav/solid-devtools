@@ -1,12 +1,5 @@
 import { AnyFunction, AnyObject } from "@solid-primitives/utils"
-import {
-	MappedNode,
-	OwnerType,
-	SolidOwner,
-	MappedSignal,
-	SolidSignal,
-	MappedBase,
-} from "@shared/graph"
+import { MappedOwner, OwnerType, SolidOwner, MappedSignal } from "@shared/graph"
 import { SafeValue, UpdateType } from "@shared/messanger"
 import { batchUpdate } from "./batchUpdates"
 import { getSafeValue } from "./serialize"
@@ -93,7 +86,7 @@ function mapOwnerSignals(o: Readonly<SolidOwner>): MappedSignal[] {
 	})
 }
 
-function mapOwner(owner: SolidOwner, parentType: OwnerType): MappedNode {
+function mapOwner(owner: SolidOwner, parentType: OwnerType): MappedOwner {
 	let id: number
 	if (owner.sdtId !== undefined) {
 		id = owner.sdtId
@@ -113,7 +106,7 @@ function mapOwner(owner: SolidOwner, parentType: OwnerType): MappedNode {
 		valueObj = { value: getSafeValue(owner.value) }
 	}
 
-	const mapped: MappedBase = {
+	return {
 		id,
 		name: getOwnerName(owner),
 		type,
@@ -121,15 +114,14 @@ function mapOwner(owner: SolidOwner, parentType: OwnerType): MappedNode {
 		children: mapChildren(owner, type),
 		...valueObj,
 	}
-	return mapped as MappedNode
 }
 
-function mapChildren(owner: Readonly<SolidOwner>, parentType: OwnerType): MappedNode[] {
+function mapChildren(owner: Readonly<SolidOwner>, parentType: OwnerType): MappedOwner[] {
 	if (!Array.isArray(owner.owned)) return []
 	return owner.owned.map(child => mapOwner(child, parentType))
 }
 
-function mapOwnerTree(root: SolidOwner): MappedNode[] {
+function mapOwnerTree(root: SolidOwner): MappedOwner[] {
 	return mapChildren(root, OwnerType.Component)
 }
 

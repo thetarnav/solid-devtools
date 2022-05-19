@@ -1,4 +1,4 @@
-import { GraphNode, OwnerType } from "@shared/graph"
+import { GraphOwner, OwnerType } from "@shared/graph"
 import { For, JSX, Show } from "solid-js"
 import { DeepReadonly } from "solid-js/store"
 import { colors, hexToRgb, tw } from "./twind"
@@ -7,7 +7,7 @@ import { TransitionGroup, animateExit, animateEnter } from "@otonashixav/solid-f
 
 const highlightRgba = hexToRgb(colors.cyan[400], 0.6)
 
-export function OwnerChildren(props: { children: GraphNode[] }) {
+export function OwnerChildren(props: { children: GraphOwner[] }) {
 	return (
 		<TransitionGroup enter={animateEnter()} exit={animateExit()}>
 			<For each={props.children}>{o => <OwnerNode owner={o} />}</For>
@@ -15,7 +15,7 @@ export function OwnerChildren(props: { children: GraphNode[] }) {
 	)
 }
 
-export function OwnerNode(props: { owner: GraphNode }): JSX.Element {
+export function OwnerNode(props: { owner: GraphOwner }): JSX.Element {
 	const { name, type } = props.owner
 	const children = () => props.owner.children
 	const signals = () => props.owner.signals
