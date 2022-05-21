@@ -73,7 +73,7 @@ export interface MappedOwner {
 export interface MappedSignal {
 	name: string
 	id: number
-	value: SafeValue
+	value?: SafeValue
 }
 
 //

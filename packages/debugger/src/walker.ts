@@ -88,24 +88,23 @@ function observeValueUpdate(
 
 let LAST_ID = 0
 
-function markNodeID(o: { sdtId?: number }): number {
-	if (o.sdtId !== undefined) return o.sdtId
-	else return (o.sdtId = LAST_ID++)
+function markNodeID(o: { sdtId?: number }): [id: number, markedBefore: boolean] {
+	if (o.sdtId !== undefined) return [o.sdtId, true]
+	else return [(o.sdtId = LAST_ID++), false]
 }
 
-function createSignalNode({
-	id,
-	name,
-	value,
-}: {
-	id: number
-	name: string
-	value: unknown
-}): MappedSignal {
+function createSignalNode(
+	raw: {
+		id: number
+		name: string
+		value: unknown
+	},
+	addValue = true,
+): MappedSignal {
 	return {
-		name,
-		id,
-		value: getSafeValue(value),
+		name: raw.name,
+		id: raw.id,
+		...(addValue ? { value: getSafeValue(raw.value) } : null),
 	}
 }
 
@@ -122,8 +121,10 @@ function mapOwnerSignals(
 	const { sourceMap } = o
 	if (!sourceMap) return []
 	return Object.values(sourceMap).map(raw => {
-		const id = markNodeID(raw)
+		const [id, alreadyMapped] = markNodeID(raw)
 		observeValueUpdate(raw, rootId, (value, oldValue) => onSignalUpdate({ id, value, oldValue }))
+		// mapped signlas only need their value after you are created,
+		// value updates are captured and sent seperately
 		return createSignalNode({ ...raw, id })
 	})
 }
@@ -131,16 +132,15 @@ function mapOwnerSignals(
 function mapOwner(owner: SolidOwner, handlers: UpdateHandlers): MappedOwner {
 	const { onSignalUpdate, onComputationUpdate, rootId } = handlers
 
-	const id = markNodeID(owner)
+	const [id, alreadyMapped] = markNodeID(owner)
 	const type = getOwnerType(owner)
 	const name = getOwnerName(owner)
 
 	observeComputation(owner, rootId, onComputationUpdate.bind(void 0, id))
 
 	const valueObj = (() => {
-		if (type !== OwnerType.Memo) return
+		if (alreadyMapped || type !== OwnerType.Memo) return
 		observeValueUpdate(owner, rootId, (value, oldValue) => onSignalUpdate({ id, value, oldValue }))
-		// ? do we need to send values with the graph if they are being observer seperately?
 		return { value: createSignalNode({ id, name, value: owner.value }) }
 	})()
 
