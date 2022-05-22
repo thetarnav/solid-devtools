@@ -36,6 +36,14 @@ chrome.runtime.onConnect.addListener(newPort => {
 	onPortMessage(MESSAGE.BatchedUpdate, payload =>
 		postRuntimeMessage(MESSAGE.BatchedUpdate, payload),
 	)
+
+	onRuntimeMessage(MESSAGE.PanelVisibility, visibility =>
+		postPortMessage(MESSAGE.PanelVisibility, visibility),
+	)
+
+	onRuntimeMessage(MESSAGE.DevtoolsScriptConnected, () =>
+		postPortMessage(MESSAGE.DevtoolsScriptConnected),
+	)
 })
 
 // panel -> bg

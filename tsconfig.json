@@ -20,5 +20,6 @@
 			"@debugger": ["./packages/debugger/src/index.ts"],
 			"@ui": ["./packages/ui/src/index.tsx"]
 		}
-	}
+	},
+	"exclude": ["node_modules", "dist"]
 }

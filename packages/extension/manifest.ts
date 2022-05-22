@@ -19,7 +19,7 @@ export default defineManifest({
 		service_worker: "background/index.ts",
 		type: "module",
 	},
-	permissions: ["http://*/*", "https://*/*", "file:///*", "contextMenus", "scripting", "storage"],
+	permissions: ["debugger", "clipboardRead", "clipboardWrite", "idle", "scripting"],
 	host_permissions: ["file:///*", "http://*/*", "https://*/*"],
 	action: {
 		default_icon: {

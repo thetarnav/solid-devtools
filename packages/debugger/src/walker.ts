@@ -6,8 +6,8 @@ import {
 	MappedSignal,
 	ValueUpdateListener,
 } from "@shared/graph"
-import { getSafeValue } from "./serialize"
-import { ComputationUpdateHandler, SignalUpdateHandler } from "./update"
+import { ComputationUpdateHandler, SignalUpdateHandler } from "./batchUpdates"
+import { getSafeValue } from "./utils"
 
 const isComponent = (o: Readonly<AnyObject>): boolean =>
 	"componentName" in o && typeof o.value === "function"

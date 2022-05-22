@@ -5,6 +5,8 @@ console.log("devtools script working")
 
 const { onRuntimeMessage, postRuntimeMessage } = createRuntimeMessanger()
 
+postRuntimeMessage(MESSAGE.DevtoolsScriptConnected, undefined)
+
 let panel: chrome.devtools.panels.ExtensionPanel | undefined
 
 onRuntimeMessage(MESSAGE.SolidOnPage, async () => {

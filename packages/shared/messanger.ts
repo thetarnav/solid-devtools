@@ -1,10 +1,12 @@
+import { AnyFunction } from "@solid-primitives/utils"
 import { MappedRoot, MappedOwner } from "./graph"
 
 export type SafeValue = number | null | undefined | string | boolean
 
 export enum MESSAGE {
-	SolidOnPage,
 	Hello,
+	SolidOnPage,
+	DevtoolsScriptConnected,
 	PanelVisibility,
 	ResetPanel,
 	GraphUpdate,
@@ -22,6 +24,7 @@ export interface MessagePayloads {
 	[MESSAGE.ResetPanel]: void
 	[MESSAGE.GraphUpdate]: MappedRoot
 	[MESSAGE.BatchedUpdate]: BatchedUpdates
+	[MESSAGE.DevtoolsScriptConnected]: void
 }
 
 export enum UpdateType {
@@ -54,7 +57,7 @@ export type PostMessageFn = <K extends MESSAGE>(
 export type OnMessageFn = <K extends MESSAGE>(
 	id: K,
 	handler: (payload: MessagePayloads[K]) => void,
-) => void
+) => VoidFunction
 
 export const postWindowMessage: PostMessageFn = (id, payload?: any) => {
 	console.log("message posted:", MESSAGE[id], payload)
@@ -64,19 +67,28 @@ export const postWindowMessage: PostMessageFn = (id, payload?: any) => {
 const listeners: Partial<Record<MESSAGE, ((payload: any) => void)[]>> = {}
 
 export function startListeningWindowMessages() {
-	window.addEventListener(
-		"message",
-		event => {
-			const id = event.data?.id as MESSAGE
-			if (typeof id !== "number") return
-			listeners[id]?.forEach(f => f(event.data.payload))
-		},
-		false,
-	)
+	window.addEventListener("message", event => {
+		const id = event.data?.id as MESSAGE
+		if (typeof id !== "number") return
+		listeners[id]?.forEach(f => f(event.data.payload))
+	})
 }
 
 export const onWindowMessage: OnMessageFn = (id, handler) => {
 	let arr = listeners[id]
 	if (!arr) arr = listeners[id] = []
 	arr.push(handler)
+	return () => (listeners[id] = arr!.filter(l => l !== handler))
+}
+
+export function once<K extends MESSAGE>(
+	method: OnMessageFn,
+	id: K,
+	handler: (payload: MessagePayloads[K]) => void,
+): VoidFunction {
+	const unsub = method(id, (...cbArgs) => {
+		unsub()
+		return handler(...cbArgs)
+	})
+	return unsub
 }
