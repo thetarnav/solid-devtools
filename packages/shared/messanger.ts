@@ -1,4 +1,4 @@
-import { AnyFunction } from "@solid-primitives/utils"
+import { AnyFunction, isServer } from "@solid-primitives/utils"
 import { MappedRoot, MappedOwner } from "./graph"
 
 export type SafeValue = number | null | undefined | string | boolean
@@ -66,7 +66,11 @@ export const postWindowMessage: PostMessageFn = (id, payload?: any) => {
 
 const listeners: Partial<Record<MESSAGE, ((payload: any) => void)[]>> = {}
 
+/**
+ * Important ot call this if you want to use {@link onWindowMessage}
+ */
 export function startListeningWindowMessages() {
+	if (isServer) return
 	window.addEventListener("message", event => {
 		const id = event.data?.id as MESSAGE
 		if (typeof id !== "number") return

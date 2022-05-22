@@ -1,4 +1,4 @@
-import { MESSAGE } from "@shared/messanger"
+import { MESSAGE, once } from "@shared/messanger"
 import { createPortMessanger, createRuntimeMessanger } from "../shared/utils"
 import { DEVTOOLS_CONTENT_PORT } from "../shared/variables"
 
@@ -15,7 +15,7 @@ chrome.runtime.onConnect.addListener(newPort => {
 
 	if (port) {
 		console.log(`Switching BG Ports: ${port.sender?.documentId} -> ${newPort.sender?.documentId}`)
-		postRuntimeMessage(MESSAGE.ResetPanel, undefined)
+		postRuntimeMessage(MESSAGE.ResetPanel)
 	}
 
 	port = newPort
@@ -29,7 +29,7 @@ chrome.runtime.onConnect.addListener(newPort => {
 	// content -> bg
 	onPortMessage(MESSAGE.Hello, greeting => console.log("BG received a Port greeting:", greeting))
 
-	onPortMessage(MESSAGE.SolidOnPage, () => postRuntimeMessage(MESSAGE.SolidOnPage, undefined))
+	onPortMessage(MESSAGE.SolidOnPage, () => postRuntimeMessage(MESSAGE.SolidOnPage))
 
 	onPortMessage(MESSAGE.GraphUpdate, graph => postRuntimeMessage(MESSAGE.GraphUpdate, graph))
 
@@ -41,20 +41,17 @@ chrome.runtime.onConnect.addListener(newPort => {
 		postPortMessage(MESSAGE.PanelVisibility, visibility),
 	)
 
-	onRuntimeMessage(MESSAGE.DevtoolsScriptConnected, () =>
+	once(onRuntimeMessage, MESSAGE.DevtoolsScriptConnected, () =>
 		postPortMessage(MESSAGE.DevtoolsScriptConnected),
 	)
 })
 
 // panel -> bg
-onRuntimeMessage(MESSAGE.Hello, (greeting, respond) => {
+onRuntimeMessage(MESSAGE.Hello, greeting => {
 	console.log("BG received a Runtime greeting:", greeting)
-	respond("Hi I'm BG :)")
 })
 
 // bg -> panel
-postRuntimeMessage(MESSAGE.Hello, "hi from background", response => {
-	console.log(`background got response:`, response)
-})
+postRuntimeMessage(MESSAGE.Hello, "hi from background")
 
 export {}

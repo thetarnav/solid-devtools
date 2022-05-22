@@ -1,15 +1,15 @@
 import { createRuntimeMessanger } from "../shared/utils"
-import { MESSAGE } from "@shared/messanger"
+import { MESSAGE, once } from "@shared/messanger"
 
 console.log("devtools script working")
 
 const { onRuntimeMessage, postRuntimeMessage } = createRuntimeMessanger()
 
-postRuntimeMessage(MESSAGE.DevtoolsScriptConnected, undefined)
+postRuntimeMessage(MESSAGE.DevtoolsScriptConnected)
 
 let panel: chrome.devtools.panels.ExtensionPanel | undefined
 
-onRuntimeMessage(MESSAGE.SolidOnPage, async () => {
+once(onRuntimeMessage, MESSAGE.SolidOnPage, async () => {
 	if (panel) return console.log("Panel already exists")
 
 	console.log("Solid on page – creating panel")
