@@ -1,12 +1,8 @@
-import { GraphOwner, GraphSignal, OwnerType } from "@shared/graph"
-import { Component, For, JSX, Show } from "solid-js"
-import { DeepReadonly } from "solid-js/store"
-import { colors, hexToRgb, tw } from "./twind"
+import { GraphOwner, OwnerType } from "@shared/graph"
+import { For, JSX, Show } from "solid-js"
+import { tw } from "./twind"
 import { TransitionGroup, animateExit, animateEnter } from "@otonashixav/solid-flip"
-import { Signals } from "./signalNode"
-// import {TransitionGroup} from "solid-transition-group"
-
-const highlightRgba = hexToRgb(colors.cyan[400], 0.6)
+import { HighlightText, Signals, ValueNode } from "./signalNode"
 
 export function OwnerChildren(props: { children: GraphOwner[] }) {
 	return (
@@ -35,27 +31,16 @@ export function OwnerNode(props: { owner: GraphOwner }): JSX.Element {
 				border-0 border-t-[1px] border-l-[1px] border-cyan-900 border-opacity-30 outline-[1px]
 			`}
 		>
-			<div class={tw`pr-2`}>
-				<p>
-					<span
-						class={tw`px-1 py-0.5 rounded transition-color`}
-						style={{
-							"background-color": rerun() ? highlightRgba : null,
-						}}
-					>
-						<span class={tw`italic font-medium`}>
-							{type === OwnerType.Component ? `<${name}>` : name}{" "}
-						</span>
-						<span class={tw`ml-2 text-[10px] opacity-40`}>{typeName}</span>
-					</span>
-				</p>
-
-				<Show when={props.owner.signal}>{signal => <div>{signal.value}</div>}</Show>
-				{/* <ValueNode value={value} /> */}
-				{/* <div class="flex space-x-1">
-					<DependencyCount n={dependencies().length} type="dependencies" />
-					<Show when={dependents}>{d => <DependencyCount n={d().length} type="dependents" />}</Show>
-				</div> */}
+			<div class={tw`pl-1 pr-2 flex items-center`}>
+				<div class={tw`w-36 flex items-center`}>
+					<HighlightText strong={rerun()} bgColor class={tw`italic font-medium`}>
+						{type === OwnerType.Component ? `<${name}>` : name}
+					</HighlightText>
+					<div class={tw`ml-2 text-[10px] opacity-40`}>{typeName}</div>
+				</div>
+				<Show when={props.owner.signal}>
+					{signal => <ValueNode value={signal.value} updated={signal.updated} />}
+				</Show>
 			</div>
 			<Signals each={signals()} />
 			{/* <Show when={children().length}> */}
