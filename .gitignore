@@ -20,3 +20,6 @@ lerna-debug.log
 .vscode/settings.json
 
 .DS_Store
+
+# chrome extension private key file
+*.pem
