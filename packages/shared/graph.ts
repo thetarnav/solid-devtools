@@ -18,7 +18,7 @@ export enum OwnerType {
 export interface SolidSignal {
 	name: string
 	value: unknown
-	observers: SolidOwner[]
+	observers?: SolidOwner[] | null
 	// added by sdt:
 	sdtId?: number
 	onValueUpdate?: {
@@ -26,24 +26,17 @@ export interface SolidSignal {
 	}
 }
 
-export interface SolidOwner {
-	name?: string
+export interface SolidOwner extends SolidSignal {
 	componentName?: string
 	owner: SolidOwner | null
 	owned: SolidOwner[]
 	fn: AnyFunction
 	cleanups: VoidFunction[] | null
+	sources: (SolidOwner | SolidSignal)[] | null
 	context: any | null
 	sourceMap?: Record<string, SolidSignal>
-	// every owner has a value, only for memo that value is available as a signal
-	value: unknown
-	// added by sdt:
-	sdtId?: number
 	onComputationUpdate?: {
 		[rootID: number]: VoidFunction
-	}
-	onValueUpdate?: {
-		[rootID: number]: ValueUpdateListener
 	}
 }
 
@@ -67,12 +60,14 @@ export interface MappedOwner {
 	type: OwnerType
 	signals: MappedSignal[]
 	children: MappedOwner[]
+	sources: number[]
 	value?: MappedSignal
 }
 
 export interface MappedSignal {
 	name: string
 	id: number
+	observers: number[]
 	value?: SafeValue
 }
 
