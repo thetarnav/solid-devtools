@@ -10,7 +10,7 @@ const dispose = (o: { dispose?: VoidFunction }) => o.dispose?.()
 const disposeAll = (list: { dispose?: VoidFunction }[]) => list.forEach(dispose)
 
 const computationRerunMap: Record<number, Setter<boolean>> = {}
-const signalUpdateMap: Record<number, Setter<unknown>> = {}
+const signalUpdateMap: Record<number, { update: Setter<boolean>; value: Setter<unknown> }> = {}
 
 /**
  * maps the raw owner tree to be placed into the reactive graph store
@@ -56,12 +56,16 @@ function mapNewOwner(owner: Readonly<MappedOwner>): GraphOwner {
 function createSignalNode(raw: Readonly<MappedSignal>): GraphSignal {
 	if (!getOwner()) throw "This should be executed under a root"
 	const [value, setValue] = createSignal(raw.value)
-	signalUpdateMap[raw.id] = setValue
+	const [updated, setUpdated] = createSignal(false)
+	signalUpdateMap[raw.id] = { value: setValue, update: setUpdated }
 	return {
 		id: raw.id,
 		name: raw.name,
 		get value() {
 			return value()
+		},
+		get updated() {
+			return updated()
 		},
 	}
 }
@@ -131,6 +135,7 @@ const exports = createRoot(() => {
 		// reset all of the computationRerun state
 		batch(() => {
 			for (const id in computationRerunMap) computationRerunMap[id](false)
+			for (const id in signalUpdateMap) signalUpdateMap[id].update(false)
 		})
 
 		const index = graphs.findIndex(i => i.id === root.id)
@@ -159,7 +164,11 @@ const exports = createRoot(() => {
 			for (const update of updates) {
 				if (update.type === UpdateType.Signal) {
 					console.log("Signal update", update.payload.id, update.payload.value)
-					signalUpdateMap[update.payload.id]?.(update.payload.value)
+					const signal = signalUpdateMap[update.payload.id]
+					if (signal) {
+						signal.value(update.payload.value)
+						signal.update(true)
+					}
 				} else {
 					console.log("Computation rerun", update.payload)
 					computationRerunMap[update.payload]?.(true)

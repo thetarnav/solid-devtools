@@ -1,8 +1,9 @@
-import { GraphOwner, OwnerType } from "@shared/graph"
-import { For, JSX, Show } from "solid-js"
+import { GraphOwner, GraphSignal, OwnerType } from "@shared/graph"
+import { Component, For, JSX, Show } from "solid-js"
 import { DeepReadonly } from "solid-js/store"
 import { colors, hexToRgb, tw } from "./twind"
 import { TransitionGroup, animateExit, animateEnter } from "@otonashixav/solid-flip"
+import { Signals } from "./signalNode"
 // import {TransitionGroup} from "solid-transition-group"
 
 const highlightRgba = hexToRgb(colors.cyan[400], 0.6)
@@ -27,22 +28,25 @@ export function OwnerNode(props: { owner: GraphOwner }): JSX.Element {
 	return (
 		<div
 			ref={ref}
-			class={tw`bg-cyan-200 bg-opacity-5 border-0 border-t-[1px] border-l-[1px] border-cyan-900 border-opacity-30 outline-[1px] pt-1 pl-1`}
+			class={tw`
+				pt-1 pl-1
+				bg-cyan-200 bg-opacity-5
+				text-black
+				border-0 border-t-[1px] border-l-[1px] border-cyan-900 border-opacity-30 outline-[1px]
+			`}
 		>
 			<div class={tw`pr-2`}>
 				<p>
 					<span
-						class={tw`
-							pl-1 pr-1 pb-0.5 pt-0.5
-							rounded italic
-							transition-color
-						`}
+						class={tw`px-1 py-0.5 rounded transition-color`}
 						style={{
 							"background-color": rerun() ? highlightRgba : null,
 						}}
 					>
-						{type === OwnerType.Component ? `<${name}>` : name}{" "}
-						<span class={tw`text-[10px] opacity-40`}>{typeName}</span>
+						<span class={tw`italic font-medium`}>
+							{type === OwnerType.Component ? `<${name}>` : name}{" "}
+						</span>
+						<span class={tw`ml-2 text-[10px] opacity-40`}>{typeName}</span>
 					</span>
 				</p>
 
@@ -53,17 +57,7 @@ export function OwnerNode(props: { owner: GraphOwner }): JSX.Element {
 					<Show when={dependents}>{d => <DependencyCount n={d().length} type="dependents" />}</Show>
 				</div> */}
 			</div>
-			<Show when={signals().length}>
-				<div>
-					<For each={signals()}>
-						{signal => (
-							<div>
-								{signal.name} — {JSON.stringify(signal.value)}
-							</div>
-						)}
-					</For>
-				</div>
-			</Show>
+			<Signals each={signals()} />
 			{/* <Show when={children().length}> */}
 			<div
 				class={tw`pl-4 pt-1 transition-opacity duration-500`}

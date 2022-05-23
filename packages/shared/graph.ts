@@ -97,6 +97,7 @@ export interface GraphSignal {
 	readonly name: string
 	readonly dispose?: VoidFunction
 	readonly value: SafeValue
+	readonly updated: boolean
 }
 
 export interface GraphRoot {
