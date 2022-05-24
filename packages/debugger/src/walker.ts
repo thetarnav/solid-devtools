@@ -8,7 +8,7 @@ import {
 	SolidSignal,
 } from "@shared/graph"
 import { ComputationUpdateHandler, SignalUpdateHandler } from "./batchUpdates"
-import { getSafeValue } from "./utils"
+import { getNewSdtId, getSafeValue } from "./utils"
 
 const isComponent = (o: Readonly<AnyObject>): boolean =>
 	"componentName" in o && typeof o.value === "function"
@@ -87,11 +87,9 @@ function observeValueUpdate(
 	})
 }
 
-let LAST_ID = 0
-
 function markNodeID(o: { sdtId?: number }): number {
 	if (o.sdtId !== undefined) return o.sdtId
-	else return (o.sdtId = LAST_ID++)
+	else return (o.sdtId = getNewSdtId())
 }
 function markNodesID(nodes?: { sdtId?: number }[] | null): number[] {
 	if (!nodes || !nodes.length) return []
@@ -100,13 +98,12 @@ function markNodesID(nodes?: { sdtId?: number }[] | null): number[] {
 
 function createSignalNode(
 	raw: Pick<SolidSignal, "name" | "value" | "observers"> & { id: number },
-	addValue = true,
 ): MappedSignal {
 	return {
 		name: raw.name,
 		id: raw.id,
 		observers: markNodesID(raw.observers),
-		...(addValue ? { value: getSafeValue(raw.value) } : null),
+		value: getSafeValue(raw.value),
 	}
 }
 
@@ -125,8 +122,6 @@ function mapOwnerSignals(
 	return Object.values(sourceMap).map(raw => {
 		const id = markNodeID(raw)
 		observeValueUpdate(raw, rootId, (value, oldValue) => onSignalUpdate({ id, value, oldValue }))
-		// mapped signlas only need their value after you are created,
-		// value updates are captured and sent seperately
 		return createSignalNode({ ...raw, id })
 	})
 }
@@ -141,7 +136,6 @@ function mapOwner(owner: SolidOwner, handlers: UpdateHandlers): MappedOwner {
 	observeComputation(owner, rootId, onComputationUpdate.bind(void 0, id))
 
 	const memoProps = (() => {
-		// ! having a ID od not is not a good way to distinguish between mapped/not-mapped nodes
 		if (type !== OwnerType.Memo) return
 		observeValueUpdate(owner, rootId, (value, oldValue) => onSignalUpdate({ id, value, oldValue }))
 		return {

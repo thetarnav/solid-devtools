@@ -68,7 +68,7 @@ export interface MappedSignal {
 	name: string
 	id: number
 	observers: number[]
-	value?: SafeValue
+	value: SafeValue
 }
 
 //

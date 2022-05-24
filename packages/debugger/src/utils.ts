@@ -9,7 +9,10 @@ export function getSafeValue(value: unknown): SafeValue {
 }
 
 /** helper to getting to an owner that you want */
-function findOwner(root: SolidOwner, predicate: (owner: SolidOwner) => boolean): SolidOwner | null {
+export function findOwner(
+	root: SolidOwner,
+	predicate: (owner: SolidOwner) => boolean,
+): SolidOwner | null {
 	const queue: SolidOwner[] = [root]
 	for (const owner of queue) {
 		if (predicate(owner)) return owner
@@ -17,3 +20,6 @@ function findOwner(root: SolidOwner, predicate: (owner: SolidOwner) => boolean):
 	}
 	return null
 }
+
+let LAST_ID = 0
+export const getNewSdtId = () => LAST_ID++
