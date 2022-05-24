@@ -82,9 +82,10 @@ export interface GraphOwner {
 	readonly type: OwnerType
 	readonly dispose: VoidFunction
 	readonly rerun: boolean
+	sources: GraphSignal[]
 	readonly children: GraphOwner[]
 	readonly signals: GraphSignal[]
-	readonly signal?: GraphSignal
+	signal?: GraphSignal
 }
 
 export interface GraphSignal {
@@ -92,6 +93,7 @@ export interface GraphSignal {
 	readonly name: string
 	readonly dispose?: VoidFunction
 	readonly value: SafeValue
+	readonly observers: GraphOwner[]
 	readonly updated: boolean
 }
 
