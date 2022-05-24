@@ -53,7 +53,7 @@
 		"watchlist": "^0.3.1"
 	},
 	"dependencies": {
-		"@solid-primitives/utils": "^1.5.2",
+		"@solid-primitives/utils": "^2.0.3",
 		"solid-js": "^1.4.1",
 		"solid-meta": "^0.27.3",
 		"twind": "^0.16.17"
