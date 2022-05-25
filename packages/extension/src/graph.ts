@@ -3,12 +3,33 @@
 import { batch, createRoot, createSignal, getOwner, onCleanup, Setter } from "solid-js"
 import { createStore, produce } from "solid-js/store"
 import { UpdateType, MESSAGE } from "@shared/messanger"
-import { pushToArrayProp } from "@shared/utils"
+import { mutateFilter, pushToArrayProp } from "@shared/utils"
 import { MappedOwner, MappedSignal, GraphOwner, GraphSignal, GraphRoot } from "@shared/graph"
 import { onRuntimeMessage } from "./messanger"
 
 const dispose = (o: { dispose?: VoidFunction }) => o.dispose?.()
 const disposeAll = (list: { dispose?: VoidFunction }[]) => list.forEach(dispose)
+
+/**
+ * Reconciles an array by mutating it. Diffs items by "id" prop. And uses {@link mapFunc} for creating new items.
+ * Use for dynamic arrays that can change entirely. Like sources or observers.
+ */
+function reconcileArrayByIds<T extends { id: number }>(
+	ids: readonly number[],
+	array: T[],
+	mapFunc: (id: number, array: T[]) => void,
+): void {
+	const removed: T[] = []
+	const intersection: number[] = []
+	let id: number
+	for (const item of array) {
+		id = item.id
+		if (ids.includes(id)) intersection.push(id)
+		else removed.push(item)
+	}
+	mutateFilter(array, o => !removed.includes(o))
+	for (id of ids) intersection.includes(id) || mapFunc(id, array)
+}
 
 // Maps <ID -- updated signal setter> for triggering "updated" state of computations & signals
 const computationRerunMap: Record<number, Setter<boolean>> = {}
@@ -18,40 +39,45 @@ const signalUpdateMap: Record<number, { update: Setter<boolean>; value: Setter<u
 const ownersMap: Record<number, GraphOwner> = {}
 const signalsMap: Record<number, GraphSignal> = {}
 
-// TODO: clear these after each tree reconciliation
 // TODO: map source/observers length separately, as these won't always resolve
-let currentSourcesToAdd: Record<number, ((source: GraphSignal) => void)[]>
-let currentObserversToAdd: Record<number, ((source: GraphOwner) => void)[]>
+let sourcesToAddLazy: Record<number, ((source: GraphSignal) => void)[]> = {}
+let observersToAddLazy: Record<number, ((source: GraphOwner) => void)[]> = {}
+
+function afterGraphUpdate() {
+	// sources and observers can be added lazily only during one reconciliation
+	sourcesToAddLazy = {}
+	observersToAddLazy = {}
+}
 
 const addSignalToMap = (node: GraphSignal) => {
 	const id = node.id
 	signalsMap[id] = node
-	const toAdd = currentSourcesToAdd[id]
+	const toAdd = sourcesToAddLazy[id]
 	if (toAdd) {
 		toAdd.forEach(f => f(node))
-		delete currentSourcesToAdd[id]
+		delete sourcesToAddLazy[id]
 	}
 }
 const addOwnerToMap = (node: GraphOwner) => {
 	const id = node.id
 	ownersMap[id] = node
-	const toAdd = currentObserversToAdd[id]
+	const toAdd = observersToAddLazy[id]
 	if (toAdd) {
 		toAdd.forEach(f => f(node))
-		delete currentObserversToAdd[id]
+		delete observersToAddLazy[id]
 	}
 }
 
 function mapObserver(id: number, mutable: GraphOwner[]) {
 	const node = ownersMap[id]
 	if (node) mutable.push(node)
-	else pushToArrayProp(currentObserversToAdd, id, owner => mutable.push(owner))
+	else pushToArrayProp(observersToAddLazy, id, owner => mutable.push(owner))
 }
 
 function mapSource(id: number, mutable: GraphSignal[]) {
 	const node = signalsMap[id]
 	if (node) mutable.push(node)
-	else pushToArrayProp(currentSourcesToAdd, id, signal => mutable.push(signal))
+	else pushToArrayProp(sourcesToAddLazy, id, signal => mutable.push(signal))
 }
 
 /**
@@ -84,7 +110,7 @@ function mapNewOwner(owner: Readonly<MappedOwner>): GraphOwner {
 
 		node.signals.push(...owner.signals.map(createSignalNode))
 		node.children.push(...owner.children.map(mapNewOwner))
-		if (owner.value) node.signal = createSignalNode(owner.value)
+		if (owner.signal) node.signal = createSignalNode(owner.signal)
 
 		computationRerunMap[id] = setRerun
 		onCleanup(() => delete computationRerunMap[id])
@@ -162,25 +188,13 @@ function reconcileChildren(newChildren: MappedOwner[], children: GraphOwner[]): 
 			// reconcile child
 			reconcileChildren(mapped.children, node.children)
 			reconcileSignals(mapped.signals, node.signals)
+			reconcileArrayByIds(mapped.sources, node.sources, mapSource)
 
-			// TODO: reconcile observers of the node.signal
-
-			// reconcile sources
-			// cannot rely on index for indenfifying removed/added like with children/signals
-			// sources are highly dynamic — can be removed and added again
-			const { sources } = node
-			const ids = new Set(mapped.sources)
-			const toRemove: GraphSignal[] = []
-			let id: number
-			for (const signal of sources) {
-				// remove removed sources
-				id = signal.id
-				if (ids.has(id)) ids.delete(id)
-				else toRemove.push(signal)
+			// reconcile signal observers
+			if (mapped.signal) {
+				if (!node.signal) node.signal = createSignalNodeAsync(mapped.signal)
+				else reconcileArrayByIds(mapped.signal.observers, node.signal.observers, mapObserver)
 			}
-			node.sources = sources.filter(s => !toRemove.includes(s))
-			// add new sources
-			for (id of ids) mapSource(id, sources)
 		} else {
 			// dispose old, map new child
 			node.dispose()
@@ -200,15 +214,16 @@ function reconcileChildren(newChildren: MappedOwner[], children: GraphOwner[]): 
 	}
 }
 
-function reconcileSignals(newSignals: MappedSignal[], signals: GraphSignal[]): void {
+function reconcileSignals(newSignals: readonly MappedSignal[], signals: GraphSignal[]): void {
 	const length = signals.length,
 		newLength = newSignals.length
 
-	// TODO: reconcile observers
-
-	for (let i = length; i < newLength; i++) {
-		signals[i] = createSignalNodeAsync(newSignals[i])
-	}
+	let i = 0
+	// reconcile observers
+	for (; i < length; i++)
+		reconcileArrayByIds(newSignals[i].observers, signals[i].observers, mapObserver)
+	// add new signals (signals can only be added)
+	for (; i < newLength; i++) signals[i] = createSignalNodeAsync(newSignals[i])
 }
 
 const exports = createRoot(() => {
@@ -237,6 +252,8 @@ const exports = createRoot(() => {
 				children: root.children.map(mapNewOwner),
 			})
 		}
+
+		afterGraphUpdate()
 	})
 
 	onRuntimeMessage(MESSAGE.ResetPanel, () => setGraphs([]))

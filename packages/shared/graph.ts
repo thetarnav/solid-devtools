@@ -35,6 +35,7 @@ export interface SolidOwner extends SolidSignal {
 	sources: (SolidOwner | SolidSignal)[] | null
 	context: any | null
 	sourceMap?: Record<string, SolidSignal>
+	sdtType?: OwnerType
 	onComputationUpdate?: {
 		[rootID: number]: VoidFunction
 	}
@@ -61,7 +62,7 @@ export interface MappedOwner {
 	signals: MappedSignal[]
 	children: MappedOwner[]
 	sources: number[]
-	value?: MappedSignal
+	signal?: MappedSignal
 }
 
 export interface MappedSignal {

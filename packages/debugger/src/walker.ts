@@ -87,6 +87,10 @@ function observeValueUpdate(
 	})
 }
 
+function markOwnerType(o: SolidOwner): OwnerType {
+	if (o.sdtType !== undefined) return o.sdtType
+	else return (o.sdtType = getOwnerType(o))
+}
 function markNodeID(o: { sdtId?: number }): number {
 	if (o.sdtId !== undefined) return o.sdtId
 	else return (o.sdtId = getNewSdtId())
@@ -130,7 +134,7 @@ function mapOwner(owner: SolidOwner, handlers: UpdateHandlers): MappedOwner {
 	const { onSignalUpdate, onComputationUpdate, rootId } = handlers
 
 	const id = markNodeID(owner)
-	const type = getOwnerType(owner)
+	const type = markOwnerType(owner)
 	const name = getOwnerName(owner)
 
 	observeComputation(owner, rootId, onComputationUpdate.bind(void 0, id))
@@ -139,7 +143,7 @@ function mapOwner(owner: SolidOwner, handlers: UpdateHandlers): MappedOwner {
 		if (type !== OwnerType.Memo) return
 		observeValueUpdate(owner, rootId, (value, oldValue) => onSignalUpdate({ id, value, oldValue }))
 		return {
-			value: createSignalNode({ id, name, value: owner.value, observers: owner.observers }),
+			signal: createSignalNode({ id, name, value: owner.value, observers: owner.observers }),
 		}
 	})()
 
