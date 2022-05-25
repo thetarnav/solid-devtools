@@ -16,7 +16,7 @@ export function OwnerNode(props: { owner: GraphOwner }): JSX.Element {
 	const { name, type } = props.owner
 	const children = () => props.owner.children
 	const signals = () => props.owner.signals
-	const rerun = () => props.owner.rerun
+	const rerun = () => props.owner.updated
 	const typeName = OwnerType[type]
 
 	let ref!: HTMLDivElement

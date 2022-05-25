@@ -1,6 +1,6 @@
 /* @refresh reload */
 
-import { batch, createRoot, createSignal, getOwner, onCleanup, Setter } from "solid-js"
+import { batch, createRoot, createSignal, getOwner, onCleanup } from "solid-js"
 import { createStore, produce } from "solid-js/store"
 import { UpdateType, MESSAGE } from "@shared/messanger"
 import { mutateFilter, pushToArrayProp } from "@shared/utils"
@@ -9,6 +9,9 @@ import { onRuntimeMessage } from "./messanger"
 
 const dispose = (o: { dispose?: VoidFunction }) => o.dispose?.()
 const disposeAll = (list: { dispose?: VoidFunction }[]) => list.forEach(dispose)
+function deleteKey<K extends PropertyKey>(this: { [_ in K]?: unknown }, key: K) {
+	delete this[key]
+}
 
 /**
  * Reconciles an array by mutating it. Diffs items by "id" prop. And uses {@link mapFunc} for creating new items.
@@ -31,11 +34,9 @@ function reconcileArrayByIds<T extends { id: number }>(
 	for (id of ids) intersection.includes(id) || mapFunc(id, array)
 }
 
-// Maps <ID -- updated signal setter> for triggering "updated" state of computations & signals
-const computationRerunMap: Record<number, Setter<boolean>> = {}
-const signalUpdateMap: Record<number, { update: Setter<boolean>; value: Setter<unknown> }> = {}
+const signalsUpdated = new Set<number>()
+const ownersUpdated = new Set<number>()
 
-// TODO: removing disposed nodes from maps
 const ownersMap: Record<number, GraphOwner> = {}
 const signalsMap: Record<number, GraphSignal> = {}
 
@@ -47,11 +48,14 @@ function afterGraphUpdate() {
 	// sources and observers can be added lazily only during one reconciliation
 	sourcesToAddLazy = {}
 	observersToAddLazy = {}
+	signalsUpdated.clear()
+	ownersUpdated.clear()
 }
 
 const addSignalToMap = (node: GraphSignal) => {
 	const id = node.id
 	signalsMap[id] = node
+	onCleanup(deleteKey.bind(signalsMap, id))
 	const toAdd = sourcesToAddLazy[id]
 	if (toAdd) {
 		toAdd.forEach(f => f(node))
@@ -61,6 +65,7 @@ const addSignalToMap = (node: GraphSignal) => {
 const addOwnerToMap = (node: GraphOwner) => {
 	const id = node.id
 	ownersMap[id] = node
+	onCleanup(deleteKey.bind(ownersMap, id))
 	const toAdd = observersToAddLazy[id]
 	if (toAdd) {
 		toAdd.forEach(f => f(node))
@@ -87,7 +92,7 @@ function mapSource(id: number, mutable: GraphSignal[]) {
 function mapNewOwner(owner: Readonly<MappedOwner>): GraphOwner {
 	// wrap with root that will be disposed together with the rest of the tree
 	return createRoot(dispose => {
-		const [rerun, setRerun] = createSignal(false)
+		const [updated, setUpdate] = createSignal(false)
 
 		const { id } = owner
 		const sources: GraphSignal[] = []
@@ -101,9 +106,10 @@ function mapNewOwner(owner: Readonly<MappedOwner>): GraphOwner {
 			signals,
 			children,
 			dispose,
-			get rerun() {
-				return rerun()
+			get updated() {
+				return updated()
 			},
+			setUpdate,
 		}
 		addOwnerToMap(node)
 		owner.sources.forEach(sourceId => mapSource(sourceId, sources))
@@ -112,15 +118,8 @@ function mapNewOwner(owner: Readonly<MappedOwner>): GraphOwner {
 		node.children.push(...owner.children.map(mapNewOwner))
 		if (owner.signal) node.signal = createSignalNode(owner.signal)
 
-		computationRerunMap[id] = setRerun
-		onCleanup(() => delete computationRerunMap[id])
 		onCleanup(disposeAll.bind(void 0, node.children))
-		onCleanup(() => {
-			for (const signal of node.signals) {
-				signal.dispose?.()
-				delete signalUpdateMap[signal.id]
-			}
-		})
+		onCleanup(disposeAll.bind(void 0, node.signals))
 
 		return node
 	})
@@ -133,8 +132,7 @@ function mapNewOwner(owner: Readonly<MappedOwner>): GraphOwner {
 function createSignalNode(raw: Readonly<MappedSignal>): GraphSignal {
 	if (!getOwner()) throw "This should be executed under a root"
 	const [value, setValue] = createSignal(raw.value)
-	const [updated, setUpdated] = createSignal(false)
-	signalUpdateMap[raw.id] = { value: setValue, update: setUpdated }
+	const [updated, setUpdate] = createSignal(false)
 	const observers: GraphOwner[] = []
 	const { id } = raw
 	const node: GraphSignal = {
@@ -147,6 +145,8 @@ function createSignalNode(raw: Readonly<MappedSignal>): GraphSignal {
 		get updated() {
 			return updated()
 		},
+		setValue,
+		setUpdate,
 	}
 	addSignalToMap(node)
 	raw.observers.forEach(observerId => mapObserver(observerId, observers))
@@ -232,8 +232,8 @@ const exports = createRoot(() => {
 	onRuntimeMessage(MESSAGE.GraphUpdate, root => {
 		// reset all of the computationRerun state
 		batch(() => {
-			for (const id in computationRerunMap) computationRerunMap[id](false)
-			for (const id in signalUpdateMap) signalUpdateMap[id].update(false)
+			for (const id of ownersUpdated) ownersMap[id].setUpdate(false)
+			for (const id of signalsUpdated) signalsMap[id].setUpdate(false)
 		})
 
 		const index = graphs.findIndex(i => i.id === root.id)
@@ -264,14 +264,19 @@ const exports = createRoot(() => {
 			for (const update of updates) {
 				if (update.type === UpdateType.Signal) {
 					console.log("Signal update", update.payload.id, update.payload.value)
-					const signal = signalUpdateMap[update.payload.id]
+					const signal = signalsMap[update.payload.id]
 					if (signal) {
-						signal.value(update.payload.value)
-						signal.update(true)
+						signal.setValue(update.payload.value)
+						signal.setUpdate(true)
+						signalsUpdated.add(update.payload.id)
 					}
 				} else {
 					console.log("Computation rerun", update.payload)
-					computationRerunMap[update.payload]?.(true)
+					const owner = ownersMap[update.payload]
+					if (owner) {
+						owner.setUpdate(true)
+						ownersUpdated.add(update.payload)
+					}
 				}
 			}
 		})
