@@ -1,4 +1,4 @@
-import { createSignal } from "solid-js"
+import { Accessor, createEffect, createSignal } from "solid-js"
 import { throttle } from "@solid-primitives/scheduled"
 import { MappedOwner, MappedRoot, SolidOwner } from "@shared/graph"
 import { UpdateType } from "@shared/messanger"
@@ -11,10 +11,10 @@ export function createOwnerObserver(
 	owner: SolidOwner,
 	rootId: number,
 	onUpdate: (tree: MappedOwner[]) => void,
-): {
-	update: VoidFunction
-	forceUpdate: VoidFunction
-} {
+	options: { enabled?: Accessor<boolean> } = {},
+) {
+	const { enabled } = options
+
 	const onComputationUpdate: ComputationUpdateHandler = payload => {
 		batchUpdate({ type: UpdateType.Computation, payload })
 	}
@@ -30,27 +30,30 @@ export function createOwnerObserver(
 		onUpdate(tree)
 	}
 	const update = throttle(forceUpdate, 300)
-	makeGraphUpdateListener(update)
+
+	if (enabled)
+		createEffect(() => {
+			if (!enabled()) return
+			forceUpdate()
+			makeGraphUpdateListener(update)
+		})
+	else makeGraphUpdateListener(update)
+
 	return { update, forceUpdate }
 }
 
-export function createGraphRoot(root: SolidOwner): [
-	root: MappedRoot,
-	actions: {
-		update: VoidFunction
-		forceUpdate: VoidFunction
-	},
-] {
+export function createGraphRoot(
+	root: SolidOwner,
+	options?: { enabled?: Accessor<boolean> },
+): MappedRoot {
 	const [tree, setTree] = createSignal<MappedOwner[]>([])
 	const id = getNewSdtId()
-	const actions = createOwnerObserver(root, id, setTree)
-	return [
-		{
-			id,
-			get children() {
-				return tree()
-			},
+	const { update } = createOwnerObserver(root, id, setTree, options)
+	update()
+	return {
+		id,
+		get children() {
+			return tree()
 		},
-		actions,
-	]
+	}
 }

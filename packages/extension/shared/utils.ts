@@ -1,5 +1,5 @@
 import { noop } from "@solid-primitives/utils"
-import { MESSAGE, MessagePayloads, OnMessageFn, PostMessageFn } from "@shared/messanger"
+import { LOG_MESSAGES, MESSAGE, OnMessageFn, PostMessageFn } from "@shared/messanger"
 
 export function createPortMessanger(port: chrome.runtime.Port): {
 	postPortMessage: PostMessageFn
@@ -19,14 +19,14 @@ export function createPortMessanger(port: chrome.runtime.Port): {
 		if (!event || typeof event !== "object") return
 		const e = event as Record<PropertyKey, unknown>
 		if (typeof e.id !== "number") return
-		console.log("port message received:", MESSAGE[e.id], e.payload)
+		LOG_MESSAGES && console.log("port message received:", MESSAGE[e.id], e.payload)
 		listeners[e.id as MESSAGE]?.forEach(f => f(e.payload))
 	}
 	port.onMessage.addListener(onMessage)
 
 	return {
 		postPortMessage: (id, payload?: any) => {
-			console.log("port message posted:", MESSAGE[id], payload)
+			LOG_MESSAGES && console.log("port message posted:", MESSAGE[id], payload)
 			if (!connected) return
 			port.postMessage({ id, payload })
 		},
@@ -49,7 +49,7 @@ export function createRuntimeMessanger(): {
 	chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 		const id = message?.id as MESSAGE
 		if (typeof id !== "number") return
-		console.log("runtime message received:", MESSAGE[id], message.payload)
+		LOG_MESSAGES && console.log("runtime message received:", MESSAGE[id], message.payload)
 		listeners[id]?.forEach(f => f(message.payload))
 		// lines below are necessary to avoid "The message port closed before a response was received." errors.
 		// https://github.com/mozilla/webextension-polyfill/issues/130
@@ -65,7 +65,7 @@ export function createRuntimeMessanger(): {
 			return () => (listeners[id] = arr!.filter(l => l !== handler))
 		},
 		postRuntimeMessage: (id, payload?: any) => {
-			console.log("runtime message posted:", MESSAGE[id], payload)
+			LOG_MESSAGES && console.log("runtime message posted:", MESSAGE[id], payload)
 			chrome.runtime.sendMessage({ id, payload })
 		},
 	}

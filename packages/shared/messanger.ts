@@ -1,10 +1,11 @@
 import { AnyFunction, isServer } from "@solid-primitives/utils"
 import { MappedRoot, MappedOwner } from "./graph"
 
+export const LOG_MESSAGES = false
+
 export type SafeValue = number | null | undefined | string | boolean
 
 export enum MESSAGE {
-	Hello,
 	SolidOnPage,
 	DevtoolsScriptConnected,
 	PanelVisibility,
@@ -19,7 +20,6 @@ export interface Message<K extends MESSAGE> {
 
 export interface MessagePayloads {
 	[MESSAGE.SolidOnPage]: void
-	[MESSAGE.Hello]: string
 	[MESSAGE.PanelVisibility]: boolean
 	[MESSAGE.ResetPanel]: void
 	[MESSAGE.GraphUpdate]: MappedRoot
@@ -60,7 +60,7 @@ export type OnMessageFn = <K extends MESSAGE>(
 ) => VoidFunction
 
 export const postWindowMessage: PostMessageFn = (id, payload?: any) => {
-	console.log("message posted:", MESSAGE[id], payload)
+	LOG_MESSAGES && console.log("message posted:", MESSAGE[id], payload)
 	window.postMessage({ id, payload }, "*")
 }
 

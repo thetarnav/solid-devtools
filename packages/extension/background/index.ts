@@ -1,3 +1,4 @@
+import { createCallbackStack } from "@solid-primitives/utils"
 import { MESSAGE, once } from "@shared/messanger"
 import { createPortMessanger, createRuntimeMessanger } from "../shared/utils"
 import { DEVTOOLS_CONTENT_PORT } from "../shared/variables"
@@ -8,6 +9,9 @@ const { onRuntimeMessage, postRuntimeMessage } = createRuntimeMessanger()
 
 let port: chrome.runtime.Port | undefined
 let lastDocumentId: string | undefined
+let panelVisibility = false
+
+const { push: addCleanup, execute: clearListeners } = createCallbackStack()
 
 chrome.runtime.onConnect.addListener(newPort => {
 	if (newPort.name !== DEVTOOLS_CONTENT_PORT)
@@ -16,6 +20,7 @@ chrome.runtime.onConnect.addListener(newPort => {
 	if (port) {
 		console.log(`Switching BG Ports: ${port.sender?.documentId} -> ${newPort.sender?.documentId}`)
 		postRuntimeMessage(MESSAGE.ResetPanel)
+		clearListeners()
 	}
 
 	port = newPort
@@ -23,35 +28,38 @@ chrome.runtime.onConnect.addListener(newPort => {
 
 	const { postPortMessage, onPortMessage } = createPortMessanger(port)
 
-	// bg -> content
-	postPortMessage(MESSAGE.Hello, "Hello from background script!")
-
-	// content -> bg
-	onPortMessage(MESSAGE.Hello, greeting => console.log("BG received a Port greeting:", greeting))
-
-	onPortMessage(MESSAGE.SolidOnPage, () => postRuntimeMessage(MESSAGE.SolidOnPage))
-
-	onPortMessage(MESSAGE.GraphUpdate, graph => postRuntimeMessage(MESSAGE.GraphUpdate, graph))
-
-	onPortMessage(MESSAGE.BatchedUpdate, payload =>
-		postRuntimeMessage(MESSAGE.BatchedUpdate, payload),
+	addCleanup(
+		onPortMessage(MESSAGE.SolidOnPage, () => {
+			postRuntimeMessage(MESSAGE.SolidOnPage)
+			// respond with page visibility to the debugger, to let him know
+			// if the panel is already created and visible (after page refresh)
+			postPortMessage(MESSAGE.PanelVisibility, panelVisibility)
+		}),
 	)
 
-	onRuntimeMessage(MESSAGE.PanelVisibility, visibility =>
-		postPortMessage(MESSAGE.PanelVisibility, visibility),
+	addCleanup(
+		onPortMessage(MESSAGE.GraphUpdate, graph => postRuntimeMessage(MESSAGE.GraphUpdate, graph)),
 	)
 
-	once(onRuntimeMessage, MESSAGE.DevtoolsScriptConnected, () =>
-		postPortMessage(MESSAGE.DevtoolsScriptConnected),
+	addCleanup(
+		onPortMessage(MESSAGE.BatchedUpdate, payload =>
+			postRuntimeMessage(MESSAGE.BatchedUpdate, payload),
+		),
+	)
+
+	addCleanup(
+		onRuntimeMessage(MESSAGE.PanelVisibility, visibility => {
+			panelVisibility = visibility
+			postPortMessage(MESSAGE.PanelVisibility, visibility)
+		}),
+	)
+
+	addCleanup(
+		once(onRuntimeMessage, MESSAGE.DevtoolsScriptConnected, () => {
+			panelVisibility = false
+			postPortMessage(MESSAGE.DevtoolsScriptConnected)
+		}),
 	)
 })
-
-// panel -> bg
-onRuntimeMessage(MESSAGE.Hello, greeting => {
-	console.log("BG received a Runtime greeting:", greeting)
-})
-
-// bg -> panel
-postRuntimeMessage(MESSAGE.Hello, "hi from background")
 
 export {}

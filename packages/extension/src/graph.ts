@@ -285,10 +285,12 @@ const exports = createRoot(() => {
 		setGraphs([])
 		disposeAll(Object.values(ownersMap))
 		disposeAll(Object.values(signalsMap))
+		// TODO: rename this function:
+		afterGraphUpdate()
 	})
 
 	onRuntimeMessage(MESSAGE.BatchedUpdate, updates => {
-		console.group("Batched Updates")
+		console.groupCollapsed("Batched Updates")
 		batch(() => {
 			for (const update of updates) {
 				if (update.type === UpdateType.Signal) {

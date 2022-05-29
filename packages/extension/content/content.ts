@@ -15,14 +15,6 @@ const port = chrome.runtime.connect({ name: DEVTOOLS_CONTENT_PORT })
 startListeningWindowMessages()
 const { postPortMessage, onPortMessage } = createPortMessanger(port)
 
-// content -> bg
-postPortMessage(MESSAGE.Hello, "hello from content script")
-
-// bg -> content
-onPortMessage(MESSAGE.Hello, greeting => {
-	console.log("In content script, received a greeting:", greeting)
-})
-
 onWindowMessage(MESSAGE.SolidOnPage, () => postPortMessage(MESSAGE.SolidOnPage))
 
 onWindowMessage(MESSAGE.GraphUpdate, graph => postPortMessage(MESSAGE.GraphUpdate, graph))
