@@ -32,8 +32,9 @@
 	"dependencies": {
 		"@motionone/solid": "^10.8.1",
 		"@otonashixav/solid-flip": "^0.10.5",
-		"@solid-primitives/utils": "^2.0.3",
+		"@solid-aria/primitives": "^0.0.10",
 		"@solid-primitives/props": "^2.1.2",
+		"@solid-primitives/utils": "^2.0.3",
 		"solid-js": "^1.4.1",
 		"solid-transition-group": "^0.0.10",
 		"twind": "^0.16.17"

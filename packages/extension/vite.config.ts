@@ -6,7 +6,7 @@ import manifest from "./manifest"
 import path from "path"
 
 export default defineConfig({
-	plugins: [solidPlugin(), crx({ manifest })],
+	plugins: [solidPlugin({ hot: false }), crx({ manifest })],
 	resolve: {
 		alias: {
 			"@shared": path.resolve(__dirname, "..", "shared"),

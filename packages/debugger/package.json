@@ -51,7 +51,7 @@
 	},
 	"dependencies": {
 		"@solid-primitives/rootless": "^1.1.0",
-		"@solid-primitives/throttle": "^1.2.0",
+		"@solid-primitives/scheduled": "^1.0.0",
 		"@solid-primitives/utils": "^2.0.3",
 		"solid-js": "^1.4.1"
 	},

@@ -1,5 +1,5 @@
 import { createSignal } from "solid-js"
-import throttle from "@solid-primitives/throttle"
+import { throttle } from "@solid-primitives/scheduled"
 import { MappedOwner, MappedRoot, SolidOwner } from "@shared/graph"
 import { UpdateType } from "@shared/messanger"
 import { batchUpdate, ComputationUpdateHandler, SignalUpdateHandler } from "./batchUpdates"
@@ -29,7 +29,7 @@ export function createOwnerObserver(
 		})
 		onUpdate(tree)
 	}
-	const [update] = throttle(forceUpdate, 300)
+	const update = throttle(forceUpdate, 300)
 	makeGraphUpdateListener(update)
 	return { update, forceUpdate }
 }

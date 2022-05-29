@@ -1,6 +1,4 @@
-/* @refresh reload */
-
-import { batch, createRoot, createSignal, getOwner, onCleanup } from "solid-js"
+import { batch, createRoot, createSelector, createSignal, getOwner, onCleanup } from "solid-js"
 import { createStore, produce } from "solid-js/store"
 import { UpdateType, MESSAGE } from "@shared/messanger"
 import { mutateFilter, pushToArrayProp } from "@shared/utils"
@@ -229,6 +227,33 @@ function reconcileSignals(newSignals: readonly MappedSignal[], signals: GraphSig
 const exports = createRoot(() => {
 	const [graphs, setGraphs] = createStore<GraphRoot[]>([])
 
+	let lastHoveredNode: null | GraphOwner | GraphSignal = null
+	const [highlightedObservers, setHighlightedObservers] = createSignal<GraphOwner[]>([])
+	const [highlightedSources, setHighlightedSources] = createSignal<GraphSignal[]>([])
+
+	const highlights = {
+		highlightObserversOf(signal: GraphSignal): void {
+			setHighlightedObservers(signal.observers)
+			lastHoveredNode = signal
+		},
+		cancelHightlightObserversOf(signal: GraphSignal): void {
+			if (lastHoveredNode === signal) setHighlightedObservers([])
+		},
+		highlightSourcesOf(owner: GraphOwner): void {
+			setHighlightedSources(owner.sources)
+			lastHoveredNode = owner
+		},
+		cancelHightlightSourcesOf(owner: GraphOwner): void {
+			if (lastHoveredNode === owner) setHighlightedSources([])
+		},
+		isObserverHighlighted: createSelector(highlightedObservers, (owner: GraphOwner, list) =>
+			list.includes(owner),
+		),
+		isSourceHighlighted: createSelector(highlightedSources, (signal: GraphSignal, list) =>
+			list.includes(signal),
+		),
+	}
+
 	onRuntimeMessage(MESSAGE.GraphUpdate, root => {
 		// reset all of the computationRerun state
 		batch(() => {
@@ -256,7 +281,11 @@ const exports = createRoot(() => {
 		afterGraphUpdate()
 	})
 
-	onRuntimeMessage(MESSAGE.ResetPanel, () => setGraphs([]))
+	onRuntimeMessage(MESSAGE.ResetPanel, () => {
+		setGraphs([])
+		disposeAll(Object.values(ownersMap))
+		disposeAll(Object.values(signalsMap))
+	})
 
 	onRuntimeMessage(MESSAGE.BatchedUpdate, updates => {
 		console.group("Batched Updates")
@@ -283,6 +312,9 @@ const exports = createRoot(() => {
 		console.groupEnd()
 	})
 
-	return { graphs }
+	return {
+		graphs,
+		highlights,
+	}
 })
-export const { graphs } = exports
+export const { graphs, highlights } = exports
