@@ -1,10 +1,11 @@
 import { createSignal } from "solid-js"
-import throttle from "@solid-primitives/throttle"
+import { throttle } from "@solid-primitives/scheduled"
 import { MappedOwner, MappedRoot, SolidOwner } from "@shared/graph"
 import { UpdateType } from "@shared/messanger"
 import { batchUpdate, ComputationUpdateHandler, SignalUpdateHandler } from "./batchUpdates"
 import { makeGraphUpdateListener } from "./update"
 import { mapOwnerTree } from "./walker"
+import { getNewSdtId } from "./utils"
 
 export function createOwnerObserver(
 	owner: SolidOwner,
@@ -21,15 +22,17 @@ export function createOwnerObserver(
 		batchUpdate({ type: UpdateType.Signal, payload })
 	}
 	const forceUpdate = () => {
-		const tree = mapOwnerTree(owner, { onComputationUpdate, onSignalUpdate, rootId })
+		const tree = mapOwnerTree(owner, {
+			onComputationUpdate,
+			onSignalUpdate,
+			rootId,
+		})
 		onUpdate(tree)
 	}
-	const [update] = throttle(forceUpdate, 300)
+	const update = throttle(forceUpdate, 300)
 	makeGraphUpdateListener(update)
 	return { update, forceUpdate }
 }
-
-let LAST_ROOT_ID = 0
 
 export function createGraphRoot(root: SolidOwner): [
 	root: MappedRoot,
@@ -39,7 +42,7 @@ export function createGraphRoot(root: SolidOwner): [
 	},
 ] {
 	const [tree, setTree] = createSignal<MappedOwner[]>([])
-	const id = LAST_ROOT_ID++
+	const id = getNewSdtId()
 	const actions = createOwnerObserver(root, id, setTree)
 	return [
 		{

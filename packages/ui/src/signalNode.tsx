@@ -1,7 +1,9 @@
-import { Component, For, JSX, ParentComponent, Show, splitProps } from "solid-js"
+import { Component, createEffect, For, JSX, on, ParentComponent, Show, splitProps } from "solid-js"
 import { combineProps } from "@solid-primitives/props"
 import { GraphSignal } from "@shared/graph"
 import { tw, colors, hexToRgb } from "./twind"
+import { useHighlights } from "./ctx/highlights"
+import { createHover } from "@solid-aria/primitives"
 
 export const Signals: Component<{ each: GraphSignal[] }> = props => {
 	return (
@@ -13,11 +15,19 @@ export const Signals: Component<{ each: GraphSignal[] }> = props => {
 	)
 }
 
-export const SignalNode: Component<GraphSignal> = props => {
+export const SignalNode: Component<GraphSignal> = signal => {
+	const { highlightObserversOf, cancelHightlightObserversOf, isSourceHighlighted } = useHighlights()
+	const isHighlighted = isSourceHighlighted.bind(null, signal)
+
+	const { hoverProps, isHovered } = createHover({})
+	createEffect(() =>
+		isHovered() ? highlightObserversOf(signal) : cancelHightlightObserversOf(signal),
+	)
+
 	return (
-		<div class={tw`px-1 h-5 flex items-center`}>
-			<div class={tw`w-36 italic text-gray-800`}>{props.name}</div>
-			<ValueNode value={props.value} updated={props.updated} />
+		<div class={tw`px-1 h-5 flex items-center`} {...hoverProps}>
+			<div class={tw`w-36 italic text-gray-800`}>{signal.name}</div>
+			<ValueNode value={signal.value} updated={signal.updated} highlighted={isHighlighted()} />
 		</div>
 	)
 }
@@ -50,10 +60,10 @@ export const HighlightText: ParentComponent<
 > = props => {
 	const bg = props.bgColor === true ? colors.cyan[400] : props.bgColor
 	const color = props.textColor === true ? colors.black : props.textColor
-	const bgStrong = bg ? hexToRgb(bg, 0.6) : null
-	const bgLight = bg ? hexToRgb(bg, 0.3) : null
-	const colorStrong = color ? hexToRgb(color, 0.6) : null
-	const colorLight = color ? hexToRgb(color, 0.3) : null
+	const bgStrong = bg ? hexToRgb(bg, 0.7) : null
+	const bgLight = bg ? hexToRgb(bg, 0.4) : null
+	const colorStrong = color ? hexToRgb(color, 0.7) : null
+	const colorLight = color ? hexToRgb(color, 0.4) : null
 	const [, attrs] = splitProps(props, ["textColor", "bgColor", "strong", "light"])
 	return (
 		<span

@@ -18,7 +18,7 @@ export enum OwnerType {
 export interface SolidSignal {
 	name: string
 	value: unknown
-	observers: SolidOwner[]
+	observers?: SolidOwner[] | null
 	// added by sdt:
 	sdtId?: number
 	onValueUpdate?: {
@@ -26,24 +26,18 @@ export interface SolidSignal {
 	}
 }
 
-export interface SolidOwner {
-	name?: string
+export interface SolidOwner extends SolidSignal {
 	componentName?: string
 	owner: SolidOwner | null
 	owned: SolidOwner[]
 	fn: AnyFunction
 	cleanups: VoidFunction[] | null
+	sources: (SolidOwner | SolidSignal)[] | null
 	context: any | null
 	sourceMap?: Record<string, SolidSignal>
-	// every owner has a value, only for memo that value is available as a signal
-	value: unknown
-	// added by sdt:
-	sdtId?: number
+	sdtType?: OwnerType
 	onComputationUpdate?: {
 		[rootID: number]: VoidFunction
-	}
-	onValueUpdate?: {
-		[rootID: number]: ValueUpdateListener
 	}
 }
 
@@ -67,13 +61,15 @@ export interface MappedOwner {
 	type: OwnerType
 	signals: MappedSignal[]
 	children: MappedOwner[]
-	value?: MappedSignal
+	sources: number[]
+	signal?: MappedSignal
 }
 
 export interface MappedSignal {
 	name: string
 	id: number
-	value?: SafeValue
+	observers: number[]
+	value: SafeValue
 }
 
 //
@@ -86,18 +82,23 @@ export interface GraphOwner {
 	readonly name: string
 	readonly type: OwnerType
 	readonly dispose: VoidFunction
-	readonly rerun: boolean
+	readonly updated: boolean
+	readonly setUpdate: (value: boolean) => void
+	sources: GraphSignal[]
 	readonly children: GraphOwner[]
 	readonly signals: GraphSignal[]
-	readonly signal?: GraphSignal
+	signal?: GraphSignal
 }
 
 export interface GraphSignal {
 	readonly id: number
 	readonly name: string
 	readonly dispose?: VoidFunction
-	readonly value: SafeValue
 	readonly updated: boolean
+	readonly setUpdate: (value: boolean) => void
+	readonly value: SafeValue
+	readonly setValue: (value: unknown) => void
+	readonly observers: GraphOwner[]
 }
 
 export interface GraphRoot {

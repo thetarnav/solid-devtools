@@ -5,9 +5,10 @@ import {
 	SolidOwner,
 	MappedSignal,
 	ValueUpdateListener,
+	SolidSignal,
 } from "@shared/graph"
 import { ComputationUpdateHandler, SignalUpdateHandler } from "./batchUpdates"
-import { getSafeValue } from "./utils"
+import { getNewSdtId, getSafeValue } from "./utils"
 
 const isComponent = (o: Readonly<AnyObject>): boolean =>
 	"componentName" in o && typeof o.value === "function"
@@ -86,25 +87,27 @@ function observeValueUpdate(
 	})
 }
 
-let LAST_ID = 0
-
-function markNodeID(o: { sdtId?: number }): [id: number, markedBefore: boolean] {
-	if (o.sdtId !== undefined) return [o.sdtId, true]
-	else return [(o.sdtId = LAST_ID++), false]
+function markOwnerType(o: SolidOwner): OwnerType {
+	if (o.sdtType !== undefined) return o.sdtType
+	else return (o.sdtType = getOwnerType(o))
+}
+function markNodeID(o: { sdtId?: number }): number {
+	if (o.sdtId !== undefined) return o.sdtId
+	else return (o.sdtId = getNewSdtId())
+}
+function markNodesID(nodes?: { sdtId?: number }[] | null): number[] {
+	if (!nodes || !nodes.length) return []
+	return nodes.map(markNodeID)
 }
 
 function createSignalNode(
-	raw: {
-		id: number
-		name: string
-		value: unknown
-	},
-	addValue = true,
+	raw: Pick<SolidSignal, "name" | "value" | "observers"> & { id: number },
 ): MappedSignal {
 	return {
 		name: raw.name,
 		id: raw.id,
-		...(addValue ? { value: getSafeValue(raw.value) } : null),
+		observers: markNodesID(raw.observers),
+		value: getSafeValue(raw.value),
 	}
 }
 
@@ -115,16 +118,14 @@ type UpdateHandlers = {
 }
 
 function mapOwnerSignals(
-	o: Readonly<SolidOwner>,
+	owner: Readonly<SolidOwner>,
 	{ onSignalUpdate, rootId }: UpdateHandlers,
 ): MappedSignal[] {
-	const { sourceMap } = o
+	const { sourceMap } = owner
 	if (!sourceMap) return []
 	return Object.values(sourceMap).map(raw => {
-		const [id, alreadyMapped] = markNodeID(raw)
+		const id = markNodeID(raw)
 		observeValueUpdate(raw, rootId, (value, oldValue) => onSignalUpdate({ id, value, oldValue }))
-		// mapped signlas only need their value after you are created,
-		// value updates are captured and sent seperately
 		return createSignalNode({ ...raw, id })
 	})
 }
@@ -132,16 +133,18 @@ function mapOwnerSignals(
 function mapOwner(owner: SolidOwner, handlers: UpdateHandlers): MappedOwner {
 	const { onSignalUpdate, onComputationUpdate, rootId } = handlers
 
-	const [id, alreadyMapped] = markNodeID(owner)
-	const type = getOwnerType(owner)
+	const id = markNodeID(owner)
+	const type = markOwnerType(owner)
 	const name = getOwnerName(owner)
 
 	observeComputation(owner, rootId, onComputationUpdate.bind(void 0, id))
 
-	const valueObj = (() => {
-		if (alreadyMapped || type !== OwnerType.Memo) return
+	const memoProps = (() => {
+		if (type !== OwnerType.Memo) return
 		observeValueUpdate(owner, rootId, (value, oldValue) => onSignalUpdate({ id, value, oldValue }))
-		return { value: createSignalNode({ id, name, value: owner.value }) }
+		return {
+			signal: createSignalNode({ id, name, value: owner.value, observers: owner.observers }),
+		}
 	})()
 
 	return {
@@ -150,7 +153,8 @@ function mapOwner(owner: SolidOwner, handlers: UpdateHandlers): MappedOwner {
 		type,
 		signals: mapOwnerSignals(owner, handlers),
 		children: mapChildren(owner, handlers),
-		...valueObj,
+		sources: markNodesID(owner.sources),
+		...memoProps,
 	}
 }
 
