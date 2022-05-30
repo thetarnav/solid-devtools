@@ -10,6 +10,9 @@ const disposeAll = (list: { dispose?: VoidFunction }[]) => list.forEach(dispose)
 function deleteKey<K extends PropertyKey>(this: { [_ in K]?: unknown }, key: K) {
 	delete this[key]
 }
+function compareId(this: { id: number }, o: { id: number }) {
+	return this.id === o.id
+}
 
 /**
  * Reconciles an array by mutating it. Diffs items by "id" prop. And uses {@link mapFunc} for creating new items.
@@ -213,15 +216,23 @@ function reconcileChildren(newChildren: MappedOwner[], children: GraphOwner[]): 
 }
 
 function reconcileSignals(newSignals: readonly MappedSignal[], signals: GraphSignal[]): void {
-	const length = signals.length,
-		newLength = newSignals.length
-
-	let i = 0
-	// reconcile observers
-	for (; i < length; i++)
-		reconcileArrayByIds(newSignals[i].observers, signals[i].observers, mapObserver)
-	// add new signals (signals can only be added)
-	for (; i < newLength; i++) signals[i] = createSignalNodeAsync(newSignals[i])
+	if (!newSignals.length && !signals.length) return
+	const removed: number[] = []
+	const intersection: MappedSignal[] = []
+	for (const signal of signals) {
+		const newSignal = newSignals.find(compareId.bind(signal))
+		if (newSignal) {
+			// reconcile signal observers
+			reconcileArrayByIds(newSignal.observers, signal.observers, mapObserver)
+			intersection.push(newSignal)
+		} else removed.push(signal.id)
+	}
+	// remove
+	if (removed.length) mutateFilter(signals, o => !removed.includes(o.id))
+	// map new signals
+	for (const raw of newSignals) {
+		if (!intersection.includes(raw)) signals.push(createSignalNodeAsync(raw))
+	}
 }
 
 const exports = createRoot(() => {
@@ -261,7 +272,7 @@ const exports = createRoot(() => {
 			for (const id of signalsUpdated) signalsMap[id].setUpdate(false)
 		})
 
-		const index = graphs.findIndex(i => i.id === root.id)
+		const index = graphs.findIndex(compareId.bind(root))
 		// reconcile existing root
 		if (index !== -1) {
 			setGraphs(
@@ -285,7 +296,6 @@ const exports = createRoot(() => {
 		setGraphs([])
 		disposeAll(Object.values(ownersMap))
 		disposeAll(Object.values(signalsMap))
-		// TODO: rename this function:
 		afterGraphUpdate()
 	})
 
@@ -294,16 +304,16 @@ const exports = createRoot(() => {
 		batch(() => {
 			for (const update of updates) {
 				if (update.type === UpdateType.Signal) {
-					console.log("Signal update", update.payload.id, update.payload.value)
 					const signal = signalsMap[update.payload.id]
+					console.log("Signal update", update.payload.id, update.payload.value, "in map:", !!signal)
 					if (signal) {
 						signal.setValue(update.payload.value)
 						signal.setUpdate(true)
 						signalsUpdated.add(update.payload.id)
 					}
 				} else {
-					console.log("Computation rerun", update.payload)
 					const owner = ownersMap[update.payload]
+					console.log("Computation rerun", update.payload, "in map:", !!owner)
 					if (owner) {
 						owner.setUpdate(true)
 						ownersUpdated.add(update.payload)

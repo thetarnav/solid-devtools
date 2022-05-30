@@ -7,7 +7,9 @@ import {
 	Show,
 	createComputed,
 	runWithOwner,
+	Setter,
 } from "solid-js"
+import { makeTimer } from "@solid-primitives/timer"
 
 // import { createDevtools } from "solid-devtools-overlay"
 
@@ -36,8 +38,12 @@ const App: Component = () => {
 		})
 	})
 
+	let setMe: Setter<string>
+	makeTimer(() => setMe(["🙂", "🤔", "🤯"][Math.floor(Math.random() * 3)]), 2000, setInterval)
 	createEffect(
 		() => {
+			const [, _setMe] = createSignal("🙂", { name: "smiley" })
+			setMe = _setMe
 			console.log(count())
 		},
 		undefined,
