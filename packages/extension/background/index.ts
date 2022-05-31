@@ -10,6 +10,7 @@ const { onRuntimeMessage, postRuntimeMessage } = createRuntimeMessanger()
 let port: chrome.runtime.Port | undefined
 let lastDocumentId: string | undefined
 let panelVisibility = false
+let solidOnPage = false
 
 const { push: addCleanup, execute: clearListeners } = createCallbackStack()
 
@@ -30,6 +31,7 @@ chrome.runtime.onConnect.addListener(newPort => {
 
 	addCleanup(
 		onPortMessage(MESSAGE.SolidOnPage, () => {
+			solidOnPage = true
 			postRuntimeMessage(MESSAGE.SolidOnPage)
 			// respond with page visibility to the debugger, to let him know
 			// if the panel is already created and visible (after page refresh)
@@ -54,12 +56,14 @@ chrome.runtime.onConnect.addListener(newPort => {
 		}),
 	)
 
+	// make sure the devtools script will be triggered to create devtools panel
 	addCleanup(
 		once(onRuntimeMessage, MESSAGE.DevtoolsScriptConnected, () => {
-			panelVisibility = false
-			postPortMessage(MESSAGE.DevtoolsScriptConnected)
+			if (solidOnPage) postRuntimeMessage(MESSAGE.SolidOnPage)
 		}),
 	)
+
+	addCleanup(onRuntimeMessage(MESSAGE.ForceUpdate, () => postPortMessage(MESSAGE.ForceUpdate)))
 })
 
 export {}

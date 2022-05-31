@@ -9,13 +9,13 @@ export const Signals: Component<{ each: GraphSignal[] }> = props => {
 	return (
 		<Show when={props.each.length}>
 			<div class={tw`my-1`}>
-				<For each={props.each}>{signal => <SignalNode {...signal} />}</For>
+				<For each={props.each}>{signal => <SignalNode signal={signal} />}</For>
 			</div>
 		</Show>
 	)
 }
 
-export const SignalNode: Component<GraphSignal> = signal => {
+export const SignalNode: Component<{ signal: GraphSignal }> = ({ signal }) => {
 	const { highlightObserversOf, cancelHightlightObserversOf, isSourceHighlighted } = useHighlights()
 	const isHighlighted = isSourceHighlighted.bind(null, signal)
 
@@ -26,7 +26,9 @@ export const SignalNode: Component<GraphSignal> = signal => {
 
 	return (
 		<div class={tw`px-1 h-5 flex items-center`} {...hoverProps}>
-			<div class={tw`w-36 italic text-gray-800`}>{signal.name}</div>
+			<div class={tw`w-36 italic text-gray-800`}>
+				{signal.name} ({signal.id})
+			</div>
 			<ValueNode value={signal.value} updated={signal.updated} highlighted={isHighlighted()} />
 		</div>
 	)

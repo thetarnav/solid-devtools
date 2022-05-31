@@ -12,6 +12,7 @@ export enum MESSAGE {
 	ResetPanel,
 	GraphUpdate,
 	BatchedUpdate,
+	ForceUpdate,
 }
 
 export interface Message<K extends MESSAGE> {
@@ -20,11 +21,12 @@ export interface Message<K extends MESSAGE> {
 
 export interface MessagePayloads {
 	[MESSAGE.SolidOnPage]: void
+	[MESSAGE.DevtoolsScriptConnected]: void
 	[MESSAGE.PanelVisibility]: boolean
 	[MESSAGE.ResetPanel]: void
 	[MESSAGE.GraphUpdate]: MappedRoot
 	[MESSAGE.BatchedUpdate]: BatchedUpdates
-	[MESSAGE.DevtoolsScriptConnected]: void
+	[MESSAGE.ForceUpdate]: void
 }
 
 export enum UpdateType {

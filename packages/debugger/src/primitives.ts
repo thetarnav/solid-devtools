@@ -12,7 +12,10 @@ export function createOwnerObserver(
 	rootId: number,
 	onUpdate: (tree: MappedOwner[]) => void,
 	options: { enabled?: Accessor<boolean> } = {},
-) {
+): {
+	update: VoidFunction
+	forceUpdate: VoidFunction
+} {
 	const { enabled } = options
 
 	const onComputationUpdate: ComputationUpdateHandler = payload => {
@@ -45,15 +48,27 @@ export function createOwnerObserver(
 export function createGraphRoot(
 	root: SolidOwner,
 	options?: { enabled?: Accessor<boolean> },
-): MappedRoot {
+): [
+	MappedRoot,
+	{
+		update: VoidFunction
+		forceUpdate: VoidFunction
+	},
+] {
 	const [tree, setTree] = createSignal<MappedOwner[]>([])
 	const id = getNewSdtId()
-	const { update } = createOwnerObserver(root, id, setTree, options)
+	const { update, forceUpdate } = createOwnerObserver(root, id, setTree, options)
 	update()
-	return {
-		id,
-		get children() {
-			return tree()
+	return [
+		{
+			id,
+			get children() {
+				return tree()
+			},
 		},
-	}
+		{
+			update,
+			forceUpdate,
+		},
+	]
 }

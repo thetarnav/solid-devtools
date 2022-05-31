@@ -29,4 +29,6 @@ once(onPortMessage, MESSAGE.DevtoolsScriptConnected, () =>
 	postWindowMessage(MESSAGE.DevtoolsScriptConnected),
 )
 
+once(onPortMessage, MESSAGE.ForceUpdate, () => postWindowMessage(MESSAGE.ForceUpdate))
+
 export {}

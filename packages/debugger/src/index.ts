@@ -5,7 +5,6 @@ import {
 	MESSAGE,
 	onWindowMessage,
 	startListeningWindowMessages,
-	once,
 } from "@shared/messanger"
 import { getOwner } from "@shared/graph"
 import { makeBatchUpdateListener } from "./batchUpdates"
@@ -23,25 +22,21 @@ export const Debugger: FlowComponent = props => {
 	const [enabled, setEnabled] = createSignal(false)
 
 	let dispose: VoidFunction | undefined
+	let _forceUpdate: VoidFunction | undefined
 	onCleanup(() => dispose?.())
 
 	postWindowMessage(MESSAGE.SolidOnPage)
 
-	// make sure the devtools script will be triggered to create devtools panel
-	onCleanup(
-		once(onWindowMessage, MESSAGE.DevtoolsScriptConnected, () =>
-			postWindowMessage(MESSAGE.SolidOnPage),
-		),
-	)
-
 	// update the graph only if the devtools panel is in view
 	onCleanup(onWindowMessage(MESSAGE.PanelVisibility, setEnabled))
+	onCleanup(onWindowMessage(MESSAGE.ForceUpdate, () => _forceUpdate?.()))
 
 	setTimeout(() => {
 		// create the graph in a separate root, so that it doesn't walk and track itself
 		createRoot(_dispose => {
 			dispose = _dispose
-			const tree = createGraphRoot(root, { enabled })
+			const [tree, { forceUpdate }] = createGraphRoot(root, { enabled })
+			_forceUpdate = forceUpdate
 			createEffect(() => postWindowMessage(MESSAGE.GraphUpdate, tree))
 		})
 	})
