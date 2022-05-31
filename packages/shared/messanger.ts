@@ -1,7 +1,7 @@
 import { AnyFunction, isServer } from "@solid-primitives/utils"
 import { MappedRoot, MappedOwner } from "./graph"
 
-export const LOG_MESSAGES = true
+export const LOG_MESSAGES = false
 
 export type SafeValue = number | null | undefined | string | boolean
 

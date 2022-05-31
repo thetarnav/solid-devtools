@@ -160,12 +160,7 @@ function createSignalNode(raw: Readonly<MappedSignal>): GraphSignal {
  * when there is no reactive root to take care of cleaning up the value signal
  */
 function createSignalNodeAsync(raw: Readonly<MappedSignal>): GraphSignal {
-	return createRoot(dispose => {
-		return {
-			...createSignalNode(raw),
-			dispose,
-		}
-	})
+	return createRoot(dispose => Object.assign(createSignalNode(raw), { dispose }))
 }
 
 /**
