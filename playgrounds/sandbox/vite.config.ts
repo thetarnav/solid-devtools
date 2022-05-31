@@ -2,13 +2,16 @@ import { defineConfig } from "vite"
 import solidPlugin from "vite-plugin-solid"
 import path from "path"
 
+const pathToPackages = path.resolve(__dirname, "..", "..", "packages")
+
 export default defineConfig({
 	plugins: [solidPlugin()],
 	resolve: {
 		alias: {
 			// used inside packages/debugger
-			"@shared": path.resolve(__dirname, "..", "..", "packages", "shared"),
-			"@solid-devtools/locator": path.resolve(__dirname, "..", "..", "locator", "src"),
+			"@shared": path.resolve(pathToPackages, "shared"),
+			"@solid-devtools/locator": path.resolve(pathToPackages, "locator", "src"),
+			"@solid-devtools/extension-adapter": path.resolve(pathToPackages, "extension-adapter", "src"),
 		},
 	},
 	build: {

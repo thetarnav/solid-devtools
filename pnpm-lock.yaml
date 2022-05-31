@@ -17,6 +17,7 @@ importers:
   packages/debugger:
     specifiers:
       '@rollup/plugin-alias': ^3.1.9
+      '@solid-devtools/extension-adapter': ^0.0.1
       '@solid-devtools/locator': ^0.0.1
       '@solid-primitives/rootless': ^1.1.0
       '@solid-primitives/scheduled': ^1.0.0
@@ -28,6 +29,7 @@ importers:
       typescript: ^4.6.4
       watchlist: ^0.3.1
     dependencies:
+      '@solid-devtools/extension-adapter': link:../extension-adapter
       '@solid-devtools/locator': link:../locator
       '@solid-primitives/rootless': 1.1.0_solid-js@1.4.3
       '@solid-primitives/scheduled': 1.0.0_solid-js@1.4.3
@@ -71,6 +73,27 @@ importers:
       typescript: 4.6.4
       vite: 2.9.9
       vite-plugin-solid: 2.2.6
+
+  packages/extension-adapter:
+    specifiers:
+      '@rollup/plugin-alias': ^3.1.9
+      '@solid-primitives/utils': ^2.0.3
+      rimraf: ^3.0.2
+      rollup: ^2.75.4
+      rollup-preset-solid: ^1.4.0
+      solid-js: ^1.4.3
+      typescript: ^4.7.2
+      watchlist: ^0.3.1
+    dependencies:
+      '@solid-primitives/utils': 2.0.3_solid-js@1.4.3
+      solid-js: 1.4.3
+    devDependencies:
+      '@rollup/plugin-alias': 3.1.9_rollup@2.75.4
+      rimraf: 3.0.2
+      rollup: 2.75.4
+      rollup-preset-solid: 1.4.0
+      typescript: 4.7.2
+      watchlist: 0.3.1
 
   packages/locator:
     specifiers:

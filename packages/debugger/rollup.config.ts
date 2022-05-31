@@ -9,6 +9,12 @@ export default withSolid({
 			entries: {
 				"@shared": path.resolve(__dirname, "..", "shared"),
 				"@solid-devtools/locator": path.resolve(__dirname, "..", "locator", "src"),
+				"@solid-devtools/extension-adapter": path.resolve(
+					__dirname,
+					"..",
+					"extension-adapter",
+					"src",
+				),
 			},
 		}),
 	],

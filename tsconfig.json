@@ -19,7 +19,8 @@
 			"@shared/*": ["./packages/shared/*"],
 			"@debugger": ["./packages/debugger/src/index.ts"],
 			"@ui": ["./packages/ui/src/index.tsx"],
-			"@solid-devtools/locator": ["./packages/locator/src/index.tsx"]
+			"@solid-devtools/locator": ["./packages/locator/src/index.tsx"],
+			"@solid-devtools/extension-adapter": ["./packages/extension-adapter/src/index.ts"]
 		}
 	},
 	"exclude": ["node_modules", "dist"]

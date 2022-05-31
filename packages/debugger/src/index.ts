@@ -1,50 +1,37 @@
-import { FlowComponent, createEffect, onCleanup, createRoot, createSignal } from "solid-js"
+import { FlowComponent, createSignal, createComputed } from "solid-js"
 import { isProd } from "@solid-primitives/utils"
-import {
-	postWindowMessage,
-	MESSAGE,
-	onWindowMessage,
-	startListeningWindowMessages,
-} from "@shared/messanger"
+import { createBranch } from "@solid-primitives/rootless"
 import { getOwner } from "@shared/graph"
 import { makeBatchUpdateListener } from "./batchUpdates"
 import { createGraphRoot } from "./primitives"
 import { useLocator } from "@solid-devtools/locator"
+import { useExtensionAdapter } from "@solid-devtools/extension-adapter"
 
-console.log("debugger script working")
-
-startListeningWindowMessages()
+export { makeBatchUpdateListener } from "./batchUpdates"
+export type { BatchUpdateListener } from "./batchUpdates"
 
 export const Debugger: FlowComponent = props => {
 	// run the debugger only on client in development env
 	if (isProd) return props.children
 
 	const root = getOwner()!
-	const [enabled, setEnabled] = createSignal(false)
 
-	let dispose: VoidFunction | undefined
-	let _forceUpdate: VoidFunction | undefined
-	onCleanup(() => dispose?.())
+	// create the graph in a separate root, so that it doesn't walk and track itself
+	createBranch(() => {
+		const [enabled, setEnabled] = createSignal(false)
+		const [tree, { forceUpdate, update }] = createGraphRoot(root, { enabled })
 
-	postWindowMessage(MESSAGE.SolidOnPage)
-
-	// update the graph only if the devtools panel is in view
-	onCleanup(onWindowMessage(MESSAGE.PanelVisibility, setEnabled))
-	onCleanup(onWindowMessage(MESSAGE.ForceUpdate, () => _forceUpdate?.()))
-
-	setTimeout(() => {
-		// create the graph in a separate root, so that it doesn't walk and track itself
-		createRoot(_dispose => {
-			dispose = _dispose
-			const [tree, { forceUpdate }] = createGraphRoot(root, { enabled })
-			_forceUpdate = forceUpdate
-			createEffect(() => postWindowMessage(MESSAGE.GraphUpdate, tree))
+		const { enabled: extensionAdapterEnabled } = useExtensionAdapter({
+			tree,
+			forceUpdate,
+			update,
+			makeBatchUpdateListener,
 		})
+
+		const { enabled: locatorEnabled } = useLocator({ components: () => [] })
+
+		createComputed(() => setEnabled(extensionAdapterEnabled() || locatorEnabled()))
 	})
-
-	useLocator({ components: () => [] })
-
-	makeBatchUpdateListener(updates => postWindowMessage(MESSAGE.BatchedUpdate, updates))
 
 	return props.children
 }
