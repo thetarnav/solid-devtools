@@ -28,5 +28,5 @@
 		"solid-js": "^1.4.3",
 		"twind": "^0.16.17"
 	},
-	"packageManager": "pnpm@6.32.11"
+	"packageManager": "pnpm@7.1.15"
 }
