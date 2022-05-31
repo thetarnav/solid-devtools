@@ -3,4 +3,4 @@ import { MESSAGE } from "@shared/messanger"
 
 export const { onRuntimeMessage, postRuntimeMessage } = createRuntimeMessanger()
 
-postRuntimeMessage(MESSAGE.Hello, "Hello from Panel")
+postRuntimeMessage(MESSAGE.ForceUpdate)

@@ -1,7 +1,7 @@
 import { AnyFunction, isServer } from "@solid-primitives/utils"
 import { MappedRoot, MappedOwner } from "./graph"
 
-export const LOG_MESSAGES = false
+export const LOG_MESSAGES = true
 
 export type SafeValue = number | null | undefined | string | boolean
 
@@ -12,6 +12,7 @@ export enum MESSAGE {
 	ResetPanel,
 	GraphUpdate,
 	BatchedUpdate,
+	ForceUpdate,
 }
 
 export interface Message<K extends MESSAGE> {
@@ -20,11 +21,12 @@ export interface Message<K extends MESSAGE> {
 
 export interface MessagePayloads {
 	[MESSAGE.SolidOnPage]: void
+	[MESSAGE.DevtoolsScriptConnected]: void
 	[MESSAGE.PanelVisibility]: boolean
 	[MESSAGE.ResetPanel]: void
 	[MESSAGE.GraphUpdate]: MappedRoot
 	[MESSAGE.BatchedUpdate]: BatchedUpdates
-	[MESSAGE.DevtoolsScriptConnected]: void
+	[MESSAGE.ForceUpdate]: void
 }
 
 export enum UpdateType {
