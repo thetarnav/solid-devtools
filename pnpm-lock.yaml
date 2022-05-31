@@ -17,6 +17,7 @@ importers:
   packages/debugger:
     specifiers:
       '@rollup/plugin-alias': ^3.1.9
+      '@solid-devtools/locator': ^0.0.1
       '@solid-primitives/rootless': ^1.1.0
       '@solid-primitives/scheduled': ^1.0.0
       '@solid-primitives/utils': ^2.0.3
@@ -27,6 +28,7 @@ importers:
       typescript: ^4.6.4
       watchlist: ^0.3.1
     dependencies:
+      '@solid-devtools/locator': link:../locator
       '@solid-primitives/rootless': 1.1.0_solid-js@1.4.3
       '@solid-primitives/scheduled': 1.0.0_solid-js@1.4.3
       '@solid-primitives/utils': 2.0.3_solid-js@1.4.3
@@ -69,6 +71,27 @@ importers:
       typescript: 4.6.4
       vite: 2.9.9
       vite-plugin-solid: 2.2.6
+
+  packages/locator:
+    specifiers:
+      '@rollup/plugin-alias': ^3.1.9
+      '@solid-primitives/utils': ^2.0.3
+      rimraf: ^3.0.2
+      rollup: ^2.75.4
+      rollup-preset-solid: ^1.4.0
+      solid-js: ^1.4.3
+      typescript: ^4.7.2
+      watchlist: ^0.3.1
+    dependencies:
+      '@solid-primitives/utils': 2.0.3_solid-js@1.4.3
+      solid-js: 1.4.3
+    devDependencies:
+      '@rollup/plugin-alias': 3.1.9_rollup@2.75.4
+      rimraf: 3.0.2
+      rollup: 2.75.4
+      rollup-preset-solid: 1.4.0
+      typescript: 4.7.2
+      watchlist: 0.3.1
 
   packages/overlay:
     specifiers:
@@ -1551,6 +1574,16 @@ packages:
       slash: 3.0.0
     dev: true
 
+  /@rollup/plugin-alias/3.1.9_rollup@2.75.4:
+    resolution: {integrity: sha512-QI5fsEvm9bDzt32k39wpOwZhVzRcL5ydcffUHMyLVaVaLeC70I8TJZ17F1z1eMoLu4E/UOcH9BWVkKpIKdrfiw==}
+    engines: {node: '>=8.0.0'}
+    peerDependencies:
+      rollup: ^1.20.0||^2.0.0
+    dependencies:
+      rollup: 2.75.4
+      slash: 3.0.0
+    dev: true
+
   /@rollup/plugin-babel/5.3.1_o5sqowbm3tib3dowmwlyo7rr74:
     resolution: {integrity: sha512-WFfdLWU/xVWKeRQnKmIAQULUI7Il0gZnBIH/ZFO069wYIfPu+8zrfp/KMW0atmELoRDq8FbiP3VCss9MhCut7Q==}
     engines: {node: '>= 10.0.0'}
@@ -2635,7 +2668,7 @@ packages:
     dev: true
 
   /fs.realpath/1.0.0:
-    resolution: {integrity: sha1-FQStJSMVjKpA20onh8sBQRmU6k8=}
+    resolution: {integrity: sha512-OO0pH2lK6a0hZnAdau5ItzHPI6pUlvI7jMVnxUQRtw4owF2wk8lOSabtGDCTP4Ggrg2MbGnWO9X8K1t4+fGMDw==}
     dev: true
 
   /fsevents/2.3.2:
@@ -2745,7 +2778,7 @@ packages:
     dev: true
 
   /inflight/1.0.6:
-    resolution: {integrity: sha1-Sb1jMdfQLQwJvJEKEHW6gWW1bfk=}
+    resolution: {integrity: sha512-k92I/b08q4wvFscXCLvqfsHCrjrF7yiXsQuIVvVE7N82W3+aqpzuUdBbfhWcy/FZR3/4IgflMgKLOsvPDrGCJA==}
     dependencies:
       once: 1.4.0
       wrappy: 1.0.2
@@ -3110,6 +3143,14 @@ packages:
       fsevents: 2.3.2
     dev: true
 
+  /rollup/2.75.4:
+    resolution: {integrity: sha512-JgZiJMJkKImMZJ8ZY1zU80Z2bA/TvrL/7D9qcBCrfl2bP+HUaIw0QHUroB4E3gBpFl6CRFM1YxGbuYGtdAswbQ==}
+    engines: {node: '>=10.0.0'}
+    hasBin: true
+    optionalDependencies:
+      fsevents: 2.3.2
+    dev: true
+
   /run-parallel/1.2.0:
     resolution: {integrity: sha512-5l4VyZR86LZ/lDxZTR6jqL8AFE2S0IFLMP26AbjsLVADxHdhB/c0GUsH+y39UfCi3dzz8OlQuPmnaJOMoDHQBA==}
     dependencies:
@@ -3408,6 +3449,12 @@ packages:
 
   /typescript/4.6.4:
     resolution: {integrity: sha512-9ia/jWHIEbo49HfjrLGfKbZSuWo9iTMwXO+Ca3pRsSpbsMbc7/IU8NKdCZVRRBafVPGnoJeFL76ZOAA84I9fEg==}
+    engines: {node: '>=4.2.0'}
+    hasBin: true
+    dev: true
+
+  /typescript/4.7.2:
+    resolution: {integrity: sha512-Mamb1iX2FDUpcTRzltPxgWMKy3fhg0TN378ylbktPGPK/99KbDtMQ4W1hwgsbPAsG3a0xKa1vmw4VKZQbkvz5A==}
     engines: {node: '>=4.2.0'}
     hasBin: true
     dev: true

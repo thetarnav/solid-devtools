@@ -8,6 +8,7 @@ export default withSolid({
 		alias({
 			entries: {
 				"@shared": path.resolve(__dirname, "..", "shared"),
+				"@solid-devtools/locator": path.resolve(__dirname, "..", "locator", "src"),
 			},
 		}),
 	],

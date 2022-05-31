@@ -9,6 +9,7 @@ import {
 import { getOwner } from "@shared/graph"
 import { makeBatchUpdateListener } from "./batchUpdates"
 import { createGraphRoot } from "./primitives"
+import { useLocator } from "@solid-devtools/locator"
 
 console.log("debugger script working")
 
@@ -40,6 +41,8 @@ export const Debugger: FlowComponent = props => {
 			createEffect(() => postWindowMessage(MESSAGE.GraphUpdate, tree))
 		})
 	})
+
+	useLocator({ components: () => [] })
 
 	makeBatchUpdateListener(updates => postWindowMessage(MESSAGE.BatchedUpdate, updates))
 

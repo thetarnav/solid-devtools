@@ -8,6 +8,7 @@ export default defineConfig({
 		alias: {
 			// used inside packages/debugger
 			"@shared": path.resolve(__dirname, "..", "..", "packages", "shared"),
+			"@solid-devtools/locator": path.resolve(__dirname, "..", "..", "locator", "src"),
 		},
 	},
 	build: {
