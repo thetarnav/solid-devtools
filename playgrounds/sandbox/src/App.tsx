@@ -8,6 +8,8 @@ import {
 	createComputed,
 	runWithOwner,
 	Setter,
+	ParentComponent,
+	Accessor,
 } from "solid-js"
 import { makeTimer } from "@solid-primitives/timer"
 
@@ -20,6 +22,10 @@ const Button = (props: { text: string; onClick: VoidFunction }) => {
 			{text()}
 		</button>
 	)
+}
+
+const Spinner: ParentComponent<{ deg: number }> = props => {
+	return <div>{props.children}</div>
 }
 
 const App: Component = () => {
@@ -39,11 +45,13 @@ const App: Component = () => {
 	})
 
 	let setMe: Setter<string>
+	const [smiley, setSmiley] = createSignal<Accessor<string>>()
 	makeTimer(() => setMe(["🙂", "🤔", "🤯"][Math.floor(Math.random() * 3)]), 2000, setInterval)
 	createEffect(
 		() => {
-			const [, _setMe] = createSignal("🙂", { name: "smiley" })
+			const [_smiley, _setMe] = createSignal("🙂", { name: "smiley" })
 			setMe = _setMe
+			setSmiley(() => _smiley)
 			console.log(count())
 		},
 		undefined,
@@ -60,6 +68,13 @@ const App: Component = () => {
 			</header>
 			<div>
 				<Show when={showEven()}>{count()} is even!</Show>
+			</div>
+			<div>
+				<Spinner deg={count()}>
+					<Show when={showEven()} fallback={<p>\\{smiley()}/</p>}>
+						<p style={{ background: "darkgray" }}>{smiley()}</p>
+					</Show>
+				</Spinner>
 			</div>
 		</div>
 	)

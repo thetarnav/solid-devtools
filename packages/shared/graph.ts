@@ -1,4 +1,4 @@
-import { getOwner as _getOwner, Setter } from "solid-js"
+import { Accessor, getOwner as _getOwner, Setter } from "solid-js"
 import { AnyFunction } from "@solid-primitives/utils"
 import { MESSAGE, SafeValue } from "./messanger"
 
@@ -70,6 +70,12 @@ export interface MappedSignal {
 	id: number
 	observers: number[]
 	value: SafeValue
+}
+
+export type MappedComponent = {
+	name: string
+	// ! HTMLElements aren't JSON serialisable
+	element: HTMLElement
 }
 
 //

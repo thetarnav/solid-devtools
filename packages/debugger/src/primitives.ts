@@ -1,6 +1,6 @@
-import { Accessor, createEffect, createSignal } from "solid-js"
+import { Accessor, createEffect, createSignal, untrack } from "solid-js"
 import { throttle } from "@solid-primitives/scheduled"
-import { MappedOwner, MappedRoot, SolidOwner } from "@shared/graph"
+import { MappedComponent, MappedOwner, MappedRoot, SolidOwner } from "@shared/graph"
 import { UpdateType } from "@shared/messanger"
 import { batchUpdate, ComputationUpdateHandler, SignalUpdateHandler } from "./batchUpdates"
 import { makeGraphUpdateListener } from "./update"
@@ -21,7 +21,7 @@ export function boundReturn<T>(this: T): T {
 export function createOwnerObserver(
 	owner: SolidOwner,
 	rootId: number,
-	onUpdate: (tree: MappedOwner[]) => void,
+	onUpdate: (children: MappedOwner[], components: MappedComponent[]) => void,
 	options: CreateOwnerTreeOptions = {},
 ): {
 	update: VoidFunction
@@ -41,15 +41,17 @@ export function createOwnerObserver(
 		batchUpdate({ type: UpdateType.Signal, payload })
 	}
 	const forceUpdate = () => {
-		const tree = mapOwnerTree(owner, {
-			onComputationUpdate,
-			onSignalUpdate,
-			rootId,
-			trackSignals: trackSignals(),
-			trackComponents: trackComponents(),
-			trackBatchedUpdates: trackBatchedUpdates(),
-		})
-		onUpdate(tree)
+		const { children, components } = untrack(
+			mapOwnerTree.bind(void 0, owner, {
+				onComputationUpdate,
+				onSignalUpdate,
+				rootId,
+				trackSignals: trackSignals(),
+				trackComponents: trackComponents(),
+				trackBatchedUpdates: trackBatchedUpdates(),
+			}),
+		)
+		onUpdate(children, components)
 	}
 	const update = throttle(forceUpdate, 300)
 
@@ -68,26 +70,34 @@ export function createGraphRoot(
 	root: SolidOwner,
 	options?: CreateOwnerTreeOptions,
 ): [
-	MappedRoot,
+	{
+		id: number
+		children: Accessor<MappedOwner[]>
+		components: Accessor<MappedComponent[]>
+	},
 	{
 		update: VoidFunction
 		forceUpdate: VoidFunction
 	},
 ] {
-	const [tree, setTree] = createSignal<MappedOwner[]>([])
+	const [children, setChildren] = createSignal<MappedOwner[]>([])
+	const [components, setComponents] = createSignal<MappedComponent[]>([])
+
 	const id = getNewSdtId()
-	const { update, forceUpdate } = createOwnerObserver(root, id, setTree, options)
+
+	const { update, forceUpdate } = createOwnerObserver(
+		root,
+		id,
+		(children, components) => {
+			setChildren(children)
+			setComponents(components)
+		},
+		options,
+	)
 	update()
+
 	return [
-		{
-			id,
-			get children() {
-				return tree()
-			},
-		},
-		{
-			update,
-			forceUpdate,
-		},
+		{ id, children, components },
+		{ update, forceUpdate },
 	]
 }

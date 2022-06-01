@@ -5,6 +5,7 @@ import {
 	MappedSignal,
 	ValueUpdateListener,
 	SolidSignal,
+	MappedComponent,
 } from "@shared/graph"
 import { ComputationUpdateHandler, SignalUpdateHandler } from "./batchUpdates"
 import { getOwnerName, getSafeValue, markNodeID, markNodesID, markOwnerType } from "./utils"
@@ -17,6 +18,7 @@ let OnComputationUpdate: ComputationUpdateHandler
 let TrackSignals: boolean
 let TrackBatchedUpdates: boolean
 let TrackComponents: boolean
+let Components: MappedComponent[] = []
 
 function observeComputation(owner: SolidOwner, id: number) {
 	if (TrackBatchedUpdates)
@@ -86,6 +88,12 @@ function mapOwner(owner: SolidOwner): MappedOwner {
 
 	observeComputation(owner, id)
 
+	if (type === OwnerType.Component && TrackComponents && typeof owner.value === "function") {
+		const v = owner.value()
+		// ! HTMLElements aren't JSON serialisable
+		if (v instanceof HTMLElement) Components.push({ name, element: v })
+	}
+
 	const mapped = {
 		id,
 		name,
@@ -112,14 +120,18 @@ export type WalkerConfig = {
 	trackComponents: boolean
 }
 
-function mapOwnerTree(root: SolidOwner, config: WalkerConfig): MappedOwner[] {
+function mapOwnerTree(
+	root: SolidOwner,
+	config: WalkerConfig,
+): { children: MappedOwner[]; components: MappedComponent[] } {
 	RootID = config.rootId
 	OnSignalUpdate = config.onSignalUpdate
 	OnComputationUpdate = config.onComputationUpdate
 	TrackSignals = config.trackSignals
 	TrackBatchedUpdates = config.trackBatchedUpdates
 	TrackComponents = config.trackComponents
-	return mapChildren(root)
+	if (TrackComponents) Components = []
+	return { children: mapChildren(root), components: Components }
 }
 
 export { mapOwnerTree }
