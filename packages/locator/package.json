@@ -53,8 +53,9 @@
 		"watchlist": "^0.3.1"
 	},
 	"dependencies": {
+		"solid-js": "^1.4.3",
 		"@solid-primitives/utils": "^2.0.3",
-		"solid-js": "^1.4.3"
+		"@solid-devtools/ui": "0.0.1"
 	},
 	"packageManager": "pnpm@7.1.5"
 }
