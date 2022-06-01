@@ -99,6 +99,8 @@ importers:
     specifiers:
       '@rollup/plugin-alias': ^3.1.9
       '@solid-devtools/ui': 0.0.1
+      '@solid-primitives/event-listener': ^2.0.0
+      '@solid-primitives/memo': ^0.2.2
       '@solid-primitives/utils': ^2.0.3
       rimraf: ^3.0.2
       rollup: ^2.75.4
@@ -108,6 +110,8 @@ importers:
       watchlist: ^0.3.1
     dependencies:
       '@solid-devtools/ui': link:../ui
+      '@solid-primitives/event-listener': 2.0.0_solid-js@1.4.3
+      '@solid-primitives/memo': 0.2.2_solid-js@1.4.3
       '@solid-primitives/utils': 2.0.3_solid-js@1.4.3
       solid-js: 1.4.3
     devDependencies:
@@ -1978,11 +1982,30 @@ packages:
       solid-js: 1.4.3
     dev: false
 
+  /@solid-primitives/event-listener/2.0.0_solid-js@1.4.3:
+    resolution: {integrity: sha512-52VCuor6vL9LFDS0cNZ3n6vHLDEi1/ysAnu5GeonUEDE4MP4h2av7sJsnqj9EFZKNx7BfvRJPqC4xB2YSNMnfQ==}
+    peerDependencies:
+      solid-js: ^1.3.1
+    dependencies:
+      '@solid-primitives/utils': 1.5.2_solid-js@1.4.3
+      solid-js: 1.4.3
+    dev: false
+
   /@solid-primitives/keyed/1.0.0_solid-js@1.4.3:
     resolution: {integrity: sha512-9vznFq6xR1FLEcQH3S3aGZ3iWOY6EZmDEl0raNOXJxdgXnudHepcAOfx8G52bROHJ3AdPnIqv4ITIegPQOK2BA==}
     peerDependencies:
       solid-js: ^1.4.0
     dependencies:
+      solid-js: 1.4.3
+    dev: false
+
+  /@solid-primitives/memo/0.2.2_solid-js@1.4.3:
+    resolution: {integrity: sha512-n9lXj/b6fs/zbn5biuQoNO4/B90USwXJq29VlDY1LB6pSs8y61ymlvifetcbVAnU2F2ka0v2Q1s0woDDzbhthw==}
+    peerDependencies:
+      solid-js: ^1.4.2
+    dependencies:
+      '@solid-primitives/scheduled': 1.0.0_solid-js@1.4.3
+      '@solid-primitives/utils': 2.0.3_solid-js@1.4.3
       solid-js: 1.4.3
     dev: false
 
