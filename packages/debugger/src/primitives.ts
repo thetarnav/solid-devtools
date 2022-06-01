@@ -7,16 +7,32 @@ import { makeGraphUpdateListener } from "./update"
 import { mapOwnerTree } from "./walker"
 import { getNewSdtId } from "./utils"
 
+export type CreateOwnerTreeOptions = {
+	enabled?: Accessor<boolean>
+	trackSignals?: Accessor<boolean>
+	trackBatchedUpdates?: Accessor<boolean>
+	trackComponents?: Accessor<boolean>
+}
+
+export function boundReturn<T>(this: T): T {
+	return this
+}
+
 export function createOwnerObserver(
 	owner: SolidOwner,
 	rootId: number,
 	onUpdate: (tree: MappedOwner[]) => void,
-	options: { enabled?: Accessor<boolean> } = {},
+	options: CreateOwnerTreeOptions = {},
 ): {
 	update: VoidFunction
 	forceUpdate: VoidFunction
 } {
-	const { enabled } = options
+	const {
+		enabled,
+		trackSignals = boundReturn.bind(false),
+		trackComponents = boundReturn.bind(false),
+		trackBatchedUpdates = boundReturn.bind(false),
+	} = options
 
 	const onComputationUpdate: ComputationUpdateHandler = payload => {
 		batchUpdate({ type: UpdateType.Computation, payload })
@@ -29,6 +45,9 @@ export function createOwnerObserver(
 			onComputationUpdate,
 			onSignalUpdate,
 			rootId,
+			trackSignals: trackSignals(),
+			trackComponents: trackComponents(),
+			trackBatchedUpdates: trackBatchedUpdates(),
 		})
 		onUpdate(tree)
 	}
@@ -47,7 +66,7 @@ export function createOwnerObserver(
 
 export function createGraphRoot(
 	root: SolidOwner,
-	options?: { enabled?: Accessor<boolean> },
+	options?: CreateOwnerTreeOptions,
 ): [
 	MappedRoot,
 	{
