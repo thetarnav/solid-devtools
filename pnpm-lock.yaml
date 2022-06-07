@@ -99,6 +99,7 @@ importers:
     specifiers:
       '@rollup/plugin-alias': ^3.1.9
       '@solid-devtools/ui': 0.0.1
+      '@solid-primitives/bounds': ^0.0.100
       '@solid-primitives/event-listener': ^2.0.0
       '@solid-primitives/memo': ^0.2.2
       '@solid-primitives/utils': ^2.0.3
@@ -110,6 +111,7 @@ importers:
       watchlist: ^0.3.1
     dependencies:
       '@solid-devtools/ui': link:../ui
+      '@solid-primitives/bounds': 0.0.100_solid-js@1.4.3
       '@solid-primitives/event-listener': 2.0.0_solid-js@1.4.3
       '@solid-primitives/memo': 0.2.2_solid-js@1.4.3
       '@solid-primitives/utils': 2.0.3_solid-js@1.4.3
@@ -182,21 +184,53 @@ importers:
       typescript: 4.6.4
       watchlist: 0.3.1
 
+  playgrounds/clock:
+    specifiers:
+      solid-devtools: ^0.0.1
+      solid-js: ^1.4.3
+      typescript: ^4.7.3
+      vite: ^2.9.10
+      vite-plugin-solid: ^2.2.6
+    dependencies:
+      solid-devtools: link:../../packages/debugger
+      solid-js: 1.4.3
+    devDependencies:
+      typescript: 4.7.3
+      vite: 2.9.10
+      vite-plugin-solid: 2.2.6
+
   playgrounds/sandbox:
     specifiers:
       '@solid-primitives/timer': ^1.3.1
       solid-devtools-overlay: workspace:0.0.1
       solid-js: ^1.4.3
-      typescript: ^4.6.4
-      vite: ^2.9.9
+      typescript: ^4.7.3
+      vite: ^2.9.10
       vite-plugin-solid: ^2.2.6
     dependencies:
       '@solid-primitives/timer': 1.3.1_solid-js@1.4.3
       solid-devtools-overlay: link:../../packages/overlay
       solid-js: 1.4.3
     devDependencies:
-      typescript: 4.6.4
-      vite: 2.9.9
+      typescript: 4.7.3
+      vite: 2.9.10
+      vite-plugin-solid: 2.2.6
+
+  playgrounds/todomvc:
+    specifiers:
+      solid-js: ^1.4.3
+      todomvc-app-css: ^2.4.2
+      todomvc-common: ^1.0.5
+      typescript: ^4.7.3
+      vite: ^2.9.10
+      vite-plugin-solid: ^2.2.6
+    dependencies:
+      solid-js: 1.4.3
+      todomvc-app-css: 2.4.2
+      todomvc-common: 1.0.5
+    devDependencies:
+      typescript: 4.7.3
+      vite: 2.9.10
       vite-plugin-solid: 2.2.6
 
 packages:
@@ -1974,6 +2008,17 @@ packages:
       - '@solid-primitives/props'
     dev: false
 
+  /@solid-primitives/bounds/0.0.100_solid-js@1.4.3:
+    resolution: {integrity: sha512-UkIzY2FHow7zZzacrqByOMYxFTpg3mLnyZ0rVOxLlJP4G0/E+ig+ulh5tlTssRuxvs54m9dEOHkG7Is6DUNPEQ==}
+    peerDependencies:
+      solid-js: ^1.4.0
+    dependencies:
+      '@solid-primitives/event-listener': 2.1.0_solid-js@1.4.3
+      '@solid-primitives/resize-observer': 2.0.1_solid-js@1.4.3
+      '@solid-primitives/utils': 2.1.0_solid-js@1.4.3
+      solid-js: 1.4.3
+    dev: false
+
   /@solid-primitives/context/0.1.0_solid-js@1.4.3:
     resolution: {integrity: sha512-OTPSv00OErONieh/rdvWXqgSB4EHIXHkwvnsgUX5kZO0A5BMbkjcbXzwCbx3hRlLDfNteHd8ovzyKFo5oqA5kA==}
     peerDependencies:
@@ -1984,6 +2029,15 @@ packages:
 
   /@solid-primitives/event-listener/2.0.0_solid-js@1.4.3:
     resolution: {integrity: sha512-52VCuor6vL9LFDS0cNZ3n6vHLDEi1/ysAnu5GeonUEDE4MP4h2av7sJsnqj9EFZKNx7BfvRJPqC4xB2YSNMnfQ==}
+    peerDependencies:
+      solid-js: ^1.3.1
+    dependencies:
+      '@solid-primitives/utils': 1.5.2_solid-js@1.4.3
+      solid-js: 1.4.3
+    dev: false
+
+  /@solid-primitives/event-listener/2.1.0_solid-js@1.4.3:
+    resolution: {integrity: sha512-EO80fKPjG3CsACyLY+7an6kZfGRVUjifi8Rl7WvLHK99ryupwHy7uSAPMRivWE30cHJkjCWmdOchgdv02XmNdA==}
     peerDependencies:
       solid-js: ^1.3.1
     dependencies:
@@ -2015,6 +2069,17 @@ packages:
       solid-js: ^1.3.0
     dependencies:
       '@solid-primitives/utils': 2.0.3_solid-js@1.4.3
+      solid-js: 1.4.3
+    dev: false
+
+  /@solid-primitives/resize-observer/2.0.1_solid-js@1.4.3:
+    resolution: {integrity: sha512-zHUkwPCs/CVfxATo1aXVS+MtZ3ABGFBh+V3V1/pzZTck4JcF1hHEBGchH/KIjfynopaWJ42h110HtjibVRflpw==}
+    peerDependencies:
+      solid-js: ^1.4.0
+    dependencies:
+      '@solid-primitives/event-listener': 2.1.0_solid-js@1.4.3
+      '@solid-primitives/rootless': 1.1.0_solid-js@1.4.3
+      '@solid-primitives/utils': 2.1.0_solid-js@1.4.3
       solid-js: 1.4.3
     dev: false
 
@@ -2053,6 +2118,14 @@ packages:
 
   /@solid-primitives/utils/2.0.3_solid-js@1.4.3:
     resolution: {integrity: sha512-dIv339WSJZ8C50kcJ7Ys5aLPSs59+GMsSrtJ/bGnA38gkLgmKry1XIZJLAUVz/uiOiZ661GUJ+IMngsqG8u09g==}
+    peerDependencies:
+      solid-js: ^1.4.1
+    dependencies:
+      solid-js: 1.4.3
+    dev: false
+
+  /@solid-primitives/utils/2.1.0_solid-js@1.4.3:
+    resolution: {integrity: sha512-QOiYt7CG/q8zV22C6J630YdnUf+365csXWQbMVFkY5YsfvpfFskI+Sh6Ge7FfD8aQxTPJ7PpqtlN0p5wVuiiAw==}
     peerDependencies:
       solid-js: ^1.4.1
     dependencies:
@@ -3343,6 +3416,14 @@ packages:
       is-number: 7.0.0
     dev: true
 
+  /todomvc-app-css/2.4.2:
+    resolution: {integrity: sha512-ViAkQ7ed89rmhFIGRsT36njN+97z8+s3XsJnB8E2IKOq+/SLD/6PtSvmTtiwUcVk39qPcjAc/OyeDys4LoJUVg==}
+    dev: false
+
+  /todomvc-common/1.0.5:
+    resolution: {integrity: sha512-D8kEJmxVMQIWwztEdH+WeiAfXRbbSCpgXq4NkYi+gduJ2tr8CNq7sYLfJvjpQ10KD9QxJwig57rvMbV2QAESwQ==}
+    dev: false
+
   /tr46/1.0.1:
     resolution: {integrity: sha1-qLE/1r/SSJUZZ0zN5VujaTtwbQk=}
     dependencies:
@@ -3499,10 +3580,15 @@ packages:
     resolution: {integrity: sha512-9ia/jWHIEbo49HfjrLGfKbZSuWo9iTMwXO+Ca3pRsSpbsMbc7/IU8NKdCZVRRBafVPGnoJeFL76ZOAA84I9fEg==}
     engines: {node: '>=4.2.0'}
     hasBin: true
-    dev: true
 
   /typescript/4.7.2:
     resolution: {integrity: sha512-Mamb1iX2FDUpcTRzltPxgWMKy3fhg0TN378ylbktPGPK/99KbDtMQ4W1hwgsbPAsG3a0xKa1vmw4VKZQbkvz5A==}
+    engines: {node: '>=4.2.0'}
+    hasBin: true
+    dev: true
+
+  /typescript/4.7.3:
+    resolution: {integrity: sha512-WOkT3XYvrpXx4vMMqlD+8R8R37fZkjyLGlxavMc4iB8lrl8L0DeTcHbYgw/v0N/z9wAFsgBhcsF0ruoySS22mA==}
     engines: {node: '>=4.2.0'}
     hasBin: true
     dev: true
@@ -3554,6 +3640,30 @@ packages:
       - sass
       - stylus
       - supports-color
+    dev: true
+
+  /vite/2.9.10:
+    resolution: {integrity: sha512-TwZRuSMYjpTurLqXspct+HZE7ONiW9d+wSWgvADGxhDPPyoIcNywY+RX4ng+QpK30DCa1l/oZgi2PLZDibhzbQ==}
+    engines: {node: '>=12.2.0'}
+    hasBin: true
+    peerDependencies:
+      less: '*'
+      sass: '*'
+      stylus: '*'
+    peerDependenciesMeta:
+      less:
+        optional: true
+      sass:
+        optional: true
+      stylus:
+        optional: true
+    dependencies:
+      esbuild: 0.14.39
+      postcss: 8.4.14
+      resolve: 1.22.0
+      rollup: 2.75.4
+    optionalDependencies:
+      fsevents: 2.3.2
     dev: true
 
   /vite/2.9.9:

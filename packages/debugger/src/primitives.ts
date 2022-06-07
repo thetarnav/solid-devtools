@@ -53,7 +53,7 @@ export function createOwnerObserver(
 		)
 		onUpdate(children, components)
 	}
-	const update = throttle(forceUpdate, 300)
+	const update = throttle(forceUpdate, 350)
 
 	if (enabled)
 		createEffect(() => {
@@ -80,8 +80,8 @@ export function createGraphRoot(
 		forceUpdate: VoidFunction
 	},
 ] {
-	const [children, setChildren] = createSignal<MappedOwner[]>([])
-	const [components, setComponents] = createSignal<MappedComponent[]>([])
+	const [children, setChildren] = createSignal<MappedOwner[]>([], { internal: true })
+	const [components, setComponents] = createSignal<MappedComponent[]>([], { internal: true })
 
 	const id = getNewSdtId()
 
@@ -89,6 +89,7 @@ export function createGraphRoot(
 		root,
 		id,
 		(children, components) => {
+			console.log("GRAPH UPDATE")
 			setChildren(children)
 			setComponents(components)
 		},

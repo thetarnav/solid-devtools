@@ -54,6 +54,7 @@
 	},
 	"dependencies": {
 		"@solid-devtools/ui": "0.0.1",
+		"@solid-primitives/bounds": "^0.0.100",
 		"@solid-primitives/event-listener": "^2.0.0",
 		"@solid-primitives/memo": "^0.2.2",
 		"@solid-primitives/utils": "^2.0.3",

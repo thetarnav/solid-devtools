@@ -25,10 +25,10 @@ export const Debugger: FlowComponent = props => {
 
 	// create the graph in a separate root, so that it doesn't walk and track itself
 	createBranch(() => {
-		const [enabled, setEnabled] = createSignal(false)
-		const [trackSignals, setTrackSignals] = createSignal(false)
-		const [trackBatchedUpdates, setTrackBatchedUpdates] = createSignal(false)
-		const [trackComponents, setTrackComponents] = createSignal(false)
+		const [enabled, setEnabled] = createSignal(false, { internal: true })
+		const [trackSignals, setTrackSignals] = createSignal(false, { internal: true })
+		const [trackBatchedUpdates, setTrackBatchedUpdates] = createSignal(false, { internal: true })
+		const [trackComponents, setTrackComponents] = createSignal(false, { internal: true })
 
 		const [{ id, children, components }, { forceUpdate, update }] = createGraphRoot(root, {
 			enabled,
