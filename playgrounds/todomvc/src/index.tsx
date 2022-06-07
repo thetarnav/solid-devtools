@@ -33,10 +33,7 @@ const TodoApp = () => {
 		toggleAll = (completed: boolean) =>
 			setState("todos", todo => todo.completed !== completed, { completed }),
 		setEditing = (todoId: number | null) => setState("editingTodoId", todoId),
-		addTodo: JSX.EventHandlerUnion<HTMLInputElement, KeyboardEvent> = ({
-			currentTarget,
-			keyCode,
-		}) => {
+		addTodo: JSX.EventHandler<HTMLInputElement, KeyboardEvent> = ({ currentTarget, keyCode }) => {
 			const title = currentTarget.value.trim()
 			if (keyCode === ENTER_KEY && title) {
 				setState({
