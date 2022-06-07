@@ -1,0 +1,21 @@
+{
+	"name": "solid-devtools-clock-playground",
+	"version": "0.0.1",
+	"description": "",
+	"scripts": {
+		"start": "vite",
+		"dev": "vite",
+		"build": "vite build",
+		"serve": "vite preview"
+	},
+	"license": "MIT",
+	"devDependencies": {
+		"typescript": "^4.7.3",
+		"vite": "^2.9.10",
+		"vite-plugin-solid": "^2.2.6"
+	},
+	"dependencies": {
+		"solid-js": "^1.4.3",
+		"solid-devtools": "^0.0.1"
+	}
+}

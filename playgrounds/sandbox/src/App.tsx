@@ -46,7 +46,7 @@ const App: Component = () => {
 
 	let setMe: Setter<string>
 	const [smiley, setSmiley] = createSignal<Accessor<string>>()
-	makeTimer(() => setMe(["🙂", "🤔", "🤯"][Math.floor(Math.random() * 3)]), 2000, setInterval)
+	// makeTimer(() => setMe(["🙂", "🤔", "🤯"][Math.floor(Math.random() * 3)]), 2000, setInterval)
 	createEffect(
 		() => {
 			const [_smiley, _setMe] = createSignal("🙂", { name: "smiley" })
