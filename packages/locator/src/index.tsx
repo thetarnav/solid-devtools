@@ -2,7 +2,6 @@ import {
 	Accessor,
 	Component,
 	createComputed,
-	createEffect,
 	createMemo,
 	createSignal,
 	on,
@@ -14,11 +13,11 @@ import { Motion, Presence } from "@motionone/solid"
 import { Rerun } from "@solid-primitives/keyed"
 import { isProd } from "@solid-primitives/utils"
 import { createElementBounds } from "@solid-primitives/bounds"
+import { makeEventListener } from "@solid-primitives/event-listener"
 import { MappedComponent } from "@shared/graph"
 import { sheet, tw } from "@ui"
 import { clearFindComponentCache, findComponent } from "./findComponent"
 import { makeHoverElementListener } from "./hoverElement"
-import { makeEventListener } from "@solid-primitives/event-listener"
 import { createElementCursor } from "./elementCursor"
 
 const [selected, setSelected] = createSignal<MappedComponent | null>(null, { internal: true })
@@ -29,27 +28,31 @@ export function useLocator({ components }: { components: Accessor<MappedComponen
 } {
 	if (isProd) return { enabled: () => false }
 
-	const [enabled, setEnabled] = createSignal(false, { internal: true })
+	const [inLocatorMode, setInLocatorMode] = createSignal(false)
+	makeEventListener(window, "keydown", e => {
+		if (e.key !== "Alt") return
+		e.preventDefault()
+		setInLocatorMode(true)
+	})
+	makeEventListener(window, "keyup", e => {
+		if (e.key !== "Alt") return
+		e.preventDefault()
+		setInLocatorMode(false)
+	})
+	makeEventListener(document, "visibilitychange", () => {
+		if (document.visibilityState !== "visible") setInLocatorMode(false)
+	})
+
 	onCleanup(setHoverTarget.bind(void 0, null))
 	onCleanup(setSelected.bind(void 0, null))
 
 	attachLocator()
 
-	makeEventListener(window, "keydown", e => {
-		if (e.key !== "Alt") return
-		e.preventDefault()
-		setEnabled(true)
-	})
-	makeEventListener(window, "keyup", e => {
-		if (e.key !== "Alt") return
-		e.preventDefault()
-		setEnabled(false)
-	})
 	makeHoverElementListener(setHoverTarget)
 
 	createComputed(on(components, clearFindComponentCache))
 	const selectedComp = createMemo(() => {
-		if (!enabled()) return null
+		if (!inLocatorMode()) return null
 		return findComponent.call(components, hoverTarget)
 	})
 	createComputed(on(selectedComp, setSelected))
@@ -57,9 +60,7 @@ export function useLocator({ components }: { components: Accessor<MappedComponen
 	// set pointer cursor to selected component
 	createElementCursor(() => selected()?.element)
 
-	createEffect(() => console.log(selectedComp()))
-
-	return { enabled }
+	return { enabled: inLocatorMode }
 }
 
 function attachLocator() {
