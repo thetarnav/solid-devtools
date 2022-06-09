@@ -7,19 +7,20 @@ import {
 	createSignal,
 	on,
 	onCleanup,
+	Show,
 } from "solid-js"
 import { Portal } from "solid-js/web"
+import { Motion, Presence } from "@motionone/solid"
+import { Rerun } from "@solid-primitives/keyed"
 import { isProd } from "@solid-primitives/utils"
-import { makeEventListener } from "@solid-primitives/event-listener"
 import { createElementBounds } from "@solid-primitives/bounds"
 import { MappedComponent } from "@shared/graph"
-import { colors, sheet, tw } from "@ui"
+import { sheet, tw } from "@ui"
 import { clearFindComponentCache, findComponent } from "./findComponent"
+import { makeHoverElementListener } from "./hoverElement"
 
 const [selected, setSelected] = createSignal<MappedComponent | null>(null, { internal: true })
 const [hoverTarget, setHoverTarget] = createSignal<Element | null>(null, { internal: true })
-const updateHoverTarget = (e: Event) =>
-	setHoverTarget(e.target instanceof Element ? e.target : null)
 
 export function useLocator({ components }: { components: Accessor<MappedComponent[]> }): {
 	enabled: Accessor<boolean>
@@ -32,9 +33,7 @@ export function useLocator({ components }: { components: Accessor<MappedComponen
 
 	createEffect(() => {
 		if (!enabled()) return setHoverTarget(null)
-		// makeEventListener(window, "mouseover", e => console.log(e.target instanceof Element))
-		makeEventListener(window, "pointerover", updateHoverTarget)
-		makeEventListener(document, "mouseleave", setHoverTarget.bind(void 0, null))
+		makeHoverElementListener(setHoverTarget)
 	})
 
 	createComputed(on(components, clearFindComponentCache))
@@ -59,7 +58,7 @@ function attachLocator() {
 				(container.shadowRoot.adoptedStyleSheets = [sheet.target])
 			}
 		>
-			<ElementOverlay selected={!!selected()} {...bounds} />
+			<ElementOverlay selected={!!selected()} name={selected()?.name} {...bounds} />
 		</Portal>
 	)
 }
@@ -69,6 +68,7 @@ const ElementOverlay: Component<{
 	top: number | null
 	width: number | null
 	height: number | null
+	name: string | undefined
 	selected: boolean
 }> = props => {
 	const left = createMemo<number>(prev => (props.left === null ? prev : props.left), 0)
@@ -79,14 +79,41 @@ const ElementOverlay: Component<{
 
 	return (
 		<div
-			class={tw`fixed top-0 left-0 pointer-events-none rounded mix-blend-difference transition-all duration-100`}
+			class={tw`fixed top-0 left-0 pointer-events-none transition-all duration-100`}
 			style={{
-				outline: `8px solid ${colors.cyan[900]}`,
 				transform: transform(),
 				width: width() + "px",
 				height: height() + "px",
 				opacity: selected() ? 1 : 0,
 			}}
-		></div>
+		>
+			<div class={tw`absolute -inset-2 rounded border-8 border-cyan-900 border-opacity-80`} />
+			<Presence>
+				<Show when={!!props.name}>
+					<Motion.div
+						initial={{ opacity: 0, y: -10 }}
+						animate={{ opacity: 1, y: 0 }}
+						exit={{ opacity: 0, y: 10 }}
+						class={tw`absolute top-full inset-x-0 flex justify-center`}
+					>
+						<div class={tw`relative mt-3 py-1 px-2 bg-cyan-900 bg-opacity-80 rounded`}>
+							<Presence exitBeforeEnter>
+								<Rerun on={createMemo(() => props.name)}>
+									<Motion.span
+										initial={{ opacity: 0 }}
+										animate={{ opacity: 1, x: 0 }}
+										exit={{ opacity: 0, x: 4, transition: { duration: 0.2 } }}
+										class={tw`absolute`}
+									>
+										{`<${props.name}>`}
+									</Motion.span>
+								</Rerun>
+							</Presence>
+							<span class={tw`invisible`}>{`<${props.name}>`}</span>
+						</div>
+					</Motion.div>
+				</Show>
+			</Presence>
+		</div>
 	)
 }
