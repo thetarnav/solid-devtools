@@ -18,6 +18,7 @@ import { MappedComponent } from "@shared/graph"
 import { sheet, tw } from "@ui"
 import { clearFindComponentCache, findComponent } from "./findComponent"
 import { makeHoverElementListener } from "./hoverElement"
+import { makeEventListener } from "@solid-primitives/event-listener"
 
 const [selected, setSelected] = createSignal<MappedComponent | null>(null, { internal: true })
 const [hoverTarget, setHoverTarget] = createSignal<Element | null>(null, { internal: true })
@@ -25,21 +26,50 @@ const [hoverTarget, setHoverTarget] = createSignal<Element | null>(null, { inter
 export function useLocator({ components }: { components: Accessor<MappedComponent[]> }): {
 	enabled: Accessor<boolean>
 } {
-	// TODO: enable only when the page window is opened
-	const [enabled, setEnabled] = createSignal(true, { internal: true })
+	if (isProd) return { enabled: () => false }
+
+	const [enabled, setEnabled] = createSignal(false, { internal: true })
 	onCleanup(setHoverTarget.bind(void 0, null))
+	onCleanup(setSelected.bind(void 0, null))
 
 	attachLocator()
 
-	createEffect(() => {
-		if (!enabled()) return setHoverTarget(null)
-		makeHoverElementListener(setHoverTarget)
+	makeEventListener(window, "keydown", e => {
+		if (e.key !== "Alt") return
+		e.preventDefault()
+		setEnabled(true)
 	})
+	makeEventListener(window, "keyup", e => {
+		if (e.key !== "Alt") return
+		e.preventDefault()
+		setEnabled(false)
+	})
+	makeHoverElementListener(setHoverTarget)
 
 	createComputed(on(components, clearFindComponentCache))
-	const selectedComp = createMemo(findComponent.bind(components, hoverTarget))
+	const selectedComp = createMemo(() => {
+		if (!enabled()) return null
+		return findComponent.call(components, hoverTarget)
+	})
 	createComputed(on(selectedComp, setSelected))
-	onCleanup(setSelected.bind(void 0, null))
+
+	// set pointer cursor to selected component
+	createEffect<{ el: HTMLElement | undefined; cursor: string }>(
+		prev => {
+			if (prev.el) prev.el.style.cursor = prev.cursor
+			const el = selected()?.element
+			if (el) {
+				const cursor = el.style.cursor
+				el.style.cursor = "pointer"
+				return { el, cursor }
+			}
+			return { el, cursor: "" }
+		},
+		{
+			el: undefined,
+			cursor: "",
+		},
+	)
 
 	createEffect(() => console.log(selectedComp()))
 
