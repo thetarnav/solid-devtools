@@ -19,6 +19,7 @@ import { sheet, tw } from "@ui"
 import { clearFindComponentCache, findComponent } from "./findComponent"
 import { makeHoverElementListener } from "./hoverElement"
 import { makeEventListener } from "@solid-primitives/event-listener"
+import { createElementCursor } from "./elementCursor"
 
 const [selected, setSelected] = createSignal<MappedComponent | null>(null, { internal: true })
 const [hoverTarget, setHoverTarget] = createSignal<Element | null>(null, { internal: true })
@@ -54,22 +55,7 @@ export function useLocator({ components }: { components: Accessor<MappedComponen
 	createComputed(on(selectedComp, setSelected))
 
 	// set pointer cursor to selected component
-	createEffect<{ el: HTMLElement | undefined; cursor: string }>(
-		prev => {
-			if (prev.el) prev.el.style.cursor = prev.cursor
-			const el = selected()?.element
-			if (el) {
-				const cursor = el.style.cursor
-				el.style.cursor = "pointer"
-				return { el, cursor }
-			}
-			return { el, cursor: "" }
-		},
-		{
-			el: undefined,
-			cursor: "",
-		},
-	)
+	createElementCursor(() => selected()?.element)
 
 	createEffect(() => console.log(selectedComp()))
 
