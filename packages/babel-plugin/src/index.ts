@@ -39,50 +39,47 @@ import { Visitor, NodePath } from "@babel/traverse"
 // 	}
 // }
 
-export default function transformComponents(app: any): {
+export default (): {
 	name: string
 	visitor: Visitor
-} {
-	console.log(app)
+} => ({
+	name: "@solid-devtools/babel-plugin",
+	visitor: {
+		JSXOpeningElement: (path, state) => {
+			console.log("---")
+			console.log("name", path.get("name"))
 
-	const DATA_SOURCE_LOCATION = "data-source-loc"
+			// console.log(path, state)
 
-	return {
-		name: "jsx-source-loc",
-		visitor: {
-			JSXOpeningElement: (path, state) => {
-				console.log(path, state)
+			// if (isReactFragment(path.get("name"))) return
 
-				// if (isReactFragment(path.get("name"))) return
+			// const location = path.container.openingElement.loc
+			// if (!location) {
+			// 	// the element was generated and doesn't have location information
+			// 	return
+			// }
 
-				// const location = path.container.openingElement.loc
-				// if (!location) {
-				// 	// the element was generated and doesn't have location information
-				// 	return
-				// }
+			// const attributes = path.container.openingElement.attributes
+			// for (let i = 0; i < attributes.length; i++) {
+			// 	const name = attributes[i].name
+			// 	if (name && name === DATA_SOURCE_LOCATION) {
+			// 		// The attribute already exists
+			// 		return
+			// 	}
+			// }
 
-				// const attributes = path.container.openingElement.attributes
-				// for (let i = 0; i < attributes.length; i++) {
-				// 	const name = attributes[i].name
-				// 	if (name && name === DATA_SOURCE_LOCATION) {
-				// 		// The attribute already exists
-				// 		return
-				// 	}
-				// }
-
-				// attributes.push(
-				// 	t.jsxAttribute(
-				// 		t.jsxIdentifier(DATA_SOURCE_LOCATION),
-				// 		t.stringLiteral(
-				// 			relative(state.cwd || "", state.filename || "") +
-				// 				":" +
-				// 				location.start.line +
-				// 				":" +
-				// 				location.start.column,
-				// 		),
-				// 	),
-				// )
-			},
+			// attributes.push(
+			// 	t.jsxAttribute(
+			// 		t.jsxIdentifier(DATA_SOURCE_LOCATION),
+			// 		t.stringLiteral(
+			// 			relative(state.cwd || "", state.filename || "") +
+			// 				":" +
+			// 				location.start.line +
+			// 				":" +
+			// 				location.start.column,
+			// 		),
+			// 	),
+			// )
 		},
-	}
-}
+	},
+})
