@@ -1,0 +1,50 @@
+{
+	"name": "@solid-devtools/babel-plugin",
+	"version": "0.0.1",
+	"description": "Babel plugin for transforming SolidJS code in development to support using devtools.",
+	"license": "MIT",
+	"author": "Damian Tarnawski <gthetarnav@gmail.com>",
+	"contributors": [],
+	"homepage": "https://github.com/thetarnav/solid-devtools#readme",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/thetarnav/solid-devtools.git"
+	},
+	"bugs": {
+		"url": "https://github.com/thetarnav/solid-devtools/issues"
+	},
+	"keywords": [
+		"solid",
+		"devtools",
+		"components",
+		"babel",
+		"plugin",
+		"jsx"
+	],
+	"private": false,
+	"sideEffects": true,
+	"type": "module",
+	"files": [
+		"dist"
+	],
+	"scripts": {
+		"dev": "tsc ./src/index.ts --watch --outDir dist",
+		"build": "tsc ./src/index.ts --outDir dist",
+		"ts": "tsc ./src/index.ts --outDir dist"
+	},
+	"dependencies": {
+		"@babel/core": "^7.18.2",
+		"@babel/plugin-syntax-jsx": "^7.17.12",
+		"@babel/preset-env": "^7.18.2",
+		"babel-preset-solid": "^1.4.4",
+		"@babel/preset-typescript": "^7.17.12",
+		"@babel/traverse": "^7.18.2",
+		"@babel/parser": "^7.18.4"
+	},
+	"devDependencies": {
+		"@babel/types": "^7.18.4",
+		"@types/babel__traverse": "^7.17.1",
+		"babel-plugin-tester": "^10.1.0",
+		"typescript": "^4.7.3"
+	}
+}
