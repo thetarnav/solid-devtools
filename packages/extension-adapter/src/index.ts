@@ -6,7 +6,7 @@ import {
 	startListeningWindowMessages,
 } from "@shared/messanger"
 import { MappedRoot } from "@shared/graph"
-import { BatchUpdateListener } from "@debugger"
+import { BatchUpdateListener } from "solid-devtools"
 
 console.log("debugger script working")
 

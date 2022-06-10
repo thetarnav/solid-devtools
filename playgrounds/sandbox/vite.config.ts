@@ -1,22 +1,18 @@
 import { defineConfig, PluginOption } from "vite"
 import solidPlugin from "vite-plugin-solid"
+import { devtoolsPlugin } from "@solid-devtools/babel-plugin"
 import path from "path"
 
 const pathToPackages = path.resolve(__dirname, "..", "..", "packages")
 
 export default defineConfig({
-	plugins: [
-		solidPlugin({
-			babel: {
-				plugins: ["@solid-devtools/babel-plugin"],
-			},
-		}) as PluginOption,
-	],
+	plugins: [devtoolsPlugin(), solidPlugin() as PluginOption],
 	resolve: {
 		alias: {
 			// used inside packages/debugger
 			"@shared": path.resolve(pathToPackages, "shared"),
 			"@ui": path.resolve(pathToPackages, "ui", "src"),
+			"solid-devtools": path.resolve(pathToPackages, "debugger", "src"),
 			"@solid-devtools/locator": path.resolve(pathToPackages, "locator", "src"),
 			"@solid-devtools/extension-adapter": path.resolve(pathToPackages, "extension-adapter", "src"),
 		},

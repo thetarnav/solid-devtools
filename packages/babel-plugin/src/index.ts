@@ -1,44 +1,14 @@
 import { relative } from "path"
-import { Visitor, NodePath } from "@babel/traverse"
-// import t from "@babel/types"
+import { Visitor } from "@babel/traverse"
+import { PluginOption } from "vite"
+import { babel } from "@rollup/plugin-babel"
+import { jsxAttribute, jsxIdentifier, stringLiteral, JSXElement } from "@babel/types"
 
-// function isReactImportOrRequire(path: NodePath) {
-// 	if (path.parentPath.type === "ImportDeclaration")
-// 		return path.parentPath.node.source.value === "react"
-// 	else if (path.node.type === "VariableDeclarator") {
-// 		const { init } = path.node
-// 		return (
-// 			init.type === "CallExpression" &&
-// 			init.callee.type === "Identifier" &&
-// 			init.callee.name === "require" &&
-// 			init.arguments[0] &&
-// 			init.arguments[0].type === "StringLiteral" &&
-// 			init.arguments[0].value === "react"
-// 		)
-// 	}
-// }
+const isLowercase = (s: string) => s.toLowerCase() === s
 
-// function isReactFragment(path: NodePath) {
-// 	const { node } = path
-// 	if (
-// 		node.type === "JSXMemberExpression" &&
-// 		node.property.type === "JSXIdentifier" &&
-// 		node.property.name === "Fragment" &&
-// 		node.object.type === "JSXIdentifier"
-// 	) {
-// 		if (node.object.name === "React") return true
-// 		const binding = path.scope.getBinding(node.object.name)
-// 		const boundPath = binding ? binding.path : null
-// 		if (!boundPath) return false
-// 		return isReactImportOrRequire(boundPath)
-// 	} else if (node.type === "JSXIdentifier" && node.name === "Fragment") {
-// 		const binding = path.scope.getBinding(node.name)
-// 		const boundPath = binding ? binding.path : null
-// 		if (!boundPath) return false
-// 		return isReactImportOrRequire(boundPath)
-// 	}
-// }
+const DATA_SOURCE_LOCATION = "data-source-loc"
 
+// This is the entry point for babel.
 export default (): {
 	name: string
 	visitor: Visitor
@@ -46,40 +16,41 @@ export default (): {
 	name: "@solid-devtools/babel-plugin",
 	visitor: {
 		JSXOpeningElement: (path, state) => {
-			console.log("---")
-			console.log("name", path.get("name"))
+			const container = path.container as JSXElement
+			if (container.openingElement.name.type !== "JSXIdentifier") return
+			const name = container.openingElement.name.name
 
-			// console.log(path, state)
+			// Filter native elements
+			if (!isLowercase(name) || name.includes(".")) return
 
-			// if (isReactFragment(path.get("name"))) return
+			const location = container.openingElement.loc
+			if (!location) return
 
-			// const location = path.container.openingElement.loc
-			// if (!location) {
-			// 	// the element was generated and doesn't have location information
-			// 	return
-			// }
+			const { cwd, filename } = state as { cwd: unknown; filename: unknown }
+			if (typeof cwd !== "string" || typeof filename !== "string") return
 
-			// const attributes = path.container.openingElement.attributes
-			// for (let i = 0; i < attributes.length; i++) {
-			// 	const name = attributes[i].name
-			// 	if (name && name === DATA_SOURCE_LOCATION) {
-			// 		// The attribute already exists
-			// 		return
-			// 	}
-			// }
-
-			// attributes.push(
-			// 	t.jsxAttribute(
-			// 		t.jsxIdentifier(DATA_SOURCE_LOCATION),
-			// 		t.stringLiteral(
-			// 			relative(state.cwd || "", state.filename || "") +
-			// 				":" +
-			// 				location.start.line +
-			// 				":" +
-			// 				location.start.column,
-			// 		),
-			// 	),
-			// )
+			container.openingElement.attributes.push(
+				jsxAttribute(
+					jsxIdentifier(DATA_SOURCE_LOCATION),
+					stringLiteral(
+						relative(cwd, filename) + ":" + location.start.line + ":" + location.start.column,
+					),
+				),
+			)
 		},
 	},
 })
+
+// This export is used for configuration.
+export const devtoolsPlugin = (): PluginOption => {
+	return {
+		...babel({
+			plugins: [
+				["@babel/plugin-syntax-typescript", { isTSX: true }],
+				"@solid-devtools/babel-plugin",
+			],
+			extensions: [".tsx"],
+		}),
+		enforce: "pre",
+	}
+}

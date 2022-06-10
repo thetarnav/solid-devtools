@@ -17,7 +17,7 @@
 		"baseUrl": ".",
 		"paths": {
 			"@shared/*": ["./packages/shared/*"],
-			"@debugger": ["./packages/debugger/src/index.ts"],
+			"solid-devtools": ["./packages/debugger/src/index.ts"],
 			"@ui": ["./packages/ui/src/index.tsx"],
 			"@solid-devtools/locator": ["./packages/locator/src/index.tsx"],
 			"@solid-devtools/extension-adapter": ["./packages/extension-adapter/src/index.ts"]

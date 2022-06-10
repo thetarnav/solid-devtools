@@ -24,26 +24,34 @@
 	"private": false,
 	"sideEffects": true,
 	"main": "dist/index.js",
+	"types": "dist/index.d.ts",
 	"files": [
 		"dist"
 	],
 	"scripts": {
-		"dev": "tsc ./src/index.ts --watch --outDir dist",
-		"build": "tsup",
-		"ts": "tsc ./src/index.ts --outDir dist"
+		"dev": "tsup --watch",
+		"build": "tsup"
 	},
 	"devDependencies": {
+		"@babel/core": "^7.18.2",
+		"@babel/parser": "^7.18.4",
 		"@babel/plugin-syntax-jsx": "^7.17.12",
 		"@babel/traverse": "^7.18.2",
-		"@babel/parser": "^7.18.4",
 		"@babel/types": "^7.18.4",
 		"@types/babel__traverse": "^7.17.1",
 		"babel-plugin-tester": "^10.1.0",
+		"tsup": "^6.1.0",
 		"typescript": "^4.7.3",
-		"tsup": "^6.1.0"
+		"vite": "^2.9.12"
 	},
 	"peerDependencies": {
 		"@babel/core": "^7.18.2",
-		"solid-js": "^1.4.4"
+		"solid-js": "^1.4.4",
+		"vite": "^2.9.12",
+		"rollup": "^2.75.6"
+	},
+	"dependencies": {
+		"@babel/plugin-syntax-typescript": "^7.17.12",
+		"@rollup/plugin-babel": "^5.3.1"
 	}
 }

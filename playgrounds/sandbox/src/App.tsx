@@ -11,7 +11,6 @@ import {
 	ParentComponent,
 	Accessor,
 } from "solid-js"
-import { makeTimer } from "@solid-primitives/timer"
 
 // import { createDevtools } from "solid-devtools-overlay"
 
@@ -61,22 +60,25 @@ const App: Component = () => {
 	// createDevtools(getOwner()!)
 
 	return (
-		<div>
-			<header>
-				<Button onClick={() => setCount(p => ++p)} text={`Count: ${count()}`} />
-				<Button onClick={() => setCount(p => ++p)} text={`Count: ${count()}`} />
-			</header>
+		<>
+			<h1>Welcome to the Sandbox</h1>
 			<div>
-				<Show when={showEven()}>{count()} is even!</Show>
+				<header>
+					<Button onClick={() => setCount(p => ++p)} text={`Count: ${count()}`} />
+					<Button onClick={() => setCount(p => ++p)} text={`Count: ${count()}`} />
+				</header>
+				<div>
+					<Show when={showEven()}>{count()} is even!</Show>
+				</div>
+				<div>
+					<Spinner deg={count()}>
+						<Show when={showEven()} fallback={<p>\\{smiley()}/</p>}>
+							<p style={{ background: "darkgray" }}>{smiley()}</p>
+						</Show>
+					</Spinner>
+				</div>
 			</div>
-			<div>
-				<Spinner deg={count()}>
-					<Show when={showEven()} fallback={<p>\\{smiley()}/</p>}>
-						<p style={{ background: "darkgray" }}>{smiley()}</p>
-					</Show>
-				</Spinner>
-			</div>
-		</div>
+		</>
 	)
 }
 
