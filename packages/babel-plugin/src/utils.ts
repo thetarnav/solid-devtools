@@ -22,3 +22,12 @@ export function getLocationFromAttribute(value: string): {
 		column: +column,
 	}
 }
+
+export function getFileExtension(filename: string): string {
+	const index = filename.lastIndexOf(".")
+	return index < 0 ? "" : filename.substring(index)
+}
+export function isFileJSX(filename: string): boolean {
+	const ext = getFileExtension(filename)
+	return ext === ".jsx" || ext === ".tsx"
+}

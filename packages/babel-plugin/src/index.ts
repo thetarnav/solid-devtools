@@ -1,9 +1,9 @@
+import { transformAsync } from "@babel/core"
 import { relative } from "path"
 import { Visitor } from "@babel/traverse"
 import { PluginOption } from "vite"
-import { babel } from "@rollup/plugin-babel"
 import * as t from "@babel/types"
-import { getLocationAttribute, isLowercase } from "./utils"
+import { getLocationAttribute, isFileJSX, isLowercase } from "./utils"
 
 export { getLocationFromAttribute } from "./utils"
 
@@ -48,14 +48,33 @@ export default (): {
 
 // This export is used for configuration.
 export const devtoolsPlugin = (): PluginOption => {
+	let enablePlugin = false
+	let projectRoot = process.cwd()
+
 	return {
-		...babel({
-			plugins: [
-				["@babel/plugin-syntax-typescript", { isTSX: true }],
-				"@solid-devtools/babel-plugin",
-			],
-			extensions: [".tsx"],
-		}),
+		name: "solid-devtools",
 		enforce: "pre",
+		configResolved(config) {
+			enablePlugin = config.command === "serve" && config.mode !== "production"
+		},
+		async transform(source, id, transformOptions) {
+			if (transformOptions?.ssr || !enablePlugin || !isFileJSX(id)) return
+
+			const result = await transformAsync(source, {
+				babelrc: false,
+				configFile: false,
+				root: projectRoot,
+				filename: id,
+				sourceFileName: id,
+				plugins: [
+					["@babel/plugin-syntax-typescript", { isTSX: true }],
+					"@solid-devtools/babel-plugin",
+				],
+			})
+			if (!result) return null
+			const { code } = result
+			if (!code) return null
+			return { code }
+		},
 	}
 }
