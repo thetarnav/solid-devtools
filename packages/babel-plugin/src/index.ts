@@ -2,11 +2,12 @@ import { relative } from "path"
 import { Visitor } from "@babel/traverse"
 import { PluginOption } from "vite"
 import { babel } from "@rollup/plugin-babel"
-import { jsxAttribute, jsxIdentifier, stringLiteral, JSXElement } from "@babel/types"
+import * as t from "@babel/types"
+import { getLocationAttribute, isLowercase } from "./utils"
 
-const isLowercase = (s: string) => s.toLowerCase() === s
+export { getLocationFromAttribute } from "./utils"
 
-const DATA_SOURCE_LOCATION = "data-source-loc"
+export const LOCATION_ATTRIBUTE_NAME = "data-source-loc"
 
 // This is the entry point for babel.
 export default (): {
@@ -16,12 +17,12 @@ export default (): {
 	name: "@solid-devtools/babel-plugin",
 	visitor: {
 		JSXOpeningElement: (path, state) => {
-			const container = path.container as JSXElement
+			const container = path.container as t.JSXElement
 			if (container.openingElement.name.type !== "JSXIdentifier") return
 			const name = container.openingElement.name.name
 
 			// Filter native elements
-			if (!isLowercase(name) || name.includes(".")) return
+			if (!isLowercase(name)) return
 
 			const location = container.openingElement.loc
 			if (!location) return
@@ -30,10 +31,14 @@ export default (): {
 			if (typeof cwd !== "string" || typeof filename !== "string") return
 
 			container.openingElement.attributes.push(
-				jsxAttribute(
-					jsxIdentifier(DATA_SOURCE_LOCATION),
-					stringLiteral(
-						relative(cwd, filename) + ":" + location.start.line + ":" + location.start.column,
+				t.jsxAttribute(
+					t.jsxIdentifier(LOCATION_ATTRIBUTE_NAME),
+					t.stringLiteral(
+						getLocationAttribute(
+							relative(cwd, filename),
+							location.start.line,
+							location.start.column,
+						),
 					),
 				),
 			)

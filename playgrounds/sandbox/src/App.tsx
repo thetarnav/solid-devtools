@@ -27,6 +27,10 @@ const Spinner: ParentComponent<{ deg: number }> = props => {
 	return <div>{props.children}</div>
 }
 
+const obj = {
+	comp: () => <div>This is an object property component</div>,
+}
+
 const App: Component = () => {
 	const [count, setCount] = createSignal(0, { name: "count_sig" })
 	const [showEven, setShowEven] = createSignal(false)
@@ -78,6 +82,7 @@ const App: Component = () => {
 					</Spinner>
 				</div>
 			</div>
+			<obj.comp />
 		</>
 	)
 }
