@@ -19,7 +19,7 @@
 		"solid",
 		"devtools"
 	],
-	"private": false,
+	"private": true,
 	"sideEffects": true,
 	"type": "module",
 	"files": [

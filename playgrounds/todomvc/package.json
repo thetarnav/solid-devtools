@@ -1,6 +1,7 @@
 {
 	"name": "solid-devtools-todomvc-playground",
 	"version": "0.0.1",
+	"private": true,
 	"description": "Solid implementation of TodoMVC",
 	"scripts": {
 		"start": "vite",
@@ -27,7 +28,6 @@
 	"bugs": {
 		"url": "https://github.com/thetarnav/solid-devtools/issues"
 	},
-	"private": true,
 	"engines": {
 		"node": ">=16.6.1",
 		"npm": ">=7.20.1"

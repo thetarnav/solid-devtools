@@ -1,6 +1,7 @@
 {
 	"name": "solid-devtools-sandbox-playground",
 	"version": "0.0.1",
+	"private": true,
 	"description": "",
 	"scripts": {
 		"start": "vite",
