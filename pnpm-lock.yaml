@@ -135,12 +135,12 @@ importers:
       '@solid-primitives/keyed': 1.0.0_solid-js@1.4.4
       '@solid-primitives/memo': 0.2.2_solid-js@1.4.4
       '@solid-primitives/utils': 2.0.3_solid-js@1.4.4
-      solid-js: 1.4.4
     optionalDependencies:
       '@solid-devtools/babel-plugin': link:../babel-plugin
     devDependencies:
       esbuild: 0.14.43
       esbuild-plugin-solid: 0.4.2_w4ytpsuhb2xoeyu56gvesuqe3y
+      solid-js: 1.4.4
       tsup: 6.1.2_typescript@4.7.3
       typescript: 4.7.3
 
