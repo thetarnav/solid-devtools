@@ -10,7 +10,7 @@ export default defineConfig({
 	resolve: {
 		alias: {
 			"@shared": path.resolve(__dirname, "..", "shared"),
-			"@ui": path.resolve(__dirname, "..", "ui", "src"),
+			"@solid-devtools/ui": path.resolve(__dirname, "..", "ui", "src"),
 		},
 	},
 	build: {
