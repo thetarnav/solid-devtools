@@ -53,5 +53,5 @@
 	"optionalDependencies": {
 		"@solid-devtools/babel-plugin": "^0.0.1"
 	},
-	"packageManager": "pnpm@7.1.5"
+	"packageManager": "pnpm@7.2.0"
 }
