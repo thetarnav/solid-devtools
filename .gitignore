@@ -17,6 +17,9 @@ lerna-debug.log
 # turbo
 .turbo
 
+# solid
+.solid
+
 # VSC Settings
 .vscode/settings.json
 
