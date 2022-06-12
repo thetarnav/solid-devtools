@@ -44,7 +44,8 @@ function goToSelectedComponentSource(): void {
 	const comp = selected()
 	if (!comp || !comp.location) return
 	const { path, column, line } = comp.location
-	console.log(path, column, line)
+	const url = `vscode://file/${path}:${line}:${column}`
+	window.open(url, "_blank")
 }
 
 export function useLocator({ components }: { components: Accessor<MappedComponent[]> }): {

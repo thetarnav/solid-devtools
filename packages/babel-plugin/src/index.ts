@@ -37,11 +37,7 @@ export default (): {
 				t.jsxAttribute(
 					t.jsxIdentifier(LOCATION_ATTRIBUTE_NAME),
 					t.stringLiteral(
-						getLocationAttribute(
-							relative(cwd, filename),
-							location.start.line,
-							location.start.column,
-						),
+						getLocationAttribute(filename, location.start.line, location.start.column),
 					),
 				),
 			)
