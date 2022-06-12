@@ -1,5 +1,6 @@
 node_modules
 dist
+gitignore
 
 # debug
 npm-debug.log*
@@ -19,7 +20,14 @@ lerna-debug.log
 # VSC Settings
 .vscode/settings.json
 
+/.idea
+.project
+.classpath
+*.launch
+.settings/
+
 .DS_Store
+Thumbs.db
 
 # chrome extension private key file
 *.pem

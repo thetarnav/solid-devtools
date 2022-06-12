@@ -19,13 +19,21 @@
 	],
 	"private": false,
 	"sideEffects": true,
-	"type": "module",
 	"files": [
 		"dist"
 	],
-	"main": "dist/index.cjs",
-	"module": "dist/index.js",
-	"types": "dist/index.d.ts",
+	"type": "module",
+	"main": "./dist/server.cjs",
+	"module": "./dist/index.js",
+	"types": "./dist/index.d.ts",
+	"exports": {
+		"node": {
+			"import": "./dist/server.js",
+			"require": "./dist/server.cjs"
+		},
+		"import": "./dist/index.js",
+		"require": "./dist/index.cjs"
+	},
 	"scripts": {
 		"dev": "tsup --watch",
 		"build": "tsup",

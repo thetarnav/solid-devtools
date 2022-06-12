@@ -31,6 +31,15 @@ const stopPropagation =
 		callback(e)
 	}
 
+const preventDefault =
+	<E extends { preventDefault: VoidFunction }>(
+		callback: (event: E) => void,
+	): ((event: E) => void) =>
+	e => {
+		e.preventDefault()
+		callback(e)
+	}
+
 export type SelectedComponent = {
 	name: string
 	element: HTMLElement
@@ -88,7 +97,16 @@ export function useLocator({ components }: { components: Accessor<MappedComponen
 	// go to selected component source code on click
 	createEffect(() => {
 		if (!inLocatorMode()) return
-		makeEventListener(window, "click", stopPropagation(goToSelectedComponentSource), true)
+		makeEventListener(
+			window,
+			"click",
+			e => {
+				e.preventDefault()
+				e.stopPropagation()
+				goToSelectedComponentSource()
+			},
+			true,
+		)
 	})
 
 	return { enabled: inLocatorMode }
@@ -131,7 +149,7 @@ const ElementOverlay: Component<{
 
 	return (
 		<div
-			class={tw`fixed top-0 left-0 pointer-events-none transition-all duration-100`}
+			class={tw`fixed z-9999 top-0 left-0 pointer-events-none transition-all duration-100`}
 			style={{
 				transform: transform(),
 				width: width() + "px",

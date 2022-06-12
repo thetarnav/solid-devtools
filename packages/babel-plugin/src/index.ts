@@ -30,8 +30,8 @@ export default (): {
 			const location = container.openingElement.loc
 			if (!location) return
 
-			const { cwd, filename } = state as { cwd: unknown; filename: unknown }
-			if (typeof cwd !== "string" || typeof filename !== "string") return
+			const { filename } = state as { filename: unknown }
+			if (typeof filename !== "string") return
 
 			container.openingElement.attributes.push(
 				t.jsxAttribute(
