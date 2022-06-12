@@ -34,15 +34,18 @@
 	},
 	"devDependencies": {
 		"typescript": "^4.7.3",
-		"tsup": "^6.1.2"
+		"tsup": "^6.1.2",
+		"solid-js": "^1.4.4"
 	},
 	"dependencies": {
-		"solid-js": "^1.4.4",
 		"@solid-primitives/rootless": "^1.1.0",
 		"@solid-primitives/scheduled": "^1.0.0",
 		"@solid-primitives/utils": "^2.0.3",
 		"@solid-devtools/locator": "^0.0.1",
 		"@solid-devtools/extension-adapter": "^0.0.1"
+	},
+	"peerDependencies": {
+		"solid-js": "^1.4.4"
 	},
 	"packageManager": "pnpm@7.2.0"
 }

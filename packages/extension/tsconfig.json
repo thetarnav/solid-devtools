@@ -9,6 +9,7 @@
 		"content/**/*",
 		"devtools/**/*",
 		"shared/**/*",
-		"../../env.d.ts"
+		"../../env.d.ts",
+		"env.d.ts"
 	]
 }

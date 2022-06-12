@@ -37,10 +37,13 @@
 	},
 	"devDependencies": {
 		"typescript": "^4.7.3",
-		"tsup": "^6.1.2"
+		"tsup": "^6.1.2",
+		"solid-js": "^1.4.4"
 	},
 	"dependencies": {
-		"@solid-primitives/utils": "^2.1.0",
+		"@solid-primitives/utils": "^2.1.0"
+	},
+	"peerDependencies": {
 		"solid-js": "^1.4.4"
 	},
 	"packageManager": "pnpm@7.2.0"
