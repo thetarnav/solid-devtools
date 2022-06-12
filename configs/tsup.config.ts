@@ -1,4 +1,5 @@
 import { defineConfig } from "tsup"
+import { solidPlugin } from "esbuild-plugin-solid"
 
 export default (
 	extension: "tsx" | "ts" = "ts",
@@ -10,5 +11,6 @@ export default (
 		dts: entry,
 		format: Array.isArray(target) ? target : [target],
 		entryPoints: [entry],
+		esbuildPlugins: extension === "tsx" ? [solidPlugin()] : undefined,
 	})
 }
