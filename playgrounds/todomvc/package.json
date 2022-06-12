@@ -35,7 +35,7 @@
 	"dependencies": {
 		"todomvc-app-css": "^2.4.2",
 		"todomvc-common": "^1.0.5",
-		"solid-js": "^1.4.3"
+		"solid-js": "^1.4.4"
 	},
 	"devDependencies": {
 		"typescript": "^4.7.3",

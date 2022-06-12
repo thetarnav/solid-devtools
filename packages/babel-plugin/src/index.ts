@@ -4,10 +4,13 @@ import { Visitor } from "@babel/traverse"
 import { PluginOption } from "vite"
 import * as t from "@babel/types"
 import { getLocationAttribute, isFileJSX, isLowercase } from "./utils"
+import { LOCATION_ATTRIBUTE_NAME } from "@shared/variables"
 
-export { getLocationFromAttribute } from "./utils"
-
-export const LOCATION_ATTRIBUTE_NAME = "data-source-loc"
+export type ElementLocation = {
+	path: string
+	line: number
+	column: number
+}
 
 // This is the entry point for babel.
 export default (): {

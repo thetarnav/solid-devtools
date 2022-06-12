@@ -2,6 +2,7 @@ import {
 	Accessor,
 	Component,
 	createComputed,
+	createEffect,
 	createMemo,
 	createSignal,
 	on,
@@ -15,13 +16,20 @@ import { isProd } from "@solid-primitives/utils"
 import { createElementBounds } from "@solid-primitives/bounds"
 import { makeEventListener } from "@solid-primitives/event-listener"
 import { MappedComponent } from "@shared/graph"
+import { ElementLocation } from "@solid-devtools/babel-plugin"
 import { sheet, tw } from "@ui"
 import { clearFindComponentCache, findComponent } from "./findComponent"
 import { makeHoverElementListener } from "./hoverElement"
 import { createElementCursor } from "./elementCursor"
 
-const [selected, setSelected] = createSignal<MappedComponent | null>(null, { internal: true })
-const [hoverTarget, setHoverTarget] = createSignal<Element | null>(null, { internal: true })
+export type SelectedComponent = {
+	name: string
+	element: HTMLElement
+	location: (ElementLocation & { element: HTMLElement }) | null
+}
+
+const [selected, setSelected] = createSignal<SelectedComponent | null>(null, { internal: true })
+const [hoverTarget, setHoverTarget] = createSignal<HTMLElement | null>(null, { internal: true })
 
 export function useLocator({ components }: { components: Accessor<MappedComponent[]> }): {
 	enabled: Accessor<boolean>
@@ -60,6 +68,8 @@ export function useLocator({ components }: { components: Accessor<MappedComponen
 	// set pointer cursor to selected component
 	createElementCursor(() => selected()?.element)
 
+	createEffect(() => console.log(selected()))
+
 	return { enabled: inLocatorMode }
 }
 
@@ -69,12 +79,7 @@ function attachLocator() {
 	const bounds = createElementBounds(() => selected()?.element)
 
 	return (
-		<Portal
-			useShadow
-			ref={(container: HTMLDivElement & { shadowRoot: ShadowRoot }) =>
-				(container.shadowRoot.adoptedStyleSheets = [sheet.target])
-			}
-		>
+		<Portal useShadow ref={({ shadowRoot }) => (shadowRoot.adoptedStyleSheets = [sheet.target])}>
 			<ElementOverlay selected={!!selected()} name={selected()?.name} {...bounds} />
 		</Portal>
 	)
