@@ -26,6 +26,7 @@ export const theme: ThemeConfiguration = {
 	},
 	zIndex: {
 		"1": "1",
+		"9999": "9999",
 	},
 }
 

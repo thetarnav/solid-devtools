@@ -1,0 +1,50 @@
+{
+	"name": "@solid-devtools/extension-adapter",
+	"version": "0.0.1",
+	"description": "Adapter for @solid-devtools/debugger for communicating with Solid Devtools chrome extension.",
+	"license": "MIT",
+	"author": "Damian Tarnawski <gthetarnav@gmail.com>",
+	"contributors": [],
+	"homepage": "https://github.com/thetarnav/solid-devtools#readme",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/thetarnav/solid-devtools.git"
+	},
+	"bugs": {
+		"url": "https://github.com/thetarnav/solid-devtools/issues"
+	},
+	"keywords": [
+		"solid",
+		"devtools",
+		"components",
+		"locator",
+		"vscode"
+	],
+	"private": false,
+	"sideEffects": true,
+	"type": "module",
+	"files": [
+		"dist"
+	],
+	"main": "dist/index.cjs",
+	"module": "dist/index.js",
+	"types": "dist/index.d.ts",
+	"scripts": {
+		"dev": "tsup --watch",
+		"build": "tsup",
+		"test": "echo \"NOOP TEST\"",
+		"typecheck": "tsc --noEmit"
+	},
+	"devDependencies": {
+		"typescript": "^4.7.3",
+		"tsup": "^6.1.2",
+		"solid-js": "^1.4.4"
+	},
+	"dependencies": {
+		"@solid-primitives/utils": "^2.1.0"
+	},
+	"peerDependencies": {
+		"solid-js": "^1.4.4"
+	},
+	"packageManager": "pnpm@7.2.0"
+}

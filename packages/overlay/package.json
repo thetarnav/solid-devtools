@@ -36,14 +36,7 @@
 			"node": "./dist/esm/index.js"
 		}
 	},
-	"scripts": {
-		"dev": "pnpm run build && watchlist src -- npm run build",
-		"build": "pnpm run clean && rollup -c && rimraf ./dist/source",
-		"clean": "rimraf ./dist",
-		"test": "echo \"NOOP TEST\"",
-		"test:watch": "watchlist src test -- pnpm run test",
-		"typecheck": "tsc --noEmit"
-	},
+	"scripts": {},
 	"devDependencies": {
 		"@rollup/plugin-alias": "^3.1.9",
 		"rimraf": "^3.0.2",
@@ -54,9 +47,9 @@
 	},
 	"dependencies": {
 		"@solid-primitives/utils": "^2.0.3",
-		"solid-js": "^1.4.3",
+		"solid-js": "^1.4.4",
 		"solid-meta": "^0.27.3",
 		"twind": "^0.16.17"
 	},
-	"packageManager": "pnpm@7.1.5"
+	"packageManager": "pnpm@7.2.0"
 }

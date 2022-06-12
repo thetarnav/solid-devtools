@@ -1,5 +1,5 @@
 {
-	"name": "solid-devtools-ui",
+	"name": "@solid-devtools/ui",
 	"version": "0.0.1",
 	"description": "UI Library for visualization of the reactive graph. Powering Solid Devtools.",
 	"license": "MIT",
@@ -20,14 +20,22 @@
 	"private": true,
 	"sideEffects": false,
 	"type": "module",
+	"main": "dist/index.cjs",
+	"module": "dist/index.js",
+	"types": "dist/index.d.ts",
 	"scripts": {
+		"dev": "tsup --watch",
+		"build": "tsup",
 		"test": "echo \"NOOP TEST\"",
-		"test:watch": "watchlist src test -- npm test",
 		"typecheck": "tsc --noEmit"
 	},
 	"devDependencies": {
-		"typescript": "^4.6.4",
-		"watchlist": "^0.3.1"
+		"@solid-devtools/babel-plugin": "^0.0.1",
+		"typescript": "^4.7.3",
+		"tsup": "^6.1.2",
+		"esbuild-plugin-solid": "^0.4.2",
+		"esbuild": "^0.14.43",
+		"solid-js": "^1.4.4"
 	},
 	"dependencies": {
 		"@motionone/solid": "^10.8.1",
@@ -36,9 +44,11 @@
 		"@solid-primitives/props": "^2.1.2",
 		"@solid-primitives/utils": "^2.0.3",
 		"@solid-primitives/keyed": "^1.0.0",
-		"solid-js": "^1.4.3",
 		"solid-transition-group": "^0.0.10",
 		"twind": "^0.16.17"
 	},
-	"packageManager": "pnpm@7.1.5"
+	"peerDependencies": {
+		"solid-js": "^1.4.4"
+	},
+	"packageManager": "pnpm@7.2.0"
 }

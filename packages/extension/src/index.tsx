@@ -1,6 +1,6 @@
 /* @refresh reload */
 import { render } from "solid-js/web"
-import { sheet } from "@ui"
+import { sheet } from "@solid-devtools/ui"
 
 console.log("panel working")
 

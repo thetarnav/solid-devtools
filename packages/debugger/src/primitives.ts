@@ -1,22 +1,38 @@
-import { Accessor, createEffect, createSignal } from "solid-js"
+import { Accessor, createEffect, createSignal, untrack } from "solid-js"
 import { throttle } from "@solid-primitives/scheduled"
-import { MappedOwner, MappedRoot, SolidOwner } from "@shared/graph"
+import { MappedComponent, MappedOwner, MappedRoot, SolidOwner } from "@shared/graph"
 import { UpdateType } from "@shared/messanger"
 import { batchUpdate, ComputationUpdateHandler, SignalUpdateHandler } from "./batchUpdates"
 import { makeGraphUpdateListener } from "./update"
 import { mapOwnerTree } from "./walker"
 import { getNewSdtId } from "./utils"
 
+export type CreateOwnerTreeOptions = {
+	enabled?: Accessor<boolean>
+	trackSignals?: Accessor<boolean>
+	trackBatchedUpdates?: Accessor<boolean>
+	trackComponents?: Accessor<boolean>
+}
+
+export function boundReturn<T>(this: T): T {
+	return this
+}
+
 export function createOwnerObserver(
 	owner: SolidOwner,
 	rootId: number,
-	onUpdate: (tree: MappedOwner[]) => void,
-	options: { enabled?: Accessor<boolean> } = {},
+	onUpdate: (children: MappedOwner[], components: MappedComponent[]) => void,
+	options: CreateOwnerTreeOptions = {},
 ): {
 	update: VoidFunction
 	forceUpdate: VoidFunction
 } {
-	const { enabled } = options
+	const {
+		enabled,
+		trackSignals = boundReturn.bind(false),
+		trackComponents = boundReturn.bind(false),
+		trackBatchedUpdates = boundReturn.bind(false),
+	} = options
 
 	const onComputationUpdate: ComputationUpdateHandler = payload => {
 		batchUpdate({ type: UpdateType.Computation, payload })
@@ -25,14 +41,19 @@ export function createOwnerObserver(
 		batchUpdate({ type: UpdateType.Signal, payload })
 	}
 	const forceUpdate = () => {
-		const tree = mapOwnerTree(owner, {
-			onComputationUpdate,
-			onSignalUpdate,
-			rootId,
-		})
-		onUpdate(tree)
+		const { children, components } = untrack(
+			mapOwnerTree.bind(void 0, owner, {
+				onComputationUpdate,
+				onSignalUpdate,
+				rootId,
+				trackSignals: trackSignals(),
+				trackComponents: trackComponents(),
+				trackBatchedUpdates: trackBatchedUpdates(),
+			}),
+		)
+		onUpdate(children, components)
 	}
-	const update = throttle(forceUpdate, 300)
+	const update = throttle(forceUpdate, 350)
 
 	if (enabled)
 		createEffect(() => {
@@ -47,28 +68,37 @@ export function createOwnerObserver(
 
 export function createGraphRoot(
 	root: SolidOwner,
-	options?: { enabled?: Accessor<boolean> },
+	options?: CreateOwnerTreeOptions,
 ): [
-	MappedRoot,
+	{
+		id: number
+		children: Accessor<MappedOwner[]>
+		components: Accessor<MappedComponent[]>
+	},
 	{
 		update: VoidFunction
 		forceUpdate: VoidFunction
 	},
 ] {
-	const [tree, setTree] = createSignal<MappedOwner[]>([])
+	const [children, setChildren] = createSignal<MappedOwner[]>([], { internal: true })
+	const [components, setComponents] = createSignal<MappedComponent[]>([], { internal: true })
+
 	const id = getNewSdtId()
-	const { update, forceUpdate } = createOwnerObserver(root, id, setTree, options)
+
+	const { update, forceUpdate } = createOwnerObserver(
+		root,
+		id,
+		(children, components) => {
+			console.log("GRAPH UPDATE")
+			setChildren(children)
+			setComponents(components)
+		},
+		options,
+	)
 	update()
+
 	return [
-		{
-			id,
-			get children() {
-				return tree()
-			},
-		},
-		{
-			update,
-			forceUpdate,
-		},
+		{ id, children, components },
+		{ update, forceUpdate },
 	]
 }

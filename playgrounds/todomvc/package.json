@@ -1,0 +1,45 @@
+{
+	"name": "solid-devtools-todomvc-playground",
+	"version": "0.0.1",
+	"description": "Solid implementation of TodoMVC",
+	"scripts": {
+		"start": "vite",
+		"dev": "vite",
+		"build": "vite build",
+		"serve": "vite preview"
+	},
+	"keywords": [
+		"solid",
+		"javascript",
+		"framework",
+		"todomvc"
+	],
+	"author": "Ryan Carniato",
+	"contributors": [
+		"Damian Tarnawski <gthetarnav@gmail.com>"
+	],
+	"license": "MIT",
+	"homepage": "https://github.com/thetarnav/solid-devtools#readme",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/thetarnav/solid-devtools.git"
+	},
+	"bugs": {
+		"url": "https://github.com/thetarnav/solid-devtools/issues"
+	},
+	"private": true,
+	"engines": {
+		"node": ">=16.6.1",
+		"npm": ">=7.20.1"
+	},
+	"dependencies": {
+		"todomvc-app-css": "^2.4.2",
+		"todomvc-common": "^1.0.5",
+		"solid-js": "^1.4.4"
+	},
+	"devDependencies": {
+		"typescript": "^4.7.3",
+		"vite": "^2.9.10",
+		"vite-plugin-solid": "^2.2.6"
+	}
+}

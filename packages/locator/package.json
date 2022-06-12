@@ -1,0 +1,61 @@
+{
+	"name": "@solid-devtools/locator",
+	"version": "0.0.1",
+	"description": "On-page overlay for localisating SolidJS components, and revealing them in your code editor.",
+	"license": "MIT",
+	"author": "Damian Tarnawski <gthetarnav@gmail.com>",
+	"contributors": [],
+	"homepage": "https://github.com/thetarnav/solid-devtools#readme",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/thetarnav/solid-devtools.git"
+	},
+	"bugs": {
+		"url": "https://github.com/thetarnav/solid-devtools/issues"
+	},
+	"keywords": [
+		"solid",
+		"devtools",
+		"components",
+		"locator",
+		"vscode"
+	],
+	"private": false,
+	"sideEffects": true,
+	"type": "module",
+	"files": [
+		"dist"
+	],
+	"main": "dist/index.cjs",
+	"module": "dist/index.js",
+	"types": "dist/index.d.ts",
+	"scripts": {
+		"dev": "tsup --watch",
+		"build": "tsup",
+		"test": "echo \"NOOP TEST\"",
+		"typecheck": "tsc --noEmit"
+	},
+	"devDependencies": {
+		"typescript": "^4.7.3",
+		"tsup": "^6.1.2",
+		"esbuild-plugin-solid": "^0.4.2",
+		"esbuild": "^0.14.43",
+		"solid-js": "^1.4.4"
+	},
+	"dependencies": {
+		"@motionone/solid": "^10.10.0",
+		"@solid-primitives/bounds": "^0.0.100",
+		"@solid-primitives/event-listener": "^2.0.0",
+		"@solid-primitives/keyed": "^1.0.0",
+		"@solid-primitives/memo": "^0.2.2",
+		"@solid-primitives/utils": "^2.0.3",
+		"@solid-devtools/ui": "0.0.1"
+	},
+	"peerDependencies": {
+		"solid-js": "^1.4.4"
+	},
+	"optionalDependencies": {
+		"@solid-devtools/babel-plugin": "^0.0.1"
+	},
+	"packageManager": "pnpm@7.2.0"
+}

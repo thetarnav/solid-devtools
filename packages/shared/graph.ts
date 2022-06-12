@@ -1,6 +1,6 @@
-import { getOwner as _getOwner, Setter } from "solid-js"
+import { Accessor, getOwner as _getOwner, Setter } from "solid-js"
 import { AnyFunction } from "@solid-primitives/utils"
-import { MESSAGE, SafeValue } from "./messanger"
+import { BatchedUpdates, MESSAGE, SafeValue } from "./messanger"
 
 export enum OwnerType {
 	Component,
@@ -41,6 +41,8 @@ export interface SolidOwner extends SolidSignal {
 	}
 }
 
+export type BatchUpdateListener = (updates: BatchedUpdates) => void
+
 export type ValueUpdateListener = (newValue: unknown, oldValue: unknown) => void
 
 export const getOwner = _getOwner as () => SolidOwner | null
@@ -70,6 +72,12 @@ export interface MappedSignal {
 	id: number
 	observers: number[]
 	value: SafeValue
+}
+
+export type MappedComponent = {
+	name: string
+	// ! HTMLElements aren't JSON serialisable
+	element: HTMLElement
 }
 
 //

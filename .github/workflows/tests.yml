@@ -30,5 +30,6 @@ jobs:
           pnpm install
           pnpm run build
           pnpm run test
+          pnpm run typecheck
         env:
           CI: true

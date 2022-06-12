@@ -8,10 +8,9 @@ import {
 	createComputed,
 	runWithOwner,
 	Setter,
+	ParentComponent,
+	Accessor,
 } from "solid-js"
-import { makeTimer } from "@solid-primitives/timer"
-
-// import { createDevtools } from "solid-devtools-overlay"
 
 const Button = (props: { text: string; onClick: VoidFunction }) => {
 	const text = createMemo(() => <span>{props.text}</span>)
@@ -20,6 +19,27 @@ const Button = (props: { text: string; onClick: VoidFunction }) => {
 			{text()}
 		</button>
 	)
+}
+
+const Spinner: ParentComponent<{ deg: number }> = props => {
+	return <div>{props.children}</div>
+}
+
+const Article: Component = () => {
+	return (
+		<article>
+			<h3>A cool headline for testing :)</h3>
+			<p>
+				Lorem ipsum dolor sit amet, consectetur adipisicing elit. Dolorem odio culpa vel vitae? Quis
+				deleniti soluta rem velit necessitatibus? Saepe nulla omnis nobis minima perferendis odio
+				doloremque deleniti dolore corrupti.
+			</p>
+		</article>
+	)
+}
+
+const obj = {
+	comp: () => <div>This is an object property component</div>,
 }
 
 const App: Component = () => {
@@ -39,11 +59,13 @@ const App: Component = () => {
 	})
 
 	let setMe: Setter<string>
-	makeTimer(() => setMe(["🙂", "🤔", "🤯"][Math.floor(Math.random() * 3)]), 2000, setInterval)
+	const [smiley, setSmiley] = createSignal<Accessor<string>>()
+	// makeTimer(() => setMe(["🙂", "🤔", "🤯"][Math.floor(Math.random() * 3)]), 2000, setInterval)
 	createEffect(
 		() => {
-			const [, _setMe] = createSignal("🙂", { name: "smiley" })
+			const [_smiley, _setMe] = createSignal("🙂", { name: "smiley" })
 			setMe = _setMe
+			setSmiley(() => _smiley)
 			console.log(count())
 		},
 		undefined,
@@ -53,15 +75,27 @@ const App: Component = () => {
 	// createDevtools(getOwner()!)
 
 	return (
-		<div>
-			<header>
-				<Button onClick={() => setCount(p => ++p)} text={`Count: ${count()}`} />
-				<Button onClick={() => setCount(p => ++p)} text={`Count: ${count()}`} />
-			</header>
+		<>
+			<h1>Welcome to the Sandbox</h1>
 			<div>
-				<Show when={showEven()}>{count()} is even!</Show>
+				<header>
+					<Button onClick={() => setCount(p => ++p)} text={`Count: ${count()}`} />
+					<Button onClick={() => setCount(p => ++p)} text={`Count: ${count()}`} />
+				</header>
+				<div>
+					<Show when={showEven()}>{count()} is even!</Show>
+				</div>
+				<div>
+					<Spinner deg={count()}>
+						<Show when={showEven()} fallback={<p>\\{smiley()}/</p>}>
+							<p style={{ background: "darkgray" }}>{smiley()}</p>
+						</Show>
+					</Spinner>
+				</div>
 			</div>
-		</div>
+			<obj.comp />
+			<Article />
+		</>
 	)
 }
 

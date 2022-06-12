@@ -1,5 +1,6 @@
 import { GraphOwner, GraphSignal } from "@shared/graph"
 import { createContext, useContext } from "solid-js"
+import type { ContextProviderComponent } from "solid-js/types/reactive/signal"
 
 export type HighlightContextState = {
 	highlightObserversOf: (signal: GraphSignal) => void
@@ -12,7 +13,8 @@ export type HighlightContextState = {
 
 const HighlightsContext = createContext<HighlightContextState>()
 
-export const HighlightsProvider = HighlightsContext.Provider
+export const HighlightsProvider: ContextProviderComponent<HighlightContextState | undefined> =
+	HighlightsContext.Provider
 export const useHighlights = () => {
 	const ctx = useContext(HighlightsContext)
 	if (!ctx) throw "GraphContext wasn't provided."

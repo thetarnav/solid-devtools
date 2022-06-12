@@ -1,47 +1,60 @@
-import { FlowComponent, createEffect, onCleanup, createRoot, createSignal } from "solid-js"
+import { FlowComponent, createSignal, createComputed, onCleanup } from "solid-js"
 import { isProd } from "@solid-primitives/utils"
-import {
-	postWindowMessage,
-	MESSAGE,
-	onWindowMessage,
-	startListeningWindowMessages,
-} from "@shared/messanger"
+import { createBranch } from "@solid-primitives/rootless"
 import { getOwner } from "@shared/graph"
 import { makeBatchUpdateListener } from "./batchUpdates"
 import { createGraphRoot } from "./primitives"
+import { useLocator } from "@solid-devtools/locator"
+import { useExtensionAdapter } from "@solid-devtools/extension-adapter"
 
-console.log("debugger script working")
+export { makeBatchUpdateListener } from "./batchUpdates"
 
-startListeningWindowMessages()
+let debuggerAlive = false
 
 export const Debugger: FlowComponent = props => {
 	// run the debugger only on client in development env
 	if (isProd) return props.children
 
+	if (debuggerAlive)
+		throw "Currently there can be only one <Debugger> component on the page at once."
+	debuggerAlive = true
+	onCleanup(() => (debuggerAlive = false))
+
 	const root = getOwner()!
-	const [enabled, setEnabled] = createSignal(false)
 
-	let dispose: VoidFunction | undefined
-	let _forceUpdate: VoidFunction | undefined
-	onCleanup(() => dispose?.())
+	// create the graph in a separate root, so that it doesn't walk and track itself
+	createBranch(() => {
+		const [enabled, setEnabled] = createSignal(false, { internal: true })
+		const [trackSignals, setTrackSignals] = createSignal(false, { internal: true })
+		const [trackBatchedUpdates, setTrackBatchedUpdates] = createSignal(false, { internal: true })
+		const [trackComponents, setTrackComponents] = createSignal(false, { internal: true })
 
-	postWindowMessage(MESSAGE.SolidOnPage)
-
-	// update the graph only if the devtools panel is in view
-	onCleanup(onWindowMessage(MESSAGE.PanelVisibility, setEnabled))
-	onCleanup(onWindowMessage(MESSAGE.ForceUpdate, () => _forceUpdate?.()))
-
-	setTimeout(() => {
-		// create the graph in a separate root, so that it doesn't walk and track itself
-		createRoot(_dispose => {
-			dispose = _dispose
-			const [tree, { forceUpdate }] = createGraphRoot(root, { enabled })
-			_forceUpdate = forceUpdate
-			createEffect(() => postWindowMessage(MESSAGE.GraphUpdate, tree))
+		const [{ id, children, components }, { forceUpdate, update }] = createGraphRoot(root, {
+			enabled,
+			trackSignals,
+			trackBatchedUpdates,
+			trackComponents,
 		})
-	})
 
-	makeBatchUpdateListener(updates => postWindowMessage(MESSAGE.BatchedUpdate, updates))
+		const { enabled: extensionAdapterEnabled } = useExtensionAdapter({
+			tree: {
+				id,
+				get children() {
+					return children()
+				},
+			},
+			forceUpdate,
+			update,
+			makeBatchUpdateListener,
+		})
+
+		const { enabled: locatorEnabled } = useLocator({ components })
+
+		createComputed(() => setEnabled(extensionAdapterEnabled() || locatorEnabled()))
+		createComputed(() => setTrackSignals(extensionAdapterEnabled))
+		createComputed(() => setTrackBatchedUpdates(extensionAdapterEnabled))
+		createComputed(() => setTrackComponents(locatorEnabled))
+	})
 
 	return props.children
 }
