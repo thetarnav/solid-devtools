@@ -35,10 +35,12 @@ export function findComponent(
 			return cached
 		}
 
-		const locAttr = el.attributes.getNamedItem(LOCATION_ATTRIBUTE_NAME)
-		if (locAttr) {
-			const loc = getLocationFromAttribute(locAttr.value)
-			if (loc) location = { ...loc, element: el }
+		if (!location) {
+			const locAttr = el.attributes.getNamedItem(LOCATION_ATTRIBUTE_NAME)
+			if (locAttr) {
+				const loc = getLocationFromAttribute(locAttr.value)
+				if (loc) location = { ...loc, element: el }
+			}
 		}
 
 		checked.push(el)

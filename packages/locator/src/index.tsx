@@ -11,7 +11,6 @@ import {
 } from "solid-js"
 import { Portal } from "solid-js/web"
 import { Motion, Presence } from "@motionone/solid"
-import { Rerun } from "@solid-primitives/keyed"
 import { isProd } from "@solid-primitives/utils"
 import { createElementBounds } from "@solid-primitives/bounds"
 import { makeEventListener } from "@solid-primitives/event-listener"
@@ -22,6 +21,16 @@ import { clearFindComponentCache, findComponent } from "./findComponent"
 import { makeHoverElementListener } from "./hoverElement"
 import { createElementCursor } from "./elementCursor"
 
+// TODO: contribute to solid-primitives
+const stopPropagation =
+	<E extends { stopPropagation: VoidFunction }>(
+		callback: (event: E) => void,
+	): ((event: E) => void) =>
+	e => {
+		e.stopPropagation()
+		callback(e)
+	}
+
 export type SelectedComponent = {
 	name: string
 	element: HTMLElement
@@ -30,6 +39,13 @@ export type SelectedComponent = {
 
 const [selected, setSelected] = createSignal<SelectedComponent | null>(null, { internal: true })
 const [hoverTarget, setHoverTarget] = createSignal<HTMLElement | null>(null, { internal: true })
+
+function goToSelectedComponentSource(): void {
+	const comp = selected()
+	if (!comp || !comp.location) return
+	const { path, column, line } = comp.location
+	console.log(path, column, line)
+}
 
 export function useLocator({ components }: { components: Accessor<MappedComponent[]> }): {
 	enabled: Accessor<boolean>
@@ -68,7 +84,11 @@ export function useLocator({ components }: { components: Accessor<MappedComponen
 	// set pointer cursor to selected component
 	createElementCursor(() => selected()?.element)
 
-	createEffect(() => console.log(selected()))
+	// go to selected component source code on click
+	createEffect(() => {
+		if (!inLocatorMode()) return
+		makeEventListener(window, "click", stopPropagation(goToSelectedComponentSource), true)
+	})
 
 	return { enabled: inLocatorMode }
 }
@@ -76,11 +96,19 @@ export function useLocator({ components }: { components: Accessor<MappedComponen
 function attachLocator() {
 	if (isProd) return
 
-	const bounds = createElementBounds(() => selected()?.element)
+	const highlightElement = createMemo(
+		on(selected, c => (c ? c.location?.element ?? c.element : null)),
+	)
+	const bounds = createElementBounds(highlightElement)
 
 	return (
 		<Portal useShadow ref={({ shadowRoot }) => (shadowRoot.adoptedStyleSheets = [sheet.target])}>
-			<ElementOverlay selected={!!selected()} name={selected()?.name} {...bounds} />
+			<ElementOverlay
+				tag={highlightElement()?.tagName.toLocaleLowerCase()}
+				selected={!!selected()}
+				name={selected()?.name}
+				{...bounds}
+			/>
 		</Portal>
 	)
 }
@@ -91,6 +119,7 @@ const ElementOverlay: Component<{
 	width: number | null
 	height: number | null
 	name: string | undefined
+	tag: string | undefined
 	selected: boolean
 }> = props => {
 	const left = createMemo<number>(prev => (props.left === null ? prev : props.left), 0)
@@ -109,7 +138,9 @@ const ElementOverlay: Component<{
 				opacity: selected() ? 1 : 0,
 			}}
 		>
-			<div class={tw`absolute -inset-2 rounded border-8 border-cyan-900 border-opacity-80`} />
+			<div
+				class={tw`absolute -inset-2 rounded border-2 border-cyan-800 border-opacity-80 bg-cyan-800 bg-opacity-30`}
+			/>
 			<Presence>
 				<Show when={!!props.name}>
 					<Motion.div
@@ -119,19 +150,9 @@ const ElementOverlay: Component<{
 						class={tw`absolute top-full inset-x-0 flex justify-center`}
 					>
 						<div class={tw`relative mt-3 py-1 px-2 bg-cyan-900 bg-opacity-80 rounded`}>
-							<Presence exitBeforeEnter>
-								<Rerun on={createMemo(() => props.name)}>
-									<Motion.span
-										initial={{ opacity: 0 }}
-										animate={{ opacity: 1, x: 0 }}
-										exit={{ opacity: 0, x: 4, transition: { duration: 0.2 } }}
-										class={tw`absolute`}
-									>
-										{`<${props.name}>`}
-									</Motion.span>
-								</Rerun>
-							</Presence>
-							<span class={tw`invisible`}>{`<${props.name}>`}</span>
+							<span>
+								{props.name}: {props.tag}
+							</span>
 						</div>
 					</Motion.div>
 				</Show>

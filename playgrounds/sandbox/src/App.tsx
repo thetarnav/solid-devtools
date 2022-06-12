@@ -27,6 +27,19 @@ const Spinner: ParentComponent<{ deg: number }> = props => {
 	return <div>{props.children}</div>
 }
 
+const Article: Component = () => {
+	return (
+		<article>
+			<h3>Some unimportant text :)</h3>
+			<p>
+				Lorem ipsum dolor sit amet, consectetur adipisicing elit. Dolorem odio culpa vel vitae? Quis
+				deleniti soluta rem velit necessitatibus? Saepe nulla omnis nobis minima perferendis odio
+				doloremque deleniti dolore corrupti.
+			</p>
+		</article>
+	)
+}
+
 const obj = {
 	comp: () => <div>This is an object property component</div>,
 }
@@ -83,6 +96,7 @@ const App: Component = () => {
 				</div>
 			</div>
 			<obj.comp />
+			<Article />
 		</>
 	)
 }
