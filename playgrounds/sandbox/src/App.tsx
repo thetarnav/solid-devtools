@@ -12,8 +12,6 @@ import {
 	Accessor,
 } from "solid-js"
 
-// import { createDevtools } from "solid-devtools-overlay"
-
 const Button = (props: { text: string; onClick: VoidFunction }) => {
 	const text = createMemo(() => <span>{props.text}</span>)
 	return (
@@ -30,7 +28,7 @@ const Spinner: ParentComponent<{ deg: number }> = props => {
 const Article: Component = () => {
 	return (
 		<article>
-			<h3>Some unimportant text :)</h3>
+			<h3>A cool headline for testing :)</h3>
 			<p>
 				Lorem ipsum dolor sit amet, consectetur adipisicing elit. Dolorem odio culpa vel vitae? Quis
 				deleniti soluta rem velit necessitatibus? Saepe nulla omnis nobis minima perferendis odio

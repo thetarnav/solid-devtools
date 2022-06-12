@@ -6,11 +6,13 @@ importers:
     specifiers:
       '@types/node': ^17.0.33
       prettier: 2.6.2
+      tsup: ^6.1.2
       turbo: ^1.2.9
       typescript: ^4.6.4
     devDependencies:
       '@types/node': 17.0.35
       prettier: 2.6.2
+      tsup: 6.1.2_typescript@4.6.4
       turbo: 1.2.14
       typescript: 4.6.4
 
@@ -45,18 +47,14 @@ importers:
 
   packages/debugger:
     specifiers:
-      '@rollup/plugin-alias': ^3.1.9
       '@solid-devtools/extension-adapter': ^0.0.1
       '@solid-devtools/locator': ^0.0.1
       '@solid-primitives/rootless': ^1.1.0
       '@solid-primitives/scheduled': ^1.0.0
       '@solid-primitives/utils': ^2.0.3
-      rimraf: ^3.0.2
-      rollup: ^2.73.0
-      rollup-preset-solid: ^1.4.0
       solid-js: ^1.4.4
-      typescript: ^4.6.4
-      watchlist: ^0.3.1
+      tsup: ^6.1.2
+      typescript: ^4.7.3
     dependencies:
       '@solid-devtools/extension-adapter': link:../extension-adapter
       '@solid-devtools/locator': link:../locator
@@ -65,12 +63,8 @@ importers:
       '@solid-primitives/utils': 2.0.3_solid-js@1.4.4
       solid-js: 1.4.4
     devDependencies:
-      '@rollup/plugin-alias': 3.1.9_rollup@2.74.1
-      rimraf: 3.0.2
-      rollup: 2.74.1
-      rollup-preset-solid: 1.4.0
-      typescript: 4.6.4
-      watchlist: 0.3.1
+      tsup: 6.1.2_typescript@4.7.3
+      typescript: 4.7.3
 
   packages/extension:
     specifiers:
@@ -105,29 +99,20 @@ importers:
 
   packages/extension-adapter:
     specifiers:
-      '@rollup/plugin-alias': ^3.1.9
-      '@solid-primitives/utils': ^2.0.3
-      rimraf: ^3.0.2
-      rollup: ^2.75.4
-      rollup-preset-solid: ^1.4.0
+      '@solid-primitives/utils': ^2.1.0
       solid-js: ^1.4.4
-      typescript: ^4.7.2
-      watchlist: ^0.3.1
+      tsup: ^6.1.2
+      typescript: ^4.7.3
     dependencies:
-      '@solid-primitives/utils': 2.0.3_solid-js@1.4.4
+      '@solid-primitives/utils': 2.1.0_solid-js@1.4.4
       solid-js: 1.4.4
     devDependencies:
-      '@rollup/plugin-alias': 3.1.9_rollup@2.75.4
-      rimraf: 3.0.2
-      rollup: 2.75.4
-      rollup-preset-solid: 1.4.0
-      typescript: 4.7.2
-      watchlist: 0.3.1
+      tsup: 6.1.2_typescript@4.7.3
+      typescript: 4.7.3
 
   packages/locator:
     specifiers:
       '@motionone/solid': ^10.10.0
-      '@rollup/plugin-alias': ^3.1.9
       '@solid-devtools/babel-plugin': ^0.0.1
       '@solid-devtools/ui': 0.0.1
       '@solid-primitives/bounds': ^0.0.100
@@ -135,12 +120,9 @@ importers:
       '@solid-primitives/keyed': ^1.0.0
       '@solid-primitives/memo': ^0.2.2
       '@solid-primitives/utils': ^2.0.3
-      rimraf: ^3.0.2
-      rollup: ^2.75.4
-      rollup-preset-solid: ^1.4.0
       solid-js: ^1.4.4
-      typescript: ^4.7.2
-      watchlist: ^0.3.1
+      tsup: ^6.1.2
+      typescript: ^4.7.3
     dependencies:
       '@motionone/solid': 10.10.0_solid-js@1.4.4
       '@solid-devtools/ui': link:../ui
@@ -153,12 +135,8 @@ importers:
     optionalDependencies:
       '@solid-devtools/babel-plugin': link:../babel-plugin
     devDependencies:
-      '@rollup/plugin-alias': 3.1.9_rollup@2.75.4
-      rimraf: 3.0.2
-      rollup: 2.75.4
-      rollup-preset-solid: 1.4.0
-      typescript: 4.7.2
-      watchlist: 0.3.1
+      tsup: 6.1.2_typescript@4.7.3
+      typescript: 4.7.3
 
   packages/overlay:
     specifiers:
@@ -1713,16 +1691,6 @@ packages:
       rollup: ^1.20.0||^2.0.0
     dependencies:
       rollup: 2.74.1
-      slash: 3.0.0
-    dev: true
-
-  /@rollup/plugin-alias/3.1.9_rollup@2.75.4:
-    resolution: {integrity: sha512-QI5fsEvm9bDzt32k39wpOwZhVzRcL5ydcffUHMyLVaVaLeC70I8TJZ17F1z1eMoLu4E/UOcH9BWVkKpIKdrfiw==}
-    engines: {node: '>=8.0.0'}
-    peerDependencies:
-      rollup: ^1.20.0||^2.0.0
-    dependencies:
-      rollup: 2.75.4
       slash: 3.0.0
     dev: true
 
@@ -3828,6 +3796,78 @@ packages:
       - ts-node
     dev: true
 
+  /tsup/6.1.2_typescript@4.6.4:
+    resolution: {integrity: sha512-Hw4hKDHaAQkm2eVavlArEOrAPA93bziRDamdfwaNs0vXQdUUFfItvUWY0L/F6oQQMVh6GvjQq1+HpDXw8UKtPA==}
+    engines: {node: '>=14'}
+    hasBin: true
+    peerDependencies:
+      '@swc/core': ^1
+      postcss: ^8.4.12
+      typescript: ^4.1.0
+    peerDependenciesMeta:
+      '@swc/core':
+        optional: true
+      postcss:
+        optional: true
+      typescript:
+        optional: true
+    dependencies:
+      bundle-require: 3.0.4_esbuild@0.14.39
+      cac: 6.7.12
+      chokidar: 3.5.3
+      debug: 4.3.4
+      esbuild: 0.14.39
+      execa: 5.1.1
+      globby: 11.1.0
+      joycon: 3.1.1
+      postcss-load-config: 3.1.4
+      resolve-from: 5.0.0
+      rollup: 2.75.4
+      source-map: 0.8.0-beta.0
+      sucrase: 3.21.0
+      tree-kill: 1.2.2
+      typescript: 4.6.4
+    transitivePeerDependencies:
+      - supports-color
+      - ts-node
+    dev: true
+
+  /tsup/6.1.2_typescript@4.7.3:
+    resolution: {integrity: sha512-Hw4hKDHaAQkm2eVavlArEOrAPA93bziRDamdfwaNs0vXQdUUFfItvUWY0L/F6oQQMVh6GvjQq1+HpDXw8UKtPA==}
+    engines: {node: '>=14'}
+    hasBin: true
+    peerDependencies:
+      '@swc/core': ^1
+      postcss: ^8.4.12
+      typescript: ^4.1.0
+    peerDependenciesMeta:
+      '@swc/core':
+        optional: true
+      postcss:
+        optional: true
+      typescript:
+        optional: true
+    dependencies:
+      bundle-require: 3.0.4_esbuild@0.14.39
+      cac: 6.7.12
+      chokidar: 3.5.3
+      debug: 4.3.4
+      esbuild: 0.14.39
+      execa: 5.1.1
+      globby: 11.1.0
+      joycon: 3.1.1
+      postcss-load-config: 3.1.4
+      resolve-from: 5.0.0
+      rollup: 2.75.4
+      source-map: 0.8.0-beta.0
+      sucrase: 3.21.0
+      tree-kill: 1.2.2
+      typescript: 4.7.3
+    transitivePeerDependencies:
+      - supports-color
+      - ts-node
+    dev: true
+
   /turbo-darwin-64/1.2.14:
     resolution: {integrity: sha512-Fdx212fvhcbF/KKnSoenTtNLZ5Wzl+DDBmwHoHXmG2DX/1qFk4HD1/D6waCySZU1Hu1bQToIimEyrWgwAkCVbQ==}
     cpu: [x64]
@@ -3971,12 +4011,6 @@ packages:
     resolution: {integrity: sha512-9ia/jWHIEbo49HfjrLGfKbZSuWo9iTMwXO+Ca3pRsSpbsMbc7/IU8NKdCZVRRBafVPGnoJeFL76ZOAA84I9fEg==}
     engines: {node: '>=4.2.0'}
     hasBin: true
-
-  /typescript/4.7.2:
-    resolution: {integrity: sha512-Mamb1iX2FDUpcTRzltPxgWMKy3fhg0TN378ylbktPGPK/99KbDtMQ4W1hwgsbPAsG3a0xKa1vmw4VKZQbkvz5A==}
-    engines: {node: '>=4.2.0'}
-    hasBin: true
-    dev: true
 
   /typescript/4.7.3:
     resolution: {integrity: sha512-WOkT3XYvrpXx4vMMqlD+8R8R37fZkjyLGlxavMc4iB8lrl8L0DeTcHbYgw/v0N/z9wAFsgBhcsF0ruoySS22mA==}

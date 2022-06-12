@@ -36,14 +36,7 @@
 			"node": "./dist/esm/index.js"
 		}
 	},
-	"scripts": {
-		"dev": "pnpm run build && watchlist src -- npm run build",
-		"build": "pnpm run clean && rollup -c && rimraf ./dist/source",
-		"clean": "rimraf ./dist",
-		"test": "echo \"NOOP TEST\"",
-		"test:watch": "watchlist src test -- pnpm run test",
-		"typecheck": "tsc --noEmit"
-	},
+	"scripts": {},
 	"devDependencies": {
 		"@rollup/plugin-alias": "^3.1.9",
 		"rimraf": "^3.0.2",
