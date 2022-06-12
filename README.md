@@ -10,6 +10,48 @@ Reactivity Debugger & Devtools Chrome Extension for SolidJS.
 
 To change the way you write, debug and understand your SolidJS applications and reactivity within.
 
+## Available Devtools
+
+All of the packages are currently nothing more then just ideas. Some in progress, and some very much in progress. But a man can dream, and this is what's out there waiting:
+
+### [Babel Plugin](./packages/babel-plugin/)
+
+(`@solid-devtools/babel-plugin`)
+
+A babel plugin for vite for transforming Solid code. For development — debugging purposes only.
+
+Currently only transforms JSX, adding code location to it. Necessary for the [Locator](./packages/locator/) package.
+
+### [Debugger](./packages/debugger/)
+
+###### `solid-devtools`
+
+A runtime package, used to get information out of the Solid's reactivity graph. It's a cornerstone of almost all packages.
+
+It comes with [Extension Adapter](./packages/extension-adapter/) and [Locator](./packages/locator/) packages included.
+
+### [Chrome Extension](./packages/extension/)
+
+Not-yet-public Chrome extension for visualizing and interacting with Solid's reactivity graph.
+
+### [Extension Adapter](./packages/extension-adapter/)
+
+###### `@solid-devtools/extension-adapter`
+
+A runtime library connecting the [Debugger](./packages/debugger/) with [Chrome Extension](./packages/extension/).
+
+### [Locator](./packages/locator/)
+
+###### `@solid-devtools/locator`
+
+A runtime library for locating components on the page, and their source code in VSCode.
+
+### [UI](./packages/ui/)
+
+###### `@solid-devtools/ui`
+
+A collection of UI components for visualizing and interacting with Solid's reactivity graph. Used by the [Chrome Extension](./packages/extension/).
+
 ## Resources
 
 From of the lack of proper README, here are a couple of resources and similar projects that inspire this one:
