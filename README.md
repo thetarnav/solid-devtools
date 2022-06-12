@@ -16,7 +16,7 @@ All of the packages are currently nothing more then just ideas. Some in progress
 
 ### [Babel Plugin](./packages/babel-plugin/)
 
-(`@solid-devtools/babel-plugin`)
+###### `@solid-devtools/babel-plugin`
 
 A babel plugin for vite for transforming Solid code. For development — debugging purposes only.
 
