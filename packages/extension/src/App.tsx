@@ -1,7 +1,7 @@
 import { Component } from "solid-js"
 import { Key } from "@solid-primitives/keyed"
 import { graphs, highlights } from "./graph"
-import { HighlightsProvider, OwnerChildren, tw } from "@ui"
+import { HighlightsProvider, OwnerChildren, tw } from "@solid-devtools/ui"
 import { GraphOwner } from "@shared/graph"
 
 const App: Component = () => {
