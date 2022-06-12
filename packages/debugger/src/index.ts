@@ -8,7 +8,6 @@ import { useLocator } from "@solid-devtools/locator"
 import { useExtensionAdapter } from "@solid-devtools/extension-adapter"
 
 export { makeBatchUpdateListener } from "./batchUpdates"
-export type { BatchUpdateListener } from "./batchUpdates"
 
 let debuggerAlive = false
 

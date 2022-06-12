@@ -102,11 +102,13 @@ importers:
   packages/extension-adapter:
     specifiers:
       '@solid-primitives/utils': ^2.1.0
+      solid-devtools: ^0.0.1
       solid-js: ^1.4.4
       tsup: ^6.1.2
       typescript: ^4.7.3
     dependencies:
       '@solid-primitives/utils': 2.1.0_solid-js@1.4.4
+      solid-devtools: link:../debugger
     devDependencies:
       solid-js: 1.4.4
       tsup: 6.1.2_typescript@4.7.3

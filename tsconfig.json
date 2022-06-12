@@ -16,11 +16,7 @@
 		"types": ["node"],
 		"baseUrl": ".",
 		"paths": {
-			"@shared/*": ["./packages/shared/*"],
-			"solid-devtools": ["./packages/debugger/"],
-			"@solid-devtools/ui": ["./packages/ui/"],
-			"@solid-devtools/locator": ["./packages/locator/"],
-			"@solid-devtools/extension-adapter": ["./packages/extension-adapter/"]
+			"@shared/*": ["./packages/shared/*"]
 		}
 	},
 	"exclude": ["node_modules", "./packages/**/dist/**/*"]

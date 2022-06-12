@@ -1,6 +1,6 @@
 import { Accessor, getOwner as _getOwner, Setter } from "solid-js"
 import { AnyFunction } from "@solid-primitives/utils"
-import { MESSAGE, SafeValue } from "./messanger"
+import { BatchedUpdates, MESSAGE, SafeValue } from "./messanger"
 
 export enum OwnerType {
 	Component,
@@ -40,6 +40,8 @@ export interface SolidOwner extends SolidSignal {
 		[rootID: number]: VoidFunction
 	}
 }
+
+export type BatchUpdateListener = (updates: BatchedUpdates) => void
 
 export type ValueUpdateListener = (newValue: unknown, oldValue: unknown) => void
 
