@@ -88,7 +88,6 @@ export function createGraphRoot(
 	const { update, forceUpdate, rootId } = createOwnerObserver(
 		root,
 		(children, components) => {
-			console.log("GRAPH UPDATE")
 			setChildren(children)
 			setComponents(components)
 		},

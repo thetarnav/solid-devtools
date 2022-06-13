@@ -47,26 +47,9 @@ function createSignalNode(
 	}
 }
 
-/**
- * Creates a copy of `sourceMap` without duplicated signals. (after computation rerun, signals are duplicated in sourceMap)
- */
-function dedupeSourceMap(
-	sourceMap: Readonly<Record<string, SolidSignal>>,
-): Record<string, SolidSignal> {
-	const map: Record<string, SolidSignal> = {}
-	for (let name in sourceMap) {
-		const signal = sourceMap[name]
-		const match = name.match(/(.*)-\d+(?!.)/)
-		if (match) name = signal.name = match[1]
-		map[name] = signal
-	}
-	return map
-}
-
 function mapOwnerSignals(owner: SolidOwner): MappedSignal[] {
 	if (!owner.sourceMap || !TrackSignals) return []
-	const map = (owner.sourceMap = dedupeSourceMap(owner.sourceMap))
-	return Object.values(map).map(raw => {
+	return Object.values(owner.sourceMap).map(raw => {
 		const id = markNodeID(raw)
 		observeValue(raw, id)
 		return createSignalNode({ ...raw, id })
