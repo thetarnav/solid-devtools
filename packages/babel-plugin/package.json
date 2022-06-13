@@ -1,6 +1,6 @@
 {
 	"name": "@solid-devtools/babel-plugin",
-	"version": "0.1.0",
+	"version": "0.1.1",
 	"description": "Babel plugin for transforming SolidJS code in development to support using devtools.",
 	"license": "MIT",
 	"author": "Damian Tarnawski <gthetarnav@gmail.com>",
@@ -47,7 +47,9 @@
 		"@babel/plugin-syntax-typescript": "^7.17.12",
 		"@babel/core": "^7.18.2",
 		"@babel/types": "^7.18.4",
-		"solid-js": "^1.4.4",
 		"vite": "^2.9.12"
+	},
+	"peerDependencies": {
+		"solid-js": "^1.4.4"
 	}
 }

@@ -1,5 +1,4 @@
 import { transformAsync } from "@babel/core"
-import { relative } from "path"
 import { Visitor } from "@babel/traverse"
 import { PluginOption } from "vite"
 import * as t from "@babel/types"
@@ -37,7 +36,7 @@ export default (): {
 				t.jsxAttribute(
 					t.jsxIdentifier(LOCATION_ATTRIBUTE_NAME),
 					t.stringLiteral(
-						getLocationAttribute(filename, location.start.line, location.start.column),
+						getLocationAttribute(filename, location.start.line, location.start.column + 2),
 					),
 				),
 			)
