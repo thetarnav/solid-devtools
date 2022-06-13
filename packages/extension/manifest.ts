@@ -10,7 +10,7 @@ export default defineManifest({
 	devtools_page: "devtools/devtools.html",
 	content_scripts: [
 		{
-			matches: ["<all_urls>"],
+			matches: ["*://*/*"],
 			js: ["content/content.ts"],
 			run_at: "document_start",
 		},

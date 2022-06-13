@@ -74,7 +74,7 @@ importers:
 
   packages/extension:
     specifiers:
-      '@crxjs/vite-plugin': 1.0.6
+      '@crxjs/vite-plugin': ^1.0.11
       '@solid-devtools/ui': 0.1.0
       '@solid-primitives/context': ^0.1.0
       '@solid-primitives/keyed': ^1.0.0
@@ -96,7 +96,7 @@ importers:
       solid-js: 1.4.4
       twind: 0.16.17_typescript@4.7.3
     devDependencies:
-      '@crxjs/vite-plugin': 1.0.6_vite@2.9.12
+      '@crxjs/vite-plugin': 1.0.11_vite@2.9.12
       '@types/chrome': 0.0.183
       rimraf: 3.0.2
       typescript: 4.7.3
@@ -1700,8 +1700,8 @@ packages:
       prettier: 1.19.1
     dev: true
 
-  /@crxjs/vite-plugin/1.0.6_vite@2.9.12:
-    resolution: {integrity: sha512-D+KzEq00PAMNlS448L0bHcE/HVh+u6qA1UlhFtpJyIuCJYBlS79uMAZxVEbr6ktwU0HtBqc4BulwtdJXZT0jGw==}
+  /@crxjs/vite-plugin/1.0.11_vite@2.9.12:
+    resolution: {integrity: sha512-MyWQIQtyuVlTFGRryrvimlgvbfC/3hw7jTMMjC3+zjLzQog05qxI9a8wDvO6iVZ+vSv+RuDttEAPom9ZBS+Nkw==}
     engines: {node: '>=14'}
     peerDependencies:
       vite: ^2.9.0

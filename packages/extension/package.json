@@ -1,6 +1,6 @@
 {
 	"name": "solid-devtools-extension",
-	"version": "0.0.2",
+	"version": "0.0.3",
 	"private": true,
 	"license": "MIT",
 	"author": "Damian Tarnawski <gthetarnav@gmail.com>",
@@ -13,7 +13,7 @@
 		"typecheck": "tsc --noEmit"
 	},
 	"devDependencies": {
-		"@crxjs/vite-plugin": "1.0.6",
+		"@crxjs/vite-plugin": "^1.0.11",
 		"@types/chrome": "^0.0.183",
 		"rimraf": "^3.0.2",
 		"typescript": "^4.7.3",
