@@ -11,7 +11,7 @@ export default defineConfig({
 		alias: {
 			// used inside packages/debugger
 			"@shared": path.resolve(pathToPackages, "shared"),
-			"@ui": path.resolve(pathToPackages, "ui", "src"),
+			"@solid-devtools/ui": path.resolve(pathToPackages, "ui", "src"),
 			"solid-devtools": path.resolve(pathToPackages, "debugger", "src"),
 			"@solid-devtools/locator": path.resolve(pathToPackages, "locator", "src"),
 			"@solid-devtools/extension-adapter": path.resolve(pathToPackages, "extension-adapter", "src"),

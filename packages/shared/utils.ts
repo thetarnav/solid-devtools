@@ -1,3 +1,12 @@
+export function callArrayProp<
+	K extends PropertyKey,
+	T extends (...args: Args) => void,
+	Args extends unknown[],
+>(object: { [_ in K]?: T[] }, key: K, ...args: Args): void {
+	const arr = object[key]
+	if (arr) for (const cb of arr) cb(...args)
+}
+
 export function pushToArrayProp<K extends PropertyKey, T>(
 	object: { [_ in K]?: T[] },
 	key: K,

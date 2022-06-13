@@ -1,5 +1,6 @@
-import { SolidOwner, ValueUpdateListener } from "@shared/graph"
 import { onCleanup } from "solid-js"
+import { SolidOwner, ValueUpdateListener } from "@shared/graph"
+import { callArrayProp, mutateRemove, pushToArrayProp } from "@shared/utils"
 import { getSafeValue } from "./utils"
 
 let windowAfterUpdatePatched = false
@@ -17,11 +18,31 @@ function patchWindowAfterUpdate() {
 /**
  * Runs the callback on every Solid Graph Update – whenever computations update because of a signal change.
  * The listener is automatically cleaned-up on root dispose.
+ *
+ * This will listen to all updates of the reactive graph — including ones outside of the <Debugger> component, and debugger internal computations.
  */
-export function makeGraphUpdateListener(onUpdate: VoidFunction): VoidFunction {
+export function makeSolidUpdateListener(onUpdate: VoidFunction): VoidFunction {
 	patchWindowAfterUpdate()
 	graphUpdateListeners.add(onUpdate)
 	return onCleanup(() => graphUpdateListeners.delete(onUpdate))
+}
+
+const RootUpdateListeners: Record<number, VoidFunction[]> = {}
+
+/**
+ * Runs the callback on every Solid Graph Update — scoped to a Root of given {@link rootId}.
+ * The listener is automatically cleaned-up on root dispose.
+ *
+ * @param rootId id of root of tracked owner tree
+ * @param onUpdate callback
+ * @returns clean function
+ */
+export function makeRootUpdateListener(rootId: number, onUpdate: VoidFunction): VoidFunction {
+	const listeners = pushToArrayProp(RootUpdateListeners, rootId, onUpdate)
+	return () => {
+		mutateRemove(listeners, onUpdate)
+		if (listeners.length === 0) delete RootUpdateListeners[rootId]
+	}
 }
 
 /**
@@ -42,6 +63,7 @@ export function observeComputationUpdate(
 	const fn = owner.fn.bind(owner)
 	owner.fn = (...a) => {
 		for (const listener of Object.values(owner.onComputationUpdate!)) listener()
+		callArrayProp(RootUpdateListeners, rootId)
 		return fn(...a)
 	}
 }

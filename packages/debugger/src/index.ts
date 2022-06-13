@@ -29,7 +29,7 @@ export const Debugger: FlowComponent = props => {
 		const [trackBatchedUpdates, setTrackBatchedUpdates] = createSignal(false, { internal: true })
 		const [trackComponents, setTrackComponents] = createSignal(false, { internal: true })
 
-		const [{ id, children, components }, { forceUpdate, update }] = createGraphRoot(root, {
+		const [{ rootId, children, components }, { forceUpdate, update }] = createGraphRoot(root, {
 			enabled,
 			trackSignals,
 			trackBatchedUpdates,
@@ -38,7 +38,7 @@ export const Debugger: FlowComponent = props => {
 
 		const { enabled: extensionAdapterEnabled } = useExtensionAdapter({
 			tree: {
-				id,
+				id: rootId,
 				get children() {
 					return children()
 				},
