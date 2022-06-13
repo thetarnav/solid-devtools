@@ -11,6 +11,7 @@ import {
 	ParentComponent,
 	Accessor,
 } from "solid-js"
+import Todos from "./Todos"
 
 const Button = (props: { text: string; onClick: VoidFunction }) => {
 	const text = createMemo(() => <span>{props.text}</span>)
@@ -21,8 +22,8 @@ const Button = (props: { text: string; onClick: VoidFunction }) => {
 	)
 }
 
-const Spinner: ParentComponent<{ deg: number }> = props => {
-	return <div>{props.children}</div>
+const PassChildren: ParentComponent = props => {
+	return props.children
 }
 
 const Article: Component = () => {
@@ -31,8 +32,12 @@ const Article: Component = () => {
 			<h3>A cool headline for testing :)</h3>
 			<p>
 				Lorem ipsum dolor sit amet, consectetur adipisicing elit. Dolorem odio culpa vel vitae? Quis
-				deleniti soluta rem velit necessitatibus? Saepe nulla omnis nobis minima perferendis odio
-				doloremque deleniti dolore corrupti.
+				deleniti soluta rem velit necessitatibus?{" "}
+				<PassChildren>
+					<b>
+						Saepe nulla omnis nobis minima perferendis odio doloremque deleniti dolore corrupti.
+					</b>
+				</PassChildren>
 			</p>
 		</article>
 	)
@@ -86,15 +91,16 @@ const App: Component = () => {
 					<Show when={showEven()}>{count()} is even!</Show>
 				</div>
 				<div>
-					<Spinner deg={count()}>
+					<PassChildren>
 						<Show when={showEven()} fallback={<p>\\{smiley()}/</p>}>
 							<p style={{ background: "darkgray" }}>{smiley()}</p>
 						</Show>
-					</Spinner>
+					</PassChildren>
 				</div>
 			</div>
 			<obj.comp />
 			<Article />
+			<Todos />
 		</>
 	)
 }

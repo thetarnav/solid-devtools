@@ -1,4 +1,3 @@
-import { Accessor } from "solid-js"
 import type { ElementLocation } from "@solid-devtools/babel-plugin"
 import { MappedComponent } from "@shared/graph"
 import { LOCATION_ATTRIBUTE_NAME } from "@shared/variables"
@@ -19,22 +18,15 @@ export function getLocationFromAttribute(value: string): ElementLocation | null 
 const findComponentCache = new Map<HTMLElement, SelectedComponent | null>()
 
 export function findComponent(
-	this: Accessor<MappedComponent[]>,
-	getTarget: Accessor<HTMLElement | null>,
+	comps: MappedComponent[],
+	target: HTMLElement | null,
 ): SelectedComponent | null {
-	const target = getTarget()
 	if (!target) return null
-	const comps = this()
 	const checked: HTMLElement[] = []
 	const toCheck = [target]
 	let location: SelectedComponent["location"] = null
-	for (const el of toCheck) {
-		const cached = findComponentCache.get(el)
-		if (cached !== undefined) {
-			for (const cel of checked) findComponentCache.set(cel, cached)
-			return cached
-		}
 
+	for (const el of toCheck) {
 		if (!location) {
 			const locAttr = el.attributes.getNamedItem(LOCATION_ATTRIBUTE_NAME)
 			if (locAttr) {
@@ -43,11 +35,28 @@ export function findComponent(
 			}
 		}
 
+		const cached = findComponentCache.get(el)
+		if (cached !== undefined) {
+			for (const cel of checked) findComponentCache.set(cel, cached)
+			return cached
+				? {
+						...cached,
+						location: location ?? cached.location,
+				  }
+				: null
+		}
+
 		checked.push(el)
-		for (const comp of comps) {
-			if (el === comp.element) {
+
+		for (let i = comps.length - 1; i >= 0; i--) {
+			const comp = comps[i]
+			if (
+				(Array.isArray(comp.resolved) && comp.resolved.some(e => e === el)) ||
+				el === comp.resolved
+			) {
 				const obj = {
-					...comp,
+					name: comp.name,
+					element: el,
 					location,
 				}
 				for (const cel of checked) findComponentCache.set(cel, obj)
@@ -56,6 +65,7 @@ export function findComponent(
 		}
 		el.parentElement && toCheck.push(el.parentElement)
 	}
+
 	for (const cel of checked) findComponentCache.set(cel, null)
 	return null
 }

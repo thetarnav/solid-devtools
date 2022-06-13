@@ -1,4 +1,4 @@
-import { AnyFunction, AnyObject } from "@solid-primitives/utils"
+import { AnyFunction, AnyObject, Many } from "@solid-primitives/utils"
 import { OwnerType, SolidOwner } from "@shared/graph"
 import { SafeValue } from "@shared/messanger"
 
@@ -68,4 +68,23 @@ export function markNodeID(o: { sdtId?: number }): number {
 export function markNodesID(nodes?: { sdtId?: number }[] | null): number[] {
 	if (!nodes || !nodes.length) return []
 	return nodes.map(markNodeID)
+}
+
+export function resolveChildren(value: unknown): Many<HTMLElement> | null {
+	let resolved = getResolvedChildren(value)
+	if (Array.isArray(resolved) && !resolved.length) resolved = null
+	return resolved
+}
+function getResolvedChildren(value: unknown): Many<HTMLElement> | null {
+	if (typeof value === "function" && !value.length && value.name === "bound readSignal")
+		return getResolvedChildren(value())
+	if (Array.isArray(value)) {
+		const results: HTMLElement[] = []
+		for (const item of value) {
+			const result = getResolvedChildren(item)
+			if (result) Array.isArray(result) ? results.push.apply(results, result) : results.push(result)
+		}
+		return results
+	}
+	return value instanceof HTMLElement ? value : null
 }

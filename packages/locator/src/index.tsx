@@ -63,8 +63,9 @@ export function useLocator({ components }: { components: Accessor<MappedComponen
 	if (isProd) return { enabled: () => false }
 
 	const [inLocatorMode, setInLocatorMode] = createSignal(false)
+
 	makeEventListener(window, "keydown", e => {
-		if (e.key !== "Alt") return
+		if (e.key !== "Alt" || e.repeat) return
 		e.preventDefault()
 		setInLocatorMode(true)
 	})
@@ -85,14 +86,23 @@ export function useLocator({ components }: { components: Accessor<MappedComponen
 	makeHoverElementListener(setHoverTarget)
 
 	createComputed(on(components, clearFindComponentCache))
-	const selectedComp = createMemo(() => {
-		if (!inLocatorMode()) return null
-		return findComponent.call(components, hoverTarget)
+
+	createComputed(() => {
+		if (!inLocatorMode()) setSelected(null)
+		else {
+			// defferred computed inside of computed
+			// this is to prevent calculating selected with old components array
+			// data flow: enable inLocatorMode() -> trigger outer computed -> components() updated -> trigger defferred computed
+			createComputed(
+				on([components, hoverTarget], inputs => setSelected(findComponent(...inputs)), {
+					defer: true,
+				}),
+			)
+		}
 	})
-	createComputed(on(selectedComp, setSelected))
 
 	// set pointer cursor to selected component
-	createElementCursor(() => selected()?.element)
+	createElementCursor(() => selected()?.location?.element)
 
 	// go to selected component source code on click
 	createEffect(() => {

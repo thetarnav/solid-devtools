@@ -8,7 +8,14 @@ import {
 	MappedComponent,
 } from "@shared/graph"
 import { ComputationUpdateHandler, SignalUpdateHandler } from "./batchUpdates"
-import { getOwnerName, getSafeValue, markNodeID, markNodesID, markOwnerType } from "./utils"
+import {
+	getOwnerName,
+	getSafeValue,
+	markNodeID,
+	markNodesID,
+	markOwnerType,
+	resolveChildren,
+} from "./utils"
 import { observeComputationUpdate, observeValueUpdate } from "./update"
 
 // Globals set before each walker cycle
@@ -72,9 +79,8 @@ function mapOwner(owner: SolidOwner): MappedOwner {
 	observeComputation(owner, id)
 
 	if (type === OwnerType.Component && TrackComponents && typeof owner.value === "function") {
-		const v = owner.value()
-		// ! HTMLElements aren't JSON serialisable
-		if (v instanceof HTMLElement) Components.push({ name, element: v })
+		const resolved = resolveChildren(owner.value())
+		if (resolved) Components.push({ name, resolved })
 	}
 
 	const mapped = {
@@ -107,6 +113,7 @@ function mapOwnerTree(
 	root: SolidOwner,
 	config: WalkerConfig,
 ): { children: MappedOwner[]; components: MappedComponent[] } {
+	// set the globals to be available for this walk cycle
 	RootID = config.rootId
 	OnSignalUpdate = config.onSignalUpdate
 	OnComputationUpdate = config.onComputationUpdate
@@ -114,6 +121,7 @@ function mapOwnerTree(
 	TrackBatchedUpdates = config.trackBatchedUpdates
 	TrackComponents = config.trackComponents
 	if (TrackComponents) Components = []
+
 	return { children: mapChildren(root), components: Components }
 }
 

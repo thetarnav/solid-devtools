@@ -1,5 +1,5 @@
 import { Accessor, getOwner as _getOwner, Setter } from "solid-js"
-import { AnyFunction } from "@solid-primitives/utils"
+import { AnyFunction, Many } from "@solid-primitives/utils"
 import { BatchedUpdates, MESSAGE, SafeValue } from "./messanger"
 
 export enum OwnerType {
@@ -76,8 +76,8 @@ export interface MappedSignal {
 
 export type MappedComponent = {
 	name: string
-	// ! HTMLElements aren't JSON serialisable
-	element: HTMLElement
+	// ! Functions aren't JSON serialisable
+	resolved: Many<HTMLElement>
 }
 
 //
