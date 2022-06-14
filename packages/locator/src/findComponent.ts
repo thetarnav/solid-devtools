@@ -37,7 +37,7 @@ export function findComponent(
 
 		const cached = findComponentCache.get(el)
 		if (cached !== undefined) {
-			for (const cel of checked) findComponentCache.set(cel, cached)
+			checked.forEach(cel => findComponentCache.set(cel, cached))
 			return cached
 				? {
 						...cached,
@@ -59,14 +59,14 @@ export function findComponent(
 					element: el,
 					location,
 				}
-				for (const cel of checked) findComponentCache.set(cel, obj)
+				checked.forEach(cel => findComponentCache.set(cel, obj))
 				return obj
 			}
 		}
 		el.parentElement && toCheck.push(el.parentElement)
 	}
 
-	for (const cel of checked) findComponentCache.set(cel, null)
+	checked.forEach(cel => findComponentCache.set(cel, null))
 	return null
 }
 

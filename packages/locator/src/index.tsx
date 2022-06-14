@@ -23,18 +23,14 @@ import { createElementCursor } from "./elementCursor"
 
 // TODO: contribute to solid-primitives
 const stopPropagation =
-	<E extends { stopPropagation: VoidFunction }>(
-		callback: (event: E) => void,
-	): ((event: E) => void) =>
+	<E extends Event>(callback: (event: E) => void): ((event: E) => void) =>
 	e => {
 		e.stopPropagation()
 		callback(e)
 	}
 
 const preventDefault =
-	<E extends { preventDefault: VoidFunction }>(
-		callback: (event: E) => void,
-	): ((event: E) => void) =>
+	<E extends Event>(callback: (event: E) => void): ((event: E) => void) =>
 	e => {
 		e.preventDefault()
 		callback(e)
@@ -110,11 +106,7 @@ export function useLocator({ components }: { components: Accessor<MappedComponen
 		makeEventListener(
 			window,
 			"click",
-			e => {
-				e.preventDefault()
-				e.stopPropagation()
-				goToSelectedComponentSource()
-			},
+			preventDefault(stopPropagation(goToSelectedComponentSource)),
 			true,
 		)
 	})
