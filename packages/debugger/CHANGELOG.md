@@ -1,5 +1,11 @@
 # solid-devtools
 
+## 0.2.4
+
+### Patch Changes
+
+- Prevent motionone componentName error
+
 ## 0.2.1
 
 ### Patch Changes
