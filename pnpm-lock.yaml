@@ -123,8 +123,6 @@ importers:
       '@solid-devtools/ui': 0.1.0
       '@solid-primitives/bounds': ^0.0.100
       '@solid-primitives/event-listener': ^2.0.0
-      '@solid-primitives/keyed': ^1.0.0
-      '@solid-primitives/memo': ^0.2.2
       '@solid-primitives/utils': ^2.0.3
       esbuild: ^0.14.43
       esbuild-plugin-solid: ^0.4.2
@@ -136,8 +134,6 @@ importers:
       '@solid-devtools/ui': link:../ui
       '@solid-primitives/bounds': 0.0.100_solid-js@1.4.4
       '@solid-primitives/event-listener': 2.0.0_solid-js@1.4.4
-      '@solid-primitives/keyed': 1.0.0_solid-js@1.4.4
-      '@solid-primitives/memo': 0.2.2_solid-js@1.4.4
       '@solid-primitives/utils': 2.0.3_solid-js@1.4.4
     optionalDependencies:
       '@solid-devtools/babel-plugin': link:../babel-plugin
@@ -2392,16 +2388,6 @@ packages:
     peerDependencies:
       solid-js: ^1.4.0
     dependencies:
-      solid-js: 1.4.4
-    dev: false
-
-  /@solid-primitives/memo/0.2.2_solid-js@1.4.4:
-    resolution: {integrity: sha512-n9lXj/b6fs/zbn5biuQoNO4/B90USwXJq29VlDY1LB6pSs8y61ymlvifetcbVAnU2F2ka0v2Q1s0woDDzbhthw==}
-    peerDependencies:
-      solid-js: ^1.4.2
-    dependencies:
-      '@solid-primitives/scheduled': 1.0.0_solid-js@1.4.4
-      '@solid-primitives/utils': 2.0.3_solid-js@1.4.4
       solid-js: 1.4.4
     dev: false
 
