@@ -14,14 +14,6 @@ To change the way you write, debug and understand your SolidJS applications and 
 
 All of the packages are currently nothing more then just ideas. Some in progress, and some very much in progress. But a man can dream, and this is what's out there waiting:
 
-### [Babel Plugin](./packages/babel-plugin/)
-
-###### `@solid-devtools/babel-plugin`
-
-A babel plugin for vite for transforming Solid code. For development — debugging purposes only.
-
-Currently only transforms JSX, adding code location to it. Necessary for the [Locator](./packages/locator#readme) package.
-
 ### [Debugger](./packages/debugger#readme)
 
 ###### `solid-devtools`
@@ -29,6 +21,20 @@ Currently only transforms JSX, adding code location to it. Necessary for the [Lo
 A runtime package, used to get information and track changes of the Solid's reactivity graph. It's a cornerstone of the rest of the packages.
 
 It comes with [Extension Adapter](./packages/extension-adapter#readme) and [Locator](./packages/locator#readme) packages included.
+
+### [Locator](./packages/locator#readme)
+
+###### `@solid-devtools/locator`
+
+A runtime library for locating components on the page, and their source code in your IDE.
+
+### [Babel Plugin](./packages/babel-plugin/)
+
+###### `@solid-devtools/babel-plugin`
+
+A babel plugin for vite for transforming Solid code. For development — debugging purposes only.
+
+Currently only transforms JSX, adding code location to it. Necessary for the [Locator](./packages/locator#readme) package.
 
 ### [Chrome Extension](./packages/extension#readme)
 
@@ -39,12 +45,6 @@ Not-yet-public Chrome extension for visualizing and interacting with Solid's rea
 ###### `@solid-devtools/extension-adapter`
 
 A runtime library connecting the [Debugger](./packages/debugger#readme) with [Chrome Extension](./packages/extension#readme).
-
-### [Locator](./packages/locator#readme)
-
-###### `@solid-devtools/locator`
-
-A runtime library for locating components on the page, and their source code in your IDE.
 
 ### [UI](./packages/ui#readme)
 
