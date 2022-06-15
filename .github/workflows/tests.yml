@@ -17,7 +17,7 @@ jobs:
         with:
           fetch-depth: 2
 
-      - uses: pnpm/action-setup@v2.2.1
+      - uses: pnpm/action-setup@v2.2.2
 
       - name: Setup Node.js environment ${{ matrix.node-version }}
         uses: actions/setup-node@v3
