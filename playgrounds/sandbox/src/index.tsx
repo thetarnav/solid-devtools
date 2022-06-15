@@ -6,7 +6,11 @@ import App from "./App"
 
 render(
 	() => (
-		<Debugger>
+		<Debugger
+			locator={{
+				targetIDE: "vscode",
+			}}
+		>
 			<App />
 			{/* <App /> */}
 		</Debugger>

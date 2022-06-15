@@ -20,6 +20,7 @@ import { sheet, tw } from "@solid-devtools/ui"
 import { clearFindComponentCache, findComponent } from "./findComponent"
 import { makeHoverElementListener } from "./hoverElement"
 import { createElementCursor } from "./elementCursor"
+import { openCodeSource, TargetIDE, TargetURLFunction } from "./goToSource"
 
 // TODO: contribute to solid-primitives
 const stopPropagation =
@@ -42,18 +43,24 @@ export type SelectedComponent = {
 	location: (ElementLocation & { element: HTMLElement }) | null
 }
 
+export type { TargetIDE, TargetURLFunction } from "./goToSource"
+
+export type LocatorOptions = {
+	components: Accessor<MappedComponent[]>
+	targetIDE?: false | TargetIDE | TargetURLFunction
+}
+
 const [selected, setSelected] = createSignal<SelectedComponent | null>(null, { internal: true })
 const [hoverTarget, setHoverTarget] = createSignal<HTMLElement | null>(null, { internal: true })
 
-function goToSelectedComponentSource(): void {
+function openSelectedComponentSource(target: TargetIDE | TargetURLFunction): void {
 	const comp = selected()
 	if (!comp || !comp.location) return
-	const { path, column, line } = comp.location
-	const url = `vscode://file/${path}:${line}:${column}`
-	window.open(url, "_blank")
+	const { path, line, column } = comp.location
+	openCodeSource(target, path, line, column)
 }
 
-export function useLocator({ components }: { components: Accessor<MappedComponent[]> }): {
+export function useLocator({ components, targetIDE }: LocatorOptions): {
 	enabled: Accessor<boolean>
 } {
 	if (isProd) return { enabled: () => false }
@@ -61,7 +68,8 @@ export function useLocator({ components }: { components: Accessor<MappedComponen
 	const [inLocatorMode, setInLocatorMode] = createSignal(false)
 
 	makeEventListener(window, "keydown", e => {
-		if (e.key !== "Alt" || e.repeat) return
+		if (e.key !== "Alt") return setInLocatorMode(false)
+		if (e.repeat) return
 		e.preventDefault()
 		setInLocatorMode(true)
 	})
@@ -97,19 +105,21 @@ export function useLocator({ components }: { components: Accessor<MappedComponen
 		}
 	})
 
-	// set pointer cursor to selected component
-	createElementCursor(() => selected()?.location?.element)
+	if (targetIDE) {
+		// set pointer cursor to selected component
+		createElementCursor(() => selected()?.location?.element)
 
-	// go to selected component source code on click
-	createEffect(() => {
-		if (!inLocatorMode()) return
-		makeEventListener(
-			window,
-			"click",
-			preventDefault(stopPropagation(goToSelectedComponentSource)),
-			true,
-		)
-	})
+		// go to selected component source code on click
+		createEffect(() => {
+			if (!inLocatorMode()) return
+			makeEventListener(
+				window,
+				"click",
+				preventDefault(stopPropagation(openSelectedComponentSource.bind(null, targetIDE))),
+				true,
+			)
+		})
+	}
 
 	return { enabled: inLocatorMode }
 }
