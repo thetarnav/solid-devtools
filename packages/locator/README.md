@@ -36,19 +36,7 @@ To be able to use the _"open source code in IDE"_ feature, you need to install a
 
 Wrap your application with the [`<Debugger>`](https://github.com/thetarnav/solid-devtools/tree/main/packages/debugger#debugger) component. And enable the Locator module with passing `true` or an options object to the `locator` prop.
 
-```tsx
-import { render } from "solid-js/web"
-import { Debugger } from "solid-devtools"
-
-render(
-	() => (
-		<Debugger locator>
-			<App />
-		</Debugger>
-	),
-	document.getElementById("root")!,
-)
-```
+[**Follow the setup guide on it here**](https://github.com/thetarnav/solid-devtools/tree/main/packages/debugger#Usage-Guide)
 
 #### Locator Options
 

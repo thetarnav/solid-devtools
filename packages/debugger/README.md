@@ -10,7 +10,7 @@ A runtime package, used to get information and track changes of the Solid's reac
 
 It comes with [Extension Adapter](https://github.com/thetarnav/solid-devtools/tree/main/packages/extension-adapter#readme) and [Locator](https://github.com/thetarnav/solid-devtools/tree/main/packages/locator#readme) packages included.
 
-## Usage
+## Usage Guide
 
 ### Installation
 
@@ -20,6 +20,24 @@ npm i solid-devtools
 yarn add solid-devtools
 # or
 pnpm i solid-devtools
+```
+
+### Vite Config
+
+`solid-devtools` has to be currently excluded from `optimizeDeps` in Vite's config file to work properly:
+
+```ts
+import { defineConfig } from "vite"
+import solidPlugin from "vite-plugin-solid"
+
+export default defineConfig({
+	plugins: [solidPlugin()],
+	optimizeDeps: {
+		// this is important:
+		exclude: ["solid-devtools"],
+	},
+	// ...
+})
 ```
 
 ### Debugger
