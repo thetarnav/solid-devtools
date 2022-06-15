@@ -17,20 +17,8 @@
       "outputs": []
     },
     "typecheck": {
-      "cache": false
-    },
-    "deploy": {
       "dependsOn": [
-        "build",
-        "test",
-        "typecheck"
-      ]
-    },
-    "publish": {
-      "dependsOn": [
-        "build",
-        "test",
-        "typecheck"
+        "^build"
       ]
     }
   }
