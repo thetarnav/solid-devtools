@@ -14,7 +14,8 @@ export const fnMatchesRefresh = (fn: AnyFunction): boolean =>
 
 export const getOwnerName = (owner: Readonly<SolidOwner>): string => {
 	const { name, componentName: component } = owner
-	if (component && typeof component === "string") return component.startsWith("_Hot$$") ? component.slice(6) : component
+	if (component && typeof component === "string")
+		return component.startsWith("_Hot$$") ? component.slice(6) : component
 	return name || "(anonymous)"
 }
 
