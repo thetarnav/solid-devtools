@@ -1,5 +1,11 @@
 # @solid-devtools/locator
 
+## 0.2.2
+
+### Patch Changes
+
+- ae43b00: Add option to change locator mode key.
+
 ## 0.2.1
 
 ### Patch Changes
