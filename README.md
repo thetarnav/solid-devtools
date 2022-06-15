@@ -26,7 +26,7 @@ It comes with [Extension Adapter](./packages/extension-adapter#readme) and [Loca
 
 ###### `@solid-devtools/locator`
 
-A runtime library for locating components on the page, and their source code in your IDE.
+A runtime library for locating components on the page, and going to their source code in your IDE.
 
 ### [Babel Plugin](./packages/babel-plugin/)
 

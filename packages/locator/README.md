@@ -6,23 +6,31 @@
 
 # @solid-devtools/locator
 
-A runtime library for locating components on the page, and their source code in your IDE.
+A runtime library for locating components on the page, and going to their source code in your IDE.
 
-## Usage
-
-This module is built-in with [`solid-devtools`](https://github.com/thetarnav/solid-devtools/tree/main/packages/debugger#readme) package.
-
-Usage guide below is for using it with `solid-devtools`.
+## Getting Started
 
 ### Installation
 
+This module is built-in with [`solid-devtools`](https://github.com/thetarnav/solid-devtools/tree/main/packages/debugger#readme) package.
+
+To be able to use the _"open source code in IDE"_ feature, you need to install [`@solid-devtools/babel-plugin`](https://github.com/thetarnav/solid-devtools/tree/main/packages/babel-plugin#readme) additionally.
+
 ```bash
-npm i solid-devtools
+# @solid-devtools/babel-plugin is optional
+
+npm i solid-devtools @solid-devtools/babel-plugin
 # or
-yarn add solid-devtools
+yarn add solid-devtools @solid-devtools/babel-plugin
 # or
-pnpm i solid-devtools
+pnpm i solid-devtools @solid-devtools/babel-plugin
 ```
+
+### Babel Plugin
+
+To be able to use the _"open source code in IDE"_ feature, you need to install and add [`@solid-devtools/babel-plugin`](https://github.com/thetarnav/solid-devtools/tree/main/packages/babel-plugin#readme) to vite plugins.
+
+[**Follow the setup guide on it here**](https://github.com/thetarnav/solid-devtools/tree/main/packages/babel-plugin#Setup)
 
 ### Debugger
 
@@ -75,6 +83,8 @@ Key options: `"altKey"`, `"ctrlKey"`, `"metaKey"`, `"shiftKey"` or `string` to b
 To activate the Locator module — you have to hold down the <kbd>Alt</kbd>/<kbd>Option</kbd> key and move your mouse around the page to highlight components and their different HTML Elements.
 
 Clicking the component should take you to the component source code, given that you specified the [`targetIDE`](#targetIDE) option.
+
+https://user-images.githubusercontent.com/24491503/173916450-27549a91-4bcd-49e1-820d-39f9e81e3151.mp4
 
 ## Changelog
 
