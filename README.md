@@ -26,7 +26,7 @@ Currently only transforms JSX, adding code location to it. Necessary for the [Lo
 
 ###### `solid-devtools`
 
-A runtime package, used to get information out of the Solid's reactivity graph. It's a cornerstone of almost all packages.
+A runtime package, used to get information and track changes of the Solid's reactivity graph. It's a cornerstone of the rest of the packages.
 
 It comes with [Extension Adapter](./packages/extension-adapter/) and [Locator](./packages/locator/) packages included.
 
@@ -44,7 +44,7 @@ A runtime library connecting the [Debugger](./packages/debugger/) with [Chrome E
 
 ###### `@solid-devtools/locator`
 
-A runtime library for locating components on the page, and their source code in VSCode.
+A runtime library for locating components on the page, and their source code in your IDE.
 
 ### [UI](./packages/ui/)
 

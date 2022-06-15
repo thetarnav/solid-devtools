@@ -12,8 +12,7 @@ render(
 			}}
 		>
 			<App />
-			{/* <App /> */}
 		</Debugger>
 	),
-	document.getElementById("root") as HTMLElement,
+	document.getElementById("root")!,
 )
