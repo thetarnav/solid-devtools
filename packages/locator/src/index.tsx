@@ -21,6 +21,7 @@ import { clearFindComponentCache, findComponent } from "./findComponent"
 import { makeHoverElementListener } from "./hoverElement"
 import { createElementCursor } from "./elementCursor"
 import { openCodeSource, TargetIDE, TargetURLFunction } from "./goToSource"
+import { makeHoldKeyListener } from "./holdKeyListener"
 
 // TODO: contribute to solid-primitives
 const stopPropagation =
@@ -48,6 +49,7 @@ export type { TargetIDE, TargetURLFunction } from "./goToSource"
 export type LocatorOptions = {
 	components: Accessor<MappedComponent[]>
 	targetIDE?: false | TargetIDE | TargetURLFunction
+	key?: "altKey" | "ctrlKey" | "metaKey" | "shiftKey" | (string & {})
 }
 
 const [selected, setSelected] = createSignal<SelectedComponent | null>(null, { internal: true })
@@ -60,27 +62,14 @@ function openSelectedComponentSource(target: TargetIDE | TargetURLFunction): voi
 	openCodeSource(target, path, line, column)
 }
 
-export function useLocator({ components, targetIDE }: LocatorOptions): {
+export function useLocator({ components, targetIDE, key = "altKey" }: LocatorOptions): {
 	enabled: Accessor<boolean>
 } {
 	if (isProd) return { enabled: () => false }
 
 	const [inLocatorMode, setInLocatorMode] = createSignal(false)
 
-	makeEventListener(window, "keydown", e => {
-		if (e.key !== "Alt") return setInLocatorMode(false)
-		if (e.repeat) return
-		e.preventDefault()
-		setInLocatorMode(true)
-	})
-	makeEventListener(window, "keyup", e => {
-		if (e.key !== "Alt") return
-		e.preventDefault()
-		setInLocatorMode(false)
-	})
-	makeEventListener(document, "visibilitychange", () => {
-		if (document.visibilityState !== "visible") setInLocatorMode(false)
-	})
+	makeHoldKeyListener(key, setInLocatorMode, true)
 
 	onCleanup(setHoverTarget.bind(void 0, null))
 	onCleanup(setSelected.bind(void 0, null))
