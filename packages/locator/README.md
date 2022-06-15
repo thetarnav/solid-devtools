@@ -58,9 +58,21 @@ Out-of-the-box options: `vscode`, `atom`, `webstorm`
 </Debugger>
 ```
 
+##### `key`
+
+Holding which key should enable the locator overlay? It's `"altKey"` by default — <kbd>Alt</kbd> on Windows, and <kbd>Option</kbd> or <kbd>⌥</kbd> on macOS.
+
+Key options: `"altKey"`, `"ctrlKey"`, `"metaKey"`, `"shiftKey"` or `string` to be compared with `e.key` property.
+
+```tsx
+<Debugger locator={{ key: "ctrlKey" }}>
+	<App />
+</Debugger>
+```
+
 ### Using the Locator on the page
 
-To activate the Locator module — you have to hold down the <kbd>Alt</kbd> key and move your mouse around the page to highlight components and their different HTML Elements.
+To activate the Locator module — you have to hold down the <kbd>Alt</kbd>/<kbd>Option</kbd> key and move your mouse around the page to highlight components and their different HTML Elements.
 
 Clicking the component should take you to the component source code, given that you specified the [`targetIDE`](#targetIDE) option.
 
