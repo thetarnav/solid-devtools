@@ -75,7 +75,7 @@ importers:
   packages/extension:
     specifiers:
       '@crxjs/vite-plugin': ^1.0.11
-      '@solid-devtools/ui': 0.1.0
+      '@solid-devtools/ui': 0.1.1
       '@solid-primitives/context': ^0.1.0
       '@solid-primitives/keyed': ^1.0.0
       '@solid-primitives/rootless': ^1.1.0
@@ -120,7 +120,7 @@ importers:
     specifiers:
       '@motionone/solid': ^10.10.0
       '@solid-devtools/babel-plugin': ^0.1.0
-      '@solid-devtools/ui': 0.1.0
+      '@solid-devtools/ui': 0.1.1
       '@solid-primitives/bounds': ^0.0.100
       '@solid-primitives/event-listener': ^2.0.0
       '@solid-primitives/utils': ^2.0.3
