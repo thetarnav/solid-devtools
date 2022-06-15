@@ -20,37 +20,37 @@ All of the packages are currently nothing more then just ideas. Some in progress
 
 A babel plugin for vite for transforming Solid code. For development — debugging purposes only.
 
-Currently only transforms JSX, adding code location to it. Necessary for the [Locator](./packages/locator/) package.
+Currently only transforms JSX, adding code location to it. Necessary for the [Locator](./packages/locator#readme) package.
 
-### [Debugger](./packages/debugger/)
+### [Debugger](./packages/debugger#readme)
 
 ###### `solid-devtools`
 
 A runtime package, used to get information and track changes of the Solid's reactivity graph. It's a cornerstone of the rest of the packages.
 
-It comes with [Extension Adapter](./packages/extension-adapter/) and [Locator](./packages/locator/) packages included.
+It comes with [Extension Adapter](./packages/extension-adapter#readme) and [Locator](./packages/locator#readme) packages included.
 
-### [Chrome Extension](./packages/extension/)
+### [Chrome Extension](./packages/extension#readme)
 
 Not-yet-public Chrome extension for visualizing and interacting with Solid's reactivity graph.
 
-### [Extension Adapter](./packages/extension-adapter/)
+### [Extension Adapter](./packages/extension-adapter#readme)
 
 ###### `@solid-devtools/extension-adapter`
 
-A runtime library connecting the [Debugger](./packages/debugger/) with [Chrome Extension](./packages/extension/).
+A runtime library connecting the [Debugger](./packages/debugger#readme) with [Chrome Extension](./packages/extension#readme).
 
-### [Locator](./packages/locator/)
+### [Locator](./packages/locator#readme)
 
 ###### `@solid-devtools/locator`
 
 A runtime library for locating components on the page, and their source code in your IDE.
 
-### [UI](./packages/ui/)
+### [UI](./packages/ui#readme)
 
 ###### `@solid-devtools/ui`
 
-A collection of UI components for visualizing and interacting with Solid's reactivity graph. Used by the [Chrome Extension](./packages/extension/).
+A collection of UI components for visualizing and interacting with Solid's reactivity graph. Used by the [Chrome Extension](./packages/extension#readme).
 
 ## Resources
 
