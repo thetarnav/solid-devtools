@@ -21,7 +21,7 @@ export default function Root() {
 			</head>
 			<body>
 				<Nav />
-				<Debugger>
+				<Debugger locator={{ targetIDE: "vscode" }}>
 					<ErrorBoundary>
 						<Suspense fallback={<div class="news-list-nav">Loading...</div>}>
 							<Routes />

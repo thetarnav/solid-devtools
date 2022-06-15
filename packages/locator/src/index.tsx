@@ -170,8 +170,8 @@ const ElementOverlay: Component<{
 						class={tw`absolute top-full inset-x-0 flex justify-center`}
 					>
 						<div class={tw`relative mt-3 py-1 px-2 bg-cyan-900 bg-opacity-80 rounded`}>
-							<span>
-								{props.name}: {props.tag}
+							<span class={tw`text-cyan-50 font-mono text-sm leading-3`}>
+								{props.name}: <span class={tw`text-cyan-200`}>{props.tag}</span>
 							</span>
 						</div>
 					</Motion.div>

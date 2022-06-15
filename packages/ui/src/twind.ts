@@ -12,7 +12,13 @@ export function hexToRgb(hex: string, alpha?: number) {
 
 export const sheet = cssomSheet({ target: new CSSStyleSheet() })
 
-export const colors = _colors
+export const colors = {
+	black: _colors.black,
+	cyan: _colors.cyan,
+	while: _colors.white,
+	amber: _colors.amber,
+	gray: _colors.gray,
+}
 
 export const theme: ThemeConfiguration = {
 	colors,
