@@ -5,7 +5,6 @@
 	"author": "Damian Tarnawski <gthetarnav@gmail.com>",
 	"contributors": [],
 	"scripts": {
-		"dev": "turbo run dev",
 		"build": "turbo run build --filter=!./playgrounds/*",
 		"test": "turbo run test --filter=!./playgrounds/*",
 		"typecheck": "turbo run typecheck --filter=!./playgrounds/*",

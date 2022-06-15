@@ -32,12 +32,6 @@
         "test",
         "typecheck"
       ]
-    },
-    "dev": {
-      "outputs": [
-        "dist/**"
-      ],
-      "cache": false
     }
   }
 }
