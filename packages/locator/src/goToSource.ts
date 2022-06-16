@@ -1,9 +1,10 @@
-export type TargetIDE = "vscode" | "webstorm" | "atom"
+export type TargetIDE = "vscode" | "webstorm" | "atom" | "vscode-insiders"
 
 export type TargetURLFunction = (path: string, line: number, column: number) => string
 
 const targetIDEMap: Record<TargetIDE, TargetURLFunction> = {
 	vscode: (path, line, column) => `vscode://file/${path}:${line}:${column}`,
+	"vscode-insiders": (path, line, column) => `vscode-insiders://file/${path}:${line}:${column}`,
 	atom: (path, line, column) =>
 		`atom://core/open/file?filename=${path}&line=${line}&column=${column}`,
 	webstorm: (path, line, column) => `webstorm://open?file=${path}&line=${line}&column=${column}`,

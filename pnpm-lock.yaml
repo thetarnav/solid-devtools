@@ -122,6 +122,7 @@ importers:
       '@solid-devtools/ui': 0.1.2
       '@solid-primitives/bounds': ^0.0.100
       '@solid-primitives/event-listener': ^2.2.0
+      '@solid-primitives/platform': ^0.0.100
       '@solid-primitives/resize-observer': ^2.0.2
       '@solid-primitives/utils': ^2.1.1
       esbuild: ^0.14.43
@@ -134,6 +135,7 @@ importers:
       '@solid-devtools/ui': link:../ui
       '@solid-primitives/bounds': 0.0.100_solid-js@1.4.4
       '@solid-primitives/event-listener': 2.2.0_solid-js@1.4.4
+      '@solid-primitives/platform': 0.0.100_solid-js@1.4.4
       '@solid-primitives/resize-observer': 2.0.2_solid-js@1.4.4
       '@solid-primitives/utils': 2.1.1_solid-js@1.4.4
       motion: 10.10.0
@@ -2061,6 +2063,14 @@ packages:
 
   /@solid-primitives/keyed/1.0.0_solid-js@1.4.4:
     resolution: {integrity: sha512-9vznFq6xR1FLEcQH3S3aGZ3iWOY6EZmDEl0raNOXJxdgXnudHepcAOfx8G52bROHJ3AdPnIqv4ITIegPQOK2BA==}
+    peerDependencies:
+      solid-js: ^1.4.0
+    dependencies:
+      solid-js: 1.4.4
+    dev: false
+
+  /@solid-primitives/platform/0.0.100_solid-js@1.4.4:
+    resolution: {integrity: sha512-TMGeDtjA8b7xlUQGq3QhdR8SSa49bvqhFJ0iD+iy4fsnEHr9xA5hIDyBX/ntmz70SbOVyz+z9IdXwBnqurr4bQ==}
     peerDependencies:
       solid-js: ^1.4.0
     dependencies:

@@ -1,5 +1,12 @@
 # @solid-devtools/locator
 
+## 0.2.6
+
+### Patch Changes
+
+- Add "vscode-insiders" target and fix loc pattern matching for Mac
+- ac1e6a5: Use event handler wrappers from event-listener package
+
 ## 0.2.5
 
 ### Patch Changes

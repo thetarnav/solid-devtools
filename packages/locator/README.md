@@ -58,7 +58,7 @@ Currently Locator allows for specifying these props:
 
 Choose in which IDE the component source code should be revealed.
 
-Out-of-the-box options: `vscode`, `atom`, `webstorm`
+Out-of-the-box options: `vscode`, `atom`, `webstorm` and `vscode-insiders`
 
 ```tsx
 <Debugger locator={{ targetIDE: "vscode" }}>
@@ -84,7 +84,7 @@ To activate the Locator module — you have to hold down the <kbd>Alt</kbd>/<kbd
 
 Clicking the component should take you to the component source code, given that you specified the [`targetIDE`](#targetIDE) option.
 
-https://user-images.githubusercontent.com/24491503/173916450-27549a91-4bcd-49e1-820d-39f9e81e3151.mp4
+https://user-images.githubusercontent.com/24491503/174093606-a0d80331-021f-4d43-b0bb-e9a4041e1a26.mp4
 
 ## Changelog
 
