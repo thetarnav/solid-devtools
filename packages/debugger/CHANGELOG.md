@@ -1,5 +1,16 @@
 # solid-devtools
 
+## 0.2.9
+
+### Patch Changes
+
+- 7f0a2ca: Remove dev console log
+- 8f5f6e5: Change package export map to avoid shipping code to production
+- Updated dependencies [7f0a2ca]
+- Updated dependencies [8f5f6e5]
+  - @solid-devtools/extension-adapter@0.2.9
+  - solid-devtools@0.2.9
+
 ## 0.2.8
 
 ### Patch Changes
