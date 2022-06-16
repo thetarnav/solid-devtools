@@ -1,9 +1,9 @@
-import { Component, createEffect, For, JSX, on, ParentComponent, Show, splitProps } from "solid-js"
+import { Component, createEffect, For, JSX, ParentComponent, Show, splitProps } from "solid-js"
 import { combineProps } from "@solid-primitives/props"
 import { GraphSignal } from "@shared/graph"
 import { tw, colors, hexToRgb } from "./twind"
 import { useHighlights } from "./ctx/highlights"
-import { createHover } from "@solid-aria/primitives"
+import { createHover } from "@solid-aria/interactions"
 
 export const Signals: Component<{ each: GraphSignal[] }> = props => {
 	return (

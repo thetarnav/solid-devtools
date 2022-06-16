@@ -1,5 +1,14 @@
 # @solid-devtools/locator
 
+## 0.2.5
+
+### Patch Changes
+
+- Remove Motionone/solid dependency to just using just motion animations.
+  Display component name on top of the element overlay if the highlighted element is at the bottom oh the screen.
+- Updated dependencies
+  - @solid-devtools/ui@0.1.2
+
 ## 0.2.3
 
 ### Patch Changes

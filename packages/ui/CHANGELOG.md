@@ -1,5 +1,11 @@
 # @solid-devtools/ui
 
+## 0.1.2
+
+### Patch Changes
+
+- clear dependencies
+
 ## 0.1.1
 
 ### Patch Changes

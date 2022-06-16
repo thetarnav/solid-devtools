@@ -1,5 +1,12 @@
 # solid-devtools-extension
 
+## 0.0.5
+
+### Patch Changes
+
+- Updated dependencies
+  - @solid-devtools/ui@0.1.2
+
 ## 0.0.4
 
 ### Patch Changes
