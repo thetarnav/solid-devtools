@@ -1,5 +1,11 @@
 # solid-devtools
 
+## 0.2.7
+
+### Patch Changes
+
+- update locator version
+
 ## 0.2.4
 
 ### Patch Changes
