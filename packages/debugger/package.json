@@ -24,15 +24,19 @@
 	],
 	"type": "module",
 	"main": "./dist/server.cjs",
-	"module": "./dist/index.js",
+	"module": "./dist/server.js",
 	"types": "./dist/index.d.ts",
 	"exports": {
-		"node": {
+		"browser": {
+			"development": {
+				"import": "./dist/index.js",
+				"require": "./dist/index.cjs"
+			},
 			"import": "./dist/server.js",
 			"require": "./dist/server.cjs"
 		},
-		"import": "./dist/index.js",
-		"require": "./dist/index.cjs"
+		"import": "./dist/server.js",
+		"require": "./dist/server.cjs"
 	},
 	"scripts": {
 		"dev": "tsup --watch",
@@ -41,16 +45,17 @@
 		"typecheck": "tsc --noEmit"
 	},
 	"devDependencies": {
-		"typescript": "^4.7.3",
+		"solid-js": "^1.4.4",
 		"tsup": "^6.1.2",
-		"solid-js": "^1.4.4"
+		"typescript": "^4.7.3"
 	},
 	"dependencies": {
+		"@solid-devtools/extension-adapter": "^0.1.0",
+		"@solid-devtools/locator": "^0.2.6",
 		"@solid-primitives/rootless": "^1.1.0",
 		"@solid-primitives/scheduled": "^1.0.0",
 		"@solid-primitives/utils": "^2.0.3",
-		"@solid-devtools/locator": "^0.2.6",
-		"@solid-devtools/extension-adapter": "^0.1.0"
+		"solid-devtools": "^0.2.8"
 	},
 	"peerDependencies": {
 		"solid-js": "^1.4.4"
