@@ -54,11 +54,13 @@
 		"@solid-devtools/locator": "^0.2.6",
 		"@solid-primitives/rootless": "^1.1.0",
 		"@solid-primitives/scheduled": "^1.0.0",
-		"@solid-primitives/utils": "^2.0.3",
-		"solid-devtools": "^0.2.9"
+		"@solid-primitives/utils": "^2.0.3"
 	},
 	"peerDependencies": {
 		"solid-js": "^1.4.4"
+	},
+	"optionalDependencies": {
+		"@solid-devtools/babel-plugin": "^0.1.1"
 	},
 	"packageManager": "pnpm@7.2.0"
 }
