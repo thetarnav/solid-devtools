@@ -22,24 +22,6 @@ yarn add solid-devtools
 pnpm i solid-devtools
 ```
 
-### Vite Config
-
-`solid-devtools` has to be currently excluded from `optimizeDeps` in Vite's config file to work properly:
-
-```ts
-import { defineConfig } from "vite"
-import solidPlugin from "vite-plugin-solid"
-
-export default defineConfig({
-	plugins: [solidPlugin()],
-	optimizeDeps: {
-		// this is important:
-		exclude: ["solid-devtools"],
-	},
-	// ...
-})
-```
-
 ### Debugger
 
 The most important piece of `solid-devtools` is the `<Debugger>` component. Debugger is a cornerstone of all solid-devtools. It analyses and tracks changes of Solid's reactive graph.
