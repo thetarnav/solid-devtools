@@ -12,7 +12,11 @@ import {
 import { Portal } from "solid-js/web"
 import { isProd } from "@solid-primitives/utils"
 import { createElementBounds } from "@solid-primitives/bounds"
-import { makeEventListener } from "@solid-primitives/event-listener"
+import {
+	makeEventListener,
+	stopPropagation,
+	preventDefault,
+} from "@solid-primitives/event-listener"
 import { MappedComponent } from "@shared/graph"
 import type { ElementLocation } from "@solid-devtools/babel-plugin"
 import { sheet, tw } from "@solid-devtools/ui"
@@ -22,21 +26,6 @@ import { createElementCursor } from "./elementCursor"
 import { openCodeSource, TargetIDE, TargetURLFunction } from "./goToSource"
 import { makeHoldKeyListener } from "./holdKeyListener"
 import { animate } from "motion"
-
-// TODO: contribute to solid-primitives
-const stopPropagation =
-	<E extends Event>(callback: (event: E) => void): ((event: E) => void) =>
-	e => {
-		e.stopPropagation()
-		callback(e)
-	}
-
-const preventDefault =
-	<E extends Event>(callback: (event: E) => void): ((event: E) => void) =>
-	e => {
-		e.preventDefault()
-		callback(e)
-	}
 
 export type SelectedComponent = {
 	name: string

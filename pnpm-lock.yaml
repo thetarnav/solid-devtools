@@ -121,9 +121,9 @@ importers:
       '@solid-devtools/babel-plugin': ^0.1.0
       '@solid-devtools/ui': 0.1.2
       '@solid-primitives/bounds': ^0.0.100
-      '@solid-primitives/event-listener': ^2.0.0
+      '@solid-primitives/event-listener': ^2.2.0
       '@solid-primitives/resize-observer': ^2.0.2
-      '@solid-primitives/utils': ^2.0.3
+      '@solid-primitives/utils': ^2.1.1
       esbuild: ^0.14.43
       esbuild-plugin-solid: ^0.4.2
       motion: ^10.10.0
@@ -133,9 +133,9 @@ importers:
     dependencies:
       '@solid-devtools/ui': link:../ui
       '@solid-primitives/bounds': 0.0.100_solid-js@1.4.4
-      '@solid-primitives/event-listener': 2.0.0_solid-js@1.4.4
+      '@solid-primitives/event-listener': 2.2.0_solid-js@1.4.4
       '@solid-primitives/resize-observer': 2.0.2_solid-js@1.4.4
-      '@solid-primitives/utils': 2.0.3_solid-js@1.4.4
+      '@solid-primitives/utils': 2.1.1_solid-js@1.4.4
       motion: 10.10.0
     optionalDependencies:
       '@solid-devtools/babel-plugin': link:../babel-plugin
@@ -2036,9 +2036,9 @@ packages:
     peerDependencies:
       solid-js: ^1.4.0
     dependencies:
-      '@solid-primitives/event-listener': 2.1.0_solid-js@1.4.4
+      '@solid-primitives/event-listener': 2.2.0_solid-js@1.4.4
       '@solid-primitives/resize-observer': 2.0.2_solid-js@1.4.4
-      '@solid-primitives/utils': 2.1.0_solid-js@1.4.4
+      '@solid-primitives/utils': 2.1.1_solid-js@1.4.4
       solid-js: 1.4.4
     dev: false
 
@@ -2050,17 +2050,8 @@ packages:
       solid-js: 1.4.4
     dev: false
 
-  /@solid-primitives/event-listener/2.0.0_solid-js@1.4.4:
-    resolution: {integrity: sha512-52VCuor6vL9LFDS0cNZ3n6vHLDEi1/ysAnu5GeonUEDE4MP4h2av7sJsnqj9EFZKNx7BfvRJPqC4xB2YSNMnfQ==}
-    peerDependencies:
-      solid-js: ^1.3.1
-    dependencies:
-      '@solid-primitives/utils': 1.5.2_solid-js@1.4.4
-      solid-js: 1.4.4
-    dev: false
-
-  /@solid-primitives/event-listener/2.1.0_solid-js@1.4.4:
-    resolution: {integrity: sha512-EO80fKPjG3CsACyLY+7an6kZfGRVUjifi8Rl7WvLHK99ryupwHy7uSAPMRivWE30cHJkjCWmdOchgdv02XmNdA==}
+  /@solid-primitives/event-listener/2.2.0_solid-js@1.4.4:
+    resolution: {integrity: sha512-puW/GHPOHi/3z8KIdJozlDh2MwQsAVZxBSeahY29t26QBDzInRch0SZZ+6xX/Tjb7g7Q8IjZgA4QWE7Ts1EX7Q==}
     peerDependencies:
       solid-js: ^1.3.1
     dependencies:
@@ -2090,9 +2081,9 @@ packages:
     peerDependencies:
       solid-js: ^1.4.0
     dependencies:
-      '@solid-primitives/event-listener': 2.1.0_solid-js@1.4.4
+      '@solid-primitives/event-listener': 2.2.0_solid-js@1.4.4
       '@solid-primitives/rootless': 1.1.0_solid-js@1.4.4
-      '@solid-primitives/utils': 2.1.0_solid-js@1.4.4
+      '@solid-primitives/utils': 2.1.1_solid-js@1.4.4
       solid-js: 1.4.4
     dev: false
 
@@ -2139,6 +2130,14 @@ packages:
 
   /@solid-primitives/utils/2.1.0_solid-js@1.4.4:
     resolution: {integrity: sha512-QOiYt7CG/q8zV22C6J630YdnUf+365csXWQbMVFkY5YsfvpfFskI+Sh6Ge7FfD8aQxTPJ7PpqtlN0p5wVuiiAw==}
+    peerDependencies:
+      solid-js: ^1.4.1
+    dependencies:
+      solid-js: 1.4.4
+    dev: false
+
+  /@solid-primitives/utils/2.1.1_solid-js@1.4.4:
+    resolution: {integrity: sha512-im/WJDgLnJgjuEhB2a46RgDU/ODoc4g+FMySjJ8erPTFrhyTwIe5wv9MSUf7SYsguLe4rfQirNEKLSSyLPETkw==}
     peerDependencies:
       solid-js: ^1.4.1
     dependencies:

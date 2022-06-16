@@ -45,9 +45,9 @@
 	"dependencies": {
 		"@solid-devtools/ui": "0.1.2",
 		"@solid-primitives/bounds": "^0.0.100",
-		"@solid-primitives/event-listener": "^2.0.0",
+		"@solid-primitives/event-listener": "^2.2.0",
 		"@solid-primitives/resize-observer": "^2.0.2",
-		"@solid-primitives/utils": "^2.0.3",
+		"@solid-primitives/utils": "^2.1.1",
 		"motion": "^10.10.0"
 	},
 	"peerDependencies": {
