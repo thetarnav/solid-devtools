@@ -7,8 +7,6 @@ import {
 } from "@shared/messanger"
 import type { MappedRoot, BatchUpdateListener } from "@shared/graph"
 
-console.log("debugger script working")
-
 startListeningWindowMessages()
 
 export function useExtensionAdapter({
