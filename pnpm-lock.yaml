@@ -187,7 +187,7 @@ importers:
   packages/ui:
     specifiers:
       '@otonashixav/solid-flip': ^0.10.5
-      '@solid-aria/interactions': ^0.0.7
+      '@solid-aria/interactions': ^0.1.2
       '@solid-devtools/babel-plugin': ^0.1.0
       '@solid-primitives/keyed': ^1.0.0
       '@solid-primitives/props': ^2.1.7
@@ -200,7 +200,7 @@ importers:
       typescript: ^4.7.3
     dependencies:
       '@otonashixav/solid-flip': 0.10.5_solid-js@1.4.4
-      '@solid-aria/interactions': 0.0.7_qpuz4ldqz3v5zwrnlwsqpsac2a
+      '@solid-aria/interactions': 0.1.2_solid-js@1.4.4
       '@solid-primitives/keyed': 1.0.0_solid-js@1.4.4
       '@solid-primitives/props': 2.1.7_solid-js@1.4.4
       '@solid-primitives/utils': 2.1.0_solid-js@1.4.4
@@ -2002,37 +2002,35 @@ packages:
       picomatch: 2.3.1
     dev: true
 
-  /@solid-aria/interactions/0.0.7_qpuz4ldqz3v5zwrnlwsqpsac2a:
-    resolution: {integrity: sha512-rstps04oy/4/UUdWFwUmDfx+KGB+KRkKLQsriTeQLcebExHtXQQS9GL30foyvKgiNNezVUsfXDgAZYbGfS3zpw==}
+  /@solid-aria/interactions/0.1.2_solid-js@1.4.4:
+    resolution: {integrity: sha512-KRhSBfZHsQsSgQzIkX8qXCJVxIHTc/Gb3F1mbFWIIBqzNmeSrSYqoZGlR14tX7mXt1xSCpaYdO2h3itITEpn6g==}
     peerDependencies:
-      '@solid-primitives/props': ^2.1.2
-      '@solid-primitives/utils': ^2.0.1
-      solid-js: ^1.4.3
+      solid-js: ^1.4.4
     dependencies:
-      '@solid-aria/types': 0.0.5_a7wfgkjzm25s2qx5qt75bkjo74
-      '@solid-aria/utils': 0.0.6_solid-js@1.4.4
+      '@solid-aria/types': 0.1.2_solid-js@1.4.4
+      '@solid-aria/utils': 0.1.2_solid-js@1.4.4
+      '@solid-primitives/platform': 0.0.100_solid-js@1.4.4
       '@solid-primitives/props': 2.1.7_solid-js@1.4.4
-      '@solid-primitives/utils': 2.1.0_solid-js@1.4.4
+      '@solid-primitives/utils': 2.1.1_solid-js@1.4.4
       solid-js: 1.4.4
     dev: false
 
-  /@solid-aria/types/0.0.5_a7wfgkjzm25s2qx5qt75bkjo74:
-    resolution: {integrity: sha512-yNIjsKAiEBQI4iydyG+btYpIhmeG9QRM0HU1PiSWxFWHNaUNVOnr9Sbw0R7imCDv1ijk2t5nq3AtcO6oO1+Q3Q==}
+  /@solid-aria/types/0.1.2_solid-js@1.4.4:
+    resolution: {integrity: sha512-dHCjHB14tkmp6nQEOn5Ug71rPHhISAOs+Kv1q8G0mdsL37C9jABzBAX3JHm3DzVwkh7VadgS0bVvFmiim9aUaw==}
     peerDependencies:
-      '@solid-primitives/utils': ^2.0.1
-      solid-js: ^1.4.3
+      solid-js: ^1.4.4
     dependencies:
-      '@solid-primitives/utils': 2.1.0_solid-js@1.4.4
+      '@solid-primitives/utils': 2.1.1_solid-js@1.4.4
       solid-js: 1.4.4
     dev: false
 
-  /@solid-aria/utils/0.0.6_solid-js@1.4.4:
-    resolution: {integrity: sha512-nw6fHvJUW3dkNeMMPkHkeg5ixg0qUjIDa3CR140nV3T0dg873yLmlVOKGpGxqvjY1+4cqMUWyQpeni1nWYITcQ==}
+  /@solid-aria/utils/0.1.2_solid-js@1.4.4:
+    resolution: {integrity: sha512-FAKTXBdgv4h6/tZeyD2ncfqALVTOeh44IxiZCFSMF1VGv0R4C9KgMunjSujUt+oCQqhqkgdVy9Okn+PfBu2aLA==}
     peerDependencies:
-      solid-js: ^1.4.3
+      solid-js: ^1.4.4
     dependencies:
-      '@solid-aria/types': 0.0.5_a7wfgkjzm25s2qx5qt75bkjo74
-      '@solid-primitives/utils': 2.1.0_solid-js@1.4.4
+      '@solid-aria/types': 0.1.2_solid-js@1.4.4
+      '@solid-primitives/utils': 2.1.1_solid-js@1.4.4
       solid-js: 1.4.4
     dev: false
 

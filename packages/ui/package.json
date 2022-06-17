@@ -39,7 +39,7 @@
 	},
 	"dependencies": {
 		"@otonashixav/solid-flip": "^0.10.5",
-		"@solid-aria/interactions": "^0.0.7",
+		"@solid-aria/interactions": "^0.1.2",
 		"@solid-primitives/props": "^2.1.7",
 		"@solid-primitives/utils": "^2.1.0",
 		"@solid-primitives/keyed": "^1.0.0",
