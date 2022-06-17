@@ -50,11 +50,11 @@ render(
 )
 ```
 
-#### Locator Options
+### Locator Options
 
 Currently Locator allows for specifying these props:
 
-##### `targetIDE`
+#### `targetIDE`
 
 Choose in which IDE the component source code should be revealed.
 
@@ -97,7 +97,7 @@ Returning `false` will prevent calling `window.open` to navigate to URL, and let
 </Debugger>
 ```
 
-##### `key`
+#### `key`
 
 Holding which key should enable the locator overlay? It's `"altKey"` by default — <kbd>Alt</kbd> on Windows, and <kbd>Option</kbd> or <kbd>⌥</kbd> on macOS.
 
