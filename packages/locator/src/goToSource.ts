@@ -1,31 +1,35 @@
 export type TargetIDE = "vscode" | "webstorm" | "atom" | "vscode-insiders"
 
-export type TargetURLFunction = (path: string, line: number, column: number) => string
-
-const targetIDEMap: Record<TargetIDE, TargetURLFunction> = {
-	vscode: (path, line, column) => `vscode://file/${path}:${line}:${column}`,
-	"vscode-insiders": (path, line, column) => `vscode-insiders://file/${path}:${line}:${column}`,
-	atom: (path, line, column) =>
-		`atom://core/open/file?filename=${path}&line=${line}&column=${column}`,
-	webstorm: (path, line, column) => `webstorm://open?file=${path}&line=${line}&column=${column}`,
+export type ElementLocation = {
+	filePath: string
+	line: number
+	column: number
 }
 
-function getTargetURL(
-	target: TargetIDE | TargetURLFunction,
-	path: string,
-	line: number,
-	column: number,
-): string {
-	if (typeof target === "function") return target(path, line, column)
-	return targetIDEMap[target](path, line, column)
+export type SourceCodeData = ElementLocation & {
+	projectPath: string
+	element: HTMLElement
 }
 
-export function openCodeSource(
-	target: TargetIDE | TargetURLFunction,
-	path: string,
-	line: number,
-	column: number,
-): void {
-	const url = getTargetURL(target, path, line, column)
-	window.open(url, "_blank")
+export type TargetURLFunction = (data: SourceCodeData) => string | false
+
+const targetIDEMap: Record<TargetIDE, (data: SourceCodeData) => string> = {
+	vscode: ({ projectPath, filePath, line, column }) =>
+		`vscode://file/${projectPath}/${filePath}:${line}:${column}`,
+	"vscode-insiders": ({ projectPath, filePath, line, column }) =>
+		`vscode-insiders://file/${projectPath}/${filePath}:${line}:${column}`,
+	atom: ({ projectPath, filePath, line, column }) =>
+		`atom://core/open/file?filename=${projectPath}/${filePath}&line=${line}&column=${column}`,
+	webstorm: ({ projectPath, filePath, line, column }) =>
+		`webstorm://open?file=${projectPath}/${filePath}&line=${line}&column=${column}`,
+}
+
+function getTargetURL(target: TargetIDE | TargetURLFunction, data: SourceCodeData): string | false {
+	if (typeof target === "function") return target(data)
+	return targetIDEMap[target](data)
+}
+
+export function openCodeSource(target: TargetIDE | TargetURLFunction, data: SourceCodeData): void {
+	const url = getTargetURL(target, data)
+	if (typeof url === "string") window.open(url, "_blank")
 }

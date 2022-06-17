@@ -1,19 +1,18 @@
-import type { ElementLocation } from "@solid-devtools/babel-plugin"
 import { MappedComponent } from "@shared/graph"
 import { LOCATION_ATTRIBUTE_NAME } from "@shared/variables"
 import { isMac } from "@solid-primitives/platform"
 import { SelectedComponent } from "."
+import { ElementLocation } from "./goToSource"
 
-const LOC_ATTR_REGEX_WIN =
-	/^((?:[a-zA-Z]:\\)?(?:[^\\/:*?"<>|]+\\)*[^\\/:*?"<>|]+):([0-9]+):([0-9]+)$/
-const LOC_ATTR_REGEX_MAC = /^((?:[a-zA-Z]:)?(?:[^\\:*?"<>|]+\/)*[^\\/:*?"<>|]+):([0-9]+):([0-9]+)$/
+const LOC_ATTR_REGEX_WIN = /^((?:[^\\/:*?"<>|]+\\)*[^\\/:*?"<>|]+):([0-9]+):([0-9]+)$/
+const LOC_ATTR_REGEX_MAC = /^((?:[^\\:*?"<>|]+\/)*[^\\/:*?"<>|]+):([0-9]+):([0-9]+)$/
 
 export function getLocationFromAttribute(value: string): ElementLocation | null {
 	const match = value.match(isMac ? LOC_ATTR_REGEX_MAC : LOC_ATTR_REGEX_WIN)
 	if (!match) return null
-	const [, path, line, column] = match
+	const [, filePath, line, column] = match
 	return {
-		path,
+		filePath,
 		line: +line,
 		column: +column,
 	}

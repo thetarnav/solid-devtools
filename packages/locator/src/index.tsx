@@ -18,19 +18,18 @@ import {
 	preventDefault,
 } from "@solid-primitives/event-listener"
 import { MappedComponent } from "@shared/graph"
-import type { ElementLocation } from "@solid-devtools/babel-plugin"
 import { sheet, tw } from "@solid-devtools/ui"
 import { clearFindComponentCache, findComponent } from "./findComponent"
 import { makeHoverElementListener } from "./hoverElement"
 import { createElementCursor } from "./elementCursor"
-import { openCodeSource, TargetIDE, TargetURLFunction } from "./goToSource"
+import { openCodeSource, SourceCodeData, TargetIDE, TargetURLFunction } from "./goToSource"
 import { makeHoldKeyListener } from "./holdKeyListener"
 import { animate } from "motion"
 
 export type SelectedComponent = {
 	name: string
 	element: HTMLElement
-	location: (ElementLocation & { element: HTMLElement }) | null
+	location: Omit<SourceCodeData, "projectPath"> | null
 }
 
 export type { TargetIDE, TargetURLFunction } from "./goToSource"
@@ -47,8 +46,8 @@ const [hoverTarget, setHoverTarget] = createSignal<HTMLElement | null>(null, { i
 function openSelectedComponentSource(target: TargetIDE | TargetURLFunction): void {
 	const comp = selected()
 	if (!comp || !comp.location) return
-	const { path, line, column } = comp.location
-	openCodeSource(target, path, line, column)
+	const projectPath = window.$sdt_projectPath
+	openCodeSource(target, { ...comp.location, projectPath })
 }
 
 export function useLocator({ components, targetIDE, key = "altKey" }: LocatorOptions): {

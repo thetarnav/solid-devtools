@@ -46,10 +46,10 @@
 	"dependencies": {
 		"@babel/plugin-syntax-typescript": "^7.17.12",
 		"@babel/core": "^7.18.2",
-		"@babel/types": "^7.18.4",
-		"vite": "^2.9.12"
+		"@babel/types": "^7.18.4"
 	},
 	"peerDependencies": {
-		"solid-js": "^1.4.4"
+		"solid-js": "^1.4.4",
+		"vite": "^2.9.12"
 	}
 }
