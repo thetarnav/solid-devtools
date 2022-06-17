@@ -66,6 +66,37 @@ Out-of-the-box options: `vscode`, `atom`, `webstorm` and `vscode-insiders`
 </Debugger>
 ```
 
+**Target URL Function:**
+
+To target custom URLs (e.g. Github files) the `targetIDE` option accepts an function returning a `string` or `false`.
+
+```tsx
+<Debugger
+  locator={{
+    targetIDE: ({ filePath, line }) =>
+      // will navigate to this link when clicking
+      `https://github.com/thetarnav/solid-devtools/blob/main/playgrounds/sandbox/${filePath}#L${line}`,
+  }}
+>
+  <App />
+</Debugger>
+```
+
+Returning `false` will prevent calling `window.open` to navigate to URL, and let you handle the click yourself.
+
+```tsx
+<Debugger
+  locator={{
+    targetIDE({ projectPath, filePath, line, column, element }) {
+      console.log({ projectPath, filePath, line, column, element })
+      return false
+    },
+  }}
+>
+  <App />
+</Debugger>
+```
+
 ##### `key`
 
 Holding which key should enable the locator overlay? It's `"altKey"` by default — <kbd>Alt</kbd> on Windows, and <kbd>Option</kbd> or <kbd>⌥</kbd> on macOS.
