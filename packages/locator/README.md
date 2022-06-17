@@ -41,12 +41,12 @@ import { render } from "solid-js/web"
 import { Debugger } from "solid-devtools"
 
 render(
-	() => (
-		<Debugger locator>
-			<App />
-		</Debugger>
-	),
-	document.getElementById("root")!,
+  () => (
+    <Debugger locator>
+      <App />
+    </Debugger>
+  ),
+  document.getElementById("root")!,
 )
 ```
 
@@ -62,7 +62,7 @@ Out-of-the-box options: `vscode`, `atom`, `webstorm` and `vscode-insiders`
 
 ```tsx
 <Debugger locator={{ targetIDE: "vscode" }}>
-	<App />
+  <App />
 </Debugger>
 ```
 
@@ -74,7 +74,7 @@ Key options: `"altKey"`, `"ctrlKey"`, `"metaKey"`, `"shiftKey"` or `string` to b
 
 ```tsx
 <Debugger locator={{ key: "ctrlKey" }}>
-	<App />
+  <App />
 </Debugger>
 ```
 

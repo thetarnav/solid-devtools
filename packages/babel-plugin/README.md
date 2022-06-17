@@ -30,7 +30,7 @@ import solidPlugin from "vite-plugin-solid"
 import { devtoolsPlugin } from "@solid-devtools/babel-plugin"
 
 export default defineConfig({
-	plugins: [devtoolsPlugin(), solidPlugin()],
+  plugins: [devtoolsPlugin(), solidPlugin()],
 })
 ```
 
