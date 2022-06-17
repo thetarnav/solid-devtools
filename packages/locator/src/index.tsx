@@ -25,6 +25,7 @@ import { createElementCursor } from "./elementCursor"
 import { openCodeSource, SourceCodeData, TargetIDE, TargetURLFunction } from "./goToSource"
 import { makeHoldKeyListener } from "./holdKeyListener"
 import { animate } from "motion"
+import { WINDOW_PROJECTPATH_PROPERTY } from "@shared/variables"
 
 export type SelectedComponent = {
 	name: string
@@ -46,7 +47,7 @@ const [hoverTarget, setHoverTarget] = createSignal<HTMLElement | null>(null, { i
 function openSelectedComponentSource(target: TargetIDE | TargetURLFunction): void {
 	const comp = selected()
 	if (!comp || !comp.location) return
-	const projectPath = window.$sdt_projectPath
+	const projectPath = (window as any)[WINDOW_PROJECTPATH_PROPERTY]
 	openCodeSource(target, { ...comp.location, projectPath })
 }
 
