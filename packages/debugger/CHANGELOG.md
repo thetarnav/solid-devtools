@@ -1,5 +1,15 @@
 # solid-devtools
 
+## 0.3.0
+
+### Patch Changes
+
+- 1f14b6d: Locator & BabelPlugin:
+  Split absolute filepath into projectPath and relative filePath.
+  Returning `false` from the URL builder function won't execute `window.open`
+- Updated dependencies [1f14b6d]
+  - @solid-devtools/locator@0.3.0
+
 ## 0.2.9
 
 ### Patch Changes
