@@ -77,8 +77,6 @@ const App: Component = () => {
 		{ name: "EFFECT" },
 	)
 
-	// createDevtools(getOwner()!)
-
 	return (
 		<>
 			<h1>Welcome to the Sandbox</h1>

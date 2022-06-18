@@ -19,7 +19,7 @@ export interface SolidSignal {
 	name: string
 	value: unknown
 	observers?: SolidOwner[] | null
-	// added by sdt:
+	// added by solid-devtools:
 	sdtId?: number
 	onValueUpdate?: {
 		[rootID: number]: ValueUpdateListener
@@ -29,16 +29,18 @@ export interface SolidSignal {
 export interface SolidOwner extends SolidSignal {
 	componentName?: string
 	owner: SolidOwner | null
-	owned: SolidOwner[]
+	owned: SolidOwner[] | null
 	fn: AnyFunction
 	cleanups: VoidFunction[] | null
 	sources: (SolidOwner | SolidSignal)[] | null
 	context: any | null
 	sourceMap?: Record<string, SolidSignal>
+	// added by solid-devtools:
 	sdtType?: OwnerType
 	onComputationUpdate?: {
 		[rootID: number]: VoidFunction
 	}
+	ownedRoots?: WeakSet<SolidOwner>
 }
 
 export type BatchUpdateListener = (updates: BatchedUpdates) => void

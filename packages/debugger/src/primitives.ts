@@ -1,6 +1,7 @@
-import { Accessor, createEffect, createSignal, untrack } from "solid-js"
+import { Accessor, createEffect, createSignal, onCleanup, runWithOwner, untrack } from "solid-js"
+import type { Owner } from "solid-js/types/reactive/signal"
 import { throttle } from "@solid-primitives/scheduled"
-import { MappedComponent, MappedOwner, SolidOwner } from "@shared/graph"
+import { getOwner, MappedComponent, MappedOwner, SolidOwner } from "@shared/graph"
 import { UpdateType } from "@shared/messanger"
 import { batchUpdate, ComputationUpdateHandler, SignalUpdateHandler } from "./batchUpdates"
 import { makeRootUpdateListener } from "./update"
@@ -99,4 +100,39 @@ export function createGraphRoot(
 		{ rootId, children, components },
 		{ update, forceUpdate },
 	]
+}
+
+/**
+ * Helps the debugger find and reattach an reactive owner created by `createRoot` to it's detached parent.
+ *
+ * Call this synchronously inside `createRoot` callback body, whenever you are using `createRoot` yourself to dispose of computations early, or inside `<For>`/`<Index>` components to reattach their children to reactive graph visible by the devtools debugger.
+ * @example
+ * createRoot(dispose => {
+ * 	// This reactive Owner disapears form the owner tree
+ *
+ * 	// Reattach the Owner to the tree:
+ * 	reattachOwner();
+ * });
+ */
+export function reattachOwner(): void {
+	let owner = getOwner()
+	if (!owner)
+		return console.warn(
+			"reatachOwner helper should be used synchronously inside createRoot callback body.",
+		)
+
+	// find the detached root — user could be calling reattachOwner from inside a futher computation
+	while (owner.owner?.owned?.includes(owner)) owner = owner.owner
+	const parent = owner.owner
+
+	// attach to parent
+	if (parent) {
+		const ownedRoots = parent.ownedRoots ?? (parent.ownedRoots = new Set())
+		ownedRoots.add(owner)
+		runWithOwner(owner as Owner, () => onCleanup(() => ownedRoots.delete(owner!)))
+	}
+	// attach to UNOWNED
+	else {
+		// TODO
+	}
 }

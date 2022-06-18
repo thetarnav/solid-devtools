@@ -1,5 +1,6 @@
-import { createEffect, createSignal, batch, For, Component } from "solid-js"
+import { createEffect, createSignal, batch, For, Component, createRoot } from "solid-js"
 import { createStore, SetStoreFunction, Store } from "solid-js/store"
+import { reattachOwner } from "solid-devtools"
 
 export function createLocalStore<T extends object>(
 	name: string,
@@ -45,21 +46,24 @@ const Todos: Component = () => {
 				<button>+</button>
 			</form>
 			<For each={todos}>
-				{(todo, i) => (
-					<div>
-						<input
-							type="checkbox"
-							checked={todo.done}
-							onChange={e => setTodos(i(), "done", e.currentTarget.checked)}
-						/>
-						<input
-							type="text"
-							value={todo.title}
-							onChange={e => setTodos(i(), "title", e.currentTarget.value)}
-						/>
-						<button onClick={() => setTodos(t => removeIndex(t, i()))}>x</button>
-					</div>
-				)}
+				{(todo, i) => {
+					reattachOwner()
+					return (
+						<div>
+							<input
+								type="checkbox"
+								checked={todo.done}
+								onChange={e => setTodos(i(), "done", e.currentTarget.checked)}
+							/>
+							<input
+								type="text"
+								value={todo.title}
+								onChange={e => setTodos(i(), "title", e.currentTarget.value)}
+							/>
+							<button onClick={() => setTodos(t => removeIndex(t, i()))}>x</button>
+						</div>
+					)
+				}}
 			</For>
 		</>
 	)
