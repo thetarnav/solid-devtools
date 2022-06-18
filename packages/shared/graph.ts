@@ -1,5 +1,5 @@
 import { Accessor, getOwner as _getOwner, Setter } from "solid-js"
-import { AnyFunction, Many } from "@solid-primitives/utils"
+import { AnyFunction, Many, Modify } from "@solid-primitives/utils"
 import { BatchedUpdates, MESSAGE, SafeValue } from "./messanger"
 
 export enum OwnerType {
@@ -26,22 +26,38 @@ export interface SolidSignal {
 	}
 }
 
-export interface SolidOwner extends SolidSignal {
-	componentName?: string
-	owner: SolidOwner | null
-	owned: SolidOwner[] | null
-	fn: AnyFunction
+export interface SolidRoot {
+	name?: string
 	cleanups: VoidFunction[] | null
-	sources: (SolidOwner | SolidSignal)[] | null
 	context: any | null
+	owner: SolidOwner | SolidRoot | null
+	owned: SolidOwner[] | null
 	sourceMap?: Record<string, SolidSignal>
 	// added by solid-devtools:
-	sdtType?: OwnerType
+	ownedRoots?: Set<SolidRoot>
+}
+
+export interface SolidComputation extends SolidRoot, SolidSignal {
+	name: string
+	fn: AnyFunction
+	sources?: (SolidOwner | SolidSignal)[] | null
+	// added by solid-devtools:
 	onComputationUpdate?: {
 		[rootID: number]: VoidFunction
 	}
-	ownedRoots?: WeakSet<SolidOwner>
 }
+
+export type SolidOwner = Modify<
+	SolidSignal & SolidRoot & SolidComputation,
+	{
+		name?: string
+		value?: unknown
+		componentName?: string
+		fn?: AnyFunction
+		// added by solid-devtools:
+		sdtType?: OwnerType
+	}
+>
 
 export type BatchUpdateListener = (updates: BatchedUpdates) => void
 

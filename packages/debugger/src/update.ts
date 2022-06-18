@@ -1,5 +1,5 @@
 import { onCleanup } from "solid-js"
-import { SolidOwner, ValueUpdateListener } from "@shared/graph"
+import { SolidComputation, SolidSignal, ValueUpdateListener } from "@shared/graph"
 import { callArrayProp, mutateRemove, pushToArrayProp } from "@shared/utils"
 import { getSafeValue } from "./utils"
 
@@ -49,7 +49,7 @@ export function makeRootUpdateListener(rootId: number, onUpdate: VoidFunction): 
  * Wraps the fn prop of owner object to trigger handler whenever the computation is executed.
  */
 export function observeComputationUpdate(
-	owner: SolidOwner,
+	owner: SolidComputation,
 	rootId: number,
 	onRun: VoidFunction,
 ): void {
@@ -72,24 +72,24 @@ export function observeComputationUpdate(
  * Patches the owner/signal value, firing the callback on each update immediately as it happened.
  */
 export function observeValueUpdate(
-	node: { value: unknown; onSignalUpdate?: Record<number, ValueUpdateListener> },
+	node: SolidSignal,
 	rootId: number,
 	onUpdate: ValueUpdateListener,
 ): void {
 	// node already patched
-	if (node.onSignalUpdate) {
-		node.onSignalUpdate[rootId] = onUpdate
+	if (node.onValueUpdate) {
+		node.onValueUpdate[rootId] = onUpdate
 		return
 	}
 	// patch node
-	node.onSignalUpdate = { [rootId]: onUpdate }
+	node.onValueUpdate = { [rootId]: onUpdate }
 	let value = node.value
 	let safeValue = getSafeValue(value)
 	Object.defineProperty(node, "value", {
 		get: () => value,
 		set: newValue => {
 			const newSafe = getSafeValue(newValue)
-			for (const listener of Object.values(node.onSignalUpdate!)) listener(newSafe, safeValue)
+			for (const listener of Object.values(node.onValueUpdate!)) listener(newSafe, safeValue)
 			;(value = newValue), (safeValue = newSafe)
 		},
 	})

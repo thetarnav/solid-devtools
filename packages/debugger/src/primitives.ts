@@ -115,7 +115,7 @@ export function createGraphRoot(
  * });
  */
 export function reattachOwner(): void {
-	let owner = getOwner()
+	let owner = getOwner()!
 	if (!owner)
 		return console.warn(
 			"reatachOwner helper should be used synchronously inside createRoot callback body.",
@@ -129,7 +129,7 @@ export function reattachOwner(): void {
 	if (parent) {
 		const ownedRoots = parent.ownedRoots ?? (parent.ownedRoots = new Set())
 		ownedRoots.add(owner)
-		runWithOwner(owner as Owner, () => onCleanup(() => ownedRoots.delete(owner!)))
+		runWithOwner(owner as Owner, () => onCleanup(() => ownedRoots.delete(owner)))
 	}
 	// attach to UNOWNED
 	else {
