@@ -18,6 +18,9 @@ import {
 } from "./utils"
 import { observeComputationUpdate, observeValueUpdate } from "./update"
 
+/** Top-level computations or createRoots without a detached Owner */
+const Unowned: Set<SolidOwner> = new Set()
+
 // Globals set before each walker cycle
 let RootID: number
 let OnSignalUpdate: SignalUpdateHandler

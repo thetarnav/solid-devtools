@@ -55,6 +55,15 @@ export function findOwner(
 	return null
 }
 
+/**
+ * Attach onCleanup callback to a reactive owner
+ */
+export function onOwnerCleanup(owner: SolidOwner, fn: VoidFunction): VoidFunction {
+	if (owner.cleanups === null) owner.cleanups = [fn]
+	else owner.cleanups.push(fn)
+	return fn
+}
+
 let LAST_ID = 0
 export const getNewSdtId = () => LAST_ID++
 

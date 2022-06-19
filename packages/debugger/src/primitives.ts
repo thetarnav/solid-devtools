@@ -1,12 +1,12 @@
-import { Accessor, createEffect, createSignal, onCleanup, runWithOwner, untrack } from "solid-js"
-import type { Owner } from "solid-js/types/reactive/signal"
+import { Accessor, createEffect, createSignal, untrack } from "solid-js"
 import { throttle } from "@solid-primitives/scheduled"
 import { getOwner, MappedComponent, MappedOwner, SolidOwner } from "@shared/graph"
 import { UpdateType } from "@shared/messanger"
 import { batchUpdate, ComputationUpdateHandler, SignalUpdateHandler } from "./batchUpdates"
 import { makeRootUpdateListener } from "./update"
 import { mapOwnerTree } from "./walker"
-import { getNewSdtId } from "./utils"
+import { useDebuggerContext } from "./debugger"
+import { onOwnerCleanup } from "./utils"
 
 export type CreateOwnerTreeOptions = {
 	enabled?: Accessor<boolean>
@@ -15,27 +15,23 @@ export type CreateOwnerTreeOptions = {
 	trackComponents?: Accessor<boolean>
 }
 
-export function boundReturn<T>(this: T): T {
-	return this
-}
+const falseFn = () => false
 
 export function createOwnerObserver(
 	owner: SolidOwner,
+	rootId: number,
 	onUpdate: (children: MappedOwner[], components: MappedComponent[]) => void,
 	options: CreateOwnerTreeOptions = {},
 ): {
 	update: VoidFunction
 	forceUpdate: VoidFunction
-	rootId: number
 } {
 	const {
 		enabled,
-		trackSignals = boundReturn.bind(false),
-		trackComponents = boundReturn.bind(false),
-		trackBatchedUpdates = boundReturn.bind(false),
+		trackSignals = falseFn,
+		trackComponents = falseFn,
+		trackBatchedUpdates = falseFn,
 	} = options
-
-	const rootId = getNewSdtId()
 
 	const onComputationUpdate: ComputationUpdateHandler = payload => {
 		batchUpdate({ type: UpdateType.Computation, payload })
@@ -66,15 +62,15 @@ export function createOwnerObserver(
 		})
 	else makeRootUpdateListener(rootId, update)
 
-	return { update, forceUpdate, rootId }
+	return { update, forceUpdate }
 }
 
 export function createGraphRoot(
 	root: SolidOwner,
+	rootId: number,
 	options?: CreateOwnerTreeOptions,
 ): [
 	{
-		rootId: number
 		children: Accessor<MappedOwner[]>
 		components: Accessor<MappedComponent[]>
 	},
@@ -86,8 +82,9 @@ export function createGraphRoot(
 	const [children, setChildren] = createSignal<MappedOwner[]>([], { internal: true })
 	const [components, setComponents] = createSignal<MappedComponent[]>([], { internal: true })
 
-	const { update, forceUpdate, rootId } = createOwnerObserver(
+	const { update, forceUpdate } = createOwnerObserver(
 		root,
+		rootId,
 		(children, components) => {
 			setChildren(children)
 			setComponents(components)
@@ -97,7 +94,7 @@ export function createGraphRoot(
 	update()
 
 	return [
-		{ rootId, children, components },
+		{ children, components },
 		{ update, forceUpdate },
 	]
 }
@@ -121,6 +118,11 @@ export function reattachOwner(): void {
 			"reatachOwner helper should be used synchronously inside createRoot callback body.",
 		)
 
+	const ctx = useDebuggerContext()
+	if (!ctx) return console.warn("reatachOwner helper should be used under <Debugger> component.")
+
+	ctx.update()
+
 	// find the detached root — user could be calling reattachOwner from inside a futher computation
 	while (owner.owner?.owned?.includes(owner)) owner = owner.owner
 	const parent = owner.owner
@@ -129,7 +131,10 @@ export function reattachOwner(): void {
 	if (parent) {
 		const ownedRoots = parent.ownedRoots ?? (parent.ownedRoots = new Set())
 		ownedRoots.add(owner)
-		runWithOwner(owner as Owner, () => onCleanup(() => ownedRoots.delete(owner)))
+		onOwnerCleanup(owner, () => {
+			ownedRoots.delete(owner)
+			ctx.update()
+		})
 	}
 	// attach to UNOWNED
 	else {

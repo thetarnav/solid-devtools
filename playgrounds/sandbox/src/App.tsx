@@ -1,3 +1,4 @@
+import { reattachOwner } from "solid-devtools"
 import {
 	Component,
 	createSignal,
@@ -10,10 +11,17 @@ import {
 	Setter,
 	ParentComponent,
 	Accessor,
+	createRoot,
 } from "solid-js"
 import Todos from "./Todos"
 
 const Button = (props: { text: string; onClick: VoidFunction }) => {
+	createRoot(dispose => {
+		reattachOwner()
+		createComputed(() => {}, undefined, { name: "HEYYY, I should BE DEAD" })
+		setTimeout(dispose, 2000)
+	})
+
 	const text = createMemo(() => <span>{props.text}</span>)
 	return (
 		<button aria-label={props.text} onClick={props.onClick}>
@@ -62,6 +70,14 @@ const App: Component = () => {
 			createSignal("I am here too!", { name: "async" })
 		})
 	})
+
+	setTimeout(() => {
+		createRoot(dispose => {
+			reattachOwner()
+			createComputed(() => {}, undefined, { name: "Async Root" })
+			setTimeout(dispose, 2000)
+		}, owner)
+	}, 4000)
 
 	let setMe: Setter<string>
 	const [smiley, setSmiley] = createSignal<Accessor<string>>()

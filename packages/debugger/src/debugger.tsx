@@ -1,16 +1,19 @@
-import { Accessor, createMemo, createSignal, onCleanup, ParentComponent } from "solid-js"
+import {
+	Accessor,
+	createContext,
+	createMemo,
+	createSignal,
+	onCleanup,
+	ParentComponent,
+	useContext,
+} from "solid-js"
 import { LocatorOptions, useLocator } from "@solid-devtools/locator"
 import { createBranch } from "@solid-primitives/rootless"
 import { useExtensionAdapter } from "@solid-devtools/extension-adapter"
 import { getOwner } from "@shared/graph"
 import { createGraphRoot } from "./primitives"
 import { makeBatchUpdateListener } from "./batchUpdates"
-
-export type DebuggerLocatorOptions = Omit<LocatorOptions, "components">
-
-export type DebuggerProps = {
-	locator?: boolean | DebuggerLocatorOptions
-}
+import { getNewSdtId } from "./utils"
 
 function createConsumers(): [
 	needed: Accessor<boolean>,
@@ -19,6 +22,21 @@ function createConsumers(): [
 	const [consumers, setConsumers] = createSignal<Accessor<boolean>[]>([])
 	const enabled = createMemo<boolean>(() => consumers().some(consumer => consumer()))
 	return [enabled, consumer => setConsumers(p => [...p, consumer])]
+}
+
+export type DebuggerContextState = {
+	rootId: number
+	update: VoidFunction
+	forceUpdate: VoidFunction
+}
+
+const DebuggerContext = createContext<DebuggerContextState>()
+export const useDebuggerContext = () => useContext(DebuggerContext)
+
+export type DebuggerLocatorOptions = Omit<LocatorOptions, "components">
+
+export type DebuggerProps = {
+	locator?: boolean | DebuggerLocatorOptions
 }
 
 let debuggerAlive = false
@@ -38,6 +56,10 @@ export const Debugger: ParentComponent<DebuggerProps> = props => {
 	onCleanup(() => (debuggerAlive = false))
 
 	const root = getOwner()!
+	const rootId = getNewSdtId()
+
+	// update and forceUpdate will be populated synchronously
+	const ctx = { rootId } as DebuggerContextState
 
 	// setup the debugger in a separate root, so that it doesn't walk and track itself
 	createBranch(() => {
@@ -46,12 +68,15 @@ export const Debugger: ParentComponent<DebuggerProps> = props => {
 		const [trackBatchedUpdates, addTrackBatchedUpdatesConsumer] = createConsumers()
 		const [trackComponents, addTrackComponentsConsumer] = createConsumers()
 
-		const [{ rootId, children, components }, { forceUpdate, update }] = createGraphRoot(root, {
+		const [{ children, components }, { forceUpdate, update }] = createGraphRoot(root, rootId, {
 			enabled,
 			trackSignals,
 			trackBatchedUpdates,
 			trackComponents,
 		})
+
+		ctx.update = update
+		ctx.forceUpdate = forceUpdate
 
 		{
 			const { enabled } = useExtensionAdapter({
@@ -80,5 +105,5 @@ export const Debugger: ParentComponent<DebuggerProps> = props => {
 		}
 	})
 
-	return props.children
+	return <DebuggerContext.Provider value={ctx}>{props.children}</DebuggerContext.Provider>
 }
