@@ -1,8 +1,6 @@
-import { Component } from "solid-js"
-import { Key } from "@solid-primitives/keyed"
+import { Component, For } from "solid-js"
 import { graphs, highlights } from "./graph"
-import { HighlightsProvider, OwnerChildren, tw } from "@solid-devtools/ui"
-import { GraphOwner } from "@shared/graph"
+import { HighlightsProvider, OwnerNode, tw } from "@solid-devtools/ui"
 
 const App: Component = () => {
 	return (
@@ -12,9 +10,7 @@ const App: Component = () => {
 				<p>Number of Roots: {Object.keys(graphs).length}</p>
 			</header>
 			<div>
-				<Key each={graphs} by="id">
-					{root => <OwnerChildren children={root().children as GraphOwner[]} />}
-				</Key>
+				<For each={graphs}>{root => <OwnerNode owner={root.tree} />}</For>
 			</div>
 		</HighlightsProvider>
 	)

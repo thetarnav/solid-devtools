@@ -12,8 +12,20 @@ import {
 	ParentComponent,
 	Accessor,
 	createRoot,
+	onCleanup,
 } from "solid-js"
 import Todos from "./Todos"
+
+createRoot(() => {
+	reattachOwner()
+
+	getOwner()!.name = "OUTSIDE_ROOT"
+
+	const [count, setCount] = createSignal(0)
+	createEffect(() => count())
+	const timeoutId = setInterval(() => setCount(p => ++p), 1500)
+	onCleanup(() => clearInterval(timeoutId))
+})
 
 const Button = (props: { text: string; onClick: VoidFunction }) => {
 	createRoot(dispose => {

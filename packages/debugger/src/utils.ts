@@ -1,6 +1,7 @@
 import { AnyFunction, AnyObject, Many } from "@solid-primitives/utils"
-import { OwnerType, SolidOwner } from "@shared/graph"
+import { DebuggerContext, OwnerType, SolidOwner } from "@shared/graph"
 import { SafeValue } from "@shared/messanger"
+import { Accessor, createMemo, createSignal } from "solid-js"
 
 export const isComponent = (o: Readonly<AnyObject>): boolean =>
 	"componentName" in o && typeof o.value === "function"
@@ -42,7 +43,9 @@ export function getSafeValue(value: unknown): SafeValue {
 	return value + ""
 }
 
-/** helper to getting to an owner that you want */
+/**
+ * helper to getting to an owner that you want — walking downwards
+ */
 export function findOwner(
 	root: SolidOwner,
 	predicate: (owner: SolidOwner) => boolean,
@@ -53,6 +56,17 @@ export function findOwner(
 		if (Array.isArray(owner.owned)) queue.push(...owner.owned)
 	}
 	return null
+}
+
+export function setDebuggerContext(owner: SolidOwner, ctx: DebuggerContext): void {
+	owner.sdtContext = ctx
+}
+export function getDebuggerContext(owner: SolidOwner): DebuggerContext | undefined {
+	while (!owner.sdtContext && owner.owner) owner = owner.owner
+	return owner.sdtContext
+}
+export function removeDebuggerContext(owner: SolidOwner): void {
+	delete owner.sdtContext
 }
 
 /**
@@ -67,9 +81,9 @@ export function onOwnerCleanup(owner: SolidOwner, fn: VoidFunction): VoidFunctio
 let LAST_ID = 0
 export const getNewSdtId = () => LAST_ID++
 
-export function markOwnerType(o: SolidOwner): OwnerType {
+export function markOwnerType(o: SolidOwner, type?: OwnerType): OwnerType {
 	if (o.sdtType !== undefined) return o.sdtType
-	else return (o.sdtType = getOwnerType(o))
+	else return (o.sdtType = type ?? getOwnerType(o))
 }
 export function markNodeID(o: { sdtId?: number }): number {
 	if (o.sdtId !== undefined) return o.sdtId
@@ -97,4 +111,16 @@ function getResolvedChildren(value: unknown): Many<HTMLElement> | null {
 		return results
 	}
 	return value instanceof HTMLElement ? value : null
+}
+
+/**
+ * Reactive array reducer — if at least one consumer (boolean signal) is enabled — the returned result will the `true`.
+ */
+export function createConsumers(): [
+	needed: Accessor<boolean>,
+	addConsumer: (consumer: Accessor<boolean>) => void,
+] {
+	const [consumers, setConsumers] = createSignal<Accessor<boolean>[]>([])
+	const enabled = createMemo<boolean>(() => consumers().some(consumer => consumer()))
+	return [enabled, consumer => setConsumers(p => [...p, consumer])]
 }

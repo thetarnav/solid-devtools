@@ -56,18 +56,24 @@ importers:
       '@solid-devtools/babel-plugin': ^0.2.0
       '@solid-devtools/extension-adapter': ^0.2.9
       '@solid-devtools/locator': ^0.3.0
+      '@solid-primitives/event-bus': ^0.1.0
+      '@solid-primitives/immutable': ^0.1.0
       '@solid-primitives/rootless': ^1.1.0
       '@solid-primitives/scheduled': ^1.0.0
-      '@solid-primitives/utils': ^2.0.3
+      '@solid-primitives/set': ^0.1.0
+      '@solid-primitives/utils': ^2.1.1
       solid-js: ^1.4.4
       tsup: ^6.1.2
       typescript: ^4.7.3
     dependencies:
       '@solid-devtools/extension-adapter': link:../extension-adapter
       '@solid-devtools/locator': link:../locator
+      '@solid-primitives/event-bus': 0.1.0_solid-js@1.4.4
+      '@solid-primitives/immutable': 0.1.0_solid-js@1.4.4
       '@solid-primitives/rootless': 1.1.0_solid-js@1.4.4
       '@solid-primitives/scheduled': 1.0.0_solid-js@1.4.4
-      '@solid-primitives/utils': 2.0.3_solid-js@1.4.4
+      '@solid-primitives/set': 0.1.0_solid-js@1.4.4
+      '@solid-primitives/utils': 2.1.1_solid-js@1.4.4
     optionalDependencies:
       '@solid-devtools/babel-plugin': link:../babel-plugin
     devDependencies:
@@ -265,8 +271,8 @@ importers:
       solid-devtools: link:../../packages/debugger
       solid-js: 1.4.4
       solid-meta: 0.27.5_solid-js@1.4.4
-      solid-start: 0.1.0-alpha.88_rpaejj3o7mjmacznfi25z4pnr4
-      solid-start-node: 0.1.0-alpha.82_dzrryigdt5lphqedcv4g5q7rfu
+      solid-start: 0.1.0-alpha.89_rpaejj3o7mjmacznfi25z4pnr4
+      solid-start-node: 0.1.0-alpha.82_g3gyojgf2cjyjmzymualdpuys4
       typescript: 4.7.3
       undici: 4.16.0
       vite: 2.9.12
@@ -2053,6 +2059,16 @@ packages:
       solid-js: 1.4.4
     dev: false
 
+  /@solid-primitives/event-bus/0.1.0_solid-js@1.4.4:
+    resolution: {integrity: sha512-++j99s/wf2zTljNrYbrFR/oiykL/778seNpKbwCXiiGMVthq9QKp9mA4hl3M9XvXBQEpaXgQsSZOz6zqZHBpRw==}
+    peerDependencies:
+      solid-js: ^1.3.1
+    dependencies:
+      '@solid-primitives/immutable': 0.1.0_solid-js@1.4.4
+      '@solid-primitives/utils': 1.5.2_solid-js@1.4.4
+      solid-js: 1.4.4
+    dev: false
+
   /@solid-primitives/event-listener/2.2.0_solid-js@1.4.4:
     resolution: {integrity: sha512-puW/GHPOHi/3z8KIdJozlDh2MwQsAVZxBSeahY29t26QBDzInRch0SZZ+6xX/Tjb7g7Q8IjZgA4QWE7Ts1EX7Q==}
     peerDependencies:
@@ -2060,6 +2076,14 @@ packages:
     dependencies:
       '@solid-primitives/utils': 1.5.2_solid-js@1.4.4
       solid-js: 1.4.4
+    dev: false
+
+  /@solid-primitives/immutable/0.1.0_solid-js@1.4.4:
+    resolution: {integrity: sha512-vKA318tb65h6f9mizF/x7ep9CxhtCtD6HMm5XVpRE+KrujgwyWB3DAVxmJ0lM4v4cImc7jvwBWvYirpnupe11A==}
+    dependencies:
+      '@solid-primitives/utils': 1.5.2_solid-js@1.4.4
+    transitivePeerDependencies:
+      - solid-js
     dev: false
 
   /@solid-primitives/keyed/1.0.0_solid-js@1.4.4:
@@ -2112,6 +2136,15 @@ packages:
     peerDependencies:
       solid-js: ^1.4.0
     dependencies:
+      solid-js: 1.4.4
+    dev: false
+
+  /@solid-primitives/set/0.1.0_solid-js@1.4.4:
+    resolution: {integrity: sha512-0mSVt7NP/ab6c5GFjeIUk2U69IrXC2slV4SGCjo+c11+R24bFeuxdePYtauSpDPT60UXisxh4OfIoM6uFDxcMQ==}
+    peerDependencies:
+      solid-js: ^1.3.0
+    dependencies:
+      '@solid-primitives/utils': 1.5.2_solid-js@1.4.4
       solid-js: 1.4.4
     dev: false
 
@@ -4904,7 +4937,7 @@ packages:
       solid-js: 1.4.4
     dev: true
 
-  /solid-start-node/0.1.0-alpha.82_dzrryigdt5lphqedcv4g5q7rfu:
+  /solid-start-node/0.1.0-alpha.82_g3gyojgf2cjyjmzymualdpuys4:
     resolution: {integrity: sha512-v0S/y260wcFBNSZ9gShJvZjw6MWD8OfHHruPqDWgzquD0izCXtYfAoU6+YpkejF482Nt/ZfPWXB5LKR+3GdxrQ==}
     peerDependencies:
       solid-start: '*'
@@ -4918,18 +4951,18 @@ packages:
       polka: 1.0.0-next.22
       rollup: 2.75.4
       sirv: 1.0.19
-      solid-start: 0.1.0-alpha.88_rpaejj3o7mjmacznfi25z4pnr4
+      solid-start: 0.1.0-alpha.89_rpaejj3o7mjmacznfi25z4pnr4
       undici: 4.16.0
       vite: 2.9.12
     transitivePeerDependencies:
       - supports-color
     dev: true
 
-  /solid-start/0.1.0-alpha.88_rpaejj3o7mjmacznfi25z4pnr4:
-    resolution: {integrity: sha512-sML6krhbYg0oW+UVnVA0XIJjiXifP7GWKMwAKMyx9Ut9mYPiLhGTq61NEzSMr34F2z3SUq2PK9XmvvSCqMt+AA==}
+  /solid-start/0.1.0-alpha.89_rpaejj3o7mjmacznfi25z4pnr4:
+    resolution: {integrity: sha512-ZTVLt9eUAAGLkwt6UKEp3pSYsoLKdR9uYJgSuiiRZryDUm2nOj32cG2vO52nL9FXx4vD5Kpdh5xl0vB5jL5I0Q==}
     hasBin: true
     peerDependencies:
-      solid-app-router: ^0.3.1
+      solid-app-router: ^0.4.1
       solid-js: ^1.4.0
       solid-meta: ^0.27.2
       vite: ^2.8.6
@@ -4962,7 +4995,7 @@ packages:
       vite-plugin-inspect: 0.3.15_vite@2.9.12
       vite-plugin-solid: 2.2.6
     optionalDependencies:
-      solid-start-node: 0.1.0-alpha.82_dzrryigdt5lphqedcv4g5q7rfu
+      solid-start-node: 0.1.0-alpha.82_g3gyojgf2cjyjmzymualdpuys4
     transitivePeerDependencies:
       - less
       - sass

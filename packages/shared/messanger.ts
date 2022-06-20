@@ -24,7 +24,7 @@ export interface MessagePayloads {
 	[MESSAGE.DevtoolsScriptConnected]: void
 	[MESSAGE.PanelVisibility]: boolean
 	[MESSAGE.ResetPanel]: void
-	[MESSAGE.GraphUpdate]: MappedRoot
+	[MESSAGE.GraphUpdate]: MappedRoot[]
 	[MESSAGE.BatchedUpdate]: BatchedUpdates
 	[MESSAGE.ForceUpdate]: void
 }

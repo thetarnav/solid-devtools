@@ -9,6 +9,7 @@ export enum OwnerType {
 	Memo,
 	Computation,
 	Refresh,
+	Root,
 }
 
 //
@@ -18,7 +19,10 @@ export enum OwnerType {
 export interface SolidSignal {
 	name: string
 	value: unknown
-	observers?: SolidOwner[] | null
+	observers: SolidComputation[] | null
+	// TODO: set them to valid values
+	observerSlots: any
+	pending: any
 	// added by solid-devtools:
 	sdtId?: number
 	onValueUpdate?: {
@@ -31,7 +35,7 @@ export interface SolidRoot {
 	cleanups: VoidFunction[] | null
 	context: any | null
 	owner: SolidOwner | SolidRoot | null
-	owned: SolidOwner[] | null
+	owned: SolidComputation[] | null
 	sourceMap?: Record<string, SolidSignal>
 	// added by solid-devtools:
 	ownedRoots?: Set<SolidRoot>
@@ -40,7 +44,12 @@ export interface SolidRoot {
 export interface SolidComputation extends SolidRoot, SolidSignal {
 	name: string
 	fn: AnyFunction
-	sources?: (SolidOwner | SolidSignal)[] | null
+	sources: (SolidComputation | SolidSignal)[] | null
+	// TODO: set them to valid values
+	state: any
+	sourceSlots: any
+	updatedAt: any
+	pure: any
 	// added by solid-devtools:
 	onComputationUpdate?: {
 		[rootID: number]: VoidFunction
@@ -54,10 +63,26 @@ export type SolidOwner = Modify<
 		value?: unknown
 		componentName?: string
 		fn?: AnyFunction
+		sources?: (SolidComputation | SolidSignal)[] | null
+		observers?: SolidComputation[] | null
+		// TODO: set them to valid values
+		state?: any
+		sourceSlots?: any
+		updatedAt?: any
+		pure?: any
+		observerSlots?: any
+		pending?: any
 		// added by solid-devtools:
 		sdtType?: OwnerType
+		sdtContext?: DebuggerContext
 	}
 >
+
+export type DebuggerContext = {
+	rootId: number
+	triggerRootUpdate: VoidFunction
+	forceRootUpdate: VoidFunction
+}
 
 export type BatchUpdateListener = (updates: BatchedUpdates) => void
 
@@ -72,7 +97,7 @@ export const getOwner = _getOwner as () => SolidOwner | null
 
 export interface MappedRoot {
 	id: number
-	children: MappedOwner[]
+	tree: MappedOwner
 }
 
 export interface MappedOwner {
@@ -129,5 +154,5 @@ export interface GraphSignal {
 
 export interface GraphRoot {
 	readonly id: number
-	readonly children: GraphOwner[]
+	readonly tree: GraphOwner
 }

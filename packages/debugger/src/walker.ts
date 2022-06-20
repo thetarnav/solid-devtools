@@ -18,9 +18,6 @@ import {
 } from "./utils"
 import { observeComputationUpdate, observeValueUpdate } from "./update"
 
-/** Top-level computations or createRoots without a detached Owner */
-const Unowned: Set<SolidOwner> = new Set()
-
 // Globals set before each walker cycle
 let RootID: number
 let OnSignalUpdate: SignalUpdateHandler
@@ -74,9 +71,9 @@ function mapMemo(mapped: MappedOwner, owner: SolidComputation): MappedOwner {
 	})
 }
 
-function mapOwner(owner: SolidOwner): MappedOwner {
+function mapOwner(owner: SolidOwner, type?: OwnerType): MappedOwner {
+	type = markOwnerType(owner, type)
 	const id = markNodeID(owner)
-	const type = markOwnerType(owner)
 	const name = getOwnerName(owner)
 
 	observeComputation(owner, id)
@@ -110,7 +107,7 @@ function mapChildren({ owned, ownedRoots }: Readonly<SolidOwner>): MappedOwner[]
 	if (ownedRoots)
 		children.push.apply(
 			children,
-			[...ownedRoots].map(child => mapOwner(child)),
+			[...ownedRoots].map(child => mapOwner(child, OwnerType.Root)),
 		)
 
 	return children
@@ -125,10 +122,10 @@ export type WalkerConfig = {
 	trackComponents: boolean
 }
 
-function mapOwnerTree(
-	root: SolidOwner,
+export function walkSolidTree(
+	owner: SolidOwner,
 	config: WalkerConfig,
-): { children: MappedOwner[]; components: MappedComponent[] } {
+): { tree: MappedOwner; components: MappedComponent[] } {
 	// set the globals to be available for this walk cycle
 	RootID = config.rootId
 	OnSignalUpdate = config.onSignalUpdate
@@ -138,7 +135,5 @@ function mapOwnerTree(
 	TrackComponents = config.trackComponents
 	if (TrackComponents) Components = []
 
-	return { children: mapChildren(root), components: Components }
+	return { tree: mapOwner(owner), components: Components }
 }
-
-export { mapOwnerTree }

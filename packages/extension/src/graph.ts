@@ -1,4 +1,12 @@
-import { batch, createRoot, createSelector, createSignal, getOwner, onCleanup } from "solid-js"
+import {
+	batch,
+	createEffect,
+	createRoot,
+	createSelector,
+	createSignal,
+	getOwner,
+	onCleanup,
+} from "solid-js"
 import { createStore, produce } from "solid-js/store"
 import { UpdateType, MESSAGE } from "@shared/messanger"
 import { mutateFilter, pushToArrayProp } from "@shared/utils"
@@ -180,18 +188,8 @@ function reconcileChildren(newChildren: MappedOwner[], children: GraphOwner[]): 
 	for (; i < limit; i++) {
 		node = children[i]
 		mapped = newChildren[i]
-		if (node.id === mapped.id) {
-			// reconcile child
-			reconcileChildren(mapped.children, node.children)
-			reconcileSignals(mapped.signals, node.signals)
-			reconcileArrayByIds(mapped.sources, node.sources, mapSource)
-
-			// reconcile signal observers
-			if (mapped.signal) {
-				if (!node.signal) node.signal = createSignalNodeAsync(mapped.signal)
-				else reconcileArrayByIds(mapped.signal.observers, node.signal.observers, mapObserver)
-			}
-		} else {
+		if (node.id === mapped.id) reconcileNode(mapped, node)
+		else {
 			// dispose old, map new child
 			node.dispose()
 			children[i] = mapNewOwner(mapped)
@@ -230,6 +228,18 @@ function reconcileSignals(newSignals: readonly MappedSignal[], signals: GraphSig
 	}
 }
 
+function reconcileNode(mapped: MappedOwner, node: GraphOwner): void {
+	reconcileChildren(mapped.children, node.children)
+	reconcileSignals(mapped.signals, node.signals)
+	reconcileArrayByIds(mapped.sources, node.sources, mapSource)
+
+	// reconcile signal observers
+	if (mapped.signal) {
+		if (!node.signal) node.signal = createSignalNodeAsync(mapped.signal)
+		else reconcileArrayByIds(mapped.signal.observers, node.signal.observers, mapObserver)
+	}
+}
+
 const exports = createRoot(() => {
 	const [graphs, setGraphs] = createStore<GraphRoot[]>([])
 
@@ -260,29 +270,30 @@ const exports = createRoot(() => {
 		),
 	}
 
-	onRuntimeMessage(MESSAGE.GraphUpdate, root => {
-		// reset all of the computationRerun state
+	onRuntimeMessage(MESSAGE.GraphUpdate, roots => {
 		batch(() => {
+			// reset all of the computationRerun state
 			for (const id of ownersUpdated) ownersMap[id].setUpdate(false)
 			for (const id of signalsUpdated) signalsMap[id].setUpdate(false)
-		})
 
-		const index = graphs.findIndex(compareId.bind(root))
-		// reconcile existing root
-		if (index !== -1) {
-			setGraphs(
-				index,
-				"children",
-				produce(children => reconcileChildren(root.children, children)),
-			)
-		}
-		// insert new root
-		else {
-			setGraphs(graphs.length, {
-				id: root.id,
-				children: root.children.map(mapNewOwner),
+			// TODO: instead of sending whole array of roots each time — diff it before sending, and send only added/removed/modified ones
+
+			roots.forEach(({ id, tree }) => {
+				const index = graphs.findIndex(r => r.id === id)
+				// reconcile existing root
+				if (index !== -1) {
+					setGraphs(
+						index,
+						"tree",
+						produce(current => reconcileNode(tree, current)),
+					)
+				}
+				// insert new root
+				else {
+					setGraphs(graphs.length, { id, tree: mapNewOwner(tree) })
+				}
 			})
-		}
+		})
 
 		afterGraphUpdate()
 	})
