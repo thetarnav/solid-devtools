@@ -29,9 +29,9 @@ export const Debugger: ParentComponent<DebuggerProps> = props => {
 	createGraphRoot(getOwner()!)
 
 	// Extension adapter
-	registerDebuggerPlugin(({ forceTriggerUpdate, makeBatchUpdateListener, roots }) => {
+	registerDebuggerPlugin(({ forceTriggerUpdate, makeBatchUpdateListener, serialisedRoots }) => {
 		const { enabled } = useExtensionAdapter({
-			roots,
+			roots: serialisedRoots,
 			forceTriggerUpdate,
 			makeBatchUpdateListener,
 		})

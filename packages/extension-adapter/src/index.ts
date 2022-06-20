@@ -5,7 +5,7 @@ import {
 	postWindowMessage,
 	startListeningWindowMessages,
 } from "@shared/messanger"
-import type { MappedRoot, BatchUpdateListener, MappedOwner } from "@shared/graph"
+import type { SerialisedTreeRoot, BatchUpdateListener } from "@shared/graph"
 
 startListeningWindowMessages()
 
@@ -16,7 +16,7 @@ export function useExtensionAdapter({
 }: {
 	forceTriggerUpdate: VoidFunction
 	makeBatchUpdateListener: (listener: BatchUpdateListener) => VoidFunction
-	roots: Accessor<MappedRoot[]>
+	roots: Accessor<SerialisedTreeRoot[]>
 }): { enabled: Accessor<boolean> } {
 	const [enabled, setEnabled] = createSignal(false)
 

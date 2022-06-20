@@ -58,6 +58,7 @@ importers:
       '@solid-devtools/locator': ^0.3.0
       '@solid-primitives/event-bus': ^0.1.0
       '@solid-primitives/immutable': ^0.1.0
+      '@solid-primitives/memo': ^0.3.0
       '@solid-primitives/rootless': ^1.1.0
       '@solid-primitives/scheduled': ^1.0.0
       '@solid-primitives/set': ^0.1.0
@@ -70,6 +71,7 @@ importers:
       '@solid-devtools/locator': link:../locator
       '@solid-primitives/event-bus': 0.1.0_solid-js@1.4.4
       '@solid-primitives/immutable': 0.1.0_solid-js@1.4.4
+      '@solid-primitives/memo': 0.3.0_solid-js@1.4.4
       '@solid-primitives/rootless': 1.1.0_solid-js@1.4.4
       '@solid-primitives/scheduled': 1.0.0_solid-js@1.4.4
       '@solid-primitives/set': 0.1.0_solid-js@1.4.4
@@ -3040,6 +3042,16 @@ packages:
       '@solid-primitives/utils': 1.5.2_solid-js@1.4.4
     transitivePeerDependencies:
       - solid-js
+    dev: false
+
+  /@solid-primitives/memo/0.3.0_solid-js@1.4.4:
+    resolution: {integrity: sha512-WQct9lXmDfAmR+5Nu96Cs8KpZJA1DVAepQ4XKfIS/UfeyEDuohOGcq9huwZL23qXrbtbb49seP8cEPcyempsgw==}
+    peerDependencies:
+      solid-js: ^1.4.2
+    dependencies:
+      '@solid-primitives/scheduled': 1.0.0_solid-js@1.4.4
+      '@solid-primitives/utils': 2.1.1_solid-js@1.4.4
+      solid-js: 1.4.4
     dev: false
 
   /@solid-primitives/platform/0.0.100_solid-js@1.4.4:

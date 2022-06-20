@@ -1,5 +1,5 @@
-import { AnyFunction, isServer } from "@solid-primitives/utils"
-import { MappedRoot, MappedOwner } from "./graph"
+import { isServer } from "@solid-primitives/utils"
+import { SerialisedTreeRoot } from "./graph"
 
 export const LOG_MESSAGES = false
 
@@ -24,7 +24,7 @@ export interface MessagePayloads {
 	[MESSAGE.DevtoolsScriptConnected]: void
 	[MESSAGE.PanelVisibility]: boolean
 	[MESSAGE.ResetPanel]: void
-	[MESSAGE.GraphUpdate]: MappedRoot[]
+	[MESSAGE.GraphUpdate]: SerialisedTreeRoot[]
 	[MESSAGE.BatchedUpdate]: BatchedUpdates
 	[MESSAGE.ForceUpdate]: void
 }

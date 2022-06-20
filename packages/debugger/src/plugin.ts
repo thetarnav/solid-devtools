@@ -1,8 +1,10 @@
-import { BatchUpdateListener, MappedComponent, MappedRoot } from "@shared/graph"
-import { createSimpleEmitter } from "@solid-primitives/event-bus"
 import { Accessor, createRoot, createSignal, getOwner, runWithOwner } from "solid-js"
+import { createSimpleEmitter } from "@solid-primitives/event-bus"
+import { push, splice } from "@solid-primitives/immutable"
+import { BatchUpdateListener, MappedComponent, MappedRoot, SerialisedTreeRoot } from "@shared/graph"
 import { makeBatchUpdateListener } from "./batchUpdates"
 import { createConsumers } from "./utils"
+import { createLazyMemo } from "@solid-primitives/memo"
 
 const exports = createRoot(() => {
 	const owner = getOwner()!
@@ -18,7 +20,35 @@ const exports = createRoot(() => {
 	const [trackComponents, addTrackComponentsConsumer] = createConsumers()
 
 	const [roots, setRoots] = createSignal<MappedRoot[]>([])
-	const [components, setComponents] = createSignal<MappedComponent[]>([])
+
+	const components = createLazyMemo<MappedComponent[]>(() =>
+		roots().reduce((arr: MappedComponent[], root) => {
+			arr.push.apply(arr, root.components)
+			return arr
+		}, []),
+	)
+
+	const serialisedRoots = createLazyMemo<SerialisedTreeRoot[]>(() =>
+		roots().map(root => ({
+			id: root.id,
+			tree: root.tree,
+		})),
+	)
+
+	const debuggerConfig = {
+		get enabled() {
+			return enabled()
+		},
+		get trackSignals() {
+			return trackSignals()
+		},
+		get trackBatchedUpdates() {
+			return trackBatchedUpdates()
+		},
+		get trackComponents() {
+			return trackComponents()
+		},
+	}
 
 	function registerDebuggerPlugin(
 		factory: (data: {
@@ -27,6 +57,7 @@ const exports = createRoot(() => {
 			makeBatchUpdateListener: (listener: BatchUpdateListener) => VoidFunction
 			roots: Accessor<MappedRoot[]>
 			components: Accessor<MappedComponent[]>
+			serialisedRoots: Accessor<SerialisedTreeRoot[]>
 		}) => {
 			enabled?: Accessor<boolean>
 			trackSignals?: Accessor<boolean>
@@ -41,6 +72,7 @@ const exports = createRoot(() => {
 				components,
 				triggerUpdate,
 				forceTriggerUpdate,
+				serialisedRoots,
 			})
 			enabled && addDebuggerConsumer(enabled)
 			trackBatchedUpdates && addTrackBatchedUpdatesConsumer(trackBatchedUpdates)
@@ -55,14 +87,22 @@ const exports = createRoot(() => {
 		triggerUpdate,
 		forceTriggerUpdate,
 		enabled,
-		trackSignals,
-		trackBatchedUpdates,
-		trackComponents,
+		debuggerConfig,
 		roots,
 		setRoots,
-		components,
-		setComponents,
 		registerDebuggerPlugin,
+		updateRoot(root: MappedRoot): void {
+			setRoots(arr => {
+				const index = arr.findIndex(o => o.id === root.id)
+				return index !== -1 ? splice(arr, index, 1, root) : push(arr, root)
+			})
+		},
+		removeRoot(rootId: number): void {
+			setRoots(arr => {
+				const index = arr.findIndex(o => o.id === rootId)
+				return splice(arr, index, 1)
+			})
+		},
 	}
 })
 export const {
@@ -71,12 +111,10 @@ export const {
 	triggerUpdate,
 	forceTriggerUpdate,
 	enabled,
-	trackSignals,
-	trackBatchedUpdates,
-	trackComponents,
+	debuggerConfig,
 	roots,
 	setRoots,
-	components,
-	setComponents,
 	registerDebuggerPlugin,
+	updateRoot,
+	removeRoot,
 } = exports

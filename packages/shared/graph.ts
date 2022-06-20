@@ -98,6 +98,13 @@ export const getOwner = _getOwner as () => SolidOwner | null
 export interface MappedRoot {
 	id: number
 	tree: MappedOwner
+	components: MappedComponent[]
+}
+
+export interface SerialisedTreeRoot {
+	id: number
+	tree: MappedOwner
+	components?: undefined
 }
 
 export interface MappedOwner {
@@ -119,7 +126,7 @@ export interface MappedSignal {
 
 export type MappedComponent = {
 	name: string
-	// ! Functions aren't JSON serialisable
+	// ! HTMLElements aren't JSON serialisable
 	resolved: Many<HTMLElement>
 }
 

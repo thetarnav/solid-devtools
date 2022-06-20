@@ -1,23 +1,7 @@
-import {
-	Accessor,
-	createComputed,
-	createEffect,
-	createSignal,
-	onCleanup,
-	runWithOwner,
-	untrack,
-} from "solid-js"
+import { createEffect, onCleanup, runWithOwner, untrack } from "solid-js"
 import { throttle } from "@solid-primitives/scheduled"
 import { createBranch } from "@solid-primitives/rootless"
-import { push, splice } from "@solid-primitives/immutable"
-import {
-	getOwner,
-	GraphRoot,
-	MappedComponent,
-	MappedOwner,
-	MappedRoot,
-	SolidOwner,
-} from "@shared/graph"
+import { getOwner, SolidOwner } from "@shared/graph"
 import { UpdateType } from "@shared/messanger"
 import { batchUpdate, ComputationUpdateHandler, SignalUpdateHandler } from "./batchUpdates"
 import { makeRootUpdateListener } from "./update"
@@ -29,92 +13,47 @@ import {
 	removeDebuggerContext,
 	setDebuggerContext,
 } from "./utils"
-import {
-	enabled,
-	setRoots,
-	trackBatchedUpdates,
-	trackComponents,
-	trackSignals,
-	onForceUpdate,
-	onUpdate,
-} from "./plugin"
-
-export function createOwnerObserver(
-	owner: SolidOwner,
-	rootId: number,
-	updateHandler: (tree: MappedOwner, components: MappedComponent[]) => void,
-): {
-	triggerRootUpdate: VoidFunction
-	forceRootUpdate: VoidFunction
-} {
-	const onComputationUpdate: ComputationUpdateHandler = payload => {
-		// TODO: move the makeRootUpdateListener logic here, no need for separate map
-		batchUpdate({ type: UpdateType.Computation, payload })
-	}
-	const onSignalUpdate: SignalUpdateHandler = payload => {
-		batchUpdate({ type: UpdateType.Signal, payload })
-	}
-	const forceRootUpdate = () => {
-		const { tree, components } = untrack(
-			walkSolidTree.bind(void 0, owner, {
-				onComputationUpdate,
-				onSignalUpdate,
-				rootId,
-				trackSignals: trackSignals(),
-				trackComponents: trackComponents(),
-				trackBatchedUpdates: trackBatchedUpdates(),
-			}),
-		)
-		updateHandler(tree, components)
-	}
-	const triggerRootUpdate = throttle(forceRootUpdate, 350)
-
-	onUpdate(triggerRootUpdate)
-	onForceUpdate(forceRootUpdate)
-
-	createEffect(() => {
-		if (!enabled()) return
-		forceRootUpdate()
-		makeRootUpdateListener(rootId, triggerRootUpdate)
-	})
-
-	return { triggerRootUpdate, forceRootUpdate }
-}
+import { enabled, debuggerConfig, onForceUpdate, onUpdate, updateRoot, removeRoot } from "./plugin"
 
 export function createGraphRoot(owner: SolidOwner): void {
 	// setup the debugger in a separate root, so that it doesn't walk and track itself
 	createBranch(() => {
 		const rootId = getNewSdtId()
 
-		const [getTree, setTree] = createSignal<MappedOwner>()
-		const [components, setComponents] = createSignal<MappedComponent[]>([])
+		const onComputationUpdate: ComputationUpdateHandler = payload => {
+			// TODO: move the makeRootUpdateListener logic here, no need for separate map
+			batchUpdate({ type: UpdateType.Computation, payload })
+		}
+		const onSignalUpdate: SignalUpdateHandler = payload => {
+			batchUpdate({ type: UpdateType.Signal, payload })
+		}
 
-		const { triggerRootUpdate, forceRootUpdate } = createOwnerObserver(
-			owner,
-			rootId,
-			(tree, components) => {
-				setTree(tree)
-				setComponents(components)
-			},
-		)
+		const forceRootUpdate = () => {
+			const { tree, components } = untrack(
+				walkSolidTree.bind(void 0, owner, {
+					...debuggerConfig,
+					onComputationUpdate,
+					onSignalUpdate,
+					rootId,
+				}),
+			)
+			updateRoot({ id: rootId, tree, components })
+		}
+		const triggerRootUpdate = throttle(forceRootUpdate, 350)
+
+		onUpdate(triggerRootUpdate)
+		onForceUpdate(forceRootUpdate)
+
+		createEffect(() => {
+			if (!enabled()) return
+			forceRootUpdate()
+			makeRootUpdateListener(rootId, triggerRootUpdate)
+		})
 
 		setDebuggerContext(owner, { rootId, triggerRootUpdate, forceRootUpdate })
 		onCleanup(removeDebuggerContext.bind(null, owner))
 
-		// update global roots signal
-		createComputed(() => {
-			const tree = getTree()
-			if (!tree) return
-
-			const root = { id: rootId, tree }
-
-			setRoots(arr => {
-				const index = arr.findIndex(o => o.id === rootId)
-				return index !== -1 ? splice(arr, index, 1, root) : push(arr, root)
-			})
-		})
-
-		// TODO: disposal
+		onCleanup(removeRoot.bind(null, rootId))
 	})
 }
 
@@ -159,6 +98,8 @@ export function reattachOwner(): void {
 			remove()
 			ctx.triggerRootUpdate()
 		})
+
+		// TODO: attach owner to higher active node after parent disposes
 	}
 	// seperated from existing debugger roots
 	else {
@@ -167,20 +108,5 @@ export function reattachOwner(): void {
 		runWithOwner(owner, () => {
 			createGraphRoot(owner)
 		})
-	}
-
-	// attach to parent
-	if (parent) {
-		// onOwnerCleanup(parent, () => {
-		// 	if (!disposed) remove = addToUnowned(owner)
-		// })
-	}
-	// attach to UNOWNED
-	else {
-		// const remove = addToUnowned(owner)
-		// onOwnerCleanup(owner, () => {
-		// 	remove()
-		// 	ctx.update()
-		// })
 	}
 }
