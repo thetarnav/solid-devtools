@@ -25,6 +25,7 @@
 		"@solid-primitives/rootless": "^1.1.0",
 		"@solid-primitives/utils": "^2.0.3",
 		"@solid-primitives/context": "^0.1.0",
+		"@solid-primitives/immutable": "^0.1.0",
 		"solid-js": "^1.4.4",
 		"twind": "^0.16.17"
 	},

@@ -1,17 +1,17 @@
-import {
-	batch,
-	createEffect,
-	createRoot,
-	createSelector,
-	createSignal,
-	getOwner,
-	onCleanup,
-} from "solid-js"
+import { batch, createRoot, createSelector, createSignal, getOwner, onCleanup } from "solid-js"
 import { createStore, produce } from "solid-js/store"
 import { UpdateType, MESSAGE } from "@shared/messanger"
 import { mutateFilter, pushToArrayProp } from "@shared/utils"
-import { MappedOwner, MappedSignal, GraphOwner, GraphSignal, GraphRoot } from "@shared/graph"
+import {
+	MappedOwner,
+	MappedSignal,
+	GraphOwner,
+	GraphSignal,
+	GraphRoot,
+	SerialisedTreeRoot,
+} from "@shared/graph"
 import { onRuntimeMessage } from "./messanger"
+import { splice } from "@solid-primitives/immutable"
 
 const dispose = (o: { dispose?: VoidFunction }) => o.dispose?.()
 const disposeAll = (list: { dispose?: VoidFunction }[]) => list.forEach(dispose)
@@ -270,29 +270,36 @@ const exports = createRoot(() => {
 		),
 	}
 
-	onRuntimeMessage(MESSAGE.GraphUpdate, roots => {
+	const addNewRoot = (proxy: GraphRoot[], { id, tree }: SerialisedTreeRoot): void => {
+		proxy.push({ id, tree: mapNewOwner(tree) })
+	}
+	const removeRoot = (proxy: GraphRoot[], id: number): void => {
+		proxy.splice(
+			proxy.findIndex(e => e.id === id),
+			1,
+		)
+	}
+	const updateRoot = (proxy: GraphRoot[], { id, tree }: SerialisedTreeRoot): void => {
+		const index = graphs.findIndex(r => r.id === id)
+		// reconcile existing root
+		if (index !== -1) reconcileNode(tree, proxy[index].tree)
+		// insert new root
+		else addNewRoot(proxy, { id, tree })
+	}
+
+	onRuntimeMessage(MESSAGE.GraphUpdate, ({ added, removed, updated }) => {
 		batch(() => {
 			// reset all of the computationRerun state
 			for (const id of ownersUpdated) ownersMap[id].setUpdate(false)
 			for (const id of signalsUpdated) signalsMap[id].setUpdate(false)
 
-			// TODO: instead of sending whole array of roots each time — diff it before sending, and send only added/removed/modified ones
-
-			roots.forEach(({ id, tree }) => {
-				const index = graphs.findIndex(r => r.id === id)
-				// reconcile existing root
-				if (index !== -1) {
-					setGraphs(
-						index,
-						"tree",
-						produce(current => reconcileNode(tree, current)),
-					)
-				}
-				// insert new root
-				else {
-					setGraphs(graphs.length, { id, tree: mapNewOwner(tree) })
-				}
-			})
+			setGraphs(
+				produce(proxy => {
+					removed.forEach(id => removeRoot(proxy, id))
+					added.forEach(root => addNewRoot(proxy, root))
+					updated.forEach(root => updateRoot(proxy, root))
+				}),
+			)
 		})
 
 		afterGraphUpdate()

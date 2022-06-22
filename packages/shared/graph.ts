@@ -39,6 +39,8 @@ export interface SolidRoot {
 	sourceMap?: Record<string, SolidSignal>
 	// added by solid-devtools:
 	ownedRoots?: Set<SolidRoot>
+	sdtType?: OwnerType.Root
+	isDisposed?: boolean
 }
 
 export interface SolidComputation extends SolidRoot, SolidSignal {

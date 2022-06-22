@@ -71,7 +71,7 @@ const Todos: Component = () => {
 			</form>
 			<For each={todos}>
 				{(todo, i) => {
-					reattachOwner()
+					// reattachOwner()
 					return (
 						<Todo
 							{...todo}

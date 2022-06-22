@@ -6,6 +6,7 @@ import {
 	startListeningWindowMessages,
 } from "@shared/messanger"
 import type { SerialisedTreeRoot, BatchUpdateListener } from "@shared/graph"
+import { getArrayDiffById } from "./handleDiffArray"
 
 startListeningWindowMessages()
 
@@ -26,7 +27,13 @@ export function useExtensionAdapter({
 	onCleanup(onWindowMessage(MESSAGE.PanelVisibility, setEnabled))
 	onCleanup(onWindowMessage(MESSAGE.ForceUpdate, forceTriggerUpdate))
 
-	createEffect(() => postWindowMessage(MESSAGE.GraphUpdate, roots()))
+	// diff the roots array, and send only the changed roots (edited, deleted, added)
+	createEffect((prev: SerialisedTreeRoot[]) => {
+		const _roots = roots()
+		const diff = getArrayDiffById(prev, _roots)
+		postWindowMessage(MESSAGE.GraphUpdate, diff)
+		return _roots
+	}, [])
 
 	makeBatchUpdateListener(updates => postWindowMessage(MESSAGE.BatchedUpdate, updates))
 

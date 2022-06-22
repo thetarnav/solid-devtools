@@ -1,3 +1,4 @@
+import { makeTimer } from "@solid-primitives/timer"
 import { reattachOwner } from "solid-devtools"
 import {
 	Component,
@@ -16,23 +17,43 @@ import {
 } from "solid-js"
 import Todos from "./Todos"
 
-createRoot(() => {
-	reattachOwner()
+let setRootCount: Setter<number>
+let disposeOuterRoot: VoidFunction
+
+createRoot(dispose => {
+	disposeOuterRoot = dispose
+	// reattachOwner()
 
 	getOwner()!.name = "OUTSIDE_ROOT"
 
 	const [count, setCount] = createSignal(0)
-	createEffect(() => count())
-	const timeoutId = setInterval(() => setCount(p => ++p), 1500)
-	onCleanup(() => clearInterval(timeoutId))
+	setRootCount = setCount
+
+	createEffect(() => {
+		count()
+		if (count() === 1) {
+			createRoot(dispose => {
+				// reattachOwner()
+				getOwner()!.name = "OUTSIDE_TEMP_ROOT"
+
+				createEffect(() => count() === 4 && dispose())
+
+				createRoot(_ => {
+					getOwner()!.name = "OUTSIDE_INSIDE_ROOT"
+					reattachOwner()
+					createEffect(() => count())
+				})
+			})
+		}
+	})
 })
 
 const Button = (props: { text: string; onClick: VoidFunction }) => {
-	createRoot(dispose => {
-		reattachOwner()
-		createComputed(() => {}, undefined, { name: "HEYYY, I should BE DEAD" })
-		setTimeout(dispose, 2000)
-	})
+	// createRoot(dispose => {
+	// 	reattachOwner()
+	// 	createComputed(() => {}, undefined, { name: "HEYYY, I should BE DEAD" })
+	// 	setTimeout(dispose, 2000)
+	// })
 
 	const text = createMemo(() => <span>{props.text}</span>)
 	return (
@@ -83,17 +104,9 @@ const App: Component = () => {
 		})
 	})
 
-	setTimeout(() => {
-		createRoot(dispose => {
-			reattachOwner()
-			createComputed(() => {}, undefined, { name: "Async Root" })
-			setTimeout(dispose, 2000)
-		}, owner)
-	}, 4000)
-
 	let setMe: Setter<string>
 	const [smiley, setSmiley] = createSignal<Accessor<string>>()
-	// makeTimer(() => setMe(["🙂", "🤔", "🤯"][Math.floor(Math.random() * 3)]), 2000, setInterval)
+	makeTimer(() => setMe(["🙂", "🤔", "🤯"][Math.floor(Math.random() * 3)]), 2000, setInterval)
 	createEffect(
 		() => {
 			const [_smiley, _setMe] = createSignal("🙂", { name: "smiley" })
@@ -125,6 +138,8 @@ const App: Component = () => {
 				</div>
 			</div>
 			<obj.comp />
+			<button onClick={() => setRootCount(p => ++p)}>Update root count</button>
+			<button onClick={() => disposeOuterRoot()}>Dispose Outer Root</button>
 			<Article />
 			<Todos />
 		</>

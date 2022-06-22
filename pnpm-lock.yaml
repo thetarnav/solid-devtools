@@ -88,6 +88,7 @@ importers:
       '@crxjs/vite-plugin': ^1.0.11
       '@solid-devtools/ui': 0.1.2
       '@solid-primitives/context': ^0.1.0
+      '@solid-primitives/immutable': ^0.1.0
       '@solid-primitives/rootless': ^1.1.0
       '@solid-primitives/utils': ^2.0.3
       '@types/chrome': ^0.0.183
@@ -100,6 +101,7 @@ importers:
     dependencies:
       '@solid-devtools/ui': link:../ui
       '@solid-primitives/context': 0.1.0_solid-js@1.4.4
+      '@solid-primitives/immutable': 0.1.0_solid-js@1.4.4
       '@solid-primitives/rootless': 1.1.0_solid-js@1.4.4
       '@solid-primitives/utils': 2.0.3_solid-js@1.4.4
       solid-js: 1.4.4

@@ -24,7 +24,11 @@ export interface MessagePayloads {
 	[MESSAGE.DevtoolsScriptConnected]: void
 	[MESSAGE.PanelVisibility]: boolean
 	[MESSAGE.ResetPanel]: void
-	[MESSAGE.GraphUpdate]: SerialisedTreeRoot[]
+	[MESSAGE.GraphUpdate]: {
+		added: SerialisedTreeRoot[]
+		removed: number[]
+		updated: SerialisedTreeRoot[]
+	}
 	[MESSAGE.BatchedUpdate]: BatchedUpdates
 	[MESSAGE.ForceUpdate]: void
 }
