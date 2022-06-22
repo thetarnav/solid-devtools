@@ -42,7 +42,6 @@
 		"@solid-aria/interactions": "^0.1.2",
 		"@solid-primitives/props": "^2.1.7",
 		"@solid-primitives/utils": "^2.1.0",
-		"@solid-primitives/keyed": "^1.0.0",
 		"twind": "^0.16.17"
 	},
 	"peerDependencies": {

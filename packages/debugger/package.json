@@ -52,9 +52,13 @@
 	"dependencies": {
 		"@solid-devtools/extension-adapter": "^0.2.9",
 		"@solid-devtools/locator": "^0.3.0",
+		"@solid-primitives/event-bus": "^0.1.0",
+		"@solid-primitives/immutable": "^0.1.0",
+		"@solid-primitives/memo": "^0.3.0",
 		"@solid-primitives/rootless": "^1.1.0",
 		"@solid-primitives/scheduled": "^1.0.0",
-		"@solid-primitives/utils": "^2.0.3"
+		"@solid-primitives/set": "^0.1.0",
+		"@solid-primitives/utils": "^2.1.1"
 	},
 	"peerDependencies": {
 		"solid-js": "^1.4.4"

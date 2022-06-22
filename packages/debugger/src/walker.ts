@@ -3,9 +3,9 @@ import {
 	OwnerType,
 	SolidOwner,
 	MappedSignal,
-	ValueUpdateListener,
 	SolidSignal,
 	MappedComponent,
+	SolidComputation,
 } from "@shared/graph"
 import { ComputationUpdateHandler, SignalUpdateHandler } from "./batchUpdates"
 import {
@@ -28,18 +28,18 @@ let TrackComponents: boolean
 let Components: MappedComponent[] = []
 
 function observeComputation(owner: SolidOwner, id: number) {
-	if (TrackBatchedUpdates)
-		observeComputationUpdate(owner, RootID, OnComputationUpdate.bind(void 0, id))
+	// TODO: create "isComputation" util
+	if (TrackBatchedUpdates && Object.hasOwn(owner, "fn"))
+		observeComputationUpdate(
+			owner as SolidComputation,
+			RootID,
+			OnComputationUpdate.bind(void 0, id),
+		)
 }
 
-function observeValue(
-	node: {
-		value: unknown
-		onSignalUpdate?: Record<number, ValueUpdateListener> | undefined
-	},
-	id: number,
-) {
-	if (TrackBatchedUpdates)
+function observeValue(node: SolidSignal, id: number) {
+	// TODO: create "isSignal" util
+	if (TrackBatchedUpdates && Object.hasOwn(node, "value"))
 		observeValueUpdate(node, RootID, (value, oldValue) => OnSignalUpdate({ id, value, oldValue }))
 }
 
@@ -63,7 +63,7 @@ function mapOwnerSignals(owner: SolidOwner): MappedSignal[] {
 	})
 }
 
-function mapMemo(mapped: MappedOwner, owner: SolidOwner): MappedOwner {
+function mapMemo(mapped: MappedOwner, owner: SolidComputation): MappedOwner {
 	const { id, name } = mapped
 	observeValue(owner, id)
 	return Object.assign(mapped, {
@@ -71,9 +71,9 @@ function mapMemo(mapped: MappedOwner, owner: SolidOwner): MappedOwner {
 	})
 }
 
-function mapOwner(owner: SolidOwner): MappedOwner {
+function mapOwner(owner: SolidOwner, type?: OwnerType): MappedOwner {
+	type = markOwnerType(owner, type)
 	const id = markNodeID(owner)
-	const type = markOwnerType(owner)
 	const name = getOwnerName(owner)
 
 	observeComputation(owner, id)
@@ -92,12 +92,25 @@ function mapOwner(owner: SolidOwner): MappedOwner {
 		sources: markNodesID(owner.sources),
 	}
 
-	return type === OwnerType.Memo ? mapMemo(mapped, owner) : mapped
+	return type === OwnerType.Memo ? mapMemo(mapped, owner as SolidComputation) : mapped
 }
 
-function mapChildren(owner: Readonly<SolidOwner>): MappedOwner[] {
-	if (!Array.isArray(owner.owned)) return []
-	return owner.owned.map(child => mapOwner(child))
+function mapChildren({ owned, ownedRoots }: Readonly<SolidOwner>): MappedOwner[] {
+	const children: MappedOwner[] = []
+
+	if (owned)
+		children.push.apply(
+			children,
+			owned.map(child => mapOwner(child)),
+		)
+
+	if (ownedRoots)
+		children.push.apply(
+			children,
+			[...ownedRoots].map(child => mapOwner(child, OwnerType.Root)),
+		)
+
+	return children
 }
 
 export type WalkerConfig = {
@@ -109,10 +122,10 @@ export type WalkerConfig = {
 	trackComponents: boolean
 }
 
-function mapOwnerTree(
-	root: SolidOwner,
+export function walkSolidTree(
+	owner: SolidOwner,
 	config: WalkerConfig,
-): { children: MappedOwner[]; components: MappedComponent[] } {
+): { tree: MappedOwner; components: MappedComponent[] } {
 	// set the globals to be available for this walk cycle
 	RootID = config.rootId
 	OnSignalUpdate = config.onSignalUpdate
@@ -122,7 +135,5 @@ function mapOwnerTree(
 	TrackComponents = config.trackComponents
 	if (TrackComponents) Components = []
 
-	return { children: mapChildren(root), components: Components }
+	return { tree: mapOwner(owner), components: Components }
 }
-
-export { mapOwnerTree }

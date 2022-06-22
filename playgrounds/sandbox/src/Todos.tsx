@@ -1,5 +1,6 @@
 import { createEffect, createSignal, batch, For, Component } from "solid-js"
 import { createStore, SetStoreFunction, Store } from "solid-js/store"
+import { attachDebugger } from "solid-devtools"
 
 export function createLocalStore<T extends object>(
 	name: string,
@@ -16,6 +17,31 @@ export function removeIndex<T>(array: readonly T[], index: number): T[] {
 }
 
 type TodoItem = { title: string; done: boolean }
+
+const Todo: Component<{
+	done: boolean
+	title: string
+	onCheck: (value: boolean) => void
+	onUpdate: (value: string) => void
+	onRemove: VoidFunction
+}> = props => {
+	attachDebugger()
+	return (
+		<div>
+			<input
+				type="checkbox"
+				checked={props.done}
+				onChange={e => props.onCheck(e.currentTarget.checked)}
+			/>
+			<input
+				type="text"
+				value={props.title}
+				onChange={e => props.onUpdate(e.currentTarget.value)}
+			/>
+			<button onClick={props.onRemove}>x</button>
+		</div>
+	)
+}
 
 const Todos: Component = () => {
 	const [newTitle, setTitle] = createSignal("")
@@ -46,19 +72,12 @@ const Todos: Component = () => {
 			</form>
 			<For each={todos}>
 				{(todo, i) => (
-					<div>
-						<input
-							type="checkbox"
-							checked={todo.done}
-							onChange={e => setTodos(i(), "done", e.currentTarget.checked)}
-						/>
-						<input
-							type="text"
-							value={todo.title}
-							onChange={e => setTodos(i(), "title", e.currentTarget.value)}
-						/>
-						<button onClick={() => setTodos(t => removeIndex(t, i()))}>x</button>
-					</div>
+					<Todo
+						{...todo}
+						onCheck={v => setTodos(i(), "done", v)}
+						onUpdate={v => setTodos(i(), "title", v)}
+						onRemove={() => setTodos(t => removeIndex(t, i()))}
+					/>
 				)}
 			</For>
 		</>

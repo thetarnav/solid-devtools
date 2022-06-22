@@ -1,5 +1,5 @@
 import { Accessor, getOwner as _getOwner, Setter } from "solid-js"
-import { AnyFunction, Many } from "@solid-primitives/utils"
+import { AnyFunction, Many, Modify } from "@solid-primitives/utils"
 import { BatchedUpdates, MESSAGE, SafeValue } from "./messanger"
 
 export enum OwnerType {
@@ -9,6 +9,7 @@ export enum OwnerType {
 	Memo,
 	Computation,
 	Refresh,
+	Root,
 }
 
 //
@@ -18,27 +19,71 @@ export enum OwnerType {
 export interface SolidSignal {
 	name: string
 	value: unknown
-	observers?: SolidOwner[] | null
-	// added by sdt:
+	observers: SolidComputation[] | null
+	// TODO: set them to valid values
+	observerSlots: any
+	pending: any
+	// added by solid-devtools:
 	sdtId?: number
 	onValueUpdate?: {
 		[rootID: number]: ValueUpdateListener
 	}
 }
 
-export interface SolidOwner extends SolidSignal {
-	componentName?: string
-	owner: SolidOwner | null
-	owned: SolidOwner[]
-	fn: AnyFunction
+export interface SolidRoot {
+	name?: string
 	cleanups: VoidFunction[] | null
-	sources: (SolidOwner | SolidSignal)[] | null
 	context: any | null
+	owner: SolidOwner | SolidRoot | null
+	owned: SolidComputation[] | null
 	sourceMap?: Record<string, SolidSignal>
-	sdtType?: OwnerType
+	// added by solid-devtools:
+	ownedRoots?: Set<SolidRoot>
+	sdtType?: OwnerType.Root
+	isDisposed?: boolean
+}
+
+export interface SolidComputation extends SolidRoot, SolidSignal {
+	name: string
+	fn: AnyFunction
+	sources: (SolidComputation | SolidSignal)[] | null
+	// TODO: set them to valid values
+	state: any
+	sourceSlots: any
+	updatedAt: any
+	pure: any
+	// added by solid-devtools:
 	onComputationUpdate?: {
 		[rootID: number]: VoidFunction
 	}
+}
+
+export type SolidOwner = Modify<
+	SolidSignal & SolidRoot & SolidComputation,
+	{
+		name?: string
+		value?: unknown
+		componentName?: string
+		fn?: AnyFunction
+		sources?: (SolidComputation | SolidSignal)[] | null
+		observers?: SolidComputation[] | null
+		// TODO: set them to valid values
+		state?: any
+		sourceSlots?: any
+		updatedAt?: any
+		pure?: any
+		observerSlots?: any
+		pending?: any
+		// added by solid-devtools:
+		sdtType?: OwnerType
+		sdtContext?: DebuggerContext
+	}
+>
+
+export type DebuggerContext = {
+	rootId: number
+	triggerRootUpdate: VoidFunction
+	forceRootUpdate: VoidFunction
 }
 
 export type BatchUpdateListener = (updates: BatchedUpdates) => void
@@ -54,7 +99,14 @@ export const getOwner = _getOwner as () => SolidOwner | null
 
 export interface MappedRoot {
 	id: number
-	children: MappedOwner[]
+	tree: MappedOwner
+	components: MappedComponent[]
+}
+
+export interface SerialisedTreeRoot {
+	id: number
+	tree: MappedOwner
+	components?: undefined
 }
 
 export interface MappedOwner {
@@ -76,7 +128,7 @@ export interface MappedSignal {
 
 export type MappedComponent = {
 	name: string
-	// ! Functions aren't JSON serialisable
+	// ! HTMLElements aren't JSON serialisable
 	resolved: Many<HTMLElement>
 }
 
@@ -111,5 +163,5 @@ export interface GraphSignal {
 
 export interface GraphRoot {
 	readonly id: number
-	readonly children: GraphOwner[]
+	readonly tree: GraphOwner
 }

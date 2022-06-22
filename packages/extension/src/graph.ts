@@ -2,8 +2,16 @@ import { batch, createRoot, createSelector, createSignal, getOwner, onCleanup } 
 import { createStore, produce } from "solid-js/store"
 import { UpdateType, MESSAGE } from "@shared/messanger"
 import { mutateFilter, pushToArrayProp } from "@shared/utils"
-import { MappedOwner, MappedSignal, GraphOwner, GraphSignal, GraphRoot } from "@shared/graph"
+import {
+	MappedOwner,
+	MappedSignal,
+	GraphOwner,
+	GraphSignal,
+	GraphRoot,
+	SerialisedTreeRoot,
+} from "@shared/graph"
 import { onRuntimeMessage } from "./messanger"
+import { splice } from "@solid-primitives/immutable"
 
 const dispose = (o: { dispose?: VoidFunction }) => o.dispose?.()
 const disposeAll = (list: { dispose?: VoidFunction }[]) => list.forEach(dispose)
@@ -180,18 +188,8 @@ function reconcileChildren(newChildren: MappedOwner[], children: GraphOwner[]): 
 	for (; i < limit; i++) {
 		node = children[i]
 		mapped = newChildren[i]
-		if (node.id === mapped.id) {
-			// reconcile child
-			reconcileChildren(mapped.children, node.children)
-			reconcileSignals(mapped.signals, node.signals)
-			reconcileArrayByIds(mapped.sources, node.sources, mapSource)
-
-			// reconcile signal observers
-			if (mapped.signal) {
-				if (!node.signal) node.signal = createSignalNodeAsync(mapped.signal)
-				else reconcileArrayByIds(mapped.signal.observers, node.signal.observers, mapObserver)
-			}
-		} else {
+		if (node.id === mapped.id) reconcileNode(mapped, node)
+		else {
 			// dispose old, map new child
 			node.dispose()
 			children[i] = mapNewOwner(mapped)
@@ -230,6 +228,18 @@ function reconcileSignals(newSignals: readonly MappedSignal[], signals: GraphSig
 	}
 }
 
+function reconcileNode(mapped: MappedOwner, node: GraphOwner): void {
+	reconcileChildren(mapped.children, node.children)
+	reconcileSignals(mapped.signals, node.signals)
+	reconcileArrayByIds(mapped.sources, node.sources, mapSource)
+
+	// reconcile signal observers
+	if (mapped.signal) {
+		if (!node.signal) node.signal = createSignalNodeAsync(mapped.signal)
+		else reconcileArrayByIds(mapped.signal.observers, node.signal.observers, mapObserver)
+	}
+}
+
 const exports = createRoot(() => {
 	const [graphs, setGraphs] = createStore<GraphRoot[]>([])
 
@@ -260,29 +270,37 @@ const exports = createRoot(() => {
 		),
 	}
 
-	onRuntimeMessage(MESSAGE.GraphUpdate, root => {
-		// reset all of the computationRerun state
+	const addNewRoot = (proxy: GraphRoot[], { id, tree }: SerialisedTreeRoot): void => {
+		proxy.push({ id, tree: mapNewOwner(tree) })
+	}
+	const removeRoot = (proxy: GraphRoot[], id: number): void => {
+		proxy.splice(
+			proxy.findIndex(e => e.id === id),
+			1,
+		)
+	}
+	const updateRoot = (proxy: GraphRoot[], { id, tree }: SerialisedTreeRoot): void => {
+		const index = graphs.findIndex(r => r.id === id)
+		// reconcile existing root
+		if (index !== -1) reconcileNode(tree, proxy[index].tree)
+		// insert new root
+		else addNewRoot(proxy, { id, tree })
+	}
+
+	onRuntimeMessage(MESSAGE.GraphUpdate, ({ added, removed, updated }) => {
 		batch(() => {
+			// reset all of the computationRerun state
 			for (const id of ownersUpdated) ownersMap[id].setUpdate(false)
 			for (const id of signalsUpdated) signalsMap[id].setUpdate(false)
-		})
 
-		const index = graphs.findIndex(compareId.bind(root))
-		// reconcile existing root
-		if (index !== -1) {
 			setGraphs(
-				index,
-				"children",
-				produce(children => reconcileChildren(root.children, children)),
+				produce(proxy => {
+					removed.forEach(id => removeRoot(proxy, id))
+					added.forEach(root => addNewRoot(proxy, root))
+					updated.forEach(root => updateRoot(proxy, root))
+				}),
 			)
-		}
-		// insert new root
-		else {
-			setGraphs(graphs.length, {
-				id: root.id,
-				children: root.children.map(mapNewOwner),
-			})
-		}
+		})
 
 		afterGraphUpdate()
 	})

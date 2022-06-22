@@ -1,102 +1,171 @@
-import { Accessor, createEffect, createSignal, untrack } from "solid-js"
+import { createEffect, onCleanup, runWithOwner, untrack } from "solid-js"
 import { throttle } from "@solid-primitives/scheduled"
-import { MappedComponent, MappedOwner, SolidOwner } from "@shared/graph"
+import { createBranch } from "@solid-primitives/rootless"
+import { getOwner, OwnerType, SolidOwner, SolidRoot } from "@shared/graph"
 import { UpdateType } from "@shared/messanger"
 import { batchUpdate, ComputationUpdateHandler, SignalUpdateHandler } from "./batchUpdates"
 import { makeRootUpdateListener } from "./update"
-import { mapOwnerTree } from "./walker"
-import { getNewSdtId } from "./utils"
+import { walkSolidTree } from "./walker"
+import {
+	addRootToOwnedRoots,
+	getDebuggerContext,
+	getNewSdtId,
+	markOwnerType,
+	onOwnerCleanup,
+	removeDebuggerContext,
+	setDebuggerContext,
+} from "./utils"
+import { enabled, debuggerConfig, onForceUpdate, onUpdate, updateRoot, removeRoot } from "./plugin"
 
-export type CreateOwnerTreeOptions = {
-	enabled?: Accessor<boolean>
-	trackSignals?: Accessor<boolean>
-	trackBatchedUpdates?: Accessor<boolean>
-	trackComponents?: Accessor<boolean>
-}
+export function createGraphRoot(owner: SolidRoot): void {
+	// setup the debugger in a separate root, so that it doesn't walk and track itself
+	createBranch(() => {
+		const rootId = getNewSdtId()
 
-export function boundReturn<T>(this: T): T {
-	return this
-}
+		const onComputationUpdate: ComputationUpdateHandler = payload => {
+			if (!debuggerConfig.trackBatchedUpdates || owner.isDisposed) return
+			// TODO: move the makeRootUpdateListener logic here, no need for separate map
+			batchUpdate({ type: UpdateType.Computation, payload })
+		}
+		const onSignalUpdate: SignalUpdateHandler = payload => {
+			if (!debuggerConfig.trackBatchedUpdates || owner.isDisposed) return
+			batchUpdate({ type: UpdateType.Signal, payload })
+		}
 
-export function createOwnerObserver(
-	owner: SolidOwner,
-	onUpdate: (children: MappedOwner[], components: MappedComponent[]) => void,
-	options: CreateOwnerTreeOptions = {},
-): {
-	update: VoidFunction
-	forceUpdate: VoidFunction
-	rootId: number
-} {
-	const {
-		enabled,
-		trackSignals = boundReturn.bind(false),
-		trackComponents = boundReturn.bind(false),
-		trackBatchedUpdates = boundReturn.bind(false),
-	} = options
+		const forceRootUpdate = () => {
+			if (owner.isDisposed) return
+			const { tree, components } = untrack(
+				walkSolidTree.bind(void 0, owner, {
+					...debuggerConfig,
+					onComputationUpdate,
+					onSignalUpdate,
+					rootId,
+				}),
+			)
+			updateRoot({ id: rootId, tree, components })
+		}
+		const triggerRootUpdate = throttle(forceRootUpdate, 350)
 
-	const rootId = getNewSdtId()
+		onUpdate(triggerRootUpdate)
+		onForceUpdate(forceRootUpdate)
 
-	const onComputationUpdate: ComputationUpdateHandler = payload => {
-		batchUpdate({ type: UpdateType.Computation, payload })
-	}
-	const onSignalUpdate: SignalUpdateHandler = payload => {
-		batchUpdate({ type: UpdateType.Signal, payload })
-	}
-	const forceUpdate = () => {
-		const { children, components } = untrack(
-			mapOwnerTree.bind(void 0, owner, {
-				onComputationUpdate,
-				onSignalUpdate,
-				rootId,
-				trackSignals: trackSignals(),
-				trackComponents: trackComponents(),
-				trackBatchedUpdates: trackBatchedUpdates(),
-			}),
-		)
-		onUpdate(children, components)
-	}
-	const update = throttle(forceUpdate, 350)
-
-	if (enabled)
 		createEffect(() => {
 			if (!enabled()) return
-			forceUpdate()
-			makeRootUpdateListener(rootId, update)
+			forceRootUpdate()
+			makeRootUpdateListener(rootId, triggerRootUpdate)
 		})
-	else makeRootUpdateListener(rootId, update)
 
-	return { update, forceUpdate, rootId }
+		setDebuggerContext(owner, { rootId, triggerRootUpdate, forceRootUpdate })
+
+		onCleanup(() => {
+			removeDebuggerContext(owner)
+			removeRoot(rootId)
+			owner.isDisposed = true
+		})
+	})
 }
 
-export function createGraphRoot(
-	root: SolidOwner,
-	options?: CreateOwnerTreeOptions,
-): [
-	{
-		rootId: number
-		children: Accessor<MappedOwner[]>
-		components: Accessor<MappedComponent[]>
-	},
-	{
-		update: VoidFunction
-		forceUpdate: VoidFunction
-	},
-] {
-	const [children, setChildren] = createSignal<MappedOwner[]>([], { internal: true })
-	const [components, setComponents] = createSignal<MappedComponent[]>([], { internal: true })
+/**
+ * Helps the debugger find and reattach an reactive owner created by `createRoot` to it's detached parent.
+ *
+ * Call this synchronously inside `createRoot` callback body, whenever you are using `createRoot` yourself to dispose of computations early, or inside `<For>`/`<Index>` components to reattach their children to reactive graph visible by the devtools debugger.
+ * @example
+ * createRoot(dispose => {
+ * 	// This reactive Owner disapears form the owner tree
+ *
+ * 	// Reattach the Owner to the tree:
+ * 	reattachOwner();
+ * });
+ */
+export function attachDebugger(_owner: SolidOwner | null = getOwner()): void {
+	let owner = _owner as SolidOwner
+	if (!owner)
+		return console.warn(
+			"reatachOwner helper should be used synchronously inside createRoot callback body.",
+		)
 
-	const { update, forceUpdate, rootId } = createOwnerObserver(
-		root,
-		(children, components) => {
-			setChildren(children)
-			setComponents(components)
-		},
-		options,
-	)
-	update()
+	forEachLookupRoot(owner, root => {
+		const ctx = getDebuggerContext(owner)
 
-	return [
-		{ rootId, children, components },
-		{ update, forceUpdate },
-	]
+		markOwnerType(root, OwnerType.Root)
+
+		// under an existing debugger root
+		if (ctx) {
+			ctx.triggerRootUpdate()
+
+			let parent = findClosestAliveParent(root)!
+			if (!parent.owner) return console.warn("PARENT_SHOULD_BE_ALIVE")
+
+			let removeFromOwned = addRootToOwnedRoots(parent.owner, root)
+
+			const onParentCleanup = () => {
+				const newParent = findClosestAliveParent(root)
+				if (newParent.owner) {
+					parent = newParent
+					removeFromOwned()
+					removeFromOwned = addRootToOwnedRoots(parent.owner, root)
+					onOwnerCleanup(parent.root, onParentCleanup)
+				} else {
+					removeFromOwned()
+					removeOwnCleanup()
+					runWithOwner(root, () => createGraphRoot(root))
+				}
+			}
+
+			const removeParentCleanup = onOwnerCleanup(parent.root, onParentCleanup)
+
+			const removeOwnCleanup = onOwnerCleanup(root, () => {
+				root.isDisposed = true
+				removeFromOwned()
+				removeParentCleanup()
+				ctx.triggerRootUpdate()
+			})
+		}
+		// seperated from existing debugger roots
+		else runWithOwner(root, () => createGraphRoot(root))
+	})
+}
+
+const isOwnerTypeRoot = (o: SolidOwner): o is SolidRoot => o.sdtType === OwnerType.Root || !o.owner
+
+/**
+ * Searches for the closest alive parent of the given owner.
+ * A parent here consists of `{ owner: SolidOwner; root: SolidRoot }` where `owner` is the closest tree node to attach to, and `root` in the closest subroot/root that is not disposed.
+ * @param owner
+ * @returns `{ owner: SolidOwner; root: SolidRoot }`
+ */
+function findClosestAliveParent(
+	owner: SolidOwner,
+): { owner: SolidOwner; root: SolidRoot } | { owner: null; root: null } {
+	let disposed: SolidRoot | null = null
+	let closestAliveRoot: SolidRoot | null = null
+	let current = owner
+	while (current.owner && !closestAliveRoot) {
+		current = current.owner
+		if (isOwnerTypeRoot(current)) {
+			if (current.isDisposed) disposed = current
+			else closestAliveRoot = current
+		}
+	}
+	if (!closestAliveRoot) return { owner: null, root: null }
+	return { owner: disposed?.owner ?? owner.owner!, root: closestAliveRoot }
+}
+
+/**
+ * Run callback for each subroot/root from the tree root to the given owner.
+ * The callback is run only for roots that haven't been handled before.
+ */
+function forEachLookupRoot(owner: SolidOwner, callback: (root: SolidRoot) => void): void {
+	const roots: SolidRoot[] = []
+	do {
+		// check if it's a root/subroot
+		if (owner.sdtType === OwnerType.Root || !owner.owner || !owner.owner.owned?.includes(owner)) {
+			// skip already handled roots
+			if (owner.sdtType) break
+			roots.push(owner as SolidRoot)
+		}
+		owner = owner.owner!
+	} while (owner)
+	// callback roots in downwards direction
+	for (let i = roots.length - 1; i >= 0; i--) callback(roots[i])
 }

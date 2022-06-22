@@ -1,16 +1,16 @@
 /* @refresh reload */
 import { render } from "solid-js/web"
-import { Debugger } from "solid-devtools"
+import { Debugger, useLocatorPlugin } from "solid-devtools"
 
 import App from "./App"
 
+useLocatorPlugin({
+	targetIDE: "vscode",
+})
+
 render(
 	() => (
-		<Debugger
-			locator={{
-				targetIDE: "vscode",
-			}}
-		>
+		<Debugger>
 			<App />
 		</Debugger>
 	),

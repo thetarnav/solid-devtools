@@ -22,39 +22,70 @@ yarn add solid-devtools
 pnpm i solid-devtools
 ```
 
-### Debugger
+### Attaching Debugger to your application
 
-The most important piece of `solid-devtools` is the `<Debugger>` component. Debugger is a cornerstone of all solid-devtools. It analyses and tracks changes of Solid's reactive graph.
+Currently you have to manually attach the debugger to the reactive graph of your application logic. You can do that with one of the two primitives:
 
-Wrap your application with it to use compatable devtools.
+#### `attachDebugger`
+
+This is a hook that will attach the debugger to the reactive owner of the scope it was used under. For example you might want to use it in you `<App>` component, or directly in the `render` function. It can be used in many places at once without any issues.
+
+```tsx
+import { render } from "solid-js/web"
+import { attachDebugger } from "solid-devtools"
+
+render(() => {
+  attachDebugger()
+  return <App />
+}, document.getElementById("root")!)
+
+// or inside the App component:
+function App() {
+  attachDebugger()
+  return <>...</>
+}
+```
+
+#### `Debugger`
+
+The debugger component works exactly like [`attachDebugger`](#attachDebugger), but it may be more convenient to use at times.
 
 ```tsx
 import { render } from "solid-js/web"
 import { Debugger } from "solid-devtools"
 
 render(
-	() => (
-		// Debugger will observe application passed to it as children.
-		<Debugger>
-			<App />
-		</Debugger>
-	),
-	document.getElementById("root")!,
+  () => (
+    <Debugger>
+      <App />
+    </Debugger>
+  ),
+  document.getElementById("root")!,
 )
 ```
 
-#### Debugger props
+### Reattaching sub roots back to the tree
 
-Debugger accepts props for controlling it's behavior.
+Solid doesn't attach roots created with `createRoot` to it's detached parent, so the debugger has no way of reaching it. To reattach this root back to the tree tracked by the debugger — simply put another `attachDebugger` call inside it.
 
-- `locator` Options for the [Locator](https://github.com/thetarnav/solid-devtools/tree/main/packages/locator#readme) module.
+[More in this issue](https://github.com/thetarnav/solid-devtools/issues/15)
 
-The Locator module will be disabled by default. To enable it pass `true` or an [options object](https://github.com/thetarnav/solid-devtools/tree/main/packages/locator#locator-options) to the `locator` prop.
+This also will be necessary when using components that use `createRoot` internally, like `<For>`, `<Index>` or `<Suspense>`.
 
 ```tsx
-<Debugger locator>
-	<App />
-</Debugger>
+<For each={list()}>
+	{item => (
+		<Debugger>
+			<ItemComponent title={item} />
+		</Debugger>
+	)}
+<For>
+
+// or call attachDebugger inside ItemComponent
+function ItemComponent(props){
+	attachDebugger()
+	return <li>props.title</li>
+}
 ```
 
 ## Changelog

@@ -5,19 +5,19 @@ import {
 	postWindowMessage,
 	startListeningWindowMessages,
 } from "@shared/messanger"
-import type { MappedRoot, BatchUpdateListener } from "@shared/graph"
+import type { SerialisedTreeRoot, BatchUpdateListener } from "@shared/graph"
+import { getArrayDiffById } from "./handleDiffArray"
 
 startListeningWindowMessages()
 
 export function useExtensionAdapter({
-	forceUpdate,
-	tree,
+	forceTriggerUpdate,
+	roots,
 	makeBatchUpdateListener,
 }: {
-	forceUpdate: VoidFunction
-	update: VoidFunction
+	forceTriggerUpdate: VoidFunction
 	makeBatchUpdateListener: (listener: BatchUpdateListener) => VoidFunction
-	tree: MappedRoot
+	roots: Accessor<SerialisedTreeRoot[]>
 }): { enabled: Accessor<boolean> } {
 	const [enabled, setEnabled] = createSignal(false)
 
@@ -25,9 +25,15 @@ export function useExtensionAdapter({
 
 	// update the graph only if the devtools panel is in view
 	onCleanup(onWindowMessage(MESSAGE.PanelVisibility, setEnabled))
-	onCleanup(onWindowMessage(MESSAGE.ForceUpdate, forceUpdate))
+	onCleanup(onWindowMessage(MESSAGE.ForceUpdate, forceTriggerUpdate))
 
-	createEffect(() => postWindowMessage(MESSAGE.GraphUpdate, tree))
+	// diff the roots array, and send only the changed roots (edited, deleted, added)
+	createEffect((prev: SerialisedTreeRoot[]) => {
+		const _roots = roots()
+		const diff = getArrayDiffById(prev, _roots)
+		postWindowMessage(MESSAGE.GraphUpdate, diff)
+		return _roots
+	}, [])
 
 	makeBatchUpdateListener(updates => postWindowMessage(MESSAGE.BatchedUpdate, updates))
 
