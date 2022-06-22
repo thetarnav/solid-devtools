@@ -1,5 +1,20 @@
 # solid-devtools
 
+## 0.4.0
+
+### Minor Changes
+
+- e9847ec: Support for reattaching subroots to the tree.
+  Support for multiple independent trees.
+  Minor API changes.
+  Realted issue: [#15](https://github.com/thetarnav/solid-devtools/issues/15)
+
+### Patch Changes
+
+- Updated dependencies [e9847ec]
+  - @solid-devtools/extension-adapter@0.4.0
+  - @solid-devtools/locator@0.4.0
+
 ## 0.3.0
 
 ### Patch Changes

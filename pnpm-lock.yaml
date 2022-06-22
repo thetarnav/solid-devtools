@@ -54,8 +54,8 @@ importers:
   packages/debugger:
     specifiers:
       '@solid-devtools/babel-plugin': ^0.2.0
-      '@solid-devtools/extension-adapter': ^0.2.9
-      '@solid-devtools/locator': ^0.3.0
+      '@solid-devtools/extension-adapter': ^0.4.0
+      '@solid-devtools/locator': ^0.4.0
       '@solid-primitives/event-bus': ^0.1.0
       '@solid-primitives/immutable': ^0.1.0
       '@solid-primitives/memo': ^0.3.0
@@ -86,7 +86,7 @@ importers:
   packages/extension:
     specifiers:
       '@crxjs/vite-plugin': ^1.0.11
-      '@solid-devtools/ui': 0.1.2
+      '@solid-devtools/ui': 0.2.0
       '@solid-primitives/context': ^0.1.0
       '@solid-primitives/immutable': ^0.1.0
       '@solid-primitives/rootless': ^1.1.0
@@ -130,7 +130,7 @@ importers:
   packages/locator:
     specifiers:
       '@solid-devtools/babel-plugin': ^0.2.0
-      '@solid-devtools/ui': 0.1.2
+      '@solid-devtools/ui': 0.2.0
       '@solid-primitives/bounds': ^0.0.100
       '@solid-primitives/event-listener': ^2.2.0
       '@solid-primitives/platform': ^0.0.100
@@ -221,7 +221,7 @@ importers:
 
   playgrounds/clock:
     specifiers:
-      solid-devtools: ^0.3.0
+      solid-devtools: ^0.4.0
       solid-js: ^1.4.4
       typescript: ^4.7.3
       vite: ^2.9.10
@@ -238,7 +238,7 @@ importers:
     specifiers:
       '@solid-devtools/babel-plugin': ^0.2.0
       '@solid-primitives/timer': ^1.3.1
-      solid-devtools: ^0.3.0
+      solid-devtools: ^0.4.0
       solid-js: ^1.4.4
       typescript: ^4.7.3
       vite: ^2.9.12
@@ -257,7 +257,7 @@ importers:
     specifiers:
       '@solid-devtools/babel-plugin': ^0.2.0
       solid-app-router: ^0.4.1
-      solid-devtools: ^0.3.0
+      solid-devtools: ^0.4.0
       solid-js: ^1.4.4
       solid-meta: ^0.27.5
       solid-start: next

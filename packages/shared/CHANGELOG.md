@@ -1,6 +1,6 @@
-# @solid-devtools/extension-adapter
+# solid-devtools-shared
 
-## 0.4.0
+## 0.2.0
 
 ### Minor Changes
 
@@ -8,15 +8,3 @@
   Support for multiple independent trees.
   Minor API changes.
   Realted issue: [#15](https://github.com/thetarnav/solid-devtools/issues/15)
-
-## 0.2.9
-
-### Patch Changes
-
-- 7f0a2ca: Remove dev console log
-
-## 0.1.0
-
-### Minor Changes
-
-- 8e17085: Add locator package. Initial pre-release.
