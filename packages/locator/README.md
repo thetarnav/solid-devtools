@@ -34,7 +34,9 @@ To be able to use the _"open source code in IDE"_ feature, you need to install a
 
 ### Debugger
 
-Wrap your application with the [`<Debugger>`](https://github.com/thetarnav/solid-devtools/tree/main/packages/debugger#debugger) component. And enable the Locator module with passing `true` or an options object to the `locator` prop.
+Wrap your application with the [`<Debugger>`](https://github.com/thetarnav/solid-devtools/tree/main/packages/debugger#debugger) component, or use the [`attachDebugger`](https://github.com/thetarnav/solid-devtools/tree/main/packages/debugger#attachDebugger) hook to attach the debugger to your application.
+
+[**Follow the setup guide on it here**](https://github.com/thetarnav/solid-devtools/tree/main/packages/babel-plugin#Usage-Guide)
 
 ```tsx
 import { render } from "solid-js/web"
@@ -42,12 +44,24 @@ import { Debugger } from "solid-devtools"
 
 render(
   () => (
-    <Debugger locator>
+    <Debugger>
       <App />
     </Debugger>
   ),
   document.getElementById("root")!,
 )
+```
+
+### Enable the Locator plugin
+
+The [`solid-devtools`](https://github.com/thetarnav/solid-devtools/tree/main/packages/debugger#readme) package comes with this placage installed. All you need to do is configure it by calling `useLocatorPlugin` with some options.
+
+```ts
+import { useLocatorPlugin } from "solid-devtools"
+
+useLocatorPlugin({
+  targetIDE: "vscode",
+})
 ```
 
 ### Locator Options
@@ -60,41 +74,33 @@ Choose in which IDE the component source code should be revealed.
 
 Out-of-the-box options: `vscode`, `atom`, `webstorm` and `vscode-insiders`
 
-```tsx
-<Debugger locator={{ targetIDE: "vscode" }}>
-  <App />
-</Debugger>
+```ts
+useLocatorPlugin({
+  targetIDE: "vscode",
+})
 ```
 
 **Target URL Function:**
 
 To target custom URLs (e.g. Github files) the `targetIDE` option accepts an function returning a `string` or `false`.
 
-```tsx
-<Debugger
-  locator={{
-    targetIDE: ({ filePath, line }) =>
-      // will navigate to this link when clicking
-      `https://github.com/thetarnav/solid-devtools/blob/main/playgrounds/sandbox/${filePath}#L${line}`,
-  }}
->
-  <App />
-</Debugger>
+```ts
+useLocatorPlugin({
+  targetIDE: ({ filePath, line }) =>
+    // will navigate to this link when clicking
+    `https://github.com/thetarnav/solid-devtools/blob/main/playgrounds/sandbox/${filePath}#L${line}`,
+})
 ```
 
 Returning `false` will prevent calling `window.open` to navigate to URL, and let you handle the click yourself.
 
-```tsx
-<Debugger
-  locator={{
-    targetIDE({ projectPath, filePath, line, column, element }) {
-      console.log({ projectPath, filePath, line, column, element })
-      return false
-    },
-  }}
->
-  <App />
-</Debugger>
+```ts
+useLocatorPlugin({
+  targetIDE({ projectPath, filePath, line, column, element }) {
+    console.log({ projectPath, filePath, line, column, element })
+    return false
+  },
+})
 ```
 
 #### `key`
@@ -104,9 +110,9 @@ Holding which key should enable the locator overlay? It's `"altKey"` by default 
 Key options: `"altKey"`, `"ctrlKey"`, `"metaKey"`, `"shiftKey"` or `string` to be compared with `e.key` property.
 
 ```tsx
-<Debugger locator={{ key: "ctrlKey" }}>
-  <App />
-</Debugger>
+useLocatorPlugin({
+  key: "ctrlKey",
+})
 ```
 
 ### Using the Locator on the page
