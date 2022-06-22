@@ -77,7 +77,7 @@ export function createGraphRoot(owner: SolidRoot): void {
  * 	reattachOwner();
  * });
  */
-export function reattachOwner(_owner: SolidOwner | null = getOwner()): void {
+export function attachDebugger(_owner: SolidOwner | null = getOwner()): void {
 	let owner = _owner as SolidOwner
 	if (!owner)
 		return console.warn(

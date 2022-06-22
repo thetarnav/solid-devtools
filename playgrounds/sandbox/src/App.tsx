@@ -1,5 +1,5 @@
 import { makeTimer } from "@solid-primitives/timer"
-import { reattachOwner } from "solid-devtools"
+import { attachDebugger } from "solid-devtools"
 import {
 	Component,
 	createSignal,
@@ -13,7 +13,6 @@ import {
 	ParentComponent,
 	Accessor,
 	createRoot,
-	onCleanup,
 } from "solid-js"
 import Todos from "./Todos"
 
@@ -33,14 +32,14 @@ createRoot(dispose => {
 		count()
 		if (count() === 1) {
 			createRoot(dispose => {
-				// reattachOwner()
+				attachDebugger()
 				getOwner()!.name = "OUTSIDE_TEMP_ROOT"
 
 				createEffect(() => count() === 4 && dispose())
 
 				createRoot(_ => {
 					getOwner()!.name = "OUTSIDE_INSIDE_ROOT"
-					reattachOwner()
+					attachDebugger()
 					createEffect(() => count())
 				})
 			})

@@ -1,6 +1,6 @@
 import { createEffect, createSignal, batch, For, Component } from "solid-js"
 import { createStore, SetStoreFunction, Store } from "solid-js/store"
-import { reattachOwner } from "solid-devtools"
+import { attachDebugger } from "solid-devtools"
 
 export function createLocalStore<T extends object>(
 	name: string,
@@ -25,6 +25,7 @@ const Todo: Component<{
 	onUpdate: (value: string) => void
 	onRemove: VoidFunction
 }> = props => {
+	attachDebugger()
 	return (
 		<div>
 			<input
@@ -70,17 +71,14 @@ const Todos: Component = () => {
 				<button>+</button>
 			</form>
 			<For each={todos}>
-				{(todo, i) => {
-					// reattachOwner()
-					return (
-						<Todo
-							{...todo}
-							onCheck={v => setTodos(i(), "done", v)}
-							onUpdate={v => setTodos(i(), "title", v)}
-							onRemove={() => setTodos(t => removeIndex(t, i()))}
-						/>
-					)
-				}}
+				{(todo, i) => (
+					<Todo
+						{...todo}
+						onCheck={v => setTodos(i(), "done", v)}
+						onUpdate={v => setTodos(i(), "title", v)}
+						onRemove={() => setTodos(t => removeIndex(t, i()))}
+					/>
+				)}
 			</For>
 		</>
 	)
