@@ -1,5 +1,5 @@
 import { AnyFunction, AnyObject, Many } from "@solid-primitives/utils"
-import { DebuggerContext, OwnerType, SolidOwner } from "@shared/graph"
+import { DebuggerContext, OwnerType, SolidOwner, SolidRoot } from "@shared/graph"
 import { SafeValue } from "@shared/messanger"
 import { Accessor, createMemo, createSignal } from "solid-js"
 
@@ -71,11 +71,12 @@ export function removeDebuggerContext(owner: SolidOwner): void {
 
 /**
  * Attach onCleanup callback to a reactive owner
+ * @returns a function to remove the cleanup callback
  */
 export function onOwnerCleanup(owner: SolidOwner, fn: VoidFunction): VoidFunction {
 	if (owner.cleanups === null) owner.cleanups = [fn]
 	else owner.cleanups.push(fn)
-	return fn
+	return () => owner.cleanups?.splice(owner.cleanups.indexOf(fn), 1)
 }
 
 let LAST_ID = 0
@@ -92,6 +93,16 @@ export function markNodeID(o: { sdtId?: number }): number {
 export function markNodesID(nodes?: { sdtId?: number }[] | null): number[] {
 	if (!nodes || !nodes.length) return []
 	return nodes.map(markNodeID)
+}
+
+/**
+ * Adds SubRoot object to `ownedRoots` property of owner
+ * @returns a function to remove from the `ownedRoots` property
+ */
+export function addRootToOwnedRoots(parent: SolidOwner, root: SolidRoot): VoidFunction {
+	const ownedRoots = parent.ownedRoots ?? (parent.ownedRoots = new Set())
+	ownedRoots.add(root)
+	return (): void => void ownedRoots.delete(root)
 }
 
 export function resolveChildren(value: unknown): Many<HTMLElement> | null {

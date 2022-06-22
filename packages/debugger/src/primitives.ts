@@ -7,6 +7,7 @@ import { batchUpdate, ComputationUpdateHandler, SignalUpdateHandler } from "./ba
 import { makeRootUpdateListener } from "./update"
 import { walkSolidTree } from "./walker"
 import {
+	addRootToOwnedRoots,
 	getDebuggerContext,
 	getNewSdtId,
 	markOwnerType,
@@ -16,22 +17,23 @@ import {
 } from "./utils"
 import { enabled, debuggerConfig, onForceUpdate, onUpdate, updateRoot, removeRoot } from "./plugin"
 
-export function createGraphRoot(owner: SolidOwner): void {
+export function createGraphRoot(owner: SolidRoot): void {
 	// setup the debugger in a separate root, so that it doesn't walk and track itself
 	createBranch(() => {
 		const rootId = getNewSdtId()
 
 		const onComputationUpdate: ComputationUpdateHandler = payload => {
+			if (!debuggerConfig.trackBatchedUpdates || owner.isDisposed) return
 			// TODO: move the makeRootUpdateListener logic here, no need for separate map
-			// TODO: run batch update only when the debugger is enabled and the graph root isn't disposed
 			batchUpdate({ type: UpdateType.Computation, payload })
 		}
 		const onSignalUpdate: SignalUpdateHandler = payload => {
-			// TODO: run batch update only when the debugger is enabled and the graph root isn't disposed
+			if (!debuggerConfig.trackBatchedUpdates || owner.isDisposed) return
 			batchUpdate({ type: UpdateType.Signal, payload })
 		}
 
 		const forceRootUpdate = () => {
+			if (owner.isDisposed) return
 			const { tree, components } = untrack(
 				walkSolidTree.bind(void 0, owner, {
 					...debuggerConfig,
@@ -54,35 +56,13 @@ export function createGraphRoot(owner: SolidOwner): void {
 		})
 
 		setDebuggerContext(owner, { rootId, triggerRootUpdate, forceRootUpdate })
-		onCleanup(removeDebuggerContext.bind(null, owner))
 
-		onCleanup(removeRoot.bind(null, rootId))
+		onCleanup(() => {
+			removeDebuggerContext(owner)
+			removeRoot(rootId)
+			owner.isDisposed = true
+		})
 	})
-}
-
-const isOwnerTypeRoot = (o: SolidOwner): o is SolidRoot => o.sdtType === OwnerType.Root || !o.owner
-
-const addRootToOwnedRoots = (parent: SolidOwner, root: SolidRoot): VoidFunction => {
-	const ownedRoots = parent.ownedRoots ?? (parent.ownedRoots = new Set())
-	ownedRoots.add(root)
-	return (): void => void ownedRoots.delete(root)
-}
-
-const findClosestAliveParent = (
-	owner: SolidOwner,
-): { owner: SolidOwner; root: SolidRoot } | { owner: null; root: null } => {
-	let disposed: SolidRoot | null = null
-	let closestAliveRoot: SolidRoot | null = null
-	let current = owner
-	while (current.owner && !closestAliveRoot) {
-		current = current.owner
-		if (isOwnerTypeRoot(current)) {
-			if (current.isDisposed) disposed = current
-			else closestAliveRoot = current
-		}
-	}
-	if (!closestAliveRoot) return { owner: null, root: null }
-	return { owner: disposed?.owner ?? owner.owner!, root: closestAliveRoot }
 }
 
 /**
@@ -104,18 +84,7 @@ export function reattachOwner(_owner: SolidOwner | null = getOwner()): void {
 			"reatachOwner helper should be used synchronously inside createRoot callback body.",
 		)
 
-	const roots: SolidRoot[] = []
-	let o = owner
-	while (o.owner) {
-		if (isOwnerTypeRoot(o)) roots.push(o)
-		o = o.owner
-	}
-	roots.push(o as SolidRoot)
-
-	for (let i = roots.length - 1; i >= 0; i--) {
-		const root = roots[i]
-		if (root.sdtType) continue
-
+	forEachLookupRoot(owner, root => {
 		const ctx = getDebuggerContext(owner)
 
 		markOwnerType(root, OwnerType.Root)
@@ -125,43 +94,78 @@ export function reattachOwner(_owner: SolidOwner | null = getOwner()): void {
 			ctx.triggerRootUpdate()
 
 			let parent = findClosestAliveParent(root)!
-			if (!parent.owner) return console.warn("parent should be available")
+			if (!parent.owner) return console.warn("PARENT_SHOULD_BE_ALIVE")
 
-			let remove = addRootToOwnedRoots(parent.owner, root)
-
-			onOwnerCleanup(root, () => {
-				root.isDisposed = true
-				remove()
-				ctx.triggerRootUpdate()
-			})
+			let removeFromOwned = addRootToOwnedRoots(parent.owner, root)
 
 			const onParentCleanup = () => {
 				const newParent = findClosestAliveParent(root)
 				if (newParent.owner) {
-					console.log(root.name, parent, newParent)
-
 					parent = newParent
-					remove()
-					remove = addRootToOwnedRoots(parent.owner, root)
+					removeFromOwned()
+					removeFromOwned = addRootToOwnedRoots(parent.owner, root)
 					onOwnerCleanup(parent.root, onParentCleanup)
 				} else {
-					console.log("parent is dead")
-
-					// TODO: create separate tree
+					removeFromOwned()
+					removeOwnCleanup()
+					runWithOwner(root, () => createGraphRoot(root))
 				}
 			}
 
-			onOwnerCleanup(parent.root, onParentCleanup)
+			const removeParentCleanup = onOwnerCleanup(parent.root, onParentCleanup)
+
+			const removeOwnCleanup = onOwnerCleanup(root, () => {
+				root.isDisposed = true
+				removeFromOwned()
+				removeParentCleanup()
+				ctx.triggerRootUpdate()
+			})
 		}
 		// seperated from existing debugger roots
-		else {
-			// find the root
-			onOwnerCleanup(root, () => {
-				console.log("ROOT DISPOSED")
+		else runWithOwner(root, () => createGraphRoot(root))
+	})
+}
 
-				root.isDisposed = true
-			})
-			runWithOwner(root, () => createGraphRoot(root))
+const isOwnerTypeRoot = (o: SolidOwner): o is SolidRoot => o.sdtType === OwnerType.Root || !o.owner
+
+/**
+ * Searches for the closest alive parent of the given owner.
+ * A parent here consists of `{ owner: SolidOwner; root: SolidRoot }` where `owner` is the closest tree node to attach to, and `root` in the closest subroot/root that is not disposed.
+ * @param owner
+ * @returns `{ owner: SolidOwner; root: SolidRoot }`
+ */
+function findClosestAliveParent(
+	owner: SolidOwner,
+): { owner: SolidOwner; root: SolidRoot } | { owner: null; root: null } {
+	let disposed: SolidRoot | null = null
+	let closestAliveRoot: SolidRoot | null = null
+	let current = owner
+	while (current.owner && !closestAliveRoot) {
+		current = current.owner
+		if (isOwnerTypeRoot(current)) {
+			if (current.isDisposed) disposed = current
+			else closestAliveRoot = current
 		}
 	}
+	if (!closestAliveRoot) return { owner: null, root: null }
+	return { owner: disposed?.owner ?? owner.owner!, root: closestAliveRoot }
+}
+
+/**
+ * Run callback for each subroot/root from the tree root to the given owner.
+ * The callback is run only for roots that haven't been handled before.
+ */
+function forEachLookupRoot(owner: SolidOwner, callback: (root: SolidRoot) => void): void {
+	const roots: SolidRoot[] = []
+	do {
+		// check if it's a root/subroot
+		if (owner.sdtType === OwnerType.Root || !owner.owner || !owner.owner.owned?.includes(owner)) {
+			// skip already handled roots
+			if (owner.sdtType) break
+			roots.push(owner as SolidRoot)
+		}
+		owner = owner.owner!
+	} while (owner)
+	// callback roots in downwards direction
+	for (let i = roots.length - 1; i >= 0; i--) callback(roots[i])
 }
