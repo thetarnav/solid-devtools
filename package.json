@@ -11,7 +11,7 @@
 		"build-test": "turbo run build test typecheck --filter=!./playgrounds/*",
 		"format": "prettier -w \"packages/**/*.{js,ts,json,css,tsx,jsx}\" \"playgrounds/**/*.{js,ts,json,css,tsx,jsx}\"",
 		"changeset": "changeset",
-		"release": "turbo run build typecheck --filter=!./playgrounds/* && changeset publish",
+		"release": "pnpm run build-test && changeset publish",
 		"version-packages": "changeset version && pnpm install"
 	},
 	"devDependencies": {
