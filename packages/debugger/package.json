@@ -50,6 +50,7 @@
 	"devDependencies": {
 		"jest": "^28.1.1",
 		"jest-environment-jsdom": "^28.1.1",
+		"@testing-library/jest-dom": "^5.16.4",
 		"solid-js": "^1.4.4",
 		"ts-node": "^10.8.1",
 		"tsup": "^6.1.2",

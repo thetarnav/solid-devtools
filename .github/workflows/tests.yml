@@ -25,11 +25,17 @@ jobs:
           node-version: ${{ matrix.node-version }}
           cache: pnpm
 
-      - name: pnpm install, build, and test
-        run: |
-          pnpm install
-          pnpm run build
-          pnpm run test
-          pnpm run typecheck
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Run build
+        run: pnpm run build
+
+      - name: Run test
+        run: pnpm run test
+
+      - name: Run typecheck
+        run: pnpm run typecheck
+
         env:
           CI: true
