@@ -1,4 +1,5 @@
 import { getOwner, OwnerType } from "@shared/graph"
+import { SignalUpdatePayload } from "@shared/messanger"
 import { createComputed, createEffect, createRoot, createSignal } from "solid-js"
 import type * as API from "../src/walker"
 
@@ -84,10 +85,11 @@ describe("walkSolidTree", () => {
 				},
 			],
 		})
+		expect(tree).toEqual(JSON.parse(JSON.stringify(tree)))
 		expect(components).toEqual([])
 	})
 
-	it("default options", () => {
+	it("track signals", () => {
 		const walkSolidTree = getModule()
 
 		const [dispose, owner] = createRoot(dispose => {
@@ -167,6 +169,41 @@ describe("walkSolidTree", () => {
 				},
 			],
 		})
+		expect(tree).toEqual(JSON.parse(JSON.stringify(tree)))
 		expect(components).toEqual([])
 	})
+
+	it("listen to batched updates", () =>
+		createRoot(dispose => {
+			const walkSolidTree = getModule()
+
+			const capturedSignalUpdates: SignalUpdatePayload[] = []
+			const capturedComputationUpdates: number[] = []
+
+			const [a, setA] = createSignal(0)
+			createComputed(a)
+
+			walkSolidTree(getOwner()!, {
+				onComputationUpdate: id => capturedComputationUpdates.push(id),
+				onSignalUpdate: e => capturedSignalUpdates.push(e),
+				rootId: 123,
+				trackBatchedUpdates: true,
+				trackComponents: false,
+				trackSignals: true,
+			})
+
+			expect(capturedSignalUpdates.length).toBe(0)
+			expect(capturedComputationUpdates.length).toBe(0)
+
+			setA(1)
+
+			expect(capturedComputationUpdates.length).toBe(1)
+			expect(typeof capturedComputationUpdates[0]).toBe("number")
+			expect(capturedSignalUpdates.length).toBe(1)
+			expect(typeof capturedSignalUpdates[0].id).toBe("number")
+			expect(capturedSignalUpdates[0].value).toBe(1)
+			expect(capturedSignalUpdates[0].oldValue).toBe(0)
+
+			dispose()
+		}))
 })

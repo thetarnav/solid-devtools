@@ -4,8 +4,7 @@ import { SafeValue } from "@shared/messanger"
 import { Accessor, createMemo, createSignal } from "solid-js"
 
 export const isComputation = (o: SolidOwner): o is SolidComputation =>
-	(Object.hasOwn(o, "sdtType") && o.sdtType !== OwnerType.Root) ||
-	(Object.hasOwn(o, "fn") && Object.hasOwn(o, "sources"))
+	typeof o.fn === "function" && "sources" in o
 
 export const isComponent = (o: Readonly<AnyObject>): boolean => "componentName" in o
 
