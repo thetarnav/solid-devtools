@@ -18,8 +18,22 @@ export function getLocationFromAttribute(value: string): ElementLocation | null 
 	}
 }
 
+export function getLocationFromElement(element: Element): ElementLocation | null {
+	const locAttr = element.getAttribute(LOCATION_ATTRIBUTE_NAME)
+	return locAttr ? getLocationFromAttribute(locAttr) : null
+}
+
 const findComponentCache = new Map<HTMLElement, SelectedComponent | null>()
 
+/**
+ * Given an array of components and a HTML Element, find the closest component that contains the element.
+ *
+ * All the finds are stored in a cache to avoid re-computation. To clear the cache, use `clearFindComponentCache()`.
+ *
+ * @param comps An array of MappedComponents
+ * @param target HTMLElement to find the component for
+ * @returns A SelectedComponent or null if no component was found. Selected component contains also a source code location property.
+ */
 export function findComponent(
 	comps: MappedComponent[],
 	target: HTMLElement | null,
@@ -31,11 +45,8 @@ export function findComponent(
 
 	for (const el of toCheck) {
 		if (!location) {
-			const locAttr = el.attributes.getNamedItem(LOCATION_ATTRIBUTE_NAME)
-			if (locAttr) {
-				const loc = getLocationFromAttribute(locAttr.value)
-				if (loc) location = { ...loc, element: el }
-			}
+			const loc = getLocationFromElement(el)
+			if (loc) location = { ...loc, element: el }
 		}
 
 		const cached = findComponentCache.get(el)
@@ -73,4 +84,7 @@ export function findComponent(
 	return null
 }
 
+/**
+ * Clear the find component cache.
+ */
 export const clearFindComponentCache = () => findComponentCache.clear()

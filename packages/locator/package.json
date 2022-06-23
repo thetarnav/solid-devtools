@@ -1,6 +1,6 @@
 {
 	"name": "@solid-devtools/locator",
-	"version": "0.4.0",
+	"version": "0.4.1",
 	"description": "On-page overlay for localisating SolidJS components, and revealing them in your code editor.",
 	"license": "MIT",
 	"author": "Damian Tarnawski <gthetarnav@gmail.com>",
@@ -26,9 +26,21 @@
 	"files": [
 		"dist"
 	],
-	"main": "dist/index.cjs",
-	"module": "dist/index.js",
-	"types": "dist/index.d.ts",
+	"main": "./dist/server.cjs",
+	"module": "./dist/server.js",
+	"types": "./dist/index.d.ts",
+	"exports": {
+		"browser": {
+			"development": {
+				"import": "./dist/index.js",
+				"require": "./dist/index.cjs"
+			},
+			"import": "./dist/server.js",
+			"require": "./dist/server.cjs"
+		},
+		"import": "./dist/server.js",
+		"require": "./dist/server.cjs"
+	},
 	"scripts": {
 		"dev": "tsup --watch",
 		"build": "tsup",
@@ -46,9 +58,10 @@
 		"@solid-devtools/ui": "0.2.0",
 		"@solid-primitives/bounds": "^0.0.100",
 		"@solid-primitives/event-listener": "^2.2.0",
+		"@solid-primitives/keyboard": "^0.0.100",
+		"@solid-primitives/platform": "^0.0.100",
 		"@solid-primitives/resize-observer": "^2.0.2",
 		"@solid-primitives/utils": "^2.1.1",
-		"@solid-primitives/platform": "^0.0.100",
 		"motion": "^10.10.0"
 	},
 	"peerDependencies": {

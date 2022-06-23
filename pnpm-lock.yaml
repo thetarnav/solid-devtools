@@ -133,6 +133,7 @@ importers:
       '@solid-devtools/ui': 0.2.0
       '@solid-primitives/bounds': ^0.0.100
       '@solid-primitives/event-listener': ^2.2.0
+      '@solid-primitives/keyboard': ^0.0.100
       '@solid-primitives/platform': ^0.0.100
       '@solid-primitives/resize-observer': ^2.0.2
       '@solid-primitives/utils': ^2.1.1
@@ -146,6 +147,7 @@ importers:
       '@solid-devtools/ui': link:../ui
       '@solid-primitives/bounds': 0.0.100_solid-js@1.4.4
       '@solid-primitives/event-listener': 2.2.0_solid-js@1.4.4
+      '@solid-primitives/keyboard': 0.0.100_solid-js@1.4.4
       '@solid-primitives/platform': 0.0.100_solid-js@1.4.4
       '@solid-primitives/resize-observer': 2.0.2_solid-js@1.4.4
       '@solid-primitives/utils': 2.1.1_solid-js@1.4.4
@@ -3044,6 +3046,15 @@ packages:
       '@solid-primitives/utils': 1.5.2_solid-js@1.4.4
     transitivePeerDependencies:
       - solid-js
+    dev: false
+
+  /@solid-primitives/keyboard/0.0.100_solid-js@1.4.4:
+    resolution: {integrity: sha512-rdQdpOvHm6zde3lapYYT0xwiTvnQtMszHjia7u6qrb5VJLnw77wa9YigJNjdL8YYRcl6NLKZg/wLr5yfjqKVJA==}
+    peerDependencies:
+      solid-js: ^1.4.0
+    dependencies:
+      '@solid-primitives/event-listener': 2.2.0_solid-js@1.4.4
+      solid-js: 1.4.4
     dev: false
 
   /@solid-primitives/memo/0.3.0_solid-js@1.4.4:

@@ -1,5 +1,11 @@
 # @solid-devtools/locator
 
+## 0.4.1
+
+### Patch Changes
+
+- Use makeKeyHoldListener from solid-primitives. Add separate server/prod noop entry.
+
 ## 0.4.0
 
 ### Minor Changes

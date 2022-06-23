@@ -17,13 +17,13 @@ import {
 	stopPropagation,
 	preventDefault,
 } from "@solid-primitives/event-listener"
+import { makeKeyHoldListener } from "@solid-primitives/keyboard"
 import { MappedComponent } from "@shared/graph"
 import { sheet, tw } from "@solid-devtools/ui"
 import { clearFindComponentCache, findComponent } from "./findComponent"
 import { makeHoverElementListener } from "./hoverElement"
 import { createElementCursor } from "./elementCursor"
 import { openCodeSource, SourceCodeData, TargetIDE, TargetURLFunction } from "./goToSource"
-import { makeHoldKeyListener } from "./holdKeyListener"
 import { animate } from "motion"
 import { WINDOW_PROJECTPATH_PROPERTY } from "@shared/variables"
 
@@ -47,6 +47,7 @@ const [hoverTarget, setHoverTarget] = createSignal<HTMLElement | null>(null, { i
 function openSelectedComponentSource(target: TargetIDE | TargetURLFunction): void {
 	const comp = selected()
 	if (!comp || !comp.location) return
+	// project path comes from a babel plugin injecting hte value to the window object
 	const projectPath = (window as any)[WINDOW_PROJECTPATH_PROPERTY]
 	openCodeSource(target, { ...comp.location, projectPath })
 }
@@ -54,11 +55,9 @@ function openSelectedComponentSource(target: TargetIDE | TargetURLFunction): voi
 export function useLocator({ components, targetIDE, key = "altKey" }: LocatorOptions): {
 	enabled: Accessor<boolean>
 } {
-	if (isProd) return { enabled: () => false }
-
 	const [inLocatorMode, setInLocatorMode] = createSignal(false)
 
-	makeHoldKeyListener(key, setInLocatorMode, true)
+	makeKeyHoldListener(key, setInLocatorMode, { preventDefault: true })
 
 	onCleanup(setHoverTarget.bind(void 0, null))
 	onCleanup(setSelected.bind(void 0, null))
