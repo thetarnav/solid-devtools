@@ -1,5 +1,11 @@
 # solid-devtools-extension
 
+## 0.1.1
+
+### Patch Changes
+
+- 5f83694: Improve types and listening to signal/computation updates.
+
 ## 0.1.0
 
 ### Minor Changes

@@ -1,5 +1,11 @@
 # solid-devtools-shared
 
+## 0.2.1
+
+### Patch Changes
+
+- 5f83694: Improve types and listening to signal/computation updates.
+
 ## 0.2.0
 
 ### Minor Changes

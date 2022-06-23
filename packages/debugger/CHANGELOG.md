@@ -1,5 +1,13 @@
 # solid-devtools
 
+## 0.4.2
+
+### Patch Changes
+
+- 5f83694: Improve types and listening to signal/computation updates.
+- Updated dependencies [5f83694]
+  - @solid-devtools/locator@0.4.2
+
 ## 0.4.0
 
 ### Minor Changes

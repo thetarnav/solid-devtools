@@ -1,6 +1,6 @@
 {
 	"name": "solid-devtools",
-	"version": "0.4.0",
+	"version": "0.4.2",
 	"description": "Runtime helpers for hooking up SolidJS application with Solid Devtools",
 	"license": "MIT",
 	"author": "Damian Tarnawski <gthetarnav@gmail.com>",
@@ -51,7 +51,7 @@
 	},
 	"dependencies": {
 		"@solid-devtools/extension-adapter": "^0.4.0",
-		"@solid-devtools/locator": "^0.4.0",
+		"@solid-devtools/locator": "^0.4.2",
 		"@solid-primitives/event-bus": "^0.1.0",
 		"@solid-primitives/immutable": "^0.1.0",
 		"@solid-primitives/memo": "^0.3.0",
