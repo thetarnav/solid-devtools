@@ -4,7 +4,6 @@ import { createBranch } from "@solid-primitives/rootless"
 import { getOwner, OwnerType, SolidOwner, SolidRoot } from "@shared/graph"
 import { UpdateType } from "@shared/messanger"
 import { batchUpdate, ComputationUpdateHandler, SignalUpdateHandler } from "./batchUpdates"
-import { makeRootUpdateListener } from "./update"
 import { walkSolidTree } from "./walker"
 import {
 	addRootToOwnedRoots,
@@ -24,7 +23,7 @@ export function createGraphRoot(owner: SolidRoot): void {
 
 		const onComputationUpdate: ComputationUpdateHandler = payload => {
 			if (!debuggerConfig.trackBatchedUpdates || owner.isDisposed) return
-			// TODO: move the makeRootUpdateListener logic here, no need for separate map
+			if (enabled()) triggerRootUpdate()
 			batchUpdate({ type: UpdateType.Computation, payload })
 		}
 		const onSignalUpdate: SignalUpdateHandler = payload => {
@@ -49,11 +48,8 @@ export function createGraphRoot(owner: SolidRoot): void {
 		onUpdate(triggerRootUpdate)
 		onForceUpdate(forceRootUpdate)
 
-		createEffect(() => {
-			if (!enabled()) return
-			forceRootUpdate()
-			makeRootUpdateListener(rootId, triggerRootUpdate)
-		})
+		// force trigger update when enabled changes to true
+		createEffect(() => enabled() && forceRootUpdate())
 
 		setDebuggerContext(owner, { rootId, triggerRootUpdate, forceRootUpdate })
 

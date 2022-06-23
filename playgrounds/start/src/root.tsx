@@ -6,9 +6,14 @@ import { isServer } from "solid-js/web"
 import Nav from "./components/nav"
 import "./root.css"
 
-import { Debugger } from "solid-devtools"
+import { attachDebugger, useLocatorPlugin } from "solid-devtools"
+
+useLocatorPlugin({
+	targetIDE: "vscode",
+})
 
 export default function Root() {
+	attachDebugger()
 	return (
 		<html lang="en">
 			<head>
@@ -21,13 +26,11 @@ export default function Root() {
 			</head>
 			<body>
 				<Nav />
-				<Debugger locator={{ targetIDE: "vscode" }}>
-					<ErrorBoundary>
-						<Suspense fallback={<div class="news-list-nav">Loading...</div>}>
-							<Routes />
-						</Suspense>
-					</ErrorBoundary>
-				</Debugger>
+				<ErrorBoundary>
+					<Suspense fallback={<div class="news-list-nav">Loading...</div>}>
+						<Routes />
+					</Suspense>
+				</ErrorBoundary>
 				<Scripts />
 			</body>
 		</html>

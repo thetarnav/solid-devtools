@@ -11,6 +11,7 @@ import { ComputationUpdateHandler, SignalUpdateHandler } from "./batchUpdates"
 import {
 	getOwnerName,
 	getSafeValue,
+	isComputation,
 	markNodeID,
 	markNodesID,
 	markOwnerType,
@@ -28,26 +29,22 @@ let TrackComponents: boolean
 let Components: MappedComponent[] = []
 
 function observeComputation(owner: SolidOwner, id: number) {
-	// TODO: create "isComputation" util
-	if (TrackBatchedUpdates && Object.hasOwn(owner, "fn"))
-		observeComputationUpdate(
-			owner as SolidComputation,
-			RootID,
-			OnComputationUpdate.bind(void 0, id),
-		)
+	if (TrackBatchedUpdates && isComputation(owner))
+		observeComputationUpdate(owner, OnComputationUpdate.bind(void 0, id))
 }
 
 function observeValue(node: SolidSignal, id: number) {
-	// TODO: create "isSignal" util
-	if (TrackBatchedUpdates && Object.hasOwn(node, "value"))
-		observeValueUpdate(node, RootID, (value, oldValue) => OnSignalUpdate({ id, value, oldValue }))
+	// OnSignalUpdate will change
+	const handler = OnSignalUpdate
+	if (TrackBatchedUpdates)
+		observeValueUpdate(node, (value, oldValue) => handler({ id, value, oldValue }))
 }
 
 function createSignalNode(
 	raw: Pick<SolidSignal, "name" | "value" | "observers"> & { id: number },
 ): MappedSignal {
 	return {
-		name: raw.name,
+		name: raw.name ?? "(anonymous)",
 		id: raw.id,
 		observers: markNodesID(raw.observers),
 		value: getSafeValue(raw.value),

@@ -11,7 +11,6 @@ import {
 	SerialisedTreeRoot,
 } from "@shared/graph"
 import { onRuntimeMessage } from "./messanger"
-import { splice } from "@solid-primitives/immutable"
 
 const dispose = (o: { dispose?: VoidFunction }) => o.dispose?.()
 const disposeAll = (list: { dispose?: VoidFunction }[]) => list.forEach(dispose)

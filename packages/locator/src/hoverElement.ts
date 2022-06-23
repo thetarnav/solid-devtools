@@ -2,6 +2,8 @@ import { makeEventListener } from "@solid-primitives/event-listener"
 
 // TODO: contribute to solid-primitives
 
+// TODO: better support touch
+
 export function makeHoverElementListener(onHover: (el: Element | null) => void): void {
 	let last: Element | null = null
 	const handleHover = (e: { target: unknown }) => {

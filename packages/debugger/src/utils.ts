@@ -1,7 +1,11 @@
 import { AnyFunction, AnyObject, Many } from "@solid-primitives/utils"
-import { DebuggerContext, OwnerType, SolidOwner, SolidRoot } from "@shared/graph"
+import { DebuggerContext, OwnerType, SolidComputation, SolidOwner, SolidRoot } from "@shared/graph"
 import { SafeValue } from "@shared/messanger"
 import { Accessor, createMemo, createSignal } from "solid-js"
+
+export const isComputation = (o: SolidOwner): o is SolidComputation =>
+	(Object.hasOwn(o, "sdtType") && o.sdtType !== OwnerType.Root) ||
+	(Object.hasOwn(o, "fn") && Object.hasOwn(o, "sources"))
 
 export const isComponent = (o: Readonly<AnyObject>): boolean =>
 	"componentName" in o && typeof o.value === "function"
