@@ -1,3 +1,4 @@
+import { resolveElements } from "@solid-primitives/refs"
 import {
 	MappedOwner,
 	OwnerType,
@@ -15,7 +16,6 @@ import {
 	markNodeID,
 	markNodesID,
 	markOwnerType,
-	resolveChildren,
 } from "./utils"
 import { observeComputationUpdate, observeValueUpdate } from "./update"
 
@@ -76,7 +76,7 @@ function mapOwner(owner: SolidOwner, type?: OwnerType): MappedOwner {
 	observeComputation(owner, id)
 
 	if (type === OwnerType.Component && TrackComponents && typeof owner.value === "function") {
-		const resolved = resolveChildren(owner.value())
+		const resolved = resolveElements(owner.value())
 		if (resolved) Components.push({ name, resolved })
 	}
 
