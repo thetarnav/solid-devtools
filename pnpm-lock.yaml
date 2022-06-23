@@ -135,7 +135,6 @@ importers:
       '@solid-primitives/event-listener': ^2.2.0
       '@solid-primitives/keyboard': ^0.0.100
       '@solid-primitives/platform': ^0.0.100
-      '@solid-primitives/resize-observer': ^2.0.2
       '@solid-primitives/utils': ^2.1.1
       esbuild: ^0.14.43
       esbuild-plugin-solid: ^0.4.2
@@ -149,7 +148,6 @@ importers:
       '@solid-primitives/event-listener': 2.2.0_solid-js@1.4.4
       '@solid-primitives/keyboard': 0.0.100_solid-js@1.4.4
       '@solid-primitives/platform': 0.0.100_solid-js@1.4.4
-      '@solid-primitives/resize-observer': 2.0.2_solid-js@1.4.4
       '@solid-primitives/utils': 2.1.1_solid-js@1.4.4
       motion: 10.10.0
     optionalDependencies:

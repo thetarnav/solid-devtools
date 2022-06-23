@@ -10,7 +10,6 @@ import {
 	Show,
 } from "solid-js"
 import { Portal } from "solid-js/web"
-import { isProd } from "@solid-primitives/utils"
 import { createElementBounds } from "@solid-primitives/bounds"
 import {
 	makeEventListener,
@@ -102,8 +101,6 @@ export function useLocator({ components, targetIDE, key = "altKey" }: LocatorOpt
 }
 
 function attachLocator() {
-	if (isProd) return
-
 	const highlightElement = createMemo(
 		on(selected, c => (c ? c.location?.element ?? c.element : null)),
 	)
