@@ -1,14 +1,12 @@
-import { AnyFunction, AnyObject, Many } from "@solid-primitives/utils"
+import { AnyFunction, AnyObject } from "@solid-primitives/utils"
 import { DebuggerContext, OwnerType, SolidComputation, SolidOwner, SolidRoot } from "@shared/graph"
 import { SafeValue } from "@shared/messanger"
 import { Accessor, createMemo, createSignal } from "solid-js"
 
 export const isComputation = (o: SolidOwner): o is SolidComputation =>
-	(Object.hasOwn(o, "sdtType") && o.sdtType !== OwnerType.Root) ||
-	(Object.hasOwn(o, "fn") && Object.hasOwn(o, "sources"))
+	typeof o.fn === "function" && "sources" in o
 
-export const isComponent = (o: Readonly<AnyObject>): boolean =>
-	"componentName" in o && typeof o.value === "function"
+export const isComponent = (o: Readonly<AnyObject>): boolean => "componentName" in o
 
 export const isMemo = (o: Readonly<AnyObject>): boolean =>
 	"value" in o && "comparator" in o && o.pure === true
@@ -107,25 +105,6 @@ export function addRootToOwnedRoots(parent: SolidOwner, root: SolidRoot): VoidFu
 	const ownedRoots = parent.ownedRoots ?? (parent.ownedRoots = new Set())
 	ownedRoots.add(root)
 	return (): void => void ownedRoots.delete(root)
-}
-
-export function resolveChildren(value: unknown): Many<HTMLElement> | null {
-	let resolved = getResolvedChildren(value)
-	if (Array.isArray(resolved) && !resolved.length) resolved = null
-	return resolved
-}
-function getResolvedChildren(value: unknown): Many<HTMLElement> | null {
-	if (typeof value === "function" && !value.length && value.name === "bound readSignal")
-		return getResolvedChildren(value())
-	if (Array.isArray(value)) {
-		const results: HTMLElement[] = []
-		for (const item of value) {
-			const result = getResolvedChildren(item)
-			if (result) Array.isArray(result) ? results.push.apply(results, result) : results.push(result)
-		}
-		return results
-	}
-	return value instanceof HTMLElement ? value : null
 }
 
 /**
