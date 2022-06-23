@@ -1,5 +1,12 @@
 # solid-devtools
 
+## 0.4.3
+
+### Patch Changes
+
+- fd5f408: Improve isComputation check
+- 7611271: Move resolveElements to solid-primitives/refs
+
 ## 0.4.2
 
 ### Patch Changes

@@ -19,7 +19,7 @@
 		"undici": "^4.12.2",
 		"vite": "2.9.12",
 		"@solid-devtools/babel-plugin": "^0.2.0",
-		"solid-devtools": "^0.4.2"
+		"solid-devtools": "^0.4.3"
 	},
 	"engines": {
 		"node": ">=14"

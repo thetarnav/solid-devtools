@@ -1,6 +1,6 @@
 {
 	"name": "solid-devtools",
-	"version": "0.4.2",
+	"version": "0.4.3",
 	"description": "Runtime helpers for hooking up SolidJS application with Solid Devtools",
 	"license": "MIT",
 	"author": "Damian Tarnawski <gthetarnav@gmail.com>",
