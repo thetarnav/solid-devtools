@@ -1,10 +1,10 @@
-<a href="https://github.com/thetarnav/solid-devtools/tree/main/packages/debugger#readme" target="_blank">
+<a href="https://github.com/thetarnav/solid-devtools/tree/main/packages/main#readme" target="_blank">
   <p>
-    <img width="100%" src="https://assets.solidjs.com/banner?type=Devtools&background=tiles&project=Debugger" alt="Solid Devtools Debugger">
+    <img width="100%" src="https://assets.solidjs.com/banner?type=Devtools&background=tiles&project=Library" alt="Solid Devtools">
   </p>
 </a>
 
-# @solid-devtools/debugger
+# solid-devtools
 
 A runtime package, used to get information and track changes of the Solid's reactivity graph. It's a cornerstone of the rest of the packages.
 

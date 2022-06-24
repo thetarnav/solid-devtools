@@ -1,7 +1,7 @@
 {
-	"name": "solid-devtools",
-	"version": "0.4.3",
-	"description": "Runtime helpers for hooking up SolidJS application with Solid Devtools",
+	"name": "@solid-devtools/debugger",
+	"version": "0.0.1",
+	"description": "Debugger of the Solid's reactivity graph — a cornerstone of all solid-devtools.",
 	"license": "MIT",
 	"author": "Damian Tarnawski <gthetarnav@gmail.com>",
 	"contributors": [],
@@ -15,7 +15,9 @@
 	},
 	"keywords": [
 		"solid",
-		"devtools"
+		"devtools",
+		"debugger",
+		"reactivity"
 	],
 	"private": false,
 	"sideEffects": true,
@@ -57,8 +59,6 @@
 		"typescript": "^4.7.3"
 	},
 	"dependencies": {
-		"@solid-devtools/extension-adapter": "^0.4.0",
-		"@solid-devtools/locator": "^0.4.2",
 		"@solid-primitives/event-bus": "^0.1.0",
 		"@solid-primitives/immutable": "^0.1.0",
 		"@solid-primitives/memo": "^0.3.0",
@@ -70,9 +70,6 @@
 	},
 	"peerDependencies": {
 		"solid-js": "^1.4.4"
-	},
-	"optionalDependencies": {
-		"@solid-devtools/babel-plugin": "^0.2.0"
 	},
 	"packageManager": "pnpm@7.2.0"
 }

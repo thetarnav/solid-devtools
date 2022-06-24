@@ -65,9 +65,6 @@ importers:
 
   packages/debugger:
     specifiers:
-      '@solid-devtools/babel-plugin': ^0.2.0
-      '@solid-devtools/extension-adapter': ^0.4.0
-      '@solid-devtools/locator': ^0.4.2
       '@solid-primitives/event-bus': ^0.1.0
       '@solid-primitives/immutable': ^0.1.0
       '@solid-primitives/memo': ^0.3.0
@@ -84,8 +81,6 @@ importers:
       tsup: ^6.1.2
       typescript: ^4.7.3
     dependencies:
-      '@solid-devtools/extension-adapter': link:../extension-adapter
-      '@solid-devtools/locator': link:../locator
       '@solid-primitives/event-bus': 0.1.0_solid-js@1.4.4
       '@solid-primitives/immutable': 0.1.0_solid-js@1.4.4
       '@solid-primitives/memo': 0.3.0_solid-js@1.4.4
@@ -94,8 +89,6 @@ importers:
       '@solid-primitives/scheduled': 1.0.0_solid-js@1.4.4
       '@solid-primitives/set': 0.1.0_solid-js@1.4.4
       '@solid-primitives/utils': 2.1.1_solid-js@1.4.4
-    optionalDependencies:
-      '@solid-devtools/babel-plugin': link:../babel-plugin
     devDependencies:
       '@testing-library/jest-dom': 5.16.4
       jest: 28.1.1_jbmz3vlfopghb5mdasddsdxfzq
@@ -138,11 +131,13 @@ importers:
 
   packages/extension-adapter:
     specifiers:
+      '@solid-devtools/debugger': ^0.0.1
       '@solid-primitives/utils': ^2.1.0
       solid-js: ^1.4.4
       tsup: ^6.1.2
       typescript: ^4.7.3
     dependencies:
+      '@solid-devtools/debugger': link:../debugger
       '@solid-primitives/utils': 2.1.0_solid-js@1.4.4
     devDependencies:
       solid-js: 1.4.4
@@ -152,6 +147,7 @@ importers:
   packages/locator:
     specifiers:
       '@solid-devtools/babel-plugin': ^0.2.0
+      '@solid-devtools/debugger': ^0.0.1
       '@solid-devtools/ui': 0.2.0
       '@solid-primitives/bounds': ^0.0.100
       '@solid-primitives/event-listener': ^2.2.0
@@ -165,6 +161,7 @@ importers:
       tsup: ^6.1.2
       typescript: ^4.7.3
     dependencies:
+      '@solid-devtools/debugger': link:../debugger
       '@solid-devtools/ui': link:../ui
       '@solid-primitives/bounds': 0.0.100_solid-js@1.4.4
       '@solid-primitives/event-listener': 2.2.0_solid-js@1.4.4
@@ -200,6 +197,26 @@ importers:
       solid-js: 1.4.4
       ts-node: 10.8.1_qiyc72axg2v44xl4yovan2v55u
       tsup: 6.1.2_mu66ohdiwyrigyorzidgf4bsdu
+      typescript: 4.7.4
+
+  packages/main:
+    specifiers:
+      '@solid-devtools/babel-plugin': ^0.2.0
+      '@solid-devtools/debugger': ^0.0.1
+      '@solid-devtools/extension-adapter': ^0.4.0
+      '@solid-devtools/locator': ^0.4.2
+      solid-js: ^1.4.4
+      tsup: ^6.1.2
+      typescript: ^4.7.3
+    dependencies:
+      '@solid-devtools/debugger': link:../debugger
+      '@solid-devtools/extension-adapter': link:../extension-adapter
+      '@solid-devtools/locator': link:../locator
+    optionalDependencies:
+      '@solid-devtools/babel-plugin': link:../babel-plugin
+    devDependencies:
+      solid-js: 1.4.4
+      tsup: 6.1.2_typescript@4.7.4
       typescript: 4.7.4
 
   packages/overlay:
@@ -270,7 +287,7 @@ importers:
       vite: ^2.9.10
       vite-plugin-solid: ^2.2.6
     dependencies:
-      solid-devtools: link:../../packages/debugger
+      solid-devtools: link:../../packages/main
       solid-js: 1.4.4
     devDependencies:
       typescript: 4.7.3
@@ -291,7 +308,7 @@ importers:
       solid-js: 1.4.4
     devDependencies:
       '@solid-devtools/babel-plugin': link:../../packages/babel-plugin
-      solid-devtools: link:../../packages/debugger
+      solid-devtools: link:../../packages/main
       typescript: 4.7.3
       vite: 2.9.12
       vite-plugin-solid: 2.2.6
@@ -311,7 +328,7 @@ importers:
     devDependencies:
       '@solid-devtools/babel-plugin': link:../../packages/babel-plugin
       solid-app-router: 0.4.1_solid-js@1.4.4
-      solid-devtools: link:../../packages/debugger
+      solid-devtools: link:../../packages/main
       solid-js: 1.4.4
       solid-meta: 0.27.5_solid-js@1.4.4
       solid-start: 0.1.0-alpha.89_zpxzd3noxdfvsiiznyr2qoaoie
@@ -6396,7 +6413,7 @@ packages:
       pretty-format: 28.1.1
       slash: 3.0.0
       strip-json-comments: 3.1.1
-      ts-node: 10.8.1_qiyc72axg2v44xl4yovan2v55u
+      ts-node: 10.8.1_w7x2tbnlqsjlyiccdck6zsdv74
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -7407,7 +7424,7 @@ packages:
         optional: true
     dependencies:
       lilconfig: 2.0.5
-      ts-node: 10.8.1_qiyc72axg2v44xl4yovan2v55u
+      ts-node: 10.8.1_w7x2tbnlqsjlyiccdck6zsdv74
       yaml: 1.10.2
     dev: true
 
