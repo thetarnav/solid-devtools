@@ -1,5 +1,5 @@
 import { onCleanup } from "solid-js"
-import { SolidComputation, SolidSignal, ValueUpdateListener } from "@shared/graph"
+import { getOwner, SolidComputation, SolidSignal, ValueUpdateListener } from "@shared/graph"
 import { getSafeValue } from "./utils"
 
 let windowAfterUpdatePatched = false
@@ -23,7 +23,9 @@ function patchWindowAfterUpdate() {
 export function makeSolidUpdateListener(onUpdate: VoidFunction): VoidFunction {
 	patchWindowAfterUpdate()
 	graphUpdateListeners.add(onUpdate)
-	return onCleanup(() => graphUpdateListeners.delete(onUpdate))
+	const unsub = () => graphUpdateListeners.delete(onUpdate)
+	getOwner() && onCleanup(unsub)
+	return unsub
 }
 
 /**

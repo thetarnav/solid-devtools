@@ -23,6 +23,7 @@ export const getOwnerName = (owner: Readonly<SolidOwner>): string => {
 }
 
 export const getOwnerType = (o: Readonly<AnyObject>): OwnerType => {
+	if ("sdtType" in o) return o.sdtType
 	// Precompiled components do not start with "_Hot$$"
 	// we need a way to identify imported (3rd party) vs user components
 	if (isComponent(o)) return OwnerType.Component

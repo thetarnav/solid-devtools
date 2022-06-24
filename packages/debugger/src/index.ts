@@ -8,6 +8,10 @@ export type { TargetIDE, TargetURLFunction } from "@solid-devtools/locator"
 
 export { attachDebugger } from "./primitives"
 
+export { makeSolidUpdateListener } from "./update"
+
+export { getOwnerType, getOwnerName, isComputation } from "./utils"
+
 export const Debugger: ParentComponent = props => {
 	attachDebugger()
 	return props.children

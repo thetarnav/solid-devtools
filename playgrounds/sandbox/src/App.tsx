@@ -1,5 +1,6 @@
 import { makeTimer } from "@solid-primitives/timer"
 import { attachDebugger } from "solid-devtools"
+import { debugComputation } from "@solid-devtools/logger"
 import {
 	Component,
 	createSignal,
@@ -15,6 +16,10 @@ import {
 	createRoot,
 } from "solid-js"
 import Todos from "./Todos"
+
+const doMediumCalc = () => {
+	Array.from({ length: 1000000 }, (_, i) => i).sort(() => Math.random() - 5)
+}
 
 let setRootCount: Setter<number>
 let disposeOuterRoot: VoidFunction
@@ -89,33 +94,53 @@ const obj = {
 
 const App: Component = () => {
 	const [count, setCount] = createSignal(0, { name: "count_sig" })
-	const [showEven, setShowEven] = createSignal(false)
+	// const [showEven, setShowEven] = createSignal(false)
 
 	createComputed(() => {
-		setShowEven(count() % 2 === 0)
+		debugComputation()
+		console.log("run")
+		createSignal("hello")
+		if (count() === 2) {
+			doMediumCalc()
+			setCount(p => p + 1)
+			createComputed(() => {
+				console.log("run 2")
+				count()
+			})
+		}
+		return count()
+
+		// setShowEven(count() % 2 === 0)
 	})
 
-	// add signal asynchronously
-	const owner = getOwner()!
-	setTimeout(() => {
-		runWithOwner(owner, () => {
-			createSignal("I am here too!", { name: "async" })
-		})
+	setCount(1)
+
+	createEffect(() => {
+		console.log("effect")
+		count()
 	})
 
-	let setMe: Setter<string>
-	const [smiley, setSmiley] = createSignal<Accessor<string>>()
-	makeTimer(() => setMe(["🙂", "🤔", "🤯"][Math.floor(Math.random() * 3)]), 2000, setInterval)
-	createEffect(
-		() => {
-			const [_smiley, _setMe] = createSignal("🙂", { name: "smiley" })
-			setMe = _setMe
-			setSmiley(() => _smiley)
-			console.log(count())
-		},
-		undefined,
-		{ name: "EFFECT" },
-	)
+	// // add signal asynchronously
+	// const owner = getOwner()!
+	// setTimeout(() => {
+	// 	runWithOwner(owner, () => {
+	// 		createSignal("I am here too!", { name: "async" })
+	// 	})
+	// })
+
+	// let setMe: Setter<string>
+	// const [smiley, setSmiley] = createSignal<Accessor<string>>()
+	// makeTimer(() => setMe(["🙂", "🤔", "🤯"][Math.floor(Math.random() * 3)]), 2000, setInterval)
+	// createEffect(
+	// 	() => {
+	// 		const [_smiley, _setMe] = createSignal("🙂", { name: "smiley" })
+	// 		setMe = _setMe
+	// 		setSmiley(() => _smiley)
+	// 		console.log(count())
+	// 	},
+	// 	undefined,
+	// 	{ name: "EFFECT" },
+	// )
 
 	return (
 		<>
@@ -125,7 +150,7 @@ const App: Component = () => {
 					<Button onClick={() => setCount(p => ++p)} text={`Count: ${count()}`} />
 					<Button onClick={() => setCount(p => ++p)} text={`Count: ${count()}`} />
 				</header>
-				<div>
+				{/* <div>
 					<Show when={showEven()}>{count()} is even!</Show>
 				</div>
 				<div>
@@ -134,13 +159,13 @@ const App: Component = () => {
 							<p style={{ background: "darkgray" }}>{smiley()}</p>
 						</Show>
 					</PassChildren>
-				</div>
+				</div> */}
 			</div>
-			<obj.comp />
+			{/* <obj.comp />
 			<button onClick={() => setRootCount(p => ++p)}>Update root count</button>
 			<button onClick={() => disposeOuterRoot()}>Dispose Outer Root</button>
 			<Article />
-			<Todos />
+			<Todos /> */}
 		</>
 	)
 }
