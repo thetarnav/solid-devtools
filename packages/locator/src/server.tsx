@@ -1,3 +1,4 @@
+import { noop } from "@solid-primitives/utils"
 import * as API from "."
 
-export const useLocator: typeof API.useLocator = () => ({ enabled: () => false })
+export const useLocatorPlugin: typeof API.useLocatorPlugin = noop
