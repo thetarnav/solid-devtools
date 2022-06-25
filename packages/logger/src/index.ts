@@ -53,28 +53,6 @@ const makeTimeMeter = () => {
 	}
 }
 
-function executeOnFirstPropertyTouch<P extends PropertyKey>(
-	obj: { [K in P]: unknown },
-	key: P,
-	callback: VoidFunction,
-): void {
-	let value = obj[key]
-	const fn = () => {
-		callback()
-		Object.defineProperty(obj, key, { value, writable: true })
-	}
-	Object.defineProperty(obj, key, {
-		get() {
-			fn()
-			return value
-		},
-		set(v) {
-			value = v
-			fn()
-		},
-	})
-}
-
 const logComputationDetails = ({
 	causedBy,
 	owned,
@@ -182,26 +160,29 @@ export function debugComputation() {
 		})
 	}
 
-	// solid reads "updatedAt" property right after it executes the "fn" callback
-	// https://github.com/solidjs/solid/blob/main/packages/solid/src/reactive/signal.ts#L1287
 	// this is for logging the initial state after the first callback execution
-	// the "updatedAt" property is monkey patched for one function execution
-	// and then patched back to the original value
-	executeOnFirstPropertyTouch(owner, "updatedAt", () => {
-		const timeElapsed = time()
-		const sources = owner.sources ? dedupeArray(owner.sources) : []
-		logComputation(
-			[`%c${typeName} %c${name}%c created  ${styleTime(timeElapsed)}`, "", STYLES.ownerName, ""],
-			{
-				owned: owner.owned ?? [],
-				sources,
-				prev: UNUSED,
-				value: usesValue ? owner.value : UNUSED,
-				causedBy: null,
-			},
-		)
-		observeSources(sources)
-	})
+	// the "value" property is monkey patched for one function execution
+	const removeValueObserver = observeValueUpdate(
+		owner,
+		value => {
+			const timeElapsed = time()
+			removeValueObserver()
+			const sources = owner.sources ? dedupeArray(owner.sources) : []
+
+			logComputation(
+				[`%c${typeName} %c${name}%c created  ${styleTime(timeElapsed)}`, "", STYLES.ownerName, ""],
+				{
+					owned: owner.owned ?? [],
+					sources,
+					prev: UNUSED,
+					value: usesValue ? value : UNUSED,
+					causedBy: null,
+				},
+			)
+			observeSources(sources)
+		},
+		SYMBOL,
+	)
 
 	// monkey patch the "fn" callback to intercept every computation function execution
 	const fn = owner.fn
