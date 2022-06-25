@@ -14,10 +14,12 @@ type UpdateCause = {
 	value: unknown
 }
 
+const UNUSED = Symbol("unused")
+
 type ComputationState = {
 	owned: SolidComputation[]
-	prev: unknown
-	value: unknown
+	prev: unknown | typeof UNUSED
+	value: unknown | typeof UNUSED
 	sources: (SolidComputation | SolidSignal)[]
 	causedBy: UpdateCause[] | null
 }
@@ -51,10 +53,39 @@ const makeTimeMeter = () => {
 	}
 }
 
-const logComputationDetails = (
-	{ sources, owned, prev, value, causedBy }: Readonly<ComputationState>,
-	usesValue: boolean,
-) => {
+function executeOnFirstPropertyTouch<P extends PropertyKey>(
+	obj: { [K in P]: unknown },
+	key: P,
+	callback: VoidFunction,
+): void {
+	let value = obj[key]
+	const fn = () => {
+		callback()
+		Object.defineProperty(obj, key, { value, writable: true })
+	}
+	Object.defineProperty(obj, key, {
+		get() {
+			fn()
+			return value
+		},
+		set(v) {
+			value = v
+			fn()
+		},
+	})
+}
+
+const logComputationDetails = ({
+	causedBy,
+	owned,
+	sources,
+	prev,
+	value,
+}: Readonly<ComputationState>) => {
+	// Value
+	if (value !== UNUSED) console.log(inGray("Value ="), value)
+	if (prev !== UNUSED) console.log(inGray("Previous ="), prev)
+
 	// Caused By
 	if (causedBy && causedBy.length) {
 		if (causedBy.length === 1)
@@ -70,7 +101,7 @@ const logComputationDetails = (
 			causedBy.forEach(cause => {
 				console.log(
 					`%c${getName(cause)}%c ${inGray("=")}`,
-					"owned" in cause ? STYLES.grayBackground : "",
+					cause.type === "computation" ? STYLES.grayBackground : "",
 					"",
 					cause.value,
 				)
@@ -79,19 +110,13 @@ const logComputationDetails = (
 		}
 	}
 
-	// Value
-	if (usesValue) {
-		console.log(inGray("Value ="), value)
-		console.log(inGray("Previous ="), prev)
-	}
-
 	// Sources
 	if (sources.length) {
 		console.groupCollapsed(inGray("Sources:"), sources.length)
 		sources.forEach(source => {
 			console.log(
 				`%c${getName(source)}%c ${inGray("=")}`,
-				"owned" in source ? STYLES.grayBackground : "",
+				isComputation(source) ? STYLES.grayBackground : "",
 				"",
 				source.value,
 			)
@@ -111,13 +136,9 @@ const logComputationDetails = (
 	}
 }
 
-const logComputation = (
-	groupLabel: string | string[],
-	state: Readonly<ComputationState>,
-	usesValue: boolean,
-) => {
+const logComputation = (groupLabel: string | string[], state: Readonly<ComputationState>) => {
 	console.groupCollapsed(...asArray(groupLabel))
-	logComputationDetails(state, usesValue)
+	logComputationDetails(state)
 	console.groupEnd()
 }
 
@@ -132,22 +153,25 @@ export function debugComputation() {
 	const typeName = OwnerType[type]
 	const name = getOwnerName(owner)
 	const SYMBOL = Symbol(name)
-	// log value and prev value only of the computation callback uses it
-	const usesValue = !!owner.fn.length
+	// log prev value only of the computation callback uses it
+	const usesPrev = !!owner.fn.length
+	const usesValue = usesPrev || type === OwnerType.Memo
 
 	let updateListeners: VoidFunction[] = []
 	let signalUpdates: UpdateCause[] = []
 
+	// patches source objects to track their value updates
+	// will unsubscribe from previous sources on each call
 	const observeSources = (sources: (SolidComputation | SolidSignal)[]) => {
 		updateListeners.forEach(unsub => unsub())
 		updateListeners = []
-		sources.forEach(s => {
+		sources.forEach(source => {
 			const unsub = observeValueUpdate(
-				s,
+				source,
 				value => {
 					const update: UpdateCause = {
-						type: "sources" in s ? "computation" : "signal",
-						name: getName(s),
+						type: isComputation(source) ? "computation" : "signal",
+						name: getName(source),
 						value,
 					}
 					signalUpdates.push(update)
@@ -163,30 +187,20 @@ export function debugComputation() {
 	// this is for logging the initial state after the first callback execution
 	// the "updatedAt" property is monkey patched for one function execution
 	// and then patched back to the original value
-	let updatedAt = owner.updatedAt
-	Object.defineProperty(owner, "updatedAt", {
-		get() {
-			const sources = owner.sources ? dedupeArray(owner.sources) : []
-			logComputation(
-				[`%c${typeName} %c${name}%c created  ${styleTime(time())}`, "", STYLES.ownerName, ""],
-				{
-					owned: owner.owned ?? [],
-					sources,
-					prev: undefined,
-					value: owner.value,
-					causedBy: null,
-				},
-				usesValue,
-			)
-			observeSources(sources)
-
-			Object.defineProperty(owner, "updatedAt", {
-				value: updatedAt,
-				writable: true,
-			})
-			return updatedAt
-		},
-		set: v => (updatedAt = v),
+	executeOnFirstPropertyTouch(owner, "updatedAt", () => {
+		const timeElapsed = time()
+		const sources = owner.sources ? dedupeArray(owner.sources) : []
+		logComputation(
+			[`%c${typeName} %c${name}%c created  ${styleTime(timeElapsed)}`, "", STYLES.ownerName, ""],
+			{
+				owned: owner.owned ?? [],
+				sources,
+				prev: UNUSED,
+				value: usesValue ? owner.value : UNUSED,
+				causedBy: null,
+			},
+		)
+		observeSources(sources)
 	})
 
 	// monkey patch the "fn" callback to intercept every computation function execution
@@ -200,11 +214,13 @@ export function debugComputation() {
 		const elapsedTime = time()
 
 		const sources = owner.sources ? dedupeArray(owner.sources) : []
-		logComputation(
-			[`%c${name}%c re-executed  ${styleTime(elapsedTime)}`, STYLES.ownerName, ""],
-			{ owned: owner.owned ?? [], sources, prev, value, causedBy: updates },
-			usesValue,
-		)
+		logComputation([`%c${name}%c re-executed  ${styleTime(elapsedTime)}`, STYLES.ownerName, ""], {
+			owned: owner.owned ?? [],
+			sources,
+			prev: usesPrev ? prev : UNUSED,
+			value: usesValue ? value : UNUSED,
+			causedBy: updates,
+		})
 		observeSources(sources)
 
 		return value

@@ -161,7 +161,7 @@ const App: Component = () => {
 			<div>
 				<header>
 					<Button onClick={() => setCount(p => ++p)} text={`Count: ${count()}`} />
-					<Button onClick={() => setCount(p => ++p)} text={`Count: ${count()}`} />
+					{/* <Button onClick={() => setCount(p => ++p)} text={`Count: ${count()}`} /> */}
 				</header>
 				<p>Dispose computation</p>
 				<button onClick={dispose}>Dispose</button>
