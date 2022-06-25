@@ -23,7 +23,7 @@ type _Computation = import("solid-js/types/reactive/signal").Computation<unknown
 declare module "solid-js/types/reactive/signal" {
 	interface SignalState<T> {
 		sdtId?: number
-		onValueUpdate?: ValueUpdateListener
+		onValueUpdate?: Record<symbol, ValueUpdateListener>
 	}
 	interface Owner {
 		sdtId?: number
@@ -34,7 +34,7 @@ declare module "solid-js/types/reactive/signal" {
 		sdtId?: number
 		sdtType?: OwnerType
 		ownedRoots?: Set<SolidRoot>
-		onValueUpdate?: ValueUpdateListener
+		onValueUpdate?: Record<symbol, ValueUpdateListener>
 		onComputationUpdate?: VoidFunction
 	}
 }

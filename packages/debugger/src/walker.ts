@@ -28,6 +28,8 @@ let TrackBatchedUpdates: boolean
 let TrackComponents: boolean
 let Components: MappedComponent[] = []
 
+const WALKER = Symbol("walker")
+
 function observeComputation(owner: SolidOwner, id: number) {
 	if (TrackBatchedUpdates && isComputation(owner))
 		observeComputationUpdate(owner, OnComputationUpdate.bind(void 0, id))
@@ -37,7 +39,7 @@ function observeValue(node: SolidSignal, id: number) {
 	// OnSignalUpdate will change
 	const handler = OnSignalUpdate
 	if (TrackBatchedUpdates)
-		observeValueUpdate(node, (value, oldValue) => handler({ id, value, oldValue }))
+		observeValueUpdate(node, (value, oldValue) => handler({ id, value, oldValue }), WALKER)
 }
 
 function createSignalNode(

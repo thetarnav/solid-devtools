@@ -76,10 +76,13 @@ export function removeDebuggerContext(owner: SolidOwner): void {
  * Attach onCleanup callback to a reactive owner
  * @returns a function to remove the cleanup callback
  */
-export function onOwnerCleanup(owner: SolidOwner, fn: VoidFunction): VoidFunction {
-	if (owner.cleanups === null) owner.cleanups = [fn]
-	else owner.cleanups.push(fn)
-	return () => owner.cleanups?.splice(owner.cleanups.indexOf(fn), 1)
+export function onOwnerCleanup(owner: SolidOwner, fn: VoidFunction, front = false): VoidFunction {
+	let _fn: VoidFunction | undefined = fn
+	const callback = () => _fn?.()
+	if (owner.cleanups === null) owner.cleanups = [callback]
+	else if (front) owner.cleanups.splice(0, 0, callback)
+	else owner.cleanups.push(callback)
+	return () => (_fn = undefined)
 }
 
 let LAST_ID = 0

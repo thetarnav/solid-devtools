@@ -14,6 +14,7 @@ import {
 	ParentComponent,
 	Accessor,
 	createRoot,
+	batch,
 } from "solid-js"
 import Todos from "./Todos"
 
@@ -94,31 +95,37 @@ const obj = {
 
 const App: Component = () => {
 	const [count, setCount] = createSignal(0, { name: "count_sig" })
-	// const [showEven, setShowEven] = createSignal(false)
+	const [showEven, setShowEven] = createSignal(false)
 
-	createComputed(() => {
-		debugComputation()
-		console.log("run")
-		createSignal("hello")
-		if (count() === 2) {
-			doMediumCalc()
-			setCount(p => p + 1)
-			createComputed(() => {
-				console.log("run 2")
-				count()
-			})
-		}
-		return count()
+	const dispose = createRoot(dispose => {
+		createComputed(() => {
+			debugComputation()
+			showEven()
+			createSignal("hello")
+			if (count() === 2) {
+				doMediumCalc()
+				setCount(p => p + 1)
+				createComputed(() => {
+					// console.log("run 2")
+					count()
+				})
+			}
+			return count()
 
-		// setShowEven(count() % 2 === 0)
+			// setShowEven(count() % 2 === 0)
+		})
+		return dispose
 	})
 
-	setCount(1)
-
-	createEffect(() => {
-		console.log("effect")
-		count()
+	batch(() => {
+		setCount(1)
+		setShowEven(true)
 	})
+
+	// createEffect(() => {
+	// 	console.log("effect")
+	// 	count()
+	// })
 
 	// // add signal asynchronously
 	// const owner = getOwner()!
@@ -150,6 +157,8 @@ const App: Component = () => {
 					<Button onClick={() => setCount(p => ++p)} text={`Count: ${count()}`} />
 					<Button onClick={() => setCount(p => ++p)} text={`Count: ${count()}`} />
 				</header>
+				<p>Dispose computation</p>
+				<button onClick={dispose}>Dispose</button>
 				{/* <div>
 					<Show when={showEven()}>{count()} is even!</Show>
 				</div>

@@ -46,19 +46,28 @@ export function observeComputationUpdate(owner: SolidComputation, onRun: VoidFun
 /**
  * Patches the owner/signal value, firing the callback on each update immediately as it happened.
  */
-export function observeValueUpdate(node: SolidSignal, onUpdate: ValueUpdateListener): void {
+export function observeValueUpdate(
+	node: SolidSignal,
+	onUpdate: ValueUpdateListener,
+	symbol: symbol,
+): VoidFunction {
+	const remove = () => delete node.onValueUpdate![symbol]
 	// node already patched
-	if (node.onValueUpdate) return void (node.onValueUpdate = onUpdate)
+	if (node.onValueUpdate) {
+		node.onValueUpdate[symbol] = onUpdate
+		return remove
+	}
 	// patch node
-	node.onValueUpdate = onUpdate
+	const map = (node.onValueUpdate = { [symbol]: onUpdate })
 	let value = node.value
 	let safeValue = getSafeValue(value)
 	Object.defineProperty(node, "value", {
 		get: () => value,
 		set: newValue => {
 			const newSafe = getSafeValue(newValue)
-			node.onValueUpdate!(newSafe, safeValue)
+			for (let sym of Object.getOwnPropertySymbols(map)) map[sym](newSafe, safeValue)
 			;(value = newValue), (safeValue = newSafe)
 		},
 	})
+	return remove
 }
