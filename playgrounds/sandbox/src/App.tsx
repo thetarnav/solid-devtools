@@ -95,25 +95,31 @@ const obj = {
 
 const App: Component = () => {
 	const [count, setCount] = createSignal(0, { name: "count_sig" })
-	const [showEven, setShowEven] = createSignal(false)
+	const [showEven, setShowEven] = createSignal(false, { name: "showEven" })
 
 	const dispose = createRoot(dispose => {
-		createComputed(() => {
-			debugComputation()
-			showEven()
-			createSignal("hello")
-			if (count() === 2) {
-				doMediumCalc()
-				setCount(p => p + 1)
-				createComputed(() => {
-					// console.log("run 2")
-					count()
-				})
-			}
-			return count()
+		createComputed(
+			_ => {
+				debugComputation()
 
-			// setShowEven(count() % 2 === 0)
-		})
+				showEven()
+				createSignal("hello")
+				if (count() === 2) {
+					doMediumCalc()
+					setCount(p => p + 1)
+					createComputed(
+						() => {
+							count()
+						},
+						undefined,
+						{ name: "run 2" },
+					)
+				}
+				return count()
+			},
+			undefined,
+			{ name: "main_computed" },
+		)
 		return dispose
 	})
 
