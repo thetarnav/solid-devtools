@@ -10,16 +10,16 @@
 	"type": "module",
 	"main": "./dist/index.js",
 	"devDependencies": {
+		"@solid-devtools/babel-plugin": "^0.2.0",
 		"solid-app-router": "^0.4.1",
+		"solid-devtools": "^0.4.3",
 		"solid-js": "^1.4.4",
 		"solid-meta": "^0.27.5",
 		"solid-start": "next",
 		"solid-start-node": "next",
 		"typescript": "^4.7.4",
-		"undici": "^4.12.2",
-		"vite": "2.9.12",
-		"@solid-devtools/babel-plugin": "^0.2.0",
-		"solid-devtools": "^0.4.3"
+		"undici": "^4.16.0",
+		"vite": "2.9.12"
 	},
 	"engines": {
 		"node": ">=14"
