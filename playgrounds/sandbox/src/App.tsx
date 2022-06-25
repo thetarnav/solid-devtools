@@ -98,12 +98,14 @@ const App: Component = () => {
 	const [showEven, setShowEven] = createSignal(false, { name: "showEven" })
 
 	const dispose = createRoot(dispose => {
+		attachDebugger()
 		createComputed(
 			_ => {
 				debugComputation()
 
-				showEven()
+				// showEven()
 				createSignal("hello")
+				setShowEven(count() % 2 === 0)
 				if (count() === 2) {
 					doMediumCalc()
 					setCount(p => p + 1)
@@ -123,37 +125,37 @@ const App: Component = () => {
 		return dispose
 	})
 
-	batch(() => {
-		setCount(1)
-		setShowEven(true)
+	// batch(() => {
+	// 	setCount(1)
+	// 	setShowEven(true)
+	// })
+
+	createEffect(() => {
+		console.log("effect")
+		count()
 	})
 
-	// createEffect(() => {
-	// 	console.log("effect")
-	// 	count()
-	// })
+	// add signal asynchronously
+	const owner = getOwner()!
+	setTimeout(() => {
+		runWithOwner(owner, () => {
+			createSignal("I am here too!", { name: "async" })
+		})
+	})
 
-	// // add signal asynchronously
-	// const owner = getOwner()!
-	// setTimeout(() => {
-	// 	runWithOwner(owner, () => {
-	// 		createSignal("I am here too!", { name: "async" })
-	// 	})
-	// })
-
-	// let setMe: Setter<string>
-	// const [smiley, setSmiley] = createSignal<Accessor<string>>()
-	// makeTimer(() => setMe(["🙂", "🤔", "🤯"][Math.floor(Math.random() * 3)]), 2000, setInterval)
-	// createEffect(
-	// 	() => {
-	// 		const [_smiley, _setMe] = createSignal("🙂", { name: "smiley" })
-	// 		setMe = _setMe
-	// 		setSmiley(() => _smiley)
-	// 		console.log(count())
-	// 	},
-	// 	undefined,
-	// 	{ name: "EFFECT" },
-	// )
+	let setMe: Setter<string>
+	const [smiley, setSmiley] = createSignal<Accessor<string>>()
+	makeTimer(() => setMe(["🙂", "🤔", "🤯"][Math.floor(Math.random() * 3)]), 2000, setInterval)
+	createEffect(
+		() => {
+			const [_smiley, _setMe] = createSignal("🙂", { name: "smiley" })
+			setMe = _setMe
+			setSmiley(() => _smiley)
+			console.log(count())
+		},
+		undefined,
+		{ name: "EFFECT" },
+	)
 
 	return (
 		<>
@@ -161,11 +163,11 @@ const App: Component = () => {
 			<div>
 				<header>
 					<Button onClick={() => setCount(p => ++p)} text={`Count: ${count()}`} />
-					{/* <Button onClick={() => setCount(p => ++p)} text={`Count: ${count()}`} /> */}
+					<Button onClick={() => setCount(p => ++p)} text={`Count: ${count()}`} />
 				</header>
 				<p>Dispose computation</p>
 				<button onClick={dispose}>Dispose</button>
-				{/* <div>
+				<div>
 					<Show when={showEven()}>{count()} is even!</Show>
 				</div>
 				<div>
@@ -174,13 +176,13 @@ const App: Component = () => {
 							<p style={{ background: "darkgray" }}>{smiley()}</p>
 						</Show>
 					</PassChildren>
-				</div> */}
+				</div>
 			</div>
-			{/* <obj.comp />
+			<obj.comp />
 			<button onClick={() => setRootCount(p => ++p)}>Update root count</button>
 			<button onClick={() => disposeOuterRoot()}>Dispose Outer Root</button>
 			<Article />
-			<Todos /> */}
+			<Todos />
 		</>
 	)
 }

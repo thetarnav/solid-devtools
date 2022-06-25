@@ -209,17 +209,18 @@ export function debugComputation() {
 
 	// CLEANUP
 	// listen to parent cleanup, instead of own, because for computations onCleanup runs for every re-execution
-	onOwnerCleanup(
-		owner.owner!,
-		() => {
-			console.log(`%c${name}%c disposed`, STYLES.ownerName, "")
-			updateListeners.forEach(unsub => unsub())
-			updateListeners.length = 0
-			signalUpdates.length = 0
-		},
-		// run before other cleanup functions
-		true,
-	)
+	if (owner.owner)
+		onOwnerCleanup(
+			owner.owner,
+			() => {
+				console.log(`%c${name}%c disposed`, STYLES.ownerName, "")
+				updateListeners.forEach(unsub => unsub())
+				updateListeners.length = 0
+				signalUpdates.length = 0
+			},
+			// run before other cleanup functions
+			true,
+		)
 
 	const time = makeTimeMeter()
 }
