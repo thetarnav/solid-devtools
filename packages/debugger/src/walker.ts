@@ -7,6 +7,8 @@ import {
 	SolidSignal,
 	MappedComponent,
 	SolidComputation,
+	SignalState,
+	SolidMemo,
 } from "@shared/graph"
 import { ComputationUpdateHandler, SignalUpdateHandler } from "./batchUpdates"
 import {
@@ -35,7 +37,7 @@ function observeComputation(owner: SolidOwner, id: number) {
 		observeComputationUpdate(owner, OnComputationUpdate.bind(void 0, id))
 }
 
-function observeValue(node: SolidSignal, id: number) {
+function observeValue(node: SignalState, id: number) {
 	// OnSignalUpdate will change
 	const handler = OnSignalUpdate
 	if (TrackBatchedUpdates)
@@ -62,7 +64,7 @@ function mapOwnerSignals(owner: SolidOwner): MappedSignal[] {
 	})
 }
 
-function mapMemo(mapped: MappedOwner, owner: SolidComputation): MappedOwner {
+function mapMemo(mapped: MappedOwner, owner: SolidMemo): MappedOwner {
 	const { id, name } = mapped
 	observeValue(owner, id)
 	return Object.assign(mapped, {
@@ -91,7 +93,7 @@ function mapOwner(owner: SolidOwner, type?: OwnerType): MappedOwner {
 		sources: markNodesID(owner.sources),
 	}
 
-	return type === OwnerType.Memo ? mapMemo(mapped, owner as SolidComputation) : mapped
+	return type === OwnerType.Memo ? mapMemo(mapped, owner as SolidMemo) : mapped
 }
 
 function mapChildren({ owned, ownedRoots }: Readonly<SolidOwner>): MappedOwner[] {

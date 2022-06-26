@@ -10,7 +10,7 @@ export { attachDebugger } from "./primitives"
 
 export { makeSolidUpdateListener, observeComputationUpdate, observeValueUpdate } from "./update"
 
-export { getOwnerType, getOwnerName, isComputation, onOwnerCleanup } from "./utils"
+export { getOwnerType, getOwnerName, isComputation, onOwnerCleanup, onParentCleanup } from "./utils"
 
 export const Debugger: ParentComponent = props => {
 	attachDebugger()

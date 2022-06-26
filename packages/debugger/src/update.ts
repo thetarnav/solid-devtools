@@ -1,5 +1,5 @@
 import { onCleanup } from "solid-js"
-import { getOwner, SolidComputation, SolidSignal, ValueUpdateListener } from "@shared/graph"
+import { getOwner, SignalState, SolidComputation, ValueUpdateListener } from "@shared/graph"
 import { getSafeValue } from "./utils"
 
 let windowAfterUpdatePatched = false
@@ -47,7 +47,7 @@ export function observeComputationUpdate(owner: SolidComputation, onRun: VoidFun
  * Patches the owner/signal value, firing the callback on each update immediately as it happened.
  */
 export function observeValueUpdate(
-	node: SolidSignal,
+	node: SignalState,
 	onUpdate: ValueUpdateListener,
 	symbol: symbol,
 ): VoidFunction {

@@ -23,7 +23,6 @@ type _Computation = import("solid-js/types/reactive/signal").Computation<unknown
 declare module "solid-js/types/reactive/signal" {
 	interface SignalState<T> {
 		sdtId?: number
-		onValueUpdate?: Record<symbol, ValueUpdateListener>
 	}
 	interface Owner {
 		sdtId?: number
@@ -39,29 +38,42 @@ declare module "solid-js/types/reactive/signal" {
 	}
 }
 
-export interface SolidSignal extends _SignalState {
+export interface SignalState {
+	value: unknown
+	observers?: SolidComputation[] | null
+	onValueUpdate?: Record<symbol, ValueUpdateListener>
+}
+
+export interface SolidSignal extends _SignalState, SignalState {
 	value: unknown
 	observers: SolidComputation[] | null
 }
 
 export interface SolidRoot extends _Owner {
 	owned: SolidComputation[] | null
-	owner: SolidRoot | SolidComputation | null
+	owner: SolidOwner | null
 	sourceMap?: Record<string, SolidSignal>
 	isDisposed?: boolean
 	sdtContext?: DebuggerContext
 }
 
-export interface SolidComputation extends _Computation, SolidRoot, SolidSignal {
-	owned: SolidComputation[] | null
-	owner: SolidRoot | SolidComputation | null
-	value: unknown
-	sourceMap?: Record<string, SolidSignal>
+export interface SolidComputation extends _Computation, SolidRoot {
 	name: string
-	sources: (SolidComputation | SolidSignal)[] | null
+	value: unknown
+	observers?: SolidComputation[] | null
+	owned: SolidComputation[] | null
+	owner: SolidOwner | null
+	sourceMap?: Record<string, SolidSignal>
+	sources: SolidSignal[] | null
 }
 
-export type SolidOwner = SolidRoot & Partial<SolidComputation>
+export interface SolidMemo extends SolidSignal, SolidComputation {
+	name: string
+	value: unknown
+	observers: SolidComputation[] | null
+}
+
+export type SolidOwner = (SolidComputation | SolidRoot) & Partial<SolidComputation>
 
 export type DebuggerContext = {
 	rootId: number

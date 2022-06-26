@@ -1,4 +1,4 @@
-import { AnyFunction, AnyObject } from "@solid-primitives/utils"
+import { AnyFunction, AnyObject, noop } from "@solid-primitives/utils"
 import {
 	DebuggerContext,
 	OwnerType,
@@ -6,6 +6,7 @@ import {
 	SolidOwner,
 	SolidRoot,
 	SolidSignal,
+	getOwner,
 } from "@shared/graph"
 import { SafeValue } from "@shared/messanger"
 import { Accessor, createMemo, createSignal } from "solid-js"
@@ -81,15 +82,38 @@ export function removeDebuggerContext(owner: SolidOwner): void {
 
 /**
  * Attach onCleanup callback to a reactive owner
+ * @param prepend add the callback to the front of the stack, instead of pushing, fot it to be called before other cleanup callbacks.
  * @returns a function to remove the cleanup callback
  */
-export function onOwnerCleanup(owner: SolidOwner, fn: VoidFunction, front = false): VoidFunction {
-	let _fn: VoidFunction | undefined = fn
-	const callback = () => _fn?.()
-	if (owner.cleanups === null) owner.cleanups = [callback]
-	else if (front) owner.cleanups.splice(0, 0, callback)
-	else owner.cleanups.push(callback)
-	return () => (_fn = undefined)
+export function onOwnerCleanup(owner: SolidOwner, fn: VoidFunction, prepend = false): VoidFunction {
+	if (owner.cleanups === null) owner.cleanups = [fn]
+	else if (prepend) owner.cleanups.splice(0, 0, fn)
+	else owner.cleanups.push(fn)
+	return () => owner.cleanups?.splice(owner.cleanups.indexOf(fn), 1)
+}
+
+/**
+ * Attach onCleanup callback to the parent of a reactive owner if it has one.
+ * @param prepend add the callback to the front of the stack, instead of pushing, fot it to be called before other cleanup callbacks.
+ * @returns a function to remove the cleanup callback
+ */
+export function onParentCleanup(
+	owner: SolidOwner,
+	fn: VoidFunction,
+	prepend = false,
+): VoidFunction {
+	if (owner.owner) return onOwnerCleanup(owner.owner, fn, prepend)
+	return noop
+}
+
+export function onDispose<T>(fn: () => T, prepend = false): () => T {
+	const owner = getOwner()
+	if (!owner) {
+		console.warn("onDispose called outside of a reactive owner")
+		return fn
+	}
+	onParentCleanup(owner, fn, prepend)
+	return fn
 }
 
 let LAST_ID = 0
