@@ -1,6 +1,6 @@
 import { makeTimer } from "@solid-primitives/timer"
 import { attachDebugger } from "solid-devtools"
-import { debugComputation } from "@solid-devtools/logger"
+import { debugComputation, debugSignal } from "@solid-devtools/logger"
 import {
 	Component,
 	createSignal,
@@ -14,7 +14,6 @@ import {
 	ParentComponent,
 	Accessor,
 	createRoot,
-	batch,
 } from "solid-js"
 import Todos from "./Todos"
 
@@ -96,6 +95,8 @@ const obj = {
 const App: Component = () => {
 	const [count, setCount] = createSignal(0, { name: "count_sig" })
 	const [showEven, setShowEven] = createSignal(false, { name: "showEven" })
+
+	debugSignal(count)
 
 	const dispose = createRoot(dispose => {
 		attachDebugger()

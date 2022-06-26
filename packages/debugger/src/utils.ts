@@ -9,7 +9,14 @@ import {
 	getOwner,
 } from "@shared/graph"
 import { SafeValue } from "@shared/messanger"
-import { Accessor, createMemo, createSignal } from "solid-js"
+import {
+	Accessor,
+	createComputed,
+	createMemo,
+	createRoot,
+	createSignal,
+	runWithOwner,
+} from "solid-js"
 
 export const isComputation = (o: SolidOwner | SolidSignal): o is SolidComputation =>
 	"fn" in o && typeof o.fn === "function" && "sources" in o
@@ -112,8 +119,29 @@ export function onDispose<T>(fn: () => T, prepend = false): () => T {
 		console.warn("onDispose called outside of a reactive owner")
 		return fn
 	}
-	onParentCleanup(owner, fn, prepend)
+	// owner is a root
+	if (!owner.owner?.owned?.includes(owner)) onOwnerCleanup(owner, fn, prepend)
+	// owner is a computation
+	else onOwnerCleanup(owner.owner, fn, prepend)
 	return fn
+}
+
+export function getFunctionSources(fn: () => unknown): SolidSignal[] {
+	let nodes: SolidSignal[] | undefined
+	let init = true
+	runWithOwner(null as any, () =>
+		createRoot(dispose =>
+			createComputed(() => {
+				if (!init) return
+				init = false
+				fn()
+				const sources = getOwner()!.sources
+				if (sources) nodes = [...sources]
+				dispose()
+			}),
+		),
+	)
+	return nodes ?? []
 }
 
 let LAST_ID = 0
