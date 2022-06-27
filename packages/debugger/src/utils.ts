@@ -126,6 +126,10 @@ export function onDispose<T>(fn: () => T, prepend = false): () => T {
 	return fn
 }
 
+export function createUnownedRoot<T>(fn: (dispose: VoidFunction) => T): T {
+	return runWithOwner(null as any, () => createRoot(fn))
+}
+
 export function getFunctionSources(fn: () => unknown): SolidSignal[] {
 	let nodes: SolidSignal[] | undefined
 	let init = true

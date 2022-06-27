@@ -1,4 +1,4 @@
-import { asArray } from "@solid-primitives/utils"
+import { arrayEquals, asArray } from "@solid-primitives/utils"
 import { getOwner, OwnerType, SolidComputation, SolidOwner, SolidSignal } from "@shared/graph"
 import {
 	getOwnerType,
@@ -7,6 +7,7 @@ import {
 	observeValueUpdate,
 	onParentCleanup,
 	getFunctionSources,
+	makeSolidUpdateListener,
 } from "@solid-devtools/debugger"
 
 type UpdateCause = {
@@ -247,9 +248,19 @@ function logCausedUpdates(observers: SolidComputation[]): void {
 	console.groupEnd()
 }
 
-function logObservers(observers: SolidComputation[], prevObservers: SolidComputation[]): void {
-	if (!observers.length && !prevObservers.length) return console.log(inGray("Observers:"), 0)
-	console.groupCollapsed(inGray("Observers:"), observers.length)
+function logObservers(
+	signalName: string,
+	observers: SolidComputation[],
+	prevObservers: SolidComputation[],
+): void {
+	const label = [
+		`%c${signalName}%c observers changed:`,
+		`${STYLES.bold} ${STYLES.signalUnderline}`,
+		"",
+		observers.length,
+	]
+	if (!observers.length && !prevObservers.length) return console.log(...label)
+	console.groupCollapsed(...label)
 	const toLog: [type: string, name: string, mark: "added" | "removed" | null][] = []
 	let typeLength = 0
 	prevObservers.forEach(observer => {
@@ -308,9 +319,7 @@ export function debugSignal(getter: () => unknown): void {
 	const name = getName(signal)
 	const SYMBOL = Symbol(name)
 
-	let prevObservers: SolidComputation[] = []
-	let actualPrevObservers: SolidComputation[] = []
-
+	// Initial
 	console.log(
 		`%c${type} %c${name}%c initial value ${inGray("=")}`,
 		"",
@@ -319,22 +328,47 @@ export function debugSignal(getter: () => unknown): void {
 		signal.value,
 	)
 
+	let actualObservers: SolidComputation[]
+	let prevObservers: SolidComputation[] = []
+	let actualPrevObservers: SolidComputation[] = []
+
+	if (!signal.observers) {
+		signal.observers = []
+		signal.observerSlots = []
+	}
+
+	// Value Update
 	observeValueUpdate(
 		signal,
 		(value, prev) => {
-			console.group(
+			console.groupCollapsed(
 				`%c${name}%c updated ${inGray("=")}`,
 				`${STYLES.bold} ${STYLES.signalUnderline}`,
 				"",
 				value,
 			)
-			const observers = signal.observers ? dedupeArray(signal.observers) : []
 			logPrevValue(prev)
-			logCausedUpdates(actualPrevObservers)
-			logObservers(observers, prevObservers)
-			actualPrevObservers = prevObservers = observers
+			logCausedUpdates(prevObservers)
 			console.groupEnd()
 		},
 		SYMBOL,
 	)
+
+	// Observers Change
+	function logObserversChange() {
+		const observers = dedupeArray(actualObservers)
+		if (arrayEquals(observers, prevObservers)) return
+		logObservers(name, observers, prevObservers)
+		prevObservers = [...observers]
+		actualPrevObservers = [...actualObservers]
+	}
+
+	// Listen to Solid's _$afterUpdate hook to check if observers changed
+	makeSolidUpdateListener(() => {
+		actualObservers = signal.observers!
+		if (actualObservers.length !== actualPrevObservers.length) return logObserversChange()
+		for (let i = actualObservers.length; i >= 0; i--) {
+			if (actualObservers[i] !== actualPrevObservers[i]) return logObserversChange()
+		}
+	})
 }
