@@ -44,10 +44,14 @@
 	"scripts": {
 		"dev": "tsup --watch",
 		"build": "tsup",
-		"test": "echo \"NOOP TEST\"",
+		"test": "jest --config jest.config.ts",
 		"typecheck": "tsc --noEmit"
 	},
 	"devDependencies": {
+		"@testing-library/jest-dom": "^5.16.4",
+		"jest": "^28.1.1",
+		"jest-environment-jsdom": "^28.1.1",
+		"ts-node": "^10.8.1",
 		"esbuild": "^0.14.47",
 		"esbuild-plugin-solid": "^0.4.2",
 		"solid-js": "^1.4.4",

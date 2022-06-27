@@ -17,7 +17,11 @@ const config: Config.InitialOptions = {
 
 	testEnvironment: "jsdom",
 
-	setupFilesAfterEnv: ["@testing-library/jest-dom", "regenerator-runtime"],
+	setupFilesAfterEnv: [
+		"@testing-library/jest-dom",
+		"regenerator-runtime",
+		`${projectRootPath}/configs/jest.setup.ts`,
+	],
 
 	moduleNameMapper: {
 		"@shared/(.*)": `${projectRootPath}/packages/shared/$1`,

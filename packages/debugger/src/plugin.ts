@@ -20,7 +20,7 @@ export type PluginFactory = (data: {
 	trackComponents?: Accessor<boolean>
 }
 
-const exports = createRoot(() => {
+const api = createRoot(() => {
 	const owner = getOwner()!
 
 	/** throttled global update */
@@ -117,4 +117,4 @@ export const {
 	registerDebuggerPlugin,
 	updateRoot,
 	removeRoot,
-} = exports
+} = api
