@@ -124,6 +124,12 @@ export const logComputation = (
 	console.groupEnd()
 }
 
+export function logSignalsInitialValues(signals: SolidSignal[]) {
+	console.groupCollapsed("Signals initial values:")
+	logSignalValues(signals)
+	console.groupEnd()
+}
+
 export const logInitialValue = (type: string, name: string, value: unknown): void =>
 	console.log(
 		`%c${type} %c${name}%c initial value ${inGray("=")}`,
@@ -132,6 +138,21 @@ export const logInitialValue = (type: string, name: string, value: unknown): voi
 		"",
 		value,
 	)
+
+export function logSignalValues(signals: SolidSignal[]): void {
+	signals.forEach(signal => {
+		const isSignal = !isComputation(signal)
+		const type = isSignal ? "Signal" : "Memo"
+		const name = getName(signal)
+
+		console.log(
+			`${inGray(type)} %c${name}%c ${inGray("=")}`,
+			`${isSignal ? STYLES.signalUnderline : STYLES.grayBackground}`,
+			"",
+			signal.value,
+		)
+	})
+}
 
 export function logSignalValueUpdate(
 	name: string,

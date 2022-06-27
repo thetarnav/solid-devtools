@@ -1,4 +1,6 @@
-import { getOwner, OwnerType, SolidComputation, SolidSignal } from "@shared/graph"
+import { Accessor } from "solid-js"
+import type { SignalState } from "solid-js/types/reactive/signal"
+import { asArray, Many } from "@solid-primitives/utils"
 import {
 	getOwnerType,
 	getOwnerName,
@@ -9,6 +11,8 @@ import {
 	makeSolidUpdateListener,
 	getName,
 } from "@solid-devtools/debugger"
+import { getOwner, OwnerType, SolidComputation, SolidSignal } from "@shared/graph"
+import { dedupeArray, arrayRefEquals } from "@shared/utils"
 import {
 	getComputationCreatedLabel,
 	getComputationRerunLabel,
@@ -16,6 +20,7 @@ import {
 	logComputation,
 	logInitialValue,
 	logObservers,
+	logSignalsInitialValues,
 	logSignalValueUpdate,
 	UNUSED,
 	UpdateCause,
@@ -30,13 +35,7 @@ declare module "solid-js/types/reactive/signal" {
 	}
 }
 
-const dedupeArray = <T>(array: readonly T[]) => Array.from(new Set(array))
-
-/** Checks if both arrays contain the same values. Order doesn't matter. */
-const arrayRefEquals = <T>(a: readonly T[], b: readonly T[]) =>
-	a === b || (a.length === b.length && a.every(e => b.includes(e)))
-
-const makeTimeMeter = () => {
+function makeTimeMeter(): () => number {
 	let last = performance.now()
 	return () => {
 		const now = performance.now()
@@ -147,18 +146,31 @@ export function debugComputation() {
 	const time = makeTimeMeter()
 }
 
-export function debugSignal(
-	getter: () => unknown,
-	{ trackObservers = true }: { trackObservers?: boolean } = {},
-): void {
-	const sources = getFunctionSources(getter)
-	if (sources.length === 0) return console.warn("No signal was passed to debugSignal")
-	else if (sources.length > 1) return console.warn("More then one signal was passed to debugSignal")
+export interface DebugSignalOptions {
+	trackObservers?: boolean
+	logInitialValue?: boolean
+}
 
-	const signal = sources[0]
+export function debugSignal(
+	source: Accessor<unknown> | SignalState<unknown>,
+	options: DebugSignalOptions = {},
+): void {
+	let signal: SolidSignal
+
+	if (typeof source === "function") {
+		const sources = getFunctionSources(source)
+		if (sources.length === 0) return console.warn("No signal was passed to debugSignal")
+		else if (sources.length > 1)
+			return console.warn("More then one signal was passed to debugSignal")
+		signal = sources[0]
+	} else {
+		signal = source as SolidSignal
+	}
 
 	if (signal.$debug) return
 	signal.$debug = true
+
+	const { trackObservers = true, logInitialValue: _logInitialValue = true } = options
 
 	const isSignal = !isComputation(signal)
 	const type = isSignal ? "Signal" : "Memo"
@@ -166,7 +178,7 @@ export function debugSignal(
 	const SYMBOL = Symbol(name)
 
 	// Initial
-	logInitialValue(type, name, signal.value)
+	_logInitialValue && logInitialValue(type, name, signal.value)
 
 	let actualObservers: SolidComputation[]
 	let prevObservers: SolidComputation[] = []
@@ -209,4 +221,29 @@ export function debugSignal(
 			}
 		})
 	}
+}
+
+export function debugSignals(
+	source: Many<Accessor<unknown>>,
+	options: DebugSignalOptions = {},
+): void {
+	let signals: SolidSignal[] = []
+	asArray(source).forEach(s => signals.push.apply(signals, getFunctionSources(s)))
+	if (signals.length === 0) return console.warn("No signals were passed to debugSignals")
+
+	// filter out already debugged signals
+	signals = signals.filter(s => !s.$debug)
+
+	if (signals.length === 1) return debugSignal(signals[0], options)
+
+	const { logInitialValue = true } = options
+
+	if (logInitialValue) logSignalsInitialValues(signals)
+
+	signals.forEach(signal => {
+		debugSignal(signal, {
+			...options,
+			logInitialValue: false,
+		})
+	})
 }
