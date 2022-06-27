@@ -37,6 +37,9 @@ export const getOwnerName = (owner: Readonly<SolidOwner>): string => {
 	return name || "(anonymous)"
 }
 
+export const getName = (o: SolidSignal | SolidOwner) =>
+	isComputation(o) ? getOwnerName(o) : o.name ?? "(unnamed)"
+
 export const getOwnerType = (o: Readonly<AnyObject>): OwnerType => {
 	if ("sdtType" in o) return o.sdtType
 	// Precompiled components do not start with "_Hot$$"

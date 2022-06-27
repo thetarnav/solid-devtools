@@ -18,6 +18,7 @@ export {
 	onParentCleanup,
 	getFunctionSources,
 	createUnownedRoot,
+	getName,
 } from "./utils"
 
 export const Debugger: ParentComponent = props => {
