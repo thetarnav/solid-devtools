@@ -40,8 +40,8 @@ export enum UpdateType {
 
 export interface SignalUpdatePayload {
 	id: number
-	value: unknown
-	oldValue: unknown
+	value: SafeValue
+	oldValue: SafeValue
 }
 
 export type BatchedUpdate =

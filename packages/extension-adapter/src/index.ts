@@ -1,10 +1,12 @@
 import { createEffect, createSignal, onCleanup } from "solid-js"
-import { registerDebuggerPlugin, PluginFactory } from "@solid-devtools/debugger"
+import { registerDebuggerPlugin, PluginFactory, getSafeValue } from "@solid-devtools/debugger"
 import {
+	BatchedUpdates,
 	MESSAGE,
 	onWindowMessage,
 	postWindowMessage,
 	startListeningWindowMessages,
+	UpdateType,
 } from "@shared/messanger"
 import type { SerialisedTreeRoot } from "@shared/graph"
 import { getArrayDiffById } from "./handleDiffArray"
@@ -32,7 +34,21 @@ const extensionAdapterFactory: PluginFactory = ({
 		return _roots
 	}, [])
 
-	makeBatchUpdateListener(updates => postWindowMessage(MESSAGE.BatchedUpdate, updates))
+	makeBatchUpdateListener(updates => {
+		// serialize the updates and send them to the devtools panel
+		updates = updates.map(({ type, payload }) => ({
+			type,
+			payload:
+				type === UpdateType.Computation
+					? payload
+					: {
+							id: payload.id,
+							value: getSafeValue(payload.value),
+							oldValue: getSafeValue(payload.oldValue),
+					  },
+		})) as BatchedUpdates
+		postWindowMessage(MESSAGE.BatchedUpdate, updates)
+	})
 
 	return { enabled }
 }

@@ -1,5 +1,5 @@
 import { OwnerType, SolidComputation, SolidOwner, SolidSignal } from "@shared/graph"
-import { getName, getOwnerType, isComputation } from "@solid-devtools/debugger"
+import { getName, getOwnerType, isSolidComputation, isSolidOwner } from "@solid-devtools/debugger"
 import { asArray } from "@solid-primitives/utils"
 
 export type UpdateCause = {
@@ -29,6 +29,12 @@ const STYLES = {
 const inGray = (text: unknown) => `\x1B[90m${text}\x1B[m`
 const styleTime = (time: number) => `\x1B[90;3m${time} ms\x1B[m`
 
+function getValueSpecifier(v: unknown) {
+	if (typeof v === "object") return " %o"
+	if (typeof v === "function") return "%O"
+	return ""
+}
+
 export const getComputationCreatedLabel = (
 	type: string,
 	name: string,
@@ -51,7 +57,7 @@ export const getOwnerDisposedLabel = (name: string): string[] => [
 ]
 
 export function logPrevValue(prev: unknown): void {
-	console.log(inGray("Previous:"), prev)
+	console.log(`${inGray("Previous =")}${getValueSpecifier(prev)}`, prev)
 }
 
 export const logComputationDetails = ({
@@ -62,8 +68,8 @@ export const logComputationDetails = ({
 	value,
 }: Readonly<ComputationState>) => {
 	// Value
-	if (value !== UNUSED) console.log(inGray("Value ="), value)
-	if (prev !== UNUSED) console.log(inGray("Previous ="), prev)
+	if (value !== UNUSED) console.log(`${inGray("Value =")}${getValueSpecifier(value)}`, value)
+	if (prev !== UNUSED) logPrevValue(prev)
 
 	// Caused By
 	if (causedBy && causedBy.length) {
@@ -95,7 +101,7 @@ export const logComputationDetails = ({
 		sources.forEach(source => {
 			console.log(
 				`%c${getName(source)}%c ${inGray("=")}`,
-				isComputation(source) ? STYLES.grayBackground : STYLES.signalUnderline,
+				isSolidOwner(source) ? STYLES.grayBackground : STYLES.signalUnderline,
 				"",
 				source.value,
 			)
@@ -130,9 +136,16 @@ export function logSignalsInitialValues(signals: SolidSignal[]) {
 	console.groupEnd()
 }
 
+export function logSignalInitialValue(signal: SolidSignal): void {
+	const isSignal = !isSolidOwner(signal)
+	const type = isSignal ? "Signal" : "Memo"
+	const name = getName(signal)
+	logInitialValue(type, name, signal.value)
+}
+
 export const logInitialValue = (type: string, name: string, value: unknown): void =>
 	console.log(
-		`%c${type} %c${name}%c initial value ${inGray("=")}`,
+		`%c${type} %c${name}%c initial value ${inGray("=")}${getValueSpecifier(value)}`,
 		"",
 		`${STYLES.bold} ${STYLES.signalUnderline}`,
 		"",
@@ -141,12 +154,12 @@ export const logInitialValue = (type: string, name: string, value: unknown): voi
 
 export function logSignalValues(signals: SolidSignal[]): void {
 	signals.forEach(signal => {
-		const isSignal = !isComputation(signal)
+		const isSignal = !isSolidOwner(signal)
 		const type = isSignal ? "Signal" : "Memo"
 		const name = getName(signal)
 
 		console.log(
-			`${inGray(type)} %c${name}%c ${inGray("=")}`,
+			`${inGray(type)} %c${name}%c ${inGray("=")}${getValueSpecifier(signal.value)}`,
 			`${isSignal ? STYLES.signalUnderline : STYLES.grayBackground}`,
 			"",
 			signal.value,
@@ -161,7 +174,7 @@ export function logSignalValueUpdate(
 	observers?: SolidComputation[],
 ): void {
 	console.groupCollapsed(
-		`%c${name}%c updated ${inGray("=")}`,
+		`%c${name}%c updated ${inGray("=")}${getValueSpecifier(value)}`,
 		`${STYLES.bold} ${STYLES.signalUnderline}`,
 		"",
 		value,

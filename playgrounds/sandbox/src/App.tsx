@@ -1,6 +1,11 @@
 import { makeTimer } from "@solid-primitives/timer"
 import { attachDebugger } from "solid-devtools"
-import { debugComputation, debugSignal, debugSignals } from "@solid-devtools/logger"
+import {
+	debugComputation,
+	debugOwnerSignals,
+	debugSignal,
+	debugSignals,
+} from "@solid-devtools/logger"
 import {
 	Component,
 	createSignal,
@@ -32,6 +37,8 @@ createRoot(dispose => {
 
 	const [count, setCount] = createSignal(0)
 	setRootCount = setCount
+
+	debugOwnerSignals()
 
 	createEffect(() => {
 		count()
@@ -96,8 +103,20 @@ const App: Component = () => {
 	const [count, setCount] = createSignal(0, { name: "count_sig" })
 	const [showEven, setShowEven] = createSignal(false, { name: "showEven" })
 
-	debugSignal(count)
-	debugSignals([count, showEven])
+	const objmemo = createMemo(() => {
+		debugComputation()
+		return {
+			foo: "bar",
+			count: count(),
+		}
+	})
+
+	debugSignal(objmemo)
+
+	// debugSignal(count)
+	// debugSignals([count, showEven])
+
+	// debugOwnerSignals()
 
 	const dispose = createRoot(dispose => {
 		attachDebugger()

@@ -14,7 +14,7 @@ import { ComputationUpdateHandler, SignalUpdateHandler } from "./batchUpdates"
 import {
 	getOwnerName,
 	getSafeValue,
-	isComputation,
+	isSolidComputation,
 	markNodeID,
 	markNodesID,
 	markOwnerType,
@@ -33,7 +33,7 @@ let Components: MappedComponent[] = []
 const WALKER = Symbol("walker")
 
 function observeComputation(owner: SolidOwner, id: number) {
-	if (TrackBatchedUpdates && isComputation(owner))
+	if (TrackBatchedUpdates && isSolidComputation(owner))
 		observeComputationUpdate(owner, OnComputationUpdate.bind(void 0, id))
 }
 

@@ -13,10 +13,14 @@ export { makeSolidUpdateListener, observeComputationUpdate, observeValueUpdate }
 export {
 	getOwnerType,
 	getOwnerName,
-	isComputation,
+	isSolidComputation,
+	isSolidMemo,
+	isSolidOwner,
+	isSolidRoot,
 	onOwnerCleanup,
 	onParentCleanup,
 	getFunctionSources,
+	getSafeValue,
 	createUnownedRoot,
 	getName,
 } from "./utils"

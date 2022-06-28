@@ -17,7 +17,7 @@ export const observeValueUpdate: typeof API.observeValueUpdate = () => noop
 export const getOwnerType: typeof API.getOwnerType = () => 0
 export const getOwnerName: typeof API.getOwnerName = () => "(anonymous)"
 export const getName: typeof API.getName = () => "(anonymous)"
-export const isComputation: typeof API.isComputation = (o): o is SolidComputation => false
+export const isComputation: typeof API.isSolidComputation = (o): o is SolidComputation => false
 export const onOwnerCleanup: typeof API.onOwnerCleanup = () => noop
 export const onParentCleanup: typeof API.onParentCleanup = () => noop
 export const getFunctionSources: typeof API.getFunctionSources = () => []

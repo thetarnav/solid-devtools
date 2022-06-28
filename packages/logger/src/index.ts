@@ -1,17 +1,19 @@
-import { Accessor } from "solid-js"
-import type { SignalState } from "solid-js/types/reactive/signal"
+import type { SignalState, Owner } from "solid-js/types/reactive/signal"
+import { Accessor, onCleanup } from "solid-js"
 import { asArray, Many } from "@solid-primitives/utils"
 import {
 	getOwnerType,
 	getOwnerName,
-	isComputation,
+	isSolidComputation,
 	observeValueUpdate,
 	onParentCleanup,
 	getFunctionSources,
 	makeSolidUpdateListener,
 	getName,
+	isSolidMemo,
+	isSolidOwner,
 } from "@solid-devtools/debugger"
-import { getOwner, OwnerType, SolidComputation, SolidSignal } from "@shared/graph"
+import { getOwner, OwnerType, SolidComputation, SolidOwner, SolidSignal } from "@shared/graph"
 import { dedupeArray, arrayRefEquals } from "@shared/utils"
 import {
 	getComputationCreatedLabel,
@@ -29,9 +31,10 @@ import {
 declare module "solid-js/types/reactive/signal" {
 	interface Owner {
 		$debug?: boolean
+		$debugSignals?: boolean
 	}
 	interface SignalState<T> {
-		$debug?: boolean
+		$debugSignal?: boolean
 	}
 }
 
@@ -45,12 +48,30 @@ function makeTimeMeter(): () => number {
 	}
 }
 
+/**
+ * @returns true if the node was marked before
+ */
+function markDebugNode(o: Owner, type: "computation" | "signals"): true | void
+function markDebugNode(o: SignalState<any>): true | void
+function markDebugNode(o: Owner | SignalState<any>, type?: "computation" | "signals"): true | void {
+	switch (type) {
+		case "computation":
+			if ((o as Owner).$debug) return true
+			;(o as Owner).$debug = true
+		case "signals":
+			if ((o as Owner).$debugSignals) return true
+			;(o as Owner).$debugSignals = true
+		default:
+			if ((o as SignalState<any>).$debugSignal) return true
+			;(o as SignalState<any>).$debugSignal = true
+	}
+}
+
 export function debugComputation() {
 	const owner = getOwner()
-	if (!owner || !isComputation(owner)) return console.warn("owner is not a computation")
+	if (!owner || !isSolidComputation(owner)) return console.warn("owner is not a computation")
 
-	if (owner.$debug) return
-	owner.$debug = true
+	if (markDebugNode(owner, "computation")) return
 
 	const type = getOwnerType(owner)
 	const typeName = OwnerType[type]
@@ -73,7 +94,7 @@ export function debugComputation() {
 				source,
 				value => {
 					const update: UpdateCause = {
-						type: isComputation(source) ? "computation" : "signal",
+						type: isSolidOwner(source) ? "computation" : "signal",
 						name: getName(source),
 						value,
 					}
@@ -134,7 +155,7 @@ export function debugComputation() {
 	onParentCleanup(
 		owner,
 		() => {
-			console.log(getOwnerDisposedLabel(name))
+			console.log(...getOwnerDisposedLabel(name))
 			updateListeners.forEach(unsub => unsub())
 			updateListeners.length = 0
 			signalUpdates.length = 0
@@ -167,12 +188,11 @@ export function debugSignal(
 		signal = source as SolidSignal
 	}
 
-	if (signal.$debug) return
-	signal.$debug = true
+	if (markDebugNode(signal)) return
 
 	const { trackObservers = true, logInitialValue: _logInitialValue = true } = options
 
-	const isSignal = !isComputation(signal)
+	const isSignal = !isSolidOwner(signal)
 	const type = isSignal ? "Signal" : "Memo"
 	const name = getName(signal)
 	const SYMBOL = Symbol(name)
@@ -190,16 +210,19 @@ export function debugSignal(
 	}
 
 	// Value Update
-	observeValueUpdate(
-		signal,
-		(value, prev) =>
-			logSignalValueUpdate(
-				name,
-				value,
-				prev,
-				trackObservers ? prevObservers : dedupeArray(signal.observers!),
-			),
-		SYMBOL,
+	onCleanup(
+		observeValueUpdate(
+			signal,
+			(value, prev) => {
+				logSignalValueUpdate(
+					name,
+					value,
+					prev,
+					trackObservers ? prevObservers : dedupeArray(signal.observers!),
+				)
+			},
+			SYMBOL,
+		),
 	)
 
 	if (trackObservers) {
@@ -224,15 +247,18 @@ export function debugSignal(
 }
 
 export function debugSignals(
-	source: Many<Accessor<unknown>>,
+	source: Many<Accessor<unknown>> | SignalState<unknown>[],
 	options: DebugSignalOptions = {},
 ): void {
 	let signals: SolidSignal[] = []
-	asArray(source).forEach(s => signals.push.apply(signals, getFunctionSources(s)))
+	asArray(source).forEach(s => {
+		if (typeof s === "function") signals.push.apply(signals, getFunctionSources(s))
+		else signals.push(s as SolidSignal)
+	})
 	if (signals.length === 0) return console.warn("No signals were passed to debugSignals")
 
 	// filter out already debugged signals
-	signals = signals.filter(s => !s.$debug)
+	signals = signals.filter(s => !s.$debugSignal)
 
 	if (signals.length === 1) return debugSignal(signals[0], options)
 
@@ -245,5 +271,42 @@ export function debugSignals(
 			...options,
 			logInitialValue: false,
 		})
+	})
+}
+
+export function debugOwnerSignals(owner?: Owner, options: DebugSignalOptions = {}) {
+	owner = getOwner()!
+	if (!owner) return console.warn("debugOwnerState found no Owner")
+	if (markDebugNode(owner, "signals")) return
+
+	const solidOwner = owner as SolidOwner
+
+	let prevSourceListLength = 0
+	let prevOwnedLength = 0
+
+	makeSolidUpdateListener(() => {
+		const signals: SolidSignal[] = []
+
+		let i: number
+		// add owned signals
+		if (solidOwner.sourceMap) {
+			const sourceList = Object.values(solidOwner.sourceMap)
+			// signals can only be added
+			for (i = prevSourceListLength; i < sourceList.length; i++) signals.push(sourceList[i])
+			prevSourceListLength = i
+		}
+		// add owned memos
+		if (solidOwner.owned) {
+			// owned can only be added
+			for (i = prevOwnedLength; i < solidOwner.owned.length; i++) {
+				const owner = solidOwner.owned[i]
+				if (isSolidMemo(owner)) signals.push(owner)
+			}
+			prevOwnedLength = i
+		}
+
+		if (signals.length === 0) return
+
+		debugSignals(signals, options)
 	})
 }

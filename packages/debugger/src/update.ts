@@ -60,13 +60,11 @@ export function observeValueUpdate(
 	// patch node
 	const map = (node.onValueUpdate = { [symbol]: onUpdate })
 	let value = node.value
-	let safeValue = getSafeValue(value)
 	Object.defineProperty(node, "value", {
 		get: () => value,
 		set: newValue => {
-			const newSafe = getSafeValue(newValue)
-			for (let sym of Object.getOwnPropertySymbols(map)) map[sym](newSafe, safeValue)
-			;(value = newValue), (safeValue = newSafe)
+			for (let sym of Object.getOwnPropertySymbols(map)) map[sym](newValue, value)
+			value = newValue
 		},
 	})
 	return remove

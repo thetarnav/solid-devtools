@@ -6,6 +6,7 @@ import {
 	SolidOwner,
 	SolidRoot,
 	SolidSignal,
+	SolidMemo,
 	getOwner,
 } from "@shared/graph"
 import { SafeValue } from "@shared/messanger"
@@ -18,15 +19,20 @@ import {
 	runWithOwner,
 } from "solid-js"
 
-export const isComputation = (o: SolidOwner | SolidSignal): o is SolidComputation =>
-	"fn" in o && typeof o.fn === "function" && "sources" in o
+export const isSolidComputation = (o: Readonly<SolidOwner>): o is SolidComputation => "fn" in o
 
-export const isComponent = (o: Readonly<AnyObject>): boolean => "componentName" in o
+export const isSolidMemo = (o: Readonly<SolidOwner>): o is SolidMemo => _isMemo(o)
 
-export const isMemo = (o: Readonly<AnyObject>): boolean =>
+export const isSolidOwner = (o: Readonly<SolidOwner> | SolidSignal): o is SolidOwner => "owned" in o
+
+export const isSolidRoot = (o: Readonly<SolidOwner>): o is SolidRoot => !isSolidComputation(o)
+
+const _isComponent = (o: Readonly<AnyObject>): boolean => "componentName" in o
+
+const _isMemo = (o: Readonly<AnyObject>): boolean =>
 	"value" in o && "comparator" in o && o.pure === true
 
-export const fnMatchesRefresh = (fn: AnyFunction): boolean =>
+const fnMatchesRefresh = (fn: AnyFunction): boolean =>
 	(fn + "").replace(/[\n\t]/g, "").replace(/ +/g, " ") ===
 	"() => { const c = source(); if (c) { return untrack(() => c(props)); } return undefined; }"
 
@@ -37,15 +43,16 @@ export const getOwnerName = (owner: Readonly<SolidOwner>): string => {
 	return name || "(anonymous)"
 }
 
-export const getName = (o: SolidSignal | SolidOwner) =>
-	isComputation(o) ? getOwnerName(o) : o.name ?? "(unnamed)"
+export const getName = (o: Readonly<SolidSignal | SolidOwner>) =>
+	isSolidOwner(o) ? getOwnerName(o) : o.name ?? "(unnamed)"
 
-export const getOwnerType = (o: Readonly<AnyObject>): OwnerType => {
-	if ("sdtType" in o) return o.sdtType
+export const getOwnerType = (o: Readonly<SolidOwner>): OwnerType => {
+	if (typeof o.sdtType !== "undefined") return o.sdtType
+	if (!isSolidComputation(o)) return OwnerType.Root
 	// Precompiled components do not start with "_Hot$$"
 	// we need a way to identify imported (3rd party) vs user components
-	if (isComponent(o)) return OwnerType.Component
-	if (isMemo(o)) {
+	if (_isComponent(o)) return OwnerType.Component
+	if (isSolidMemo(o)) {
 		if (fnMatchesRefresh(o.fn)) return OwnerType.Refresh
 		return OwnerType.Memo
 	}
