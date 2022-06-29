@@ -1,12 +1,6 @@
 import { makeTimer } from "@solid-primitives/timer"
 import { attachDebugger } from "solid-devtools"
-import {
-	debugComputation,
-	debugOwned,
-	debugOwnerSignals,
-	debugSignal,
-	debugSignals,
-} from "@solid-devtools/logger"
+import { debugOwnerComputations, debugOwnerSignals } from "@solid-devtools/logger"
 import {
 	Component,
 	createSignal,
@@ -22,6 +16,7 @@ import {
 	createRoot,
 } from "solid-js"
 import Todos from "./Todos"
+import { disposeApp } from "."
 
 const doMediumCalc = () => {
 	Array.from({ length: 1000000 }, (_, i) => i).sort(() => Math.random() - 5)
@@ -39,7 +34,7 @@ createRoot(dispose => {
 	const [count, setCount] = createSignal(0)
 	setRootCount = setCount
 
-	debugOwnerSignals()
+	// debugOwnerSignals()
 
 	createEffect(() => {
 		count()
@@ -104,6 +99,9 @@ const App: Component = () => {
 	const [count, setCount] = createSignal(0, { name: "count_sig" })
 	const [showEven, setShowEven] = createSignal(false, { name: "showEven" })
 
+	debugOwnerSignals()
+	debugOwnerComputations()
+
 	const objmemo = createMemo(() => {
 		// debugComputation()
 		return {
@@ -112,12 +110,12 @@ const App: Component = () => {
 		}
 	})
 
-	// debugSignal(objmemo)
+	// // debugSignal(objmemo)
 
-	// debugSignal(count)
-	// debugSignals([count, showEven])
+	// // debugSignal(count)
+	// // debugSignals([count, showEven])
 
-	// debugOwnerSignals()
+	// // debugOwnerSignals()
 
 	const dispose = createRoot(dispose => {
 		attachDebugger()
@@ -127,17 +125,17 @@ const App: Component = () => {
 				// showEven()
 				createSignal("hello")
 				setShowEven(count() % 2 === 0)
-				if (count() === 2) {
-					doMediumCalc()
-					setCount(p => p + 1)
-					createComputed(
-						() => {
-							count()
-						},
-						undefined,
-						{ name: "run 2" },
-					)
-				}
+				// if (count() === 2) {
+				// 	doMediumCalc()
+				// 	setCount(p => p + 1)
+				// 	createComputed(
+				// 		() => {
+				// 			count()
+				// 		},
+				// 		undefined,
+				// 		{ name: "run 2" },
+				// 	)
+				// }
 				return count()
 			},
 			undefined,
@@ -187,11 +185,12 @@ const App: Component = () => {
 					<Button onClick={() => setCount(p => ++p)} text={`Count: ${count()}`} />
 					<Button onClick={() => setCount(p => ++p)} text={`Count: ${count()}`} />
 				</header>
-				<p>Dispose computation</p>
-				<button onClick={dispose}>Dispose</button>
+				<br />
 				<div>
 					<Show when={showEven()}>{count()} is even!</Show>
 				</div>
+				<p>Dispose application</p>
+				<button onClick={() => disposeApp()}>Dispose</button>
 				<div>
 					<PassChildren>
 						<Show when={showEven()} fallback={<p>\\{smiley()}/</p>}>

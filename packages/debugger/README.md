@@ -8,18 +8,16 @@
 
 A runtime package, used to get information and track changes of the Solid's reactivity graph. It's a cornerstone of the rest of the packages.
 
-It comes with [Extension Adapter](https://github.com/thetarnav/solid-devtools/tree/main/packages/extension-adapter#readme) and [Locator](https://github.com/thetarnav/solid-devtools/tree/main/packages/locator#readme) packages included.
-
 ## Usage Guide
 
 ### Installation
 
 ```bash
-npm i solid-devtools
+npm i @solid-devtools/debugger
 # or
-yarn add solid-devtools
+yarn add @solid-devtools/debugger
 # or
-pnpm i solid-devtools
+pnpm add @solid-devtools/debugger
 ```
 
 ### Attaching Debugger to your application
@@ -32,7 +30,7 @@ This is a hook that will attach the debugger to the reactive owner of the scope 
 
 ```tsx
 import { render } from "solid-js/web"
-import { attachDebugger } from "solid-devtools"
+import { attachDebugger } from "@solid-devtools/debugger"
 
 render(() => {
   attachDebugger()
@@ -52,7 +50,7 @@ The debugger component works exactly like [`attachDebugger`](#attachDebugger), b
 
 ```tsx
 import { render } from "solid-js/web"
-import { Debugger } from "solid-devtools"
+import { Debugger } from "@solid-devtools/debugger"
 
 render(
   () => (

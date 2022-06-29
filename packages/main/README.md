@@ -6,11 +6,13 @@
 
 # solid-devtools
 
-A runtime package, used to get information and track changes of the Solid's reactivity graph. It's a cornerstone of the rest of the packages.
+The main package of Solid Devtools. It contains the following subpackages:
 
-It comes with [Extension Adapter](https://github.com/thetarnav/solid-devtools/tree/main/packages/extension-adapter#readme) and [Locator](https://github.com/thetarnav/solid-devtools/tree/main/packages/locator#readme) packages included.
+- [Debugger](https://github.com/thetarnav/solid-devtools/tree/main/packages/debugger#readme)
+- [Extension Adapter](https://github.com/thetarnav/solid-devtools/tree/main/packages/extension-adapter#readme) _(this one is automatically enabled)_
+- [Locator](https://github.com/thetarnav/solid-devtools/tree/main/packages/locator#readme)
 
-## Usage Guide
+## Getting started
 
 ### Installation
 
@@ -19,74 +21,30 @@ npm i solid-devtools
 # or
 yarn add solid-devtools
 # or
-pnpm i solid-devtools
+pnpm add solid-devtools
 ```
 
 ### Attaching Debugger to your application
 
-Currently you have to manually attach the debugger to the reactive graph of your application logic. You can do that with one of the two primitives:
+Currently you have to manually attach the debugger to the reactive graph of your application logic.
 
-#### `attachDebugger`
-
-This is a hook that will attach the debugger to the reactive owner of the scope it was used under. For example you might want to use it in you `<App>` component, or directly in the `render` function. It can be used in many places at once without any issues.
+[**Follow this guide of the debugger**](https://github.com/thetarnav/solid-devtools/tree/main/packages/debugger#attaching-debugger-to-your-application)
 
 ```tsx
-import { render } from "solid-js/web"
 import { attachDebugger } from "solid-devtools"
 
-render(() => {
-  attachDebugger()
-  return <App />
-}, document.getElementById("root")!)
-
-// or inside the App component:
+// simply place the attachDebugger hook in the App component:
 function App() {
   attachDebugger()
   return <>...</>
 }
 ```
 
-#### `Debugger`
+### Using the locator package
 
-The debugger component works exactly like [`attachDebugger`](#attachDebugger), but it may be more convenient to use at times.
+The `solid-devtools` package comes with the [Locator](https://github.com/thetarnav/solid-devtools/tree/main/packages/locator#readme) package included.
 
-```tsx
-import { render } from "solid-js/web"
-import { Debugger } from "solid-devtools"
-
-render(
-  () => (
-    <Debugger>
-      <App />
-    </Debugger>
-  ),
-  document.getElementById("root")!,
-)
-```
-
-### Reattaching sub roots back to the tree
-
-Solid doesn't attach roots created with `createRoot` to it's detached parent, so the debugger has no way of reaching it. To reattach this root back to the tree tracked by the debugger — simply put another `attachDebugger` call inside it.
-
-[More in this issue](https://github.com/thetarnav/solid-devtools/issues/15)
-
-This also will be necessary when using components that use `createRoot` internally, like `<For>`, `<Index>` or `<Suspense>`.
-
-```tsx
-<For each={list()}>
-	{item => (
-		<Debugger>
-			<ItemComponent title={item} />
-		</Debugger>
-	)}
-<For>
-
-// or call attachDebugger inside ItemComponent
-function ItemComponent(props){
-	attachDebugger()
-	return <li>props.title</li>
-}
-```
+[**Follow this guide of the locator package**](https://github.com/thetarnav/solid-devtools/tree/main/packages/locator#Getting-Started)
 
 ## Changelog
 
