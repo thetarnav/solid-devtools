@@ -1,5 +1,19 @@
 # @solid-devtools/locator
 
+## 0.5.0
+
+### Minor Changes
+
+- 2bb429a: Add the `locator` package.
+
+  Separate `debugger` into `debugger` and `main` packages.
+
+### Patch Changes
+
+- Updated dependencies [2bb429a]
+  - @solid-devtools/debugger@0.1.0
+  - @solid-devtools/ui@0.3.0
+
 ## 0.4.2
 
 ### Patch Changes

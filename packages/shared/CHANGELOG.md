@@ -1,5 +1,13 @@
 # solid-devtools-shared
 
+## 0.3.0
+
+### Minor Changes
+
+- 2bb429a: Add the `locator` package.
+
+  Separate `debugger` into `debugger` and `main` packages.
+
 ## 0.2.1
 
 ### Patch Changes

@@ -16,7 +16,7 @@
 		"vite-plugin-solid": "^2.2.6"
 	},
 	"dependencies": {
-		"solid-devtools": "^0.4.3",
+		"solid-devtools": "^0.5.0",
 		"solid-js": "^1.4.4"
 	}
 }
