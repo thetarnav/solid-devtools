@@ -1,7 +1,7 @@
 import { resolveElements } from "@solid-primitives/refs"
 import {
 	MappedOwner,
-	OwnerType,
+	NodeType,
 	SolidOwner,
 	MappedSignal,
 	SolidSignal,
@@ -72,14 +72,14 @@ function mapMemo(mapped: MappedOwner, owner: SolidMemo): MappedOwner {
 	})
 }
 
-function mapOwner(owner: SolidOwner, type?: OwnerType): MappedOwner {
+function mapOwner(owner: SolidOwner, type?: NodeType): MappedOwner {
 	type = markOwnerType(owner, type)
 	const id = markNodeID(owner)
 	const name = getOwnerName(owner)
 
 	observeComputation(owner, id)
 
-	if (type === OwnerType.Component && TrackComponents && typeof owner.value === "function") {
+	if (type === NodeType.Component && TrackComponents && typeof owner.value === "function") {
 		const resolved = resolveElements(owner.value())
 		if (resolved) Components.push({ name, resolved })
 	}
@@ -93,7 +93,7 @@ function mapOwner(owner: SolidOwner, type?: OwnerType): MappedOwner {
 		sources: markNodesID(owner.sources),
 	}
 
-	return type === OwnerType.Memo ? mapMemo(mapped, owner as SolidMemo) : mapped
+	return type === NodeType.Memo ? mapMemo(mapped, owner as SolidMemo) : mapped
 }
 
 function mapChildren({ owned, ownedRoots }: Readonly<SolidOwner>): MappedOwner[] {
@@ -108,7 +108,7 @@ function mapChildren({ owned, ownedRoots }: Readonly<SolidOwner>): MappedOwner[]
 	if (ownedRoots)
 		children.push.apply(
 			children,
-			[...ownedRoots].map(child => mapOwner(child, OwnerType.Root)),
+			[...ownedRoots].map(child => mapOwner(child, NodeType.Root)),
 		)
 
 	return children

@@ -1,13 +1,31 @@
 // see https://developer.chrome.com/docs/devtools/console/format-style/
 // to gen a overview of how to style console messages
 
-import { OwnerType, SolidComputation, SolidOwner, SolidSignal } from "@shared/graph"
+import { NodeType, SolidComputation, SolidOwner, SolidSignal } from "@shared/graph"
 import { dedupeArray } from "@shared/utils"
-import { getName, getOwnerName, getOwnerType, isSolidOwner } from "@solid-devtools/debugger"
-import { asArray } from "@solid-primitives/utils"
+import {
+	getName,
+	getNodeType,
+	getOwnerName,
+	getOwnerType,
+	isSolidMemo,
+} from "@solid-devtools/debugger"
 
 export type UpdateCause = {
 	type: "signal" | "computation"
+	name: string
+	value: unknown
+}
+
+export type NodeState = {
+	type: NodeType
+	typeName: string
+	name: string
+}
+
+export type NodeStateWithValue = {
+	type: NodeType
+	typeName: string
 	name: string
 	value: unknown
 }
@@ -16,6 +34,7 @@ export const UNUSED = Symbol("unused")
 
 export type ComputationState = {
 	owned: SolidComputation[]
+	owner: SolidOwner | NodeState | null | typeof UNUSED
 	prev: unknown | typeof UNUSED
 	value: unknown | typeof UNUSED
 	sources: (SolidComputation | SolidSignal)[]
@@ -39,8 +58,28 @@ function getValueSpecifier(v: unknown) {
 	return ""
 }
 
-const getNameStyle = (type: "Signal" | "Memo"): string =>
-	type === "Signal" ? STYLES.signalUnderline : STYLES.grayBackground
+export function getNodeState(owner: SolidOwner | SolidSignal | NodeState): NodeState {
+	if ("type" in owner && "typeName" in owner && "name" in owner) return owner
+	const type = getNodeType(owner)
+	return {
+		type,
+		typeName: NodeType[type],
+		name: getName(owner),
+	}
+}
+export function getNodeStateWithValue(owner: SolidSignal | NodeStateWithValue): NodeStateWithValue {
+	if ("type" in owner && "typeName" in owner && "name" in owner) return owner
+	const type = getNodeType(owner)
+	return {
+		type,
+		typeName: NodeType[type],
+		name: getName(owner),
+		value: owner.value,
+	}
+}
+
+const getNameStyle = (type: NodeType): string =>
+	type === NodeType.Signal ? STYLES.signalUnderline : STYLES.grayBackground
 
 export const getComputationCreatedLabel = (
 	type: string,
@@ -69,11 +108,22 @@ export function logPrevValue(prev: unknown): void {
 
 export const logComputationDetails = ({
 	causedBy,
+	owner,
 	owned,
 	sources,
 	prev,
 	value,
 }: Readonly<ComputationState>) => {
+	// Owner
+	if (owner !== UNUSED) {
+		const label = inGray("Owner:")
+		if (!owner) console.log(label, null)
+		else {
+			const { name } = getNodeState(owner)
+			console.log(`${label} %c${name}`, STYLES.grayBackground)
+		}
+	}
+
 	// Value
 	if (value !== UNUSED) console.log(`${inGray("Value =")}${getValueSpecifier(value)}`, value)
 	if (prev !== UNUSED) logPrevValue(prev)
@@ -106,7 +156,7 @@ export const logComputationDetails = ({
 	if (sources.length) {
 		console.groupCollapsed(inGray("Sources:"), sources.length)
 		sources.forEach(source => {
-			const type = isSolidOwner(source) ? "Memo" : "Signal"
+			const type = getNodeType(source)
 			console.log(`%c${getName(source)}%c ${inGray("=")}`, getNameStyle(type), "", source.value)
 		})
 		console.groupEnd()
@@ -130,14 +180,24 @@ export const logComputation = (groupLabel: string[], state: Readonly<Computation
 	console.groupEnd()
 }
 
-export function logOwned(type: string, name: string, owned: SolidComputation[]) {
-	console.group(`Owned by the %c${name}%c ${type}:`, STYLES.ownerName, "")
+export function logOwned(
+	ownerState: NodeState,
+	owned: Readonly<SolidComputation[]>,
+	prevOwned: Readonly<SolidComputation[]>,
+) {
+	console.groupCollapsed(
+		`Owned by the %c${ownerState.name}%c ${ownerState.typeName}:`,
+		STYLES.ownerName,
+		"",
+		owned.length,
+	)
 
-	logOwnerList(owned, (owner, type) => {
+	logOwnersDiff(prevOwned, owned, "stack", owner => {
 		const sources = owner.sources ? dedupeArray(owner.sources) : []
 		const usesPrev = !!owner.fn.length
-		const usesValue = usesPrev || type === "Memo"
+		const usesValue = usesPrev || isSolidMemo(owner)
 		logComputationDetails({
+			owner: ownerState,
 			owned: owner.owned ?? [],
 			sources,
 			prev: UNUSED,
@@ -155,28 +215,24 @@ export function logSignalsInitialValues(signals: SolidSignal[]) {
 	console.groupEnd()
 }
 
-export function logSignalInitialValue(signal: SolidSignal): void {
-	const type = isSolidOwner(signal) ? "Memo" : "Signal"
-	const name = getName(signal)
-	logInitialValue(type, name, signal.value)
-}
-
-export const logInitialValue = (type: "Signal" | "Memo", name: string, value: unknown): void =>
+export function logInitialValue(node: SolidSignal | NodeStateWithValue): void {
+	const { type, typeName, value, name } = getNodeStateWithValue(node)
 	console.log(
-		`%c${type} %c${name}%c initial value ${inGray("=")}${getValueSpecifier(value)}`,
+		`%c${typeName} %c${name}%c initial value ${inGray("=")}${getValueSpecifier(value)}`,
 		"",
 		`${STYLES.bold} ${getNameStyle(type)}`,
 		"",
 		value,
 	)
+}
 
 export function logSignalValues(signals: SolidSignal[]): void {
 	signals.forEach(signal => {
-		const type = isSolidOwner(signal) ? "Memo" : "Signal"
+		const type = getNodeType(signal)
 		const name = getName(signal)
 
 		console.log(
-			`${inGray(type)} %c${name}%c ${inGray("=")}${getValueSpecifier(signal.value)}`,
+			`${inGray(NodeType[type])} %c${name}%c ${inGray("=")}${getValueSpecifier(signal.value)}`,
 			`${getNameStyle(type)}`,
 			"",
 			signal.value,
@@ -185,8 +241,7 @@ export function logSignalValues(signals: SolidSignal[]): void {
 }
 
 export function logSignalValueUpdate(
-	type: "Signal" | "Memo",
-	name: string,
+	{ name, type }: NodeState,
 	value: unknown,
 	prev: unknown,
 	observers?: SolidComputation[],
@@ -202,32 +257,19 @@ export function logSignalValueUpdate(
 	console.groupEnd()
 }
 
-function getPaddedOwnerTypes<T extends SolidOwner>(owners: T[]): [owner: T, type: string][] {
+function getPaddedOwnerTypes<T extends SolidOwner>(
+	owners: readonly T[],
+): [owner: T, type: string][] {
 	let typeLength = 0
 	const types: [owner: T, type: string][] = []
 	if (!owners.length) []
 	owners.forEach(owner => {
-		const typeName = OwnerType[getOwnerType(owner)]
+		const typeName = NodeType[getOwnerType(owner)]
 		typeLength = Math.max(typeName.length, typeLength)
 		types.push([owner, typeName])
 	})
 	types.forEach(pair => (pair[1] = pair[1].padEnd(typeLength)))
 	return types
-}
-
-export function logOwnerList<T extends SolidOwner>(
-	owners: T[],
-	logGroup?: (owner: T, type: string) => void,
-): void {
-	const types = getPaddedOwnerTypes(owners)
-	types.forEach(([owner, type]) => {
-		const label = [`${inGray(type)} %c${getName(owner)}`, STYLES.grayBackground]
-		if (logGroup) {
-			console.groupCollapsed(...label)
-			logGroup(owner, type)
-			console.groupEnd()
-		} else console.log(...label)
-	})
 }
 
 function logCausedUpdates(observers: SolidComputation[]): void {
@@ -250,41 +292,92 @@ export function logObservers(
 	]
 	if (!observers.length && !prevObservers.length) return console.log(...label)
 	console.groupCollapsed(...label)
-	const marks = new WeakMap<SolidOwner, "added" | "removed" | null>()
-	const owners: SolidOwner[] = []
-	prevObservers.forEach(observer => {
-		marks.set(observer, observers.includes(observer) ? null : "removed")
-		owners.push(observer)
+	logOwnersDiff(prevObservers, observers, "thorow")
+	console.groupEnd()
+}
+
+function getThorowOwnersDiff<T extends SolidOwner>(
+	from: Readonly<T[]>,
+	to: Readonly<T[]>,
+): [WeakMap<T, "added" | "removed">, T[]] {
+	const marks = new WeakMap<T, "added" | "removed">()
+	const owners: T[] = []
+	const toCopy = [...to]
+
+	from.forEach(owner => {
+		const index = toCopy.indexOf(owner)
+		if (index !== -1) toCopy.splice(index, 1)
+		else marks.set(owner, "removed")
+		owners.push(owner)
 	})
-	observers.forEach(observer => {
-		if (prevObservers.includes(observer)) return
-		marks.set(observer, "added")
-		owners.push(observer)
+	toCopy.forEach(owner => {
+		if (owners.includes(owner)) return
+		marks.set(owner, "added")
+		owners.push(owner)
 	})
+
+	return [marks, owners]
+}
+
+function getStackOwnersDiff<T extends SolidOwner>(
+	from: Readonly<T[]>,
+	to: Readonly<T[]>,
+): [WeakMap<T, "added">, T[]] {
+	const marks = new WeakMap<T, "added">()
+	const owners: T[] = [...from]
+	for (let i = owners.length; i < to.length; i++) {
+		owners.push(to[i])
+		marks.set(to[i], "added")
+	}
+	return [marks, owners]
+}
+
+function logOwnersDiff<T extends SolidOwner>(
+	from: Readonly<T[]>,
+	to: Readonly<T[]>,
+	diff: "thorow" | "stack",
+	logGroup?: (owner: T) => void,
+): void {
+	const [marks, owners] =
+		diff === "thorow" ? getThorowOwnersDiff(from, to) : getStackOwnersDiff(from, to)
 	const types = getPaddedOwnerTypes(owners)
+
 	types.forEach(([owner, type]) => {
 		const mark = marks.get(owner)
 		const name = getOwnerName(owner)
-		switch (mark) {
-			case "added":
-				console.log(
+		const label = (() => {
+			if (mark === "added")
+				return [
 					`${inGray(type)} %c${name}%c  new`,
 					STYLES.grayBackground,
 					"color: orange; font-style: italic",
-				)
-				break
-
-			case "removed":
-				console.log(
+				]
+			if (mark === "removed")
+				return [
 					`${inGray(type)} %c${name}`,
 					"background: rgba(153, 153, 153, 0.15); padding: 0 0.2em; border-radius: 4px; text-decoration: line-through; color: #888",
-				)
-				break
-
-			default:
-				console.log(`${inGray(type)} %c${name}`, STYLES.grayBackground)
-				break
-		}
+				]
+			return [`${inGray(type)} %c${name}`, STYLES.grayBackground]
+		})()
+		if (logGroup) {
+			console.groupCollapsed(...label)
+			logGroup(owner)
+			console.groupEnd()
+		} else console.log(...label)
 	})
-	console.groupEnd()
+}
+
+export function logOwnerList<T extends SolidOwner>(
+	owners: readonly T[],
+	logGroup?: (owner: T) => void,
+): void {
+	const types = getPaddedOwnerTypes(owners)
+	types.forEach(([owner, type]) => {
+		const label = [`${inGray(type)} %c${getName(owner)}`, STYLES.grayBackground]
+		if (logGroup) {
+			console.groupCollapsed(...label)
+			logGroup(owner)
+			console.groupEnd()
+		} else console.log(...label)
+	})
 }

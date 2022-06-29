@@ -1,4 +1,4 @@
-import { SolidOwner, getOwner, OwnerType } from "@shared/graph"
+import { SolidOwner, getOwner, NodeType } from "@shared/graph"
 import {
 	createComponent,
 	createComputed,
@@ -19,33 +19,33 @@ describe("getOwnerType", () => {
 			}, {})
 			dispose()
 		})
-		expect(getOwnerType(owner)).toBe(OwnerType.Component)
+		expect(getOwnerType(owner)).toBe(NodeType.Component)
 	})
 	it("identifies Effect", () =>
 		createRoot(dispose => {
 			createEffect(() => {
-				expect(getOwnerType(getOwner()!)).toBe(OwnerType.Effect)
+				expect(getOwnerType(getOwner()!)).toBe(NodeType.Effect)
 				dispose()
 			})
 		}))
 	it("identifies Memo", () =>
 		createRoot(dispose => {
-			createMemo(() => expect(getOwnerType(getOwner()!)).toBe(OwnerType.Memo))
+			createMemo(() => expect(getOwnerType(getOwner()!)).toBe(NodeType.Memo))
 			dispose()
 		}))
 	it("identifies Computation", () =>
 		createRoot(dispose => {
-			createComputed(() => expect(getOwnerType(getOwner()!)).toBe(OwnerType.Computation))
+			createComputed(() => expect(getOwnerType(getOwner()!)).toBe(NodeType.Computation))
 			dispose()
 		}))
 	it("identifies Render Effect", () =>
 		createRoot(dispose => {
-			createRenderEffect(() => expect(getOwnerType(getOwner()!)).toBe(OwnerType.Render))
+			createRenderEffect(() => expect(getOwnerType(getOwner()!)).toBe(NodeType.Render))
 			dispose()
 		}))
 	it("identifies Root", () =>
 		createRoot(dispose => {
-			expect(getOwnerType(getOwner()!)).toBe(OwnerType.Root)
+			expect(getOwnerType(getOwner()!)).toBe(NodeType.Root)
 			dispose()
 		}))
 })

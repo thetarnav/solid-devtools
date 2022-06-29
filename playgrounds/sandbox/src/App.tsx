@@ -105,15 +105,14 @@ const App: Component = () => {
 	const [showEven, setShowEven] = createSignal(false, { name: "showEven" })
 
 	const objmemo = createMemo(() => {
-		debugComputation()
+		// debugComputation()
 		return {
 			foo: "bar",
 			count: count(),
 		}
 	})
 
-	debugSignal(objmemo)
-	debugOwned()
+	// debugSignal(objmemo)
 
 	// debugSignal(count)
 	// debugSignals([count, showEven])
@@ -125,7 +124,6 @@ const App: Component = () => {
 		createComputed(
 			_ => {
 				// debugComputation()
-
 				// showEven()
 				createSignal("hello")
 				setShowEven(count() % 2 === 0)
@@ -162,6 +160,7 @@ const App: Component = () => {
 	const owner = getOwner()!
 	setTimeout(() => {
 		runWithOwner(owner, () => {
+			createComputed(smiley, undefined, { name: "async_smiley" })
 			createSignal("I am here too!", { name: "async" })
 		})
 	})

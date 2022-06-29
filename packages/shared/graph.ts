@@ -2,13 +2,14 @@ import { getOwner as _getOwner } from "solid-js"
 import { Many } from "@solid-primitives/utils"
 import { SafeValue, UpdateType } from "./messanger"
 
-export enum OwnerType {
+export enum NodeType {
 	Component,
 	Effect,
 	Render,
 	Memo,
 	Computation,
 	Refresh,
+	Signal,
 	Root,
 }
 
@@ -26,12 +27,12 @@ declare module "solid-js/types/reactive/signal" {
 	}
 	interface Owner {
 		sdtId?: number
-		sdtType?: OwnerType
+		sdtType?: NodeType
 		ownedRoots?: Set<SolidRoot>
 	}
 	interface Computation<Init, Next> {
 		sdtId?: number
-		sdtType?: OwnerType
+		sdtType?: NodeType
 		ownedRoots?: Set<SolidRoot>
 		onValueUpdate?: Record<symbol, ValueUpdateListener>
 		onComputationUpdate?: VoidFunction
@@ -123,7 +124,7 @@ export interface SerialisedTreeRoot {
 export interface MappedOwner {
 	id: number
 	name: string
-	type: OwnerType
+	type: NodeType
 	signals: MappedSignal[]
 	children: MappedOwner[]
 	sources: number[]
@@ -151,7 +152,7 @@ export type MappedComponent = {
 export interface GraphOwner {
 	readonly id: number
 	readonly name: string
-	readonly type: OwnerType
+	readonly type: NodeType
 	readonly dispose: VoidFunction
 	readonly updated: boolean
 	readonly setUpdate: (value: boolean) => void

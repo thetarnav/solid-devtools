@@ -1,7 +1,7 @@
 import { AnyFunction, AnyObject, noop } from "@solid-primitives/utils"
 import {
 	DebuggerContext,
-	OwnerType,
+	NodeType,
 	SolidComputation,
 	SolidOwner,
 	SolidRoot,
@@ -46,22 +46,27 @@ export const getOwnerName = (owner: Readonly<SolidOwner>): string => {
 export const getName = (o: Readonly<SolidSignal | SolidOwner>) =>
 	isSolidOwner(o) ? getOwnerName(o) : o.name ?? "(unnamed)"
 
-export const getOwnerType = (o: Readonly<SolidOwner>): OwnerType => {
+export function getNodeType(o: Readonly<SolidSignal | SolidOwner>): NodeType {
+	if (isSolidOwner(o)) return getOwnerType(o)
+	return NodeType.Signal
+}
+
+export const getOwnerType = (o: Readonly<SolidOwner>): NodeType => {
 	if (typeof o.sdtType !== "undefined") return o.sdtType
-	if (!isSolidComputation(o)) return OwnerType.Root
+	if (!isSolidComputation(o)) return NodeType.Root
 	// Precompiled components do not start with "_Hot$$"
 	// we need a way to identify imported (3rd party) vs user components
-	if (_isComponent(o)) return OwnerType.Component
+	if (_isComponent(o)) return NodeType.Component
 	if (isSolidMemo(o)) {
-		if (fnMatchesRefresh(o.fn)) return OwnerType.Refresh
-		return OwnerType.Memo
+		if (fnMatchesRefresh(o.fn)) return NodeType.Refresh
+		return NodeType.Memo
 	}
 	// Effect
 	if (o.pure === false) {
-		if (o.user === true) return OwnerType.Effect
-		return OwnerType.Render
+		if (o.user === true) return NodeType.Effect
+		return NodeType.Render
 	}
-	return OwnerType.Computation
+	return NodeType.Computation
 }
 
 const literalTypes = ["bigint", "number", "boolean", "string", "undefined"]
@@ -161,7 +166,7 @@ export function getFunctionSources(fn: () => unknown): SolidSignal[] {
 let LAST_ID = 0
 export const getNewSdtId = () => LAST_ID++
 
-export function markOwnerType(o: SolidOwner, type?: OwnerType): OwnerType {
+export function markOwnerType(o: SolidOwner, type?: NodeType): NodeType {
 	if (o.sdtType !== undefined) return o.sdtType
 	else return (o.sdtType = type ?? getOwnerType(o))
 }

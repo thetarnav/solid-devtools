@@ -8,10 +8,16 @@ export type { TargetIDE, TargetURLFunction } from "@solid-devtools/locator"
 
 export { attachDebugger } from "./primitives"
 
-export { makeSolidUpdateListener, observeComputationUpdate, observeValueUpdate } from "./update"
+export {
+	makeSolidUpdateListener,
+	observeComputationUpdate,
+	observeValueUpdate,
+	interceptComputationRerun,
+} from "./update"
 
 export {
 	getOwnerType,
+	getNodeType,
 	getOwnerName,
 	isSolidComputation,
 	isSolidMemo,

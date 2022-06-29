@@ -36,11 +36,28 @@ export function observeComputationUpdate(owner: SolidComputation, onRun: VoidFun
 	if (owner.onComputationUpdate) return void (owner.onComputationUpdate = onRun)
 	// patch owner
 	owner.onComputationUpdate = onRun
-	const fn = owner.fn.bind(owner)
-	owner.fn = (...a) => {
+	interceptComputationRerun(owner, (fn, prev) => {
 		owner.onComputationUpdate!()
-		return fn(...a)
-	}
+		fn(prev)
+	})
+}
+
+export function interceptComputationRerun(
+	owner: SolidComputation,
+	onRun: <T>(execute: (prev: T) => T, prev: T) => void,
+): void {
+	const _fn = owner.fn
+	let v!: unknown
+	const fn = (a: unknown) => (v = _fn(a))
+	owner.fn = !!owner.fn.length
+		? prev => {
+				onRun(fn, prev)
+				return v
+		  }
+		: () => {
+				onRun(fn, undefined)
+				return v
+		  }
 }
 
 /**
