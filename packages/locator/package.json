@@ -44,24 +44,29 @@
 	"scripts": {
 		"dev": "tsup --watch",
 		"build": "tsup",
-		"test": "echo \"NOOP TEST\"",
+		"test": "jest --config jest.config.ts",
 		"typecheck": "tsc --noEmit"
 	},
 	"devDependencies": {
-		"esbuild": "^0.14.43",
+		"@testing-library/jest-dom": "^5.16.4",
+		"jest": "^28.1.1",
+		"jest-environment-jsdom": "^28.1.1",
+		"ts-node": "^10.8.1",
+		"esbuild": "^0.14.47",
 		"esbuild-plugin-solid": "^0.4.2",
 		"solid-js": "^1.4.4",
 		"tsup": "^6.1.2",
-		"typescript": "^4.7.3"
+		"typescript": "^4.7.4"
 	},
 	"dependencies": {
+		"@solid-devtools/debugger": "^0.0.1",
 		"@solid-devtools/ui": "0.2.0",
 		"@solid-primitives/bounds": "^0.0.100",
 		"@solid-primitives/event-listener": "^2.2.0",
 		"@solid-primitives/keyboard": "^0.0.100",
 		"@solid-primitives/platform": "^0.0.100",
 		"@solid-primitives/utils": "^2.1.1",
-		"motion": "^10.10.0"
+		"motion": "^10.10.2"
 	},
 	"peerDependencies": {
 		"solid-js": "^1.4.4"
@@ -69,5 +74,5 @@
 	"optionalDependencies": {
 		"@solid-devtools/babel-plugin": "^0.2.0"
 	},
-	"packageManager": "pnpm@7.2.0"
+	"packageManager": "pnpm@7.3.0"
 }

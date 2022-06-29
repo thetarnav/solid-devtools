@@ -1,5 +1,6 @@
 import { makeTimer } from "@solid-primitives/timer"
 import { attachDebugger } from "solid-devtools"
+import { debugOwnerComputations, debugOwnerSignals } from "@solid-devtools/logger"
 import {
 	Component,
 	createSignal,
@@ -15,6 +16,11 @@ import {
 	createRoot,
 } from "solid-js"
 import Todos from "./Todos"
+import { disposeApp } from "."
+
+const doMediumCalc = () => {
+	Array.from({ length: 1000000 }, (_, i) => i).sort(() => Math.random() - 5)
+}
 
 let setRootCount: Setter<number>
 let disposeOuterRoot: VoidFunction
@@ -27,6 +33,8 @@ createRoot(dispose => {
 
 	const [count, setCount] = createSignal(0)
 	setRootCount = setCount
+
+	// debugOwnerSignals()
 
 	createEffect(() => {
 		count()
@@ -89,16 +97,68 @@ const obj = {
 
 const App: Component = () => {
 	const [count, setCount] = createSignal(0, { name: "count_sig" })
-	const [showEven, setShowEven] = createSignal(false)
+	const [showEven, setShowEven] = createSignal(false, { name: "showEven" })
 
-	createComputed(() => {
-		setShowEven(count() % 2 === 0)
+	debugOwnerSignals()
+	debugOwnerComputations()
+
+	const objmemo = createMemo(() => {
+		// debugComputation()
+		return {
+			foo: "bar",
+			count: count(),
+		}
+	})
+
+	// // debugSignal(objmemo)
+
+	// // debugSignal(count)
+	// // debugSignals([count, showEven])
+
+	// // debugOwnerSignals()
+
+	const dispose = createRoot(dispose => {
+		attachDebugger()
+		createComputed(
+			_ => {
+				// debugComputation()
+				// showEven()
+				createSignal("hello")
+				setShowEven(count() % 2 === 0)
+				// if (count() === 2) {
+				// 	doMediumCalc()
+				// 	setCount(p => p + 1)
+				// 	createComputed(
+				// 		() => {
+				// 			count()
+				// 		},
+				// 		undefined,
+				// 		{ name: "run 2" },
+				// 	)
+				// }
+				return count()
+			},
+			undefined,
+			{ name: "main_computed" },
+		)
+		return dispose
+	})
+
+	// batch(() => {
+	// 	setCount(1)
+	// 	setShowEven(true)
+	// })
+
+	createEffect(() => {
+		console.log("effect")
+		count()
 	})
 
 	// add signal asynchronously
 	const owner = getOwner()!
 	setTimeout(() => {
 		runWithOwner(owner, () => {
+			createComputed(smiley, undefined, { name: "async_smiley" })
 			createSignal("I am here too!", { name: "async" })
 		})
 	})
@@ -125,9 +185,12 @@ const App: Component = () => {
 					<Button onClick={() => setCount(p => ++p)} text={`Count: ${count()}`} />
 					<Button onClick={() => setCount(p => ++p)} text={`Count: ${count()}`} />
 				</header>
+				<br />
 				<div>
 					<Show when={showEven()}>{count()} is even!</Show>
 				</div>
+				<p>Dispose application</p>
+				<button onClick={() => disposeApp()}>Dispose</button>
 				<div>
 					<PassChildren>
 						<Show when={showEven()} fallback={<p>\\{smiley()}/</p>}>

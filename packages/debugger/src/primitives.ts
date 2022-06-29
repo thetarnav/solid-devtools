@@ -1,7 +1,7 @@
 import { createEffect, onCleanup, runWithOwner, untrack } from "solid-js"
 import { throttle } from "@solid-primitives/scheduled"
 import { createBranch } from "@solid-primitives/rootless"
-import { getOwner, OwnerType, SolidOwner, SolidRoot } from "@shared/graph"
+import { getOwner, NodeType, SolidOwner, SolidRoot } from "@shared/graph"
 import { UpdateType } from "@shared/messanger"
 import { batchUpdate, ComputationUpdateHandler, SignalUpdateHandler } from "./batchUpdates"
 import { walkSolidTree } from "./walker"
@@ -83,7 +83,7 @@ export function attachDebugger(_owner: SolidOwner | null = getOwner()): void {
 	forEachLookupRoot(owner, root => {
 		const ctx = getDebuggerContext(owner)
 
-		markOwnerType(root, OwnerType.Root)
+		markOwnerType(root, NodeType.Root)
 
 		// under an existing debugger root
 		if (ctx) {
@@ -122,7 +122,7 @@ export function attachDebugger(_owner: SolidOwner | null = getOwner()): void {
 	})
 }
 
-const isOwnerTypeRoot = (o: SolidOwner): o is SolidRoot => o.sdtType === OwnerType.Root || !o.owner
+const isOwnerTypeRoot = (o: SolidOwner): o is SolidRoot => o.sdtType === NodeType.Root || !o.owner
 
 /**
  * Searches for the closest alive parent of the given owner.
@@ -155,7 +155,7 @@ function forEachLookupRoot(owner: SolidOwner, callback: (root: SolidRoot) => voi
 	const roots: SolidRoot[] = []
 	do {
 		// check if it's a root/subroot
-		if (owner.sdtType === OwnerType.Root || !owner.owner || !owner.owner.owned?.includes(owner)) {
+		if (owner.sdtType === NodeType.Root || !owner.owner || !owner.owner.owned?.includes(owner)) {
 			// skip already handled roots
 			if (owner.sdtType) break
 			roots.push(owner as SolidRoot)

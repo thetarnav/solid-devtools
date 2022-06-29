@@ -1,14 +1,15 @@
 import { getOwner as _getOwner } from "solid-js"
 import { Many } from "@solid-primitives/utils"
-import { BatchedUpdates, SafeValue } from "./messanger"
+import { SafeValue, UpdateType } from "./messanger"
 
-export enum OwnerType {
+export enum NodeType {
 	Component,
 	Effect,
 	Render,
 	Memo,
 	Computation,
 	Refresh,
+	Signal,
 	Root,
 }
 
@@ -23,45 +24,59 @@ type _Computation = import("solid-js/types/reactive/signal").Computation<unknown
 declare module "solid-js/types/reactive/signal" {
 	interface SignalState<T> {
 		sdtId?: number
-		onValueUpdate?: ValueUpdateListener
 	}
 	interface Owner {
 		sdtId?: number
-		sdtType?: OwnerType
+		sdtType?: NodeType
 		ownedRoots?: Set<SolidRoot>
 	}
 	interface Computation<Init, Next> {
 		sdtId?: number
-		sdtType?: OwnerType
+		sdtType?: NodeType
 		ownedRoots?: Set<SolidRoot>
-		onValueUpdate?: ValueUpdateListener
+		onValueUpdate?: Record<symbol, ValueUpdateListener>
 		onComputationUpdate?: VoidFunction
 	}
 }
 
-export interface SolidSignal extends _SignalState {
+export interface SignalState {
+	value: unknown
+	observers?: SolidComputation[] | null
+	onValueUpdate?: Record<symbol, ValueUpdateListener>
+}
+
+export interface SolidSignal extends _SignalState, SignalState {
 	value: unknown
 	observers: SolidComputation[] | null
 }
 
 export interface SolidRoot extends _Owner {
 	owned: SolidComputation[] | null
-	owner: SolidRoot | SolidComputation | null
+	owner: SolidOwner | null
 	sourceMap?: Record<string, SolidSignal>
 	isDisposed?: boolean
 	sdtContext?: DebuggerContext
 }
 
-export interface SolidComputation extends _Computation, SolidRoot, SolidSignal {
-	owned: SolidComputation[] | null
-	owner: SolidRoot | SolidComputation | null
-	value: unknown
-	sourceMap?: Record<string, SolidSignal>
+export interface SolidComputation extends _Computation, SolidRoot {
 	name: string
-	sources: (SolidComputation | SolidSignal)[] | null
+	value: unknown
+	observers?: SolidComputation[] | null
+	owned: SolidComputation[] | null
+	owner: SolidOwner | null
+	sourceMap?: Record<string, SolidSignal>
+	sources: SolidSignal[] | null
 }
 
-export type SolidOwner = SolidRoot & Partial<SolidComputation>
+export interface SolidMemo extends SolidSignal, SolidComputation {
+	name: string
+	value: unknown
+	observers: SolidComputation[] | null
+}
+
+export type SolidOwner = (SolidComputation | SolidRoot) & Partial<SolidComputation>
+
+export const getOwner = _getOwner as () => SolidOwner | null
 
 export type DebuggerContext = {
 	rootId: number
@@ -69,11 +84,25 @@ export type DebuggerContext = {
 	forceRootUpdate: VoidFunction
 }
 
-export type BatchUpdateListener = (updates: BatchedUpdates) => void
+export type BatchedUpdate =
+	| {
+			type: UpdateType.Signal
+			payload: SignalUpdatePayload
+	  }
+	| {
+			type: UpdateType.Computation
+			payload: number
+	  }
+
+export interface SignalUpdatePayload {
+	id: number
+	value: unknown
+	oldValue: unknown
+}
+
+export type BatchUpdateListener = (updates: BatchedUpdate[]) => void
 
 export type ValueUpdateListener = (newValue: unknown, oldValue: unknown) => void
-
-export const getOwner = _getOwner as () => SolidOwner | null
 
 //
 // "Mapped___" — owner/signal/etc. objects created by the solid-devtools-debugger runtime library
@@ -95,7 +124,7 @@ export interface SerialisedTreeRoot {
 export interface MappedOwner {
 	id: number
 	name: string
-	type: OwnerType
+	type: NodeType
 	signals: MappedSignal[]
 	children: MappedOwner[]
 	sources: number[]
@@ -123,7 +152,7 @@ export type MappedComponent = {
 export interface GraphOwner {
 	readonly id: number
 	readonly name: string
-	readonly type: OwnerType
+	readonly type: NodeType
 	readonly dispose: VoidFunction
 	readonly updated: boolean
 	readonly setUpdate: (value: boolean) => void

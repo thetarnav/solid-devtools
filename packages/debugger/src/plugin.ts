@@ -6,7 +6,21 @@ import { makeBatchUpdateListener } from "./batchUpdates"
 import { createConsumers } from "./utils"
 import { createLazyMemo } from "@solid-primitives/memo"
 
-const exports = createRoot(() => {
+export type PluginFactory = (data: {
+	triggerUpdate: VoidFunction
+	forceTriggerUpdate: VoidFunction
+	makeBatchUpdateListener: (listener: BatchUpdateListener) => VoidFunction
+	roots: Accessor<MappedRoot[]>
+	components: Accessor<MappedComponent[]>
+	serialisedRoots: Accessor<SerialisedTreeRoot[]>
+}) => {
+	enabled?: Accessor<boolean>
+	trackSignals?: Accessor<boolean>
+	trackBatchedUpdates?: Accessor<boolean>
+	trackComponents?: Accessor<boolean>
+}
+
+const api = createRoot(() => {
 	const owner = getOwner()!
 
 	/** throttled global update */
@@ -50,21 +64,7 @@ const exports = createRoot(() => {
 		},
 	}
 
-	function registerDebuggerPlugin(
-		factory: (data: {
-			triggerUpdate: VoidFunction
-			forceTriggerUpdate: VoidFunction
-			makeBatchUpdateListener: (listener: BatchUpdateListener) => VoidFunction
-			roots: Accessor<MappedRoot[]>
-			components: Accessor<MappedComponent[]>
-			serialisedRoots: Accessor<SerialisedTreeRoot[]>
-		}) => {
-			enabled?: Accessor<boolean>
-			trackSignals?: Accessor<boolean>
-			trackBatchedUpdates?: Accessor<boolean>
-			trackComponents?: Accessor<boolean>
-		},
-	) {
+	function registerDebuggerPlugin(factory: PluginFactory) {
 		runWithOwner(owner, () => {
 			const { enabled, trackBatchedUpdates, trackComponents, trackSignals } = factory({
 				makeBatchUpdateListener,
@@ -117,4 +117,4 @@ export const {
 	registerDebuggerPlugin,
 	updateRoot,
 	removeRoot,
-} = exports
+} = api

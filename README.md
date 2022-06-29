@@ -10,23 +10,35 @@ Reactivity Debugger & Devtools Chrome Extension for SolidJS.
 
 To change the way you write, debug and understand your SolidJS applications and reactivity within.
 
+## Main Devtools package
+
+Most of the devtools are reexported from the main `solid-devtools` package.
+
+See [README](./packages/main#readme) for more information.
+
 ## Available Devtools
 
 All of the packages are currently nothing more then just ideas. Some in progress, and some very much in progress. But a man can dream, and this is what's out there waiting:
 
 ### [Debugger](./packages/debugger#readme)
 
-###### `solid-devtools`
+###### `@solid-devtools/debugger`
 
 A runtime package, used to get information and track changes of the Solid's reactivity graph. It's a cornerstone of the rest of the packages.
-
-It comes with [Extension Adapter](./packages/extension-adapter#readme) and [Locator](./packages/locator#readme) packages included.
 
 ### [Locator](./packages/locator#readme)
 
 ###### `@solid-devtools/locator`
 
 A runtime library for locating components on the page, and going to their source code in your IDE.
+
+### [Logger](./packages/logger#readme)
+
+###### `@solid-devtools/logger`
+
+For debugging only the pinpoint places parts of the Solid's reactivity graph you are concerned with, right in the console you use all the time.
+
+Provides a variaty of debugging utilities for logging the state and lifecycle of the nodes of reactivity graph to the browser console.
 
 ### [Babel Plugin](./packages/babel-plugin/)
 

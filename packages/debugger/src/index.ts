@@ -1,36 +1,35 @@
-import { useExtensionAdapter } from "@solid-devtools/extension-adapter"
-import { LocatorOptions, useLocator } from "@solid-devtools/locator"
 import { ParentComponent } from "solid-js"
-import { registerDebuggerPlugin } from "./plugin"
 import { attachDebugger } from "./primitives"
 
-// Extension adapter
-registerDebuggerPlugin(({ forceTriggerUpdate, makeBatchUpdateListener, serialisedRoots }) => {
-	const { enabled } = useExtensionAdapter({
-		roots: serialisedRoots,
-		forceTriggerUpdate,
-		makeBatchUpdateListener,
-	})
-	return {
-		enabled,
-		trackSignals: enabled,
-		trackBatchedUpdates: enabled,
-	}
-})
+export { registerDebuggerPlugin } from "./plugin"
+export type { PluginFactory } from "./plugin"
 
 export type { TargetIDE, TargetURLFunction } from "@solid-devtools/locator"
 
 export { attachDebugger } from "./primitives"
 
-export function useLocatorPlugin(options: Omit<LocatorOptions, "components">) {
-	registerDebuggerPlugin(({ components }) => {
-		const { enabled } = useLocator({ ...options, components })
-		return {
-			enabled,
-			trackComponents: enabled,
-		}
-	})
-}
+export {
+	makeSolidUpdateListener,
+	observeComputationUpdate,
+	observeValueUpdate,
+	interceptComputationRerun,
+} from "./update"
+
+export {
+	getOwnerType,
+	getNodeType,
+	getOwnerName,
+	isSolidComputation,
+	isSolidMemo,
+	isSolidOwner,
+	isSolidRoot,
+	onOwnerCleanup,
+	onParentCleanup,
+	getFunctionSources,
+	getSafeValue,
+	createUnownedRoot,
+	getName,
+} from "./utils"
 
 export const Debugger: ParentComponent = props => {
 	attachDebugger()

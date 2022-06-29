@@ -1,7 +1,7 @@
 import { createEffect, For, JSX, onCleanup } from "solid-js"
 import { TransitionGroup, animateExit, animateEnter } from "@otonashixav/solid-flip"
 import { createHover } from "@solid-aria/interactions"
-import { GraphOwner, OwnerType } from "@shared/graph"
+import { GraphOwner, NodeType } from "@shared/graph"
 import { tw } from "./twind"
 import { HighlightText, Signals, ValueNode } from "./signalNode"
 import { useHighlights } from "./ctx/highlights"
@@ -20,7 +20,7 @@ export function OwnerNode(props: { owner: GraphOwner }): JSX.Element {
 	const children = () => owner.children
 	const signals = () => owner.signals
 	const rerun = () => owner.updated
-	const typeName = OwnerType[type]
+	const typeName = NodeType[type]
 
 	const { hoverProps, isHovered } = createHover({})
 
@@ -65,7 +65,7 @@ export function OwnerNode(props: { owner: GraphOwner }): JSX.Element {
 						bgColor
 						class={tw`italic font-medium`}
 					>
-						{type === OwnerType.Component ? `<${name}>` : name}
+						{type === NodeType.Component ? `<${name}>` : name}
 					</HighlightText>
 					<div class={tw`ml-2 text-[10px] opacity-40 select-none`}>{typeName}</div>
 				</div>

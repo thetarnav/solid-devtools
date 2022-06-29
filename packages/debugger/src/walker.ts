@@ -1,18 +1,19 @@
 import { resolveElements } from "@solid-primitives/refs"
 import {
 	MappedOwner,
-	OwnerType,
+	NodeType,
 	SolidOwner,
 	MappedSignal,
 	SolidSignal,
 	MappedComponent,
-	SolidComputation,
+	SignalState,
+	SolidMemo,
 } from "@shared/graph"
 import { ComputationUpdateHandler, SignalUpdateHandler } from "./batchUpdates"
 import {
 	getOwnerName,
 	getSafeValue,
-	isComputation,
+	isSolidComputation,
 	markNodeID,
 	markNodesID,
 	markOwnerType,
@@ -28,16 +29,18 @@ let TrackBatchedUpdates: boolean
 let TrackComponents: boolean
 let Components: MappedComponent[] = []
 
+const WALKER = Symbol("walker")
+
 function observeComputation(owner: SolidOwner, id: number) {
-	if (TrackBatchedUpdates && isComputation(owner))
+	if (TrackBatchedUpdates && isSolidComputation(owner))
 		observeComputationUpdate(owner, OnComputationUpdate.bind(void 0, id))
 }
 
-function observeValue(node: SolidSignal, id: number) {
+function observeValue(node: SignalState, id: number) {
 	// OnSignalUpdate will change
 	const handler = OnSignalUpdate
 	if (TrackBatchedUpdates)
-		observeValueUpdate(node, (value, oldValue) => handler({ id, value, oldValue }))
+		observeValueUpdate(node, (value, oldValue) => handler({ id, value, oldValue }), WALKER)
 }
 
 function createSignalNode(
@@ -60,7 +63,7 @@ function mapOwnerSignals(owner: SolidOwner): MappedSignal[] {
 	})
 }
 
-function mapMemo(mapped: MappedOwner, owner: SolidComputation): MappedOwner {
+function mapMemo(mapped: MappedOwner, owner: SolidMemo): MappedOwner {
 	const { id, name } = mapped
 	observeValue(owner, id)
 	return Object.assign(mapped, {
@@ -68,14 +71,14 @@ function mapMemo(mapped: MappedOwner, owner: SolidComputation): MappedOwner {
 	})
 }
 
-function mapOwner(owner: SolidOwner, type?: OwnerType): MappedOwner {
+function mapOwner(owner: SolidOwner, type?: NodeType): MappedOwner {
 	type = markOwnerType(owner, type)
 	const id = markNodeID(owner)
 	const name = getOwnerName(owner)
 
 	observeComputation(owner, id)
 
-	if (type === OwnerType.Component && TrackComponents && typeof owner.value === "function") {
+	if (type === NodeType.Component && TrackComponents && typeof owner.value === "function") {
 		const resolved = resolveElements(owner.value())
 		if (resolved) Components.push({ name, resolved })
 	}
@@ -89,7 +92,7 @@ function mapOwner(owner: SolidOwner, type?: OwnerType): MappedOwner {
 		sources: markNodesID(owner.sources),
 	}
 
-	return type === OwnerType.Memo ? mapMemo(mapped, owner as SolidComputation) : mapped
+	return type === NodeType.Memo ? mapMemo(mapped, owner as SolidMemo) : mapped
 }
 
 function mapChildren({ owned, ownedRoots }: Readonly<SolidOwner>): MappedOwner[] {
@@ -104,7 +107,7 @@ function mapChildren({ owned, ownedRoots }: Readonly<SolidOwner>): MappedOwner[]
 	if (ownedRoots)
 		children.push.apply(
 			children,
-			[...ownedRoots].map(child => mapOwner(child, OwnerType.Root)),
+			[...ownedRoots].map(child => mapOwner(child, NodeType.Root)),
 		)
 
 	return children

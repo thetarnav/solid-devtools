@@ -8,7 +8,7 @@ useLocatorPlugin({
 	targetIDE: "vscode",
 })
 
-render(
+export const disposeApp = render(
 	() => (
 		<Debugger>
 			<App />

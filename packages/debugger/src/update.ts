@@ -1,6 +1,5 @@
 import { onCleanup } from "solid-js"
-import { SolidComputation, SolidSignal, ValueUpdateListener } from "@shared/graph"
-import { getSafeValue } from "./utils"
+import { getOwner, SignalState, SolidComputation, ValueUpdateListener } from "@shared/graph"
 
 let windowAfterUpdatePatched = false
 const graphUpdateListeners = new Set<VoidFunction>()
@@ -23,7 +22,9 @@ function patchWindowAfterUpdate() {
 export function makeSolidUpdateListener(onUpdate: VoidFunction): VoidFunction {
 	patchWindowAfterUpdate()
 	graphUpdateListeners.add(onUpdate)
-	return onCleanup(() => graphUpdateListeners.delete(onUpdate))
+	const unsub = () => graphUpdateListeners.delete(onUpdate)
+	getOwner() && onCleanup(unsub)
+	return unsub
 }
 
 /**
@@ -34,29 +35,70 @@ export function observeComputationUpdate(owner: SolidComputation, onRun: VoidFun
 	if (owner.onComputationUpdate) return void (owner.onComputationUpdate = onRun)
 	// patch owner
 	owner.onComputationUpdate = onRun
-	const fn = owner.fn.bind(owner)
-	owner.fn = (...a) => {
+	interceptComputationRerun(owner, fn => {
 		owner.onComputationUpdate!()
-		return fn(...a)
-	}
+		fn()
+	})
+}
+
+/**
+ * Patches the "fn" prop of SolidComputation. Will execute the {@link onRun} callback whenever the computation is executed.
+ * @param owner computation to patch
+ * @param onRun execution handler
+ *
+ * {@link onRun} is provided with `execute()` function, and a `prev` value. `execute` is the computation handler function, it needs to be called inside {@link onRun} to calculate the next value or run side-effects.
+ *
+ * @example
+ * ```ts
+ * interceptComputationRerun(owner, (fn, prev) => {
+ * 	// do something before execution
+ * 	fn()
+ * 	// do something after execution
+ * })
+ * ```
+ */
+export function interceptComputationRerun(
+	owner: SolidComputation,
+	onRun: <T>(execute: () => T, prev: T) => void,
+): void {
+	const _fn = owner.fn
+	let v!: unknown
+	let prev!: unknown
+	const fn = () => (v = _fn(prev))
+	owner.fn = !!owner.fn.length
+		? p => {
+				onRun(fn, (prev = p))
+				return v
+		  }
+		: () => {
+				onRun(fn, undefined)
+				return v
+		  }
 }
 
 /**
  * Patches the owner/signal value, firing the callback on each update immediately as it happened.
  */
-export function observeValueUpdate(node: SolidSignal, onUpdate: ValueUpdateListener): void {
+export function observeValueUpdate(
+	node: SignalState,
+	onUpdate: ValueUpdateListener,
+	symbol: symbol,
+): VoidFunction {
+	const remove = () => delete node.onValueUpdate![symbol]
 	// node already patched
-	if (node.onValueUpdate) return void (node.onValueUpdate = onUpdate)
+	if (node.onValueUpdate) {
+		node.onValueUpdate[symbol] = onUpdate
+		return remove
+	}
 	// patch node
-	node.onValueUpdate = onUpdate
+	const map = (node.onValueUpdate = { [symbol]: onUpdate })
 	let value = node.value
-	let safeValue = getSafeValue(value)
 	Object.defineProperty(node, "value", {
 		get: () => value,
 		set: newValue => {
-			const newSafe = getSafeValue(newValue)
-			node.onValueUpdate!(newSafe, safeValue)
-			;(value = newValue), (safeValue = newSafe)
+			for (let sym of Object.getOwnPropertySymbols(map)) map[sym](newValue, value)
+			value = newValue
 		},
 	})
+	return remove
 }

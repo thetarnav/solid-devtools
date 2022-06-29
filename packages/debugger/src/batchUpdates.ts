@@ -1,12 +1,11 @@
 import { onCleanup } from "solid-js"
 import { chain, createMicrotask } from "@solid-primitives/utils"
-import { BatchedUpdate, BatchedUpdates, SignalUpdatePayload } from "@shared/messanger"
-import { BatchUpdateListener } from "@shared/graph"
+import { BatchedUpdate, BatchUpdateListener, SignalUpdatePayload } from "@shared/graph"
 
 export type SignalUpdateHandler = (payload: SignalUpdatePayload) => void
 export type ComputationUpdateHandler = (id: number) => void
 
-let updateBatchQueue: BatchedUpdates = []
+let updateBatchQueue: BatchedUpdate[] = []
 const batchUpdateListeners = new Set<BatchUpdateListener>()
 
 const callBatchUpdateListeners = chain(batchUpdateListeners)

@@ -17,11 +17,13 @@
 		"baseUrl": ".",
 		"paths": {
 			"@shared/*": ["./packages/shared/*"],
-			"solid-devtools": ["./packages/debugger/src/index.ts"],
+			"solid-devtools": ["./packages/main/src/index.ts"],
+			"@solid-devtools/debugger": ["./packages/debugger/src/index.ts"],
+			"@solid-devtools/logger": ["./packages/logger/src/index.ts"],
 			"@solid-devtools/ui": ["./packages/ui/src/index.tsx"],
 			"@solid-devtools/locator": ["./packages/locator/src/index.tsx"],
 			"@solid-devtools/extension-adapter": ["./packages/extension-adapter/src/index.ts"]
 		}
 	},
-	"exclude": ["node_modules", "./packages/**/dist/**/*"]
+	"exclude": ["node_modules", "**/dist/**/*"]
 }

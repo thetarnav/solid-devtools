@@ -29,7 +29,7 @@ export interface MessagePayloads {
 		removed: number[]
 		updated: SerialisedTreeRoot[]
 	}
-	[MESSAGE.BatchedUpdate]: BatchedUpdates
+	[MESSAGE.BatchedUpdate]: BatchedUpdate[]
 	[MESSAGE.ForceUpdate]: void
 }
 
@@ -40,8 +40,8 @@ export enum UpdateType {
 
 export interface SignalUpdatePayload {
 	id: number
-	value: unknown
-	oldValue: unknown
+	value: SafeValue
+	oldValue: SafeValue
 }
 
 export type BatchedUpdate =
@@ -53,8 +53,6 @@ export type BatchedUpdate =
 			type: UpdateType.Computation
 			payload: number
 	  }
-
-export type BatchedUpdates = BatchedUpdate[]
 
 export type PostMessageFn = <K extends MESSAGE>(
 	..._: [K] extends [void] ? [id: K] : [id: K, payload: MessagePayloads[K]]
