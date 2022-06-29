@@ -1,5 +1,6 @@
 import { Link } from "solid-app-router"
 import { Component, createSignal, For, Show } from "solid-js"
+import { debugOwnerSignals, debugOwnerComputations } from "@solid-devtools/logger"
 
 import type { IComment } from "../types"
 
@@ -7,6 +8,9 @@ const pluralize = (n: number) => n + (n === 1 ? " reply" : " replies")
 
 const Comment: Component<{ comment: IComment }> = props => {
 	const [open, setOpen] = createSignal(true)
+
+	debugOwnerSignals()
+	debugOwnerComputations()
 
 	return (
 		<li class="comment">

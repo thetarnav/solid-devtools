@@ -313,20 +313,19 @@ export function debugSignal(
 	}
 
 	// Value Update
-	onCleanup(
-		observeValueUpdate(
-			signal,
-			(value, prev) => {
-				logSignalValueUpdate(
-					state,
-					value,
-					prev,
-					trackObservers ? prevObservers : dedupeArray(signal.observers!),
-				)
-			},
-			SYMBOL,
-		),
+	const stopListening = observeValueUpdate(
+		signal,
+		(value, prev) => {
+			logSignalValueUpdate(
+				state,
+				value,
+				prev,
+				trackObservers ? prevObservers : dedupeArray(signal.observers!),
+			)
+		},
+		SYMBOL,
 	)
+	if (getOwner()) onCleanup(stopListening)
 
 	if (trackObservers) {
 		// Observers Change

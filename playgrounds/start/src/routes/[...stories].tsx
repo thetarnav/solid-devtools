@@ -22,7 +22,10 @@ export const routeData: RouteDataFunc = ({ location, params }) => {
 	const page = () => +location.query.page || 1
 	const type = () => params.stories || "top"
 
-	const [stories] = createResource(() => `${mapStories[type()]}?page=${page()}`, fetchAPI)
+	const [stories] = createResource(
+		() => `${mapStories[type() as keyof typeof mapStories]}?page=${page()}`,
+		fetchAPI,
+	)
 
 	return { type, stories, page }
 }
