@@ -6,7 +6,6 @@ import {
 	MappedSignal,
 	SolidSignal,
 	MappedComponent,
-	SolidComputation,
 	SignalState,
 	SolidMemo,
 } from "@shared/graph"

@@ -14,9 +14,11 @@ export const registerDebuggerPlugin: typeof API.registerDebuggerPlugin = noop
 export const makeSolidUpdateListener: typeof API.makeSolidUpdateListener = () => noop
 export const observeComputationUpdate: typeof API.observeComputationUpdate = noop
 export const observeValueUpdate: typeof API.observeValueUpdate = () => noop
+export const interceptComputationRerun: typeof API.interceptComputationRerun = noop
 
 // utils
 export const getOwnerType: typeof API.getOwnerType = () => 0
+export const getNodeType: typeof API.getNodeType = () => 0
 export const getOwnerName: typeof API.getOwnerName = () => "(anonymous)"
 export const getName: typeof API.getName = () => "(anonymous)"
 export const isSolidComputation: typeof API.isSolidComputation = (o): o is SolidComputation => false

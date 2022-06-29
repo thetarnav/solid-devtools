@@ -1,6 +1,5 @@
 import { onCleanup } from "solid-js"
 import { getOwner, SignalState, SolidComputation, ValueUpdateListener } from "@shared/graph"
-import { getSafeValue } from "./utils"
 
 let windowAfterUpdatePatched = false
 const graphUpdateListeners = new Set<VoidFunction>()
@@ -36,22 +35,39 @@ export function observeComputationUpdate(owner: SolidComputation, onRun: VoidFun
 	if (owner.onComputationUpdate) return void (owner.onComputationUpdate = onRun)
 	// patch owner
 	owner.onComputationUpdate = onRun
-	interceptComputationRerun(owner, (fn, prev) => {
+	interceptComputationRerun(owner, fn => {
 		owner.onComputationUpdate!()
-		fn(prev)
+		fn()
 	})
 }
 
+/**
+ * Patches the "fn" prop of SolidComputation. Will execute the {@link onRun} callback whenever the computation is executed.
+ * @param owner computation to patch
+ * @param onRun execution handler
+ *
+ * {@link onRun} is provided with `execute()` function, and a `prev` value. `execute` is the computation handler function, it needs to be called inside {@link onRun} to calculate the next value or run side-effects.
+ *
+ * @example
+ * ```ts
+ * interceptComputationRerun(owner, (fn, prev) => {
+ * 	// do something before execution
+ * 	fn()
+ * 	// do something after execution
+ * })
+ * ```
+ */
 export function interceptComputationRerun(
 	owner: SolidComputation,
-	onRun: <T>(execute: (prev: T) => T, prev: T) => void,
+	onRun: <T>(execute: () => T, prev: T) => void,
 ): void {
 	const _fn = owner.fn
 	let v!: unknown
-	const fn = (a: unknown) => (v = _fn(a))
+	let prev!: unknown
+	const fn = () => (v = _fn(prev))
 	owner.fn = !!owner.fn.length
-		? prev => {
-				onRun(fn, prev)
+		? p => {
+				onRun(fn, (prev = p))
 				return v
 		  }
 		: () => {

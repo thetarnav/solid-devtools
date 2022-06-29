@@ -55,12 +55,12 @@ function makeTimeMeter(): () => number {
 /**
  * @returns true if the node was marked before
  */
-function markDebugNode(o: Owner, type: "computation" | "signals" | "owned"): true | void
-function markDebugNode(o: SignalState<any>): true | void
+function markDebugNode(o: Owner, type: "computation" | "signals" | "owned"): true | VoidFunction
+function markDebugNode(o: SignalState<any>): true | VoidFunction
 function markDebugNode(
 	o: Owner | SignalState<any>,
 	type?: "computation" | "signals" | "owned",
-): true | void {
+): true | VoidFunction {
 	let property: "$debug" | "$debugSignals" | "$debugOwned" | "$debugSignal"
 	if (type === "computation") property = "$debug"
 	else if (type === "signals") property = "$debugSignals"
@@ -69,6 +69,7 @@ function markDebugNode(
 
 	if ((o as any)[property]) return true
 	;(o as any)[property] = true
+	return () => ((o as any)[property] = false)
 }
 
 interface DebugComputationOptions {
@@ -83,7 +84,7 @@ export function debugComputation(
 	const owner = _owner === undefined ? getOwner() : (_owner as SolidOwner)
 	if (!owner || !isSolidComputation(owner)) return console.warn("owner is not a computation")
 
-	if (markDebugNode(owner, "computation")) return
+	if (markDebugNode(owner, "computation") === true) return
 
 	const type = getOwnerType(owner)
 	const typeName = NodeType[type]
@@ -148,7 +149,7 @@ export function debugComputation(
 		signalUpdates = []
 
 		time()
-		const value = fn(prev)
+		const value = fn()
 		const elapsedTime = time()
 
 		const sources = owner.sources ? dedupeArray(owner.sources) : []
@@ -185,16 +186,13 @@ export function debugOwned(_owner?: Owner): void {
 	const owner = _owner === undefined ? getOwner() : (_owner as SolidOwner)
 	if (!owner) return console.warn("no owner passed to debugOwnedComputations")
 
-	if (markDebugNode(owner, "owned")) return
-	onCleanup(() => (owner!.$debugOwned = false))
+	const marked = markDebugNode(owner, "owned")
+	if (marked === true) return
+	onCleanup(marked)
 
-	const { type, typeName, name } = (() => {
-		const type = getOwnerType(owner)
+	const { type, typeName, name } =
 		// for solid-refresh HMR memos, return the owned component
-		if (type === NodeType.Refresh) return getNodeState(owner.owner!)
-		return getNodeState(owner)
-	})()
-	const SYMBOL = Symbol(name)
+		getOwnerType(owner) === NodeType.Refresh ? getNodeState(owner.owner!) : getNodeState(owner)
 
 	let prevOwned: SolidComputation[] = []
 
@@ -243,7 +241,7 @@ export function debugSignal(
 		signal = source as SolidSignal
 	}
 
-	if (markDebugNode(signal)) return
+	if (markDebugNode(signal) === true) return
 
 	const { trackObservers = true, logInitialValue: _logInitialValue = true } = options
 
@@ -331,7 +329,7 @@ export function debugOwnerSignals(owner?: Owner, options: DebugSignalOptions = {
 	owner = getOwner()!
 	if (!owner) return console.warn("debugOwnerState found no Owner")
 
-	if (markDebugNode(owner, "signals")) return
+	if (markDebugNode(owner, "signals") === true) return
 
 	const solidOwner = owner as SolidOwner
 

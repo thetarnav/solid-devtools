@@ -52,6 +52,9 @@ const STYLES = {
 const inGray = (text: unknown) => `\x1B[90m${text}\x1B[m`
 const styleTime = (time: number) => `\x1B[90;3m${time} ms\x1B[m`
 
+const getNameStyle = (type: NodeType): string =>
+	type === NodeType.Signal ? STYLES.signalUnderline : STYLES.grayBackground
+
 function getValueSpecifier(v: unknown) {
 	if (typeof v === "object") return " %o"
 	if (typeof v === "function") return " %O"
@@ -77,9 +80,6 @@ export function getNodeStateWithValue(owner: SolidSignal | NodeStateWithValue): 
 		value: owner.value,
 	}
 }
-
-const getNameStyle = (type: NodeType): string =>
-	type === NodeType.Signal ? STYLES.signalUnderline : STYLES.grayBackground
 
 export const getComputationCreatedLabel = (
 	type: string,
