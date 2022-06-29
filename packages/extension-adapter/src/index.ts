@@ -1,7 +1,7 @@
 import { createEffect, createSignal, onCleanup } from "solid-js"
 import { registerDebuggerPlugin, PluginFactory, getSafeValue } from "@solid-devtools/debugger"
 import {
-	BatchedUpdates,
+	BatchedUpdate,
 	MESSAGE,
 	onWindowMessage,
 	postWindowMessage,
@@ -36,7 +36,7 @@ const extensionAdapterFactory: PluginFactory = ({
 
 	makeBatchUpdateListener(updates => {
 		// serialize the updates and send them to the devtools panel
-		updates = updates.map(({ type, payload }) => ({
+		const safeUpdates = updates.map(({ type, payload }) => ({
 			type,
 			payload:
 				type === UpdateType.Computation
@@ -46,8 +46,8 @@ const extensionAdapterFactory: PluginFactory = ({
 							value: getSafeValue(payload.value),
 							oldValue: getSafeValue(payload.oldValue),
 					  },
-		})) as BatchedUpdates
-		postWindowMessage(MESSAGE.BatchedUpdate, updates)
+		})) as BatchedUpdate[]
+		postWindowMessage(MESSAGE.BatchedUpdate, safeUpdates)
 	})
 
 	return { enabled }

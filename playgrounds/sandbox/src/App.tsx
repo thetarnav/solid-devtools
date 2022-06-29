@@ -2,6 +2,7 @@ import { makeTimer } from "@solid-primitives/timer"
 import { attachDebugger } from "solid-devtools"
 import {
 	debugComputation,
+	debugOwned,
 	debugOwnerSignals,
 	debugSignal,
 	debugSignals,
@@ -112,6 +113,7 @@ const App: Component = () => {
 	})
 
 	debugSignal(objmemo)
+	debugOwned()
 
 	// debugSignal(count)
 	// debugSignals([count, showEven])
@@ -122,7 +124,7 @@ const App: Component = () => {
 		attachDebugger()
 		createComputed(
 			_ => {
-				debugComputation()
+				// debugComputation()
 
 				// showEven()
 				createSignal("hello")

@@ -1,6 +1,6 @@
 import { getOwner as _getOwner } from "solid-js"
 import { Many } from "@solid-primitives/utils"
-import { BatchedUpdates, SafeValue } from "./messanger"
+import { SafeValue, UpdateType } from "./messanger"
 
 export enum OwnerType {
 	Component,
@@ -75,17 +75,33 @@ export interface SolidMemo extends SolidSignal, SolidComputation {
 
 export type SolidOwner = (SolidComputation | SolidRoot) & Partial<SolidComputation>
 
+export const getOwner = _getOwner as () => SolidOwner | null
+
 export type DebuggerContext = {
 	rootId: number
 	triggerRootUpdate: VoidFunction
 	forceRootUpdate: VoidFunction
 }
 
-export type BatchUpdateListener = (updates: BatchedUpdates) => void
+export type BatchedUpdate =
+	| {
+			type: UpdateType.Signal
+			payload: SignalUpdatePayload
+	  }
+	| {
+			type: UpdateType.Computation
+			payload: number
+	  }
+
+export interface SignalUpdatePayload {
+	id: number
+	value: unknown
+	oldValue: unknown
+}
+
+export type BatchUpdateListener = (updates: BatchedUpdate[]) => void
 
 export type ValueUpdateListener = (newValue: unknown, oldValue: unknown) => void
-
-export const getOwner = _getOwner as () => SolidOwner | null
 
 //
 // "Mapped___" — owner/signal/etc. objects created by the solid-devtools-debugger runtime library

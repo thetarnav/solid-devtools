@@ -22,6 +22,7 @@ import {
 	logComputation,
 	logInitialValue,
 	logObservers,
+	logOwned,
 	logSignalsInitialValues,
 	logSignalValueUpdate,
 	UNUSED,
@@ -32,6 +33,7 @@ declare module "solid-js/types/reactive/signal" {
 	interface Owner {
 		$debug?: boolean
 		$debugSignals?: boolean
+		$debugOwned?: boolean
 	}
 	interface SignalState<T> {
 		$debugSignal?: boolean
@@ -51,24 +53,25 @@ function makeTimeMeter(): () => number {
 /**
  * @returns true if the node was marked before
  */
-function markDebugNode(o: Owner, type: "computation" | "signals"): true | void
+function markDebugNode(o: Owner, type: "computation" | "signals" | "owned"): true | void
 function markDebugNode(o: SignalState<any>): true | void
-function markDebugNode(o: Owner | SignalState<any>, type?: "computation" | "signals"): true | void {
-	switch (type) {
-		case "computation":
-			if ((o as Owner).$debug) return true
-			;(o as Owner).$debug = true
-		case "signals":
-			if ((o as Owner).$debugSignals) return true
-			;(o as Owner).$debugSignals = true
-		default:
-			if ((o as SignalState<any>).$debugSignal) return true
-			;(o as SignalState<any>).$debugSignal = true
-	}
+function markDebugNode(
+	o: Owner | SignalState<any>,
+	type?: "computation" | "signals" | "owned",
+): true | void {
+	let property: "$debug" | "$debugSignals" | "$debugOwned" | "$debugSignal"
+	if (type === "computation") property = "$debug"
+	else if (type === "signals") property = "$debugSignals"
+	else if (type === "owned") property = "$debugOwned"
+	else property = "$debugSignal"
+
+	if ((o as any)[property]) return true
+	;(o as any)[property] = true
 }
 
-export function debugComputation() {
-	const owner = getOwner()
+export function debugComputation(owner?: Owner): void
+export function debugComputation(_owner?: Owner): void {
+	const owner = _owner === undefined ? getOwner() : (_owner as SolidOwner)
 	if (!owner || !isSolidComputation(owner)) return console.warn("owner is not a computation")
 
 	if (markDebugNode(owner, "computation")) return
@@ -167,6 +170,46 @@ export function debugComputation() {
 	const time = makeTimeMeter()
 }
 
+export function debugOwned(owner?: Owner): void
+export function debugOwned(_owner?: Owner): void {
+	const owner = _owner === undefined ? getOwner() : (_owner as SolidOwner)
+	if (!owner) return console.warn("no owner passed to debugOwnedComputations")
+
+	if (markDebugNode(owner, "owned")) return
+
+	const { type, name } = (() => {
+		const type = getOwnerType(owner)
+		if (type === OwnerType.Refresh)
+			// for solid-refresh HMR memos, return the owned component
+			return {
+				type: OwnerType[OwnerType.Component],
+				name: getOwnerName(owner.owner!),
+			}
+		return { type: OwnerType[type], name: getOwnerName(owner) }
+	})()
+	const SYMBOL = Symbol(name)
+
+	let prevOwnedLength = 0
+
+	makeSolidUpdateListener(() => {
+		const { owned } = owner
+		if (!owned) return
+
+		const computations: SolidComputation[] = []
+
+		let i = prevOwnedLength
+		// owned can only be added
+		for (; i < owned.length; i++) computations.push(owned[i])
+		prevOwnedLength = i
+
+		// TODO: omit already debugged computations
+
+		if (computations.length === 0) return
+
+		logOwned(type, name, computations)
+	})
+}
+
 export interface DebugSignalOptions {
 	trackObservers?: boolean
 	logInitialValue?: boolean
@@ -192,8 +235,7 @@ export function debugSignal(
 
 	const { trackObservers = true, logInitialValue: _logInitialValue = true } = options
 
-	const isSignal = !isSolidOwner(signal)
-	const type = isSignal ? "Signal" : "Memo"
+	const type = isSolidOwner(signal) ? "Memo" : "Signal"
 	const name = getName(signal)
 	const SYMBOL = Symbol(name)
 
@@ -215,6 +257,7 @@ export function debugSignal(
 			signal,
 			(value, prev) => {
 				logSignalValueUpdate(
+					type,
 					name,
 					value,
 					prev,
