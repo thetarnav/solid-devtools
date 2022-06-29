@@ -43,10 +43,9 @@ describe("getOwnerType", () => {
 			createRenderEffect(() => expect(getOwnerType(getOwner()!)).toBe(OwnerType.Render))
 			dispose()
 		}))
-	// roots aren't identified by getOwnerType, but with attachDebugger hook
-	// it("identifies Root", () =>
-	// 	createRoot(dispose => {
-	// 		expect(getOwnerType(getOwner()!)).toBe(OwnerType.Root)
-	// 		dispose()
-	// 	}))
+	it("identifies Root", () =>
+		createRoot(dispose => {
+			expect(getOwnerType(getOwner()!)).toBe(OwnerType.Root)
+			dispose()
+		}))
 })

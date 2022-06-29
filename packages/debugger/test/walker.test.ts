@@ -1,5 +1,4 @@
-import { getOwner, OwnerType } from "@shared/graph"
-import { SignalUpdatePayload } from "@shared/messanger"
+import { getOwner, OwnerType, SignalUpdatePayload } from "@shared/graph"
 import { createComputed, createEffect, createRoot, createSignal } from "solid-js"
 import type * as API from "../src/walker"
 
@@ -56,7 +55,7 @@ describe("walkSolidTree", () => {
 			name: "(anonymous)",
 			signals: [],
 			sources: [],
-			type: OwnerType.Computation,
+			type: OwnerType.Root,
 			children: [
 				{
 					id: 1,
@@ -112,7 +111,7 @@ describe("walkSolidTree", () => {
 			id: 0,
 			name: "(anonymous)",
 			sources: [],
-			type: OwnerType.Computation,
+			type: OwnerType.Root,
 			signals: [
 				{
 					id: 1,
