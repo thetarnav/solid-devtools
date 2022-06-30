@@ -1,3 +1,4 @@
+/* @refresh reload */
 import { makeTimer } from "@solid-primitives/timer"
 import { attachDebugger } from "solid-devtools"
 import { debugOwnerComputations, debugOwnerSignals } from "@solid-devtools/logger"
@@ -149,33 +150,33 @@ const App: Component = () => {
 	// 	setShowEven(true)
 	// })
 
-	createEffect(() => {
-		console.log("effect")
-		count()
-	})
+	// createEffect(() => {
+	// 	console.log("effect")
+	// 	count()
+	// })
 
-	// add signal asynchronously
-	const owner = getOwner()!
-	setTimeout(() => {
-		runWithOwner(owner, () => {
-			createComputed(smiley, undefined, { name: "async_smiley" })
-			createSignal("I am here too!", { name: "async" })
-		})
-	})
+	// // add signal asynchronously
+	// const owner = getOwner()!
+	// setTimeout(() => {
+	// 	runWithOwner(owner, () => {
+	// 		createComputed(smiley, undefined, { name: "async_smiley" })
+	// 		createSignal("I am here too!", { name: "async" })
+	// 	})
+	// })
 
-	let setMe: Setter<string>
-	const [smiley, setSmiley] = createSignal<Accessor<string>>()
-	makeTimer(() => setMe(["🙂", "🤔", "🤯"][Math.floor(Math.random() * 3)]), 2000, setInterval)
-	createEffect(
-		() => {
-			const [_smiley, _setMe] = createSignal("🙂", { name: "smiley" })
-			setMe = _setMe
-			setSmiley(() => _smiley)
-			console.log(count())
-		},
-		undefined,
-		{ name: "EFFECT" },
-	)
+	// let setMe: Setter<string>
+	// const [smiley, setSmiley] = createSignal<Accessor<string>>()
+	// makeTimer(() => setMe(["🙂", "🤔", "🤯"][Math.floor(Math.random() * 3)]), 2000, setInterval)
+	// createEffect(
+	// 	() => {
+	// 		const [_smiley, _setMe] = createSignal("🙂", { name: "smiley" })
+	// 		setMe = _setMe
+	// 		setSmiley(() => _smiley)
+	// 		console.log(count())
+	// 	},
+	// 	undefined,
+	// 	{ name: "EFFECT" },
+	// )
 
 	return (
 		<>
@@ -191,19 +192,19 @@ const App: Component = () => {
 				</div>
 				<p>Dispose application</p>
 				<button onClick={() => disposeApp()}>Dispose</button>
-				<div>
+				{/* <div>
 					<PassChildren>
 						<Show when={showEven()} fallback={<p>\\{smiley()}/</p>}>
 							<p style={{ background: "darkgray" }}>{smiley()}</p>
 						</Show>
 					</PassChildren>
-				</div>
+				</div> */}
 			</div>
-			<obj.comp />
+			{/* <obj.comp />
 			<button onClick={() => setRootCount(p => ++p)}>Update root count</button>
 			<button onClick={() => disposeOuterRoot()}>Dispose Outer Root</button>
 			<Article />
-			<Todos />
+			<Todos /> */}
 		</>
 	)
 }

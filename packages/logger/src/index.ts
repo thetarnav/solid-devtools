@@ -73,7 +73,8 @@ function markDebugNode(
 }
 
 interface DebugComputationOptions {
-	logInitialState?: boolean
+	/** hook called during initial computation run? *(Defaults to `true`)* */
+	initialRun?: boolean
 }
 
 /**
@@ -97,7 +98,7 @@ interface DebugComputationOptions {
 export function debugComputation(owner?: Owner, options?: DebugComputationOptions): void
 export function debugComputation(
 	_owner?: Owner,
-	{ logInitialState = true }: DebugComputationOptions = {},
+	{ initialRun = true }: DebugComputationOptions = {},
 ): void {
 	const owner = _owner === undefined ? getOwner() : (_owner as SolidOwner)
 	if (!owner || !isSolidComputation(owner)) return console.warn("owner is not a computation")
@@ -139,7 +140,7 @@ export function debugComputation(
 
 	// this is for logging the initial state after the first callback execution
 	// the "value" property is monkey patched for one function execution
-	if (logInitialState) {
+	if (initialRun) {
 		const removeValueObserver = observeValueUpdate(
 			owner,
 			value => {
@@ -160,6 +161,9 @@ export function debugComputation(
 			SYMBOL,
 		)
 	}
+	// if debugComputation after the initial run of the computation
+	// sources should be observed immediately
+	else observeSources(owner.sources ? dedupeArray(owner.sources) : [])
 
 	// monkey patch the "fn" callback to intercept every computation function execution
 	interceptComputationRerun(owner, (fn, prev) => {
@@ -244,7 +248,7 @@ export function debugOwnerComputations(_owner?: Owner): void {
 		for (; i < owned.length; i++) {
 			const computation = owned[i]
 			debugComputation(computation, {
-				logInitialState: false,
+				initialRun: false,
 			})
 			computations.push(computation)
 		}
