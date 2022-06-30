@@ -1,5 +1,11 @@
 # @solid-devtools/logger
 
+## 0.1.1
+
+### Patch Changes
+
+- 9b8e9bf: Fix showing `Caused by` field when using debugOwnerComputations.
+
 ## 0.1.0
 
 ### Minor Changes
