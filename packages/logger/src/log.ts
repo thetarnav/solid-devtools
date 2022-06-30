@@ -1,21 +1,9 @@
 // see https://developer.chrome.com/docs/devtools/console/format-style/
 // to gen a overview of how to style console messages
 
+import { getName, getNodeType, getOwnerType, isSolidMemo } from "@solid-devtools/debugger"
 import { NodeType, SolidComputation, SolidOwner, SolidSignal } from "@shared/graph"
 import { dedupeArray } from "@shared/utils"
-import {
-	getName,
-	getNodeType,
-	getOwnerName,
-	getOwnerType,
-	isSolidMemo,
-} from "@solid-devtools/debugger"
-
-export type UpdateCause = {
-	type: "signal" | "computation"
-	name: string
-	value: unknown
-}
 
 export type NodeState = {
 	type: NodeType
@@ -38,7 +26,7 @@ export type ComputationState = {
 	prev: unknown | typeof UNUSED
 	value: unknown | typeof UNUSED
 	sources: (SolidComputation | SolidSignal)[]
-	causedBy: UpdateCause[] | null
+	causedBy: NodeStateWithValue[] | null
 }
 
 const STYLES = {
@@ -55,6 +43,15 @@ const styleTime = (time: number) => `\x1B[90;3m${time} ms\x1B[m`
 const getNameStyle = (type: NodeType): string =>
 	type === NodeType.Signal ? STYLES.signalUnderline : STYLES.grayBackground
 
+/** function that trims too long string */
+function trimString(str: string, maxLength: number): string {
+	if (str.length <= maxLength) return str
+	return str.slice(0, maxLength) + "…"
+}
+
+export const getDisplayName = (node: Readonly<SolidOwner | SolidSignal>): string =>
+	trimString(getName(node), 20)
+
 function getValueSpecifier(v: unknown) {
 	if (typeof v === "object") return " %o"
 	if (typeof v === "function") return " %O"
@@ -67,16 +64,18 @@ export function getNodeState(owner: SolidOwner | SolidSignal | NodeState): NodeS
 	return {
 		type,
 		typeName: NodeType[type],
-		name: getName(owner),
+		name: getDisplayName(owner),
 	}
 }
-export function getNodeStateWithValue(owner: SolidSignal | NodeStateWithValue): NodeStateWithValue {
+export function getNodeStateWithValue(
+	owner: SolidComputation | SolidSignal | NodeStateWithValue,
+): NodeStateWithValue {
 	if ("type" in owner && "typeName" in owner && "name" in owner) return owner
 	const type = getNodeType(owner)
 	return {
 		type,
 		typeName: NodeType[type],
-		name: getName(owner),
+		name: getDisplayName(owner),
 		value: owner.value,
 	}
 }
@@ -130,23 +129,19 @@ export const logComputationDetails = ({
 
 	// Caused By
 	if (causedBy && causedBy.length) {
-		if (causedBy.length === 1)
+		if (causedBy.length === 1) {
+			const { name, type, value } = causedBy[0]
 			console.log(
-				`%c${inGray("Caused By:")} %c${causedBy[0].name}%c ${inGray("=")}`,
+				`%c${inGray("Caused By:")} %c${name}%c ${inGray("=")}`,
 				"",
-				"owned" in causedBy[0] ? STYLES.grayBackground : STYLES.signalUnderline,
+				getNameStyle(type),
 				"",
-				causedBy[0].value,
+				value,
 			)
-		else {
+		} else {
 			console.groupCollapsed(inGray("Caused By:"), causedBy.length)
-			causedBy.forEach(cause => {
-				console.log(
-					`%c${cause.name}%c ${inGray("=")}`,
-					cause.type === "computation" ? STYLES.grayBackground : STYLES.signalUnderline,
-					"",
-					cause.value,
-				)
+			causedBy.forEach(({ name, type, value }) => {
+				console.log(`%c${name}%c ${inGray("=")}`, getNameStyle(type), "", value)
 			})
 			console.groupEnd()
 		}
@@ -156,8 +151,8 @@ export const logComputationDetails = ({
 	if (sources.length) {
 		console.groupCollapsed(inGray("Sources:"), sources.length)
 		sources.forEach(source => {
-			const type = getNodeType(source)
-			console.log(`%c${getName(source)}%c ${inGray("=")}`, getNameStyle(type), "", source.value)
+			const { type, name } = getNodeState(source)
+			console.log(`%c${name}%c ${inGray("=")}`, getNameStyle(type), "", source.value)
 		})
 		console.groupEnd()
 	} else {
@@ -228,14 +223,12 @@ export function logInitialValue(node: SolidSignal | NodeStateWithValue): void {
 
 export function logSignalValues(signals: SolidSignal[]): void {
 	signals.forEach(signal => {
-		const type = getNodeType(signal)
-		const name = getName(signal)
-
+		const { type, typeName, name, value } = getNodeStateWithValue(signal)
 		console.log(
-			`${inGray(NodeType[type])} %c${name}%c ${inGray("=")}${getValueSpecifier(signal.value)}`,
+			`${inGray(typeName)} %c${name}%c ${inGray("=")}${getValueSpecifier(value)}`,
 			`${getNameStyle(type)}`,
 			"",
-			signal.value,
+			value,
 		)
 	})
 }
@@ -344,7 +337,7 @@ function logOwnersDiff<T extends SolidOwner>(
 
 	types.forEach(([owner, type]) => {
 		const mark = marks.get(owner)
-		const name = getOwnerName(owner)
+		const name = getDisplayName(owner)
 		const label = (() => {
 			if (mark === "added")
 				return [
@@ -373,7 +366,7 @@ export function logOwnerList<T extends SolidOwner>(
 ): void {
 	const types = getPaddedOwnerTypes(owners)
 	types.forEach(([owner, type]) => {
-		const label = [`${inGray(type)} %c${getName(owner)}`, STYLES.grayBackground]
+		const label = [`${inGray(type)} %c${getDisplayName(owner)}`, STYLES.grayBackground]
 		if (logGroup) {
 			console.groupCollapsed(...label)
 			logGroup(owner)

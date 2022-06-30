@@ -3,15 +3,12 @@ import { Accessor, onCleanup } from "solid-js"
 import { asArray, Many } from "@solid-primitives/utils"
 import {
 	getOwnerType,
-	getOwnerName,
 	isSolidComputation,
 	observeValueUpdate,
 	onParentCleanup,
 	getFunctionSources,
 	makeSolidUpdateListener,
-	getName,
 	isSolidMemo,
-	isSolidOwner,
 	interceptComputationRerun,
 } from "@solid-devtools/debugger"
 import { getOwner, NodeType, SolidComputation, SolidOwner, SolidSignal } from "@shared/graph"
@@ -28,7 +25,7 @@ import {
 	logSignalsInitialValues,
 	logSignalValueUpdate,
 	UNUSED,
-	UpdateCause,
+	NodeStateWithValue,
 } from "./log"
 
 declare module "solid-js/types/reactive/signal" {
@@ -105,16 +102,14 @@ export function debugComputation(
 
 	if (markDebugNode(owner, "computation") === true) return
 
-	const type = getOwnerType(owner)
-	const typeName = NodeType[type]
-	const name = getOwnerName(owner)
+	const { type, typeName, name } = getNodeState(owner)
 	const SYMBOL = Symbol(name)
 	// log prev value only of the computation callback uses it
 	const usesPrev = !!owner.fn.length
 	const usesValue = usesPrev || type === NodeType.Memo
 
 	let updateListeners: VoidFunction[] = []
-	let signalUpdates: UpdateCause[] = []
+	let signalUpdates: NodeStateWithValue[] = []
 
 	// patches source objects to track their value updates
 	// will unsubscribe from previous sources on each call
@@ -124,14 +119,7 @@ export function debugComputation(
 		sources.forEach(source => {
 			const unsub = observeValueUpdate(
 				source,
-				value => {
-					const update: UpdateCause = {
-						type: isSolidOwner(source) ? "computation" : "signal",
-						name: getName(source),
-						value,
-					}
-					signalUpdates.push(update)
-				},
+				value => signalUpdates.push({ ...getNodeState(source), value }),
 				SYMBOL,
 			)
 			updateListeners.push(unsub)

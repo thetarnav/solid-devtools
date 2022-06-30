@@ -118,32 +118,32 @@ const App: Component = () => {
 
 	// // debugOwnerSignals()
 
-	const dispose = createRoot(dispose => {
-		attachDebugger()
-		createComputed(
-			_ => {
-				// debugComputation()
-				// showEven()
-				createSignal("hello")
-				setShowEven(count() % 2 === 0)
-				// if (count() === 2) {
-				// 	doMediumCalc()
-				// 	setCount(p => p + 1)
-				// 	createComputed(
-				// 		() => {
-				// 			count()
-				// 		},
-				// 		undefined,
-				// 		{ name: "run 2" },
-				// 	)
-				// }
-				return count()
-			},
-			undefined,
-			{ name: "main_computed" },
-		)
-		return dispose
-	})
+	// const dispose = createRoot(dispose => {
+	// 	attachDebugger()
+	createComputed(
+		_ => {
+			// debugComputation()
+			// showEven()
+			createSignal("hello")
+			setShowEven(count() % 2 === 0)
+			// if (count() === 2) {
+			// 	doMediumCalc()
+			// 	setCount(p => p + 1)
+			// 	createComputed(
+			// 		() => {
+			// 			count()
+			// 		},
+			// 		undefined,
+			// 		{ name: "run 2" },
+			// 	)
+			// }
+			return count()
+		},
+		undefined,
+		{ name: "c-12-3-1-2-3-2-1-1-1-1-1-1-1-0-1-2-1-1-0" },
+	)
+	// 	return dispose
+	// })
 
 	// batch(() => {
 	// 	setCount(1)
