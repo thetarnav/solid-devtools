@@ -124,7 +124,7 @@ debugSignals(() => {
 
 ### `debugOwnerSignals`
 
-Debug the {@link owner} signals by logging their lifecycle state to the browser console.
+Debug the signals created under given reactive owner by logging their lifecycle state to the browser console.
 
 Accepts following arguments:
 
@@ -150,6 +150,16 @@ const Button = props => {
 ## Demo video
 
 https://user-images.githubusercontent.com/24491503/176549151-c06a1d14-2d99-4211-9f9e-74392be8890a.mp4
+
+## More hook ideas
+
+There is still a lot of places this package
+could be extended or improved.
+I'm still planning on doing a hook for debugging
+component props for example.
+
+If you have any ideas or needs for features that
+might be helpful, let me know! :)
 
 ## Changelog
 
