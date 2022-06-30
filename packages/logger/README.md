@@ -12,7 +12,7 @@ Provides a variaty of debugging utilities for logging the state and lifecycle of
 
 ## Installation
 
-The `Logger` package is currently not a part of `solid-devtools` package — has to be installed separately. _(`solid-devtools` is it's dependency, so you don't have to install it explicitely as well)_
+The `Logger` package is currently not a part of the main `solid-devtools` library — it has to be installed on it's own.
 
 ```bash
 npm i @solid-devtools/logger
