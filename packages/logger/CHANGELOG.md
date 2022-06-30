@@ -1,5 +1,11 @@
 # @solid-devtools/logger
 
+## 0.1.2
+
+### Patch Changes
+
+- c1e512e: Trim long owner names. Fixes #23
+
 ## 0.1.1
 
 ### Patch Changes
