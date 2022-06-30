@@ -12,19 +12,26 @@ To change the way you write, debug and understand your SolidJS applications and 
 
 ## Main Devtools package
 
-Most of the devtools are reexported from the main `solid-devtools` package.
+###### `solid-devtools`
+
+The main library is re-exporting and connecting
+the rest of packages together to provide a
+common experience for users.
+It is a recommended and easy way to get started.
 
 See [README](./packages/main#readme) for more information.
 
 ## Available Devtools
 
-All of the packages are currently nothing more then just ideas. Some in progress, and some very much in progress. But a man can dream, and this is what's out there waiting:
+Most of the present packages are not much more then just ideas and experiments. Some in progress, and some very much in progress.
+But few of them can help you in your work already, and a man can dream, so this is what's out there waiting:
 
 ### [Debugger](./packages/debugger#readme)
 
 ###### `@solid-devtools/debugger`
 
-A runtime package, used to get information and track changes of the Solid's reactivity graph. It's a cornerstone of the rest of the packages.
+A runtime library, used to get information and track changes of the Solid's reactivity graph.
+It's a cornerstone of the rest of the packages.
 
 ### [Locator](./packages/locator#readme)
 
