@@ -1,16 +1,25 @@
 import { onCleanup } from "solid-js"
-import { getOwner, SignalState, SolidComputation, ValueUpdateListener } from "@shared/graph"
+import {
+	getOwner,
+	SignalState,
+	SolidComputation,
+	SolidRoot,
+	ValueUpdateListener,
+} from "@shared/graph"
+import { Owner } from "@shared/solid"
+import { skipInternalRoot } from "./utils"
 
-let windowAfterUpdatePatched = false
-const graphUpdateListeners = new Set<VoidFunction>()
+// AFTER UPDATE
 
-function patchWindowAfterUpdate() {
-	if (windowAfterUpdatePatched) return
-	const runListeners = () => graphUpdateListeners.forEach(f => f())
+const GraphUpdateListeners = new Set<VoidFunction>()
+
+// Patch window._$afterUpdate
+{
+	const runListeners = () => GraphUpdateListeners.forEach(f => f())
 	if (typeof window._$afterUpdate === "function") {
-		const prev = window._$afterUpdate
-		window._$afterUpdate = () => (prev(), runListeners())
-	} else window._$afterUpdate = runListeners
+		GraphUpdateListeners.add(window._$afterUpdate)
+	}
+	window._$afterUpdate = runListeners
 }
 
 /**
@@ -20,9 +29,37 @@ function patchWindowAfterUpdate() {
  * This will listen to all updates of the reactive graph — including ones outside of the <Debugger> component, and debugger internal computations.
  */
 export function makeSolidUpdateListener(onUpdate: VoidFunction): VoidFunction {
-	patchWindowAfterUpdate()
-	graphUpdateListeners.add(onUpdate)
-	const unsub = () => graphUpdateListeners.delete(onUpdate)
+	GraphUpdateListeners.add(onUpdate)
+	const unsub = () => GraphUpdateListeners.delete(onUpdate)
+	getOwner() && onCleanup(unsub)
+	return unsub
+}
+
+// AFTER CREATE ROOT
+
+export type AfterCrateRoot = (root: SolidRoot) => void
+
+const CreateRootListeners = new Set<AfterCrateRoot>()
+
+// Patch window._$afterCreateRoot
+{
+	const runListeners: AfterCrateRoot = root => {
+		if (skipInternalRoot()) return
+		CreateRootListeners.forEach(f => f(root))
+	}
+	if (typeof window._$afterCreateRoot === "function") {
+		CreateRootListeners.add(window._$afterCreateRoot)
+	}
+	window._$afterCreateRoot = runListeners as (root: Owner) => void
+}
+
+/**
+ * Runs the callback every time a new Solid Root is created.
+ * The listener is automatically cleaned-up on root dispose.
+ */
+export function makeCreateRootListener(onUpdate: AfterCrateRoot): VoidFunction {
+	CreateRootListeners.add(onUpdate)
+	const unsub = () => CreateRootListeners.delete(onUpdate)
 	getOwner() && onCleanup(unsub)
 	return unsub
 }

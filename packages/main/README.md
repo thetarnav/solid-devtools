@@ -24,22 +24,6 @@ yarn add solid-devtools
 pnpm add solid-devtools
 ```
 
-### Attaching Debugger to your application
-
-Currently you have to manually attach the debugger to the reactive graph of your application logic.
-
-[**Follow this guide of the debugger**](https://github.com/thetarnav/solid-devtools/tree/main/packages/debugger#attaching-debugger-to-your-application)
-
-```tsx
-import { attachDebugger } from "solid-devtools"
-
-// simply place the attachDebugger hook in the App component:
-function App() {
-  attachDebugger()
-  return <>...</>
-}
-```
-
 ### Using the locator package
 
 The `solid-devtools` package comes with the [Locator](https://github.com/thetarnav/solid-devtools/tree/main/packages/locator#readme) package included.

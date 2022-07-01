@@ -1,6 +1,5 @@
 /* @refresh reload */
 import { makeTimer } from "@solid-primitives/timer"
-import { attachDebugger } from "solid-devtools"
 import { debugOwnerComputations, debugOwnerSignals } from "@solid-devtools/logger"
 import {
 	Component,
@@ -41,14 +40,12 @@ createRoot(dispose => {
 		count()
 		if (count() === 1) {
 			createRoot(dispose => {
-				attachDebugger()
 				getOwner()!.name = "OUTSIDE_TEMP_ROOT"
 
 				createEffect(() => count() === 4 && dispose())
 
 				createRoot(_ => {
 					getOwner()!.name = "OUTSIDE_INSIDE_ROOT"
-					attachDebugger()
 					createEffect(() => count())
 				})
 			})
@@ -187,9 +184,7 @@ const App: Component = () => {
 					<Button onClick={() => setCount(p => ++p)} text={`Count: ${count()}`} />
 				</header>
 				<br />
-				<div>
-					<Show when={showEven()}>{count()} is even!</Show>
-				</div>
+				<div>{/* <Show when={showEven()}>{count()} is even!</Show> */}</div>
 				<p>Dispose application</p>
 				<button onClick={() => disposeApp()}>Dispose</button>
 				{/* <div>
@@ -200,11 +195,11 @@ const App: Component = () => {
 					</PassChildren>
 				</div> */}
 			</div>
-			{/* <obj.comp />
+			<obj.comp />
 			<button onClick={() => setRootCount(p => ++p)}>Update root count</button>
 			<button onClick={() => disposeOuterRoot()}>Dispose Outer Root</button>
 			<Article />
-			<Todos /> */}
+			<Todos />
 		</>
 	)
 }

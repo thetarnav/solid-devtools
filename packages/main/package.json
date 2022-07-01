@@ -63,7 +63,7 @@
 		"@solid-devtools/locator": "^0.5.0"
 	},
 	"peerDependencies": {
-		"solid-js": "^1.4.4"
+		"solid-js": "^1.4.5"
 	},
 	"optionalDependencies": {
 		"@solid-devtools/babel-plugin": "^0.2.0"

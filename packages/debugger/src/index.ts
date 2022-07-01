@@ -10,10 +10,12 @@ export { attachDebugger } from "./primitives"
 
 export {
 	makeSolidUpdateListener,
+	makeCreateRootListener,
 	observeComputationUpdate,
 	observeValueUpdate,
 	interceptComputationRerun,
 } from "./update"
+export type { AfterCrateRoot } from "./update"
 
 export {
 	getOwnerType,
@@ -28,6 +30,7 @@ export {
 	getFunctionSources,
 	getSafeValue,
 	createUnownedRoot,
+	createInternalRoot,
 } from "./utils"
 
 export const Debugger: ParentComponent = props => {

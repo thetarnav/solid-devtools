@@ -1,4 +1,5 @@
 import { getOwner, NodeType, SignalUpdatePayload } from "@shared/graph"
+import { UNNAMED } from "@shared/variables"
 import { createComputed, createEffect, createRoot, createSignal } from "solid-js"
 import type * as API from "../src/walker"
 
@@ -52,7 +53,7 @@ describe("walkSolidTree", () => {
 
 		expect(tree).toEqual({
 			id: 0,
-			name: "(anonymous)",
+			name: UNNAMED,
 			signals: [],
 			sources: [],
 			type: NodeType.Root,
@@ -109,7 +110,7 @@ describe("walkSolidTree", () => {
 
 		expect(tree).toEqual({
 			id: 0,
-			name: "(anonymous)",
+			name: UNNAMED,
 			sources: [],
 			type: NodeType.Root,
 			signals: [

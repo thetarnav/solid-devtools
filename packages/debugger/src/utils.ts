@@ -4,9 +4,10 @@ import {
 	createMemo,
 	createRoot,
 	createSignal,
+	onCleanup,
 	runWithOwner,
 } from "solid-js"
-import { AnyFunction, AnyObject, noop } from "@solid-primitives/utils"
+import { AnyFunction, AnyObject, noop, warn } from "@solid-primitives/utils"
 import {
 	DebuggerContext,
 	NodeType,
@@ -18,8 +19,9 @@ import {
 	getOwner,
 } from "@shared/graph"
 import { SafeValue } from "@shared/messanger"
-import { UNNAMED } from "@shared/variables"
+import { INTERNAL, UNNAMED } from "@shared/variables"
 import { trimString } from "@shared/utils"
+import { Owner, RootFunction } from "@shared/solid"
 
 export const isSolidComputation = (o: Readonly<SolidOwner>): o is SolidComputation => "fn" in o
 
@@ -27,7 +29,8 @@ export const isSolidMemo = (o: Readonly<SolidOwner>): o is SolidMemo => _isMemo(
 
 export const isSolidOwner = (o: Readonly<SolidOwner> | SolidSignal): o is SolidOwner => "owned" in o
 
-export const isSolidRoot = (o: Readonly<SolidOwner>): o is SolidRoot => !isSolidComputation(o)
+export const isSolidRoot = (o: Readonly<SolidOwner>): o is SolidRoot =>
+	o.sdtType === NodeType.Root || !isSolidComputation(o)
 
 const _isComponent = (o: Readonly<AnyObject>): boolean => "componentName" in o
 
@@ -98,7 +101,7 @@ export function findOwner(
 	return null
 }
 
-export function setDebuggerContext(owner: SolidOwner, ctx: DebuggerContext): void {
+export function setDebuggerContext(owner: SolidRoot, ctx: DebuggerContext): void {
 	owner.sdtContext = ctx
 }
 export function getDebuggerContext(owner: SolidOwner): DebuggerContext | undefined {
@@ -135,16 +138,25 @@ export function onParentCleanup(
 	return noop
 }
 
-export function onDispose<T>(fn: () => T, prepend = false): () => T {
+const DISPOSE_ID = Symbol("Dispose ID")
+export function onDispose<T>(
+	fn: () => T,
+	{ prepend = false, id }: { prepend?: boolean; id?: string | symbol } = {},
+): () => T {
 	const owner = getOwner()
 	if (!owner) {
-		console.warn("onDispose called outside of a reactive owner")
+		warn("onDispose called outside of a reactive owner")
 		return fn
 	}
 	// owner is a root
-	if (!owner.owner?.owned?.includes(owner)) onOwnerCleanup(owner, fn, prepend)
+	if (isSolidRoot(owner)) onOwnerCleanup(owner, fn, prepend)
 	// owner is a computation
-	else onOwnerCleanup(owner.owner, fn, prepend)
+	else if (owner.owner) {
+		if (id !== undefined && owner.owner.cleanups?.some(c => (c as any)[DISPOSE_ID] === id))
+			return fn
+		onOwnerCleanup(owner.owner, fn, prepend)
+		;(fn as any)[DISPOSE_ID] = id
+	}
 	return fn
 }
 
@@ -203,7 +215,25 @@ export function createConsumers(): [
 	needed: Accessor<boolean>,
 	addConsumer: (consumer: Accessor<boolean>) => void,
 ] {
-	const [consumers, setConsumers] = createSignal<Accessor<boolean>[]>([])
+	const [consumers, setConsumers] = createSignal<Accessor<boolean>[]>([], { name: "consumers" })
 	const enabled = createMemo<boolean>(() => consumers().some(consumer => consumer()))
 	return [enabled, consumer => setConsumers(p => [...p, consumer])]
+}
+
+let SkipInternalRoot: RootFunction<unknown> | null = null
+
+export function createInternalRoot<T>(fn: RootFunction<T>, detachedOwner?: Owner): T {
+	SkipInternalRoot = fn
+	const v = createRoot(dispose => {
+		const owner = getOwner() as SolidRoot
+		setDebuggerContext(owner, INTERNAL)
+		return fn(dispose)
+	}, detachedOwner)
+	if (SkipInternalRoot === fn) SkipInternalRoot = null
+	return v
+}
+export const skipInternalRoot = () => {
+	const skip = !!SkipInternalRoot
+	if (skip) SkipInternalRoot = null
+	return skip
 }
