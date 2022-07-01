@@ -1,10 +1,10 @@
-import { Accessor, createRoot, createSignal, getOwner, runWithOwner } from "solid-js"
+import { Accessor, createSignal, getOwner, runWithOwner } from "solid-js"
 import { createSimpleEmitter } from "@solid-primitives/event-bus"
 import { push, splice } from "@solid-primitives/immutable"
+import { createLazyMemo } from "@solid-primitives/memo"
 import { BatchUpdateListener, MappedComponent, MappedRoot, SerialisedTreeRoot } from "@shared/graph"
 import { makeBatchUpdateListener } from "./batchUpdates"
-import { createConsumers } from "./utils"
-import { createLazyMemo } from "@solid-primitives/memo"
+import { createConsumers, createInternalRoot } from "./utils"
 
 export type PluginFactory = (data: {
 	triggerUpdate: VoidFunction
@@ -20,7 +20,7 @@ export type PluginFactory = (data: {
 	trackComponents?: Accessor<boolean>
 }
 
-const api = createRoot(() => {
+const api = createInternalRoot(() => {
 	const owner = getOwner()!
 
 	/** throttled global update */

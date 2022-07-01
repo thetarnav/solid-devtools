@@ -1,6 +1,13 @@
 import { getOwner as _getOwner } from "solid-js"
 import { Many } from "@solid-primitives/utils"
 import { SafeValue, UpdateType } from "./messanger"
+import {
+	Owner as _Owner,
+	SignalState as _SignalState,
+	Computation as _Computation,
+	EffectFunction,
+} from "./solid"
+import { INTERNAL } from "./variables"
 
 export enum NodeType {
 	Component,
@@ -16,10 +23,6 @@ export enum NodeType {
 //
 // "Signal___" — owner/signals/etc. objects in the Solid's internal owner graph
 //
-
-type _Owner = import("solid-js/types/reactive/signal").Owner
-type _SignalState = import("solid-js/types/reactive/signal").SignalState<unknown>
-type _Computation = import("solid-js/types/reactive/signal").Computation<unknown>
 
 declare module "solid-js/types/reactive/signal" {
 	interface SignalState<T> {
@@ -55,10 +58,20 @@ export interface SolidRoot extends _Owner {
 	owner: SolidOwner | null
 	sourceMap?: Record<string, SolidSignal>
 	isDisposed?: boolean
+	// Used by the debugger
+	sdtAttached?: true
 	sdtContext?: DebuggerContext
+	// SolidComputation compatibility
+	value?: undefined
+	sources?: undefined
+	fn?: undefined
+	state?: undefined
+	sourceSlots?: undefined
+	updatedAt?: undefined
+	pure?: undefined
 }
 
-export interface SolidComputation extends _Computation, SolidRoot {
+export interface SolidComputation extends _Computation {
 	name: string
 	value: unknown
 	observers?: SolidComputation[] | null
@@ -66,6 +79,8 @@ export interface SolidComputation extends _Computation, SolidRoot {
 	owner: SolidOwner | null
 	sourceMap?: Record<string, SolidSignal>
 	sources: SolidSignal[] | null
+	// devtools:
+	sdtContext?: undefined
 }
 
 export interface SolidMemo extends SolidSignal, SolidComputation {
@@ -74,15 +89,17 @@ export interface SolidMemo extends SolidSignal, SolidComputation {
 	observers: SolidComputation[] | null
 }
 
-export type SolidOwner = (SolidComputation | SolidRoot) & Partial<SolidComputation>
+export type SolidOwner = SolidComputation | SolidRoot
 
 export const getOwner = _getOwner as () => SolidOwner | null
 
-export type DebuggerContext = {
-	rootId: number
-	triggerRootUpdate: VoidFunction
-	forceRootUpdate: VoidFunction
-}
+export type DebuggerContext =
+	| {
+			rootId: number
+			triggerRootUpdate: VoidFunction
+			forceRootUpdate: VoidFunction
+	  }
+	| typeof INTERNAL
 
 export type BatchedUpdate =
 	| {

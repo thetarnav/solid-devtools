@@ -11,7 +11,7 @@ import {
 } from "@shared/graph"
 import { ComputationUpdateHandler, SignalUpdateHandler } from "./batchUpdates"
 import {
-	getOwnerName,
+	getNodeName,
 	getSafeValue,
 	isSolidComputation,
 	markNodeID,
@@ -74,7 +74,7 @@ function mapMemo(mapped: MappedOwner, owner: SolidMemo): MappedOwner {
 function mapOwner(owner: SolidOwner, type?: NodeType): MappedOwner {
 	type = markOwnerType(owner, type)
 	const id = markNodeID(owner)
-	const name = getOwnerName(owner)
+	const name = getNodeName(owner)
 
 	observeComputation(owner, id)
 

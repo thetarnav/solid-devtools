@@ -1,6 +1,5 @@
 import { createEffect, createSignal, batch, For, Component } from "solid-js"
 import { createStore, SetStoreFunction, Store } from "solid-js/store"
-import { attachDebugger } from "solid-devtools"
 
 export function createLocalStore<T extends object>(
 	name: string,
@@ -25,7 +24,6 @@ const Todo: Component<{
 	onUpdate: (value: string) => void
 	onRemove: VoidFunction
 }> = props => {
-	attachDebugger()
 	return (
 		<div>
 			<input

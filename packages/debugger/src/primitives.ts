@@ -1,24 +1,28 @@
-import { createEffect, onCleanup, runWithOwner, untrack } from "solid-js"
+import { createEffect, onCleanup, untrack } from "solid-js"
 import { throttle } from "@solid-primitives/scheduled"
-import { createBranch } from "@solid-primitives/rootless"
-import { getOwner, NodeType, SolidOwner, SolidRoot } from "@shared/graph"
+import { DebuggerContext, getOwner, NodeType, SolidOwner, SolidRoot } from "@shared/graph"
 import { UpdateType } from "@shared/messanger"
 import { batchUpdate, ComputationUpdateHandler, SignalUpdateHandler } from "./batchUpdates"
 import { walkSolidTree } from "./walker"
 import {
 	addRootToOwnedRoots,
+	createInternalRoot,
 	getDebuggerContext,
 	getNewSdtId,
+	isSolidRoot,
 	markOwnerType,
 	onOwnerCleanup,
 	removeDebuggerContext,
 	setDebuggerContext,
 } from "./utils"
 import { enabled, debuggerConfig, onForceUpdate, onUpdate, updateRoot, removeRoot } from "./plugin"
+import { INTERNAL } from "@shared/variables"
 
 export function createGraphRoot(owner: SolidRoot): void {
 	// setup the debugger in a separate root, so that it doesn't walk and track itself
-	createBranch(() => {
+	createInternalRoot(dispose => {
+		onOwnerCleanup(owner, dispose)
+
 		const rootId = getNewSdtId()
 
 		const onComputationUpdate: ComputationUpdateHandler = payload => {
@@ -80,20 +84,18 @@ export function attachDebugger(_owner: SolidOwner | null = getOwner()): void {
 			"reatachOwner helper should be used synchronously inside createRoot callback body.",
 		)
 
-	forEachLookupRoot(owner, root => {
-		const ctx = getDebuggerContext(owner)
-
+	forEachLookupRoot(owner, (root, ctx) => {
+		root.sdtAttached = true
 		markOwnerType(root, NodeType.Root)
+
+		if (ctx === INTERNAL) return
 
 		// under an existing debugger root
 		if (ctx) {
 			ctx.triggerRootUpdate()
-
 			let parent = findClosestAliveParent(root)!
 			if (!parent.owner) return console.warn("PARENT_SHOULD_BE_ALIVE")
-
 			let removeFromOwned = addRootToOwnedRoots(parent.owner, root)
-
 			const onParentCleanup = () => {
 				const newParent = findClosestAliveParent(root)
 				if (newParent.owner) {
@@ -104,12 +106,10 @@ export function attachDebugger(_owner: SolidOwner | null = getOwner()): void {
 				} else {
 					removeFromOwned()
 					removeOwnCleanup()
-					runWithOwner(root, () => createGraphRoot(root))
+					createGraphRoot(root)
 				}
 			}
-
 			const removeParentCleanup = onOwnerCleanup(parent.root, onParentCleanup)
-
 			const removeOwnCleanup = onOwnerCleanup(root, () => {
 				root.isDisposed = true
 				removeFromOwned()
@@ -118,11 +118,9 @@ export function attachDebugger(_owner: SolidOwner | null = getOwner()): void {
 			})
 		}
 		// seperated from existing debugger roots
-		else runWithOwner(root, () => createGraphRoot(root))
+		else createGraphRoot(root)
 	})
 }
-
-const isOwnerTypeRoot = (o: SolidOwner): o is SolidRoot => o.sdtType === NodeType.Root || !o.owner
 
 /**
  * Searches for the closest alive parent of the given owner.
@@ -138,7 +136,7 @@ function findClosestAliveParent(
 	let current = owner
 	while (current.owner && !closestAliveRoot) {
 		current = current.owner
-		if (isOwnerTypeRoot(current)) {
+		if (isSolidRoot(current)) {
 			if (current.isDisposed) disposed = current
 			else closestAliveRoot = current
 		}
@@ -151,17 +149,33 @@ function findClosestAliveParent(
  * Run callback for each subroot/root from the tree root to the given owner.
  * The callback is run only for roots that haven't been handled before.
  */
-function forEachLookupRoot(owner: SolidOwner, callback: (root: SolidRoot) => void): void {
+function forEachLookupRoot(
+	owner: SolidOwner,
+	callback: (root: SolidRoot, ctx: DebuggerContext | undefined) => void,
+): void {
 	const roots: SolidRoot[] = []
+	let ctx: DebuggerContext | undefined
 	do {
 		// check if it's a root/subroot
-		if (owner.sdtType === NodeType.Root || !owner.owner || !owner.owner.owned?.includes(owner)) {
-			// skip already handled roots
-			if (owner.sdtType) break
+		if (isSolidRoot(owner)) {
+			// skip already handled and INTERNAL roots
+			if (owner.sdtAttached) {
+				if (!ctx) ctx = getDebuggerContext(owner)
+				break
+			}
+			if (owner.sdtContext === INTERNAL) {
+				ctx = INTERNAL
+				break
+			}
 			roots.push(owner as SolidRoot)
 		}
 		owner = owner.owner!
 	} while (owner)
 	// callback roots in downwards direction
-	for (let i = roots.length - 1; i >= 0; i--) callback(roots[i])
+	for (let i = roots.length - 1; i >= 0; i--) {
+		const root = roots[i]
+		callback(root, ctx)
+		// check if context was added during callback
+		if (root.sdtContext) ctx = root.sdtContext
+	}
 }
