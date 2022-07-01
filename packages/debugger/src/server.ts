@@ -1,5 +1,6 @@
 import { noop } from "@solid-primitives/utils"
 import { SolidComputation, SolidMemo, SolidOwner, SolidRoot } from "@shared/graph"
+import { UNNAMED } from "@shared/variables"
 import * as API from "./index"
 
 export { getSafeValue } from "./index"
@@ -19,8 +20,7 @@ export const interceptComputationRerun: typeof API.interceptComputationRerun = n
 // utils
 export const getOwnerType: typeof API.getOwnerType = () => 0
 export const getNodeType: typeof API.getNodeType = () => 0
-export const getOwnerName: typeof API.getOwnerName = () => "(anonymous)"
-export const getName: typeof API.getName = () => "(anonymous)"
+export const getNodeName: typeof API.getNodeName = () => UNNAMED
 export const isSolidComputation: typeof API.isSolidComputation = (o): o is SolidComputation => false
 export const isSolidMemo: typeof API.isSolidMemo = (o): o is SolidMemo => false
 export const isSolidOwner: typeof API.isSolidOwner = (o): o is SolidOwner => false

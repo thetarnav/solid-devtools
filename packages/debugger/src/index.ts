@@ -18,7 +18,7 @@ export {
 export {
 	getOwnerType,
 	getNodeType,
-	getOwnerName,
+	getNodeName,
 	isSolidComputation,
 	isSolidMemo,
 	isSolidOwner,
@@ -28,7 +28,6 @@ export {
 	getFunctionSources,
 	getSafeValue,
 	createUnownedRoot,
-	getName,
 } from "./utils"
 
 export const Debugger: ParentComponent = props => {

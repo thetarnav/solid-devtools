@@ -44,3 +44,9 @@ export const dedupeArray = <T>(array: readonly T[]) => Array.from(new Set(array)
 /** Checks if both arrays contain the same values. Order doesn't matter. */
 export const arrayRefEquals = <T>(a: readonly T[], b: readonly T[]) =>
 	a === b || (a.length === b.length && a.every(e => b.includes(e)))
+
+/** function that trims too long string */
+export function trimString(str: string, maxLength: number): string {
+	if (str.length <= maxLength) return str
+	return str.slice(0, maxLength) + "…"
+}

@@ -1,7 +1,7 @@
 // see https://developer.chrome.com/docs/devtools/console/format-style/
 // to gen a overview of how to style console messages
 
-import { getName, getNodeType, getOwnerType, isSolidMemo } from "@solid-devtools/debugger"
+import { getNodeName, getNodeType, getOwnerType, isSolidMemo } from "@solid-devtools/debugger"
 import { NodeType, SolidComputation, SolidOwner, SolidSignal } from "@shared/graph"
 import { dedupeArray } from "@shared/utils"
 
@@ -43,15 +43,6 @@ const styleTime = (time: number) => `\x1B[90;3m${time} ms\x1B[m`
 const getNameStyle = (type: NodeType): string =>
 	type === NodeType.Signal ? STYLES.signalUnderline : STYLES.grayBackground
 
-/** function that trims too long string */
-function trimString(str: string, maxLength: number): string {
-	if (str.length <= maxLength) return str
-	return str.slice(0, maxLength) + "…"
-}
-
-export const getDisplayName = (node: Readonly<SolidOwner | SolidSignal>): string =>
-	trimString(getName(node), 20)
-
 function getValueSpecifier(v: unknown) {
 	if (typeof v === "object") return " %o"
 	if (typeof v === "function") return " %O"
@@ -64,7 +55,7 @@ export function getNodeState(owner: SolidOwner | SolidSignal | NodeState): NodeS
 	return {
 		type,
 		typeName: NodeType[type],
-		name: getDisplayName(owner),
+		name: getNodeName(owner),
 	}
 }
 export function getNodeStateWithValue(
@@ -75,7 +66,7 @@ export function getNodeStateWithValue(
 	return {
 		type,
 		typeName: NodeType[type],
-		name: getDisplayName(owner),
+		name: getNodeName(owner),
 		value: owner.value,
 	}
 }
@@ -337,7 +328,7 @@ function logOwnersDiff<T extends SolidOwner>(
 
 	types.forEach(([owner, type]) => {
 		const mark = marks.get(owner)
-		const name = getDisplayName(owner)
+		const name = getNodeName(owner)
 		const label = (() => {
 			if (mark === "added")
 				return [
@@ -366,7 +357,7 @@ export function logOwnerList<T extends SolidOwner>(
 ): void {
 	const types = getPaddedOwnerTypes(owners)
 	types.forEach(([owner, type]) => {
-		const label = [`${inGray(type)} %c${getDisplayName(owner)}`, STYLES.grayBackground]
+		const label = [`${inGray(type)} %c${getNodeName(owner)}`, STYLES.grayBackground]
 		if (logGroup) {
 			console.groupCollapsed(...label)
 			logGroup(owner)

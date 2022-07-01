@@ -1,3 +1,11 @@
+import {
+	Accessor,
+	createComputed,
+	createMemo,
+	createRoot,
+	createSignal,
+	runWithOwner,
+} from "solid-js"
 import { AnyFunction, AnyObject, noop } from "@solid-primitives/utils"
 import {
 	DebuggerContext,
@@ -10,14 +18,8 @@ import {
 	getOwner,
 } from "@shared/graph"
 import { SafeValue } from "@shared/messanger"
-import {
-	Accessor,
-	createComputed,
-	createMemo,
-	createRoot,
-	createSignal,
-	runWithOwner,
-} from "solid-js"
+import { UNNAMED } from "@shared/variables"
+import { trimString } from "@shared/utils"
 
 export const isSolidComputation = (o: Readonly<SolidOwner>): o is SolidComputation => "fn" in o
 
@@ -36,15 +38,20 @@ const fnMatchesRefresh = (fn: AnyFunction): boolean =>
 	(fn + "").replace(/[\n\t]/g, "").replace(/ +/g, " ") ===
 	"() => { const c = source(); if (c) { return untrack(() => c(props)); } return undefined; }"
 
-export const getOwnerName = (owner: Readonly<SolidOwner>): string => {
+export function getOwnerName(owner: Readonly<SolidOwner>): string {
 	const { name, componentName: component } = owner
 	if (component && typeof component === "string")
 		return component.startsWith("_Hot$$") ? component.slice(6) : component
-	return name || "(anonymous)"
+	return name || UNNAMED
+}
+export function getSignalName(signal: Readonly<SolidSignal>): string {
+	return signal.name || UNNAMED
 }
 
-export const getName = (o: Readonly<SolidSignal | SolidOwner>) =>
-	isSolidOwner(o) ? getOwnerName(o) : o.name ?? "(unnamed)"
+export function getNodeName(o: Readonly<SolidSignal | SolidOwner>): string {
+	const name = isSolidOwner(o) ? getOwnerName(o) : getSignalName(o)
+	return trimString(name, 20)
+}
 
 export function getNodeType(o: Readonly<SolidSignal | SolidOwner>): NodeType {
 	if (isSolidOwner(o)) return getOwnerType(o)
