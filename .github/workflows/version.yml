@@ -1,6 +1,9 @@
 name: Version
 
-on: [workflow_dispatch]
+on:
+  push:
+    branches:
+      - main
 
 concurrency: ${{ github.workflow }}-${{ github.ref }}
 
@@ -33,4 +36,3 @@ jobs:
           version: pnpm run ci:version
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
