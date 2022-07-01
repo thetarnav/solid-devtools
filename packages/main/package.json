@@ -31,16 +31,31 @@
 	"module": "./dist/server.js",
 	"types": "./dist/index.d.ts",
 	"exports": {
-		"browser": {
-			"development": {
-				"import": "./dist/index.js",
-				"require": "./dist/index.cjs"
+		".": {
+			"browser": {
+				"development": {
+					"import": "./dist/index.js",
+					"require": "./dist/index.cjs"
+				},
+				"import": "./dist/server.js",
+				"require": "./dist/server.cjs"
 			},
 			"import": "./dist/server.js",
-			"require": "./dist/server.cjs"
+			"require": "./dist/server.cjs",
+			"types": "./dist/index.d.ts"
 		},
-		"import": "./dist/server.js",
-		"require": "./dist/server.cjs"
+		"./vite": {
+			"import": "./dist/vite.js",
+			"require": "./dist/vite.cjs",
+			"types": "./dist/vite.d.ts"
+		}
+	},
+	"typesVersions": {
+		"*": {
+			"vite": [
+				"./dist/vite.d.ts"
+			]
+		}
 	},
 	"scripts": {
 		"dev": "tsup --watch",
@@ -60,13 +75,11 @@
 	"dependencies": {
 		"@solid-devtools/debugger": "^0.2.0",
 		"@solid-devtools/extension-adapter": "^0.6.0",
-		"@solid-devtools/locator": "^0.6.0"
+		"@solid-devtools/locator": "^0.6.0",
+		"@solid-devtools/babel-plugin": "^0.2.0"
 	},
 	"peerDependencies": {
 		"solid-js": "^1.4.5"
-	},
-	"optionalDependencies": {
-		"@solid-devtools/babel-plugin": "^0.2.0"
 	},
 	"packageManager": "pnpm@7.3.0"
 }
