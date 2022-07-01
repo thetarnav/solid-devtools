@@ -219,11 +219,10 @@ importers:
       tsup: ^6.1.2
       typescript: ^4.7.4
     dependencies:
+      '@solid-devtools/babel-plugin': link:../babel-plugin
       '@solid-devtools/debugger': link:../debugger
       '@solid-devtools/extension-adapter': link:../extension-adapter
       '@solid-devtools/locator': link:../locator
-    optionalDependencies:
-      '@solid-devtools/babel-plugin': link:../babel-plugin
     devDependencies:
       '@testing-library/jest-dom': 5.16.4
       jest: 28.1.2_jbmz3vlfopghb5mdasddsdxfzq
@@ -5139,7 +5138,7 @@ packages:
     dev: true
 
   /ee-first/1.1.1:
-    resolution: {integrity: sha512-WMwm9LhRUo+WUaRN+vRuETqG89IgZphVSNkdFgeb6sS/E4OrDIN7t48CAewSHXc6C8lefD8KKfr5vY61brQlow==}
+    resolution: {integrity: sha1-WQxhFWsK4vTwJVcyoViyZrxWsh0=}
     dev: true
 
   /electron-to-chromium/1.4.139:
@@ -9338,7 +9337,7 @@ packages:
     dev: true
 
   /utils-merge/1.0.1:
-    resolution: {integrity: sha512-pMZTvIkT1d+TFGvDOqodOclx0QWkkgi6Tdoa8gC8ffGAAqz9pzPTZWAybbsHHoED/ztMtkv/VoYTYyShUn81hA==}
+    resolution: {integrity: sha1-n5VxD1CiZ5R7LMwSR0HBAoQn5xM=}
     engines: {node: '>= 0.4.0'}
     dev: true
 

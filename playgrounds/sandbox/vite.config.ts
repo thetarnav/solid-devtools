@@ -1,22 +1,23 @@
-import { defineConfig, PluginOption } from "vite"
+import { defineConfig } from "vite"
 import solidPlugin from "vite-plugin-solid"
-import { devtoolsPlugin } from "@solid-devtools/babel-plugin"
+import devtoolsPlugin from "solid-devtools/vite"
 import path from "path"
 
 const pathToPackages = path.resolve(__dirname, "..", "..", "packages")
+const resolvePackage = (...filepath: string[]) => path.resolve(pathToPackages, ...filepath)
 
 export default defineConfig({
-	plugins: [devtoolsPlugin(), solidPlugin() as PluginOption],
+	plugins: [devtoolsPlugin(), solidPlugin()],
 	resolve: {
 		alias: {
 			// used inside packages/debugger
-			"@shared": path.resolve(pathToPackages, "shared"),
-			"solid-devtools": path.resolve(pathToPackages, "main", "src"),
-			"@solid-devtools/debugger": path.resolve(pathToPackages, "debugger", "src"),
-			"@solid-devtools/logger": path.resolve(pathToPackages, "logger", "src"),
-			"@solid-devtools/ui": path.resolve(pathToPackages, "ui", "src"),
-			"@solid-devtools/locator": path.resolve(pathToPackages, "locator", "src"),
-			"@solid-devtools/extension-adapter": path.resolve(pathToPackages, "extension-adapter", "src"),
+			"@shared": resolvePackage("shared"),
+			"solid-devtools": resolvePackage("main", "src"),
+			"@solid-devtools/debugger": resolvePackage("debugger", "src"),
+			"@solid-devtools/logger": resolvePackage("logger", "src"),
+			"@solid-devtools/ui": resolvePackage("ui", "src"),
+			"@solid-devtools/locator": resolvePackage("locator", "src"),
+			"@solid-devtools/extension-adapter": resolvePackage("extension-adapter", "src"),
 		},
 	},
 	build: {
@@ -24,6 +25,6 @@ export default defineConfig({
 		polyfillDynamicImport: false,
 	},
 	optimizeDeps: {
-		exclude: ["@solid-devtools/babel-plugin"],
+		exclude: ["solid-devtools/vite"],
 	},
 })

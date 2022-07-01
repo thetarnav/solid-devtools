@@ -14,27 +14,33 @@ A runtime library for locating components on the page, and going to their source
 
 This module is built-in with [`solid-devtools`](https://github.com/thetarnav/solid-devtools/tree/main/packages/debugger#readme) package.
 
-To be able to use the _"open source code in IDE"_ feature, you need to install [`@solid-devtools/babel-plugin`](https://github.com/thetarnav/solid-devtools/tree/main/packages/babel-plugin#readme) additionally.
-
 ```bash
-# @solid-devtools/babel-plugin is optional
-
-npm i solid-devtools @solid-devtools/babel-plugin
+npm i solid-devtools
 # or
-yarn add solid-devtools @solid-devtools/babel-plugin
+yarn add solid-devtools
 # or
-pnpm i solid-devtools @solid-devtools/babel-plugin
+pnpm i solid-devtools
 ```
 
 ### Babel Plugin
 
-To be able to use the _"open source code in IDE"_ feature, you need to install and add [`@solid-devtools/babel-plugin`](https://github.com/thetarnav/solid-devtools/tree/main/packages/babel-plugin#readme) to vite plugins.
+To be able to use the _"open source code in IDE"_ feature, you need to add vite plugin to your `.vite.config.js` file:
 
-[**Follow the setup guide on it here**](https://github.com/thetarnav/solid-devtools/tree/main/packages/babel-plugin#Setup)
+```ts
+// vite.config.ts
+
+import { defineConfig } from "vite"
+import solidPlugin from "vite-plugin-solid"
+import devtoolsPlugin from "solid-devtools/vite"
+
+export default defineConfig({
+  plugins: [devtoolsPlugin(), solidPlugin()],
+})
+```
 
 ### Enable the Locator plugin
 
-The [`solid-devtools`](https://github.com/thetarnav/solid-devtools/tree/main/packages/debugger#readme) package comes with this placage installed. All you need to do is configure it by calling `useLocatorPlugin` with some options.
+The [`solid-devtools`](https://github.com/thetarnav/solid-devtools/tree/main/packages/main#readme) package comes together with the locator installed. All you need to do is configure it by calling `useLocatorPlugin` with some options.
 
 ```ts
 import { useLocatorPlugin } from "solid-devtools"
