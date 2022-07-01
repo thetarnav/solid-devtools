@@ -6,7 +6,7 @@
 	"contributors": [],
 	"dependencies": {
 		"@solid-primitives/utils": "^2.1.1",
-		"solid-js": "^1.4.4"
+		"solid-js": "^1.4.5"
 	},
 	"private": true
 }

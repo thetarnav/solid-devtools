@@ -31,9 +31,9 @@
 	},
 	"devDependencies": {
 		"@solid-devtools/babel-plugin": "^0.2.0",
-		"esbuild": "^0.14.47",
+		"esbuild": "^0.14.48",
 		"esbuild-plugin-solid": "^0.4.2",
-		"solid-js": "^1.4.4",
+		"solid-js": "^1.4.5",
 		"tsup": "^6.1.2",
 		"typescript": "^4.7.4"
 	},
