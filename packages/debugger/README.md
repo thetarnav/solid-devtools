@@ -20,9 +20,25 @@ yarn add @solid-devtools/debugger
 pnpm add @solid-devtools/debugger
 ```
 
-### Attaching Debugger to your application
+### Automatically Attaching Debugger
 
-Currently you have to manually attach the debugger to the reactive graph of your application logic. You can do that with one of the two primitives:
+[In Solid version `1.4.5`, a `_$afterCreateRoot` dev hook was added](https://github.com/solidjs/solid/pull/1067) to allow for automatic attaching of the debugger.
+
+That means that you can use the debugger in your Solid apps without having to manually attach it to every root or the reactive graph in your application. To enable automatic attaching, you need to add the following code to the entry point of your app:
+
+[**If you use `solid-devtools` package, this is already handled for you!**](https://github.com/thetarnav/solid-devtools/tree/main/packages/main)
+
+```ts
+import { attachDebugger, makeCreateRootListener } from "@solid-devtools/debugger"
+
+makeCreateRootListener(root => attachDebugger(root))
+```
+
+### Manually Attaching Debugger
+
+If you don't want to automatically attach debugger, it can be done manually. It will give you the freedom to attach debugger to any root you choose.
+
+To do so you need to import the debugger package and use one of the two primitives:
 
 #### `attachDebugger`
 
@@ -62,13 +78,17 @@ render(
 )
 ```
 
-### Reattaching sub roots back to the tree
+#### Reattaching sub roots back to the tree
 
-Solid doesn't attach roots created with `createRoot` to it's detached parent, so the debugger has no way of reaching it. To reattach this root back to the tree tracked by the debugger — simply put another `attachDebugger` call inside it.
+If you choose to attach debugger manually, you have to do that with every sub root, even if it is theoretically a part of existing and attached tree. This is because Solid doesn't attach roots created with `createRoot` to it's detached parent, so the debugger has no way of reaching it. To reattach this root back to the tree tracked by the debugger — simply put another `attachDebugger` call inside it.
 
 [More in this issue](https://github.com/thetarnav/solid-devtools/issues/15)
 
 This also will be necessary when using components that use `createRoot` internally, like `<For>`, `<Index>` or `<Suspense>`.
+
+> **Note**
+> This applies only when you are attaching roots manually.
+> For automatic attaching, this is already handled.
 
 ```tsx
 <For each={list()}>
