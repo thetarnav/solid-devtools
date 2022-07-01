@@ -6,8 +6,9 @@ import {
 	createMemo,
 	createRenderEffect,
 	createRoot,
+	createSignal,
 } from "solid-js"
-import { getOwnerType } from "../src/utils"
+import { getFunctionSources, getOwnerType, onDispose } from "../src/utils"
 
 describe("getOwnerType", () => {
 	it("identifies Component", () => {
@@ -47,5 +48,43 @@ describe("getOwnerType", () => {
 		createRoot(dispose => {
 			expect(getOwnerType(getOwner()!)).toBe(NodeType.Root)
 			dispose()
+		}))
+})
+
+describe("getFunctionSources", () => {
+	it("returns the sources of a function", () =>
+		createRoot(dispose => {
+			const [c] = createSignal(0)
+			const m = createMemo(c)
+
+			const owner = getOwner()!
+			const cNode = Object.values(owner.sourceMap!)[0]
+			const mNode = owner.owned![0]
+
+			const sources = getFunctionSources(() => {
+				c()
+				m()
+			})
+
+			expect(sources).toEqual([cNode, mNode])
+			dispose()
+		}))
+})
+
+describe("onDispose", () => {
+	it("call callback on dispose, not cleanup", () =>
+		createRoot(dispose => {
+			let calls = 0
+			const [c, setC] = createSignal(0)
+			createComputed(() => {
+				c()
+				onDispose(() => calls++, { id: "123" })
+			})
+
+			setC(1)
+			expect(calls).toBe(0)
+
+			dispose()
+			expect(calls).toBe(1)
 		}))
 })

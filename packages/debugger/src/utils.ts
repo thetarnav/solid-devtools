@@ -4,10 +4,10 @@ import {
 	createMemo,
 	createRoot,
 	createSignal,
+	onCleanup,
 	runWithOwner,
 } from "solid-js"
-import { AnyFunction, AnyObject, noop } from "@solid-primitives/utils"
-import { createBranch } from "@solid-primitives/rootless"
+import { AnyFunction, AnyObject, noop, warn } from "@solid-primitives/utils"
 import {
 	DebuggerContext,
 	NodeType,
@@ -138,17 +138,25 @@ export function onParentCleanup(
 	return noop
 }
 
-export function onDispose<T>(fn: () => T, prepend = false): () => T {
+const DISPOSE_ID = Symbol("Dispose ID")
+export function onDispose<T>(
+	fn: () => T,
+	{ prepend = false, id }: { prepend?: boolean; id?: string | symbol } = {},
+): () => T {
 	const owner = getOwner()
 	if (!owner) {
-		console.warn("onDispose called outside of a reactive owner")
+		warn("onDispose called outside of a reactive owner")
 		return fn
 	}
 	// owner is a root
 	if (isSolidRoot(owner)) onOwnerCleanup(owner, fn, prepend)
 	// owner is a computation
-	else if ((owner as SolidComputation).owner)
-		onOwnerCleanup((owner as SolidComputation).owner!, fn, prepend)
+	else if (owner.owner) {
+		if (id !== undefined && owner.owner.cleanups?.some(c => (c as any)[DISPOSE_ID] === id))
+			return fn
+		onOwnerCleanup(owner.owner, fn, prepend)
+		;(fn as any)[DISPOSE_ID] = id
+	}
 	return fn
 }
 

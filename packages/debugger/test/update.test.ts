@@ -1,10 +1,12 @@
-import { getOwner } from "@shared/graph"
+import { getOwner, SolidRoot } from "@shared/graph"
 import { createComputed, createRoot, createSignal } from "solid-js"
 import {
 	interceptComputationRerun,
 	makeSolidUpdateListener,
+	makeCreateRootListener,
 	observeValueUpdate,
 } from "../src/update"
+import { createInternalRoot } from "../src/utils"
 
 describe("makeSolidUpdateListener", () => {
 	it("listens to solid updates", () =>
@@ -28,6 +30,30 @@ describe("makeSolidUpdateListener", () => {
 					})
 				})
 			})
+		}))
+})
+
+describe("makeCreateRootListener", () => {
+	it("listens to new roots", () =>
+		createRoot(dispose => {
+			const captured: SolidRoot[] = []
+			makeCreateRootListener(root => captured.push(root))
+
+			const o = createRoot(f => {
+				const o = getOwner()
+				f()
+				return o
+			})
+			expect(captured.length).toBe(1)
+			expect(captured[0]).toBe(o)
+
+			createInternalRoot(f => f())
+			expect(captured.length).toBe(1)
+
+			dispose()
+
+			createRoot(f => f())
+			expect(captured.length).toBe(1)
 		}))
 })
 
