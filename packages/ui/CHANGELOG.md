@@ -1,5 +1,11 @@
 # @solid-devtools/ui
 
+## 0.3.1
+
+### Patch Changes
+
+- 24ccd14: Use Solid's new dev hook (`_$afterCreateRoot`) to automatically attach roots and subroots to the debugger.
+
 ## 0.3.0
 
 ### Minor Changes
