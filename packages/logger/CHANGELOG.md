@@ -1,5 +1,15 @@
 # @solid-devtools/logger
 
+## 0.1.3
+
+### Patch Changes
+
+- 24ccd14: Use Solid's new dev hook (`_$afterCreateRoot`) to automatically attach roots and subroots to the debugger.
+- 892d87e: Cleanup getName utils
+- Updated dependencies [24ccd14]
+- Updated dependencies [892d87e]
+  - @solid-devtools/debugger@0.2.0
+
 ## 0.1.2
 
 ### Patch Changes

@@ -1,6 +1,6 @@
 {
 	"name": "solid-devtools-extension",
-	"version": "0.2.0",
+	"version": "0.2.1",
 	"private": true,
 	"license": "MIT",
 	"author": "Damian Tarnawski <gthetarnav@gmail.com>",
@@ -21,7 +21,7 @@
 		"vite-plugin-solid": "^2.2.6"
 	},
 	"dependencies": {
-		"@solid-devtools/ui": "0.3.0",
+		"@solid-devtools/ui": "0.3.1",
 		"@solid-primitives/context": "^0.1.0",
 		"@solid-primitives/immutable": "^0.1.0",
 		"@solid-primitives/rootless": "^1.1.0",
