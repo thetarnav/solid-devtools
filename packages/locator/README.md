@@ -32,26 +32,6 @@ To be able to use the _"open source code in IDE"_ feature, you need to install a
 
 [**Follow the setup guide on it here**](https://github.com/thetarnav/solid-devtools/tree/main/packages/babel-plugin#Setup)
 
-### Debugger
-
-Wrap your application with the [`<Debugger>`](https://github.com/thetarnav/solid-devtools/tree/main/packages/debugger#debugger) component, or use the [`attachDebugger`](https://github.com/thetarnav/solid-devtools/tree/main/packages/debugger#attachDebugger) hook to attach the debugger to your application.
-
-[**Follow the setup guide on it here**](https://github.com/thetarnav/solid-devtools/tree/main/packages/babel-plugin#Usage-Guide)
-
-```tsx
-import { render } from "solid-js/web"
-import { Debugger } from "solid-devtools"
-
-render(
-  () => (
-    <Debugger>
-      <App />
-    </Debugger>
-  ),
-  document.getElementById("root")!,
-)
-```
-
 ### Enable the Locator plugin
 
 The [`solid-devtools`](https://github.com/thetarnav/solid-devtools/tree/main/packages/debugger#readme) package comes with this placage installed. All you need to do is configure it by calling `useLocatorPlugin` with some options.
