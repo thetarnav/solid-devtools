@@ -12,7 +12,7 @@ A runtime library for locating components on the page, and going to their source
 
 ### Installation
 
-This module is built-in with [`solid-devtools`](https://github.com/thetarnav/solid-devtools/tree/main/packages/debugger#readme) package.
+This module is built-in with [`solid-devtools`](https://github.com/thetarnav/solid-devtools/tree/main/packages/main#readme) package.
 
 ```bash
 npm i solid-devtools
