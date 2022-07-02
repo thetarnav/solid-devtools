@@ -1,5 +1,11 @@
 # @solid-devtools/locator
 
+## 0.7.0
+
+### Patch Changes
+
+- 092b850: Export vite plugin from the main package.
+
 ## 0.6.0
 
 ### Patch Changes
