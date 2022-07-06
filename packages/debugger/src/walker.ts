@@ -78,8 +78,8 @@ function mapOwner(owner: SolidOwner, type?: NodeType): MappedOwner {
 
 	observeComputation(owner, id)
 
-	if (type === NodeType.Component && TrackComponents && typeof owner.value === "function") {
-		const resolved = resolveElements(owner.value())
+	if (type === NodeType.Component && TrackComponents) {
+		const resolved = resolveElements(owner.value)
 		if (resolved) Components.push({ name, resolved })
 	}
 
