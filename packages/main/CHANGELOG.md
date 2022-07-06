@@ -1,5 +1,14 @@
 # solid-devtools
 
+## 0.7.1
+
+### Patch Changes
+
+- aa992fd: Fix walker issue, not resolving component elements sometimes
+- Updated dependencies [aa992fd]
+  - @solid-devtools/debugger@0.2.1
+  - @solid-devtools/locator@0.7.1
+
 ## 0.7.0
 
 ### Minor Changes

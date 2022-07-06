@@ -1,5 +1,11 @@
 # @solid-devtools/debugger
 
+## 0.2.1
+
+### Patch Changes
+
+- aa992fd: Fix walker issue, not resolving component elements sometimes
+
 ## 0.2.0
 
 ### Minor Changes
