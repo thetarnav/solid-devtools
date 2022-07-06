@@ -143,7 +143,7 @@ importers:
   packages/locator:
     specifiers:
       '@solid-devtools/babel-plugin': ^0.2.0
-      '@solid-devtools/debugger': ^0.2.0
+      '@solid-devtools/debugger': ^0.2.1
       '@solid-devtools/ui': 0.3.1
       '@solid-primitives/bounds': ^0.0.100
       '@solid-primitives/event-listener': ^2.2.0
@@ -208,9 +208,9 @@ importers:
   packages/main:
     specifiers:
       '@solid-devtools/babel-plugin': ^0.2.0
-      '@solid-devtools/debugger': ^0.2.0
+      '@solid-devtools/debugger': ^0.2.1
       '@solid-devtools/extension-adapter': ^0.6.0
-      '@solid-devtools/locator': ^0.7.0
+      '@solid-devtools/locator': ^0.7.1
       '@testing-library/jest-dom': ^5.16.4
       jest: ^28.1.2
       jest-environment-jsdom: ^28.1.2
@@ -294,7 +294,7 @@ importers:
 
   playgrounds/clock:
     specifiers:
-      solid-devtools: ^0.7.0
+      solid-devtools: ^0.7.1
       solid-js: ^1.4.5
       typescript: ^4.7.4
       vite: ^2.9.13
@@ -312,7 +312,7 @@ importers:
       '@solid-devtools/babel-plugin': ^0.2.0
       '@solid-devtools/logger': ^0.1.3
       '@solid-primitives/timer': ^1.3.1
-      solid-devtools: ^0.7.0
+      solid-devtools: ^0.7.1
       solid-js: ^1.4.5
       typescript: ^4.7.4
       vite: ^2.9.13
@@ -333,7 +333,7 @@ importers:
       '@solid-devtools/babel-plugin': ^0.2.0
       '@solid-devtools/logger': ^0.1.3
       solid-app-router: ^0.4.1
-      solid-devtools: ^0.7.0
+      solid-devtools: ^0.7.1
       solid-js: ^1.4.5
       solid-meta: ^0.27.5
       solid-start: next
