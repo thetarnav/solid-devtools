@@ -47,7 +47,7 @@
 	},
 	"dependencies": {
 		"@solid-primitives/utils": "^2.1.1",
-		"solid-js": "^1.4.5",
+		"solid-js": "^1.4.7",
 		"solid-meta": "^0.27.5",
 		"twind": "^0.16.17"
 	},

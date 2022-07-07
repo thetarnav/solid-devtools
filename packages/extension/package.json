@@ -26,7 +26,7 @@
 		"@solid-primitives/immutable": "^0.1.0",
 		"@solid-primitives/rootless": "^1.1.0",
 		"@solid-primitives/utils": "^2.1.1",
-		"solid-js": "^1.4.5",
+		"solid-js": "^1.4.7",
 		"twind": "^0.16.17"
 	},
 	"packageManager": "pnpm@7.3.0"
