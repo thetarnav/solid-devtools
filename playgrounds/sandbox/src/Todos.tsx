@@ -59,6 +59,10 @@ const Todos: Component = () => {
 		})
 	}
 
+	setTimeout(() => {
+		setTodos(0, Math.random() + "", "hello")
+	}, 1000)
+
 	return (
 		<>
 			<h3>Simple Todos Example</h3>

@@ -1,5 +1,5 @@
-import { Accessor, onCleanup, $PROXY, untrack } from "solid-js"
-import { asArray, Many } from "@solid-primitives/utils"
+import { Accessor, onCleanup, $PROXY, untrack, createEffect } from "solid-js"
+import { arrayEquals, asArray, Many } from "@solid-primitives/utils"
 import {
 	getOwnerType,
 	isSolidComputation,
@@ -30,7 +30,6 @@ import {
 	getNameStyle,
 	inGray,
 	getValueSpecifier,
-	createAlignedTextWidth,
 	paddedForEach,
 } from "./log"
 
@@ -487,5 +486,33 @@ export function debugProps(props: Record<string, unknown>): void {
 			},
 		)
 		console.groupEnd()
+	}
+
+	if (isProxy) {
+		let prevKeys: string[]
+		createEffect(() => {
+			const keys = Object.keys(props)
+			if (!prevKeys) return (prevKeys = keys)
+			if (arrayEquals(keys, prevKeys)) return
+			prevKeys = keys
+
+			descriptors = Object.entries(Object.getOwnPropertyDescriptors(props))
+			if (descriptors.length === 0) {
+				console.log(`Dynamic props of %c${name}%c are empty now`, getNameStyle(type), "")
+			} else {
+				console.group(`Dynamic props of %c${name}%c updated keys:`, getNameStyle(type), "")
+				paddedForEach(
+					descriptors,
+					([, desc]) => (desc.get ? "Getter" : "Value"),
+					(type, [name, desc]) => {
+						const value = untrack(() => (desc.get ? desc.get.call(props) : desc.value))
+						console.log(`${inGray(type)} ${name} ${inGray("=")}${getValueSpecifier(value)}`, value)
+					},
+				)
+				console.groupEnd()
+			}
+		})
+		// const s = getFunctionSources(() => (props as any)[SYMBOL])
+		// console.log(s)
 	}
 }
