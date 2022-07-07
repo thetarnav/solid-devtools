@@ -20,7 +20,7 @@
 		"devtools"
 	],
 	"private": true,
-	"sideEffects": true,
+	"sideEffects": false,
 	"type": "module",
 	"files": [
 		"dist"

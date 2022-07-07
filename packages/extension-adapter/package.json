@@ -21,7 +21,7 @@
 		"vscode"
 	],
 	"private": false,
-	"sideEffects": true,
+	"sideEffects": false,
 	"type": "module",
 	"files": [
 		"dist"

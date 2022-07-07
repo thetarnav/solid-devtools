@@ -21,7 +21,7 @@
 		"debugger"
 	],
 	"private": false,
-	"sideEffects": true,
+	"sideEffects": false,
 	"publishConfig": {
 		"access": "public"
 	},
