@@ -1,3 +1,4 @@
+import { debugProps } from "@solid-devtools/logger"
 import { createEffect, createSignal, batch, For, Component } from "solid-js"
 import { createStore, SetStoreFunction, Store } from "solid-js/store"
 
@@ -24,6 +25,8 @@ const Todo: Component<{
 	onUpdate: (value: string) => void
 	onRemove: VoidFunction
 }> = props => {
+	debugProps(props)
+
 	return (
 		<div>
 			<input

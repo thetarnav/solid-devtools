@@ -21,6 +21,7 @@ export {
 	getOwnerType,
 	getNodeType,
 	getNodeName,
+	lookupOwner,
 	isSolidComputation,
 	isSolidMemo,
 	isSolidOwner,

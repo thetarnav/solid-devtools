@@ -1,5 +1,4 @@
-import type { SignalState, Owner } from "solid-js/types/reactive/signal"
-import { Accessor, onCleanup } from "solid-js"
+import { Accessor, onCleanup, $PROXY, untrack } from "solid-js"
 import { asArray, Many } from "@solid-primitives/utils"
 import {
 	getOwnerType,
@@ -10,7 +9,9 @@ import {
 	makeSolidUpdateListener,
 	isSolidMemo,
 	interceptComputationRerun,
+	lookupOwner,
 } from "@solid-devtools/debugger"
+import { SignalState, Owner } from "@shared/solid"
 import { getOwner, NodeType, SolidComputation, SolidOwner, SolidSignal } from "@shared/graph"
 import { dedupeArray, arrayRefEquals } from "@shared/utils"
 import {
@@ -26,6 +27,11 @@ import {
 	logSignalValueUpdate,
 	UNUSED,
 	NodeStateWithValue,
+	getNameStyle,
+	inGray,
+	getValueSpecifier,
+	createAlignedTextWidth,
+	paddedForEach,
 } from "./log"
 
 declare module "solid-js/types/reactive/signal" {
@@ -39,6 +45,9 @@ declare module "solid-js/types/reactive/signal" {
 	}
 }
 
+/**
+ * For measuring the time elapsed. Returns a function that will return the time elapsed since it's last call.
+ * */
 function makeTimeMeter(): () => number {
 	let last = performance.now()
 	return () => {
@@ -49,13 +58,15 @@ function makeTimeMeter(): () => number {
 	}
 }
 
+const isSolidProxy = (o: any): boolean => !!o[$PROXY]
+
 /**
  * @returns true if the node was marked before
  */
 function markDebugNode(o: Owner, type: "computation" | "signals" | "owned"): true | VoidFunction
-function markDebugNode(o: SignalState<any>): true | VoidFunction
+function markDebugNode(o: SignalState): true | VoidFunction
 function markDebugNode(
-	o: Owner | SignalState<any>,
+	o: Owner | SignalState,
 	type?: "computation" | "signals" | "owned",
 ): true | VoidFunction {
 	let property: "$debug" | "$debugSignals" | "$debugOwned" | "$debugSignal"
@@ -219,9 +230,10 @@ export function debugOwnerComputations(_owner?: Owner): void {
 	if (marked === true) return
 	onCleanup(marked)
 
-	const { type, typeName, name } =
-		// for solid-refresh HMR memos, return the owned component
-		getOwnerType(owner) === NodeType.Refresh ? getNodeState(owner.owner!) : getNodeState(owner)
+	// for solid-refresh HMR memos, return the owned component
+	const { type, typeName, name } = getNodeState(
+		lookupOwner(owner, o => getOwnerType(o) !== NodeType.Refresh)!,
+	)
 
 	let prevOwned: SolidComputation[] = []
 
@@ -270,7 +282,7 @@ export interface DebugSignalOptions {
  * ```
  */
 export function debugSignal(
-	source: Accessor<unknown> | SignalState<unknown>,
+	source: Accessor<unknown> | SignalState,
 	options: DebugSignalOptions = {},
 ): void {
 	let signal: SolidSignal
@@ -357,7 +369,7 @@ export function debugSignal(
  * ```
  */
 export function debugSignals(
-	source: Many<Accessor<unknown>> | SignalState<unknown>[],
+	source: Many<Accessor<unknown>> | SignalState[],
 	options: DebugSignalOptions = {},
 ): void {
 	let signals: SolidSignal[] = []
@@ -439,4 +451,41 @@ export function debugOwnerSignals(owner?: Owner, options: DebugSignalOptions = {
 
 		debugSignals(signals, options)
 	})
+}
+
+export function debugProps(props: Record<string, unknown>): void {
+	const owner = getOwner()
+	if (!owner) return console.warn("debugProps should be used synchronously inside a component")
+
+	// for solid-refresh HMR memos, return the owned component
+	const { type, typeName, name } = getNodeState(
+		lookupOwner(owner, o => getOwnerType(o) !== NodeType.Refresh)!,
+	)
+	const isProxy = isSolidProxy(props)
+
+	let descriptors = Object.entries(Object.getOwnPropertyDescriptors(props))
+	if (descriptors.length === 0) {
+		console.log(
+			`%c${typeName} %c${name}%c called with empty ${isProxy ? "dynamic " : ""}props`,
+			"",
+			getNameStyle(type),
+			"",
+		)
+	} else {
+		console.group(
+			`%c${typeName} %c${name}%c called with ${isProxy ? "dynamic " : ""}props:`,
+			"",
+			getNameStyle(type),
+			"",
+		)
+		paddedForEach(
+			descriptors,
+			([, desc]) => (desc.get ? "Getter" : "Value"),
+			(type, [name, desc]) => {
+				const value = untrack(() => (desc.get ? desc.get.call(props) : desc.value))
+				console.log(`${inGray(type)} ${name} ${inGray("=")}${getValueSpecifier(value)}`, value)
+			},
+		)
+		console.groupEnd()
+	}
 }

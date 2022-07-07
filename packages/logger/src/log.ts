@@ -29,7 +29,7 @@ export type ComputationState = {
 	causedBy: NodeStateWithValue[] | null
 }
 
-const STYLES = {
+export const STYLES = {
 	bold: "font-weight: bold; font-size: 1.1em;",
 	ownerName:
 		"font-weight: bold; font-size: 1.1em; background: rgba(153, 153, 153, 0.3); padding: 0.1em 0.3em; border-radius: 4px;",
@@ -37,13 +37,13 @@ const STYLES = {
 	signalUnderline: "text-decoration: orange wavy underline;",
 }
 
-const inGray = (text: unknown) => `\x1B[90m${text}\x1B[m`
-const styleTime = (time: number) => `\x1B[90;3m${time} ms\x1B[m`
+export const inGray = (text: unknown) => `\x1B[90m${text}\x1B[m`
+export const styleTime = (time: number) => `\x1B[90;3m${time} ms\x1B[m`
 
-const getNameStyle = (type: NodeType): string =>
+export const getNameStyle = (type: NodeType): string =>
 	type === NodeType.Signal ? STYLES.signalUnderline : STYLES.grayBackground
 
-function getValueSpecifier(v: unknown) {
+export function getValueSpecifier(v: unknown) {
 	if (typeof v === "object") return " %o"
 	if (typeof v === "function") return " %O"
 	return ""
@@ -69,6 +69,28 @@ export function getNodeStateWithValue(
 		name: getNodeName(owner),
 		value: owner.value,
 	}
+}
+
+export function createAlignedTextWidth<T extends string>(): [
+	getPaddedText: (text: string) => T,
+	updateWidth: (text: string) => number,
+] {
+	let width = 0
+	return [text => text.padEnd(width) as T, text => (width = Math.max(text.length, width))]
+}
+
+export function paddedForEach<T, I extends string>(
+	list: readonly T[],
+	getPaddedValue: (item: T, index: number) => I,
+	callback: (paddedValue: I, item: T, index: number) => void,
+): void {
+	const [getPaddedText, updateWidth] = createAlignedTextWidth<I>()
+	const mapped: [T, I][] = list.map((item, index) => {
+		const paddedValue = getPaddedValue(item, index)
+		updateWidth(paddedValue)
+		return [item, paddedValue]
+	})
+	mapped.forEach(([item, paddedValue], index) => callback(getPaddedText(paddedValue), item, index))
 }
 
 export const getComputationCreatedLabel = (
@@ -241,21 +263,6 @@ export function logSignalValueUpdate(
 	console.groupEnd()
 }
 
-function getPaddedOwnerTypes<T extends SolidOwner>(
-	owners: readonly T[],
-): [owner: T, type: string][] {
-	let typeLength = 0
-	const types: [owner: T, type: string][] = []
-	if (!owners.length) []
-	owners.forEach(owner => {
-		const typeName = NodeType[getOwnerType(owner)]
-		typeLength = Math.max(typeName.length, typeLength)
-		types.push([owner, typeName])
-	})
-	types.forEach(pair => (pair[1] = pair[1].padEnd(typeLength)))
-	return types
-}
-
 function logCausedUpdates(observers: SolidComputation[]): void {
 	if (!observers.length) return
 	console.groupCollapsed(inGray("Caused Updates:"), observers.length)
@@ -324,44 +331,50 @@ function logOwnersDiff<T extends SolidOwner>(
 ): void {
 	const [marks, owners] =
 		diff === "thorow" ? getThorowOwnersDiff(from, to) : getStackOwnersDiff(from, to)
-	const types = getPaddedOwnerTypes(owners)
 
-	types.forEach(([owner, type]) => {
-		const mark = marks.get(owner)
-		const name = getNodeName(owner)
-		const label = (() => {
-			if (mark === "added")
-				return [
-					`${inGray(type)} %c${name}%c  new`,
-					STYLES.grayBackground,
-					"color: orange; font-style: italic",
-				]
-			if (mark === "removed")
-				return [
-					`${inGray(type)} %c${name}`,
-					"background: rgba(153, 153, 153, 0.15); padding: 0 0.2em; border-radius: 4px; text-decoration: line-through; color: #888",
-				]
-			return [`${inGray(type)} %c${name}`, STYLES.grayBackground]
-		})()
-		if (logGroup) {
-			console.groupCollapsed(...label)
-			logGroup(owner)
-			console.groupEnd()
-		} else console.log(...label)
-	})
+	paddedForEach(
+		owners,
+		owner => NodeType[getOwnerType(owner)],
+		(type, owner) => {
+			const mark = marks.get(owner)
+			const name = getNodeName(owner)
+			const label = (() => {
+				if (mark === "added")
+					return [
+						`${inGray(type)} %c${name}%c  new`,
+						STYLES.grayBackground,
+						"color: orange; font-style: italic",
+					]
+				if (mark === "removed")
+					return [
+						`${inGray(type)} %c${name}`,
+						"background: rgba(153, 153, 153, 0.15); padding: 0 0.2em; border-radius: 4px; text-decoration: line-through; color: #888",
+					]
+				return [`${inGray(type)} %c${name}`, STYLES.grayBackground]
+			})()
+			if (logGroup) {
+				console.groupCollapsed(...label)
+				logGroup(owner)
+				console.groupEnd()
+			} else console.log(...label)
+		},
+	)
 }
 
 export function logOwnerList<T extends SolidOwner>(
 	owners: readonly T[],
 	logGroup?: (owner: T) => void,
 ): void {
-	const types = getPaddedOwnerTypes(owners)
-	types.forEach(([owner, type]) => {
-		const label = [`${inGray(type)} %c${getNodeName(owner)}`, STYLES.grayBackground]
-		if (logGroup) {
-			console.groupCollapsed(...label)
-			logGroup(owner)
-			console.groupEnd()
-		} else console.log(...label)
-	})
+	paddedForEach(
+		owners,
+		owner => NodeType[getOwnerType(owner)],
+		(type, owner) => {
+			const label = [`${inGray(type)} %c${getNodeName(owner)}`, STYLES.grayBackground]
+			if (logGroup) {
+				console.groupCollapsed(...label)
+				logGroup(owner)
+				console.groupEnd()
+			} else console.log(...label)
+		},
+	)
 }
