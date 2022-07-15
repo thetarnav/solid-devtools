@@ -5,7 +5,7 @@
 	"license": "MIT",
 	"author": "Damian Tarnawski <gthetarnav@gmail.com>",
 	"contributors": [],
-	"homepage": "https://github.com/thetarnav/solid-devtools#readme",
+	"homepage": "https://github.com/thetarnav/solid-devtools/tree/main/packages/babel-plugin#readme",
 	"repository": {
 		"type": "git",
 		"url": "git+https://github.com/thetarnav/solid-devtools.git"
