@@ -1,5 +1,11 @@
 # @solid-devtools/babel-plugin
 
+## 0.2.1
+
+### Patch Changes
+
+- a8d0354: Correct "homepage" filed in package.json, to lead to individual package readme.
+
 ## 0.2.0
 
 ### Minor Changes

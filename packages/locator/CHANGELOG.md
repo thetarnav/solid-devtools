@@ -1,5 +1,14 @@
 # @solid-devtools/locator
 
+## 0.7.2
+
+### Patch Changes
+
+- a8d0354: Correct "homepage" filed in package.json, to lead to individual package readme.
+- Updated dependencies [a8d0354]
+  - @solid-devtools/debugger@0.2.2
+  - @solid-devtools/ui@0.3.2
+
 ## 0.7.1
 
 ### Patch Changes

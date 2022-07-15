@@ -1,5 +1,11 @@
 # @solid-devtools/ui
 
+## 0.3.2
+
+### Patch Changes
+
+- a8d0354: Correct "homepage" filed in package.json, to lead to individual package readme.
+
 ## 0.3.1
 
 ### Patch Changes

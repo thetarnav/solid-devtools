@@ -10,10 +10,10 @@
 	"type": "module",
 	"main": "./dist/index.js",
 	"devDependencies": {
-		"@solid-devtools/babel-plugin": "^0.2.0",
-		"@solid-devtools/logger": "^0.1.3",
+		"@solid-devtools/babel-plugin": "^0.2.1",
+		"@solid-devtools/logger": "^0.1.4",
 		"solid-app-router": "^0.4.1",
-		"solid-devtools": "^0.7.1",
+		"solid-devtools": "^0.7.2",
 		"solid-js": "^1.4.5",
 		"solid-meta": "^0.27.5",
 		"solid-start": "next",
