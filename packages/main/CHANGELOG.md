@@ -1,5 +1,17 @@
 # solid-devtools
 
+## 0.8.0
+
+### Minor Changes
+
+- 4c79a90: Bump vite peerDepenedency to version 3.0.0 (#34)
+
+### Patch Changes
+
+- Updated dependencies [4c79a90]
+  - @solid-devtools/babel-plugin@0.3.0
+  - @solid-devtools/locator@0.8.0
+
 ## 0.7.2
 
 ### Patch Changes

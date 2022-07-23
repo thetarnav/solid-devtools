@@ -30,7 +30,7 @@
 		"typecheck": "tsc --noEmit"
 	},
 	"devDependencies": {
-		"@solid-devtools/babel-plugin": "^0.2.1",
+		"@solid-devtools/babel-plugin": "^0.3.0",
 		"esbuild": "^0.14.48",
 		"esbuild-plugin-solid": "^0.4.2",
 		"solid-js": "^1.4.5",

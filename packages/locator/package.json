@@ -1,6 +1,6 @@
 {
 	"name": "@solid-devtools/locator",
-	"version": "0.7.2",
+	"version": "0.8.0",
 	"description": "On-page overlay for localisating SolidJS components, and revealing them in your code editor.",
 	"license": "MIT",
 	"author": "Damian Tarnawski <gthetarnav@gmail.com>",
@@ -72,7 +72,7 @@
 		"solid-js": "^1.4.4"
 	},
 	"optionalDependencies": {
-		"@solid-devtools/babel-plugin": "^0.2.1"
+		"@solid-devtools/babel-plugin": "^0.3.0"
 	},
 	"packageManager": "pnpm@7.3.0"
 }
