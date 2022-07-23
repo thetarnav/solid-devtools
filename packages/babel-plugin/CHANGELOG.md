@@ -1,5 +1,11 @@
 # @solid-devtools/babel-plugin
 
+## 0.3.0
+
+### Minor Changes
+
+- 4c79a90: Bump vite peerDepenedency to version 3.0.0 (#34)
+
 ## 0.2.1
 
 ### Patch Changes
