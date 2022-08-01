@@ -4,6 +4,7 @@
 import { getNodeName, getNodeType, getOwnerType, isSolidMemo } from "@solid-devtools/debugger"
 import { NodeType, SolidComputation, SolidOwner, SolidSignal } from "@shared/graph"
 import { dedupeArray } from "@shared/utils"
+import { getDiffMap, getStackDiffMap } from "./utils"
 
 export type NodeState = {
 	type: NodeType
@@ -35,6 +36,7 @@ export const STYLES = {
 		"font-weight: bold; font-size: 1.1em; background: rgba(153, 153, 153, 0.3); padding: 0.1em 0.3em; border-radius: 4px;",
 	grayBackground: "background: rgba(153, 153, 153, 0.3); padding: 0 0.2em; border-radius: 4px;",
 	signalUnderline: "text-decoration: orange wavy underline;",
+	new: "color: orange; font-style: italic",
 }
 
 export const inGray = (text: unknown) => `\x1B[90m${text}\x1B[m`
@@ -219,7 +221,7 @@ export function logOwned(
 
 export function logSignalsInitialValues(signals: SolidSignal[]) {
 	console.groupCollapsed("Signals initial values:")
-	logSignalValues(signals)
+	signals.forEach(logSignalValue)
 	console.groupEnd()
 }
 
@@ -234,16 +236,14 @@ export function logInitialValue(node: SolidSignal | NodeStateWithValue): void {
 	)
 }
 
-export function logSignalValues(signals: SolidSignal[]): void {
-	signals.forEach(signal => {
-		const { type, typeName, name, value } = getNodeStateWithValue(signal)
-		console.log(
-			`${inGray(typeName)} %c${name}%c ${inGray("=")}${getValueSpecifier(value)}`,
-			`${getNameStyle(type)}`,
-			"",
-			value,
-		)
-	})
+export function logSignalValue(signal: SolidSignal | NodeStateWithValue): void {
+	const { type, typeName, name, value } = getNodeStateWithValue(signal)
+	console.log(
+		`${inGray(typeName)} %c${name}%c ${inGray("=")}${getValueSpecifier(value)}`,
+		`${getNameStyle(type)}`,
+		"",
+		value,
+	)
 }
 
 export function logSignalValueUpdate(
@@ -287,64 +287,23 @@ export function logObservers(
 	console.groupEnd()
 }
 
-function getThorowOwnersDiff<T extends SolidOwner>(
-	from: Readonly<T[]>,
-	to: Readonly<T[]>,
-): [WeakMap<T, "added" | "removed">, T[]] {
-	const marks = new WeakMap<T, "added" | "removed">()
-	const owners: T[] = []
-	const toCopy = [...to]
-
-	from.forEach(owner => {
-		const index = toCopy.indexOf(owner)
-		if (index !== -1) toCopy.splice(index, 1)
-		else marks.set(owner, "removed")
-		owners.push(owner)
-	})
-	toCopy.forEach(owner => {
-		if (owners.includes(owner)) return
-		marks.set(owner, "added")
-		owners.push(owner)
-	})
-
-	return [marks, owners]
-}
-
-function getStackOwnersDiff<T extends SolidOwner>(
-	from: Readonly<T[]>,
-	to: Readonly<T[]>,
-): [WeakMap<T, "added">, T[]] {
-	const marks = new WeakMap<T, "added">()
-	const owners: T[] = [...from]
-	for (let i = owners.length; i < to.length; i++) {
-		owners.push(to[i])
-		marks.set(to[i], "added")
-	}
-	return [marks, owners]
-}
-
 function logOwnersDiff<T extends SolidOwner>(
-	from: Readonly<T[]>,
-	to: Readonly<T[]>,
+	from: readonly T[],
+	to: readonly T[],
 	diff: "thorow" | "stack",
 	logGroup?: (owner: T) => void,
 ): void {
-	const [marks, owners] =
-		diff === "thorow" ? getThorowOwnersDiff(from, to) : getStackOwnersDiff(from, to)
+	const [getMark, owners] = diff === "thorow" ? getDiffMap(from, to) : getStackDiffMap(from, to)
 
 	paddedForEach(
 		owners,
 		owner => NodeType[getOwnerType(owner)],
 		(type, owner) => {
-			const mark = marks.get(owner)
+			const mark = getMark(owner)
 			const name = getNodeName(owner)
 			const label = (() => {
 				if (mark === "added")
-					return [
-						`${inGray(type)} %c${name}%c  new`,
-						STYLES.grayBackground,
-						"color: orange; font-style: italic",
-					]
+					return [`${inGray(type)} %c${name}%c  new`, STYLES.grayBackground, STYLES.new]
 				if (mark === "removed")
 					return [
 						`${inGray(type)} %c${name}`,
@@ -377,4 +336,46 @@ export function logOwnerList<T extends SolidOwner>(
 			} else console.log(...label)
 		},
 	)
+}
+
+//
+// PROPS
+//
+
+export function getPropsInitLabel(state: NodeState, proxy: boolean, empty: boolean): string[] {
+	const { type, typeName, name } = state
+	return [
+		`%c${typeName} %c${name}%c created with ${empty ? "empty" : ""}${proxy ? "dynamic " : ""}props`,
+		"",
+		getNameStyle(type),
+		"",
+	]
+}
+
+export function getPropsKeyUpdateLabel({ name, type }: NodeState, empty: boolean): any[] {
+	return [
+		`Dynamic props of %c${name}%c ${empty ? "are empty now" : "updated keys:"}`,
+		getNameStyle(type),
+		"",
+	]
+}
+
+export function getPropLabel(
+	type: "Getter" | "Value",
+	name: string,
+	value: unknown,
+	occurrence: "added" | "removed" | null,
+): any[] {
+	// stayed
+	if (occurrence === null)
+		return [`${inGray(type)} ${name} ${inGray("=")}${getValueSpecifier(value)}`, value]
+	// added
+	if (occurrence === "added")
+		return [
+			`${inGray(type)} ${name}%c new ${inGray("=")}${getValueSpecifier(value)}`,
+			STYLES.new,
+			value,
+		]
+	// removed
+	return [`${inGray(type)} %c${name}`, "text-decoration: line-through; color: #888"]
 }

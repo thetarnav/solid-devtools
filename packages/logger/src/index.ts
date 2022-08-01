@@ -1,4 +1,4 @@
-import { Accessor, onCleanup, $PROXY, untrack, createEffect } from "solid-js"
+import { Accessor, onCleanup, $PROXY, untrack, createEffect, on } from "solid-js"
 import { arrayEquals, asArray, Many } from "@solid-primitives/utils"
 import {
 	getOwnerType,
@@ -27,11 +27,13 @@ import {
 	logSignalValueUpdate,
 	UNUSED,
 	NodeStateWithValue,
-	getNameStyle,
-	inGray,
-	getValueSpecifier,
 	paddedForEach,
+	getPropsInitLabel,
+	logSignalValue,
+	getPropsKeyUpdateLabel,
+	getPropLabel,
 } from "./log"
+import { getDiffMap, makeTimeMeter } from "./utils"
 
 declare module "solid-js/types/reactive/signal" {
 	interface Owner {
@@ -41,19 +43,6 @@ declare module "solid-js/types/reactive/signal" {
 	}
 	interface SignalState<T> {
 		$debugSignal?: boolean
-	}
-}
-
-/**
- * For measuring the time elapsed. Returns a function that will return the time elapsed since it's last call.
- * */
-function makeTimeMeter(): () => number {
-	let last = performance.now()
-	return () => {
-		const now = performance.now()
-		const diff = now - last
-		last = now
-		return Math.round(diff)
 	}
 }
 
@@ -452,67 +441,89 @@ export function debugOwnerSignals(owner?: Owner, options: DebugSignalOptions = {
 	})
 }
 
+const getPropValue = (props: Record<string, unknown>, desc: PropertyDescriptor): unknown =>
+	untrack(() => (desc.get ? desc.get.call(props) : desc.value))
+
+/**
+ * Debug the provided {@link props} object by logging their state to the console.
+ * @param props component's props object.
+ * @example
+ * ```tsx
+ * const Button = props => {
+ * 	debugProps(props)
+ * 	return <div>Hello</div>
+ * }
+ * ```
+ */
 export function debugProps(props: Record<string, unknown>): void {
 	const owner = getOwner()
 	if (!owner) return console.warn("debugProps should be used synchronously inside a component")
 
 	// for solid-refresh HMR memos, return the owned component
-	const { type, typeName, name } = getNodeState(
-		lookupOwner(owner, o => getOwnerType(o) !== NodeType.Refresh)!,
-	)
+	const ownerState = getNodeState(lookupOwner(owner, o => getOwnerType(o) !== NodeType.Refresh)!)
 	const isProxy = isSolidProxy(props)
 
-	let descriptors = Object.entries(Object.getOwnPropertyDescriptors(props))
-	if (descriptors.length === 0) {
-		console.log(
-			`%c${typeName} %c${name}%c called with empty ${isProxy ? "dynamic " : ""}props`,
-			"",
-			getNameStyle(type),
-			"",
-		)
-	} else {
-		console.group(
-			`%c${typeName} %c${name}%c called with ${isProxy ? "dynamic " : ""}props:`,
-			"",
-			getNameStyle(type),
-			"",
-		)
+	const descriptorsList = Object.entries(Object.getOwnPropertyDescriptors(props))
+
+	if (descriptorsList.length === 0) console.log(...getPropsInitLabel(ownerState, isProxy, true))
+	else {
+		console.group(...getPropsInitLabel(ownerState, isProxy, false))
 		paddedForEach(
-			descriptors,
+			descriptorsList,
 			([, desc]) => (desc.get ? "Getter" : "Value"),
-			(type, [name, desc]) => {
-				const value = untrack(() => (desc.get ? desc.get.call(props) : desc.value))
-				console.log(`${inGray(type)} ${name} ${inGray("=")}${getValueSpecifier(value)}`, value)
+			(type, [key, desc]) => {
+				const value = getPropValue(props, desc)
+				const signals = type === "Getter" ? getFunctionSources(() => props[key]) : []
+				const label = getPropLabel(type, key, value, null)
+
+				if (signals.length > 0) {
+					console.groupCollapsed(...label)
+					signals.forEach(logSignalValue)
+					console.groupEnd()
+				} else console.log(...label)
 			},
 		)
 		console.groupEnd()
 	}
 
 	if (isProxy) {
-		let prevKeys: string[]
-		createEffect(() => {
-			const keys = Object.keys(props)
-			if (!prevKeys) return (prevKeys = keys)
-			if (arrayEquals(keys, prevKeys)) return
-			prevKeys = keys
+		createEffect(
+			on(
+				() => Object.keys(props),
+				(keys, prevKeys) => {
+					if (!prevKeys) return
+					if (arrayEquals(keys, prevKeys)) return
 
-			descriptors = Object.entries(Object.getOwnPropertyDescriptors(props))
-			if (descriptors.length === 0) {
-				console.log(`Dynamic props of %c${name}%c are empty now`, getNameStyle(type), "")
-			} else {
-				console.group(`Dynamic props of %c${name}%c updated keys:`, getNameStyle(type), "")
-				paddedForEach(
-					descriptors,
-					([, desc]) => (desc.get ? "Getter" : "Value"),
-					(type, [name, desc]) => {
-						const value = untrack(() => (desc.get ? desc.get.call(props) : desc.value))
-						console.log(`${inGray(type)} ${name} ${inGray("=")}${getValueSpecifier(value)}`, value)
-					},
-				)
-				console.groupEnd()
-			}
-		})
-		// const s = getFunctionSources(() => (props as any)[SYMBOL])
-		// console.log(s)
+					const descriptors = Object.getOwnPropertyDescriptors(props)
+
+					if (Object.entries(descriptors).length === 0) {
+						console.log(...getPropsKeyUpdateLabel(ownerState, true))
+					} else {
+						const [getMark, allKeys] = getDiffMap(prevKeys, keys, Map)
+						console.group(...getPropsKeyUpdateLabel(ownerState, false))
+						allKeys.forEach(key => {
+							const mark = getMark(key)
+
+							if (mark === "removed")
+								return console.log(...getPropLabel("Getter", key, null, "removed"))
+
+							const desc = descriptors[key]
+							const value = getPropValue(props, desc)
+							const label = getPropLabel("Getter", key, value, mark)
+							const signals = getFunctionSources(() => props[key])
+
+							if (signals.length > 0) {
+								console.groupCollapsed(...label)
+								signals.forEach(logSignalValue)
+								console.groupEnd()
+							} else console.log(...label)
+						})
+						console.groupEnd()
+					}
+				},
+			),
+			undefined,
+			{ name: "debugProps EFFECT" },
+		)
 	}
 }

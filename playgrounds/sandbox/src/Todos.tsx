@@ -1,5 +1,6 @@
 import { debugProps } from "@solid-devtools/logger"
 import { createEffect, createSignal, batch, For, Component } from "solid-js"
+import { reconcile } from "solid-js/store"
 import { createStore, SetStoreFunction, Store } from "solid-js/store"
 
 export function createLocalStore<T extends object>(
@@ -60,7 +61,14 @@ const Todos: Component = () => {
 	}
 
 	setTimeout(() => {
-		setTodos(0, Math.random() + "", "hello")
+		setTodos(
+			0,
+			reconcile({
+				title: "Learn Solid-JS",
+				done: false,
+				[Math.random() + ""]: "hello",
+			}),
+		)
 	}, 1000)
 
 	return (
