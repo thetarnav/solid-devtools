@@ -74,7 +74,7 @@ importers:
       '@solid-primitives/memo': ^0.3.0
       '@solid-primitives/refs': ^0.3.0
       '@solid-primitives/scheduled': ^1.0.0
-      '@solid-primitives/utils': ^2.1.1
+      '@solid-primitives/utils': ^3.0.1
       '@testing-library/jest-dom': ^5.16.4
       jest: ^28.1.2
       jest-environment-jsdom: ^28.1.2
@@ -88,7 +88,7 @@ importers:
       '@solid-primitives/memo': 0.3.0_solid-js@1.4.8
       '@solid-primitives/refs': 0.3.0_solid-js@1.4.8
       '@solid-primitives/scheduled': 1.0.0_solid-js@1.4.8
-      '@solid-primitives/utils': 2.1.1_solid-js@1.4.8
+      '@solid-primitives/utils': 3.0.1_solid-js@1.4.8
     devDependencies:
       '@testing-library/jest-dom': 5.16.4
       jest: 28.1.2_bc7y33wneoblweznpgbbldfcu4
@@ -105,7 +105,7 @@ importers:
       '@solid-primitives/context': ^0.1.0
       '@solid-primitives/immutable': ^0.1.0
       '@solid-primitives/rootless': ^1.1.0
-      '@solid-primitives/utils': ^2.1.1
+      '@solid-primitives/utils': ^3.0.1
       '@types/chrome': ^0.0.183
       rimraf: ^3.0.2
       solid-js: ^1.4.7
@@ -118,7 +118,7 @@ importers:
       '@solid-primitives/context': 0.1.0_solid-js@1.4.8
       '@solid-primitives/immutable': 0.1.0_solid-js@1.4.8
       '@solid-primitives/rootless': 1.1.0_solid-js@1.4.8
-      '@solid-primitives/utils': 2.1.1_solid-js@1.4.8
+      '@solid-primitives/utils': 3.0.1_solid-js@1.4.8
       solid-js: 1.4.8
       twind: 0.16.17_typescript@4.7.4
     devDependencies:
@@ -132,13 +132,13 @@ importers:
   packages/extension-adapter:
     specifiers:
       '@solid-devtools/debugger': ^0.2.2
-      '@solid-primitives/utils': ^2.1.1
+      '@solid-primitives/utils': ^3.0.1
       solid-js: ^1.4.7
       tsup: ^6.1.3
       typescript: ^4.7.4
     dependencies:
       '@solid-devtools/debugger': link:../debugger
-      '@solid-primitives/utils': 2.1.1_solid-js@1.4.8
+      '@solid-primitives/utils': 3.0.1_solid-js@1.4.8
     devDependencies:
       solid-js: 1.4.8
       tsup: 6.1.3_typescript@4.7.4
@@ -153,7 +153,7 @@ importers:
       '@solid-primitives/event-listener': ^2.2.0
       '@solid-primitives/keyboard': ^0.0.100
       '@solid-primitives/platform': ^0.0.100
-      '@solid-primitives/utils': ^2.1.1
+      '@solid-primitives/utils': ^3.0.1
       '@testing-library/jest-dom': ^5.16.4
       esbuild: ^0.14.48
       esbuild-plugin-solid: ^0.4.2
@@ -171,7 +171,7 @@ importers:
       '@solid-primitives/event-listener': 2.2.0_solid-js@1.4.8
       '@solid-primitives/keyboard': 0.0.100_solid-js@1.4.8
       '@solid-primitives/platform': 0.0.100_solid-js@1.4.8
-      '@solid-primitives/utils': 2.1.1_solid-js@1.4.8
+      '@solid-primitives/utils': 3.0.1_solid-js@1.4.8
       motion: 10.11.2
     optionalDependencies:
       '@solid-devtools/babel-plugin': link:../babel-plugin
@@ -189,7 +189,7 @@ importers:
   packages/logger:
     specifiers:
       '@solid-devtools/debugger': ^0.2.2
-      '@solid-primitives/utils': ^2.1.1
+      '@solid-primitives/utils': ^3.0.1
       '@testing-library/jest-dom': ^5.16.4
       jest: ^28.1.2
       jest-environment-jsdom: ^28.1.2
@@ -199,7 +199,7 @@ importers:
       typescript: ^4.7.4
     dependencies:
       '@solid-devtools/debugger': link:../debugger
-      '@solid-primitives/utils': 2.1.1_solid-js@1.4.8
+      '@solid-primitives/utils': 3.0.1_solid-js@1.4.8
     devDependencies:
       '@testing-library/jest-dom': 5.16.4
       jest: 28.1.2_bc7y33wneoblweznpgbbldfcu4
@@ -239,7 +239,7 @@ importers:
   packages/overlay:
     specifiers:
       '@rollup/plugin-alias': ^3.1.9
-      '@solid-primitives/utils': ^2.1.1
+      '@solid-primitives/utils': ^3.0.1
       rimraf: ^3.0.2
       rollup: ^2.75.7
       rollup-preset-solid: ^1.4.0
@@ -249,7 +249,7 @@ importers:
       typescript: ^4.7.4
       watchlist: ^0.3.1
     dependencies:
-      '@solid-primitives/utils': 2.1.1_solid-js@1.4.8
+      '@solid-primitives/utils': 3.0.1_solid-js@1.4.8
       solid-js: 1.4.8
       solid-meta: 0.27.5_solid-js@1.4.8
       twind: 0.16.17_typescript@4.7.4
@@ -263,10 +263,10 @@ importers:
 
   packages/shared:
     specifiers:
-      '@solid-primitives/utils': ^2.1.1
+      '@solid-primitives/utils': ^3.0.1
       solid-js: ^1.4.7
     dependencies:
-      '@solid-primitives/utils': 2.1.1_solid-js@1.4.8
+      '@solid-primitives/utils': 3.0.1_solid-js@1.4.8
       solid-js: 1.4.8
 
   packages/ui:
@@ -275,7 +275,7 @@ importers:
       '@solid-aria/interactions': ^0.1.4
       '@solid-devtools/babel-plugin': ^0.3.0
       '@solid-primitives/props': ^2.1.8
-      '@solid-primitives/utils': ^2.1.1
+      '@solid-primitives/utils': ^3.0.1
       esbuild: ^0.14.48
       esbuild-plugin-solid: ^0.4.2
       solid-js: ^1.4.7
@@ -286,7 +286,7 @@ importers:
       '@otonashixav/solid-flip': 0.10.5_solid-js@1.4.8
       '@solid-aria/interactions': 0.1.4_solid-js@1.4.8
       '@solid-primitives/props': 2.1.8_solid-js@1.4.8
-      '@solid-primitives/utils': 2.1.1_solid-js@1.4.8
+      '@solid-primitives/utils': 3.0.1_solid-js@1.4.8
       twind: 0.16.17_typescript@4.7.4
     devDependencies:
       '@solid-devtools/babel-plugin': link:../babel-plugin
@@ -689,7 +689,7 @@ packages:
     dependencies:
       '@babel/core': 7.18.2
       '@babel/helper-compilation-targets': 7.18.2_@babel+core@7.18.2
-      '@babel/helper-module-imports': 7.16.7
+      '@babel/helper-module-imports': 7.18.6
       '@babel/helper-plugin-utils': 7.17.12
       '@babel/traverse': 7.18.5
       debug: 4.3.4
@@ -2835,7 +2835,7 @@ packages:
       '@babel/helper-plugin-utils': 7.17.12
       '@babel/plugin-proposal-unicode-property-regex': 7.17.12_@babel+core@7.18.2
       '@babel/plugin-transform-dotall-regex': 7.16.7_@babel+core@7.18.2
-      '@babel/types': 7.18.4
+      '@babel/types': 7.18.7
       esutils: 2.0.3
     dev: true
 
@@ -4012,6 +4012,14 @@ packages:
 
   /@solid-primitives/utils/2.1.1_solid-js@1.4.8:
     resolution: {integrity: sha512-im/WJDgLnJgjuEhB2a46RgDU/ODoc4g+FMySjJ8erPTFrhyTwIe5wv9MSUf7SYsguLe4rfQirNEKLSSyLPETkw==}
+    peerDependencies:
+      solid-js: ^1.4.1
+    dependencies:
+      solid-js: 1.4.8
+    dev: false
+
+  /@solid-primitives/utils/3.0.1_solid-js@1.4.8:
+    resolution: {integrity: sha512-tQl0z8HG+iJ7eryq5KmRkr9xNk9oU06gOUQ37YKod0N5oPaWEvP+ATzi7Uo7w5L67wjaZuQCt80p9vlm1/J/Mg==}
     peerDependencies:
       solid-js: ^1.4.1
     dependencies:
