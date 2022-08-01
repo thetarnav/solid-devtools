@@ -1,5 +1,16 @@
 # solid-devtools
 
+## 0.8.1
+
+### Patch Changes
+
+- fdb09bc: Various minor changes.
+- Updated dependencies [fdb09bc]
+  - @solid-devtools/babel-plugin@0.3.1
+  - @solid-devtools/debugger@0.2.3
+  - @solid-devtools/extension-adapter@0.8.1
+  - @solid-devtools/locator@0.8.1
+
 ## 0.8.0
 
 ### Minor Changes

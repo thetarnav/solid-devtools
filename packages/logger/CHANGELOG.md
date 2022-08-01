@@ -1,5 +1,17 @@
 # @solid-devtools/logger
 
+## 0.2.0
+
+### Minor Changes
+
+- fdb09bc: Add `debugProps` hook
+
+### Patch Changes
+
+- fdb09bc: Various minor changes.
+- Updated dependencies [fdb09bc]
+  - @solid-devtools/debugger@0.2.3
+
 ## 0.1.4
 
 ### Patch Changes

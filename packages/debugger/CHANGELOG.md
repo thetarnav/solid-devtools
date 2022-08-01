@@ -1,5 +1,11 @@
 # @solid-devtools/debugger
 
+## 0.2.3
+
+### Patch Changes
+
+- fdb09bc: Various minor changes.
+
 ## 0.2.2
 
 ### Patch Changes

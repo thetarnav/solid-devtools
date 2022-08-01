@@ -1,5 +1,14 @@
 # @solid-devtools/locator
 
+## 0.8.1
+
+### Patch Changes
+
+- fdb09bc: Various minor changes.
+- Updated dependencies [fdb09bc]
+  - @solid-devtools/debugger@0.2.3
+  - @solid-devtools/ui@0.3.3
+
 ## 0.8.0
 
 ## 0.7.2
