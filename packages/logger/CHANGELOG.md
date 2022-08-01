@@ -1,5 +1,13 @@
 # @solid-devtools/logger
 
+## 0.1.4
+
+### Patch Changes
+
+- a8d0354: Correct "homepage" filed in package.json, to lead to individual package readme.
+- Updated dependencies [a8d0354]
+  - @solid-devtools/debugger@0.2.2
+
 ## 0.1.3
 
 ### Patch Changes

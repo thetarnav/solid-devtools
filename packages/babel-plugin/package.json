@@ -1,11 +1,11 @@
 {
 	"name": "@solid-devtools/babel-plugin",
-	"version": "0.2.0",
+	"version": "0.3.0",
 	"description": "Babel plugin for transforming SolidJS code in development to enchance solid-devtools usage.",
 	"license": "MIT",
 	"author": "Damian Tarnawski <gthetarnav@gmail.com>",
 	"contributors": [],
-	"homepage": "https://github.com/thetarnav/solid-devtools#readme",
+	"homepage": "https://github.com/thetarnav/solid-devtools/tree/main/packages/babel-plugin#readme",
 	"repository": {
 		"type": "git",
 		"url": "git+https://github.com/thetarnav/solid-devtools.git"
@@ -40,7 +40,7 @@
 		"@types/babel__traverse": "^7.17.1",
 		"tsup": "^6.1.3",
 		"typescript": "^4.7.4",
-		"vite": "^2.9.13"
+		"vite": "^3.0.2"
 	},
 	"dependencies": {
 		"@babel/core": "^7.18.6",
@@ -49,6 +49,6 @@
 	},
 	"peerDependencies": {
 		"solid-js": "^1.4.4",
-		"vite": "^2.9.12"
+		"vite": "^3.0.0"
 	}
 }

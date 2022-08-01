@@ -7,7 +7,7 @@
 	"contributors": [
 		"Damian Tarnawski <gthetarnav@gmail.com>"
 	],
-	"homepage": "https://github.com/thetarnav/solid-devtools#readme",
+	"homepage": "https://github.com/thetarnav/solid-devtools/tree/main/packages/overlay#readme",
 	"repository": {
 		"type": "git",
 		"url": "git+https://github.com/thetarnav/solid-devtools.git"
