@@ -1,5 +1,11 @@
 # solid-devtools-shared
 
+## 0.3.2
+
+### Patch Changes
+
+- fdb09bc: Various minor changes.
+
 ## 0.3.1
 
 ### Patch Changes

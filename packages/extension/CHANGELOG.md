@@ -1,5 +1,13 @@
 # solid-devtools-extension
 
+## 0.2.3
+
+### Patch Changes
+
+- fdb09bc: Various minor changes.
+- Updated dependencies [fdb09bc]
+  - @solid-devtools/ui@0.3.3
+
 ## 0.2.2
 
 ### Patch Changes

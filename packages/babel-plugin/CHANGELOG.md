@@ -1,5 +1,11 @@
 # @solid-devtools/babel-plugin
 
+## 0.3.1
+
+### Patch Changes
+
+- fdb09bc: Various minor changes.
+
 ## 0.3.0
 
 ### Minor Changes
