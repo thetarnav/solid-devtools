@@ -1,5 +1,9 @@
 // TODO: contribute to solid primitives
 
+//
+// DIFF BY ID
+//
+
 export function handleDiffArrayById<T extends { id: unknown }>(
 	a: readonly T[],
 	b: readonly T[],

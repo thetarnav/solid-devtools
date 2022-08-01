@@ -9,7 +9,7 @@ import {
 	UpdateType,
 } from "@shared/messanger"
 import type { SerialisedTreeRoot } from "@shared/graph"
-import { getArrayDiffById } from "./handleDiffArray"
+import { getArrayDiffById } from "@shared/diff"
 
 startListeningWindowMessages()
 

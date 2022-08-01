@@ -5,8 +5,8 @@
 	"author": "Damian Tarnawski <gthetarnav@gmail.com>",
 	"contributors": [],
 	"dependencies": {
-		"@solid-primitives/utils": "^2.1.1",
-		"solid-js": "^1.4.5"
+		"@solid-primitives/utils": "^3.0.1",
+		"solid-js": "^1.4.8"
 	},
 	"private": true
 }

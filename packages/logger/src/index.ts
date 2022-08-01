@@ -1,6 +1,5 @@
-import type { SignalState, Owner } from "solid-js/types/reactive/signal"
-import { Accessor, onCleanup } from "solid-js"
-import { asArray, Many } from "@solid-primitives/utils"
+import { Accessor, onCleanup, $PROXY, untrack, createEffect, on } from "solid-js"
+import { arrayEquals, asArray, Many } from "@solid-primitives/utils"
 import {
 	getOwnerType,
 	isSolidComputation,
@@ -10,7 +9,9 @@ import {
 	makeSolidUpdateListener,
 	isSolidMemo,
 	interceptComputationRerun,
+	lookupOwner,
 } from "@solid-devtools/debugger"
+import { SignalState, Owner } from "@shared/solid"
 import { getOwner, NodeType, SolidComputation, SolidOwner, SolidSignal } from "@shared/graph"
 import { dedupeArray, arrayRefEquals } from "@shared/utils"
 import {
@@ -26,7 +27,13 @@ import {
 	logSignalValueUpdate,
 	UNUSED,
 	NodeStateWithValue,
+	paddedForEach,
+	getPropsInitLabel,
+	logSignalValue,
+	getPropsKeyUpdateLabel,
+	getPropLabel,
 } from "./log"
+import { getDiffMap, makeTimeMeter } from "./utils"
 
 declare module "solid-js/types/reactive/signal" {
 	interface Owner {
@@ -39,23 +46,15 @@ declare module "solid-js/types/reactive/signal" {
 	}
 }
 
-function makeTimeMeter(): () => number {
-	let last = performance.now()
-	return () => {
-		const now = performance.now()
-		const diff = now - last
-		last = now
-		return Math.round(diff)
-	}
-}
+const isSolidProxy = (o: any): boolean => !!o[$PROXY]
 
 /**
  * @returns true if the node was marked before
  */
 function markDebugNode(o: Owner, type: "computation" | "signals" | "owned"): true | VoidFunction
-function markDebugNode(o: SignalState<any>): true | VoidFunction
+function markDebugNode(o: SignalState): true | VoidFunction
 function markDebugNode(
-	o: Owner | SignalState<any>,
+	o: Owner | SignalState,
 	type?: "computation" | "signals" | "owned",
 ): true | VoidFunction {
 	let property: "$debug" | "$debugSignals" | "$debugOwned" | "$debugSignal"
@@ -219,9 +218,10 @@ export function debugOwnerComputations(_owner?: Owner): void {
 	if (marked === true) return
 	onCleanup(marked)
 
-	const { type, typeName, name } =
-		// for solid-refresh HMR memos, return the owned component
-		getOwnerType(owner) === NodeType.Refresh ? getNodeState(owner.owner!) : getNodeState(owner)
+	// for solid-refresh HMR memos, return the owned component
+	const { type, typeName, name } = getNodeState(
+		lookupOwner(owner, o => getOwnerType(o) !== NodeType.Refresh)!,
+	)
 
 	let prevOwned: SolidComputation[] = []
 
@@ -270,7 +270,7 @@ export interface DebugSignalOptions {
  * ```
  */
 export function debugSignal(
-	source: Accessor<unknown> | SignalState<unknown>,
+	source: Accessor<unknown> | SignalState,
 	options: DebugSignalOptions = {},
 ): void {
 	let signal: SolidSignal
@@ -357,7 +357,7 @@ export function debugSignal(
  * ```
  */
 export function debugSignals(
-	source: Many<Accessor<unknown>> | SignalState<unknown>[],
+	source: Many<Accessor<unknown>> | SignalState[],
 	options: DebugSignalOptions = {},
 ): void {
 	let signals: SolidSignal[] = []
@@ -439,4 +439,91 @@ export function debugOwnerSignals(owner?: Owner, options: DebugSignalOptions = {
 
 		debugSignals(signals, options)
 	})
+}
+
+const getPropValue = (props: Record<string, unknown>, desc: PropertyDescriptor): unknown =>
+	untrack(() => (desc.get ? desc.get.call(props) : desc.value))
+
+/**
+ * Debug the provided {@link props} object by logging their state to the console.
+ * @param props component's props object.
+ * @example
+ * ```tsx
+ * const Button = props => {
+ * 	debugProps(props)
+ * 	return <div>Hello</div>
+ * }
+ * ```
+ */
+export function debugProps(props: Record<string, unknown>): void {
+	const owner = getOwner()
+	if (!owner) return console.warn("debugProps should be used synchronously inside a component")
+
+	// for solid-refresh HMR memos, return the owned component
+	const ownerState = getNodeState(lookupOwner(owner, o => getOwnerType(o) !== NodeType.Refresh)!)
+	const isProxy = isSolidProxy(props)
+
+	const descriptorsList = Object.entries(Object.getOwnPropertyDescriptors(props))
+
+	if (descriptorsList.length === 0) console.log(...getPropsInitLabel(ownerState, isProxy, true))
+	else {
+		console.group(...getPropsInitLabel(ownerState, isProxy, false))
+		paddedForEach(
+			descriptorsList,
+			([, desc]) => (desc.get ? "Getter" : "Value"),
+			(type, [key, desc]) => {
+				const value = getPropValue(props, desc)
+				const signals = type === "Getter" ? getFunctionSources(() => props[key]) : []
+				const label = getPropLabel(type, key, value, null)
+
+				if (signals.length > 0) {
+					console.groupCollapsed(...label)
+					signals.forEach(logSignalValue)
+					console.groupEnd()
+				} else console.log(...label)
+			},
+		)
+		console.groupEnd()
+	}
+
+	if (isProxy) {
+		createEffect(
+			on(
+				() => Object.keys(props),
+				(keys, prevKeys) => {
+					if (!prevKeys) return
+					if (arrayEquals(keys, prevKeys)) return
+
+					const descriptors = Object.getOwnPropertyDescriptors(props)
+
+					if (Object.entries(descriptors).length === 0) {
+						console.log(...getPropsKeyUpdateLabel(ownerState, true))
+					} else {
+						const [getMark, allKeys] = getDiffMap(prevKeys, keys, Map)
+						console.group(...getPropsKeyUpdateLabel(ownerState, false))
+						allKeys.forEach(key => {
+							const mark = getMark(key)
+
+							if (mark === "removed")
+								return console.log(...getPropLabel("Getter", key, null, "removed"))
+
+							const desc = descriptors[key]
+							const value = getPropValue(props, desc)
+							const label = getPropLabel("Getter", key, value, mark)
+							const signals = getFunctionSources(() => props[key])
+
+							if (signals.length > 0) {
+								console.groupCollapsed(...label)
+								signals.forEach(logSignalValue)
+								console.groupEnd()
+							} else console.log(...label)
+						})
+						console.groupEnd()
+					}
+				},
+			),
+			undefined,
+			{ name: "debugProps EFFECT" },
+		)
+	}
 }

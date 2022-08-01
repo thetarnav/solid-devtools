@@ -1,6 +1,6 @@
 /* @refresh reload */
 import { makeTimer } from "@solid-primitives/timer"
-import { debugOwnerComputations, debugOwnerSignals } from "@solid-devtools/logger"
+import { debugOwnerComputations, debugOwnerSignals, debugProps } from "@solid-devtools/logger"
 import {
 	Component,
 	createSignal,
@@ -54,6 +54,7 @@ createRoot(dispose => {
 })
 
 const Button = (props: { text: string; onClick: VoidFunction }) => {
+	debugProps(props)
 	// createRoot(dispose => {
 	// 	reattachOwner()
 	// 	createComputed(() => {}, undefined, { name: "HEYYY, I should BE DEAD" })

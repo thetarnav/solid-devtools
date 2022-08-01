@@ -12,9 +12,9 @@
 	"devDependencies": {
 		"@solid-devtools/babel-plugin": "^0.3.0",
 		"@solid-devtools/logger": "^0.1.4",
-		"solid-app-router": "^0.4.1",
+		"solid-app-router": "^0.4.2",
 		"solid-devtools": "^0.8.0",
-		"solid-js": "^1.4.5",
+		"solid-js": "^1.4.8",
 		"solid-meta": "^0.27.5",
 		"solid-start": "next",
 		"solid-start-node": "next",

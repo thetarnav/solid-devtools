@@ -4,7 +4,6 @@ import {
 	createMemo,
 	createRoot,
 	createSignal,
-	onCleanup,
 	runWithOwner,
 } from "solid-js"
 import { AnyFunction, AnyObject, noop, warn } from "@solid-primitives/utils"
@@ -98,6 +97,17 @@ export function findOwner(
 		if (predicate(owner)) return owner
 		if (Array.isArray(owner.owned)) queue.push(...owner.owned)
 	}
+	return null
+}
+
+export function lookupOwner(
+	owner: SolidOwner,
+	predicate: (owner: SolidOwner) => boolean,
+): SolidOwner | null {
+	do {
+		if (predicate(owner)) return owner
+		owner = owner.owner!
+	} while (owner.owner)
 	return null
 }
 

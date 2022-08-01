@@ -10,6 +10,15 @@ For debugging only the pinpoint places parts of the Solid's reactivity graph you
 
 Provides a variaty of debugging utilities for logging the state and lifecycle of the nodes of reactivity graph to the browser console.
 
+API:
+
+- [`debugComputation`](#debugComputation)
+- [`debugOwnerComputations`](#debugOwnerComputations)
+- [`debugSignal`](#debugSignal)
+- [`debugSignals`](#debugSignals)
+- [`debugOwnerSignals`](#debugOwnerSignals)
+- [`debugProps`](#debugProps)
+
 ## Installation
 
 The `Logger` package is currently not a part of the main `solid-devtools` library — it has to be installed on it's own.
@@ -112,7 +121,7 @@ The `source` argument can be an array of signals or a function that calls multip
 import { debugSignals } from "@solid-devtools/logger"
 
 const [count, setCount] = createSignal(0)
-const double = createMemo(() => count * 2)
+const double = createMemo(() => count() * 2)
 
 debugSignals([count, double])
 // or
@@ -141,9 +150,27 @@ import { debugOwnerSignals } from "@solid-devtools/logger"
 
 const Button = props => {
   const [count, setCount] = createSignal(0)
-  const double = createMemo(() => count * 2)
+  const double = createMemo(() => count() * 2)
   debugOwnerSignals()
-  return <button onClick={() => setCount(count + 1)}>{count}</button>
+  return <button onClick={() => setCount(p => ++p)}>{count}</button>
+}
+```
+
+### `debugProps`
+
+Debug the provided props object by logging their state to the console.
+
+Accepts following arguments:
+
+- `props` - The component's props object to debug. _(optional)_
+
+```tsx
+import { debugProps } from "@solid-devtools/logger"
+
+const Button = props => {
+  debugProps(props)
+  const [count, setCount] = createSignal(0)
+  return <button onClick={() => setCount(p => ++p)}>{count()}</button>
 }
 ```
 

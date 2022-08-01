@@ -31,3 +31,4 @@ export const onOwnerCleanup: typeof API.onOwnerCleanup = () => noop
 export const onParentCleanup: typeof API.onParentCleanup = () => noop
 export const getFunctionSources: typeof API.getFunctionSources = () => []
 export const createInternalRoot: typeof API.createInternalRoot = createRoot
+export const lookupOwner: typeof API.lookupOwner = () => null
