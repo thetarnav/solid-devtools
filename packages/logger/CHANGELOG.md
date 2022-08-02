@@ -1,5 +1,11 @@
 # @solid-devtools/logger
 
+## 0.2.1
+
+### Patch Changes
+
+- 5e793bd: debugProps group collapsed (fixes #40)
+
 ## 0.2.0
 
 ### Minor Changes
