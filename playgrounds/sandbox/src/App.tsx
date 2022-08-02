@@ -1,4 +1,3 @@
-/* @refresh reload */
 import { makeTimer } from "@solid-primitives/timer"
 import { debugOwnerComputations, debugOwnerSignals, debugProps } from "@solid-devtools/logger"
 import {

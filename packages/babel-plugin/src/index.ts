@@ -1,76 +1,18 @@
-import { transformAsync } from "@babel/core"
-import { Visitor } from "@babel/traverse"
+import { PluginItem, transformAsync } from "@babel/core"
 import { PluginOption } from "vite"
-import * as t from "@babel/types"
-import { getLocationAttribute, isFileJSX, isLowercase } from "./utils"
-import { LOCATION_ATTRIBUTE_NAME, WINDOW_PROJECTPATH_PROPERTY } from "@shared/variables"
-import { relative } from "path"
+import { getFileExtension } from "./utils"
+import jsxLocationPlugin from "./jsxLocation"
+import wrapStoresPlugin from "./wrapStores"
 
-// This is the entry point for babel.
-export default (): {
-	name: string
-	visitor: Visitor
-} => {
-	return {
-		name: "@solid-devtools/babel-plugin",
-		visitor: {
-			Program(path, state) {
-				const { cwd, filename } = state as { cwd: unknown; filename: unknown }
-				if (typeof cwd !== "string" || typeof filename !== "string") return
-
-				// target only project files
-				if (!filename.includes(cwd)) return
-
-				// inject projectPath variable
-				const body = path.node.body
-				const windowIdentifier = t.identifier("window")
-				const dataSourceLocIdentifier = t.identifier(WINDOW_PROJECTPATH_PROPERTY)
-				const dataSourceLocMemberExpression = t.memberExpression(
-					windowIdentifier,
-					dataSourceLocIdentifier,
-				)
-				const cwdStringLiteral = t.stringLiteral(cwd)
-				const assignmentExpression = t.assignmentExpression(
-					"=",
-					dataSourceLocMemberExpression,
-					cwdStringLiteral,
-				)
-				body.splice(0, 0, t.toStatement(assignmentExpression))
-			},
-			JSXOpeningElement(path, state) {
-				const container = path.container as t.JSXElement
-				if (container.openingElement.name.type !== "JSXIdentifier") return
-				const name = container.openingElement.name.name
-
-				// Filter native elements
-				if (!isLowercase(name)) return
-
-				const location = container.openingElement.loc
-				if (!location) return
-
-				const { cwd, filename } = state as { cwd: unknown; filename: unknown }
-				if (typeof cwd !== "string" || typeof filename !== "string") return
-
-				container.openingElement.attributes.push(
-					t.jsxAttribute(
-						t.jsxIdentifier(LOCATION_ATTRIBUTE_NAME),
-						t.stringLiteral(
-							getLocationAttribute(
-								relative(cwd, filename),
-								location.start.line,
-								// 2 is added to place the caret after the "<" character
-								location.start.column + 2,
-							),
-						),
-					),
-				)
-			},
-		},
-	}
+export interface DevtoolsPluginOptions {
+	wrapStores?: boolean
+	jsxLocation?: boolean
 }
 
 // This export is used for configuration.
-export const devtoolsPlugin = (): PluginOption => {
+export const devtoolsPlugin = (options: DevtoolsPluginOptions = {}): PluginOption => {
+	const { wrapStores = false, jsxLocation = false } = options
+
 	let enablePlugin = false
 	let projectRoot = process.cwd()
 
@@ -81,9 +23,24 @@ export const devtoolsPlugin = (): PluginOption => {
 			enablePlugin = config.command === "serve" && config.mode !== "production"
 		},
 		async transform(source, id, transformOptions) {
-			// the plugin should only run on .tsx/.jsx files in development
 			// production and server should be disabled
-			if (transformOptions?.ssr || !enablePlugin || !isFileJSX(id)) return
+			if (transformOptions?.ssr || !enablePlugin) return
+
+			const extension = getFileExtension(id)
+
+			if (!["js", "jsx", "ts", "tsx"].includes(extension)) return
+
+			const isJSX = extension === "jsx" || extension === "tsx"
+			const plugins: PluginItem[] = []
+
+			// plugins that should only run on .tsx/.jsx files in development
+			if (jsxLocation && isJSX) plugins.push(jsxLocationPlugin)
+			if (wrapStores) plugins.push(wrapStoresPlugin)
+
+			if (plugins.length === 0) return
+
+			// babel doesn't work with typescript by default
+			plugins.splice(0, 0, ["@babel/plugin-syntax-typescript", { isTSX: isJSX }])
 
 			const result = await transformAsync(source, {
 				babelrc: false,
@@ -91,11 +48,9 @@ export const devtoolsPlugin = (): PluginOption => {
 				root: projectRoot,
 				filename: id,
 				sourceFileName: id,
-				plugins: [
-					["@babel/plugin-syntax-typescript", { isTSX: true }],
-					"@solid-devtools/babel-plugin",
-				],
+				plugins,
 			})
+
 			if (!result) return null
 			const { code } = result
 			if (!code) return null

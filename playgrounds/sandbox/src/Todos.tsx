@@ -1,14 +1,14 @@
-import { debugProps } from "@solid-devtools/logger"
+import { debugProps, debugStore } from "@solid-devtools/logger"
 import { createEffect, createSignal, batch, For, Component } from "solid-js"
 import { reconcile } from "solid-js/store"
-import { createStore, SetStoreFunction, Store } from "solid-js/store"
+import * as Store from "solid-js/store"
 
 export function createLocalStore<T extends object>(
 	name: string,
 	init: T,
-): [Store<T>, SetStoreFunction<T>] {
+): [Store.Store<T>, Store.SetStoreFunction<T>] {
 	const localState = localStorage.getItem(name)
-	const [state, setState] = createStore<T>(localState ? JSON.parse(localState) : init)
+	const [state, setState] = Store.createStore<T>(localState ? JSON.parse(localState) : init)
 	createEffect(() => localStorage.setItem(name, JSON.stringify(state)))
 	return [state, setState]
 }
@@ -26,7 +26,7 @@ const Todo: Component<{
 	onUpdate: (value: string) => void
 	onRemove: VoidFunction
 }> = props => {
-	debugProps(props)
+	// debugProps(props)
 
 	return (
 		<div>
@@ -49,6 +49,8 @@ const Todos: Component = () => {
 	const [newTitle, setTitle] = createSignal("")
 	const [todos, setTodos] = createLocalStore<TodoItem[]>("todos", [])
 
+	// debugStore(todos)
+
 	const addTodo = (e: SubmitEvent) => {
 		e.preventDefault()
 		batch(() => {
@@ -60,16 +62,16 @@ const Todos: Component = () => {
 		})
 	}
 
-	setTimeout(() => {
-		setTodos(
-			0,
-			reconcile({
-				title: "Learn Solid-JS",
-				done: false,
-				[Math.random() + ""]: "hello",
-			}),
-		)
-	}, 1000)
+	// setTimeout(() => {
+	// 	setTodos(
+	// 		0,
+	// 		reconcile({
+	// 			title: "Learn Solid-JS",
+	// 			done: false,
+	// 			[Math.random() + ""]: "hello",
+	// 		}),
+	// 	)
+	// }, 1000)
 
 	return (
 		<>

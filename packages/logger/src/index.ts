@@ -1,4 +1,5 @@
 import { Accessor, onCleanup, $PROXY, untrack, createEffect, on } from "solid-js"
+import { $RAW } from "solid-js/store"
 import { arrayEquals, asArray, Many } from "@solid-primitives/utils"
 import {
 	getOwnerType,
@@ -525,5 +526,40 @@ export function debugProps(props: Record<string, unknown>): void {
 			undefined,
 			{ name: "debugProps EFFECT" },
 		)
+	}
+}
+
+export function debugStore(store: object): void {
+	if (!isSolidProxy(store)) {
+		console.warn("debugStore should be used with a proxy. Instead used on:", store)
+		return
+	}
+	const owner = getOwner()
+	if (!owner) {
+		console.warn("debugStore should be used synchronously inside an owner")
+		return
+	}
+	const argTarget = (store as any)[$RAW]
+	// console.log(argTarget)
+
+	if (owner.sourceMap) {
+		// Object.defineProperty(argTarget, $RAW, {
+		// 	get() {
+		// 		console.log("ASDFGSDGDRHDZ")
+		// 		return argTarget
+		// 	},
+		// })
+		// const ownerTarget = Object.values(owner.sourceMap).find(
+		// 	s => !("name" in s) && s.value === argTarget,
+		// )
+		// if (ownerTarget) {
+		// 	ownerTarget.value = {
+		// 		0: {
+		// 			title: "Ahahaha",
+		// 			done: true,
+		// 		},
+		// 	}
+		// 	console.log(ownerTarget)
+		// }
 	}
 }

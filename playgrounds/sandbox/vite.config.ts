@@ -22,7 +22,6 @@ export default defineConfig({
 	},
 	build: {
 		target: "esnext",
-		polyfillDynamicImport: false,
 	},
 	optimizeDeps: {
 		exclude: ["solid-devtools/vite"],
