@@ -467,7 +467,7 @@ export function debugProps(props: Record<string, unknown>): void {
 
 	if (descriptorsList.length === 0) console.log(...getPropsInitLabel(ownerState, isProxy, true))
 	else {
-		console.group(...getPropsInitLabel(ownerState, isProxy, false))
+		console.groupCollapsed(...getPropsInitLabel(ownerState, isProxy, false))
 		paddedForEach(
 			descriptorsList,
 			([, desc]) => (desc.get ? "Getter" : "Value"),
@@ -500,7 +500,7 @@ export function debugProps(props: Record<string, unknown>): void {
 						console.log(...getPropsKeyUpdateLabel(ownerState, true))
 					} else {
 						const [getMark, allKeys] = getDiffMap(prevKeys, keys, Map)
-						console.group(...getPropsKeyUpdateLabel(ownerState, false))
+						console.groupCollapsed(...getPropsKeyUpdateLabel(ownerState, false))
 						allKeys.forEach(key => {
 							const mark = getMark(key)
 
