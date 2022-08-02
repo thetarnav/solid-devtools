@@ -11,7 +11,7 @@
 	"main": "./dist/index.js",
 	"devDependencies": {
 		"@solid-devtools/babel-plugin": "^0.3.1",
-		"@solid-devtools/logger": "^0.2.0",
+		"@solid-devtools/logger": "^0.2.1",
 		"solid-app-router": "^0.4.2",
 		"solid-devtools": "^0.8.1",
 		"solid-js": "^1.4.8",
