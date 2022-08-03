@@ -11,6 +11,10 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
+        with:
+          # Personal access token is required to get around the protected main branch restriction
+          token: ${{ secrets.PAT }}
+
       - uses: pnpm/action-setup@v2.2.2
 
       - name: Setup Node.js environment
