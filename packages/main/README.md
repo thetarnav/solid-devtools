@@ -11,7 +11,7 @@ The main package of Solid Devtools. It contains the following subpackages:
 - [Debugger](https://github.com/thetarnav/solid-devtools/tree/main/packages/debugger#readme)
 - [Extension Adapter](https://github.com/thetarnav/solid-devtools/tree/main/packages/extension-adapter#readme) _(this one is automatically enabled)_
 - [Locator](https://github.com/thetarnav/solid-devtools/tree/main/packages/locator#readme) — [How to use it](#using-the-locator-package)
-- [Babel Plugin](https://github.com/thetarnav/solid-devtools/tree/main/packages/babel-plugin#readme) — [How to use it](#enabling-the-babel-plugin)
+- [Babel Plugin](https://github.com/thetarnav/solid-devtools/tree/main/packages/transform#readme) — [How to use it](#enabling-the-babel-plugin)
 
 ## Getting started
 
@@ -33,7 +33,11 @@ The `solid-devtools` package comes with the [Locator](https://github.com/thetarn
 
 ### Enabling the Babel plugin
 
-`solid-devtools` reexports the [babel plugin](https://github.com/thetarnav/solid-devtools/tree/main/packages/babel-plugin#readme) as a vite plugin.
+`solid-devtools` reexports the [babel plugin](https://github.com/thetarnav/solid-devtools/tree/main/packages/transform#readme) as a vite plugin.
+
+```**Note**
+In some cases import from `solid-devtools/vite` causes errors in loading vite config. I haven't figured out the cause yet. But to avoid the error, you can import from `@solid-devtools/transform` instead.
+```
 
 To enable it you need to add it to plugins array in your `.vite.config.js` file:
 
@@ -43,11 +47,14 @@ To enable it you need to add it to plugins array in your `.vite.config.js` file:
 import { defineConfig } from "vite"
 import solidPlugin from "vite-plugin-solid"
 import devtoolsPlugin from "solid-devtools/vite"
+// or: import devtoolsPlugin from "@solid-devtools/transform"
 
 export default defineConfig({
   plugins: [devtoolsPlugin(), solidPlugin()],
 })
 ```
+
+[**See transform options**](https://github.com/thetarnav/solid-devtools/tree/main/packages/transform#Options)
 
 ## Changelog
 

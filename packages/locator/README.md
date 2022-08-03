@@ -34,7 +34,13 @@ import solidPlugin from "vite-plugin-solid"
 import devtoolsPlugin from "solid-devtools/vite"
 
 export default defineConfig({
-  plugins: [devtoolsPlugin(), solidPlugin()],
+  plugins: [
+    devtoolsPlugin({
+      // enabling this option is required for the plugin to work
+      jsxLocation: true,
+    }),
+    solidPlugin(),
+  ],
 })
 ```
 

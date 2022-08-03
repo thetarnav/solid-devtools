@@ -1,1 +1,3 @@
-export { devtoolsPlugin as default } from "@solid-devtools/babel-plugin"
+import devtoolsPlugin from "@solid-devtools/transform"
+export default devtoolsPlugin
+export * from "@solid-devtools/transform"

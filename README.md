@@ -50,13 +50,11 @@ For debugging only the pinpoint places parts of the Solid's reactivity graph you
 
 Provides a variaty of debugging utilities for logging the state and lifecycle of the nodes of reactivity graph to the browser console.
 
-### [Babel Plugin](./packages/babel-plugin/)
+### [Transform](./packages/transform/)
 
-###### `@solid-devtools/babel-plugin`
+###### `@solid-devtools/transform`
 
-A babel plugin for vite for transforming Solid code. For development — debugging purposes only.
-
-Currently only transforms JSX, adding code location to it. Necessary for the [Locator](./packages/locator#readme) package.
+A babel transform plugin for vite for transforming Solid code. For development — debugging purposes only.
 
 ### [Chrome Extension](./packages/extension#readme)
 
