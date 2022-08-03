@@ -18,9 +18,9 @@ function assertTransform(src: string, expectedOutput: string) {
 
 describe("createStore", () => {
   test("named import", () => {
-    const src = /*javascript*/ `import { createStore } from "solid-js/store";`
+    const src = `import { createStore } from "solid-js/store";`
 
-    const expectedOutput = /*javascript*/ `import { createStore as ${storeOverwriteName}0 } from "solid-js/store";
+    const expectedOutput = `import { createStore as ${storeOverwriteName}0 } from "solid-js/store";
 
 const createStore = (obj, options) => {
   let wrappedObj = obj;
@@ -36,9 +36,9 @@ const createStore = (obj, options) => {
   })
 
   test("renamed import", () => {
-    const src = /*javascript*/ `import { createStore as createSolidStore } from "solid-js/store";`
+    const src = `import { createStore as createSolidStore } from "solid-js/store";`
 
-    const expectedOutput = /*javascript*/ `import { createStore as ${storeOverwriteName}0 } from "solid-js/store";
+    const expectedOutput = `import { createStore as ${storeOverwriteName}0 } from "solid-js/store";
 
 const createSolidStore = (obj, options) => {
   let wrappedObj = obj;
@@ -56,9 +56,9 @@ const createSolidStore = (obj, options) => {
 
 describe("createMutable", () => {
   test("named import", () => {
-    const src = /*javascript*/ `import { createMutable } from "solid-js/store";`
+    const src = `import { createMutable } from "solid-js/store";`
 
-    const expectedOutput = /*javascript*/ `import { createMutable as ${storeOverwriteName}0 } from "solid-js/store";
+    const expectedOutput = `import { createMutable as ${storeOverwriteName}0 } from "solid-js/store";
 
 const createMutable = (obj, options) => {
   let wrappedObj = obj;
@@ -74,9 +74,9 @@ const createMutable = (obj, options) => {
   })
 
   test("renamed import", () => {
-    const src = /*javascript*/ `import { createMutable as createSolidStore } from "solid-js/store";`
+    const src = `import { createMutable as createSolidStore } from "solid-js/store";`
 
-    const expectedOutput = /*javascript*/ `import { createMutable as ${storeOverwriteName}0 } from "solid-js/store";
+    const expectedOutput = `import { createMutable as ${storeOverwriteName}0 } from "solid-js/store";
 
 const createSolidStore = (obj, options) => {
   let wrappedObj = obj;
@@ -93,9 +93,9 @@ const createSolidStore = (obj, options) => {
 })
 
 test("namespace import", () => {
-  const src = /*javascript*/ `import * as Store from "solid-js/store";`
+  const src = `import * as Store from "solid-js/store";`
 
-  const expectedOutput = /*javascript*/ `import * as ${storeOverwriteNamespace} from "solid-js/store";
+  const expectedOutput = `import * as ${storeOverwriteNamespace} from "solid-js/store";
 const ${storeOverwriteName}0 = ${storeOverwriteNamespace}.createStore;
 const ${storeOverwriteName}1 = ${storeOverwriteNamespace}.createMutable;
 const Store = { ...${storeOverwriteNamespace}
@@ -125,9 +125,9 @@ Store.createMutable = (obj, options) => {
 })
 
 test("both", () => {
-  const src = /*javascript*/ `import { createMutable, createStore } from "solid-js/store";`
+  const src = `import { createMutable, createStore } from "solid-js/store";`
 
-  const expectedOutput = /*javascript*/ `import { createMutable as ${storeOverwriteName}0, createStore as ${storeOverwriteName}1 } from "solid-js/store";
+  const expectedOutput = `import { createMutable as ${storeOverwriteName}0, createStore as ${storeOverwriteName}1 } from "solid-js/store";
 
 const createMutable = (obj, options) => {
   let wrappedObj = obj;
