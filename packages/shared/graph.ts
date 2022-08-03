@@ -1,12 +1,7 @@
 import { getOwner as _getOwner } from "solid-js"
 import { Many } from "@solid-primitives/utils"
 import { SafeValue, UpdateType } from "./messanger"
-import {
-  Owner as _Owner,
-  SignalState as _SignalState,
-  Computation as _Computation,
-  EffectFunction,
-} from "./solid"
+import { Owner as _Owner, SignalState as _SignalState, Computation as _Computation } from "./solid"
 import { INTERNAL } from "./variables"
 
 export enum NodeType {
