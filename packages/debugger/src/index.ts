@@ -9,32 +9,33 @@ export type { TargetIDE, TargetURLFunction } from "@solid-devtools/locator"
 export { attachDebugger } from "./primitives"
 
 export {
-	makeSolidUpdateListener,
-	makeCreateRootListener,
-	observeComputationUpdate,
-	observeValueUpdate,
-	interceptComputationRerun,
+  makeSolidUpdateListener,
+  makeCreateRootListener,
+  makeStoreObserver,
+  observeComputationUpdate,
+  observeValueUpdate,
+  interceptComputationRerun,
 } from "./update"
-export type { AfterCrateRoot } from "./update"
+export type { AfterCrateRoot, ObjectObserver } from "./update"
 
 export {
-	getOwnerType,
-	getNodeType,
-	getNodeName,
-	lookupOwner,
-	isSolidComputation,
-	isSolidMemo,
-	isSolidOwner,
-	isSolidRoot,
-	onOwnerCleanup,
-	onParentCleanup,
-	getFunctionSources,
-	getSafeValue,
-	createUnownedRoot,
-	createInternalRoot,
+  getOwnerType,
+  getNodeType,
+  getNodeName,
+  lookupOwner,
+  isSolidComputation,
+  isSolidMemo,
+  isSolidOwner,
+  isSolidRoot,
+  onOwnerCleanup,
+  onParentCleanup,
+  getFunctionSources,
+  getSafeValue,
+  createUnownedRoot,
+  createInternalRoot,
 } from "./utils"
 
 export const Debugger: ParentComponent = props => {
-	attachDebugger()
-	return props.children
+  attachDebugger()
+  return props.children
 }

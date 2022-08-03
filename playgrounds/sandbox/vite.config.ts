@@ -10,6 +10,7 @@ export default defineConfig({
   plugins: [
     devtoolsPlugin({
       wrapStores: true,
+      jsxLocation: true,
     }),
     solidPlugin(),
   ],

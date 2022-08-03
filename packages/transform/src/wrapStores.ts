@@ -1,5 +1,6 @@
 import { PluginObj } from "@babel/core"
 import * as t from "@babel/types"
+import { WINDOW_WRAP_STORE_PROPERTY } from "@shared/variables"
 import { storeOverwriteName, storeOverwriteNamespace, windowId } from "./utils"
 
 const createStoreId = t.identifier("createStore")
@@ -21,7 +22,7 @@ function getStoreWrapperArrowFn(overwrite: t.Identifier): t.ArrowFunctionExpress
   const objId = t.identifier("obj")
   const optionsId = t.identifier("options")
   const wrappedObjId = t.identifier("wrappedObj")
-  const wrapStoreId = t.identifier("$sdt_wrapStore")
+  const wrapStoreId = t.identifier(WINDOW_WRAP_STORE_PROPERTY)
   const wrapStoreMember = t.memberExpression(windowId, wrapStoreId)
 
   return t.arrowFunctionExpression(
