@@ -1,9 +1,9 @@
 import {
-	MESSAGE,
-	once,
-	onWindowMessage,
-	postWindowMessage,
-	startListeningWindowMessages,
+  MESSAGE,
+  once,
+  onWindowMessage,
+  postWindowMessage,
+  startListeningWindowMessages,
 } from "@shared/messanger"
 import { createPortMessanger } from "../shared/utils"
 import { DEVTOOLS_CONTENT_PORT } from "../shared/variables"
@@ -22,11 +22,11 @@ onWindowMessage(MESSAGE.GraphUpdate, graph => postPortMessage(MESSAGE.GraphUpdat
 onWindowMessage(MESSAGE.BatchedUpdate, payload => postPortMessage(MESSAGE.BatchedUpdate, payload))
 
 onPortMessage(MESSAGE.PanelVisibility, visible =>
-	postWindowMessage(MESSAGE.PanelVisibility, visible),
+  postWindowMessage(MESSAGE.PanelVisibility, visible),
 )
 
 once(onPortMessage, MESSAGE.DevtoolsScriptConnected, () =>
-	postWindowMessage(MESSAGE.DevtoolsScriptConnected),
+  postWindowMessage(MESSAGE.DevtoolsScriptConnected),
 )
 
 once(onPortMessage, MESSAGE.ForceUpdate, () => postWindowMessage(MESSAGE.ForceUpdate))

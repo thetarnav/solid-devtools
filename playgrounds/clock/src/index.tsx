@@ -4,10 +4,10 @@ import "./styles.css"
 import { Debugger } from "../../../packages/debugger/src"
 
 render(
-	() => (
-		<Debugger>
-			<Clock />
-		</Debugger>
-	),
-	document.getElementById("root")!,
+  () => (
+    <Debugger>
+      <Clock />
+    </Debugger>
+  ),
+  document.getElementById("root")!,
 )

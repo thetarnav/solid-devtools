@@ -1,45 +1,45 @@
 {
-	"name": "solid-devtools-todomvc-playground",
-	"version": "0.0.1",
-	"private": true,
-	"description": "Solid implementation of TodoMVC",
-	"scripts": {
-		"start": "vite",
-		"dev": "vite",
-		"build": "vite build",
-		"serve": "vite preview"
-	},
-	"keywords": [
-		"solid",
-		"javascript",
-		"framework",
-		"todomvc"
-	],
-	"author": "Ryan Carniato",
-	"contributors": [
-		"Damian Tarnawski <gthetarnav@gmail.com>"
-	],
-	"license": "MIT",
-	"homepage": "https://github.com/thetarnav/solid-devtools#readme",
-	"repository": {
-		"type": "git",
-		"url": "git+https://github.com/thetarnav/solid-devtools.git"
-	},
-	"bugs": {
-		"url": "https://github.com/thetarnav/solid-devtools/issues"
-	},
-	"engines": {
-		"node": ">=16.6.1",
-		"npm": ">=7.20.1"
-	},
-	"dependencies": {
-		"solid-js": "^1.4.8",
-		"todomvc-app-css": "^2.4.2",
-		"todomvc-common": "^1.0.5"
-	},
-	"devDependencies": {
-		"typescript": "^4.7.4",
-		"vite": "^2.9.14",
-		"vite-plugin-solid": "^2.3.0"
-	}
+  "name": "solid-devtools-todomvc-playground",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Solid implementation of TodoMVC",
+  "scripts": {
+    "start": "vite",
+    "dev": "vite",
+    "build": "vite build",
+    "serve": "vite preview"
+  },
+  "keywords": [
+    "solid",
+    "javascript",
+    "framework",
+    "todomvc"
+  ],
+  "author": "Ryan Carniato",
+  "contributors": [
+    "Damian Tarnawski <gthetarnav@gmail.com>"
+  ],
+  "license": "MIT",
+  "homepage": "https://github.com/thetarnav/solid-devtools#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/thetarnav/solid-devtools.git"
+  },
+  "bugs": {
+    "url": "https://github.com/thetarnav/solid-devtools/issues"
+  },
+  "engines": {
+    "node": ">=16.6.1",
+    "npm": ">=7.20.1"
+  },
+  "dependencies": {
+    "solid-js": "^1.4.8",
+    "todomvc-app-css": "^2.4.2",
+    "todomvc-common": "^1.0.5"
+  },
+  "devDependencies": {
+    "typescript": "^4.7.4",
+    "vite": "^2.9.14",
+    "vite-plugin-solid": "^2.3.0"
+  }
 }

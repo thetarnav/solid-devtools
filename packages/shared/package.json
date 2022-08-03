@@ -1,12 +1,12 @@
 {
-	"name": "solid-devtools-shared",
-	"version": "0.3.2",
-	"license": "MIT",
-	"author": "Damian Tarnawski <gthetarnav@gmail.com>",
-	"contributors": [],
-	"dependencies": {
-		"@solid-primitives/utils": "^3.0.1",
-		"solid-js": "^1.4.8"
-	},
-	"private": true
+  "name": "solid-devtools-shared",
+  "version": "0.3.2",
+  "license": "MIT",
+  "author": "Damian Tarnawski <gthetarnav@gmail.com>",
+  "contributors": [],
+  "dependencies": {
+    "@solid-primitives/utils": "^3.0.1",
+    "solid-js": "^1.4.8"
+  },
+  "private": true
 }

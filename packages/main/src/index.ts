@@ -7,10 +7,10 @@ makeCreateRootListener(root => attachDebugger(root))
 useExtensionAdapter()
 
 export {
-	Debugger,
-	attachDebugger,
-	registerDebuggerPlugin,
-	makeSolidUpdateListener,
+  Debugger,
+  attachDebugger,
+  registerDebuggerPlugin,
+  makeSolidUpdateListener,
 } from "@solid-devtools/debugger"
 export type { PluginFactory, TargetIDE, TargetURLFunction } from "@solid-devtools/debugger"
 

@@ -1,9 +1,9 @@
 export {}
 
 declare global {
-	namespace chrome.runtime {
-		interface MessageSender {
-			documentId: string
-		}
-	}
+  namespace chrome.runtime {
+    interface MessageSender {
+      documentId: string
+    }
+  }
 }

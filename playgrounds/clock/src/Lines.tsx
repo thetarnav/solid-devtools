@@ -6,6 +6,6 @@ type LinesProps = { numberOfLines: number; class: string; length: number; width:
 const rotate = (index: number, length: number) => () => `rotate(${(360 * index) / length})`
 
 export const Lines: Component<LinesProps> = ({ numberOfLines, ...rest }) =>
-	Array.from({ length: numberOfLines }).map((_, index) => (
-		<Hand rotate={rotate(index, numberOfLines)} {...rest} fixed />
-	))
+  Array.from({ length: numberOfLines }).map((_, index) => (
+    <Hand rotate={rotate(index, numberOfLines)} {...rest} fixed />
+  ))

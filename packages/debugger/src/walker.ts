@@ -1,22 +1,22 @@
 import { resolveElements } from "@solid-primitives/refs"
 import {
-	MappedOwner,
-	NodeType,
-	SolidOwner,
-	MappedSignal,
-	SolidSignal,
-	MappedComponent,
-	SignalState,
-	SolidMemo,
+  MappedOwner,
+  NodeType,
+  SolidOwner,
+  MappedSignal,
+  SolidSignal,
+  MappedComponent,
+  SignalState,
+  SolidMemo,
 } from "@shared/graph"
 import { ComputationUpdateHandler, SignalUpdateHandler } from "./batchUpdates"
 import {
-	getNodeName,
-	getSafeValue,
-	isSolidComputation,
-	markNodeID,
-	markNodesID,
-	markOwnerType,
+  getNodeName,
+  getSafeValue,
+  isSolidComputation,
+  markNodeID,
+  markNodesID,
+  markOwnerType,
 } from "./utils"
 import { observeComputationUpdate, observeValueUpdate } from "./update"
 
@@ -32,108 +32,108 @@ let Components: MappedComponent[] = []
 const WALKER = Symbol("walker")
 
 function observeComputation(owner: SolidOwner, id: number) {
-	if (TrackBatchedUpdates && isSolidComputation(owner))
-		observeComputationUpdate(owner, OnComputationUpdate.bind(void 0, id))
+  if (TrackBatchedUpdates && isSolidComputation(owner))
+    observeComputationUpdate(owner, OnComputationUpdate.bind(void 0, id))
 }
 
 function observeValue(node: SignalState, id: number) {
-	// OnSignalUpdate will change
-	const handler = OnSignalUpdate
-	if (TrackBatchedUpdates)
-		observeValueUpdate(node, (value, oldValue) => handler({ id, value, oldValue }), WALKER)
+  // OnSignalUpdate will change
+  const handler = OnSignalUpdate
+  if (TrackBatchedUpdates)
+    observeValueUpdate(node, (value, oldValue) => handler({ id, value, oldValue }), WALKER)
 }
 
 function createSignalNode(
-	raw: Pick<SolidSignal, "name" | "value" | "observers"> & { id: number },
+  raw: Pick<SolidSignal, "name" | "value" | "observers"> & { id: number },
 ): MappedSignal {
-	return {
-		name: raw.name ?? "(anonymous)",
-		id: raw.id,
-		observers: markNodesID(raw.observers),
-		value: getSafeValue(raw.value),
-	}
+  return {
+    name: raw.name ?? "(anonymous)",
+    id: raw.id,
+    observers: markNodesID(raw.observers),
+    value: getSafeValue(raw.value),
+  }
 }
 
 function mapOwnerSignals(owner: SolidOwner): MappedSignal[] {
-	if (!owner.sourceMap || !TrackSignals) return []
-	return Object.values(owner.sourceMap).map(raw => {
-		const id = markNodeID(raw)
-		observeValue(raw, id)
-		return createSignalNode({ ...raw, id })
-	})
+  if (!owner.sourceMap || !TrackSignals) return []
+  return Object.values(owner.sourceMap).map(raw => {
+    const id = markNodeID(raw)
+    observeValue(raw, id)
+    return createSignalNode({ ...raw, id })
+  })
 }
 
 function mapMemo(mapped: MappedOwner, owner: SolidMemo): MappedOwner {
-	const { id, name } = mapped
-	observeValue(owner, id)
-	return Object.assign(mapped, {
-		signal: createSignalNode({ id, name, value: owner.value, observers: owner.observers }),
-	})
+  const { id, name } = mapped
+  observeValue(owner, id)
+  return Object.assign(mapped, {
+    signal: createSignalNode({ id, name, value: owner.value, observers: owner.observers }),
+  })
 }
 
 function mapOwner(owner: SolidOwner, type?: NodeType): MappedOwner {
-	type = markOwnerType(owner, type)
-	const id = markNodeID(owner)
-	const name = getNodeName(owner)
+  type = markOwnerType(owner, type)
+  const id = markNodeID(owner)
+  const name = getNodeName(owner)
 
-	observeComputation(owner, id)
+  observeComputation(owner, id)
 
-	if (type === NodeType.Component && TrackComponents) {
-		const resolved = resolveElements(owner.value)
-		if (resolved) Components.push({ name, resolved })
-	}
+  if (type === NodeType.Component && TrackComponents) {
+    const resolved = resolveElements(owner.value)
+    if (resolved) Components.push({ name, resolved })
+  }
 
-	const mapped = {
-		id,
-		name,
-		type,
-		signals: mapOwnerSignals(owner),
-		children: mapChildren(owner),
-		sources: markNodesID(owner.sources),
-	}
+  const mapped = {
+    id,
+    name,
+    type,
+    signals: mapOwnerSignals(owner),
+    children: mapChildren(owner),
+    sources: markNodesID(owner.sources),
+  }
 
-	return type === NodeType.Memo ? mapMemo(mapped, owner as SolidMemo) : mapped
+  return type === NodeType.Memo ? mapMemo(mapped, owner as SolidMemo) : mapped
 }
 
 function mapChildren({ owned, ownedRoots }: Readonly<SolidOwner>): MappedOwner[] {
-	const children: MappedOwner[] = []
+  const children: MappedOwner[] = []
 
-	if (owned)
-		children.push.apply(
-			children,
-			owned.map(child => mapOwner(child)),
-		)
+  if (owned)
+    children.push.apply(
+      children,
+      owned.map(child => mapOwner(child)),
+    )
 
-	if (ownedRoots)
-		children.push.apply(
-			children,
-			[...ownedRoots].map(child => mapOwner(child, NodeType.Root)),
-		)
+  if (ownedRoots)
+    children.push.apply(
+      children,
+      [...ownedRoots].map(child => mapOwner(child, NodeType.Root)),
+    )
 
-	return children
+  return children
 }
 
 export type WalkerConfig = {
-	rootId: number
-	onSignalUpdate: SignalUpdateHandler
-	onComputationUpdate: ComputationUpdateHandler
-	trackSignals: boolean
-	trackBatchedUpdates: boolean
-	trackComponents: boolean
+  rootId: number
+  onSignalUpdate: SignalUpdateHandler
+  onComputationUpdate: ComputationUpdateHandler
+  trackSignals: boolean
+  trackBatchedUpdates: boolean
+  trackComponents: boolean
 }
 
 export function walkSolidTree(
-	owner: SolidOwner,
-	config: WalkerConfig,
+  owner: SolidOwner,
+  config: WalkerConfig,
 ): { tree: MappedOwner; components: MappedComponent[] } {
-	// set the globals to be available for this walk cycle
-	RootID = config.rootId
-	OnSignalUpdate = config.onSignalUpdate
-	OnComputationUpdate = config.onComputationUpdate
-	TrackSignals = config.trackSignals
-	TrackBatchedUpdates = config.trackBatchedUpdates
-	TrackComponents = config.trackComponents
-	if (TrackComponents) Components = []
+  // set the globals to be available for this walk cycle
+  RootID = config.rootId
+  OnSignalUpdate = config.onSignalUpdate
+  OnComputationUpdate = config.onComputationUpdate
+  TrackSignals = config.trackSignals
+  TrackBatchedUpdates = config.trackBatchedUpdates
+  TrackComponents = config.trackComponents
+  if (TrackComponents) Components = []
 
-	return { tree: mapOwner(owner), components: Components }
+  return { tree: mapOwner(owner), components: Components }
 }
