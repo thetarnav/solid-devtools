@@ -1,6 +1,6 @@
 {
   "name": "@solid-devtools/transform",
-  "version": "0.3.1",
+  "version": "0.4.0",
   "description": "Babel plugin for transforming SolidJS code in development to enchance solid-devtools usage.",
   "license": "MIT",
   "author": "Damian Tarnawski <gthetarnav@gmail.com>",

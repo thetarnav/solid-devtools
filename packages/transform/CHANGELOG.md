@@ -1,5 +1,11 @@
 # @solid-devtools/transform
 
+## 0.4.0
+
+### Minor Changes
+
+- 7721110: Add wrapStores transform.
+
 ## 0.3.1
 
 ### Patch Changes
