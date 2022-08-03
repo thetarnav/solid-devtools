@@ -1,4 +1,4 @@
-# @solid-devtools/babel-plugin
+# @solid-devtools/transform
 
 ## 0.3.1
 
@@ -10,7 +10,7 @@
 
 ### Minor Changes
 
-- 4c79a90: Bump vite peerDepenedency to version 3.0.0 (#34)
+- 4c79a90: Bump vite peerDependency to version 3.0.0 (#34)
 
 ## 0.2.1
 

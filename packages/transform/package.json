@@ -1,11 +1,11 @@
 {
-  "name": "@solid-devtools/babel-plugin",
+  "name": "@solid-devtools/transform",
   "version": "0.3.1",
   "description": "Babel plugin for transforming SolidJS code in development to enchance solid-devtools usage.",
   "license": "MIT",
   "author": "Damian Tarnawski <gthetarnav@gmail.com>",
   "contributors": [],
-  "homepage": "https://github.com/thetarnav/solid-devtools/tree/main/packages/babel-plugin#readme",
+  "homepage": "https://github.com/thetarnav/solid-devtools/tree/main/packages/transform#readme",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/thetarnav/solid-devtools.git"

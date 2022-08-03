@@ -38,41 +38,6 @@ importers:
       turbo: 1.4.0
       typescript: 4.7.4
 
-  packages/babel-plugin:
-    specifiers:
-      '@babel/core': ^7.18.10
-      '@babel/generator': ^7.18.10
-      '@babel/parser': ^7.18.10
-      '@babel/plugin-syntax-jsx': ^7.18.6
-      '@babel/plugin-syntax-typescript': ^7.18.6
-      '@babel/traverse': ^7.18.10
-      '@babel/types': ^7.18.10
-      '@types/babel__core': ^7.1.19
-      '@types/babel__generator': ^7.6.4
-      '@types/babel__traverse': ^7.17.1
-      jest: ^28.1.3
-      solid-js: ^1.4.4
-      tsup: ^6.2.1
-      typescript: ^4.7.4
-      vite: ^3.0.4
-    dependencies:
-      '@babel/core': 7.18.10
-      '@babel/plugin-syntax-typescript': 7.18.6_@babel+core@7.18.10
-      '@babel/types': 7.18.10
-      solid-js: 1.4.5
-    devDependencies:
-      '@babel/generator': 7.18.10
-      '@babel/parser': 7.18.10
-      '@babel/plugin-syntax-jsx': 7.18.6_@babel+core@7.18.10
-      '@babel/traverse': 7.18.10
-      '@types/babel__core': 7.1.19
-      '@types/babel__generator': 7.6.4
-      '@types/babel__traverse': 7.17.1
-      jest: 28.1.3
-      tsup: 6.2.1_typescript@4.7.4
-      typescript: 4.7.4
-      vite: 3.0.4
-
   packages/debugger:
     specifiers:
       '@solid-primitives/event-bus': ^0.1.0
@@ -152,8 +117,8 @@ importers:
 
   packages/locator:
     specifiers:
-      '@solid-devtools/babel-plugin': ^0.3.1
       '@solid-devtools/debugger': ^0.2.3
+      '@solid-devtools/transform': ^0.3.1
       '@solid-devtools/ui': 0.3.3
       '@solid-primitives/bounds': ^0.0.100
       '@solid-primitives/event-listener': ^2.2.1
@@ -180,7 +145,7 @@ importers:
       '@solid-primitives/utils': 3.0.1_solid-js@1.4.8
       motion: 10.13.1
     optionalDependencies:
-      '@solid-devtools/babel-plugin': link:../babel-plugin
+      '@solid-devtools/transform': link:../transform
     devDependencies:
       '@testing-library/jest-dom': 5.16.4
       esbuild: 0.14.51
@@ -217,10 +182,10 @@ importers:
 
   packages/main:
     specifiers:
-      '@solid-devtools/babel-plugin': ^0.3.1
       '@solid-devtools/debugger': ^0.2.3
       '@solid-devtools/extension-adapter': ^0.8.1
       '@solid-devtools/locator': ^0.8.1
+      '@solid-devtools/transform': ^0.3.1
       '@testing-library/jest-dom': ^5.16.4
       jest: ^28.1.3
       jest-environment-jsdom: ^28.1.3
@@ -229,10 +194,10 @@ importers:
       tsup: ^6.2.1
       typescript: ^4.7.4
     dependencies:
-      '@solid-devtools/babel-plugin': link:../babel-plugin
       '@solid-devtools/debugger': link:../debugger
       '@solid-devtools/extension-adapter': link:../extension-adapter
       '@solid-devtools/locator': link:../locator
+      '@solid-devtools/transform': link:../transform
     devDependencies:
       '@testing-library/jest-dom': 5.16.4
       jest: 28.1.3_g3ob4elhesv7uyo2jbxkqs7hje
@@ -275,11 +240,46 @@ importers:
       '@solid-primitives/utils': 3.0.1_solid-js@1.4.8
       solid-js: 1.4.8
 
+  packages/transform:
+    specifiers:
+      '@babel/core': ^7.18.10
+      '@babel/generator': ^7.18.10
+      '@babel/parser': ^7.18.10
+      '@babel/plugin-syntax-jsx': ^7.18.6
+      '@babel/plugin-syntax-typescript': ^7.18.6
+      '@babel/traverse': ^7.18.10
+      '@babel/types': ^7.18.10
+      '@types/babel__core': ^7.1.19
+      '@types/babel__generator': ^7.6.4
+      '@types/babel__traverse': ^7.17.1
+      jest: ^28.1.3
+      solid-js: ^1.4.4
+      tsup: ^6.2.1
+      typescript: ^4.7.4
+      vite: ^3.0.4
+    dependencies:
+      '@babel/core': 7.18.10
+      '@babel/plugin-syntax-typescript': 7.18.6_@babel+core@7.18.10
+      '@babel/types': 7.18.10
+    devDependencies:
+      '@babel/generator': 7.18.10
+      '@babel/parser': 7.18.10
+      '@babel/plugin-syntax-jsx': 7.18.6_@babel+core@7.18.10
+      '@babel/traverse': 7.18.10
+      '@types/babel__core': 7.1.19
+      '@types/babel__generator': 7.6.4
+      '@types/babel__traverse': 7.17.1
+      jest: 28.1.3
+      solid-js: 1.4.8
+      tsup: 6.2.1_typescript@4.7.4
+      typescript: 4.7.4
+      vite: 3.0.4
+
   packages/ui:
     specifiers:
       '@otonashixav/solid-flip': ^0.10.5
       '@solid-aria/interactions': ^0.1.4
-      '@solid-devtools/babel-plugin': ^0.3.1
+      '@solid-devtools/transform': ^0.3.1
       '@solid-primitives/props': ^2.2.1
       '@solid-primitives/utils': ^3.0.1
       esbuild: ^0.14.51
@@ -295,7 +295,7 @@ importers:
       '@solid-primitives/utils': 3.0.1_solid-js@1.4.8
       twind: 0.16.17_typescript@4.7.4
     devDependencies:
-      '@solid-devtools/babel-plugin': link:../babel-plugin
+      '@solid-devtools/transform': link:../transform
       esbuild: 0.14.51
       esbuild-plugin-solid: 0.4.2_vt7ue5mhxyhjzwryplo2mkvvwq
       solid-js: 1.4.8
@@ -319,8 +319,8 @@ importers:
 
   playgrounds/sandbox:
     specifiers:
-      '@solid-devtools/babel-plugin': ^0.3.1
       '@solid-devtools/logger': ^0.2.0
+      '@solid-devtools/transform': ^0.3.1
       '@solid-primitives/timer': ^1.3.1
       object-observer: ^5.0.4
       solid-devtools: ^0.8.1
@@ -335,15 +335,15 @@ importers:
       solid-devtools: link:../../packages/main
       solid-js: 1.4.8
     devDependencies:
-      '@solid-devtools/babel-plugin': link:../../packages/babel-plugin
+      '@solid-devtools/transform': link:../../packages/transform
       typescript: 4.7.4
       vite: 3.0.4
       vite-plugin-solid: 2.3.0_solid-js@1.4.8+vite@3.0.4
 
   playgrounds/start:
     specifiers:
-      '@solid-devtools/babel-plugin': ^0.3.1
       '@solid-devtools/logger': ^0.2.0
+      '@solid-devtools/transform': ^0.3.1
       solid-app-router: ^0.4.2
       solid-devtools: ^0.8.1
       solid-js: ^1.4.8
@@ -354,8 +354,8 @@ importers:
       undici: ^4.16.0
       vite: 2.9.12
     devDependencies:
-      '@solid-devtools/babel-plugin': link:../../packages/babel-plugin
       '@solid-devtools/logger': 0.2.1_solid-js@1.4.8
+      '@solid-devtools/transform': link:../../packages/transform
       solid-app-router: 0.4.2_solid-js@1.4.8
       solid-devtools: link:../../packages/main
       solid-js: 1.4.8
@@ -953,11 +953,11 @@ packages:
   /@babel/helper-plugin-utils/7.18.6:
     resolution: {integrity: sha512-gvZnm1YAAxh13eJdkb9EWHBnF3eAub3XTLCZEehHT2kWxiKVRL64+ae5Y6Ivne0mVHmMYKT+xWgZO+gQhuLUBg==}
     engines: {node: '>=6.9.0'}
+    dev: true
 
   /@babel/helper-plugin-utils/7.18.9:
     resolution: {integrity: sha512-aBXPT3bmtLryXaoJLyYPXPlSD4p1ld9aYeR+sJNOZjJJGiOpb+fKfh3NkcCu7J54nUJwCERPBExCCpyCOHnu/w==}
     engines: {node: '>=6.9.0'}
-    dev: true
 
   /@babel/helper-remap-async-to-generator/7.16.8:
     resolution: {integrity: sha512-fm0gH7Flb8H51LqJHy3HJ3wnE1+qtYR2A99K06ahwrawLdOFsCEWjZOrYricXJHoPSudNKxrMBUPEIPxiIIvBw==}
@@ -1814,7 +1814,7 @@ packages:
       '@babel/core': ^7.0.0-0
     dependencies:
       '@babel/core': 7.18.10
-      '@babel/helper-plugin-utils': 7.18.6
+      '@babel/helper-plugin-utils': 7.18.9
     dev: true
 
   /@babel/plugin-syntax-jsx/7.18.6_@babel+core@7.18.6:
@@ -1824,7 +1824,7 @@ packages:
       '@babel/core': ^7.0.0-0
     dependencies:
       '@babel/core': 7.18.6
-      '@babel/helper-plugin-utils': 7.18.6
+      '@babel/helper-plugin-utils': 7.18.9
     dev: true
 
   /@babel/plugin-syntax-logical-assignment-operators/7.10.4_@babel+core@7.18.10:
@@ -1982,7 +1982,7 @@ packages:
       '@babel/core': ^7.0.0-0
     dependencies:
       '@babel/core': 7.18.10
-      '@babel/helper-plugin-utils': 7.18.6
+      '@babel/helper-plugin-utils': 7.18.9
 
   /@babel/plugin-syntax-typescript/7.18.6_@babel+core@7.18.2:
     resolution: {integrity: sha512-mAWAuq4rvOepWCBid55JuRNvpTNf2UGVgoz4JV0fXEKolsVZDzsa4NqCef758WZJj/GDu0gVGItjKFiClTAmZA==}
@@ -1991,7 +1991,7 @@ packages:
       '@babel/core': ^7.0.0-0
     dependencies:
       '@babel/core': 7.18.2
-      '@babel/helper-plugin-utils': 7.18.6
+      '@babel/helper-plugin-utils': 7.18.9
     dev: true
 
   /@babel/plugin-syntax-typescript/7.18.6_@babel+core@7.18.5:
@@ -2001,7 +2001,7 @@ packages:
       '@babel/core': ^7.0.0-0
     dependencies:
       '@babel/core': 7.18.5
-      '@babel/helper-plugin-utils': 7.18.6
+      '@babel/helper-plugin-utils': 7.18.9
     dev: true
 
   /@babel/plugin-syntax-typescript/7.18.6_@babel+core@7.18.6:
@@ -2011,7 +2011,7 @@ packages:
       '@babel/core': ^7.0.0-0
     dependencies:
       '@babel/core': 7.18.6
-      '@babel/helper-plugin-utils': 7.18.6
+      '@babel/helper-plugin-utils': 7.18.9
     dev: true
 
   /@babel/plugin-transform-arrow-functions/7.17.12_@babel+core@7.18.2:
@@ -5280,7 +5280,7 @@ packages:
     dev: true
 
   /concat-map/0.0.1:
-    resolution: {integrity: sha512-/Srv4dswyQNBfohGpz9o6Yb3Gz3SrUDqBH5rTuhGR7ahtlbYKnVxw2bCFMRljaA7EXHaXZ8wsHdodFvbkhKmqg==}
+    resolution: {integrity: sha1-2Klr13/Wjfd5OnMDajug1UBdR3s=}
     dev: true
 
   /connect-injector/0.4.4:
@@ -9349,10 +9349,6 @@ packages:
     dependencies:
       solid-js: 1.4.8
     dev: true
-
-  /solid-js/1.4.5:
-    resolution: {integrity: sha512-32NGpuabEJDTeQ7fjaTR2TLC7R/X5hbqhYdEQ1e+GcIK8r8+/V0Nv17eZQii5Z/97/mtdt8yi63chzg73qnz/A==}
-    dev: false
 
   /solid-js/1.4.8:
     resolution: {integrity: sha512-XErZdnnYYXF7OwGSUAPcua2y5/ELB/c53zFCpWiEGqxTNoH1iQghzI8EsHJXk06sNn+Z/TGhb8bPDNNGSgimag==}
