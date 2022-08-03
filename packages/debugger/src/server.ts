@@ -15,6 +15,7 @@ export const registerDebuggerPlugin: typeof API.registerDebuggerPlugin = noop
 // update
 export const makeSolidUpdateListener: typeof API.makeSolidUpdateListener = () => noop
 export const makeCreateRootListener: typeof API.makeCreateRootListener = () => noop
+export const makeStoreObserver: typeof API.makeStoreObserver = () => noop
 export const observeComputationUpdate: typeof API.observeComputationUpdate = noop
 export const observeValueUpdate: typeof API.observeValueUpdate = () => noop
 export const interceptComputationRerun: typeof API.interceptComputationRerun = noop
