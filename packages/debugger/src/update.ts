@@ -68,6 +68,12 @@ export function makeCreateRootListener(onUpdate: AfterCrateRoot): VoidFunction {
 
 export type { ObjectObserver }
 
+declare global {
+  interface Window {
+    [WINDOW_WRAP_STORE_PROPERTY]?: <T extends object>(init: T) => T
+  }
+}
+
 // window[WINDOW_WRAP_STORE_PROPERTY] is internal — no need to worry about other users
 window[WINDOW_WRAP_STORE_PROPERTY] = init => {
   return Observable.from(init)
