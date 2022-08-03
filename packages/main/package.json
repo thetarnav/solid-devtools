@@ -1,6 +1,6 @@
 {
   "name": "solid-devtools",
-  "version": "0.8.1",
+  "version": "0.8.2",
   "description": "Runtime helpers for hooking up SolidJS application with Solid Devtools",
   "license": "MIT",
   "author": "Damian Tarnawski <gthetarnav@gmail.com>",
@@ -73,10 +73,10 @@
     "typescript": "^4.7.4"
   },
   "dependencies": {
-    "@solid-devtools/transform": "^0.3.1",
-    "@solid-devtools/debugger": "^0.2.3",
-    "@solid-devtools/extension-adapter": "^0.8.1",
-    "@solid-devtools/locator": "^0.8.1"
+    "@solid-devtools/transform": "^0.4.0",
+    "@solid-devtools/debugger": "^0.3.0",
+    "@solid-devtools/extension-adapter": "^0.8.2",
+    "@solid-devtools/locator": "^0.8.2"
   },
   "peerDependencies": {
     "solid-js": "^1.4.5"

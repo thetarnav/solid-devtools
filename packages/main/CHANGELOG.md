@@ -1,5 +1,16 @@
 # solid-devtools
 
+## 0.8.2
+
+### Patch Changes
+
+- Updated dependencies [7721110]
+- Updated dependencies [3c140cc]
+  - @solid-devtools/transform@0.4.0
+  - @solid-devtools/debugger@0.3.0
+  - @solid-devtools/locator@0.8.2
+  - @solid-devtools/extension-adapter@0.8.2
+
 ## 0.8.1
 
 ### Patch Changes

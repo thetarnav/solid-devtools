@@ -1,5 +1,11 @@
 # @solid-devtools/debugger
 
+## 0.3.0
+
+### Minor Changes
+
+- 3c140cc: Add basic API for observing store updates — `makeStoreObserver`.
+
 ## 0.2.3
 
 ### Patch Changes
