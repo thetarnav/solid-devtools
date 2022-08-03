@@ -29,14 +29,18 @@
 	],
 	"scripts": {
 		"dev": "tsup --watch",
-		"build": "tsup"
+		"build": "tsup",
+		"test": "jest --config jest.config.ts",
+		"typecheck": "tsc --noEmit"
 	},
 	"devDependencies": {
 		"@babel/core": "^7.18.10",
+		"@babel/generator": "^7.18.10",
 		"@babel/parser": "^7.18.10",
 		"@babel/plugin-syntax-jsx": "^7.18.6",
 		"@babel/traverse": "^7.18.10",
 		"@types/babel__core": "^7.1.19",
+		"@types/babel__generator": "^7.6.4",
 		"@types/babel__traverse": "^7.17.1",
 		"tsup": "^6.2.1",
 		"typescript": "^4.7.4",
