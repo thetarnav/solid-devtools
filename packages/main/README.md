@@ -35,6 +35,10 @@ The `solid-devtools` package comes with the [Locator](https://github.com/thetarn
 
 `solid-devtools` reexports the [babel plugin](https://github.com/thetarnav/solid-devtools/tree/main/packages/transform#readme) as a vite plugin.
 
+```**Note**
+In some cases import from `solid-devtools/vite` causes errors in loading vite config. I haven't figured out the cause yet. But to avoid the error, you can import from `@solid-devtools/transform` instead.
+```
+
 To enable it you need to add it to plugins array in your `.vite.config.js` file:
 
 ```ts
@@ -43,6 +47,7 @@ To enable it you need to add it to plugins array in your `.vite.config.js` file:
 import { defineConfig } from "vite"
 import solidPlugin from "vite-plugin-solid"
 import devtoolsPlugin from "solid-devtools/vite"
+// or: import devtoolsPlugin from "@solid-devtools/transform"
 
 export default defineConfig({
   plugins: [devtoolsPlugin(), solidPlugin()],
