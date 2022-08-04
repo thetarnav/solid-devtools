@@ -28,7 +28,7 @@ const createPanel = () =>
     chrome.devtools.panels.create(
       "Solid",
       "assets/icons/solid-normal-32.png",
-      "src/index.html",
+      "index.html",
       newPanel => {
         if (chrome.runtime.lastError) reject(chrome.runtime.lastError)
         else resolve(newPanel)

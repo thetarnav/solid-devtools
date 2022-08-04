@@ -1,4 +1,3 @@
-import { isServer } from "@solid-primitives/utils"
 import { SerialisedTreeRoot } from "./graph"
 
 export const LOG_MESSAGES = false
@@ -74,7 +73,7 @@ const listeners: Partial<Record<MESSAGE, ((payload: any) => void)[]>> = {}
  * Important ot call this if you want to use {@link onWindowMessage}
  */
 export function startListeningWindowMessages() {
-  if (isServer) return
+  if (typeof window === "undefined") return
   window.addEventListener("message", event => {
     const id = event.data?.id as MESSAGE
     if (typeof id !== "number") return

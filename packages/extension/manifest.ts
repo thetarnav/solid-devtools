@@ -16,7 +16,7 @@ export default defineManifest({
     },
   ],
   background: {
-    service_worker: "background/index.ts",
+    service_worker: "background/background.ts",
     type: "module",
   },
   permissions: ["debugger", "clipboardRead", "clipboardWrite", "idle", "scripting"],
