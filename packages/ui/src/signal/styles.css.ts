@@ -31,17 +31,17 @@ export const ValueNode = style({
   height: spacing[5],
 })
 
-export const bgColorVar: CSSVarFunction = createVar()
-
 export const HighlightText = {
   span: style({
     position: "relative",
+    display: "flex",
+    alignItems: "center",
     // TODO: transition-color
   }),
   highlight: style({
     position: "absolute",
     zIndex: -1,
-    ...insetX(1),
+    ...insetX(`-${spacing[1]}`),
     ...insetY(0),
     ...rounded(),
     // TODO: transition-color

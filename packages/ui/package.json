@@ -28,6 +28,10 @@
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
     },
+    "./css": {
+      "import": "./dist/index.css",
+      "require": "./dist/index.css"
+    },
     "./theme": {
       "import": "./dist/theme/index.js",
       "require": "./dist/theme/index.cjs"

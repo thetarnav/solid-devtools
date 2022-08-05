@@ -3,10 +3,8 @@ import { combineProps } from "@solid-primitives/props"
 import { GraphSignal } from "@shared/graph"
 import { useHighlights } from "../ctx/highlights"
 import { createHover } from "@solid-aria/interactions"
-import { hexToRgb } from "../utils"
 import * as styles from "./styles.css"
-import { bgColorVar } from "./styles.css"
-import { theme } from "../theme"
+import { hexToRgb, theme } from "../theme"
 
 export const Signals: Component<{ each: GraphSignal[] }> = props => {
   return (
@@ -77,7 +75,7 @@ export const HighlightText: ParentComponent<
     >
       <div
         class={styles.HighlightText.highlight}
-        style={{ [bgColorVar]: props.strong ? bgStrong : props.light ? bgLight : null }}
+        style={{ "background-color": props.strong ? bgStrong : props.light ? bgLight : null }}
       ></div>
       {props.children}
     </span>

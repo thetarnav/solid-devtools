@@ -1,15 +1,16 @@
 import { style } from "@vanilla-extract/css"
-import { theme } from "../theme"
+import { hexToRgb, theme } from "../theme"
 
 const { spacing, color } = theme
 
 export const container = style({
   paddingTop: spacing[1],
   paddingLeft: spacing[1],
-  backgroundColor: `rgba(${color.cyan[200]} / 0.05)`,
+  backgroundColor: hexToRgb(color.cyan[200], 0.05),
   color: color.black,
-  borderColor: `rgba(${color.cyan[900]} / 0.3)`,
+  borderColor: hexToRgb(color.cyan[900], 0.3),
   borderStyle: "solid",
+  borderWidth: 0,
   borderTopWidth: 1,
   borderLeftWidth: 1,
   outline: 1,
