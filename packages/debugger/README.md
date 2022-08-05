@@ -13,11 +13,11 @@ A runtime package, used to get information and track changes of the Solid's reac
 ### Installation
 
 ```bash
-npm i @solid-devtools/debugger
+npm i -D @solid-devtools/debugger
 # or
-yarn add @solid-devtools/debugger
+yarn add -D @solid-devtools/debugger
 # or
-pnpm add @solid-devtools/debugger
+pnpm add -D @solid-devtools/debugger
 ```
 
 ### Automatically Attaching Debugger
