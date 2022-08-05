@@ -14,8 +14,8 @@ export default (
     if (entry.includes(".")) return `src/${entry}`
     return `src/${entry}.${extension}`
   })
-  return defineConfig({
-    clean: true,
+  return defineConfig(config => ({
+    clean: config.watch ? false : true,
     dts: {
       entry: [entry, ...mappedAdditionalEntries],
     },
@@ -24,5 +24,5 @@ export default (
     // solidPlugin() returns an incompatible plugin type from 0.14.53 esbuild version
     esbuildPlugins:
       extension === "tsx" ? [solidPlugin() as any, ...additionalPlugins] : additionalPlugins,
-  })
+  }))
 }

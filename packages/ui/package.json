@@ -62,9 +62,13 @@
   "dependencies": {
     "@otonashixav/solid-flip": "^0.10.5",
     "@solid-aria/interactions": "^0.1.4",
+    "@solid-primitives/bounds": "^0.0.101",
+    "@solid-primitives/event-listener": "^2.2.1",
     "@solid-primitives/props": "^2.2.1",
+    "@solid-primitives/resize-observer": "^2.0.3",
     "@solid-primitives/utils": "^3.0.1",
     "@vanilla-extract/css": "^1.7.2",
+    "@vanilla-extract/dynamic": "^2.0.2",
     "@vanilla-extract/private": "^1.0.3",
     "csstype": "^3.1.0"
   },
