@@ -18,7 +18,6 @@ export const insetX = (n: string | keyof typeof spacing) => {
     right: nn,
   }
 }
-
 export const insetY = (n: string | keyof typeof spacing) => {
   const nn = typeof n === "string" ? n : spacing[n]
   return {
@@ -26,7 +25,6 @@ export const insetY = (n: string | keyof typeof spacing) => {
     bottom: nn,
   }
 }
-
 export const inset = (n: string | keyof typeof spacing) => {
   const nn = typeof n === "string" ? n : spacing[n]
   return {
@@ -36,6 +34,12 @@ export const inset = (n: string | keyof typeof spacing) => {
     right: nn,
   }
 }
+
+export const centerChild = {
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+} as const
 
 export const rounded = (key: keyof typeof theme.radius = "DEFAULT") => ({
   borderRadius: theme.radius[key],

@@ -291,9 +291,13 @@ importers:
       '@otonashixav/solid-flip': ^0.10.5
       '@solid-aria/interactions': ^0.1.4
       '@solid-devtools/transform': ^0.4.0
+      '@solid-primitives/bounds': ^0.0.101
+      '@solid-primitives/event-listener': ^2.2.1
       '@solid-primitives/props': ^2.2.1
+      '@solid-primitives/resize-observer': ^2.0.3
       '@solid-primitives/utils': ^3.0.1
       '@vanilla-extract/css': ^1.7.2
+      '@vanilla-extract/dynamic': ^2.0.2
       '@vanilla-extract/esbuild-plugin': ^2.1.0
       '@vanilla-extract/private': ^1.0.3
       csstype: ^3.1.0
@@ -305,9 +309,13 @@ importers:
     dependencies:
       '@otonashixav/solid-flip': 0.10.5_solid-js@1.4.8
       '@solid-aria/interactions': 0.1.4_solid-js@1.4.8
+      '@solid-primitives/bounds': 0.0.101_solid-js@1.4.8
+      '@solid-primitives/event-listener': 2.2.1_solid-js@1.4.8
       '@solid-primitives/props': 2.2.1_solid-js@1.4.8
+      '@solid-primitives/resize-observer': 2.0.3_solid-js@1.4.8
       '@solid-primitives/utils': 3.0.1_solid-js@1.4.8
       '@vanilla-extract/css': 1.7.2
+      '@vanilla-extract/dynamic': 2.0.2
       '@vanilla-extract/private': 1.0.3
       csstype: 3.1.0
     devDependencies:
@@ -3941,6 +3949,17 @@ packages:
       solid-js: 1.4.8
     dev: false
 
+  /@solid-primitives/bounds/0.0.101_solid-js@1.4.8:
+    resolution: {integrity: sha512-lxn5iwueU2xMEGteJoTcaIuGEAfAQvKcYKImJ3HSjO3Qu3iFERfCU1Oi5VBsIfLk8JA4582/ISuAcDiGTAVSCw==}
+    peerDependencies:
+      solid-js: ^1.4.0
+    dependencies:
+      '@solid-primitives/event-listener': 2.2.1_solid-js@1.4.8
+      '@solid-primitives/resize-observer': 2.0.3_solid-js@1.4.8
+      '@solid-primitives/utils': 3.0.1_solid-js@1.4.8
+      solid-js: 1.4.8
+    dev: false
+
   /@solid-primitives/context/0.1.0_solid-js@1.4.8:
     resolution: {integrity: sha512-OTPSv00OErONieh/rdvWXqgSB4EHIXHkwvnsgUX5kZO0A5BMbkjcbXzwCbx3hRlLDfNteHd8ovzyKFo5oqA5kA==}
     peerDependencies:
@@ -4029,8 +4048,19 @@ packages:
       solid-js: ^1.4.0
     dependencies:
       '@solid-primitives/event-listener': 2.2.1_solid-js@1.4.8
-      '@solid-primitives/rootless': 1.1.0_solid-js@1.4.8
+      '@solid-primitives/rootless': 1.1.2_solid-js@1.4.8
       '@solid-primitives/utils': 2.1.1_solid-js@1.4.8
+      solid-js: 1.4.8
+    dev: false
+
+  /@solid-primitives/resize-observer/2.0.3_solid-js@1.4.8:
+    resolution: {integrity: sha512-a8T3QKvrMT/9uZxqEpVbtGWYN5EH42MUuwi4z/PJCh1r4Tppv0uNeVbE5yBbVtdQy21ZFDFvIJ6rBVkoVKok/w==}
+    peerDependencies:
+      solid-js: ^1.4.0
+    dependencies:
+      '@solid-primitives/event-listener': 2.2.1_solid-js@1.4.8
+      '@solid-primitives/rootless': 1.1.2_solid-js@1.4.8
+      '@solid-primitives/utils': 3.0.1_solid-js@1.4.8
       solid-js: 1.4.8
     dev: false
 
@@ -4332,6 +4362,12 @@ packages:
       escape-string-regexp: 4.0.0
       media-query-parser: 2.0.2
       outdent: 0.8.0
+
+  /@vanilla-extract/dynamic/2.0.2:
+    resolution: {integrity: sha512-U4nKaEQ8Kuz+exXEr51DUpyaOuzo24/S/k1YbDPQR06cYcNjQqvwFRnwWtZ+9ImocqM1wTKtzrdUgSTtLGIwAg==}
+    dependencies:
+      '@vanilla-extract/private': 1.0.3
+    dev: false
 
   /@vanilla-extract/esbuild-plugin/2.1.0:
     resolution: {integrity: sha512-7d3nunHX9OziC5uPNdsQnKWntsTvUmJcEvEgwXEz4jroksDLWGbFghkWlWYzf2SlYxlh32wW1U38HkyDYuRkng==}
