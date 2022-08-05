@@ -7,13 +7,16 @@ import manifest from "./manifest"
 import path from "path"
 
 export default defineConfig({
-  plugins: [solidPlugin(), crx({ manifest }), vanillaExtractPlugin()],
+  plugins: [solidPlugin(), vanillaExtractPlugin(), crx({ manifest })],
   resolve: {
     alias: {
       "@shared": path.resolve(__dirname, "..", "shared"),
-      "@solid-devtools/ui": path.resolve(__dirname, "..", "ui", "src"),
+      // "@solid-devtools/ui": path.resolve(__dirname, "..", "ui", "src"),
     },
   },
+  // optimizeDeps: {
+  //   include: ["@solid-primitives/props"],
+  // },
   build: {
     rollupOptions: {
       input: {

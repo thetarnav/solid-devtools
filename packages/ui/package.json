@@ -23,6 +23,23 @@
   "main": "dist/index.cjs",
   "module": "dist/index.js",
   "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./theme": {
+      "import": "./dist/theme/index.js",
+      "require": "./dist/theme/index.cjs"
+    }
+  },
+  "typesVersions": {
+    "*": {
+      "theme": [
+        "./dist/theme/index.d.ts"
+      ]
+    }
+  },
   "scripts": {
     "dev": "tsup --watch",
     "build": "tsup",
@@ -44,8 +61,7 @@
     "@solid-primitives/props": "^2.2.1",
     "@solid-primitives/utils": "^3.0.1",
     "@vanilla-extract/css": "^1.7.2",
-    "@vanilla-extract/private": "^1.0.3",
-    "twind": "^0.16.17"
+    "@vanilla-extract/private": "^1.0.3"
   },
   "peerDependencies": {
     "solid-js": "^1.4.4"

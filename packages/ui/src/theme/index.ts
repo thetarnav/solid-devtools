@@ -81,24 +81,26 @@ export const theme = {
   },
 } as const
 
-export const insetX = (n: string | keyof typeof theme.spacing) => {
-  const nn = typeof n === "string" ? n : theme.spacing[n]
+export const { spacing, color } = theme
+
+export const insetX = (n: string | keyof typeof spacing) => {
+  const nn = typeof n === "string" ? n : spacing[n]
   return {
     left: nn,
     right: nn,
   }
 }
 
-export const insetY = (n: string | keyof typeof theme.spacing) => {
-  const nn = typeof n === "string" ? n : theme.spacing[n]
+export const insetY = (n: string | keyof typeof spacing) => {
+  const nn = typeof n === "string" ? n : spacing[n]
   return {
     top: nn,
     bottom: nn,
   }
 }
 
-export const inset = (n: string | keyof typeof theme.spacing) => {
-  const nn = typeof n === "string" ? n : theme.spacing[n]
+export const inset = (n: string | keyof typeof spacing) => {
+  const nn = typeof n === "string" ? n : spacing[n]
   return {
     top: nn,
     bottom: nn,

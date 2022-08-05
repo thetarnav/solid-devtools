@@ -10,7 +10,10 @@ export default (
 ) => {
   const entry = `src/index.${extension}`
   const baseEntries = server ? [entry, `src/server.${extension}`] : [entry]
-  const mappedAdditionalEntries = additionalEntries.map(entry => `src/${entry}.${extension}`)
+  const mappedAdditionalEntries = additionalEntries.map(entry => {
+    if (entry.includes(".")) return `src/${entry}`
+    return `src/${entry}.${extension}`
+  })
   return defineConfig({
     clean: true,
     dts: {
