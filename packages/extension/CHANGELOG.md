@@ -1,5 +1,16 @@
 # solid-devtools-extension
 
+## 0.3.0
+
+### Minor Changes
+
+- d15e9b0: Refactor styling in packages. Move to vanilla extract for the chrome extension and the ui package. Locator now manages it's styles separately.
+
+### Patch Changes
+
+- Updated dependencies [d15e9b0]
+  - @solid-devtools/ui@0.4.0
+
 ## 0.2.3
 
 ### Patch Changes

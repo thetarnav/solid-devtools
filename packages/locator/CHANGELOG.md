@@ -1,5 +1,11 @@
 # @solid-devtools/locator
 
+## 0.9.0
+
+### Minor Changes
+
+- d15e9b0: Refactor styling in packages. Move to vanilla extract for the chrome extension and the ui package. Locator now manages it's styles separately.
+
 ## 0.8.2
 
 ### Patch Changes
