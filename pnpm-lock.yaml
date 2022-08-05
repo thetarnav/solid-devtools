@@ -130,7 +130,6 @@ importers:
     specifiers:
       '@solid-devtools/debugger': ^0.3.0
       '@solid-devtools/transform': ^0.4.0
-      '@solid-devtools/ui': 0.3.3
       '@solid-primitives/bounds': ^0.0.100
       '@solid-primitives/event-listener': ^2.2.1
       '@solid-primitives/keyboard': ^0.0.100
@@ -149,7 +148,6 @@ importers:
       typescript: ^4.7.4
     dependencies:
       '@solid-devtools/debugger': link:../debugger
-      '@solid-devtools/ui': link:../ui
       '@solid-primitives/bounds': 0.0.100_solid-js@1.4.8
       '@solid-primitives/event-listener': 2.2.1_solid-js@1.4.8
       '@solid-primitives/keyboard': 0.0.100_solid-js@1.4.8

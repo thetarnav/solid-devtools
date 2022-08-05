@@ -60,7 +60,6 @@
   },
   "dependencies": {
     "@solid-devtools/debugger": "^0.3.0",
-    "@solid-devtools/ui": "0.3.3",
     "@solid-primitives/bounds": "^0.0.100",
     "@solid-primitives/event-listener": "^2.2.1",
     "@solid-primitives/keyboard": "^0.0.100",
