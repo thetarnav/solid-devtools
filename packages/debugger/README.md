@@ -51,7 +51,7 @@ import { attachDebugger } from "@solid-devtools/debugger"
 render(() => {
   attachDebugger()
   return <App />
-}, document.getElementById("root")!)
+}, document.getElementById("root"))
 
 // or inside the App component:
 function App() {
@@ -74,7 +74,7 @@ render(
       <App />
     </Debugger>
   ),
-  document.getElementById("root")!,
+  document.getElementById("root"),
 )
 ```
 
