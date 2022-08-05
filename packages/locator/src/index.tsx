@@ -9,9 +9,9 @@ import {
 import { makeKeyHoldListener } from "@solid-primitives/keyboard"
 import { registerDebuggerPlugin } from "@solid-devtools/debugger"
 import { WINDOW_PROJECTPATH_PROPERTY } from "@shared/variables"
+import { createElementCursor } from "@shared/utils"
 import { clearFindComponentCache, findComponent } from "./findComponent"
 import { makeHoverElementListener } from "./hoverElement"
-import { createElementCursor } from "./elementCursor"
 import { openCodeSource, SourceCodeData, TargetIDE, TargetURLFunction } from "./goToSource"
 import { ElementOverlay } from "./ElementOverlay"
 import { sheet } from "./twind"
@@ -71,7 +71,7 @@ export function useLocatorPlugin({ targetIDE, key = "altKey" }: LocatorOptions):
 
     if (targetIDE) {
       // set pointer cursor to selected component
-      createElementCursor(() => selected()?.location?.element)
+      createElementCursor(() => selected()?.location?.element, "pointer")
 
       // go to selected component source code on click
       createEffect(() => {
