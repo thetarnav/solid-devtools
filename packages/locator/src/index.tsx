@@ -8,13 +8,13 @@ import {
 } from "@solid-primitives/event-listener"
 import { makeKeyHoldListener } from "@solid-primitives/keyboard"
 import { registerDebuggerPlugin } from "@solid-devtools/debugger"
-import { sheet } from "@solid-devtools/ui"
 import { WINDOW_PROJECTPATH_PROPERTY } from "@shared/variables"
 import { clearFindComponentCache, findComponent } from "./findComponent"
 import { makeHoverElementListener } from "./hoverElement"
 import { createElementCursor } from "./elementCursor"
 import { openCodeSource, SourceCodeData, TargetIDE, TargetURLFunction } from "./goToSource"
 import { ElementOverlay } from "./ElementOverlay"
+import { sheet } from "./twind"
 
 export type SelectedComponent = {
   name: string

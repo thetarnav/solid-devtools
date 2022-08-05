@@ -2,9 +2,9 @@ import { createEffect, For, JSX, onCleanup } from "solid-js"
 import { TransitionGroup, animateExit, animateEnter } from "@otonashixav/solid-flip"
 import { createHover } from "@solid-aria/interactions"
 import { GraphOwner, NodeType } from "@shared/graph"
-import { tw } from "./twind"
-import { HighlightText, Signals, ValueNode } from "./signalNode"
-import { useHighlights } from "./ctx/highlights"
+import { HighlightText, Signals, ValueNode } from "../signal/signalNode"
+import { useHighlights } from "../ctx/highlights"
+import { childrenContainer, container, header } from "./styles.css"
 
 export function OwnerChildren(props: { children: GraphOwner[] }) {
   return (
@@ -49,32 +49,20 @@ export function OwnerNode(props: { owner: GraphOwner }): JSX.Element {
   }
 
   return (
-    <div
-      class={tw`
-				pt-1 pl-1
-				bg-cyan-200 bg-opacity-5
-				text-black
-				border-0 border-t-[1px] border-l-[1px] border-cyan-900 border-opacity-30 outline-[1px]
-			`}
-    >
-      <div class={tw`pl-1 pr-2 flex items-center`} {...hoverProps}>
-        <div class={tw`w-36 flex items-center cursor-pointer`}>
-          <HighlightText
-            strong={rerun()}
-            light={isHighlighted()}
-            bgColor
-            class={tw`italic font-medium`}
-          >
+    <div class={container}>
+      <div class={header.contailer} {...hoverProps}>
+        <div class={header.nameContainer}>
+          <HighlightText strong={rerun()} light={isHighlighted()} bgColor class={header.highlight}>
             {type === NodeType.Component ? `<${name}>` : name}
           </HighlightText>
-          <div class={tw`ml-2 text-[10px] opacity-40 select-none`}>{typeName}</div>
+          <div class={header.type}>{typeName}</div>
         </div>
         {signal && <ValueNode value={signal.value} updated={signal.updated} />}
       </div>
       <Signals each={signals()} />
       {/* <Show when={children().length}> */}
       <div
-        class={tw`pl-4 pt-1 transition-opacity duration-500`}
+        class={childrenContainer}
         style={{
           opacity: rerun() ? 0.3 : 1,
         }}

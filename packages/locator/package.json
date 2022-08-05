@@ -60,13 +60,13 @@
   },
   "dependencies": {
     "@solid-devtools/debugger": "^0.3.0",
-    "@solid-devtools/ui": "0.3.3",
     "@solid-primitives/bounds": "^0.0.100",
     "@solid-primitives/event-listener": "^2.2.1",
     "@solid-primitives/keyboard": "^0.0.100",
     "@solid-primitives/platform": "^0.0.100",
     "@solid-primitives/utils": "^3.0.1",
-    "motion": "^10.13.1"
+    "motion": "^10.13.1",
+    "twind": "^0.16.17"
   },
   "peerDependencies": {
     "solid-js": "^1.4.4"
