@@ -1,6 +1,6 @@
 /* @refresh reload */
 import { render } from "solid-js/web"
-import { sheet } from "@solid-devtools/ui"
+import { sheet } from "./twind"
 
 console.log("panel working")
 

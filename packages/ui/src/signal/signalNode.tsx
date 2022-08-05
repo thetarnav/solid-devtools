@@ -1,14 +1,17 @@
 import { Component, createEffect, For, JSX, ParentComponent, Show, splitProps } from "solid-js"
 import { combineProps } from "@solid-primitives/props"
 import { GraphSignal } from "@shared/graph"
-import { tw, colors, hexToRgb } from "./twind"
-import { useHighlights } from "./ctx/highlights"
+import { useHighlights } from "../ctx/highlights"
 import { createHover } from "@solid-aria/interactions"
+import { hexToRgb } from "../utils"
+import * as styles from "./styles.css"
+import { bgColorVar } from "./styles.css"
+import { theme } from "../theme"
 
 export const Signals: Component<{ each: GraphSignal[] }> = props => {
   return (
     <Show when={props.each.length}>
-      <div class={tw`my-1`}>
+      <div class={styles.Signals.container}>
         <For each={props.each}>{signal => <SignalNode signal={signal} />}</For>
       </div>
     </Show>
@@ -25,8 +28,8 @@ export const SignalNode: Component<{ signal: GraphSignal }> = ({ signal }) => {
   )
 
   return (
-    <div class={tw`px-1 h-5 flex items-center`} {...hoverProps}>
-      <div class={tw`w-36 italic text-gray-800`}>
+    <div class={styles.SignalNode.container} {...hoverProps}>
+      <div class={styles.SignalNode.name}>
         {signal.name} ({signal.id})
       </div>
       <ValueNode value={signal.value} updated={signal.updated} highlighted={isHighlighted()} />
@@ -43,9 +46,9 @@ export const ValueNode: Component<{
     <HighlightText
       strong={props.updated}
       light={props.highlighted}
-      bgColor={colors.amber[400]}
+      bgColor={theme.color.amber[400]}
       textColor
-      class={tw`text-amber-600 min-w-4 h-5`}
+      class={styles.ValueNode}
     >
       {JSON.stringify(props.value)}
     </HighlightText>
@@ -60,8 +63,8 @@ export const HighlightText: ParentComponent<
     light?: boolean
   } & JSX.HTMLAttributes<HTMLSpanElement>
 > = props => {
-  const bg = props.bgColor === true ? colors.cyan[400] : props.bgColor
-  const color = props.textColor === true ? colors.black : props.textColor
+  const bg = props.bgColor === true ? theme.color.cyan[400] : props.bgColor
+  const color = props.textColor === true ? theme.color.black : props.textColor
   const bgStrong = bg ? hexToRgb(bg, 0.7) : null
   const bgLight = bg ? hexToRgb(bg, 0.4) : null
   const colorStrong = color ? hexToRgb(color, 0.7) : null
@@ -69,15 +72,12 @@ export const HighlightText: ParentComponent<
   const [, attrs] = splitProps(props, ["textColor", "bgColor", "strong", "light"])
   return (
     <span
-      {...combineProps(attrs, { class: tw`relative transition-color` })}
+      {...combineProps(attrs, { class: styles.HighlightText.span })}
       style={{ color: props.strong ? colorStrong : props.light ? colorLight : null }}
     >
       <div
-        class={tw`
-					absolute -z-1 -inset-x-2 inset-y-0
-					rounded transition-color
-				`}
-        style={{ "background-color": props.strong ? bgStrong : props.light ? bgLight : null }}
+        class={styles.HighlightText.highlight}
+        style={{ [bgColorVar]: props.strong ? bgStrong : props.light ? bgLight : null }}
       ></div>
       {props.children}
     </span>

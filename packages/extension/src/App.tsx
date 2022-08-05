@@ -1,6 +1,7 @@
 import { Component, For } from "solid-js"
 import { graphs, highlights } from "./graph"
-import { HighlightsProvider, OwnerNode, tw } from "@solid-devtools/ui"
+import { HighlightsProvider, OwnerNode } from "@solid-devtools/ui"
+import { tw } from "./twind"
 
 const App: Component = () => {
   return (

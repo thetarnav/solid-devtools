@@ -1,6 +1,6 @@
-import { tw } from "@solid-devtools/ui"
 import { animate } from "motion"
 import { Component, createComputed, createMemo, Show, on, createEffect } from "solid-js"
+import { tw } from "./twind"
 
 export const ElementOverlay: Component<{
   left: number | null
