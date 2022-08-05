@@ -1,4 +1,4 @@
-import { children, createEffect, createSignal, JSX, Show } from "solid-js"
+import { children, createEffect, createSignal, JSX } from "solid-js"
 import { makeEventListener } from "@solid-primitives/event-listener"
 import { clamp } from "@solid-primitives/utils"
 import { useWindowSize } from "@solid-primitives/resize-observer"
@@ -24,7 +24,10 @@ export function Splitter(props: {
   const [progress, setProgress] = createSignal(0.5)
   const [dragging, setDragging] = createSignal(false)
 
-  const onPointerDown = setDragging.bind(void 0, true)
+  const onPointerDown = (e: PointerEvent) => {
+    e.preventDefault()
+    setDragging(true)
+  }
   makeEventListener(window, "pointermove", e => {
     if (!dragging()) return
     setProgress(clamp(e.x / containerWidth, 0, 1))
@@ -42,16 +45,14 @@ export function Splitter(props: {
       })}
       ref={container}
     >
-      <div>{props.children}</div>
+      {props.children}
       <div class={styles.split}>
         <button class={styles.toggle} onClick={() => props.onToggle(!sideResolved())}>
           {sideResolved() ? "X" : "O"}
         </button>
         <div class={styles.splitHandle} onPointerDown={onPointerDown}></div>
       </div>
-      <Show when={sideResolved()}>
-        <div>{sideResolved()}</div>
-      </Show>
+      {sideResolved()}
     </div>
   )
 }

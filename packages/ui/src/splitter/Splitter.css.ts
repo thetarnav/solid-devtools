@@ -2,12 +2,14 @@ import { style, styleVariants, createVar } from "@vanilla-extract/css"
 import { CSSVarFunction } from "@vanilla-extract/private"
 import { centerChild, color, spacing } from "../theme"
 
-const minWidth = spacing[32]
+const minWidth = spacing[36]
 const splitWidth = spacing[0.5]
 
 const containerBase = style({
   display: "grid",
   gridAutoFlow: "row",
+  height: "100%",
+  width: "100%",
 })
 
 export const progress: CSSVarFunction = createVar()
