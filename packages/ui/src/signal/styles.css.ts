@@ -1,6 +1,5 @@
-import { style, createVar } from "@vanilla-extract/css"
-import { CSSVarFunction } from "@vanilla-extract/private"
-import { insetX, insetY, rounded, theme } from "../theme"
+import { style } from "@vanilla-extract/css"
+import { insetX, insetY, rounded, theme, transition } from "../theme"
 
 const { spacing, color } = theme
 
@@ -36,7 +35,7 @@ export const HighlightText = {
     position: "relative",
     display: "flex",
     alignItems: "center",
-    // TODO: transition-color
+    ...transition("background-color"),
   }),
   highlight: style({
     position: "absolute",
@@ -44,6 +43,6 @@ export const HighlightText = {
     ...insetX(`-${spacing[1]}`),
     ...insetY(0),
     ...rounded(),
-    // TODO: transition-color
+    ...transition("background-color"),
   }),
 }

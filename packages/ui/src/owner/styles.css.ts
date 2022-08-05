@@ -1,5 +1,5 @@
 import { style } from "@vanilla-extract/css"
-import { hexToRgb, theme } from "../theme"
+import { hexToRgb, theme, transition } from "../theme"
 
 const { spacing, color } = theme
 
@@ -31,7 +31,7 @@ export const header = {
   }),
   highlight: style({
     fontStyle: "italic",
-    fontWeight: "medium",
+    fontWeight: 500,
   }),
   type: style({
     marginLeft: spacing[2],
@@ -44,5 +44,5 @@ export const header = {
 export const childrenContainer = style({
   paddingLeft: spacing[4],
   paddingTop: spacing[1],
-  // TODO: transition-opacity, duration-500
+  ...transition("opacity", theme.duration[500]),
 })

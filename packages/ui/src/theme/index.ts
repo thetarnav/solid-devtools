@@ -79,57 +79,37 @@ export const theme = {
     80: "20rem",
     96: "24rem",
   },
+  easing: {
+    DEFAULT: "cubic-bezier(0.4, 0, 0.2, 1)",
+    linear: "linear",
+    in: "cubic-bezier(0.4, 0, 1, 1)",
+    out: "cubic-bezier(0, 0, 0.2, 1)",
+    "in-out": "cubic-bezier(0.4, 0, 0.2, 1)",
+  },
+  radius: {
+    none: "0px",
+    sm: "0.125rem",
+    DEFAULT: "0.25rem",
+    md: "0.375rem",
+    lg: "0.5rem",
+    xl: "0.75rem",
+    "2xl": "1rem",
+    "3xl": "1.5rem",
+    full: "9999px",
+  },
+  duration: {
+    0: "0ms",
+    75: "75ms",
+    100: "100ms",
+    150: "150ms",
+    200: "200ms",
+    300: "300ms",
+    500: "500ms",
+    700: "700ms",
+    1000: "1000ms",
+  },
 } as const
 
 export const { spacing, color } = theme
 
-export function hexToRgb(hex: string, alpha?: number) {
-  var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex)
-  if (!result) return hex
-  const r = parseInt(result[1], 16),
-    g = parseInt(result[2], 16),
-    b = parseInt(result[3], 16)
-  return alpha === undefined ? `rgb(${r},${g},${b})` : `rgba(${r},${g},${b}, ${alpha})`
-}
-
-export const insetX = (n: string | keyof typeof spacing) => {
-  const nn = typeof n === "string" ? n : spacing[n]
-  return {
-    left: nn,
-    right: nn,
-  }
-}
-
-export const insetY = (n: string | keyof typeof spacing) => {
-  const nn = typeof n === "string" ? n : spacing[n]
-  return {
-    top: nn,
-    bottom: nn,
-  }
-}
-
-export const inset = (n: string | keyof typeof spacing) => {
-  const nn = typeof n === "string" ? n : spacing[n]
-  return {
-    top: nn,
-    bottom: nn,
-    left: nn,
-    right: nn,
-  }
-}
-
-const borderRadius = {
-  none: "0px",
-  sm: "0.125rem",
-  DEFAULT: "0.25rem",
-  md: "0.375rem",
-  lg: "0.5rem",
-  xl: "0.75rem",
-  "2xl": "1rem",
-  "3xl": "1.5rem",
-  full: "9999px",
-} as const
-
-export const rounded = (key: keyof typeof borderRadius = "DEFAULT") => ({
-  borderRadius: borderRadius[key],
-})
+export * from "./utils"

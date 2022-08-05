@@ -298,6 +298,7 @@ importers:
       '@vanilla-extract/css': ^1.7.2
       '@vanilla-extract/esbuild-plugin': ^2.1.0
       '@vanilla-extract/private': ^1.0.3
+      csstype: ^3.1.0
       esbuild: ^0.14.53
       esbuild-plugin-solid: ^0.4.2
       solid-js: ^1.4.8
@@ -310,6 +311,7 @@ importers:
       '@solid-primitives/utils': 3.0.1_solid-js@1.4.8
       '@vanilla-extract/css': 1.7.2
       '@vanilla-extract/private': 1.0.3
+      csstype: 3.1.0
     devDependencies:
       '@solid-devtools/transform': link:../transform
       '@vanilla-extract/esbuild-plugin': 2.1.0
@@ -4326,7 +4328,7 @@ packages:
       chalk: 4.1.2
       css-what: 5.1.0
       cssesc: 3.0.0
-      csstype: 3.0.11
+      csstype: 3.1.0
       deep-object-diff: 1.1.7
       deepmerge: 4.2.2
       escape-string-regexp: 4.0.0
@@ -5239,6 +5241,10 @@ packages:
 
   /csstype/3.0.11:
     resolution: {integrity: sha512-sa6P2wJ+CAbgyy4KFssIb/JNMLxFvKF1pCYCSXS8ZMuqZnMsrxqI2E5sPyoTpxoPU/gVZMzr2zjOfg8GIZOMsw==}
+    dev: false
+
+  /csstype/3.1.0:
+    resolution: {integrity: sha512-uX1KG+x9h5hIJsaKR9xHUeUraxf8IODOwq9JLNPq6BwB04a/xgpq3rcx47l5BZu5zBPlgD342tdke3Hom/nJRA==}
 
   /csv-generate/3.4.3:
     resolution: {integrity: sha512-w/T+rqR0vwvHqWs/1ZyMDWtHHSJaN06klRqJXBEpDJaM/+dZkso0OKh1VcuuYvK3XM53KysVNq8Ko/epCK8wOw==}

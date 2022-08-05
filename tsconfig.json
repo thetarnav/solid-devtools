@@ -1,29 +1,28 @@
 {
-	"compilerOptions": {
-		"strict": true,
-		"target": "ESNext",
-		"module": "ESNext",
-		"lib": ["DOM", "DOM.Iterable", "ESNext"],
-		"moduleResolution": "node",
-		"allowSyntheticDefaultImports": true,
-		"resolveJsonModule": true,
-		"esModuleInterop": true,
-		"jsx": "preserve",
-		"jsxImportSource": "solid-js",
-		"noEmit": true,
-		"isolatedModules": true,
-		"skipLibCheck": true,
-		"types": ["node", "jest"],
-		"baseUrl": ".",
-		"paths": {
-			"@shared/*": ["./packages/shared/*"],
-			"solid-devtools": ["./packages/main/src/index.ts"],
-			"@solid-devtools/debugger": ["./packages/debugger/src/index.ts"],
-			"@solid-devtools/logger": ["./packages/logger/src/index.ts"],
-			"@solid-devtools/ui": ["./packages/ui/src/index.tsx"],
-			"@solid-devtools/locator": ["./packages/locator/src/index.tsx"],
-			"@solid-devtools/extension-adapter": ["./packages/extension-adapter/src/index.ts"]
-		}
-	},
-	"exclude": ["node_modules", "**/dist/**/*"]
+  "compilerOptions": {
+    "strict": true,
+    "target": "ESNext",
+    "module": "ESNext",
+    "lib": ["DOM", "DOM.Iterable", "ESNext"],
+    "moduleResolution": "node",
+    "allowSyntheticDefaultImports": true,
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+    "jsx": "preserve",
+    "jsxImportSource": "solid-js",
+    "noEmit": true,
+    "isolatedModules": true,
+    "skipLibCheck": true,
+    "types": ["node", "jest"],
+    "baseUrl": ".",
+    "paths": {
+      "@shared/*": ["./packages/shared/*"],
+      "solid-devtools": ["./packages/main/src/index.ts"],
+      "@solid-devtools/debugger": ["./packages/debugger/src/index.ts"],
+      "@solid-devtools/logger": ["./packages/logger/src/index.ts"],
+      "@solid-devtools/locator": ["./packages/locator/src/index.tsx"],
+      "@solid-devtools/extension-adapter": ["./packages/extension-adapter/src/index.ts"]
+    }
+  },
+  "exclude": ["node_modules", "**/dist/**/*"]
 }
