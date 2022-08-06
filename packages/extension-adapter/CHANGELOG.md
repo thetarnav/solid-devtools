@@ -1,5 +1,13 @@
 # @solid-devtools/extension-adapter
 
+## 0.9.2
+
+### Patch Changes
+
+- daf75ea: Improve app-extension bridge types.
+- Updated dependencies [daf75ea]
+  - @solid-devtools/debugger@0.3.1
+
 ## 0.8.2
 
 ### Patch Changes

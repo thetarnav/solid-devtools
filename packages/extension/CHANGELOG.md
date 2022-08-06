@@ -1,5 +1,11 @@
 # solid-devtools-extension
 
+## 0.3.2
+
+### Patch Changes
+
+- daf75ea: Improve app-extension bridge types.
+
 ## 0.3.1
 
 ### Patch Changes
