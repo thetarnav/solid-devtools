@@ -42,7 +42,8 @@
   },
   "dependencies": {
     "@solid-devtools/debugger": "^0.3.0",
-    "@solid-primitives/utils": "^3.0.1"
+    "@solid-primitives/utils": "^3.0.1",
+    "type-fest": "^2.18.0"
   },
   "peerDependencies": {
     "solid-js": "^1.4.4"

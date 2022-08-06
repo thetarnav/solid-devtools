@@ -1,6 +1,7 @@
 import { getOwner as _getOwner } from "solid-js"
+import { JsonValue } from "type-fest"
 import { Many } from "@solid-primitives/utils"
-import { SafeValue, UpdateType } from "./bridge"
+import { UpdateType } from "./bridge"
 import { Owner as _Owner, SignalState as _SignalState, Computation as _Computation } from "./solid"
 import { INTERNAL } from "./variables"
 
@@ -147,7 +148,7 @@ export interface MappedSignal {
   name: string
   id: number
   observers: number[]
-  value: SafeValue
+  value: JsonValue
 }
 
 export type MappedComponent = {
@@ -180,7 +181,7 @@ export interface GraphSignal {
   readonly dispose?: VoidFunction
   readonly updated: boolean
   readonly setUpdate: (value: boolean) => void
-  readonly value: SafeValue
+  readonly value: JsonValue
   readonly setValue: (value: unknown) => void
   readonly observers: GraphOwner[]
 }

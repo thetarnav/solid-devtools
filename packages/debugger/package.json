@@ -65,7 +65,8 @@
     "@solid-primitives/refs": "^0.3.0",
     "@solid-primitives/scheduled": "^1.0.0",
     "@solid-primitives/utils": "^3.0.1",
-    "object-observer": "^5.0.4"
+    "object-observer": "^5.0.4",
+    "type-fest": "^2.18.0"
   },
   "peerDependencies": {
     "solid-js": "^1.4.5"

@@ -1,9 +1,8 @@
+import { JsonValue } from "type-fest"
 import { SerialisedTreeRoot } from "./graph"
 import { log } from "./utils"
 
 export const LOG_MESSAGES = false
-
-export type SafeValue = number | null | undefined | string | boolean
 
 export enum MESSAGE {
   SolidOnPage,
@@ -40,8 +39,8 @@ export enum UpdateType {
 
 export interface SignalUpdatePayload {
   id: number
-  value: SafeValue
-  oldValue: SafeValue
+  value: JsonValue
+  oldValue: JsonValue
 }
 
 export type BatchedUpdate =

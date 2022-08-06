@@ -6,6 +6,7 @@ import {
   createSignal,
   runWithOwner,
 } from "solid-js"
+import { JsonValue } from "type-fest"
 import { AnyFunction, AnyObject, noop, warn } from "@solid-primitives/utils"
 import {
   DebuggerContext,
@@ -17,7 +18,6 @@ import {
   SolidMemo,
   getOwner,
 } from "@shared/graph"
-import { SafeValue } from "@shared/bridge"
 import { INTERNAL, UNNAMED } from "@shared/variables"
 import { trimString } from "@shared/utils"
 import { Owner, RootFunction } from "@shared/solid"
@@ -80,8 +80,8 @@ export const getOwnerType = (o: Readonly<SolidOwner>): NodeType => {
 
 const literalTypes = ["bigint", "number", "boolean", "string", "undefined"]
 
-export function getSafeValue(value: unknown): SafeValue {
-  if (literalTypes.includes(typeof value)) return value as SafeValue
+export function getSafeValue(value: unknown): JsonValue {
+  if (literalTypes.includes(typeof value)) return value as JsonValue
   return value + ""
 }
 

@@ -30,7 +30,8 @@
     "@solid-primitives/rootless": "^1.1.2",
     "@solid-primitives/utils": "^3.0.1",
     "@vanilla-extract/css": "^1.7.2",
-    "solid-js": "^1.4.8"
+    "solid-js": "^1.4.8",
+    "type-fest": "^2.18.0"
   },
   "packageManager": "pnpm@7.8.0"
 }

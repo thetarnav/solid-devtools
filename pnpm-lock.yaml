@@ -54,6 +54,7 @@ importers:
       solid-js: ^1.4.8
       ts-node: ^10.9.1
       tsup: ^6.2.1
+      type-fest: ^2.18.0
       typescript: ^4.7.4
     dependencies:
       '@solid-primitives/event-bus': 0.1.0_solid-js@1.4.8
@@ -63,6 +64,7 @@ importers:
       '@solid-primitives/scheduled': 1.0.0_solid-js@1.4.8
       '@solid-primitives/utils': 3.0.1_solid-js@1.4.8
       object-observer: 5.0.4
+      type-fest: 2.18.0
     optionalDependencies:
       '@solid-devtools/transform': link:../transform
     devDependencies:
@@ -89,6 +91,7 @@ importers:
       esbuild-plugin-solid: ^0.4.2
       rimraf: ^3.0.2
       solid-js: ^1.4.8
+      type-fest: ^2.18.0
       typescript: ^4.7.4
       vite: ^3.0.4
       vite-plugin-solid: ^2.3.0
@@ -101,6 +104,7 @@ importers:
       '@solid-primitives/utils': 3.0.1_solid-js@1.4.8
       '@vanilla-extract/css': 1.7.2
       solid-js: 1.4.8
+      type-fest: 2.18.0
     devDependencies:
       '@crxjs/vite-plugin': 1.0.13_vite@3.0.4
       '@types/chrome': 0.0.193
@@ -117,10 +121,12 @@ importers:
       '@solid-primitives/utils': ^3.0.1
       solid-js: ^1.4.8
       tsup: ^6.2.1
+      type-fest: ^2.18.0
       typescript: ^4.7.4
     dependencies:
       '@solid-devtools/debugger': link:../debugger
       '@solid-primitives/utils': 3.0.1_solid-js@1.4.8
+      type-fest: 2.18.0
     devDependencies:
       solid-js: 1.4.8
       tsup: 6.2.1_typescript@4.7.4
@@ -247,9 +253,11 @@ importers:
     specifiers:
       '@solid-primitives/utils': ^3.0.1
       solid-js: ^1.4.8
+      type-fest: ^2.18.0
     dependencies:
       '@solid-primitives/utils': 3.0.1_solid-js@1.4.8
       solid-js: 1.4.8
+      type-fest: 2.18.0
 
   packages/transform:
     specifiers:
@@ -10126,6 +10134,11 @@ packages:
     resolution: {integrity: sha512-4dbzIzqvjtgiM5rw1k5rEHtBANKmdudhGyBEajN01fEyhaAIhsoKNy6y7+IN93IfpFtwY9iqi7kD+xwKhQsNJA==}
     engines: {node: '>=8'}
     dev: true
+
+  /type-fest/2.18.0:
+    resolution: {integrity: sha512-pRS+/yrW5TjPPHNOvxhbNZexr2bS63WjrMU8a+VzEBhUi9Tz1pZeD+vQz3ut0svZ46P+SRqMEPnJmk2XnvNzTw==}
+    engines: {node: '>=12.20'}
+    dev: false
 
   /typescript/4.7.4:
     resolution: {integrity: sha512-C0WQT0gezHuw6AdY1M2jxUO83Rjf0HP7Sk1DtXj6j1EwkQNZrHAg2XPWlq62oqEhYvONq5pkC2Y9oPljWToLmQ==}
