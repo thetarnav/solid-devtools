@@ -3,7 +3,7 @@ import { makeEventListener } from "@solid-primitives/event-listener"
 import { clamp } from "@solid-primitives/utils"
 import { useWindowSize } from "@solid-primitives/resize-observer"
 import { assignInlineVars } from "@vanilla-extract/dynamic"
-import { createBodyCursor } from "@shared/utils"
+import { createBodyCursor } from "@shared/cursor"
 import * as styles from "./Splitter.css"
 
 export function Splitter(props: {

@@ -1,4 +1,4 @@
-import { createRuntimeMessanger } from "../shared/utils"
+import { createRuntimeMessanger } from "../shared/messanger"
 import { MESSAGE } from "@shared/messanger"
 
 export const { onRuntimeMessage, postRuntimeMessage } = createRuntimeMessanger()

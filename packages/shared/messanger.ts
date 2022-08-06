@@ -1,4 +1,5 @@
 import { SerialisedTreeRoot } from "./graph"
+import { log } from "./utils"
 
 export const LOG_MESSAGES = false
 
@@ -63,7 +64,7 @@ export type OnMessageFn = <K extends MESSAGE>(
 ) => VoidFunction
 
 export const postWindowMessage: PostMessageFn = (id, payload?: any) => {
-  LOG_MESSAGES && console.log("message posted:", MESSAGE[id], payload)
+  LOG_MESSAGES && log("message posted:", MESSAGE[id], payload)
   window.postMessage({ id, payload }, "*")
 }
 

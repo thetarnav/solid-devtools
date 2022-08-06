@@ -9,7 +9,7 @@ import {
 import { makeKeyHoldListener } from "@solid-primitives/keyboard"
 import { registerDebuggerPlugin } from "@solid-devtools/debugger"
 import { WINDOW_PROJECTPATH_PROPERTY } from "@shared/variables"
-import { createElementCursor } from "@shared/utils"
+import { createElementCursor } from "@shared/cursor"
 import { clearFindComponentCache, findComponent } from "./findComponent"
 import { makeHoverElementListener } from "./hoverElement"
 import { openCodeSource, SourceCodeData, TargetIDE, TargetURLFunction } from "./goToSource"

@@ -1,7 +1,10 @@
 import { createCallbackStack } from "@solid-primitives/utils"
 import { MESSAGE, once } from "@shared/messanger"
-import { createPortMessanger, createRuntimeMessanger } from "../shared/utils"
-import { DEVTOOLS_CONTENT_PORT } from "../shared/variables"
+import {
+  createPortMessanger,
+  createRuntimeMessanger,
+  DEVTOOLS_CONTENT_PORT,
+} from "../shared/messanger"
 
 console.log("background script working")
 
