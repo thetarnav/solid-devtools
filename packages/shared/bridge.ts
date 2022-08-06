@@ -4,32 +4,18 @@ import { log } from "./utils"
 
 export const LOG_MESSAGES = false
 
-export enum MESSAGE {
-  SolidOnPage,
-  DevtoolsScriptConnected,
-  PanelVisibility,
-  ResetPanel,
-  GraphUpdate,
-  BatchedUpdate,
-  ForceUpdate,
-}
-
-export interface Message<K extends MESSAGE> {
-  id: K
-}
-
-export interface MessagePayloads {
-  [MESSAGE.SolidOnPage]: void
-  [MESSAGE.DevtoolsScriptConnected]: void
-  [MESSAGE.PanelVisibility]: boolean
-  [MESSAGE.ResetPanel]: void
-  [MESSAGE.GraphUpdate]: {
+export interface Messages {
+  SolidOnPage: void
+  DevtoolsScriptConnected: void
+  PanelVisibility: boolean
+  ResetPanel: void
+  GraphUpdate: {
     added: SerialisedTreeRoot[]
     removed: number[]
     updated: SerialisedTreeRoot[]
   }
-  [MESSAGE.BatchedUpdate]: BatchedUpdate[]
-  [MESSAGE.ForceUpdate]: void
+  BatchedUpdate: BatchedUpdate[]
+  ForceUpdate: void
 }
 
 export enum UpdateType {
@@ -53,21 +39,23 @@ export type BatchedUpdate =
       payload: number
     }
 
-export type PostMessageFn = <K extends MESSAGE>(
-  ..._: [K] extends [void] ? [id: K] : [id: K, payload: MessagePayloads[K]]
+export type PostMessageFn = <K extends keyof Messages>(
+  ..._: [K] extends [void] ? [id: K] : [id: K, payload: Messages[K]]
 ) => void
 
-export type OnMessageFn = <K extends MESSAGE>(
+export type OnMessageFn = <K extends keyof Messages>(
   id: K,
-  handler: (payload: MessagePayloads[K]) => void,
+  handler: (payload: Messages[K]) => void,
 ) => VoidFunction
 
 export const postWindowMessage: PostMessageFn = (id, payload?: any) => {
-  LOG_MESSAGES && log("message posted:", MESSAGE[id], payload)
+  LOG_MESSAGES && log("message posted:", id, payload)
   window.postMessage({ id, payload }, "*")
 }
 
-const listeners: Partial<Record<MESSAGE, ((payload: any) => void)[]>> = {}
+const listeners: {
+  [K in keyof Messages]?: ((payload: Messages[K]) => void)[]
+} = {}
 
 /**
  * Important ot call this if you want to use {@link onWindowMessage}
@@ -75,9 +63,9 @@ const listeners: Partial<Record<MESSAGE, ((payload: any) => void)[]>> = {}
 export function startListeningWindowMessages() {
   if (typeof window === "undefined") return
   window.addEventListener("message", event => {
-    const id = event.data?.id as MESSAGE
-    if (typeof id !== "number") return
-    listeners[id]?.forEach(f => f(event.data.payload))
+    const id = event.data?.id as keyof Messages
+    if (typeof id !== "string") return
+    listeners[id]?.forEach(f => f(event.data.payload as never))
   })
 }
 
@@ -85,13 +73,13 @@ export const onWindowMessage: OnMessageFn = (id, handler) => {
   let arr = listeners[id]
   if (!arr) arr = listeners[id] = []
   arr.push(handler)
-  return () => (listeners[id] = arr!.filter(l => l !== handler))
+  return () => (listeners[id] = arr!.filter(l => l !== handler) as any)
 }
 
-export function once<K extends MESSAGE>(
+export function once<K extends keyof Messages>(
   method: OnMessageFn,
   id: K,
-  handler: (payload: MessagePayloads[K]) => void,
+  handler: (payload: Messages[K]) => void,
 ): VoidFunction {
   const unsub = method(id, (...cbArgs) => {
     unsub()
