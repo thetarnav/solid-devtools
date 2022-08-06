@@ -1,5 +1,16 @@
 # solid-devtools-extension
 
+## 0.3.1
+
+### Patch Changes
+
+- 443604b: Add Scrollable component to ui library.
+- 9e5acf4: Add Splitter component to the UI lib
+- Updated dependencies [443604b]
+- Updated dependencies [9e5acf4]
+- Updated dependencies [6f620e1]
+  - @solid-devtools/ui@0.5.0
+
 ## 0.3.0
 
 ### Minor Changes
