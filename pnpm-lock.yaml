@@ -77,7 +77,7 @@ importers:
   packages/extension:
     specifiers:
       '@crxjs/vite-plugin': ^1.0.13
-      '@solid-devtools/ui': 0.4.0
+      '@solid-devtools/ui': 0.5.0
       '@solid-primitives/context': ^0.1.0
       '@solid-primitives/immutable': ^0.1.0
       '@solid-primitives/props': ^2.2.1
@@ -5509,7 +5509,7 @@ packages:
     dev: true
 
   /ee-first/1.1.1:
-    resolution: {integrity: sha1-WQxhFWsK4vTwJVcyoViyZrxWsh0=}
+    resolution: {integrity: sha512-WMwm9LhRUo+WUaRN+vRuETqG89IgZphVSNkdFgeb6sS/E4OrDIN7t48CAewSHXc6C8lefD8KKfr5vY61brQlow==}
     dev: true
 
   /electron-to-chromium/1.4.139:
@@ -10214,7 +10214,7 @@ packages:
     dev: true
 
   /utils-merge/1.0.1:
-    resolution: {integrity: sha1-n5VxD1CiZ5R7LMwSR0HBAoQn5xM=}
+    resolution: {integrity: sha512-pMZTvIkT1d+TFGvDOqodOclx0QWkkgi6Tdoa8gC8ffGAAqz9pzPTZWAybbsHHoED/ztMtkv/VoYTYyShUn81hA==}
     engines: {node: '>= 0.4.0'}
     dev: true
 

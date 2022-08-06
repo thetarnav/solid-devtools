@@ -1,5 +1,11 @@
 # @solid-devtools/locator
 
+## 0.9.1
+
+### Patch Changes
+
+- 6f620e1: Move the cursor utilities to shared lib.
+
 ## 0.9.0
 
 ### Minor Changes

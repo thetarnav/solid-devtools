@@ -1,5 +1,11 @@
 # solid-devtools-shared
 
+## 0.3.3
+
+### Patch Changes
+
+- 6f620e1: Move the cursor utilities to shared lib.
+
 ## 0.3.2
 
 ### Patch Changes
