@@ -64,6 +64,7 @@
     "@solid-aria/interactions": "^0.1.4",
     "@solid-primitives/bounds": "^0.0.101",
     "@solid-primitives/event-listener": "^2.2.1",
+    "@solid-primitives/keyboard": "^1.0.1",
     "@solid-primitives/props": "^2.2.1",
     "@solid-primitives/resize-observer": "^2.0.3",
     "@solid-primitives/utils": "^3.0.1",
