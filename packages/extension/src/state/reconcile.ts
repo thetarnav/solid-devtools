@@ -1,17 +1,6 @@
-import { batch, createRoot, createSelector, createSignal, getOwner, onCleanup } from "solid-js"
-import { createStore, produce } from "solid-js/store"
-import { HighlightContextState } from "@solid-devtools/ui"
-import { UpdateType } from "@shared/bridge"
+import { createRoot, createSignal, getOwner, onCleanup } from "solid-js"
 import { mutateFilter, pushToArrayProp } from "@shared/utils"
-import {
-  MappedOwner,
-  MappedSignal,
-  GraphOwner,
-  GraphSignal,
-  GraphRoot,
-  SerialisedTreeRoot,
-} from "@shared/graph"
-import { onRuntimeMessage } from "./messanger"
+import { MappedOwner, MappedSignal, GraphOwner, GraphSignal } from "@shared/graph"
 
 const dispose = (o: { dispose?: VoidFunction }) => o.dispose?.()
 const disposeAll = (list: { dispose?: VoidFunction }[]) => list.forEach(dispose)
@@ -53,7 +42,35 @@ const signalsMap: Record<number, GraphSignal> = {}
 let sourcesToAddLazy: Record<number, ((source: GraphSignal) => void)[]> = {}
 let observersToAddLazy: Record<number, ((source: GraphOwner) => void)[]> = {}
 
-function afterGraphUpdate() {
+export function updateSignal(id: number, newValue: unknown): void {
+  const node = signalsMap[id]
+  if (node) {
+    node.setValue(newValue)
+    node.setUpdate(true)
+    signalsUpdated.add(id)
+  }
+}
+
+export function updateComputation(id: number): void {
+  const owner = ownersMap[id]
+  if (owner) {
+    owner.setUpdate(true)
+    ownersUpdated.add(id)
+  }
+}
+
+// reset all of the computationRerun state
+export function resetComputationRerun() {
+  for (const id of ownersUpdated) ownersMap[id].setUpdate(false)
+  for (const id of signalsUpdated) signalsMap[id].setUpdate(false)
+}
+
+export function disposeAllNodes() {
+  disposeAll(Object.values(signalsMap))
+  disposeAll(Object.values(ownersMap))
+}
+
+export function afterGraphUpdate() {
   // sources and observers can be added lazily only during one reconciliation
   sourcesToAddLazy = {}
   observersToAddLazy = {}
@@ -98,7 +115,7 @@ function mapSource(id: number, mutable: GraphSignal[]) {
  * maps the raw owner tree to be placed into the reactive graph store
  * this is for new branches – owners that just have been created
  */
-function mapNewOwner(owner: Readonly<MappedOwner>): GraphOwner {
+export function mapNewOwner(owner: Readonly<MappedOwner>): GraphOwner {
   // wrap with root that will be disposed together with the rest of the tree
   return createRoot(dispose => {
     const [updated, setUpdate] = createSignal(false)
@@ -228,7 +245,7 @@ function reconcileSignals(newSignals: readonly MappedSignal[], signals: GraphSig
   }
 }
 
-function reconcileNode(mapped: MappedOwner, node: GraphOwner): void {
+export function reconcileNode(mapped: MappedOwner, node: GraphOwner): void {
   reconcileChildren(mapped.children, node.children)
   reconcileSignals(mapped.signals, node.signals)
   reconcileArrayByIds(mapped.sources, node.sources, mapSource)
@@ -239,109 +256,3 @@ function reconcileNode(mapped: MappedOwner, node: GraphOwner): void {
     else reconcileArrayByIds(mapped.signal.observers, node.signal.observers, mapObserver)
   }
 }
-
-const exports = createRoot(() => {
-  const [graphs, setGraphs] = createStore<GraphRoot[]>([])
-
-  let lastHoveredNode: null | GraphOwner | GraphSignal = null
-  const [highlightedObservers, setHighlightedObservers] = createSignal<GraphOwner[]>([])
-  const [highlightedSources, setHighlightedSources] = createSignal<GraphSignal[]>([])
-
-  const highlights: HighlightContextState = {
-    highlightSignalObservers(signal, highlight) {
-      if (highlight) {
-        setHighlightedObservers(signal.observers)
-        lastHoveredNode = signal
-      } else if (lastHoveredNode === signal) {
-        setHighlightedObservers([])
-      }
-    },
-    highlightNodeSources(owner, highlight) {
-      if (highlight) {
-        setHighlightedSources(owner.sources)
-        lastHoveredNode = owner
-      } else if (lastHoveredNode === owner) {
-        setHighlightedSources([])
-      }
-    },
-    isObserverHighlighted: createSelector(highlightedObservers, (owner: GraphOwner, list) =>
-      list.includes(owner),
-    ),
-    isSourceHighlighted: createSelector(highlightedSources, (signal: GraphSignal, list) =>
-      list.includes(signal),
-    ),
-  }
-
-  const addNewRoot = (proxy: GraphRoot[], { id, tree }: SerialisedTreeRoot): void => {
-    proxy.push({ id, tree: mapNewOwner(tree) })
-  }
-  const removeRoot = (proxy: GraphRoot[], id: number): void => {
-    proxy.splice(
-      proxy.findIndex(e => e.id === id),
-      1,
-    )
-  }
-  const updateRoot = (proxy: GraphRoot[], { id, tree }: SerialisedTreeRoot): void => {
-    const index = graphs.findIndex(r => r.id === id)
-    // reconcile existing root
-    if (index !== -1) reconcileNode(tree, proxy[index].tree)
-    // insert new root
-    else addNewRoot(proxy, { id, tree })
-  }
-
-  onRuntimeMessage("GraphUpdate", ({ added, removed, updated }) => {
-    batch(() => {
-      // reset all of the computationRerun state
-      for (const id of ownersUpdated) ownersMap[id].setUpdate(false)
-      for (const id of signalsUpdated) signalsMap[id].setUpdate(false)
-
-      setGraphs(
-        produce(proxy => {
-          removed.forEach(id => removeRoot(proxy, id))
-          added.forEach(root => addNewRoot(proxy, root))
-          updated.forEach(root => updateRoot(proxy, root))
-        }),
-      )
-    })
-
-    afterGraphUpdate()
-  })
-
-  onRuntimeMessage("ResetPanel", () => {
-    setGraphs([])
-    disposeAll(Object.values(ownersMap))
-    disposeAll(Object.values(signalsMap))
-    afterGraphUpdate()
-  })
-
-  onRuntimeMessage("BatchedUpdate", updates => {
-    console.groupCollapsed("Batched Updates")
-    batch(() => {
-      for (const update of updates) {
-        if (update.type === UpdateType.Signal) {
-          const signal = signalsMap[update.payload.id]
-          console.log("Signal update", update.payload.id, update.payload.value, "in map:", !!signal)
-          if (signal) {
-            signal.setValue(update.payload.value)
-            signal.setUpdate(true)
-            signalsUpdated.add(update.payload.id)
-          }
-        } else {
-          const owner = ownersMap[update.payload]
-          console.log("Computation rerun", update.payload, "in map:", !!owner)
-          if (owner) {
-            owner.setUpdate(true)
-            ownersUpdated.add(update.payload)
-          }
-        }
-      }
-    })
-    console.groupEnd()
-  })
-
-  return {
-    graphs,
-    highlights,
-  }
-})
-export const { graphs, highlights } = exports
