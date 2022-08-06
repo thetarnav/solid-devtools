@@ -17,13 +17,11 @@ export const Signals: Component<{ each: GraphSignal[] }> = props => {
 }
 
 export const SignalNode: Component<{ signal: GraphSignal }> = ({ signal }) => {
-  const { highlightObserversOf, cancelHightlightObserversOf, isSourceHighlighted } = useHighlights()
+  const { highlightSignalObservers, isSourceHighlighted } = useHighlights()
   const isHighlighted = isSourceHighlighted.bind(null, signal)
 
   const { hoverProps, isHovered } = createHover({})
-  createEffect(() =>
-    isHovered() ? highlightObserversOf(signal) : cancelHightlightObserversOf(signal),
-  )
+  createEffect(() => highlightSignalObservers(signal, isHovered()))
 
   return (
     <div class={styles.SignalNode.container} {...hoverProps}>

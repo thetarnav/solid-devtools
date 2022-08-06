@@ -1,5 +1,6 @@
 import { batch, createRoot, createSelector, createSignal, getOwner, onCleanup } from "solid-js"
 import { createStore, produce } from "solid-js/store"
+import { HighlightContextState } from "@solid-devtools/ui"
 import { UpdateType } from "@shared/bridge"
 import { mutateFilter, pushToArrayProp } from "@shared/utils"
 import {
@@ -246,20 +247,22 @@ const exports = createRoot(() => {
   const [highlightedObservers, setHighlightedObservers] = createSignal<GraphOwner[]>([])
   const [highlightedSources, setHighlightedSources] = createSignal<GraphSignal[]>([])
 
-  const highlights = {
-    highlightObserversOf(signal: GraphSignal): void {
-      setHighlightedObservers(signal.observers)
-      lastHoveredNode = signal
+  const highlights: HighlightContextState = {
+    highlightSignalObservers(signal, highlight) {
+      if (highlight) {
+        setHighlightedObservers(signal.observers)
+        lastHoveredNode = signal
+      } else if (lastHoveredNode === signal) {
+        setHighlightedObservers([])
+      }
     },
-    cancelHightlightObserversOf(signal: GraphSignal): void {
-      if (lastHoveredNode === signal) setHighlightedObservers([])
-    },
-    highlightSourcesOf(owner: GraphOwner): void {
-      setHighlightedSources(owner.sources)
-      lastHoveredNode = owner
-    },
-    cancelHightlightSourcesOf(owner: GraphOwner): void {
-      if (lastHoveredNode === owner) setHighlightedSources([])
+    highlightNodeSources(owner, highlight) {
+      if (highlight) {
+        setHighlightedSources(owner.sources)
+        lastHoveredNode = owner
+      } else if (lastHoveredNode === owner) {
+        setHighlightedSources([])
+      }
     },
     isObserverHighlighted: createSelector(highlightedObservers, (owner: GraphOwner, list) =>
       list.includes(owner),

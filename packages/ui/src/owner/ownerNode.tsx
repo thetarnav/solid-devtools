@@ -24,28 +24,20 @@ export function OwnerNode(props: { owner: GraphOwner }): JSX.Element {
 
   const { hoverProps, isHovered } = createHover({})
 
-  const {
-    highlightSourcesOf,
-    cancelHightlightSourcesOf,
-    highlightObserversOf,
-    cancelHightlightObserversOf,
-    isObserverHighlighted,
-  } = useHighlights()
+  const { highlightNodeSources, highlightSignalObservers, isObserverHighlighted } = useHighlights()
 
   const isHighlighted = isObserverHighlighted.bind(null, owner)
 
   createEffect(() => {
-    if (isHovered()) highlightSourcesOf(owner)
-    else cancelHightlightSourcesOf(owner)
+    highlightNodeSources(owner, isHovered())
   })
-  onCleanup(() => cancelHightlightSourcesOf(owner))
+  onCleanup(() => highlightNodeSources(owner, false))
 
   if (signal) {
     createEffect(() => {
-      if (isHovered()) highlightObserversOf(signal)
-      else cancelHightlightObserversOf(signal)
+      highlightSignalObservers(signal, isHovered())
     })
-    onCleanup(() => cancelHightlightObserversOf(signal))
+    onCleanup(() => highlightSignalObservers(signal, false))
   }
 
   return (
