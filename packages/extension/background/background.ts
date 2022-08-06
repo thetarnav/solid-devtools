@@ -1,10 +1,7 @@
 import { createCallbackStack } from "@solid-primitives/utils"
-import { once } from "@shared/bridge"
-import {
-  createPortMessanger,
-  createRuntimeMessanger,
-  DEVTOOLS_CONTENT_PORT,
-} from "../shared/bridge"
+import { MESSAGE, once } from "@shared/messanger"
+import { createPortMessanger, createRuntimeMessanger } from "../shared/utils"
+import { DEVTOOLS_CONTENT_PORT } from "../shared/variables"
 
 console.log("background script working")
 
@@ -23,7 +20,7 @@ chrome.runtime.onConnect.addListener(newPort => {
 
   if (port) {
     console.log(`Switching BG Ports: ${port.sender?.documentId} -> ${newPort.sender?.documentId}`)
-    postRuntimeMessage("ResetPanel", true)
+    postRuntimeMessage(MESSAGE.ResetPanel)
     clearListeners()
   }
 
@@ -33,36 +30,40 @@ chrome.runtime.onConnect.addListener(newPort => {
   const { postPortMessage, onPortMessage } = createPortMessanger(port)
 
   addCleanup(
-    onPortMessage("SolidOnPage", () => {
+    onPortMessage(MESSAGE.SolidOnPage, () => {
       solidOnPage = true
-      postRuntimeMessage("SolidOnPage", true)
+      postRuntimeMessage(MESSAGE.SolidOnPage)
       // respond with page visibility to the debugger, to let him know
       // if the panel is already created and visible (after page refresh)
-      postPortMessage("PanelVisibility", panelVisibility)
+      postPortMessage(MESSAGE.PanelVisibility, panelVisibility)
     }),
   )
 
-  addCleanup(onPortMessage("GraphUpdate", graph => postRuntimeMessage("GraphUpdate", graph)))
-
   addCleanup(
-    onPortMessage("BatchedUpdate", payload => postRuntimeMessage("BatchedUpdate", payload)),
+    onPortMessage(MESSAGE.GraphUpdate, graph => postRuntimeMessage(MESSAGE.GraphUpdate, graph)),
   )
 
   addCleanup(
-    onRuntimeMessage("PanelVisibility", visibility => {
+    onPortMessage(MESSAGE.BatchedUpdate, payload =>
+      postRuntimeMessage(MESSAGE.BatchedUpdate, payload),
+    ),
+  )
+
+  addCleanup(
+    onRuntimeMessage(MESSAGE.PanelVisibility, visibility => {
       panelVisibility = visibility
-      postPortMessage("PanelVisibility", visibility)
+      postPortMessage(MESSAGE.PanelVisibility, visibility)
     }),
   )
 
   // make sure the devtools script will be triggered to create devtools panel
   addCleanup(
-    once(onRuntimeMessage, "DevtoolsScriptConnected", () => {
-      if (solidOnPage) postRuntimeMessage("SolidOnPage", true)
+    once(onRuntimeMessage, MESSAGE.DevtoolsScriptConnected, () => {
+      if (solidOnPage) postRuntimeMessage(MESSAGE.SolidOnPage)
     }),
   )
 
-  addCleanup(onRuntimeMessage("ForceUpdate", () => postPortMessage("ForceUpdate", true)))
+  addCleanup(onRuntimeMessage(MESSAGE.ForceUpdate, () => postPortMessage(MESSAGE.ForceUpdate)))
 })
 
 export {}

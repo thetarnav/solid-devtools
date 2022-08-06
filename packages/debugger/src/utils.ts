@@ -17,7 +17,7 @@ import {
   SolidMemo,
   getOwner,
 } from "@shared/graph"
-import { SafeValue } from "@shared/bridge"
+import { SafeValue } from "@shared/messanger"
 import { INTERNAL, UNNAMED } from "@shared/variables"
 import { trimString } from "@shared/utils"
 import { Owner, RootFunction } from "@shared/solid"

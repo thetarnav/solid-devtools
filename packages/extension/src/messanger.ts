@@ -1,5 +1,6 @@
-import { createRuntimeMessanger } from "../shared/bridge"
+import { createRuntimeMessanger } from "../shared/utils"
+import { MESSAGE } from "@shared/messanger"
 
 export const { onRuntimeMessage, postRuntimeMessage } = createRuntimeMessanger()
 
-postRuntimeMessage("ForceUpdate", true)
+postRuntimeMessage(MESSAGE.ForceUpdate)

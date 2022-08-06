@@ -1,10 +1,12 @@
 import {
+  MESSAGE,
   once,
   onWindowMessage,
   postWindowMessage,
   startListeningWindowMessages,
-} from "@shared/bridge"
-import { createPortMessanger, DEVTOOLS_CONTENT_PORT } from "../shared/bridge"
+} from "@shared/messanger"
+import { createPortMessanger } from "../shared/utils"
+import { DEVTOOLS_CONTENT_PORT } from "../shared/variables"
 
 console.log("content script working")
 
@@ -13,18 +15,20 @@ const port = chrome.runtime.connect({ name: DEVTOOLS_CONTENT_PORT })
 startListeningWindowMessages()
 const { postPortMessage, onPortMessage } = createPortMessanger(port)
 
-onWindowMessage("SolidOnPage", () => postPortMessage("SolidOnPage", true))
+onWindowMessage(MESSAGE.SolidOnPage, () => postPortMessage(MESSAGE.SolidOnPage))
 
-onWindowMessage("GraphUpdate", graph => postPortMessage("GraphUpdate", graph))
+onWindowMessage(MESSAGE.GraphUpdate, graph => postPortMessage(MESSAGE.GraphUpdate, graph))
 
-onWindowMessage("BatchedUpdate", payload => postPortMessage("BatchedUpdate", payload))
+onWindowMessage(MESSAGE.BatchedUpdate, payload => postPortMessage(MESSAGE.BatchedUpdate, payload))
 
-onPortMessage("PanelVisibility", visible => postWindowMessage("PanelVisibility", visible))
-
-once(onPortMessage, "DevtoolsScriptConnected", () =>
-  postWindowMessage("DevtoolsScriptConnected", true),
+onPortMessage(MESSAGE.PanelVisibility, visible =>
+  postWindowMessage(MESSAGE.PanelVisibility, visible),
 )
 
-once(onPortMessage, "ForceUpdate", () => postWindowMessage("ForceUpdate", true))
+once(onPortMessage, MESSAGE.DevtoolsScriptConnected, () =>
+  postWindowMessage(MESSAGE.DevtoolsScriptConnected),
+)
+
+once(onPortMessage, MESSAGE.ForceUpdate, () => postWindowMessage(MESSAGE.ForceUpdate))
 
 export {}
