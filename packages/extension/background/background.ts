@@ -1,5 +1,5 @@
 import { createCallbackStack } from "@solid-primitives/utils"
-import { MESSAGE, once } from "@shared/messanger"
+import { MESSAGE, once } from "@shared/bridge"
 import {
   createPortMessanger,
   createRuntimeMessanger,

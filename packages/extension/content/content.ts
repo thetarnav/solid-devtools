@@ -4,7 +4,7 @@ import {
   onWindowMessage,
   postWindowMessage,
   startListeningWindowMessages,
-} from "@shared/messanger"
+} from "@shared/bridge"
 import { createPortMessanger, DEVTOOLS_CONTENT_PORT } from "../shared/messanger"
 
 console.log("content script working")

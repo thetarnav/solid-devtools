@@ -7,7 +7,7 @@ import {
   postWindowMessage,
   startListeningWindowMessages,
   UpdateType,
-} from "@shared/messanger"
+} from "@shared/bridge"
 import type { SerialisedTreeRoot } from "@shared/graph"
 import { getArrayDiffById } from "@shared/diff"
 

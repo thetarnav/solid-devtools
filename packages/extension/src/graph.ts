@@ -1,6 +1,6 @@
 import { batch, createRoot, createSelector, createSignal, getOwner, onCleanup } from "solid-js"
 import { createStore, produce } from "solid-js/store"
-import { UpdateType, MESSAGE } from "@shared/messanger"
+import { UpdateType, MESSAGE } from "@shared/bridge"
 import { mutateFilter, pushToArrayProp } from "@shared/utils"
 import {
   MappedOwner,

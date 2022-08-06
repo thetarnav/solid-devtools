@@ -1,5 +1,5 @@
 import { createRuntimeMessanger } from "../shared/messanger"
-import { MESSAGE, once } from "@shared/messanger"
+import { MESSAGE, once } from "@shared/bridge"
 
 console.log("devtools script working")
 
