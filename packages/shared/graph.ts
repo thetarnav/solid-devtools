@@ -1,6 +1,6 @@
 import { getOwner as _getOwner } from "solid-js"
 import { Many } from "@solid-primitives/utils"
-import { SafeValue, UpdateType } from "./messanger"
+import { SafeValue, UpdateType } from "./bridge"
 import { Owner as _Owner, SignalState as _SignalState, Computation as _Computation } from "./solid"
 import { INTERNAL } from "./variables"
 

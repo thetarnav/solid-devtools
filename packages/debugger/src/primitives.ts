@@ -1,7 +1,7 @@
 import { createEffect, onCleanup, untrack } from "solid-js"
 import { throttle } from "@solid-primitives/scheduled"
 import { DebuggerContext, getOwner, NodeType, SolidOwner, SolidRoot } from "@shared/graph"
-import { UpdateType } from "@shared/messanger"
+import { UpdateType } from "@shared/bridge"
 import { batchUpdate, ComputationUpdateHandler, SignalUpdateHandler } from "./batchUpdates"
 import { walkSolidTree } from "./walker"
 import {

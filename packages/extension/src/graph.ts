@@ -1,6 +1,6 @@
 import { batch, createRoot, createSelector, createSignal, getOwner, onCleanup } from "solid-js"
 import { createStore, produce } from "solid-js/store"
-import { UpdateType, MESSAGE } from "@shared/messanger"
+import { UpdateType } from "@shared/bridge"
 import { mutateFilter, pushToArrayProp } from "@shared/utils"
 import {
   MappedOwner,
@@ -286,7 +286,7 @@ const exports = createRoot(() => {
     else addNewRoot(proxy, { id, tree })
   }
 
-  onRuntimeMessage(MESSAGE.GraphUpdate, ({ added, removed, updated }) => {
+  onRuntimeMessage("GraphUpdate", ({ added, removed, updated }) => {
     batch(() => {
       // reset all of the computationRerun state
       for (const id of ownersUpdated) ownersMap[id].setUpdate(false)
@@ -304,14 +304,14 @@ const exports = createRoot(() => {
     afterGraphUpdate()
   })
 
-  onRuntimeMessage(MESSAGE.ResetPanel, () => {
+  onRuntimeMessage("ResetPanel", () => {
     setGraphs([])
     disposeAll(Object.values(ownersMap))
     disposeAll(Object.values(signalsMap))
     afterGraphUpdate()
   })
 
-  onRuntimeMessage(MESSAGE.BatchedUpdate, updates => {
+  onRuntimeMessage("BatchedUpdate", updates => {
     console.groupCollapsed("Batched Updates")
     batch(() => {
       for (const update of updates) {

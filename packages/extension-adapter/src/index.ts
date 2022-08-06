@@ -2,12 +2,11 @@ import { createEffect, createSignal, onCleanup } from "solid-js"
 import { registerDebuggerPlugin, PluginFactory, getSafeValue } from "@solid-devtools/debugger"
 import {
   BatchedUpdate,
-  MESSAGE,
   onWindowMessage,
   postWindowMessage,
   startListeningWindowMessages,
   UpdateType,
-} from "@shared/messanger"
+} from "@shared/bridge"
 import type { SerialisedTreeRoot } from "@shared/graph"
 import { getArrayDiffById } from "@shared/diff"
 
@@ -20,17 +19,17 @@ const extensionAdapterFactory: PluginFactory = ({
 }) => {
   const [enabled, setEnabled] = createSignal(false)
 
-  postWindowMessage(MESSAGE.SolidOnPage)
+  postWindowMessage("SolidOnPage", true)
 
   // update the graph only if the devtools panel is in view
-  onCleanup(onWindowMessage(MESSAGE.PanelVisibility, setEnabled))
-  onCleanup(onWindowMessage(MESSAGE.ForceUpdate, forceTriggerUpdate))
+  onCleanup(onWindowMessage("PanelVisibility", setEnabled))
+  onCleanup(onWindowMessage("ForceUpdate", forceTriggerUpdate))
 
   // diff the roots array, and send only the changed roots (edited, deleted, added)
   createEffect((prev: SerialisedTreeRoot[]) => {
     const _roots = serialisedRoots()
     const diff = getArrayDiffById(prev, _roots)
-    postWindowMessage(MESSAGE.GraphUpdate, diff)
+    postWindowMessage("GraphUpdate", diff)
     return _roots
   }, [])
 
@@ -47,7 +46,7 @@ const extensionAdapterFactory: PluginFactory = ({
               oldValue: getSafeValue(payload.oldValue),
             },
     })) as BatchedUpdate[]
-    postWindowMessage(MESSAGE.BatchedUpdate, safeUpdates)
+    postWindowMessage("BatchedUpdate", safeUpdates)
   })
 
   return { enabled }
