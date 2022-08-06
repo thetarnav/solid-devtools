@@ -1,7 +1,7 @@
 import { Component, createSignal, For } from "solid-js"
 import { graphs, highlights } from "./graph"
-import { HighlightsProvider, OwnerNode, Splitter } from "@solid-devtools/ui"
-import { styles } from "./styles.css"
+import { HighlightsProvider, OwnerNode, Splitter, Scrollable } from "@solid-devtools/ui"
+import * as styles from "./styles.css"
 
 const App: Component = () => {
   const [sideOpen, setSideOpen] = createSignal(true)
@@ -18,7 +18,9 @@ const App: Component = () => {
             onToggle={setSideOpen}
             side={sideOpen() ? <p>There is absolutely nothing here :)</p> : undefined}
           >
-            <For each={graphs}>{root => <OwnerNode owner={root.tree} />}</For>
+            <Scrollable>
+              <For each={graphs}>{root => <OwnerNode owner={root.tree} />}</For>
+            </Scrollable>
           </Splitter>
         </div>
       </div>
