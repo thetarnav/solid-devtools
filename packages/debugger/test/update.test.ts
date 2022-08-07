@@ -1,4 +1,4 @@
-import { getOwner, SolidRoot } from "@shared/graph"
+import { getOwner, SolidRoot } from "@solid-devtools/shared/graph"
 import { createComputed, createRoot, createSignal } from "solid-js"
 import {
   interceptComputationRerun,

@@ -1,8 +1,13 @@
 import { batch, createRoot, createSelector, createSignal } from "solid-js"
 import { createStore, produce } from "solid-js/store"
 import { HighlightContextState } from "@solid-devtools/ui"
-import { UpdateType } from "@shared/bridge"
-import { GraphOwner, GraphSignal, GraphRoot, SerialisedTreeRoot } from "@shared/graph"
+import { UpdateType } from "@solid-devtools/shared/bridge"
+import {
+  GraphOwner,
+  GraphSignal,
+  GraphRoot,
+  SerialisedTreeRoot,
+} from "@solid-devtools/shared/graph"
 import { onRuntimeMessage } from "./bridge"
 import {
   afterGraphUpdate,

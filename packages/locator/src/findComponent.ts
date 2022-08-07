@@ -1,5 +1,5 @@
-import { MappedComponent } from "@shared/graph"
-import { LOCATION_ATTRIBUTE_NAME } from "@shared/variables"
+import { MappedComponent } from "@solid-devtools/shared/graph"
+import { LOCATION_ATTRIBUTE_NAME } from "@solid-devtools/shared/variables"
 import { isMac } from "@solid-primitives/platform"
 import { SelectedComponent } from "."
 import { ElementLocation } from "./goToSource"

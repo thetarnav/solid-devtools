@@ -6,9 +6,9 @@ import {
   postWindowMessage,
   startListeningWindowMessages,
   UpdateType,
-} from "@shared/bridge"
-import type { SerialisedTreeRoot } from "@shared/graph"
-import { getArrayDiffById } from "@shared/diff"
+} from "@solid-devtools/shared/bridge"
+import type { SerialisedTreeRoot } from "@solid-devtools/shared/graph"
+import { getArrayDiffById } from "@solid-devtools/shared/diff"
 
 startListeningWindowMessages()
 

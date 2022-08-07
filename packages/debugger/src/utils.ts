@@ -17,10 +17,10 @@ import {
   SolidSignal,
   SolidMemo,
   getOwner,
-} from "@shared/graph"
-import { INTERNAL, UNNAMED } from "@shared/variables"
-import { trimString } from "@shared/utils"
-import { Owner, RootFunction } from "@shared/solid"
+} from "@solid-devtools/shared/graph"
+import { INTERNAL, UNNAMED } from "@solid-devtools/shared/variables"
+import { trimString } from "@solid-devtools/shared/utils"
+import { Owner, RootFunction } from "@solid-devtools/shared/solid"
 
 export const isSolidComputation = (o: Readonly<SolidOwner>): o is SolidComputation => "fn" in o
 

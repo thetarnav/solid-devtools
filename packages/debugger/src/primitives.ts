@@ -1,7 +1,13 @@
 import { createEffect, onCleanup, untrack } from "solid-js"
 import { throttle } from "@solid-primitives/scheduled"
-import { DebuggerContext, getOwner, NodeType, SolidOwner, SolidRoot } from "@shared/graph"
-import { UpdateType } from "@shared/bridge"
+import {
+  DebuggerContext,
+  getOwner,
+  NodeType,
+  SolidOwner,
+  SolidRoot,
+} from "@solid-devtools/shared/graph"
+import { UpdateType } from "@solid-devtools/shared/bridge"
 import { batchUpdate, ComputationUpdateHandler, SignalUpdateHandler } from "./batchUpdates"
 import { walkSolidTree } from "./walker"
 import {
@@ -16,8 +22,8 @@ import {
   setDebuggerContext,
 } from "./utils"
 import { enabled, debuggerConfig, onForceUpdate, onUpdate, updateRoot, removeRoot } from "./plugin"
-import { INTERNAL } from "@shared/variables"
-import { Owner } from "@shared/solid"
+import { INTERNAL } from "@solid-devtools/shared/variables"
+import { Owner } from "@solid-devtools/shared/solid"
 
 export function createGraphRoot(owner: SolidRoot): void {
   // setup the debugger in a separate root, so that it doesn't walk and track itself

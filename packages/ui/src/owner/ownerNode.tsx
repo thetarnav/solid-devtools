@@ -1,7 +1,7 @@
 import { createEffect, For, JSX, onCleanup } from "solid-js"
 import { TransitionGroup, animateExit, animateEnter } from "@otonashixav/solid-flip"
 import { createHover } from "@solid-aria/interactions"
-import { GraphOwner, NodeType } from "@shared/graph"
+import { GraphOwner, NodeType } from "@solid-devtools/shared/graph"
 import { HighlightText, Signals, ValueNode } from "../signal/signalNode"
 import { useHighlights } from "../ctx/highlights"
 import { childrenContainer, container, header } from "./styles.css"

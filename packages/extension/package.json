@@ -23,6 +23,7 @@
     "vite-plugin-solid": "^2.3.0"
   },
   "dependencies": {
+    "@solid-devtools/shared": "workspace:^0.3.3",
     "@solid-devtools/ui": "0.5.0",
     "@solid-primitives/context": "^0.1.0",
     "@solid-primitives/immutable": "^0.1.0",

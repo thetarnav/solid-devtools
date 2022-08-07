@@ -2,7 +2,7 @@ import { ParentComponent } from "solid-js"
 import { attachDebugger } from "./primitives"
 
 // export all graph types from the internal "shared" library
-export * from "@shared/graph"
+export * from "@solid-devtools/shared/graph"
 
 export { registerDebuggerPlugin } from "./plugin"
 export type { PluginFactory } from "./plugin"

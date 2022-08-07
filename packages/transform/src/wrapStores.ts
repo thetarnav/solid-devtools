@@ -1,6 +1,6 @@
 import { PluginObj } from "@babel/core"
 import * as t from "@babel/types"
-import { WINDOW_WRAP_STORE_PROPERTY } from "@shared/variables"
+import { WINDOW_WRAP_STORE_PROPERTY } from "@solid-devtools/shared/variables"
 import { storeOverwriteName, storeOverwriteNamespace, windowId } from "./utils"
 
 const createStoreId = t.identifier("createStore")

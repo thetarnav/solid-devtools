@@ -1,4 +1,4 @@
-import { SolidOwner, getOwner, NodeType } from "@shared/graph"
+import { SolidOwner, getOwner, NodeType } from "@solid-devtools/shared/graph"
 import {
   createComponent,
   createComputed,

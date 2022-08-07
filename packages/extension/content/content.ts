@@ -3,8 +3,8 @@ import {
   onWindowMessage,
   postWindowMessage,
   startListeningWindowMessages,
-} from "@shared/bridge"
-import { log } from "@shared/utils"
+} from "@solid-devtools/shared/bridge"
+import { log } from "@solid-devtools/shared/utils"
 import { createPortMessanger, DEVTOOLS_CONTENT_PORT } from "../shared/messanger"
 
 log("content script working")

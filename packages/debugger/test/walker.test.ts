@@ -1,5 +1,5 @@
-import { getOwner, NodeType, SignalUpdatePayload } from "@shared/graph"
-import { UNNAMED } from "@shared/variables"
+import { getOwner, NodeType, SignalUpdatePayload } from "@solid-devtools/shared/graph"
+import { UNNAMED } from "@solid-devtools/shared/variables"
 import { createComputed, createEffect, createRoot, createSignal } from "solid-js"
 import type * as API from "../src/walker"
 

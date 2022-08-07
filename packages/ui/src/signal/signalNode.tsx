@@ -1,6 +1,6 @@
 import { Component, createEffect, For, JSX, ParentComponent, Show, splitProps } from "solid-js"
 import { combineProps } from "@solid-primitives/props"
-import { GraphSignal } from "@shared/graph"
+import { GraphSignal } from "@solid-devtools/shared/graph"
 import { useHighlights } from "../ctx/highlights"
 import { createHover } from "@solid-aria/interactions"
 import * as styles from "./styles.css"

@@ -1,6 +1,6 @@
 import { createRuntimeMessanger } from "../shared/messanger"
-import { once } from "@shared/bridge"
-import { log } from "@shared/utils"
+import { once } from "@solid-devtools/shared/bridge"
+import { log } from "@solid-devtools/shared/utils"
 
 log("devtools script working")
 

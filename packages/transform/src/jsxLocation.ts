@@ -1,7 +1,10 @@
 import { relative } from "path"
 import { PluginObj } from "@babel/core"
 import * as t from "@babel/types"
-import { LOCATION_ATTRIBUTE_NAME, WINDOW_PROJECTPATH_PROPERTY } from "@shared/variables"
+import {
+  LOCATION_ATTRIBUTE_NAME,
+  WINDOW_PROJECTPATH_PROPERTY,
+} from "@solid-devtools/shared/variables"
 import { getLocationAttribute, isLowercase, windowId } from "./utils"
 
 const jsxLocationPlugin: PluginObj<any> = {

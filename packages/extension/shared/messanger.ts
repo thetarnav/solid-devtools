@@ -1,6 +1,6 @@
 import { noop } from "@solid-primitives/utils"
-import { LOG_MESSAGES, OnMessageFn, PostMessageFn, Messages } from "@shared/bridge"
-import { log } from "@shared/utils"
+import { LOG_MESSAGES, OnMessageFn, PostMessageFn, Messages } from "@solid-devtools/shared/bridge"
+import { log } from "@solid-devtools/shared/utils"
 
 export const DEVTOOLS_CONTENT_PORT = "DEVTOOLS_CONTENT_PORT"
 

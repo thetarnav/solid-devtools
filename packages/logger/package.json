@@ -61,6 +61,7 @@
   },
   "dependencies": {
     "@solid-devtools/debugger": "^0.3.0",
+    "@solid-devtools/shared": "workspace:^0.3.3",
     "@solid-primitives/utils": "^3.0.1"
   },
   "peerDependencies": {

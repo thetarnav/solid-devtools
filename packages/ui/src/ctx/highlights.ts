@@ -1,4 +1,4 @@
-import { GraphOwner, GraphSignal } from "@shared/graph"
+import { GraphOwner, GraphSignal } from "@solid-devtools/shared/graph"
 import { createContext, useContext } from "solid-js"
 import type { ContextProviderComponent } from "solid-js/types/reactive/signal"
 

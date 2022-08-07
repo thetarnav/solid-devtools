@@ -1,6 +1,10 @@
 import { onCleanup } from "solid-js"
 import { chain, createMicrotask } from "@solid-primitives/utils"
-import { BatchedUpdate, BatchUpdateListener, SignalUpdatePayload } from "@shared/graph"
+import {
+  BatchedUpdate,
+  BatchUpdateListener,
+  SignalUpdatePayload,
+} from "@solid-devtools/shared/graph"
 
 export type SignalUpdateHandler = (payload: SignalUpdatePayload) => void
 export type ComputationUpdateHandler = (id: number) => void

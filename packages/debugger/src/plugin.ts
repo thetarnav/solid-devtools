@@ -2,7 +2,12 @@ import { Accessor, createSignal, getOwner, runWithOwner } from "solid-js"
 import { createSimpleEmitter } from "@solid-primitives/event-bus"
 import { push, splice } from "@solid-primitives/immutable"
 import { createLazyMemo } from "@solid-primitives/memo"
-import { BatchUpdateListener, MappedComponent, MappedRoot, SerialisedTreeRoot } from "@shared/graph"
+import {
+  BatchUpdateListener,
+  MappedComponent,
+  MappedRoot,
+  SerialisedTreeRoot,
+} from "@solid-devtools/shared/graph"
 import { makeBatchUpdateListener } from "./batchUpdates"
 import { createConsumers, createInternalRoot } from "./utils"
 

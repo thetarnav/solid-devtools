@@ -1,8 +1,13 @@
 import { noop, onRootCleanup } from "@solid-primitives/utils"
 import { Observable, Observer as ObjectObserver } from "object-observer"
-import { SignalState, SolidComputation, SolidRoot, ValueUpdateListener } from "@shared/graph"
-import { Owner } from "@shared/solid"
-import { WINDOW_WRAP_STORE_PROPERTY } from "@shared/variables"
+import {
+  SignalState,
+  SolidComputation,
+  SolidRoot,
+  ValueUpdateListener,
+} from "@solid-devtools/shared/graph"
+import { Owner } from "@solid-devtools/shared/solid"
+import { WINDOW_WRAP_STORE_PROPERTY } from "@solid-devtools/shared/variables"
 import { skipInternalRoot } from "./utils"
 
 //

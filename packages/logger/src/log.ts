@@ -2,8 +2,8 @@
 // to gen a overview of how to style console messages
 
 import { getNodeName, getNodeType, getOwnerType, isSolidMemo } from "@solid-devtools/debugger"
-import { NodeType, SolidComputation, SolidOwner, SolidSignal } from "@shared/graph"
-import { dedupeArray } from "@shared/utils"
+import { NodeType, SolidComputation, SolidOwner, SolidSignal } from "@solid-devtools/shared/graph"
+import { dedupeArray } from "@solid-devtools/shared/utils"
 import { getDiffMap, getStackDiffMap } from "./utils"
 
 export type NodeState = {

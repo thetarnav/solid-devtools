@@ -8,7 +8,7 @@ import {
   MappedComponent,
   SignalState,
   SolidMemo,
-} from "@shared/graph"
+} from "@solid-devtools/shared/graph"
 import { ComputationUpdateHandler, SignalUpdateHandler } from "./batchUpdates"
 import {
   getNodeName,

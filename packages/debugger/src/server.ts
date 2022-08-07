@@ -1,10 +1,10 @@
 import { noop } from "@solid-primitives/utils"
-import { SolidComputation, SolidMemo, SolidOwner, SolidRoot } from "@shared/graph"
-import { UNNAMED } from "@shared/variables"
+import { SolidComputation, SolidMemo, SolidOwner, SolidRoot } from "@solid-devtools/shared/graph"
+import { UNNAMED } from "@solid-devtools/shared/variables"
 import * as API from "./index"
 import { createRoot } from "solid-js"
 
-export { NodeType, getOwner } from "@shared/graph"
+export { NodeType, getOwner } from "@solid-devtools/shared/graph"
 
 export { getSafeValue, createUnownedRoot } from "./index"
 

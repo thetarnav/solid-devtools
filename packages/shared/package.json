@@ -1,13 +1,103 @@
 {
-  "name": "solid-devtools-shared",
+  "name": "@solid-devtools/shared",
   "version": "0.3.3",
   "license": "MIT",
   "author": "Damian Tarnawski <gthetarnav@gmail.com>",
   "contributors": [],
+  "homepage": "https://github.com/thetarnav/solid-devtools/tree/main/packages/shared#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/thetarnav/solid-devtools.git"
+  },
+  "bugs": {
+    "url": "https://github.com/thetarnav/solid-devtools/issues"
+  },
+  "keywords": [
+    "solid",
+    "devtools"
+  ],
+  "scripts": {
+    "dev": "tsup --watch",
+    "build": "tsup",
+    "test": "echo \"NOOP TEST\"",
+    "typecheck": "tsc --noEmit"
+  },
+  "private": false,
+  "sideEffects": false,
+  "type": "module",
+  "exports": {
+    "./bridge": {
+      "import": "./dist/bridge.js",
+      "require": "./dist/bridge.cjs",
+      "types": "./dist/bridge.d.ts"
+    },
+    "./cursor": {
+      "import": "./dist/cursor.js",
+      "require": "./dist/cursor.cjs",
+      "types": "./dist/cursor.d.ts"
+    },
+    "./diff": {
+      "import": "./dist/diff.js",
+      "require": "./dist/diff.cjs",
+      "types": "./dist/diff.d.ts"
+    },
+    "./graph": {
+      "import": "./dist/graph.js",
+      "require": "./dist/graph.cjs",
+      "types": "./dist/graph.d.ts"
+    },
+    "./solid": {
+      "import": "./dist/solid.js",
+      "require": "./dist/solid.cjs",
+      "types": "./dist/solid.d.ts"
+    },
+    "./utils": {
+      "import": "./dist/utils.js",
+      "require": "./dist/utils.cjs",
+      "types": "./dist/utils.d.ts"
+    },
+    "./variables": {
+      "import": "./dist/variables.js",
+      "require": "./dist/variables.cjs",
+      "types": "./dist/variables.d.ts"
+    }
+  },
+  "typesVersions": {
+    "*": {
+      "bridge": [
+        "./dist/bridge.d.ts"
+      ],
+      "cursor": [
+        "./dist/cursor.d.ts"
+      ],
+      "diff": [
+        "./dist/diff.d.ts"
+      ],
+      "graph": [
+        "./dist/graph.d.ts"
+      ],
+      "solid": [
+        "./dist/solid.d.ts"
+      ],
+      "utils": [
+        "./dist/utils.d.ts"
+      ],
+      "variables": [
+        "./dist/variables.d.ts"
+      ]
+    }
+  },
+  "devDependencies": {
+    "solid-js": "^1.4.8",
+    "tsup": "^6.2.1",
+    "typescript": "^4.7.4"
+  },
+  "peerDependencies": {
+    "solid-js": "^1.4.8"
+  },
   "dependencies": {
     "@solid-primitives/utils": "^3.0.1",
     "solid-js": "^1.4.8",
     "type-fest": "^2.18.0"
-  },
-  "private": true
+  }
 }

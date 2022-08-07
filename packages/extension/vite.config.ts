@@ -10,7 +10,7 @@ export default defineConfig({
   plugins: [solidPlugin(), vanillaExtractPlugin(), crx({ manifest })],
   resolve: {
     alias: {
-      "@shared": path.resolve(__dirname, "..", "shared"),
+      "@solid-devtools/shared": path.resolve(__dirname, "..", "shared", "src"),
       // "@solid-devtools/ui": path.resolve(__dirname, "..", "ui", "src"),
     },
   },

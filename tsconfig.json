@@ -16,8 +16,8 @@
     "types": ["node", "jest"],
     "baseUrl": ".",
     "paths": {
-      "@shared/*": ["./packages/shared/*"],
       "solid-devtools": ["./packages/main/src/index.ts"],
+      // "@solid-devtools/shared/*": ["./packages/shared/src/*"],
       "@solid-devtools/debugger": ["./packages/debugger/src/index.ts"],
       "@solid-devtools/logger": ["./packages/logger/src/index.ts"],
       "@solid-devtools/locator": ["./packages/locator/src/index.tsx"],

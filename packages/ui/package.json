@@ -62,6 +62,7 @@
   "dependencies": {
     "@otonashixav/solid-flip": "^0.10.5",
     "@solid-aria/interactions": "^0.1.4",
+    "@solid-devtools/shared": "workspace:^0.3.3",
     "@solid-primitives/bounds": "^0.0.101",
     "@solid-primitives/event-listener": "^2.2.1",
     "@solid-primitives/keyboard": "^1.0.1",

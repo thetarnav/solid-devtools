@@ -11,9 +11,15 @@ import {
   interceptComputationRerun,
   lookupOwner,
 } from "@solid-devtools/debugger"
-import { SignalState, Owner } from "@shared/solid"
-import { getOwner, NodeType, SolidComputation, SolidOwner, SolidSignal } from "@shared/graph"
-import { dedupeArray, arrayRefEquals } from "@shared/utils"
+import { SignalState, Owner } from "@solid-devtools/shared/solid"
+import {
+  getOwner,
+  NodeType,
+  SolidComputation,
+  SolidOwner,
+  SolidSignal,
+} from "@solid-devtools/shared/graph"
+import { dedupeArray, arrayRefEquals } from "@solid-devtools/shared/utils"
 import {
   getComputationCreatedLabel,
   getComputationRerunLabel,

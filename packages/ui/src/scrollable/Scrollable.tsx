@@ -1,7 +1,7 @@
 import { createComputed, createSignal, ParentComponent } from "solid-js"
 import { createKeyHold } from "@solid-primitives/keyboard"
 import { makeEventListener } from "@solid-primitives/event-listener"
-import { createBodyCursor } from "@shared/cursor"
+import { createBodyCursor } from "@solid-devtools/shared/cursor"
 import * as styles from "./Scrollable.css"
 
 export const Scrollable: ParentComponent<{}> = props => {

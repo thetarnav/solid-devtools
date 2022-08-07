@@ -1,6 +1,6 @@
 import { createRoot, createSignal, getOwner, onCleanup } from "solid-js"
-import { mutateFilter, pushToArrayProp } from "@shared/utils"
-import { MappedOwner, MappedSignal, GraphOwner, GraphSignal } from "@shared/graph"
+import { mutateFilter, pushToArrayProp } from "@solid-devtools/shared/utils"
+import { MappedOwner, MappedSignal, GraphOwner, GraphSignal } from "@solid-devtools/shared/graph"
 
 const dispose = (o: { dispose?: VoidFunction }) => o.dispose?.()
 const disposeAll = (list: { dispose?: VoidFunction }[]) => list.forEach(dispose)

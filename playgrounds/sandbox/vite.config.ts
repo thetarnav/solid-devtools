@@ -17,8 +17,8 @@ export default defineConfig({
   resolve: {
     alias: {
       // used inside packages/debugger
-      "@shared": resolvePackage("shared"),
       "solid-devtools": resolvePackage("main", "src"),
+      "@solid-devtools/shared": resolvePackage("shared", "src"),
       "@solid-devtools/debugger": resolvePackage("debugger", "src"),
       "@solid-devtools/logger": resolvePackage("logger", "src"),
       "@solid-devtools/ui": resolvePackage("ui", "src"),
