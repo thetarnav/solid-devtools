@@ -109,6 +109,7 @@ const exports = createRoot(() => {
   return {
     graphs,
     highlights,
+    focused,
   }
 })
-export const { graphs, highlights } = exports
+export const { graphs, highlights, focused } = exports

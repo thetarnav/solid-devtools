@@ -43,6 +43,7 @@ export const header = {
   }),
   containerShadow: style({
     position: "absolute",
+    zIndex: -1,
     ...insetY(`-${spacing[0.5]}`),
     ...insetX(`-${spacing[2]}`),
     ...rounded(),

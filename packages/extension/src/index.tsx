@@ -1,13 +1,11 @@
 import { render } from "solid-js/web"
-import { Component, createSignal, For } from "solid-js"
+import { Component, For } from "solid-js"
 import { HighlightsProvider, OwnerNode, Splitter, Scrollable } from "@solid-devtools/ui"
-import { graphs, highlights } from "./state/graph"
+import { graphs, highlights, focused } from "./state/graph"
 import * as styles from "./styles.css"
 import "@solid-devtools/ui/css"
 
 const App: Component = () => {
-  const [sideOpen, setSideOpen] = createSignal(true)
-
   return (
     <HighlightsProvider value={highlights}>
       <div class={styles.app}>
@@ -17,8 +15,8 @@ const App: Component = () => {
         </header>
         <div class={styles.content}>
           <Splitter
-            onToggle={setSideOpen}
-            side={sideOpen() ? <p>There is absolutely nothing here :)</p> : undefined}
+            onToggle={() => highlights.handleFocus(null)}
+            side={focused() ? <p>There is absolutely nothing here :)</p> : undefined}
           >
             <Scrollable>
               <For each={graphs}>{root => <OwnerNode owner={root.tree} />}</For>
