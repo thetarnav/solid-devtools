@@ -22,8 +22,8 @@ onWindowMessage("BatchedUpdate", payload => postPortMessage("BatchedUpdate", pay
 
 onPortMessage("PanelVisibility", visible => postWindowMessage("PanelVisibility", visible))
 
-once(onPortMessage, "DevtoolsScriptConnected", () => postWindowMessage("DevtoolsScriptConnected"))
-
 once(onPortMessage, "ForceUpdate", () => postWindowMessage("ForceUpdate"))
+
+onPortMessage("SetFocusedOwner", ownerId => postWindowMessage("SetFocusedOwner", ownerId))
 
 export {}

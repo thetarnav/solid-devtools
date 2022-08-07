@@ -1,4 +1,4 @@
-import { batch, createRoot, createSelector, createSignal } from "solid-js"
+import { batch, createEffect, createRoot, createSelector, createSignal } from "solid-js"
 import { createStore, produce } from "solid-js/store"
 import { HighlightContextState } from "@solid-devtools/ui"
 import { UpdateType } from "@solid-devtools/shared/bridge"
@@ -8,7 +8,7 @@ import {
   GraphRoot,
   SerialisedTreeRoot,
 } from "@solid-devtools/shared/graph"
-import { onRuntimeMessage } from "./bridge"
+import { onRuntimeMessage, postRuntimeMessage } from "./bridge"
 import {
   afterGraphUpdate,
   disposeAllNodes,
@@ -104,6 +104,13 @@ const exports = createRoot(() => {
         }
       }
     })
+  })
+
+  let init = true
+  createEffect(() => {
+    const owner = focused()
+    if (init) return (init = false)
+    postRuntimeMessage("SetFocusedOwner", owner ? owner.id : null)
   })
 
   return {

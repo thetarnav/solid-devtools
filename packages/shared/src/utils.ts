@@ -1,5 +1,14 @@
 export function log(...args: any[]) {
-  console.log("%csolid-devtools", "color: #fff; background: #2c4f7c; padding: 1px 4px;", ...args)
+  console.log(
+    `%c${formatTime()} %csolid-devtools`,
+    "color: gray",
+    "color: #fff; background: #2c4f7c; padding: 1px 4px;",
+    ...args,
+  )
+}
+
+export function formatTime(date: Date = new Date()): string {
+  return `${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`
 }
 
 export function callArrayProp<

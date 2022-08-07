@@ -53,7 +53,7 @@ createRoot(dispose => {
 })
 
 const Button = (props: { text: string; onClick: VoidFunction }) => {
-  debugProps(props)
+  // debugProps(props)
   // createRoot(dispose => {
   // 	reattachOwner()
   // 	createComputed(() => {}, undefined, { name: "HEYYY, I should BE DEAD" })
@@ -97,8 +97,8 @@ const App: Component = () => {
   const [count, setCount] = createSignal(0, { name: "count_sig" })
   const [showEven, setShowEven] = createSignal(false, { name: "showEven" })
 
-  debugOwnerSignals()
-  debugOwnerComputations()
+  // debugOwnerSignals()
+  // debugOwnerComputations()
 
   const objmemo = createMemo(() => {
     // debugComputation()

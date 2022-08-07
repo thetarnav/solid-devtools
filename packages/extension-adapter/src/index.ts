@@ -1,4 +1,4 @@
-import { createEffect, createSignal, onCleanup } from "solid-js"
+import { createEffect, createSignal } from "solid-js"
 import { registerDebuggerPlugin, PluginFactory, getSafeValue } from "@solid-devtools/debugger"
 import {
   BatchedUpdate,
@@ -22,8 +22,11 @@ const extensionAdapterFactory: PluginFactory = ({
   postWindowMessage("SolidOnPage")
 
   // update the graph only if the devtools panel is in view
-  onCleanup(onWindowMessage("PanelVisibility", setEnabled))
-  onCleanup(onWindowMessage("ForceUpdate", forceTriggerUpdate))
+  onWindowMessage("PanelVisibility", setEnabled)
+  onWindowMessage("ForceUpdate", forceTriggerUpdate)
+  onWindowMessage("SetFocusedOwner", ownerId => {
+    console.log("SetFocusedOwner", ownerId)
+  })
 
   // diff the roots array, and send only the changed roots (edited, deleted, added)
   createEffect((prev: SerialisedTreeRoot[]) => {

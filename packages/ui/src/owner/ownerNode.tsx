@@ -53,7 +53,7 @@ export function OwnerNode(props: { owner: GraphOwner }): JSX.Element {
       <div
         class={styles.header.contailer[isFocused() ? "focused" : "base"]}
         {...hoverProps}
-        onClick={() => handleFocus(isFocused() ? null : owner)}
+        onClick={e => handleFocus(isFocused() ? null : owner)}
       >
         <div class={styles.header.containerShadow}></div>
         <div class={styles.header.nameContainer}>
