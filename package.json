@@ -5,6 +5,7 @@
   "author": "Damian Tarnawski <gthetarnav@gmail.com>",
   "contributors": [],
   "scripts": {
+    "dev:extension": "turbo run dev --filter=solid-devtools-extension",
     "dev:extension-deps": "turbo run dev --filter=@solid-devtools/shared --filter=@solid-devtools/ui",
     "dev:sandbox": "turbo run dev --filter=solid-devtools-sandbox-playground",
     "build": "turbo run build --filter=!./playgrounds/*",

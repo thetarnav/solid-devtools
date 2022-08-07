@@ -5,8 +5,10 @@ import type { ContextProviderComponent } from "solid-js/types/reactive/signal"
 export type HighlightContextState = {
   highlightSignalObservers: (signal: GraphSignal, highlight: boolean) => void
   highlightNodeSources: (owner: GraphOwner, highlight: boolean) => void
+  handleFocus: (owner: GraphOwner | null) => void
   isObserverHighlighted: (owner: GraphOwner) => boolean
   isSourceHighlighted: (signal: GraphSignal) => boolean
+  isOwnerFocused: (owner: GraphOwner) => boolean
 }
 
 const HighlightsContext = createContext<HighlightContextState>()

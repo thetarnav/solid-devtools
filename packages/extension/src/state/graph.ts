@@ -25,6 +25,8 @@ const exports = createRoot(() => {
   let lastHoveredNode: null | GraphOwner | GraphSignal = null
   const [highlightedObservers, setHighlightedObservers] = createSignal<GraphOwner[]>([])
   const [highlightedSources, setHighlightedSources] = createSignal<GraphSignal[]>([])
+  const [focused, setFocused] = createSignal<GraphOwner | null>(null)
+  const isFocused = createSelector<GraphOwner | null, GraphOwner>(focused)
 
   const highlights: HighlightContextState = {
     highlightSignalObservers(signal, highlight) {
@@ -49,6 +51,8 @@ const exports = createRoot(() => {
     isSourceHighlighted: createSelector(highlightedSources, (signal: GraphSignal, list) =>
       list.includes(signal),
     ),
+    handleFocus: setFocused,
+    isOwnerFocused: isFocused,
   }
 
   const addNewRoot = (proxy: GraphRoot[], { id, tree }: SerialisedTreeRoot): void => {

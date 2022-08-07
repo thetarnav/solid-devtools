@@ -4,7 +4,7 @@ import { createHover } from "@solid-aria/interactions"
 import { GraphOwner, NodeType } from "@solid-devtools/shared/graph"
 import { HighlightText, Signals, ValueNode } from "../signal/signalNode"
 import { useHighlights } from "../ctx/highlights"
-import { childrenContainer, container, header } from "./styles.css"
+import * as styles from "./OwnerNode.css"
 
 export function OwnerChildren(props: { children: GraphOwner[] }) {
   return (
@@ -24,9 +24,17 @@ export function OwnerNode(props: { owner: GraphOwner }): JSX.Element {
 
   const { hoverProps, isHovered } = createHover({})
 
-  const { highlightNodeSources, highlightSignalObservers, isObserverHighlighted } = useHighlights()
+  const {
+    highlightNodeSources,
+    highlightSignalObservers,
+    isObserverHighlighted,
+    isOwnerFocused,
+    handleFocus,
+  } = useHighlights()
 
+  const isFocused = isOwnerFocused.bind(null, owner)
   const isHighlighted = isObserverHighlighted.bind(null, owner)
+  onCleanup(() => isFocused() && handleFocus(null))
 
   createEffect(() => {
     highlightNodeSources(owner, isHovered())
@@ -41,20 +49,30 @@ export function OwnerNode(props: { owner: GraphOwner }): JSX.Element {
   }
 
   return (
-    <div class={container}>
-      <div class={header.contailer} {...hoverProps}>
-        <div class={header.nameContainer}>
-          <HighlightText strong={rerun()} light={isHighlighted()} bgColor class={header.highlight}>
+    <div class={styles.container}>
+      <div
+        class={styles.header.contailer[isFocused() ? "focused" : "base"]}
+        {...hoverProps}
+        onClick={() => handleFocus(isFocused() ? null : owner)}
+      >
+        <div class={styles.header.containerShadow}></div>
+        <div class={styles.header.nameContainer}>
+          <HighlightText
+            strong={rerun()}
+            light={isHighlighted()}
+            bgColor
+            class={styles.header.highlight}
+          >
             {type === NodeType.Component ? `<${name}>` : name}
           </HighlightText>
-          <div class={header.type}>{typeName}</div>
+          <div class={styles.header.type}>{typeName}</div>
         </div>
         {signal && <ValueNode value={signal.value} updated={signal.updated} />}
       </div>
       <Signals each={signals()} />
       {/* <Show when={children().length}> */}
       <div
-        class={childrenContainer}
+        class={styles.childrenContainer}
         style={{
           opacity: rerun() ? 0.3 : 1,
         }}
