@@ -12,7 +12,9 @@ import { onRuntimeMessage, postRuntimeMessage } from "./bridge"
 import {
   afterGraphUpdate,
   disposeAllNodes,
+  findOwnerRootId,
   mapNewOwner,
+  mapNewRoot,
   reconcileNode,
   resetComputationRerun,
   updateComputation,
@@ -56,7 +58,7 @@ const exports = createRoot(() => {
   }
 
   const addNewRoot = (proxy: GraphRoot[], { id, tree }: SerialisedTreeRoot): void => {
-    proxy.push({ id, tree: mapNewOwner(tree) })
+    proxy.push({ id, tree: mapNewRoot(id, tree) })
   }
   const removeRoot = (proxy: GraphRoot[], id: number): void => {
     proxy.splice(
@@ -67,7 +69,7 @@ const exports = createRoot(() => {
   const updateRoot = (proxy: GraphRoot[], { id, tree }: SerialisedTreeRoot): void => {
     const index = graphs.findIndex(r => r.id === id)
     // reconcile existing root
-    if (index !== -1) reconcileNode(tree, proxy[index].tree)
+    if (index !== -1) reconcileNode(id, tree, proxy[index].tree)
     // insert new root
     else addNewRoot(proxy, { id, tree })
   }
@@ -94,23 +96,29 @@ const exports = createRoot(() => {
     afterGraphUpdate()
   })
 
-  onRuntimeMessage("BatchedUpdate", updates => {
-    batch(() => {
-      for (const update of updates) {
-        if (update.type === UpdateType.Signal) {
-          updateSignal(update.payload.id, update.payload.value)
-        } else {
-          updateComputation(update.payload)
-        }
-      }
-    })
-  })
+  // TODO: batched updates are to be refactored
+  // onRuntimeMessage("BatchedUpdate", updates => {
+  //   batch(() => {
+  //     for (const update of updates) {
+  //       if (update.type === UpdateType.Signal) {
+  //         updateSignal(update.payload.id, update.payload.value)
+  //       } else {
+  //         updateComputation(update.payload)
+  //       }
+  //     }
+  //   })
+  // })
 
   let init = true
   createEffect(() => {
     const owner = focused()
     if (init) return (init = false)
-    postRuntimeMessage("SetFocusedOwner", owner ? owner.id : null)
+    if (owner) {
+      const rootId = findOwnerRootId(owner)
+      postRuntimeMessage("SetFocusedOwner", { rootId, ownerId: owner.id })
+    } else {
+      postRuntimeMessage("SetFocusedOwner", null)
+    }
   })
 
   return {

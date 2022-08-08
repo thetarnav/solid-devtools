@@ -153,12 +153,11 @@ export function observeValueUpdate(
   node: SignalState,
   onUpdate: ValueUpdateListener,
   symbol: symbol,
-): VoidFunction {
-  const remove = () => delete node.onValueUpdate![symbol]
+): void {
   // node already patched
   if (node.onValueUpdate) {
     node.onValueUpdate[symbol] = onUpdate
-    return remove
+    return
   }
   // patch node
   const map = (node.onValueUpdate = { [symbol]: onUpdate })
@@ -170,5 +169,17 @@ export function observeValueUpdate(
       value = newValue
     },
   })
-  return remove
+}
+
+export function removeValueUpdateObserver(node: SignalState, symbol: symbol): void {
+  if (node.onValueUpdate) delete node.onValueUpdate[symbol]
+}
+
+export function makeValueUpdateListener(
+  node: SignalState,
+  onUpdate: ValueUpdateListener,
+  symbol: symbol,
+): void {
+  observeValueUpdate(node, onUpdate, symbol)
+  onRootCleanup(() => removeValueUpdateObserver(node, symbol))
 }

@@ -1,4 +1,4 @@
-import { createEffect, onCleanup, untrack } from "solid-js"
+import { createEffect, getListener, onCleanup, untrack } from "solid-js"
 import { throttle } from "@solid-primitives/scheduled"
 import {
   DebuggerContext,
@@ -8,8 +8,22 @@ import {
   SolidRoot,
 } from "@solid-devtools/shared/graph"
 import { UpdateType } from "@solid-devtools/shared/bridge"
-import { batchUpdate, ComputationUpdateHandler, SignalUpdateHandler } from "./batchUpdates"
-import { walkSolidTree } from "./walker"
+import { INTERNAL } from "@solid-devtools/shared/variables"
+import { Owner } from "@solid-devtools/shared/solid"
+import { batchUpdate, ComputationUpdateHandler } from "./batchUpdates"
+import { clearOwnerSignalsObservers, walkSolidTree } from "./walker"
+import {
+  enabled,
+  walkerConfig,
+  onForceUpdate,
+  onUpdate,
+  updateRoot,
+  removeRoot,
+  handleSignalUpdate,
+  focusedWalkerConfig,
+  focusedRootId,
+  setFocusedOwnerDetails,
+} from "./plugin"
 import {
   addRootToOwnedRoots,
   createInternalRoot,
@@ -21,9 +35,11 @@ import {
   removeDebuggerContext,
   setDebuggerContext,
 } from "./utils"
-import { enabled, debuggerConfig, onForceUpdate, onUpdate, updateRoot, removeRoot } from "./plugin"
-import { INTERNAL } from "@solid-devtools/shared/variables"
-import { Owner } from "@solid-devtools/shared/solid"
+
+// TODO probably should be moved to plugin.ts
+const RootMap: Record<number, { update: VoidFunction; forceUpdate: VoidFunction }> = {}
+export const forceRootUpdate = (rootId: number) => RootMap[rootId].forceUpdate()
+export const triggerRootUpdate = (rootId: number) => RootMap[rootId].update()
 
 export function createGraphRoot(owner: SolidRoot): void {
   // setup the debugger in a separate root, so that it doesn't walk and track itself
@@ -33,28 +49,33 @@ export function createGraphRoot(owner: SolidRoot): void {
     const rootId = getNewSdtId()
 
     const onComputationUpdate: ComputationUpdateHandler = payload => {
-      if (!debuggerConfig.trackBatchedUpdates || owner.isDisposed) return
+      if (!walkerConfig.observeComputations || owner.isDisposed) return
       if (enabled()) triggerRootUpdate()
       batchUpdate({ type: UpdateType.Computation, payload })
-    }
-    const onSignalUpdate: SignalUpdateHandler = payload => {
-      if (!debuggerConfig.trackBatchedUpdates || owner.isDisposed) return
-      batchUpdate({ type: UpdateType.Signal, payload })
     }
 
     const forceRootUpdate = () => {
       if (owner.isDisposed) return
-      const { tree, components } = untrack(
-        walkSolidTree.bind(void 0, owner, {
-          ...debuggerConfig,
+      const { tree, components, focusedOwner, focusedOwnerDetails } = untrack(() =>
+        walkSolidTree(owner, {
+          ...walkerConfig,
+          ...focusedWalkerConfig,
           onComputationUpdate,
-          onSignalUpdate,
+          onSignalUpdate: handleSignalUpdate,
           rootId,
         }),
       )
+      if (untrack(focusedRootId) === rootId) {
+        setFocusedOwnerDetails(focusedOwner, focusedOwnerDetails)
+      }
       updateRoot({ id: rootId, tree, components })
     }
     const triggerRootUpdate = throttle(forceRootUpdate, 350)
+
+    RootMap[rootId] = {
+      update: triggerRootUpdate,
+      forceUpdate: forceRootUpdate,
+    }
 
     onUpdate(triggerRootUpdate)
     onForceUpdate(forceRootUpdate)
@@ -68,6 +89,8 @@ export function createGraphRoot(owner: SolidRoot): void {
       removeDebuggerContext(owner)
       removeRoot(rootId)
       owner.isDisposed = true
+      clearOwnerSignalsObservers(owner)
+      delete RootMap[rootId]
     })
   })
 }
@@ -113,6 +136,7 @@ export function attachDebugger(_owner: Owner = getOwner()!): void {
         } else {
           removeFromOwned()
           removeOwnCleanup()
+          // TODO the focused owner should be reattached to the new root
           createGraphRoot(root)
         }
       }

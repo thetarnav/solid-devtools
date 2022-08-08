@@ -195,13 +195,17 @@ export function getFunctionSources(fn: () => unknown): SolidSignal[] {
 let LAST_ID = 0
 export const getNewSdtId = () => LAST_ID++
 
+export function markOwnerName(o: SolidOwner): string {
+  if (o.sdtName !== undefined) return o.sdtName
+  return (o.sdtName = getNodeName(o))
+}
 export function markOwnerType(o: SolidOwner, type?: NodeType): NodeType {
   if (o.sdtType !== undefined) return o.sdtType
-  else return (o.sdtType = type ?? getOwnerType(o))
+  return (o.sdtType = type ?? getOwnerType(o))
 }
 export function markNodeID(o: { sdtId?: number }): number {
   if (o.sdtId !== undefined) return o.sdtId
-  else return (o.sdtId = getNewSdtId())
+  return (o.sdtId = getNewSdtId())
 }
 export function markNodesID(nodes?: { sdtId?: number }[] | null): number[] {
   if (!nodes || !nodes.length) return []

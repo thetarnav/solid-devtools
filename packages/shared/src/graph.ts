@@ -23,9 +23,11 @@ export enum NodeType {
 declare module "solid-js/types/reactive/signal" {
   interface SignalState<T> {
     sdtId?: number
+    sdtName?: string
   }
   interface Owner {
     sdtId?: number
+    sdtName?: string
     sdtType?: NodeType
     ownedRoots?: Set<SolidRoot>
   }
@@ -138,7 +140,6 @@ export interface MappedOwner {
   id: number
   name: string
   type: NodeType
-  signals: MappedSignal[]
   children: MappedOwner[]
   sources: number[]
   signal?: MappedSignal
@@ -155,6 +156,14 @@ export type MappedComponent = {
   name: string
   // ! HTMLElements aren't JSON serialisable
   resolved: Many<HTMLElement>
+}
+
+export interface OwnerDetails {
+  id: number
+  name: string
+  type: NodeType
+  path: number[]
+  signals: MappedSignal[]
 }
 
 //

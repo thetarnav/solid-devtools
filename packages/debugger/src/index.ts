@@ -1,5 +1,5 @@
 import { ParentComponent } from "solid-js"
-import { attachDebugger } from "./primitives"
+import { attachDebugger } from "./roots"
 
 // export all graph types from the internal "shared" library
 export * from "@solid-devtools/shared/graph"
@@ -9,7 +9,7 @@ export type { PluginFactory } from "./plugin"
 
 export type { TargetIDE, TargetURLFunction } from "@solid-devtools/locator"
 
-export { attachDebugger } from "./primitives"
+export { attachDebugger } from "./roots"
 
 export {
   makeSolidUpdateListener,
@@ -18,6 +18,8 @@ export {
   observeComputationUpdate,
   observeValueUpdate,
   interceptComputationRerun,
+  makeValueUpdateListener,
+  removeValueUpdateObserver,
 } from "./update"
 export type { AfterCrateRoot, ObjectObserver } from "./update"
 

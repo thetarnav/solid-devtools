@@ -17,7 +17,7 @@ export interface Messages {
   BatchedUpdate: BatchedUpdate[]
   ForceUpdate: void
   /** devtools -> adapter: request for details of owner details opened in the side-panel */
-  SetFocusedOwner: number | null
+  SetFocusedOwner: null | { rootId: number; ownerId: number }
 }
 
 export enum UpdateType {

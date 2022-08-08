@@ -8,39 +8,41 @@ import {
   MappedComponent,
   SignalState,
   SolidMemo,
+  OwnerDetails,
 } from "@solid-devtools/shared/graph"
 import { ComputationUpdateHandler, SignalUpdateHandler } from "./batchUpdates"
 import {
-  getNodeName,
   getSafeValue,
   isSolidComputation,
   markNodeID,
   markNodesID,
+  markOwnerName,
   markOwnerType,
 } from "./utils"
-import { observeComputationUpdate, observeValueUpdate } from "./update"
+import { observeComputationUpdate, observeValueUpdate, removeValueUpdateObserver } from "./update"
 
 // Globals set before each walker cycle
+let FocusedID: number | null = null
 let RootID: number
 let OnSignalUpdate: SignalUpdateHandler
 let OnComputationUpdate: ComputationUpdateHandler
-let TrackSignals: boolean
-let TrackBatchedUpdates: boolean
-let TrackComponents: boolean
+let ObserveComputations: boolean
+let GatherComponents: boolean
 let Components: MappedComponent[] = []
+let FocusedOwner: SolidOwner | null = null
+let FocusedOwnerDetails: OwnerDetails | null = null
 
 const WALKER = Symbol("walker")
 
 function observeComputation(owner: SolidOwner, id: number) {
-  if (TrackBatchedUpdates && isSolidComputation(owner))
+  if (ObserveComputations && isSolidComputation(owner))
     observeComputationUpdate(owner, OnComputationUpdate.bind(void 0, id))
 }
 
 function observeValue(node: SignalState, id: number) {
   // OnSignalUpdate will change
   const handler = OnSignalUpdate
-  if (TrackBatchedUpdates)
-    observeValueUpdate(node, (value, oldValue) => handler({ id, value, oldValue }), WALKER)
+  observeValueUpdate(node, (value, oldValue) => handler({ id, value, oldValue }), WALKER)
 }
 
 function createSignalNode(
@@ -55,7 +57,7 @@ function createSignalNode(
 }
 
 function mapOwnerSignals(owner: SolidOwner): MappedSignal[] {
-  if (!owner.sourceMap || !TrackSignals) return []
+  if (!owner.sourceMap) return []
   return Object.values(owner.sourceMap).map(raw => {
     const id = markNodeID(raw)
     observeValue(raw, id)
@@ -63,36 +65,9 @@ function mapOwnerSignals(owner: SolidOwner): MappedSignal[] {
   })
 }
 
-function mapMemo(mapped: MappedOwner, owner: SolidMemo): MappedOwner {
-  const { id, name } = mapped
-  observeValue(owner, id)
-  return Object.assign(mapped, {
-    signal: createSignalNode({ id, name, value: owner.value, observers: owner.observers }),
-  })
-}
-
-function mapOwner(owner: SolidOwner, type?: NodeType): MappedOwner {
-  type = markOwnerType(owner, type)
-  const id = markNodeID(owner)
-  const name = getNodeName(owner)
-
-  observeComputation(owner, id)
-
-  if (type === NodeType.Component && TrackComponents) {
-    const resolved = resolveElements(owner.value)
-    if (resolved) Components.push({ name, resolved })
-  }
-
-  const mapped = {
-    id,
-    name,
-    type,
-    signals: mapOwnerSignals(owner),
-    children: mapChildren(owner),
-    sources: markNodesID(owner.sources),
-  }
-
-  return type === NodeType.Memo ? mapMemo(mapped, owner as SolidMemo) : mapped
+export function clearOwnerSignalsObservers(owner: SolidOwner): void {
+  if (!owner.sourceMap) return
+  Object.values(owner.sourceMap).forEach(node => removeValueUpdateObserver(node, WALKER))
 }
 
 function mapChildren({ owned, ownedRoots }: Readonly<SolidOwner>): MappedOwner[] {
@@ -113,27 +88,90 @@ function mapChildren({ owned, ownedRoots }: Readonly<SolidOwner>): MappedOwner[]
   return children
 }
 
+// ? is this neccessary to be a part of the walked tree?
+function mapMemo(mapped: MappedOwner, owner: SolidMemo): MappedOwner {
+  const { id, name } = mapped
+  // observeValue(owner, id)
+  return Object.assign(mapped, {
+    signal: createSignalNode({ id, name, value: owner.value, observers: owner.observers }),
+  })
+}
+
+function mapOwner(owner: SolidOwner, type?: NodeType): MappedOwner {
+  type = markOwnerType(owner, type)
+  const id = markNodeID(owner)
+  const name = markOwnerName(owner)
+
+  if (id === FocusedID) {
+    FocusedOwner = owner
+    FocusedOwnerDetails = mapOwnerDetails(owner)
+  }
+
+  observeComputation(owner, id)
+
+  if (type === NodeType.Component && GatherComponents) {
+    const resolved = resolveElements(owner.value)
+    if (resolved) Components.push({ name, resolved })
+  }
+
+  const mapped = {
+    id,
+    name,
+    type,
+    children: mapChildren(owner),
+    sources: markNodesID(owner.sources),
+  }
+
+  return type === NodeType.Memo ? mapMemo(mapped, owner as SolidMemo) : mapped
+}
+
+function mapOwnerDetails(owner: SolidOwner): OwnerDetails | null {
+  const type = owner.sdtType!
+  const id = owner.sdtId!
+  const name = owner.sdtName!
+  const signals = mapOwnerSignals(owner)
+
+  return {
+    id,
+    name,
+    type,
+    // TODO:
+    path: [],
+    signals,
+  }
+}
+
 export type WalkerConfig = {
   rootId: number
   onSignalUpdate: SignalUpdateHandler
   onComputationUpdate: ComputationUpdateHandler
-  trackSignals: boolean
-  trackBatchedUpdates: boolean
-  trackComponents: boolean
+  observeComputations: boolean
+  gatherComponents: boolean
+  focusedID: number | null
 }
 
 export function walkSolidTree(
   owner: SolidOwner,
   config: WalkerConfig,
-): { tree: MappedOwner; components: MappedComponent[] } {
+): {
+  tree: MappedOwner
+  components: MappedComponent[]
+  focusedOwnerDetails: OwnerDetails | null
+  focusedOwner: SolidOwner | null
+} {
   // set the globals to be available for this walk cycle
+  FocusedID = config.focusedID
   RootID = config.rootId
   OnSignalUpdate = config.onSignalUpdate
   OnComputationUpdate = config.onComputationUpdate
-  TrackSignals = config.trackSignals
-  TrackBatchedUpdates = config.trackBatchedUpdates
-  TrackComponents = config.trackComponents
-  if (TrackComponents) Components = []
+  ObserveComputations = config.observeComputations
+  GatherComponents = config.gatherComponents
+  if (GatherComponents) Components = []
 
-  return { tree: mapOwner(owner), components: Components }
+  const tree = mapOwner(owner)
+  const components = Components
+  const focusedOwner = FocusedOwner
+  const focusedOwnerDetails = FocusedOwnerDetails
+
+  return { tree, components, focusedOwner, focusedOwnerDetails }
 }

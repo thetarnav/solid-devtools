@@ -16,6 +16,7 @@ const extensionAdapterFactory: PluginFactory = ({
   forceTriggerUpdate,
   serialisedRoots,
   makeBatchUpdateListener,
+  setFocusedOwner,
 }) => {
   const [enabled, setEnabled] = createSignal(false)
 
@@ -24,9 +25,7 @@ const extensionAdapterFactory: PluginFactory = ({
   // update the graph only if the devtools panel is in view
   onWindowMessage("PanelVisibility", setEnabled)
   onWindowMessage("ForceUpdate", forceTriggerUpdate)
-  onWindowMessage("SetFocusedOwner", ownerId => {
-    console.log("SetFocusedOwner", ownerId)
-  })
+  onWindowMessage("SetFocusedOwner", setFocusedOwner)
 
   // diff the roots array, and send only the changed roots (edited, deleted, added)
   createEffect((prev: SerialisedTreeRoot[]) => {
@@ -63,8 +62,7 @@ export function useExtensionAdapter() {
     const { enabled } = extensionAdapterFactory(data)
     return {
       enabled,
-      trackSignals: enabled,
-      trackBatchedUpdates: enabled,
+      observeComputations: enabled,
     }
   })
 }

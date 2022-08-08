@@ -84,7 +84,7 @@ export function useLocatorPlugin({ targetIDE, key = "altKey" }: LocatorOptions):
         )
       })
     }
-    return { enabled: inLocatorMode, trackComponents: inLocatorMode }
+    return { enabled: inLocatorMode, gatherComponents: inLocatorMode }
   })
 }
 
