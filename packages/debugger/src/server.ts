@@ -19,8 +19,10 @@ export const makeSolidUpdateListener: typeof API.makeSolidUpdateListener = () =>
 export const makeCreateRootListener: typeof API.makeCreateRootListener = () => noop
 export const makeStoreObserver: typeof API.makeStoreObserver = () => noop
 export const observeComputationUpdate: typeof API.observeComputationUpdate = noop
-export const observeValueUpdate: typeof API.observeValueUpdate = () => noop
 export const interceptComputationRerun: typeof API.interceptComputationRerun = noop
+export const observeValueUpdate: typeof API.observeValueUpdate = noop
+export const makeValueUpdateListener: typeof API.makeValueUpdateListener = noop
+export const removeValueUpdateObserver: typeof API.removeValueUpdateObserver = noop
 
 // utils
 export const getOwnerType: typeof API.getOwnerType = () => 0

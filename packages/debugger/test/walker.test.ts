@@ -1,4 +1,4 @@
-import { getOwner, NodeType, SignalUpdatePayload } from "@solid-devtools/shared/graph"
+import { getOwner, NodeType } from "@solid-devtools/shared/graph"
 import { UNNAMED } from "@solid-devtools/shared/variables"
 import { createComputed, createEffect, createRoot, createSignal } from "solid-js"
 import type * as API from "../src/walker"
@@ -44,9 +44,9 @@ describe("walkSolidTree", () => {
       onComputationUpdate: () => {},
       onSignalUpdate: () => {},
       rootId: 123,
-      trackBatchedUpdates: false,
-      trackComponents: false,
-      trackSignals: false,
+      focusedID: null,
+      gatherComponents: false,
+      observeComputations: false,
     })
 
     dispose()
@@ -54,21 +54,18 @@ describe("walkSolidTree", () => {
     expect(tree).toEqual({
       id: 0,
       name: UNNAMED,
-      signals: [],
       sources: [],
       type: NodeType.Root,
       children: [
         {
           id: 1,
           name: "e0",
-          signals: [],
           sources: [],
           type: NodeType.Effect,
           children: [
             {
               id: 2,
               name: "c0",
-              signals: [],
               sources: [3],
               type: NodeType.Computation,
               children: [],
@@ -76,7 +73,6 @@ describe("walkSolidTree", () => {
             {
               id: 4,
               name: "c1",
-              signals: [],
               sources: [],
               type: NodeType.Computation,
               children: [],
@@ -89,95 +85,10 @@ describe("walkSolidTree", () => {
     expect(components).toEqual([])
   })
 
-  it("track signals", () => {
-    const walkSolidTree = getModule()
-
-    const [dispose, owner] = createRoot(dispose => {
-      mockTree()
-      return [dispose, getOwner()!]
-    })
-
-    const { tree, components } = walkSolidTree(owner, {
-      onComputationUpdate: () => {},
-      onSignalUpdate: () => {},
-      rootId: 123,
-      trackBatchedUpdates: false,
-      trackComponents: false,
-      trackSignals: true,
-    })
-
-    dispose()
-
-    expect(tree).toEqual({
-      id: 0,
-      name: UNNAMED,
-      sources: [],
-      type: NodeType.Root,
-      signals: [
-        {
-          id: 1,
-          name: "s0",
-          observers: [2],
-          value: "foo",
-        },
-        {
-          id: 3,
-          name: "s1",
-          observers: [],
-          value: "hello",
-        },
-      ],
-      children: [
-        {
-          id: 4,
-          name: "e0",
-          signals: [
-            {
-              id: 5,
-              name: "s2",
-              observers: [],
-              value: "[object Object]",
-            },
-          ],
-          sources: [],
-          type: NodeType.Effect,
-          children: [
-            {
-              id: 2,
-              name: "c0",
-              signals: [],
-              sources: [1],
-              type: NodeType.Computation,
-              children: [],
-            },
-            {
-              id: 6,
-              name: "c1",
-              signals: [
-                {
-                  id: 7,
-                  name: "s3",
-                  observers: [],
-                  value: 0,
-                },
-              ],
-              sources: [],
-              type: NodeType.Computation,
-              children: [],
-            },
-          ],
-        },
-      ],
-    })
-    expect(tree).toEqual(JSON.parse(JSON.stringify(tree)))
-    expect(components).toEqual([])
-  })
-
-  it("listen to batched updates", () =>
+  it("listen to computation updates", () =>
     createRoot(dispose => {
       const walkSolidTree = getModule()
 
-      const capturedSignalUpdates: SignalUpdatePayload[] = []
       const capturedComputationUpdates: number[] = []
 
       const [a, setA] = createSignal(0)
@@ -185,24 +96,19 @@ describe("walkSolidTree", () => {
 
       walkSolidTree(getOwner()!, {
         onComputationUpdate: id => capturedComputationUpdates.push(id),
-        onSignalUpdate: e => capturedSignalUpdates.push(e),
+        onSignalUpdate: () => {},
         rootId: 123,
-        trackBatchedUpdates: true,
-        trackComponents: false,
-        trackSignals: true,
+        focusedID: null,
+        gatherComponents: false,
+        observeComputations: true,
       })
 
-      expect(capturedSignalUpdates.length).toBe(0)
       expect(capturedComputationUpdates.length).toBe(0)
 
       setA(1)
 
       expect(capturedComputationUpdates.length).toBe(1)
       expect(typeof capturedComputationUpdates[0]).toBe("number")
-      expect(capturedSignalUpdates.length).toBe(1)
-      expect(typeof capturedSignalUpdates[0].id).toBe("number")
-      expect(capturedSignalUpdates[0].value).toBe(1)
-      expect(capturedSignalUpdates[0].oldValue).toBe(0)
 
       dispose()
     }))
