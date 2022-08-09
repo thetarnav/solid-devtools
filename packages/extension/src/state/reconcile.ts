@@ -155,7 +155,6 @@ export function mapNewOwner(rootId: number, owner: Readonly<MappedOwner>): Graph
       name: owner.name,
       type: owner.type,
       sources,
-      signals,
       children,
       dispose,
       get updated() {
@@ -172,7 +171,7 @@ export function mapNewOwner(rootId: number, owner: Readonly<MappedOwner>): Graph
     // if (owner.signal) node.signal = createSignalNode(rootId, owner.signal)
 
     onCleanup(disposeAll.bind(void 0, node.children))
-    onCleanup(disposeAll.bind(void 0, node.signals))
+    // onCleanup(disposeAll.bind(void 0, node.signals))
 
     return node
   })
