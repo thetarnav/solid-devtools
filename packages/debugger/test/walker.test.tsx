@@ -1,6 +1,12 @@
 import { getOwner, NodeType } from "@solid-devtools/shared/graph"
 import { UNNAMED } from "@solid-devtools/shared/variables"
-import { createComputed, createEffect, createRoot, createSignal } from "solid-js"
+import {
+  createComputed,
+  createEffect,
+  createRenderEffect,
+  createRoot,
+  createSignal,
+} from "solid-js"
 import type * as API from "../src/walker"
 
 const getModule = (): typeof API.walkSolidTree => require("../src/walker").walkSolidTree
@@ -108,7 +114,52 @@ describe("walkSolidTree", () => {
       setA(1)
 
       expect(capturedComputationUpdates.length).toBe(1)
-      expect(typeof capturedComputationUpdates[0]).toBe("number")
+      expect(capturedComputationUpdates[0]).toBe(1)
+
+      dispose()
+    }))
+
+  it("gathers components", () =>
+    createRoot(dispose => {
+      const walkSolidTree = getModule()
+
+      const TestComponent = (props: { n: number }) => {
+        const [a] = createSignal(0)
+        createComputed(a)
+        return <div>{props.n === 0 ? "end" : <TestComponent n={props.n - 1} />}</div>
+      }
+      const Button = () => {
+        return <button>Click me</button>
+      }
+
+      createRenderEffect(() => {
+        return (
+          <>
+            <TestComponent n={5} />
+            <Button />
+          </>
+        )
+      })
+
+      const { components } = walkSolidTree(getOwner()!, {
+        onComputationUpdate: () => {},
+        onSignalUpdate: () => {},
+        rootId: 123,
+        focusedID: null,
+        gatherComponents: true,
+        observeComputations: false,
+      })
+
+      expect(components.length).toBe(7)
+
+      for (let i = 0; i < 6; i++) {
+        const comp = components[i]
+        expect(comp.name).toBe("TestComponent")
+        expect(comp.resolved).toBeInstanceOf(HTMLDivElement)
+      }
+
+      expect(components[6].name).toBe("Button")
+      expect(components[6].resolved).toBeInstanceOf(HTMLButtonElement)
 
       dispose()
     }))
