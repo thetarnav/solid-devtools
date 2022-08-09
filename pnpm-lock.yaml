@@ -263,11 +263,16 @@ importers:
     specifiers:
       '@solid-primitives/utils': ^3.0.1
       solid-js: ^1.4.8
+      tsup: ^6.2.1
       type-fest: ^2.18.0
+      typescript: ^4.7.4
     dependencies:
       '@solid-primitives/utils': 3.0.1_solid-js@1.4.8
       solid-js: 1.4.8
       type-fest: 2.18.0
+    devDependencies:
+      tsup: 6.2.1_typescript@4.7.4
+      typescript: 4.7.4
 
   packages/transform:
     specifiers:
@@ -4924,13 +4929,13 @@ packages:
       semver: 7.3.7
     dev: true
 
-  /bundle-require/3.0.4_esbuild@0.14.51:
+  /bundle-require/3.0.4_esbuild@0.14.53:
     resolution: {integrity: sha512-VXG6epB1yrLAvWVQpl92qF347/UXmncQj7J3U8kZEbdVZ1ZkQyr4hYeL/9RvcE8vVVdp53dY78Fd/3pqfRqI1A==}
     engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
     peerDependencies:
       esbuild: '>=0.13'
     dependencies:
-      esbuild: 0.14.51
+      esbuild: 0.14.53
       load-tsconfig: 0.2.3
     dev: true
 
@@ -9899,11 +9904,11 @@ packages:
       typescript:
         optional: true
     dependencies:
-      bundle-require: 3.0.4_esbuild@0.14.51
+      bundle-require: 3.0.4_esbuild@0.14.53
       cac: 6.7.12
       chokidar: 3.5.3
       debug: 4.3.4
-      esbuild: 0.14.51
+      esbuild: 0.14.53
       execa: 5.1.1
       globby: 11.1.0
       joycon: 3.1.1
@@ -9935,11 +9940,11 @@ packages:
       typescript:
         optional: true
     dependencies:
-      bundle-require: 3.0.4_esbuild@0.14.51
+      bundle-require: 3.0.4_esbuild@0.14.53
       cac: 6.7.12
       chokidar: 3.5.3
       debug: 4.3.4
-      esbuild: 0.14.51
+      esbuild: 0.14.53
       execa: 5.1.1
       globby: 11.1.0
       joycon: 3.1.1

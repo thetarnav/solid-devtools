@@ -65,7 +65,7 @@ const exports = createRoot(() => {
     )
   }
   const updateRoot = (proxy: GraphRoot[], { id, tree }: SerialisedTreeRoot): void => {
-    const index = graphs.findIndex(r => r.id === id)
+    const index = proxy.findIndex(r => r.id === id)
     // reconcile existing root
     if (index !== -1) reconcileNode(tree, proxy[index].tree)
     // insert new root
