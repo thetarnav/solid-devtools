@@ -80,6 +80,10 @@ export function disposeAllNodes() {
   }
 }
 
+export function removeRootFromMap(id: number) {
+  delete NodeMap[id]
+}
+
 export function afterGraphUpdate() {
   // sources and observers can be added lazily only during one reconciliation
   sourcesToAddLazy = {}
@@ -165,7 +169,7 @@ export function mapNewOwner(rootId: number, owner: Readonly<MappedOwner>): Graph
     // TODO: remove mapping signals
     // node.signals.push(...owner.signals.map(createSignalNode))
     node.children.push(...owner.children.map(child => mapNewOwner(rootId, child)))
-    if (owner.signal) node.signal = createSignalNode(rootId, owner.signal)
+    // if (owner.signal) node.signal = createSignalNode(rootId, owner.signal)
 
     onCleanup(disposeAll.bind(void 0, node.children))
     onCleanup(disposeAll.bind(void 0, node.signals))
@@ -287,13 +291,13 @@ export function reconcileNode(rootId: number, mapped: MappedOwner, node: GraphOw
   reconcileArrayByIds(mapped.sources, node.sources, mapSource.bind(void 0, rootId))
 
   // reconcile signal observers
-  if (mapped.signal) {
-    if (!node.signal) node.signal = createSignalNodeAsync(rootId, mapped.signal)
-    else
-      reconcileArrayByIds(
-        mapped.signal.observers,
-        node.signal.observers,
-        mapObserver.bind(void 0, rootId),
-      )
-  }
+  // if (mapped.signal) {
+  //   if (!node.signal) node.signal = createSignalNodeAsync(rootId, mapped.signal)
+  //   else
+  //     reconcileArrayByIds(
+  //       mapped.signal.observers,
+  //       node.signal.observers,
+  //       mapObserver.bind(void 0, rootId),
+  //     )
+  // }
 }

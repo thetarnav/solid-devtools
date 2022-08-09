@@ -197,7 +197,7 @@ const App: Component = () => {
       </div>
       <obj.comp />
       <button onClick={() => setRootCount(p => ++p)}>Update root count</button>
-      <button onClick={() => disposeOuterRoot()}>Dispose Outer Root</button>
+      <button onClick={() => disposeOuterRoot()}>Dispose OUTSIDE_ROOT</button>
       <Article />
       <Todos />
     </>

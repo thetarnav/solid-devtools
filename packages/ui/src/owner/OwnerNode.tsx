@@ -16,9 +16,8 @@ export function OwnerChildren(props: { children: GraphOwner[] }) {
 
 export function OwnerNode(props: { owner: GraphOwner }): JSX.Element {
   const { owner } = props
-  const { name, type, signal } = owner
+  const { name, type } = owner
   const children = () => owner.children
-  const signals = () => owner.signals
   const rerun = () => owner.updated
   const typeName = NodeType[type]
 
@@ -41,12 +40,13 @@ export function OwnerNode(props: { owner: GraphOwner }): JSX.Element {
   })
   onCleanup(() => highlightNodeSources(owner, false))
 
-  if (signal) {
-    createEffect(() => {
-      highlightSignalObservers(signal, isHovered())
-    })
-    onCleanup(() => highlightSignalObservers(signal, false))
-  }
+  // TODO: rework the observers highlighting for memos
+  // if (signal) {
+  //   createEffect(() => {
+  //     highlightSignalObservers(signal, isHovered())
+  //   })
+  //   onCleanup(() => highlightSignalObservers(signal, false))
+  // }
 
   return (
     <div class={styles.container}>
@@ -67,9 +67,9 @@ export function OwnerNode(props: { owner: GraphOwner }): JSX.Element {
           </HighlightText>
           <div class={styles.header.type}>{typeName}</div>
         </div>
-        {signal && <ValueNode value={signal.value} updated={signal.updated} />}
+        {/* {signal && <ValueNode value={signal.value} updated={signal.updated} />} */}
       </div>
-      <Signals each={signals()} />
+      {/* <Signals each={signals()} /> */}
       {/* <Show when={children().length}> */}
       <div
         class={styles.childrenContainer}

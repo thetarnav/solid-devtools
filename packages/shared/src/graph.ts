@@ -133,7 +133,6 @@ export interface MappedRoot {
 export interface SerialisedTreeRoot {
   id: number
   tree: MappedOwner
-  components?: undefined
 }
 
 export interface MappedOwner {
@@ -142,7 +141,6 @@ export interface MappedOwner {
   type: NodeType
   children: MappedOwner[]
   sources: number[]
-  signal?: MappedSignal
 }
 
 export interface MappedSignal {
@@ -164,6 +162,7 @@ export interface OwnerDetails {
   type: NodeType
   path: number[]
   signals: MappedSignal[]
+  memos: MappedSignal[]
 }
 
 //
@@ -180,8 +179,6 @@ export interface GraphOwner {
   readonly setUpdate: (value: boolean) => void
   sources: GraphSignal[]
   readonly children: GraphOwner[]
-  readonly signals: GraphSignal[]
-  signal?: GraphSignal
 }
 
 export interface GraphSignal {

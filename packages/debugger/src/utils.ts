@@ -213,16 +213,6 @@ export function markNodesID(nodes?: { sdtId?: number }[] | null): number[] {
 }
 
 /**
- * Adds SubRoot object to `ownedRoots` property of owner
- * @returns a function to remove from the `ownedRoots` property
- */
-export function addRootToOwnedRoots(parent: SolidOwner, root: SolidRoot): VoidFunction {
-  const ownedRoots = parent.ownedRoots ?? (parent.ownedRoots = new Set())
-  ownedRoots.add(root)
-  return (): void => void ownedRoots.delete(root)
-}
-
-/**
  * Reactive array reducer — if at least one consumer (boolean signal) is enabled — the returned result will the `true`.
  */
 export function createConsumers(): [

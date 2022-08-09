@@ -5,7 +5,13 @@ import { attachDebugger } from "./roots"
 export * from "@solid-devtools/shared/graph"
 
 export { registerDebuggerPlugin } from "./plugin"
-export type { PluginFactory } from "./plugin"
+export type {
+  PluginFactory,
+  FocusedState,
+  SetFocusedOwner,
+  SignaledRoot,
+  RootsUpdates,
+} from "./plugin"
 
 export type { TargetIDE, TargetURLFunction } from "@solid-devtools/locator"
 

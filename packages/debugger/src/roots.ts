@@ -1,4 +1,4 @@
-import { createEffect, getListener, onCleanup, untrack } from "solid-js"
+import { createEffect, onCleanup, untrack } from "solid-js"
 import { throttle } from "@solid-primitives/scheduled"
 import {
   DebuggerContext,
@@ -11,7 +11,7 @@ import { UpdateType } from "@solid-devtools/shared/bridge"
 import { INTERNAL } from "@solid-devtools/shared/variables"
 import { Owner } from "@solid-devtools/shared/solid"
 import { batchUpdate, ComputationUpdateHandler } from "./batchUpdates"
-import { clearOwnerSignalsObservers, walkSolidTree } from "./walker"
+import { clearOwnerObservers, walkSolidTree } from "./walker"
 import {
   enabled,
   walkerConfig,
@@ -25,7 +25,6 @@ import {
   setFocusedOwnerDetails,
 } from "./plugin"
 import {
-  addRootToOwnedRoots,
   createInternalRoot,
   getDebuggerContext,
   getNewSdtId,
@@ -89,7 +88,7 @@ export function createGraphRoot(owner: SolidRoot): void {
       removeDebuggerContext(owner)
       removeRoot(rootId)
       owner.isDisposed = true
-      clearOwnerSignalsObservers(owner)
+      clearOwnerObservers(owner)
       delete RootMap[rootId]
     })
   })
@@ -151,6 +150,16 @@ export function attachDebugger(_owner: Owner = getOwner()!): void {
     // seperated from existing debugger roots
     else createGraphRoot(root)
   })
+}
+
+/**
+ * Adds SubRoot object to `ownedRoots` property of owner
+ * @returns a function to remove from the `ownedRoots` property
+ */
+function addRootToOwnedRoots(parent: SolidOwner, root: SolidRoot): VoidFunction {
+  const ownedRoots = parent.ownedRoots ?? (parent.ownedRoots = new Set())
+  ownedRoots.add(root)
+  return (): void => void ownedRoots.delete(root)
 }
 
 /**

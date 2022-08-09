@@ -1,18 +1,19 @@
-import { Accessor, createSignal, getOwner, runWithOwner, untrack } from "solid-js"
+import { Accessor, batch, createSignal, getOwner, runWithOwner, untrack } from "solid-js"
 import { createSimpleEmitter } from "@solid-primitives/event-bus"
-import { push, splice } from "@solid-primitives/immutable"
+import { omit, splice } from "@solid-primitives/immutable"
 import { createLazyMemo } from "@solid-primitives/memo"
 import {
   BatchUpdateListener,
   MappedComponent,
   MappedRoot,
-  SerialisedTreeRoot,
   OwnerDetails,
   SolidOwner,
+  MappedOwner,
+  SerialisedTreeRoot,
 } from "@solid-devtools/shared/graph"
 import { makeBatchUpdateListener, SignalUpdateHandler } from "./batchUpdates"
 import { createConsumers, createInternalRoot } from "./utils"
-import { clearOwnerSignalsObservers, WalkerConfig } from "./walker"
+import { clearOwnerObservers, WalkerConfig } from "./walker"
 import { forceRootUpdate } from "./roots"
 
 export type SetFocusedOwner = (payload: { rootId: number; ownerId: number } | null) => void
@@ -33,7 +34,7 @@ DETAILS:
 - component props
 */
 
-type FocusedState = Readonly<
+export type FocusedState = Readonly<
   | { id: null; rootId: null; owner: null; updated: false; details: null }
   | { id: number; rootId: number; owner: null; updated: false; details: null }
   | { id: number; rootId: number; owner: SolidOwner; updated: boolean; details: OwnerDetails }
@@ -60,11 +61,11 @@ const focusedExports = createInternalRoot(() => {
     const { owner, id } = untrack(state)
     if (!payload) {
       // TODO: how to move this to the walker?
-      if (owner) clearOwnerSignalsObservers(owner)
+      if (owner) clearOwnerObservers(owner)
       setState(nullFocusedState)
     } else {
       if (id === payload.ownerId) return
-      if (owner) clearOwnerSignalsObservers(owner)
+      if (owner) clearOwnerObservers(owner)
       setState({
         id: payload.ownerId,
         rootId: payload.rootId,
@@ -114,13 +115,34 @@ export const {
   handleSignalUpdate,
 } = focusedExports
 
+export type SignaledRoot = {
+  readonly id: number
+  readonly tree: Accessor<MappedOwner>
+  readonly components: Accessor<MappedComponent[]>
+}
+
+export type RootsUpdates = {
+  readonly added: SerialisedTreeRoot[]
+  readonly removed: number[]
+  readonly updated: SerialisedTreeRoot[]
+}
+
+export type _SignaledRoot = {
+  id: number
+  tree: Accessor<MappedOwner>
+  setTree: (tree: MappedOwner) => void
+  components: Accessor<MappedComponent[]>
+  setComponents: (components: MappedComponent[]) => void
+}
+
 export type PluginFactory = (data: {
   triggerUpdate: VoidFunction
   forceTriggerUpdate: VoidFunction
   makeBatchUpdateListener: (listener: BatchUpdateListener) => VoidFunction
-  roots: Accessor<MappedRoot[]>
+  roots: Accessor<Record<number, SignaledRoot>>
+  serialisedRoots: Accessor<Record<number, MappedOwner>>
+  rootsUpdates: Accessor<RootsUpdates>
   components: Accessor<MappedComponent[]>
-  serialisedRoots: Accessor<SerialisedTreeRoot[]>
   setFocusedOwner: SetFocusedOwner
   focusedState: Accessor<FocusedState>
 }) => {
@@ -137,24 +159,79 @@ const pluginExports = createInternalRoot(() => {
   /** forced — immediate global update */
   const [onForceUpdate, forceTriggerUpdate] = createSimpleEmitter()
 
+  // Consumers:
   const [enabled, addDebuggerConsumer] = createConsumers()
   const [gatherComponents, addGatherComponentsConsumer] = createConsumers()
   const [observeComputations, addObserveComputationsConsumer] = createConsumers()
 
-  const [roots, setRoots] = createSignal<MappedRoot[]>([])
+  // Roots:
+  const [roots, setRoots] = createSignal<Record<number, _SignaledRoot>>({})
 
+  const serialisedRoots = createLazyMemo<Record<number, MappedOwner>>(() => {
+    const serialisedRoots: Record<number, MappedOwner> = {}
+    for (const [id, root] of Object.entries(roots())) {
+      serialisedRoots[+id] = root.tree()
+    }
+    return serialisedRoots
+  })
+
+  let addedIds: number[] = []
+  let updatedIds: number[] = []
+  let removedIds: number[] = []
+  const rootsUpdates = createLazyMemo<RootsUpdates>(() => {
+    updatedIds = updatedIds.filter(id => !removedIds.includes(id))
+    addedIds = addedIds.filter(id => !removedIds.includes(id) && !updatedIds.includes(id))
+
+    const sRoots = serialisedRoots()
+    const added: RootsUpdates["added"] = addedIds.map(id => ({ id, tree: sRoots[id] }))
+    const updated: RootsUpdates["updated"] = updatedIds.map(id => ({ id, tree: sRoots[id] }))
+    const removed: RootsUpdates["removed"] = removedIds
+
+    addedIds = []
+    updatedIds = []
+    removedIds = []
+
+    return { added, updated, removed }
+  })
+
+  function removeRoot(rootId: number) {
+    removedIds.push(rootId)
+    setRoots(map => omit(map, rootId))
+  }
+
+  function updateRoot(newRoot: MappedRoot): void {
+    const rootMap = untrack(roots)
+    const rootId = newRoot.id
+    const root = rootMap[rootId]
+    if (root)
+      batch(() => {
+        updatedIds.push(rootId)
+        root.setTree(newRoot.tree)
+        root.setComponents(newRoot.components)
+      })
+    else {
+      const [tree, setTree] = createSignal(newRoot.tree)
+      const [components, setComponents] = createSignal(newRoot.components)
+      addedIds.push(rootId)
+      setRoots(map => ({
+        ...map,
+        [rootId]: {
+          id: rootId,
+          tree,
+          setTree,
+          components,
+          setComponents,
+        },
+      }))
+    }
+  }
+
+  // Components:
   const components = createLazyMemo<MappedComponent[]>(() =>
-    roots().reduce((arr: MappedComponent[], root) => {
-      arr.push.apply(arr, root.components)
+    Object.values(roots()).reduce((arr: MappedComponent[], root) => {
+      arr.push.apply(arr, root.components())
       return arr
     }, []),
-  )
-
-  const serialisedRoots = createLazyMemo<SerialisedTreeRoot[]>(() =>
-    roots().map(root => ({
-      id: root.id,
-      tree: root.tree,
-    })),
   )
 
   const walkerConfig: Pick<WalkerConfig, "observeComputations" | "gatherComponents"> = {
@@ -171,10 +248,11 @@ const pluginExports = createInternalRoot(() => {
       const { enabled, gatherComponents, observeComputations } = factory({
         makeBatchUpdateListener,
         roots,
+        serialisedRoots,
+        rootsUpdates,
         components,
         triggerUpdate,
         forceTriggerUpdate,
-        serialisedRoots,
         setFocusedOwner,
         focusedState,
       })
@@ -194,18 +272,8 @@ const pluginExports = createInternalRoot(() => {
     roots,
     setRoots,
     registerDebuggerPlugin,
-    updateRoot(root: MappedRoot): void {
-      setRoots(arr => {
-        const index = arr.findIndex(o => o.id === root.id)
-        return index !== -1 ? splice(arr, index, 1, root) : push(arr, root)
-      })
-    },
-    removeRoot(rootId: number): void {
-      setRoots(arr => {
-        const index = arr.findIndex(o => o.id === rootId)
-        return splice(arr, index, 1)
-      })
-    },
+    updateRoot,
+    removeRoot,
   }
 })
 export const {

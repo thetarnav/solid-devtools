@@ -1,7 +1,6 @@
 import { batch, createEffect, createRoot, createSelector, createSignal } from "solid-js"
 import { createStore, produce } from "solid-js/store"
 import { HighlightContextState } from "@solid-devtools/ui"
-import { UpdateType } from "@solid-devtools/shared/bridge"
 import {
   GraphOwner,
   GraphSignal,
@@ -13,12 +12,10 @@ import {
   afterGraphUpdate,
   disposeAllNodes,
   findOwnerRootId,
-  mapNewOwner,
   mapNewRoot,
   reconcileNode,
+  removeRootFromMap,
   resetComputationRerun,
-  updateComputation,
-  updateSignal,
 } from "./reconcile"
 
 const exports = createRoot(() => {
@@ -65,9 +62,10 @@ const exports = createRoot(() => {
       proxy.findIndex(e => e.id === id),
       1,
     )
+    removeRootFromMap(id)
   }
   const updateRoot = (proxy: GraphRoot[], { id, tree }: SerialisedTreeRoot): void => {
-    const index = graphs.findIndex(r => r.id === id)
+    const index = proxy.findIndex(r => r.id === id)
     // reconcile existing root
     if (index !== -1) reconcileNode(id, tree, proxy[index].tree)
     // insert new root
@@ -77,7 +75,6 @@ const exports = createRoot(() => {
   onRuntimeMessage("GraphUpdate", ({ added, removed, updated }) => {
     batch(() => {
       resetComputationRerun()
-
       setGraphs(
         produce(proxy => {
           removed.forEach(id => removeRoot(proxy, id))

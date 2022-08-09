@@ -7,13 +7,13 @@ import {
   SolidSignal,
   MappedComponent,
   SignalState,
-  SolidMemo,
   OwnerDetails,
 } from "@solid-devtools/shared/graph"
 import { ComputationUpdateHandler, SignalUpdateHandler } from "./batchUpdates"
 import {
   getSafeValue,
   isSolidComputation,
+  isSolidMemo,
   markNodeID,
   markNodesID,
   markOwnerName,
@@ -65,9 +65,23 @@ function mapOwnerSignals(owner: SolidOwner): MappedSignal[] {
   })
 }
 
-export function clearOwnerSignalsObservers(owner: SolidOwner): void {
-  if (!owner.sourceMap) return
-  Object.values(owner.sourceMap).forEach(node => removeValueUpdateObserver(node, WALKER))
+function mapOwnerMemos(owner: SolidOwner): MappedSignal[] {
+  const memos: MappedSignal[] = []
+  if (!owner.owned) return memos
+  owner.owned.forEach(child => {
+    if (!isSolidMemo(child)) return
+    const id = markNodeID(child)
+    const name = markOwnerName(child)
+    observeValue(child, id)
+    memos.push(createSignalNode({ id, name, value: child.value, observers: child.observers }))
+  })
+  return memos
+}
+
+export function clearOwnerObservers(owner: SolidOwner): void {
+  if (owner.sourceMap)
+    Object.values(owner.sourceMap).forEach(node => removeValueUpdateObserver(node, WALKER))
+  if (owner.owned) owner.owned.forEach(node => removeValueUpdateObserver(node, WALKER))
 }
 
 function mapChildren({ owned, ownedRoots }: Readonly<SolidOwner>): MappedOwner[] {
@@ -88,15 +102,6 @@ function mapChildren({ owned, ownedRoots }: Readonly<SolidOwner>): MappedOwner[]
   return children
 }
 
-// ? is this neccessary to be a part of the walked tree?
-function mapMemo(mapped: MappedOwner, owner: SolidMemo): MappedOwner {
-  const { id, name } = mapped
-  // observeValue(owner, id)
-  return Object.assign(mapped, {
-    signal: createSignalNode({ id, name, value: owner.value, observers: owner.observers }),
-  })
-}
-
 function mapOwner(owner: SolidOwner, type?: NodeType): MappedOwner {
   type = markOwnerType(owner, type)
   const id = markNodeID(owner)
@@ -109,35 +114,29 @@ function mapOwner(owner: SolidOwner, type?: NodeType): MappedOwner {
 
   observeComputation(owner, id)
 
-  if (type === NodeType.Component && GatherComponents) {
+  if (GatherComponents && type === NodeType.Component) {
     const resolved = resolveElements(owner.value)
     if (resolved) Components.push({ name, resolved })
   }
 
-  const mapped = {
+  return {
     id,
     name,
     type,
     children: mapChildren(owner),
     sources: markNodesID(owner.sources),
   }
-
-  return type === NodeType.Memo ? mapMemo(mapped, owner as SolidMemo) : mapped
 }
 
 function mapOwnerDetails(owner: SolidOwner): OwnerDetails | null {
-  const type = owner.sdtType!
-  const id = owner.sdtId!
-  const name = owner.sdtName!
-  const signals = mapOwnerSignals(owner)
-
   return {
-    id,
-    name,
-    type,
+    id: owner.sdtId!,
+    name: owner.sdtName!,
+    type: owner.sdtType!,
     // TODO:
     path: [],
-    signals,
+    signals: mapOwnerSignals(owner),
+    memos: mapOwnerMemos(owner),
   }
 }
 

@@ -60,6 +60,11 @@
       "import": "./dist/variables.js",
       "require": "./dist/variables.cjs",
       "types": "./dist/variables.d.ts"
+    },
+    "./emitter": {
+      "import": "./dist/emitter.js",
+      "require": "./dist/emitter.cjs",
+      "types": "./dist/emitter.d.ts"
     }
   },
   "typesVersions": {
@@ -84,6 +89,9 @@
       ],
       "variables": [
         "./dist/variables.d.ts"
+      ],
+      "emitter": [
+        "./dist/emitter.d.ts"
       ]
     }
   },
@@ -96,6 +104,7 @@
     "solid-js": "^1.4.8"
   },
   "dependencies": {
+    "@solid-primitives/event-bus": "^0.1.0",
     "@solid-primitives/utils": "^3.0.1",
     "solid-js": "^1.4.8",
     "type-fest": "^2.18.0"
