@@ -1,6 +1,6 @@
 {
   "name": "@solid-devtools/extension-adapter",
-  "version": "0.8.2",
+  "version": "0.10.0",
   "description": "Adapter for @solid-devtools/debugger for communicating with Solid Devtools chrome extension.",
   "license": "MIT",
   "author": "Damian Tarnawski <gthetarnav@gmail.com>",
@@ -41,8 +41,8 @@
     "typescript": "^4.7.4"
   },
   "dependencies": {
-    "@solid-devtools/debugger": "^0.3.0",
-    "@solid-devtools/shared": "workspace:^0.3.3",
+    "@solid-devtools/debugger": "^0.4.0",
+    "@solid-devtools/shared": "workspace:^0.4.0",
     "@solid-primitives/utils": "^3.0.1",
     "type-fest": "^2.18.0"
   },

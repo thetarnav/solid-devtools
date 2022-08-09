@@ -1,5 +1,17 @@
 # @solid-devtools/locator
 
+## 0.10.0
+
+### Minor Changes
+
+- 2beeb22: Publish a shared library: @solid-primitives/shared
+
+### Patch Changes
+
+- Updated dependencies [2beeb22]
+  - @solid-devtools/debugger@0.4.0
+  - @solid-devtools/shared@0.4.0
+
 ## 0.9.1
 
 ### Patch Changes
