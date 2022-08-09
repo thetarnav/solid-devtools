@@ -8,8 +8,8 @@
 
 The main package of Solid Devtools. It contains the following subpackages:
 
-- [Debugger](https://github.com/thetarnav/solid-devtools/tree/main/packages/debugger#readme)
-- [Extension Adapter](https://github.com/thetarnav/solid-devtools/tree/main/packages/extension-adapter#readme) _(this one is automatically enabled)_
+- [Debugger](https://github.com/thetarnav/solid-devtools/tree/main/packages/debugger#readme) _(automatically enabled)_
+- [Extension Adapter](https://github.com/thetarnav/solid-devtools/tree/main/packages/extension-adapter#readme) _(automatically enabled)_
 - [Locator](https://github.com/thetarnav/solid-devtools/tree/main/packages/locator#readme) — [How to use it](#using-the-locator-package)
 - [Babel Plugin](https://github.com/thetarnav/solid-devtools/tree/main/packages/transform#readme) — [How to use it](#enabling-the-babel-plugin)
 
