@@ -1,5 +1,17 @@
 # solid-devtools-extension
 
+## 0.4.0
+
+### Minor Changes
+
+- 2beeb22: Publish a shared library: @solid-primitives/shared
+
+### Patch Changes
+
+- Updated dependencies [2beeb22]
+  - @solid-devtools/shared@0.4.0
+  - @solid-devtools/ui@0.6.0
+
 ## 0.3.1
 
 ### Patch Changes
