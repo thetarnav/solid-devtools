@@ -1,22 +1,30 @@
-import { Accessor, batch, createSignal, getOwner, runWithOwner, untrack } from "solid-js"
+import {
+  Accessor,
+  batch,
+  createEffect,
+  createMemo,
+  createSignal,
+  getOwner,
+  runWithOwner,
+  untrack,
+} from "solid-js"
 import { createSimpleEmitter } from "@solid-primitives/event-bus"
-import { omit, splice } from "@solid-primitives/immutable"
+import { omit } from "@solid-primitives/immutable"
 import { createLazyMemo } from "@solid-primitives/memo"
 import {
-  BatchUpdateListener,
   MappedComponent,
   MappedRoot,
   OwnerDetails,
   SolidOwner,
   MappedOwner,
-  SerialisedTreeRoot,
+  RootsUpdates,
+  NodeID,
+  BatchComputationUpdate,
 } from "@solid-devtools/shared/graph"
-import { makeBatchUpdateListener, SignalUpdateHandler } from "./batchUpdates"
 import { createConsumers, createInternalRoot } from "./utils"
-import { clearOwnerObservers, WalkerConfig } from "./walker"
+import { clearOwnerObservers, ComputationUpdateHandler, SignalUpdateHandler } from "./walker"
 import { forceRootUpdate } from "./roots"
-
-export type SetFocusedOwner = (payload: { rootId: number; ownerId: number } | null) => void
+import { throttle } from "@solid-primitives/scheduled"
 
 /*
 DETAILS:
@@ -26,7 +34,7 @@ DETAILS:
 - signals declared in it (memos too)
   - their observers and sources
 - stores
-  - their observers and sources as well (this may be too complicated to do for now)
+- their observers and sources as well (this may be too complicated to do for now)
 - current and previous value (only if the node is a computation)
 - sources (only if the node is a computation)
 - observers (only if the node is a memo)
@@ -34,113 +42,37 @@ DETAILS:
 - component props
 */
 
+export type SetFocusedOwner = (payload: { rootId: NodeID; ownerId: NodeID } | null) => void
+
 export type FocusedState = Readonly<
   | { id: null; rootId: null; owner: null; updated: false; details: null }
-  | { id: number; rootId: number; owner: null; updated: false; details: null }
-  | { id: number; rootId: number; owner: SolidOwner; updated: boolean; details: OwnerDetails }
+  | { id: NodeID; rootId: NodeID; owner: null; updated: false; details: null }
+  | { id: NodeID; rootId: NodeID; owner: SolidOwner; updated: boolean; details: OwnerDetails }
 >
 
-const nullFocusedState = {
-  id: null,
-  rootId: null,
-  owner: null,
-  updated: false,
-  details: null,
-} as const
-
-const focusedExports = createInternalRoot(() => {
-  const [state, setState] = createSignal<FocusedState>(nullFocusedState)
-
-  const handleSignalUpdate: SignalUpdateHandler = ({ id, value, oldValue }) => {
-    console.log("handleSignalUpdate", id, value, oldValue)
-  }
-
-  const setFocusedOwner: SetFocusedOwner = payload => {
-    console.log("setFocusedOwner", payload)
-
-    const { owner, id } = untrack(state)
-    if (!payload) {
-      // TODO: how to move this to the walker?
-      if (owner) clearOwnerObservers(owner)
-      setState(nullFocusedState)
-    } else {
-      if (id === payload.ownerId) return
-      if (owner) clearOwnerObservers(owner)
-      setState({
-        id: payload.ownerId,
-        rootId: payload.rootId,
-        owner: null,
-        updated: false,
-        details: null,
-      })
-      forceRootUpdate(payload.rootId)
-    }
-  }
-
-  const setFocusedOwnerDetails = (newOwner: SolidOwner | null, newDetails: OwnerDetails | null) => {
-    if (newOwner && newDetails) {
-      setState(prev => ({
-        id: prev.id!,
-        rootId: prev.rootId!,
-        owner: newOwner,
-        updated: prev.owner === newOwner,
-        details: newDetails,
-      }))
-    } else setState(nullFocusedState)
-  }
-
-  const walkerConfig: Pick<WalkerConfig, "focusedID"> = {
-    get focusedID() {
-      return state().id
-    },
-  }
-
-  const focusedRootId = () => state().rootId
-
-  return {
-    setFocusedOwner,
-    focusedState: state,
-    setFocusedOwnerDetails,
-    focusedWalkerConfig: walkerConfig,
-    focusedRootId,
-    handleSignalUpdate,
-  }
-})
-export const {
-  setFocusedOwner,
-  focusedState,
-  setFocusedOwnerDetails,
-  focusedWalkerConfig,
-  focusedRootId,
-  handleSignalUpdate,
-} = focusedExports
-
 export type SignaledRoot = {
-  readonly id: number
+  readonly id: NodeID
   readonly tree: Accessor<MappedOwner>
   readonly components: Accessor<MappedComponent[]>
 }
 
-export type RootsUpdates = {
-  readonly added: SerialisedTreeRoot[]
-  readonly removed: number[]
-  readonly updated: SerialisedTreeRoot[]
-}
-
+/** @internal */
 export type _SignaledRoot = {
-  id: number
+  id: NodeID
   tree: Accessor<MappedOwner>
   setTree: (tree: MappedOwner) => void
   components: Accessor<MappedComponent[]>
   setComponents: (components: MappedComponent[]) => void
 }
 
+export type BatchComputationUpdatesHandler = (payload: BatchComputationUpdate[]) => void
+
 export type PluginFactory = (data: {
   triggerUpdate: VoidFunction
   forceTriggerUpdate: VoidFunction
-  makeBatchUpdateListener: (listener: BatchUpdateListener) => VoidFunction
-  roots: Accessor<Record<number, SignaledRoot>>
-  serialisedRoots: Accessor<Record<number, MappedOwner>>
+  handleComputationsUpdate: (listener: BatchComputationUpdatesHandler) => VoidFunction
+  roots: Accessor<Record<NodeID, SignaledRoot>>
+  serialisedRoots: Accessor<Record<NodeID, MappedOwner>>
   rootsUpdates: Accessor<RootsUpdates>
   components: Accessor<MappedComponent[]>
   setFocusedOwner: SetFocusedOwner
@@ -151,7 +83,15 @@ export type PluginFactory = (data: {
   gatherComponents?: Accessor<boolean>
 }
 
-const pluginExports = createInternalRoot(() => {
+const nullFocusedState = {
+  id: null,
+  rootId: null,
+  owner: null,
+  updated: false,
+  details: null,
+} as const
+
+const exported = createInternalRoot(() => {
   const owner = getOwner()!
 
   /** throttled global update */
@@ -159,43 +99,43 @@ const pluginExports = createInternalRoot(() => {
   /** forced — immediate global update */
   const [onForceUpdate, forceTriggerUpdate] = createSimpleEmitter()
 
+  //
   // Consumers:
+  //
   const [enabled, addDebuggerConsumer] = createConsumers()
   const [gatherComponents, addGatherComponentsConsumer] = createConsumers()
   const [observeComputations, addObserveComputationsConsumer] = createConsumers()
 
+  //
   // Roots:
-  const [roots, setRoots] = createSignal<Record<number, _SignaledRoot>>({})
+  //
+  const [roots, setRoots] = createSignal<Record<NodeID, _SignaledRoot>>({})
 
-  const serialisedRoots = createLazyMemo<Record<number, MappedOwner>>(() => {
-    const serialisedRoots: Record<number, MappedOwner> = {}
+  const serialisedRoots = createLazyMemo<Record<NodeID, MappedOwner>>(() => {
+    const serialisedRoots: Record<NodeID, MappedOwner> = {}
     for (const [id, root] of Object.entries(roots())) {
-      serialisedRoots[+id] = root.tree()
+      serialisedRoots[id] = root.tree()
     }
     return serialisedRoots
   })
 
-  let addedIds: number[] = []
-  let updatedIds: number[] = []
-  let removedIds: number[] = []
+  const updatedIds = new Set<NodeID>()
+  const removedIds = new Set<NodeID>()
   const rootsUpdates = createLazyMemo<RootsUpdates>(() => {
-    updatedIds = updatedIds.filter(id => !removedIds.includes(id))
-    addedIds = addedIds.filter(id => !removedIds.includes(id) && !updatedIds.includes(id))
+    const _updatedIds = [...updatedIds].filter(id => !removedIds.has(id))
 
     const sRoots = serialisedRoots()
-    const added: RootsUpdates["added"] = addedIds.map(id => ({ id, tree: sRoots[id] }))
-    const updated: RootsUpdates["updated"] = updatedIds.map(id => ({ id, tree: sRoots[id] }))
-    const removed: RootsUpdates["removed"] = removedIds
+    const updated: RootsUpdates["updated"] = _updatedIds.map(id => ({ id, tree: sRoots[id] }))
+    const removed: RootsUpdates["removed"] = [...removedIds]
 
-    addedIds = []
-    updatedIds = []
-    removedIds = []
+    updatedIds.clear()
+    removedIds.clear()
 
-    return { added, updated, removed }
+    return { updated, removed }
   })
 
-  function removeRoot(rootId: number) {
-    removedIds.push(rootId)
+  function removeRoot(rootId: NodeID) {
+    removedIds.add(rootId)
     setRoots(map => omit(map, rootId))
   }
 
@@ -203,16 +143,15 @@ const pluginExports = createInternalRoot(() => {
     const rootMap = untrack(roots)
     const rootId = newRoot.id
     const root = rootMap[rootId]
-    if (root)
+    updatedIds.add(rootId)
+    if (root) {
       batch(() => {
-        updatedIds.push(rootId)
         root.setTree(newRoot.tree)
         root.setComponents(newRoot.components)
       })
-    else {
+    } else {
       const [tree, setTree] = createSignal(newRoot.tree)
       const [components, setComponents] = createSignal(newRoot.components)
-      addedIds.push(rootId)
       setRoots(map => ({
         ...map,
         [rootId]: {
@@ -226,7 +165,86 @@ const pluginExports = createInternalRoot(() => {
     }
   }
 
+  //
+  // Focused Owner details:
+  //
+  const [focusedState, setFocusedState] = createSignal<FocusedState>(nullFocusedState)
+
+  // make sure we don't keep the listeners around
+  createEffect((prev: SolidOwner | null = null) => {
+    if (prev) clearOwnerObservers(prev)
+    return focusedState().owner
+  })
+
+  const handleSignalUpdate: SignalUpdateHandler = ({ id, value, oldValue }) => {
+    console.log("handleSignalUpdate", id, value, oldValue)
+  }
+
+  const setFocusedOwner: SetFocusedOwner = payload => {
+    const { id } = untrack(focusedState)
+    if (!payload) setFocusedState(nullFocusedState)
+    else {
+      if (id === payload.ownerId) return
+      setFocusedState({
+        id: payload.ownerId,
+        rootId: payload.rootId,
+        owner: null,
+        updated: false,
+        details: null,
+      })
+      forceRootUpdate(payload.rootId)
+    }
+  }
+
+  const setFocusedOwnerDetails = (newOwner: SolidOwner | null, newDetails: OwnerDetails | null) => {
+    if (newOwner && newDetails) {
+      setFocusedState(prev => ({
+        id: prev.id!,
+        rootId: prev.rootId!,
+        owner: newOwner,
+        updated: prev.owner === newOwner,
+        details: newDetails,
+      }))
+    } else setFocusedState(nullFocusedState)
+  }
+
+  const focusedRootId = createMemo(() => focusedState().rootId)
+  const focusedId = createMemo(() => focusedState().rootId)
+
+  //
+  // Computation updates:
+  //
+  const [handleComputationsUpdate, pushComputationUpdate] = (() => {
+    const [handleComputationsUpdate, emitComputationUpdate] =
+      createSimpleEmitter<BatchComputationUpdate[]>()
+    const computationUpdates: BatchComputationUpdate[] = []
+
+    const triggerComputationUpdateEmit = throttle(() => {
+      // dedupe computation updates
+      const updatedNodes = new Set<NodeID>()
+      const updates: BatchComputationUpdate[] = []
+      for (let i = computationUpdates.length - 1; i >= 0; i--) {
+        const update = computationUpdates[i]
+        if (updatedNodes.has(update.nodeId)) continue
+        updatedNodes.add(update.nodeId)
+        updates.push(update)
+      }
+      computationUpdates.length = 0
+      emitComputationUpdate(updates)
+    }, 30)
+
+    const pushComputationUpdate: ComputationUpdateHandler = (rootId: NodeID, nodeId: NodeID) => {
+      if (!untrack(observeComputations)) return
+      computationUpdates.push({ rootId, nodeId })
+      triggerComputationUpdateEmit()
+    }
+
+    return [handleComputationsUpdate, pushComputationUpdate]
+  })()
+
+  //
   // Components:
+  //
   const components = createLazyMemo<MappedComponent[]>(() =>
     Object.values(roots()).reduce((arr: MappedComponent[], root) => {
       arr.push.apply(arr, root.components())
@@ -234,19 +252,10 @@ const pluginExports = createInternalRoot(() => {
     }, []),
   )
 
-  const walkerConfig: Pick<WalkerConfig, "observeComputations" | "gatherComponents"> = {
-    get observeComputations() {
-      return observeComputations()
-    },
-    get gatherComponents() {
-      return gatherComponents()
-    },
-  }
-
   function registerDebuggerPlugin(factory: PluginFactory) {
     runWithOwner(owner, () => {
       const { enabled, gatherComponents, observeComputations } = factory({
-        makeBatchUpdateListener,
+        handleComputationsUpdate,
         roots,
         serialisedRoots,
         rootsUpdates,
@@ -268,12 +277,18 @@ const pluginExports = createInternalRoot(() => {
     triggerUpdate,
     forceTriggerUpdate,
     enabled,
-    walkerConfig,
     roots,
     setRoots,
     registerDebuggerPlugin,
     updateRoot,
     removeRoot,
+    gatherComponents,
+    handleSignalUpdate,
+    setFocusedOwner,
+    setFocusedOwnerDetails,
+    focusedRootId,
+    focusedId,
+    pushComputationUpdate,
   }
 })
 export const {
@@ -282,10 +297,16 @@ export const {
   triggerUpdate,
   forceTriggerUpdate,
   enabled,
-  walkerConfig,
+  gatherComponents,
   roots,
   setRoots,
   registerDebuggerPlugin,
   updateRoot,
   removeRoot,
-} = pluginExports
+  handleSignalUpdate,
+  setFocusedOwner,
+  setFocusedOwnerDetails,
+  focusedRootId,
+  focusedId,
+  pushComputationUpdate,
+} = exported

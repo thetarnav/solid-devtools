@@ -18,7 +18,7 @@ onWindowMessage("SolidOnPage", () => postPortMessage("SolidOnPage"))
 
 onWindowMessage("GraphUpdate", graph => postPortMessage("GraphUpdate", graph))
 
-onWindowMessage("BatchedUpdate", payload => postPortMessage("BatchedUpdate", payload))
+onWindowMessage("ComputationsUpdate", payload => postPortMessage("ComputationsUpdate", payload))
 
 onPortMessage("PanelVisibility", visible => postWindowMessage("PanelVisibility", visible))
 

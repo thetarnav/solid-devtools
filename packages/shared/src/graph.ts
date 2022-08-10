@@ -1,7 +1,6 @@
 import { getOwner as _getOwner } from "solid-js"
 import { JsonValue } from "type-fest"
 import { Many } from "@solid-primitives/utils"
-import { UpdateType } from "./bridge"
 import { Owner as _Owner, SignalState as _SignalState, Computation as _Computation } from "./solid"
 import { INTERNAL } from "./variables"
 
@@ -16,23 +15,25 @@ export enum NodeType {
   Root,
 }
 
+export type NodeID = string & {}
+
 //
 // "Signal___" — owner/signals/etc. objects in the Solid's internal owner graph
 //
 
 declare module "solid-js/types/reactive/signal" {
   interface SignalState<T> {
-    sdtId?: number
+    sdtId?: NodeID
     sdtName?: string
   }
   interface Owner {
-    sdtId?: number
+    sdtId?: NodeID
     sdtName?: string
     sdtType?: NodeType
     ownedRoots?: Set<SolidRoot>
   }
   interface Computation<Init, Next> {
-    sdtId?: number
+    sdtId?: NodeID
     sdtType?: NodeType
     ownedRoots?: Set<SolidRoot>
     onValueUpdate?: Record<symbol, ValueUpdateListener>
@@ -93,29 +94,13 @@ export const getOwner = _getOwner as () => SolidOwner | null
 
 export type DebuggerContext =
   | {
-      rootId: number
+      rootId: NodeID
       triggerRootUpdate: VoidFunction
       forceRootUpdate: VoidFunction
     }
   | typeof INTERNAL
 
-export type BatchedUpdate =
-  | {
-      type: UpdateType.Signal
-      payload: SignalUpdatePayload
-    }
-  | {
-      type: UpdateType.Computation
-      payload: number
-    }
-
-export interface SignalUpdatePayload {
-  id: number
-  value: unknown
-  oldValue: unknown
-}
-
-export type BatchUpdateListener = (updates: BatchedUpdate[]) => void
+export type BatchComputationUpdate = { rootId: NodeID; nodeId: NodeID }
 
 export type ValueUpdateListener = (newValue: unknown, oldValue: unknown) => void
 
@@ -125,29 +110,34 @@ export type ValueUpdateListener = (newValue: unknown, oldValue: unknown) => void
 //
 
 export interface MappedRoot {
-  id: number
+  id: NodeID
   tree: MappedOwner
   components: MappedComponent[]
 }
 
 export interface SerialisedTreeRoot {
-  id: number
+  id: NodeID
   tree: MappedOwner
 }
 
+export type RootsUpdates = {
+  readonly removed: NodeID[]
+  readonly updated: SerialisedTreeRoot[]
+}
+
 export interface MappedOwner {
-  id: number
+  id: NodeID
   name: string
   type: NodeType
   children: MappedOwner[]
-  sources: number[]
+  sources: NodeID[]
 }
 
 export interface MappedSignal {
   type: NodeType.Signal | NodeType.Memo
   name: string
-  id: number
-  observers: number[]
+  id: NodeID
+  observers: NodeID[]
   value: JsonValue
 }
 
@@ -158,17 +148,17 @@ export type MappedComponent = {
 }
 
 export interface OwnerDetails {
-  id: number
+  id: NodeID
   name: string
   type: NodeType
-  path: number[]
+  path: NodeID[]
   signals: MappedSignal[]
   /** for computations */
   value?: JsonValue
   /** for computations */
-  sources?: number[]
+  sources?: NodeID[]
   /** for memos */
-  observers?: number[]
+  observers?: NodeID[]
 }
 
 //
@@ -177,7 +167,7 @@ export interface OwnerDetails {
 //
 
 export interface GraphOwner {
-  readonly id: number
+  readonly id: NodeID
   readonly name: string
   readonly type: NodeType
   readonly dispose: VoidFunction
@@ -188,7 +178,7 @@ export interface GraphOwner {
 }
 
 export interface GraphSignal {
-  readonly id: number
+  readonly id: NodeID
   readonly name: string
   readonly dispose?: VoidFunction
   readonly updated: boolean
@@ -199,6 +189,6 @@ export interface GraphSignal {
 }
 
 export interface GraphRoot {
-  readonly id: number
+  readonly id: NodeID
   readonly tree: GraphOwner
 }

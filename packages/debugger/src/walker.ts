@@ -7,8 +7,8 @@ import {
   SolidSignal,
   MappedComponent,
   OwnerDetails,
+  NodeID,
 } from "@solid-devtools/shared/graph"
-import { ComputationUpdateHandler, SignalUpdateHandler } from "./batchUpdates"
 import {
   getNodeName,
   getNodeType,
@@ -22,12 +22,18 @@ import {
 } from "./utils"
 import { observeComputationUpdate, observeValueUpdate, removeValueUpdateObserver } from "./update"
 
+export type SignalUpdateHandler = (payload: {
+  value: unknown
+  oldValue: unknown
+  id: NodeID
+}) => void
+export type ComputationUpdateHandler = (rootId: NodeID, nodeId: NodeID) => void
+
 // Globals set before each walker cycle
-let FocusedID: number | null = null
-let RootID: number
+let FocusedId: NodeID | null = null
+let RootId: NodeID
 let OnSignalUpdate: SignalUpdateHandler
 let OnComputationUpdate: ComputationUpdateHandler
-let ObserveComputations: boolean
 let GatherComponents: boolean
 let Components: MappedComponent[] = []
 let FocusedOwner: SolidOwner | null = null
@@ -35,9 +41,9 @@ let FocusedOwnerDetails: OwnerDetails | null = null
 
 const WALKER = Symbol("walker")
 
-function observeComputation(owner: SolidOwner, id: number) {
-  if (ObserveComputations && isSolidComputation(owner))
-    observeComputationUpdate(owner, OnComputationUpdate.bind(void 0, id))
+function observeComputation(owner: SolidOwner, id: NodeID) {
+  if (isSolidComputation(owner))
+    observeComputationUpdate(owner, OnComputationUpdate.bind(void 0, RootId, id))
 }
 
 function observeValue(node: SolidSignal) {
@@ -84,7 +90,7 @@ export function clearOwnerObservers(owner: SolidOwner): void {
 
 function collectOwnerDetails(owner: SolidOwner): void {
   // get owner path
-  const path: number[] = []
+  const path: NodeID[] = []
   let current: SolidOwner | null = owner.owner
   while (current) {
     // * after we flatten the tree, we'll know the length of the path — no need to use unshift then
@@ -140,7 +146,7 @@ function mapOwner(owner: SolidOwner, type?: NodeType): MappedOwner {
   const id = markNodeID(owner)
   const name = markOwnerName(owner)
 
-  if (id === FocusedID) collectOwnerDetails(owner)
+  if (id === FocusedId) collectOwnerDetails(owner)
 
   observeComputation(owner, id)
 
@@ -159,12 +165,11 @@ function mapOwner(owner: SolidOwner, type?: NodeType): MappedOwner {
 }
 
 export type WalkerConfig = {
-  rootId: number
+  rootId: NodeID
   onSignalUpdate: SignalUpdateHandler
   onComputationUpdate: ComputationUpdateHandler
-  observeComputations: boolean
   gatherComponents: boolean
-  focusedID: number | null
+  focusedId: NodeID | null
 }
 
 export function walkSolidTree(
@@ -177,11 +182,10 @@ export function walkSolidTree(
   focusedOwner: SolidOwner | null
 } {
   // set the globals to be available for this walk cycle
-  FocusedID = config.focusedID
-  RootID = config.rootId
+  FocusedId = config.focusedId
+  RootId = config.rootId
   OnSignalUpdate = config.onSignalUpdate
   OnComputationUpdate = config.onComputationUpdate
-  ObserveComputations = config.observeComputations
   GatherComponents = config.gatherComponents
   if (GatherComponents) Components = []
 

@@ -1,5 +1,5 @@
 import { JsonValue } from "type-fest"
-import { SerialisedTreeRoot } from "./graph"
+import { BatchComputationUpdate, NodeID, RootsUpdates } from "./graph"
 import { log } from "./utils"
 
 export const LOG_MESSAGES = false
@@ -9,37 +9,18 @@ export interface Messages {
   DevtoolsScriptConnected: void
   PanelVisibility: boolean
   ResetPanel: void
-  GraphUpdate: {
-    added: SerialisedTreeRoot[]
-    removed: number[]
-    updated: SerialisedTreeRoot[]
-  }
-  BatchedUpdate: BatchedUpdate[]
+  GraphUpdate: RootsUpdates
+  ComputationsUpdate: BatchComputationUpdate[]
   ForceUpdate: void
   /** devtools -> adapter: request for details of owner details opened in the side-panel */
-  SetFocusedOwner: null | { rootId: number; ownerId: number }
-}
-
-export enum UpdateType {
-  Signal,
-  Computation,
+  SetFocusedOwner: null | { rootId: NodeID; ownerId: NodeID }
 }
 
 export interface SignalUpdatePayload {
-  id: number
+  id: NodeID
   value: JsonValue
   oldValue: JsonValue
 }
-
-export type BatchedUpdate =
-  | {
-      type: UpdateType.Signal
-      payload: SignalUpdatePayload
-    }
-  | {
-      type: UpdateType.Computation
-      payload: number
-    }
 
 export type PostMessageFn = <K extends keyof Messages>(
   ..._: [K] extends [void] ? [id: K] : [id: K, payload: Messages[K]]

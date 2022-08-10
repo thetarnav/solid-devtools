@@ -1,11 +1,9 @@
 import { createEffect, createSignal } from "solid-js"
-import { registerDebuggerPlugin, PluginFactory, getSafeValue } from "@solid-devtools/debugger"
+import { registerDebuggerPlugin, PluginFactory } from "@solid-devtools/debugger"
 import {
-  BatchedUpdate,
   onWindowMessage,
   postWindowMessage,
   startListeningWindowMessages,
-  UpdateType,
 } from "@solid-devtools/shared/bridge"
 
 startListeningWindowMessages()
@@ -13,7 +11,7 @@ startListeningWindowMessages()
 const extensionAdapterFactory: PluginFactory = ({
   forceTriggerUpdate,
   rootsUpdates,
-  makeBatchUpdateListener,
+  handleComputationsUpdate,
   setFocusedOwner,
 }) => {
   const [enabled, setEnabled] = createSignal(false)
@@ -30,29 +28,21 @@ const extensionAdapterFactory: PluginFactory = ({
     postWindowMessage("GraphUpdate", rootsUpdates())
   })
 
-  // makeBatchUpdateListener(updates => {
-  //   // serialize the updates and send them to the devtools panel
-  //   const safeUpdates = updates.map(({ type, payload }) => ({
-  //     type,
-  //     payload:
-  //       type === UpdateType.Computation
-  //         ? payload
-  //         : {
-  //             id: payload.id,
-  //             value: getSafeValue(payload.value),
-  //             oldValue: getSafeValue(payload.oldValue),
-  //           },
-  //   })) as BatchedUpdate[]
-  //   postWindowMessage("BatchedUpdate", safeUpdates)
-  // })
+  handleComputationsUpdate(updates => {
+    postWindowMessage("ComputationsUpdate", updates)
+  })
 
   return { enabled }
 }
+
+let registered = false
 
 /**
  * Registers the extension adapter with the debugger.
  */
 export function useExtensionAdapter() {
+  if (registered) return console.warn("Extension adapter already registered")
+  registered = true
   registerDebuggerPlugin(data => {
     const { enabled } = extensionAdapterFactory(data)
     return {

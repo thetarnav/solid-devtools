@@ -51,35 +51,34 @@ describe("walkSolidTree", () => {
     const { tree, components, focusedOwner, focusedOwnerDetails } = walkSolidTree(owner, {
       onComputationUpdate: () => {},
       onSignalUpdate: () => {},
-      rootId: 123,
-      focusedID: null,
+      rootId: "ff",
+      focusedId: null,
       gatherComponents: false,
-      observeComputations: false,
     })
 
     dispose()
 
     expect(tree).toEqual({
-      id: 0,
+      id: "0",
       name: UNNAMED,
       sources: [],
       type: NodeType.Root,
       children: [
         {
-          id: 1,
+          id: "1",
           name: "e0",
           sources: [],
           type: NodeType.Effect,
           children: [
             {
-              id: 2,
+              id: "2",
               name: "c0",
-              sources: [3],
+              sources: ["3"],
               type: NodeType.Computation,
               children: [],
             },
             {
-              id: 4,
+              id: "4",
               name: "c1",
               sources: [],
               type: NodeType.Computation,
@@ -99,18 +98,17 @@ describe("walkSolidTree", () => {
     createRoot(dispose => {
       const walkSolidTree = getModule()
 
-      const capturedComputationUpdates: number[] = []
+      const capturedComputationUpdates: [string, string][] = []
 
       const [a, setA] = createSignal(0)
       createComputed(a)
 
       walkSolidTree(getOwner()!, {
-        onComputationUpdate: id => capturedComputationUpdates.push(id),
+        onComputationUpdate: (rootId, id) => capturedComputationUpdates.push([rootId, id]),
         onSignalUpdate: () => {},
-        rootId: 123,
-        focusedID: null,
+        rootId: "ff",
+        focusedId: null,
         gatherComponents: false,
-        observeComputations: true,
       })
 
       expect(capturedComputationUpdates.length).toBe(0)
@@ -118,7 +116,7 @@ describe("walkSolidTree", () => {
       setA(1)
 
       expect(capturedComputationUpdates.length).toBe(1)
-      expect(capturedComputationUpdates[0]).toBe(1)
+      expect(capturedComputationUpdates[0]).toEqual(["ff", "1"])
 
       dispose()
     }))
@@ -148,10 +146,9 @@ describe("walkSolidTree", () => {
       const { components } = walkSolidTree(getOwner()!, {
         onComputationUpdate: () => {},
         onSignalUpdate: () => {},
-        rootId: 123,
-        focusedID: null,
+        rootId: "ff",
+        focusedId: null,
         gatherComponents: true,
-        observeComputations: false,
       })
 
       expect(components.length).toBe(7)
@@ -180,7 +177,7 @@ describe("walkSolidTree", () => {
           const focused = createMemo(
             () => {
               owner = getOwner()!
-              owner.sdtId = 123
+              owner.sdtId = "ff"
               s()
               createSignal(0, { name: "count" })
               const memo = createMemo(() => 0, undefined, { name: "memo" })
@@ -197,45 +194,44 @@ describe("walkSolidTree", () => {
       )
 
       const { tree, focusedOwner, focusedOwnerDetails } = walkSolidTree(getOwner()!, {
-        rootId: 0,
-        focusedID: 123,
+        rootId: "0",
+        focusedId: "ff",
         onComputationUpdate: () => {},
         onSignalUpdate: () => {},
         gatherComponents: false,
-        observeComputations: false,
       })
 
       expect(owner).toBe(focusedOwner)
 
       expect(tree).toEqual({
-        id: 0,
+        id: "0",
         name: UNNAMED,
         sources: [],
         type: NodeType.Root,
         children: [
           {
-            id: 1,
+            id: "1",
             name: "WRAPPER",
-            sources: [123],
+            sources: ["ff"],
             type: NodeType.Computation,
             children: [
               {
-                id: 123,
+                id: "ff",
                 name: "focused",
-                sources: [5],
+                sources: ["5"],
                 type: NodeType.Memo,
                 children: [
                   {
-                    id: 3,
+                    id: "3",
                     name: "memo",
                     sources: [],
                     type: NodeType.Memo,
                     children: [],
                   },
                   {
-                    id: 4,
+                    id: "4",
                     name: "render",
-                    sources: [3],
+                    sources: ["3"],
                     type: NodeType.Render,
                     children: [],
                   },
@@ -247,17 +243,17 @@ describe("walkSolidTree", () => {
       })
 
       expect(focusedOwnerDetails).toEqual({
-        id: 123,
+        id: "ff",
         name: "focused",
         type: NodeType.Memo,
-        path: [0, 1],
+        path: ["0", "1"],
         signals: [
-          { type: NodeType.Signal, id: 2, name: "count", observers: [], value: 0 },
-          { type: NodeType.Memo, id: 3, name: "memo", observers: [4], value: 0 },
+          { type: NodeType.Signal, id: "2", name: "count", observers: [], value: 0 },
+          { type: NodeType.Memo, id: "3", name: "memo", observers: ["4"], value: 0 },
         ],
         value: "value",
-        sources: [5],
-        observers: [1],
+        sources: ["5"],
+        observers: ["1"],
       })
 
       dispose()

@@ -6,6 +6,7 @@ import {
   GraphSignal,
   GraphRoot,
   SerialisedTreeRoot,
+  NodeID,
 } from "@solid-devtools/shared/graph"
 import { onRuntimeMessage, postRuntimeMessage } from "./bridge"
 import {
@@ -16,6 +17,7 @@ import {
   reconcileNode,
   removeRootFromMap,
   resetComputationRerun,
+  updateComputation,
 } from "./reconcile"
 
 const exports = createRoot(() => {
@@ -54,10 +56,7 @@ const exports = createRoot(() => {
     isOwnerFocused: isFocused,
   }
 
-  const addNewRoot = (proxy: GraphRoot[], { id, tree }: SerialisedTreeRoot): void => {
-    proxy.push({ id, tree: mapNewRoot(id, tree) })
-  }
-  const removeRoot = (proxy: GraphRoot[], id: number): void => {
+  const removeRoot = (proxy: GraphRoot[], id: NodeID): void => {
     proxy.splice(
       proxy.findIndex(e => e.id === id),
       1,
@@ -69,16 +68,15 @@ const exports = createRoot(() => {
     // reconcile existing root
     if (index !== -1) reconcileNode(id, tree, proxy[index].tree)
     // insert new root
-    else addNewRoot(proxy, { id, tree })
+    else proxy.push({ id, tree: mapNewRoot(id, tree) })
   }
 
-  onRuntimeMessage("GraphUpdate", ({ added, removed, updated }) => {
+  onRuntimeMessage("GraphUpdate", ({ removed, updated }) => {
     batch(() => {
       resetComputationRerun()
       setGraphs(
         produce(proxy => {
           removed.forEach(id => removeRoot(proxy, id))
-          added.forEach(root => addNewRoot(proxy, root))
           updated.forEach(root => updateRoot(proxy, root))
         }),
       )
@@ -93,18 +91,9 @@ const exports = createRoot(() => {
     afterGraphUpdate()
   })
 
-  // TODO: batched updates are to be refactored
-  // onRuntimeMessage("BatchedUpdate", updates => {
-  //   batch(() => {
-  //     for (const update of updates) {
-  //       if (update.type === UpdateType.Signal) {
-  //         updateSignal(update.payload.id, update.payload.value)
-  //       } else {
-  //         updateComputation(update.payload)
-  //       }
-  //     }
-  //   })
-  // })
+  onRuntimeMessage("ComputationsUpdate", updates => {
+    updates.forEach(({ rootId, nodeId }) => updateComputation(rootId, nodeId))
+  })
 
   let init = true
   createEffect(() => {

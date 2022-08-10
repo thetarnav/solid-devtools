@@ -1,28 +1,31 @@
 import { createRoot, createSignal, getOwner, onCleanup } from "solid-js"
 import { mutateFilter, pushToArrayProp } from "@solid-devtools/shared/utils"
-import { MappedOwner, MappedSignal, GraphOwner, GraphSignal } from "@solid-devtools/shared/graph"
+import {
+  MappedOwner,
+  MappedSignal,
+  GraphOwner,
+  GraphSignal,
+  NodeID,
+} from "@solid-devtools/shared/graph"
 
 const dispose = (o: { dispose?: VoidFunction }) => o.dispose?.()
 const disposeAll = (list: { dispose?: VoidFunction }[]) => list.forEach(dispose)
 function deleteKey<K extends PropertyKey>(this: { [_ in K]?: unknown }, key: K) {
   delete this[key]
 }
-function compareId(this: { id: number }, o: { id: number }) {
-  return this.id === o.id
-}
 
 /**
  * Reconciles an array by mutating it. Diffs items by "id" prop. And uses {@link mapFunc} for creating new items.
  * Use for dynamic arrays that can change entirely. Like sources or observers.
  */
-function reconcileArrayByIds<T extends { id: number }>(
-  ids: readonly number[],
+function reconcileArrayByIds<T extends { id: NodeID }>(
+  ids: readonly NodeID[],
   array: T[],
-  mapFunc: (id: number, array: T[]) => void,
+  mapFunc: (id: NodeID, array: T[]) => void,
 ): void {
   const removed: T[] = []
-  const intersection: number[] = []
-  let id: number
+  const intersection: NodeID[] = []
+  let id: NodeID
   for (const item of array) {
     id = item.id
     if (ids.includes(id)) intersection.push(id)
@@ -32,23 +35,23 @@ function reconcileArrayByIds<T extends { id: number }>(
   for (id of ids) intersection.includes(id) || mapFunc(id, array)
 }
 
-const signalsUpdated = new Set<number>()
-const ownersUpdated = new Set<number>()
+const signalsUpdated = new Set<NodeID>()
+const ownersUpdated = new Set<NodeID>()
 
 // TODO: when the roots should be removed from here?
 const NodeMap: Record<
-  number,
+  NodeID,
   {
-    owners: Record<number, GraphOwner>
-    signals: Record<number, GraphSignal>
+    owners: Record<NodeID, GraphOwner>
+    signals: Record<NodeID, GraphSignal>
   }
 > = {}
 
 // TODO: map source/observers length separately, as these won't always resolve
-let sourcesToAddLazy: Record<number, ((source: GraphSignal) => void)[]> = {}
-let observersToAddLazy: Record<number, ((source: GraphOwner) => void)[]> = {}
+let sourcesToAddLazy: Record<NodeID, ((source: GraphSignal) => void)[]> = {}
+let observersToAddLazy: Record<NodeID, ((source: GraphOwner) => void)[]> = {}
 
-export function updateSignal(rootId: number, id: number, newValue: unknown): void {
+export function updateSignal(rootId: NodeID, id: NodeID, newValue: unknown): void {
   const node = NodeMap[rootId].signals[id]
   if (node) {
     node.setValue(newValue)
@@ -57,7 +60,7 @@ export function updateSignal(rootId: number, id: number, newValue: unknown): voi
   }
 }
 
-export function updateComputation(rootId: number, id: number): void {
+export function updateComputation(rootId: NodeID, id: NodeID): void {
   const owner = NodeMap[rootId].owners[id]
   if (owner) {
     owner.setUpdate(true)
@@ -80,7 +83,7 @@ export function disposeAllNodes() {
   }
 }
 
-export function removeRootFromMap(id: number) {
+export function removeRootFromMap(id: NodeID) {
   delete NodeMap[id]
 }
 
@@ -92,17 +95,17 @@ export function afterGraphUpdate() {
   ownersUpdated.clear()
 }
 
-export function findOwnerRootId(owner: GraphOwner): number {
+export function findOwnerRootId(owner: GraphOwner): NodeID {
   for (const rootId in NodeMap) {
     const owners = NodeMap[rootId].owners
     for (const id in owners) {
-      if (id === owner.id + "") return +rootId
+      if (id === owner.id + "") return rootId
     }
   }
   throw "ROOT_ID_NOT_FOUND"
 }
 
-const addSignalToMap = (rootId: number, node: GraphSignal) => {
+const addSignalToMap = (rootId: NodeID, node: GraphSignal) => {
   const id = node.id
   const signals = NodeMap[rootId].signals
   signals[id] = node
@@ -113,7 +116,7 @@ const addSignalToMap = (rootId: number, node: GraphSignal) => {
     delete sourcesToAddLazy[id]
   }
 }
-const addOwnerToMap = (rootId: number, node: GraphOwner) => {
+const addOwnerToMap = (rootId: NodeID, node: GraphOwner) => {
   const id = node.id
   const owners = NodeMap[rootId].owners
   owners[id] = node
@@ -125,13 +128,13 @@ const addOwnerToMap = (rootId: number, node: GraphOwner) => {
   }
 }
 
-function mapObserver(rootId: number, id: number, mutable: GraphOwner[]) {
+function mapObserver(rootId: NodeID, id: NodeID, mutable: GraphOwner[]) {
   const node = NodeMap[rootId].owners[id]
   if (node) mutable.push(node)
   else pushToArrayProp(observersToAddLazy, id, owner => mutable.push(owner))
 }
 
-function mapSource(rootId: number, id: number, mutable: GraphSignal[]) {
+function mapSource(rootId: NodeID, id: NodeID, mutable: GraphSignal[]) {
   const node = NodeMap[rootId].signals[id]
   if (node) mutable.push(node)
   else pushToArrayProp(sourcesToAddLazy, id, signal => mutable.push(signal))
@@ -141,7 +144,7 @@ function mapSource(rootId: number, id: number, mutable: GraphSignal[]) {
  * maps the raw owner tree to be placed into the reactive graph store
  * this is for new branches – owners that just have been created
  */
-export function mapNewOwner(rootId: number, owner: Readonly<MappedOwner>): GraphOwner {
+export function mapNewOwner(rootId: NodeID, owner: Readonly<MappedOwner>): GraphOwner {
   // wrap with root that will be disposed together with the rest of the tree
   return createRoot(dispose => {
     const [updated, setUpdate] = createSignal(false)
@@ -177,7 +180,7 @@ export function mapNewOwner(rootId: number, owner: Readonly<MappedOwner>): Graph
   })
 }
 
-export function mapNewRoot(rootId: number, owner: Readonly<MappedOwner>): GraphOwner {
+export function mapNewRoot(rootId: NodeID, owner: Readonly<MappedOwner>): GraphOwner {
   NodeMap[rootId] = {
     owners: {},
     signals: {},
@@ -189,7 +192,7 @@ export function mapNewRoot(rootId: number, owner: Readonly<MappedOwner>): GraphO
  * Sync "createSignalNode" is meant to be used when creating new owner node,
  * when there is a reactive root that will take care of cleaning up the value signal
  */
-function createSignalNode(rootId: number, raw: Readonly<MappedSignal>): GraphSignal {
+function createSignalNode(rootId: NodeID, raw: Readonly<MappedSignal>): GraphSignal {
   if (!getOwner()) throw "This should be executed under a root"
   const [value, setValue] = createSignal(raw.value)
   const [updated, setUpdate] = createSignal(false)
@@ -218,7 +221,7 @@ function createSignalNode(rootId: number, raw: Readonly<MappedSignal>): GraphSig
  * Async "createSignalNode" is meant to be used when reconciling the tree,
  * when there is no reactive root to take care of cleaning up the value signal
  */
-function createSignalNodeAsync(rootId: number, raw: Readonly<MappedSignal>): GraphSignal {
+function createSignalNodeAsync(rootId: NodeID, raw: Readonly<MappedSignal>): GraphSignal {
   return createRoot(dispose => Object.assign(createSignalNode(rootId, raw), { dispose }))
 }
 
@@ -227,7 +230,7 @@ function createSignalNodeAsync(rootId: number, raw: Readonly<MappedSignal>): Gra
  * looking for changes and applying them granularely.
  */
 function reconcileChildren(
-  rootId: number,
+  rootId: NodeID,
   newChildren: MappedOwner[],
   children: GraphOwner[],
 ): void {
@@ -265,7 +268,7 @@ function reconcileChildren(
 
 // function reconcileSignals(newSignals: readonly MappedSignal[], signals: GraphSignal[]): void {
 //   if (!newSignals.length && !signals.length) return
-//   const removed: number[] = []
+//   const removed: NodeID[] = []
 //   const intersection: MappedSignal[] = []
 //   for (const signal of signals) {
 //     const newSignal = newSignals.find(compareId.bind(signal))
@@ -283,7 +286,7 @@ function reconcileChildren(
 //   }
 // }
 
-export function reconcileNode(rootId: number, mapped: MappedOwner, node: GraphOwner): void {
+export function reconcileNode(rootId: NodeID, mapped: MappedOwner, node: GraphOwner): void {
   reconcileChildren(rootId, mapped.children, node.children)
   // TODO: remove mapping signals
   // reconcileSignals(mapped.signals, node.signals)

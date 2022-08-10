@@ -10,7 +10,7 @@ export type {
   FocusedState,
   SetFocusedOwner,
   SignaledRoot,
-  RootsUpdates,
+  BatchComputationUpdatesHandler,
 } from "./plugin"
 
 export type { TargetIDE, TargetURLFunction } from "@solid-devtools/locator"

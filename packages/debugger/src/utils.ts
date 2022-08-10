@@ -17,6 +17,7 @@ import {
   SolidSignal,
   SolidMemo,
   getOwner,
+  NodeID,
 } from "@solid-devtools/shared/graph"
 import { INTERNAL, UNNAMED } from "@solid-devtools/shared/variables"
 import { trimString } from "@solid-devtools/shared/utils"
@@ -193,7 +194,7 @@ export function getFunctionSources(fn: () => unknown): SolidSignal[] {
 }
 
 let LAST_ID = 0
-export const getNewSdtId = () => LAST_ID++
+export const getNewSdtId = (): NodeID => (LAST_ID++).toString(16)
 
 export function markOwnerName(o: SolidOwner): string {
   if (o.sdtName !== undefined) return o.sdtName
@@ -203,11 +204,11 @@ export function markOwnerType(o: SolidOwner, type?: NodeType): NodeType {
   if (o.sdtType !== undefined) return o.sdtType
   return (o.sdtType = type ?? getOwnerType(o))
 }
-export function markNodeID(o: { sdtId?: number }): number {
+export function markNodeID(o: { sdtId?: NodeID }): NodeID {
   if (o.sdtId !== undefined) return o.sdtId
   return (o.sdtId = getNewSdtId())
 }
-export function markNodesID(nodes?: { sdtId?: number }[] | null): number[] {
+export function markNodesID(nodes?: { sdtId?: NodeID }[] | null): NodeID[] {
   if (!nodes || !nodes.length) return []
   return nodes.map(markNodeID)
 }

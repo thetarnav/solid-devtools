@@ -3,26 +3,26 @@ import { throttle } from "@solid-primitives/scheduled"
 import {
   DebuggerContext,
   getOwner,
+  NodeID,
   NodeType,
   SolidOwner,
   SolidRoot,
 } from "@solid-devtools/shared/graph"
-import { UpdateType } from "@solid-devtools/shared/bridge"
 import { INTERNAL } from "@solid-devtools/shared/variables"
 import { Owner } from "@solid-devtools/shared/solid"
-import { batchUpdate, ComputationUpdateHandler } from "./batchUpdates"
-import { clearOwnerObservers, walkSolidTree } from "./walker"
+import { clearOwnerObservers, ComputationUpdateHandler, walkSolidTree } from "./walker"
 import {
   enabled,
-  walkerConfig,
   onForceUpdate,
   onUpdate,
   updateRoot,
   removeRoot,
   handleSignalUpdate,
-  focusedWalkerConfig,
   focusedRootId,
   setFocusedOwnerDetails,
+  focusedId,
+  gatherComponents,
+  pushComputationUpdate,
 } from "./plugin"
 import {
   createInternalRoot,
@@ -35,10 +35,9 @@ import {
   setDebuggerContext,
 } from "./utils"
 
-// TODO probably should be moved to plugin.ts
-const RootMap: Record<number, { update: VoidFunction; forceUpdate: VoidFunction }> = {}
-export const forceRootUpdate = (rootId: number) => RootMap[rootId].forceUpdate()
-export const triggerRootUpdate = (rootId: number) => RootMap[rootId].update()
+const RootMap: Record<NodeID, { update: VoidFunction; forceUpdate: VoidFunction }> = {}
+export const forceRootUpdate = (rootId: NodeID) => RootMap[rootId].forceUpdate()
+export const triggerRootUpdate = (rootId: NodeID) => RootMap[rootId].update()
 
 export function createGraphRoot(owner: SolidRoot): void {
   // setup the debugger in a separate root, so that it doesn't walk and track itself
@@ -47,21 +46,21 @@ export function createGraphRoot(owner: SolidRoot): void {
 
     const rootId = getNewSdtId()
 
-    const onComputationUpdate: ComputationUpdateHandler = payload => {
-      if (!walkerConfig.observeComputations || owner.isDisposed) return
+    const onComputationUpdate: ComputationUpdateHandler = (rootId, nodeId) => {
+      if (owner.isDisposed) return
       if (enabled()) triggerRootUpdate()
-      batchUpdate({ type: UpdateType.Computation, payload })
+      pushComputationUpdate(rootId, nodeId)
     }
 
     const forceRootUpdate = () => {
       if (owner.isDisposed) return
       const { tree, components, focusedOwner, focusedOwnerDetails } = untrack(() =>
         walkSolidTree(owner, {
-          ...walkerConfig,
-          ...focusedWalkerConfig,
           onComputationUpdate,
           onSignalUpdate: handleSignalUpdate,
           rootId,
+          focusedId: focusedId(),
+          gatherComponents: gatherComponents(),
         }),
       )
       if (untrack(focusedRootId) === rootId) {
