@@ -22,7 +22,7 @@ export type SetFocusedOwner = (payload: { rootId: number; ownerId: number } | nu
 DETAILS:
 
 - type of the node
-- breadcrumbs - mini path to the node
+- path
 - signals declared in it (memos too)
   - their observers and sources
 - stores

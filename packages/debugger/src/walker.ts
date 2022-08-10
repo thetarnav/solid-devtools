@@ -6,11 +6,12 @@ import {
   MappedSignal,
   SolidSignal,
   MappedComponent,
-  SignalState,
   OwnerDetails,
 } from "@solid-devtools/shared/graph"
 import { ComputationUpdateHandler, SignalUpdateHandler } from "./batchUpdates"
 import {
+  getNodeName,
+  getNodeType,
   getSafeValue,
   isSolidComputation,
   isSolidMemo,
@@ -39,29 +40,28 @@ function observeComputation(owner: SolidOwner, id: number) {
     observeComputationUpdate(owner, OnComputationUpdate.bind(void 0, id))
 }
 
-function observeValue(node: SignalState, id: number) {
+function observeValue(node: SolidSignal) {
+  const id = markNodeID(node)
   // OnSignalUpdate will change
   const handler = OnSignalUpdate
   observeValueUpdate(node, (value, oldValue) => handler({ id, value, oldValue }), WALKER)
 }
 
-function createSignalNode(
-  raw: Pick<SolidSignal, "name" | "value" | "observers"> & { id: number },
-): MappedSignal {
+function createSignalNode(node: SolidSignal): MappedSignal {
   return {
-    name: raw.name ?? "(anonymous)",
-    id: raw.id,
-    observers: markNodesID(raw.observers),
-    value: getSafeValue(raw.value),
+    type: getNodeType(node) as NodeType.Memo | NodeType.Signal,
+    name: getNodeName(node),
+    id: markNodeID(node),
+    observers: markNodesID(node.observers),
+    value: getSafeValue(node.value),
   }
 }
 
 function mapOwnerSignals(owner: SolidOwner): MappedSignal[] {
   if (!owner.sourceMap) return []
   return Object.values(owner.sourceMap).map(raw => {
-    const id = markNodeID(raw)
-    observeValue(raw, id)
-    return createSignalNode({ ...raw, id })
+    observeValue(raw)
+    return createSignalNode(raw)
   })
 }
 
@@ -70,10 +70,8 @@ function mapOwnerMemos(owner: SolidOwner): MappedSignal[] {
   if (!owner.owned) return memos
   owner.owned.forEach(child => {
     if (!isSolidMemo(child)) return
-    const id = markNodeID(child)
-    const name = markOwnerName(child)
-    observeValue(child, id)
-    memos.push(createSignalNode({ id, name, value: child.value, observers: child.observers }))
+    observeValue(child)
+    memos.push(createSignalNode(child))
   })
   return memos
 }
@@ -82,6 +80,41 @@ export function clearOwnerObservers(owner: SolidOwner): void {
   if (owner.sourceMap)
     Object.values(owner.sourceMap).forEach(node => removeValueUpdateObserver(node, WALKER))
   if (owner.owned) owner.owned.forEach(node => removeValueUpdateObserver(node, WALKER))
+}
+
+function collectOwnerDetails(owner: SolidOwner): void {
+  // get owner path
+  const path: number[] = []
+  let current: SolidOwner | null = owner.owner
+  while (current) {
+    // * after we flatten the tree, we'll know the length of the path — no need to use unshift then
+    path.unshift(markNodeID(current))
+    current = current.owner
+  }
+
+  // get signals and memos
+  const signals = mapOwnerSignals(owner)
+  signals.push.apply(signals, mapOwnerMemos(owner))
+
+  const details: OwnerDetails = {
+    // id, name and type are already set in mapOwner
+    id: owner.sdtId!,
+    name: owner.sdtName!,
+    type: owner.sdtType!,
+    path,
+    signals,
+  }
+
+  if (isSolidComputation(owner)) {
+    details.value = getSafeValue(owner.value)
+    details.sources = markNodesID(owner.sources)
+    if (isSolidMemo(owner)) {
+      details.observers = markNodesID(owner.observers)
+    }
+  }
+
+  FocusedOwner = owner
+  FocusedOwnerDetails = details
 }
 
 function mapChildren({ owned, ownedRoots }: Readonly<SolidOwner>): MappedOwner[] {
@@ -107,10 +140,7 @@ function mapOwner(owner: SolidOwner, type?: NodeType): MappedOwner {
   const id = markNodeID(owner)
   const name = markOwnerName(owner)
 
-  if (id === FocusedID) {
-    FocusedOwner = owner
-    FocusedOwnerDetails = mapOwnerDetails(owner)
-  }
+  if (id === FocusedID) collectOwnerDetails(owner)
 
   observeComputation(owner, id)
 
@@ -125,18 +155,6 @@ function mapOwner(owner: SolidOwner, type?: NodeType): MappedOwner {
     type,
     children: mapChildren(owner),
     sources: markNodesID(owner.sources),
-  }
-}
-
-function mapOwnerDetails(owner: SolidOwner): OwnerDetails | null {
-  return {
-    id: owner.sdtId!,
-    name: owner.sdtName!,
-    type: owner.sdtType!,
-    // TODO:
-    path: [],
-    signals: mapOwnerSignals(owner),
-    memos: mapOwnerMemos(owner),
   }
 }
 

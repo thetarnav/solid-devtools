@@ -144,6 +144,7 @@ export interface MappedOwner {
 }
 
 export interface MappedSignal {
+  type: NodeType.Signal | NodeType.Memo
   name: string
   id: number
   observers: number[]
@@ -162,7 +163,12 @@ export interface OwnerDetails {
   type: NodeType
   path: number[]
   signals: MappedSignal[]
-  memos: MappedSignal[]
+  /** for computations */
+  value?: JsonValue
+  /** for computations */
+  sources?: number[]
+  /** for memos */
+  observers?: number[]
 }
 
 //

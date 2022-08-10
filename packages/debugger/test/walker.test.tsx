@@ -1,8 +1,9 @@
-import { getOwner, NodeType } from "@solid-devtools/shared/graph"
+import { getOwner, NodeType, SolidOwner } from "@solid-devtools/shared/graph"
 import { UNNAMED } from "@solid-devtools/shared/variables"
 import {
   createComputed,
   createEffect,
+  createMemo,
   createRenderEffect,
   createRoot,
   createSignal,
@@ -35,6 +36,7 @@ const mockTree = () => {
 
 describe("walkSolidTree", () => {
   beforeEach(() => {
+    delete (window as any).Solid$$
     jest.resetModules()
   })
 
@@ -46,7 +48,7 @@ describe("walkSolidTree", () => {
       return [dispose, getOwner()!]
     })
 
-    const { tree, components } = walkSolidTree(owner, {
+    const { tree, components, focusedOwner, focusedOwnerDetails } = walkSolidTree(owner, {
       onComputationUpdate: () => {},
       onSignalUpdate: () => {},
       rootId: 123,
@@ -89,6 +91,8 @@ describe("walkSolidTree", () => {
     })
     expect(tree).toEqual(JSON.parse(JSON.stringify(tree)))
     expect(components).toEqual([])
+    expect(focusedOwner).toBe(null)
+    expect(focusedOwnerDetails).toBe(null)
   })
 
   it("listen to computation updates", () =>
@@ -160,6 +164,101 @@ describe("walkSolidTree", () => {
 
       expect(components[6].name).toBe("Button")
       expect(components[6].resolved).toBeInstanceOf(HTMLButtonElement)
+
+      dispose()
+    }))
+
+  it("collects focused owner details", () =>
+    createRoot(dispose => {
+      const walkSolidTree = getModule()
+      const [s, setS] = createSignal(0, { name: "source" })
+
+      let owner!: SolidOwner
+
+      createComputed(
+        () => {
+          const focused = createMemo(
+            () => {
+              owner = getOwner()!
+              owner.sdtId = 123
+              s()
+              createSignal(0, { name: "count" })
+              const memo = createMemo(() => 0, undefined, { name: "memo" })
+              createRenderEffect(memo, undefined, { name: "render" })
+              return "value"
+            },
+            undefined,
+            { name: "focused" },
+          )
+          focused()
+        },
+        undefined,
+        { name: "WRAPPER" },
+      )
+
+      const { tree, focusedOwner, focusedOwnerDetails } = walkSolidTree(getOwner()!, {
+        rootId: 0,
+        focusedID: 123,
+        onComputationUpdate: () => {},
+        onSignalUpdate: () => {},
+        gatherComponents: false,
+        observeComputations: false,
+      })
+
+      expect(owner).toBe(focusedOwner)
+
+      expect(tree).toEqual({
+        id: 0,
+        name: UNNAMED,
+        sources: [],
+        type: NodeType.Root,
+        children: [
+          {
+            id: 1,
+            name: "WRAPPER",
+            sources: [123],
+            type: NodeType.Computation,
+            children: [
+              {
+                id: 123,
+                name: "focused",
+                sources: [5],
+                type: NodeType.Memo,
+                children: [
+                  {
+                    id: 3,
+                    name: "memo",
+                    sources: [],
+                    type: NodeType.Memo,
+                    children: [],
+                  },
+                  {
+                    id: 4,
+                    name: "render",
+                    sources: [3],
+                    type: NodeType.Render,
+                    children: [],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      })
+
+      expect(focusedOwnerDetails).toEqual({
+        id: 123,
+        name: "focused",
+        type: NodeType.Memo,
+        path: [0, 1],
+        signals: [
+          { type: NodeType.Signal, id: 2, name: "count", observers: [], value: 0 },
+          { type: NodeType.Memo, id: 3, name: "memo", observers: [4], value: 0 },
+        ],
+        value: "value",
+        sources: [5],
+        observers: [1],
+      })
 
       dispose()
     }))
