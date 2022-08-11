@@ -10,7 +10,7 @@ export interface DevtoolsPluginOptions {
   wrapStores?: boolean
   /** Inject location attributes to jsx templates */
   jsxLocation?: boolean
-  /** Name signals and stores */
+  /** Add automatic name when creating signals, memos, stores, or mutables */
   name?: boolean
 }
 
