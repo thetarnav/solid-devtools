@@ -1,5 +1,11 @@
 # @solid-devtools/locator
 
+## 0.10.1
+
+### Patch Changes
+
+- @solid-devtools/debugger@0.4.1
+
 ## 0.10.0
 
 ### Minor Changes

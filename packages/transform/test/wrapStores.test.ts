@@ -1,20 +1,6 @@
-import { traverse } from "@babel/core"
-import generate from "@babel/generator"
-import { parse } from "@babel/parser"
 import { storeOverwriteName, storeOverwriteNamespace } from "../src/utils"
 import plugin from "../src/wrapStores"
-
-function assertTransform(src: string, expectedOutput: string) {
-  const ast = parse(src, {
-    sourceType: "module",
-    plugins: ["jsx"],
-  })
-
-  traverse(ast, plugin.visitor)
-  const res = generate(ast)
-
-  expect(res.code).toBe(expectedOutput)
-}
+import { assertTransform } from "./utils"
 
 describe("createStore", () => {
   test("named import", () => {
@@ -32,7 +18,7 @@ const createStore = (obj, options) => {
   return ${storeOverwriteName}0(wrappedObj, options);
 };`
 
-    assertTransform(src, expectedOutput)
+    assertTransform(src, expectedOutput, plugin)
   })
 
   test("renamed import", () => {
@@ -50,7 +36,7 @@ const createSolidStore = (obj, options) => {
   return ${storeOverwriteName}0(wrappedObj, options);
 };`
 
-    assertTransform(src, expectedOutput)
+    assertTransform(src, expectedOutput, plugin)
   })
 })
 
@@ -70,7 +56,7 @@ const createMutable = (obj, options) => {
   return ${storeOverwriteName}0(wrappedObj, options);
 };`
 
-    assertTransform(src, expectedOutput)
+    assertTransform(src, expectedOutput, plugin)
   })
 
   test("renamed import", () => {
@@ -88,7 +74,7 @@ const createSolidStore = (obj, options) => {
   return ${storeOverwriteName}0(wrappedObj, options);
 };`
 
-    assertTransform(src, expectedOutput)
+    assertTransform(src, expectedOutput, plugin)
   })
 })
 
@@ -121,7 +107,7 @@ Store.createMutable = (obj, options) => {
   return ${storeOverwriteName}1(wrappedObj, options);
 };`
 
-  assertTransform(src, expectedOutput)
+  assertTransform(src, expectedOutput, plugin)
 })
 
 test("both", () => {
@@ -149,5 +135,5 @@ const createStore = (obj, options) => {
   return ${storeOverwriteName}1(wrappedObj, options);
 };`
 
-  assertTransform(src, expectedOutput)
+  assertTransform(src, expectedOutput, plugin)
 })
