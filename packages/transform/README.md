@@ -6,7 +6,7 @@
 
 # @solid-devtools/transform
 
-Vite plugin for transforming SolidJS code in development to enchance solid-devtools usage.
+Vite plugin for transforming SolidJS code in development to enhance solid-devtools usage.
 
 ## Getting Started
 
@@ -44,12 +44,15 @@ interface DevtoolsPluginOptions {
   wrapStores?: boolean
   /** Inject location attributes to jsx templates */
   jsxLocation?: boolean
+  /** Add automatic name when creating signals, memos, stores, or mutables */
+  name?: boolean
 }
 
 // in vite.config.ts plugins array:
 devtoolsPlugin({
   wrapStores: true,
   jsxLocation: true,
+  name: true,
 })
 ```
 

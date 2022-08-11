@@ -2,6 +2,7 @@ import { PluginItem, transformAsync } from "@babel/core"
 import { PluginOption } from "vite"
 import { getFileExtension } from "./utils"
 import jsxLocationPlugin from "./jsxLocation"
+import namePlugin from "./name"
 import wrapStoresPlugin from "./wrapStores"
 
 export interface DevtoolsPluginOptions {
@@ -9,11 +10,13 @@ export interface DevtoolsPluginOptions {
   wrapStores?: boolean
   /** Inject location attributes to jsx templates */
   jsxLocation?: boolean
+  /** Add automatic name when creating signals, memos, stores, or mutables */
+  name?: boolean
 }
 
 // This export is used for configuration.
 const devtoolsPlugin = (options: DevtoolsPluginOptions = {}): PluginOption => {
-  const { wrapStores = false, jsxLocation = false } = options
+  const { wrapStores = false, jsxLocation = false, name = false } = options
 
   let enablePlugin = false
   let projectRoot = process.cwd()
@@ -37,6 +40,7 @@ const devtoolsPlugin = (options: DevtoolsPluginOptions = {}): PluginOption => {
 
       // plugins that should only run on .tsx/.jsx files in development
       if (jsxLocation && isJSX) plugins.push(jsxLocationPlugin)
+      if (name) plugins.push(namePlugin) // must come before wrapStores
       if (wrapStores) plugins.push(wrapStoresPlugin)
 
       if (plugins.length === 0) return
