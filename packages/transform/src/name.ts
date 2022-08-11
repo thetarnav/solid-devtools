@@ -21,7 +21,7 @@ function equal(a: Comparable, b: Comparable): boolean {
   }
 }
 
-type Source = "createSignal" | "createStore" | "createMutable"
+type Source = "createSignal" | "createMemo" | "createStore" | "createMutable"
 
 let sources: Record<Source, Comparable[]>
 
@@ -31,6 +31,7 @@ const namePlugin: PluginObj<any> = {
     Program() {
       sources = {
         createSignal: [],
+        createMemo: [],
         createStore: [],
         createMutable: [],
       }
@@ -43,7 +44,7 @@ const namePlugin: PluginObj<any> = {
       let targets: Source[]
       switch (source) {
         case "solid-js":
-          targets = ["createSignal"];
+          targets = ["createSignal", "createMemo"];
           break;
         case "solid-js/store":
           targets = ["createStore", "createMutable"];

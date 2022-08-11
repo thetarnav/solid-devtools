@@ -5,6 +5,7 @@ import { assertTransform } from "./utils"
 // Positive tests
 for (let [create, module] of [
   ["createSignal", "solid-js"],
+  ["createMemo", "solid-js"],
   ["createStore", "solid-js/store"],
   ["createMutable", "solid-js/store"],
 ]) {
@@ -116,6 +117,7 @@ const [signal, setSignal] = ${creator}(5, {
 // Negative tests
 for (let [create, module] of [
   ["createSignal", "solid-js/store"],
+  ["createMemo", "solid-js/store"],
   ["createStore", "solid-js"],
   ["createMutable", "solid-js"],
 ]) {
