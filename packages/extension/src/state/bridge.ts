@@ -1,4 +1,28 @@
+import { createEffect, createRoot, on } from "solid-js"
+import { NodeID } from "@solid-devtools/shared/graph"
 import { createRuntimeMessanger } from "../../shared/messanger"
-export const { onRuntimeMessage, postRuntimeMessage } = createRuntimeMessanger()
+import { handleComputationsUpdate, handleGraphUpdate, resetGraph } from "./graph"
+import { focusedMeta } from "./details"
 
+export const { onRuntimeMessage, postRuntimeMessage } = createRuntimeMessanger()
 postRuntimeMessage("ForceUpdate")
+
+onRuntimeMessage("GraphUpdate", update => {
+  handleGraphUpdate(update)
+})
+
+onRuntimeMessage("ResetPanel", () => {
+  resetGraph()
+})
+
+onRuntimeMessage("ComputationsUpdate", updates => {
+  handleComputationsUpdate(updates.map(u => u.nodeId))
+})
+
+createRoot(() => {
+  createEffect(on(focusedMeta, postFocusedOwner, { defer: true }))
+})
+
+export function postFocusedOwner(payload: { rootId: NodeID; ownerId: NodeID } | null) {
+  postRuntimeMessage("SetFocusedOwner", payload)
+}

@@ -1,7 +1,10 @@
 import { render } from "solid-js/web"
 import { Component, For } from "solid-js"
 import { HighlightsProvider, OwnerNode, Splitter, Scrollable } from "@solid-devtools/ui"
-import { graphs, highlights, focused } from "./state/graph"
+import { graphs, highlights } from "./state/graph"
+import { focused } from "./state/details"
+import "./state/bridge"
+
 import * as styles from "./styles.css"
 import "@solid-devtools/ui/css"
 

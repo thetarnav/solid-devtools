@@ -143,7 +143,9 @@ export interface MappedSignal {
 
 export type MappedComponent = {
   name: string
-  // ! HTMLElements aren't JSON serialisable
+  /**
+   * ! HTMLElements aren't JSON serialisable
+   */
   resolved: Many<HTMLElement>
 }
 
@@ -166,6 +168,11 @@ export interface OwnerDetails {
 // They are meant to be "reactive" — wrapped with a store
 //
 
+export interface GraphRoot {
+  readonly id: NodeID
+  readonly tree: GraphOwner
+}
+
 export interface GraphOwner {
   readonly id: NodeID
   readonly name: string
@@ -184,9 +191,4 @@ export interface GraphSignal {
   readonly value: JsonValue
   readonly setValue: (value: unknown) => void
   readonly observers: GraphOwner[]
-}
-
-export interface GraphRoot {
-  readonly id: NodeID
-  readonly tree: GraphOwner
 }
