@@ -23,6 +23,13 @@ function equal(a: Comparable, b: Comparable): boolean {
 
 type Source = "createSignal" | "createMemo" | "createStore" | "createMutable"
 
+const optionsArg: Record<Source, number> = {
+  createSignal: 1,
+  createMemo: 2,
+  createStore: 1,
+  createMutable: 1,
+}
+
 let sources: Record<Source, Comparable[]>
 
 const namePlugin: PluginObj<any> = {
@@ -37,7 +44,7 @@ const namePlugin: PluginObj<any> = {
       }
     },
 
-    // Track imported references to createSignal, createStore, createMutable
+    // Track imported references to createSignal/createMemo/createStore/createMutable
     ImportDeclaration(path) {
       const node = path.node
       const source = node.source.value
@@ -88,15 +95,18 @@ const namePlugin: PluginObj<any> = {
     VariableDeclaration(path) {
       const declarations = path.node.declarations
       for (let declaration of declarations) {
-        // Check initializer is a call to createSignal/createStore/createMutable
+        // Check initializer is a call to createSignal/createMemo/createStore/createMutable
         const init = declaration.init
         if (!init) continue
         if (init.type !== "CallExpression") continue
-        if (!Object.entries(sources).some(([, sources]) =>
-          (sources as Comparable[]).some(source =>
-            equal(init.callee, source)
-          )
-        )) continue
+        let target: Source | undefined
+        for (let [someTarget, someSources] of Object.entries(sources) as [Source, Comparable[]][]) {
+          if (someSources.some(source => equal(init.callee, source))) {
+            target = someTarget
+            break
+          }
+        }
+        if (!target) continue
 
         // Check declaration is either identifier or [identifier, ...]
         const id = declaration.id
@@ -118,24 +128,23 @@ const namePlugin: PluginObj<any> = {
 
         // Modify call to include name in options
         const nameProperty = t.objectProperty(nameId, t.stringLiteral(name))
-        switch (init.arguments.length) {
-          case 0:
-            init.arguments.push(t.identifier("undefined"))
-            // now 1 argument, fall through to case 1:
-          case 1:
-            init.arguments.push(t.objectExpression([nameProperty]))
-            break
-          default: // 2 or more arguments
-            const second = init.arguments[1]
-            if (second.type !== "ObjectExpression") continue
-            // Check there isn't already a "name" property
-            if (second.properties.some((property) =>
-              property.type === "ObjectProperty" &&
-              property.key.type === "Identifier" &&
-              property.key.name === nameId.name)) continue
-            if (second.type !== "ObjectExpression") continue
-            second.properties.unshift(nameProperty)
-            break
+        const argIndex = optionsArg[target]
+        while (init.arguments.length < argIndex) {
+          init.arguments.push(t.identifier("undefined"))
+        }
+        if (init.arguments.length === argIndex) { // no options argument
+          init.arguments.push(t.objectExpression([nameProperty]))
+        } else { // existing options argument
+          const options = init.arguments[argIndex]
+          if (options.type !== "ObjectExpression") continue
+          // Check there isn't already a "name" property
+          if (options.properties.some((property) =>
+            property.type === "ObjectProperty" &&
+            property.key.type === "Identifier" &&
+            property.key.name === nameId.name)) continue
+          if (options.type !== "ObjectExpression") continue
+          options.properties.unshift(nameProperty)
+          break
         }
       }
     },

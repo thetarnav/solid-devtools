@@ -3,12 +3,13 @@ import wrapPlugin from "../src/wrapStores"
 import { assertTransform } from "./utils"
 
 // Positive tests
-for (let [create, module] of [
+for (let [create, module, extraArg] of [
   ["createSignal", "solid-js"],
-  ["createMemo", "solid-js"],
+  ["createMemo", "solid-js", "1"],
   ["createStore", "solid-js/store"],
   ["createMutable", "solid-js/store"],
 ]) {
+  extraArg = extraArg ? "undefined, " : "";
   describe(create, () => {
     for (let [type, importStatement, creator] of [
       ["named import", `import { ${create} } from "${module}";`, create],
@@ -21,7 +22,7 @@ for (let [create, module] of [
   const signal = ${creator}();`
 
           const expectedOutput = `${importStatement}
-const signal = ${creator}(undefined, {
+const signal = ${creator}(undefined, ${extraArg}{
   name: "signal"
 });`
 
@@ -33,7 +34,7 @@ const signal = ${creator}(undefined, {
 const signal = ${creator}(5);`
 
           const expectedOutput = `${importStatement}
-const signal = ${creator}(5, {
+const signal = ${creator}(5, ${extraArg}{
   name: "signal"
 });`
 
@@ -43,11 +44,11 @@ const signal = ${creator}(5, {
         test("empty options", () => {
           const src = `${importStatement}
 const rest = {};
-const signal = ${creator}(5, {});`
+const signal = ${creator}(5, ${extraArg}{});`
 
       const expectedOutput = `${importStatement}
 const rest = {};
-const signal = ${creator}(5, {
+const signal = ${creator}(5, ${extraArg}{
   name: "signal"
 });`
 
@@ -57,11 +58,11 @@ const signal = ${creator}(5, {
         test("options excluding name", () => {
           const src = `${importStatement}
 const rest = {};
-const signal = ${creator}(5, { equals: false, ...rest });`
+const signal = ${creator}(5, ${extraArg}{ equals: false, ...rest });`
 
           const expectedOutput = `${importStatement}
 const rest = {};
-const signal = ${creator}(5, {
+const signal = ${creator}(5, ${extraArg}{
   name: "signal",
   equals: false,
   ...rest
@@ -73,11 +74,11 @@ const signal = ${creator}(5, {
         test("options including name", () => {
           const src = `${importStatement}
 const rest = {};
-const signal = ${creator}(5, { equals: false, name: "foo", ...rest });`
+const signal = ${creator}(5, ${extraArg}{ equals: false, name: "foo", ...rest });`
 
           const expectedOutput = `${importStatement}
 const rest = {};
-const signal = ${creator}(5, {
+const signal = ${creator}(5, ${extraArg}{
   equals: false,
   name: "foo",
   ...rest
@@ -91,7 +92,7 @@ const signal = ${creator}(5, {
 const [signal] = ${creator}(5);`
 
           const expectedOutput = `${importStatement}
-const [signal] = ${creator}(5, {
+const [signal] = ${creator}(5, ${extraArg}{
   name: "signal"
 });`
 
@@ -103,7 +104,7 @@ const [signal] = ${creator}(5, {
 const [signal, setSignal] = ${creator}(5);`
 
           const expectedOutput = `${importStatement}
-const [signal, setSignal] = ${creator}(5, {
+const [signal, setSignal] = ${creator}(5, ${extraArg}{
   name: "signal"
 });`
 
