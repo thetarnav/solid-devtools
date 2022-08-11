@@ -36,7 +36,7 @@ function reconcileArrayByIds<T extends { id: NodeID }>(
 }
 
 const signalsUpdated = new Set<NodeID>()
-const ownersUpdated = new Set<NodeID>()
+const ownersUpdated = new Set<GraphOwner>()
 
 // TODO: when the roots should be removed from here?
 const NodeMap: Record<
@@ -57,22 +57,6 @@ export function updateSignal(rootId: NodeID, id: NodeID, newValue: unknown): voi
     node.setValue(newValue)
     node.setUpdate(true)
     signalsUpdated.add(id)
-  }
-}
-
-export function updateComputation(rootId: NodeID, id: NodeID): void {
-  const owner = NodeMap[rootId].owners[id]
-  if (owner) {
-    owner.setUpdate(true)
-    ownersUpdated.add(id)
-  }
-}
-
-// reset all of the computationRerun state
-export function resetComputationRerun() {
-  for (const { owners, signals } of Object.values(NodeMap)) {
-    for (const id of ownersUpdated) owners[id].setUpdate(false)
-    for (const id of signalsUpdated) signals[id].setUpdate(false)
   }
 }
 
@@ -134,39 +118,17 @@ function mapObserver(rootId: NodeID, id: NodeID, mutable: GraphOwner[]) {
   else pushToArrayProp(observersToAddLazy, id, owner => mutable.push(owner))
 }
 
-function mapSource(rootId: NodeID, id: NodeID, mutable: GraphSignal[]) {
-  const node = NodeMap[rootId].signals[id]
-  if (node) mutable.push(node)
-  else pushToArrayProp(sourcesToAddLazy, id, signal => mutable.push(signal))
-}
-
 /**
  * maps the raw owner tree to be placed into the reactive graph store
  * this is for new branches – owners that just have been created
  */
 export function mapNewOwner(rootId: NodeID, owner: Readonly<MappedOwner>): GraphOwner {
   // wrap with root that will be disposed together with the rest of the tree
+  // TODO do we need disposing?
   return createRoot(dispose => {
-    const [updated, setUpdate] = createSignal(false)
-
-    const { id } = owner
-    const sources: GraphSignal[] = []
-    const signals: GraphSignal[] = []
     const children: GraphOwner[] = []
-    const node: GraphOwner = {
-      id,
-      name: owner.name,
-      type: owner.type,
-      sources,
-      children,
-      dispose,
-      get updated() {
-        return updated()
-      },
-      setUpdate,
-    }
+    const node: GraphOwner = { ...owner, children, dispose }
     addOwnerToMap(rootId, node)
-    owner.sources.forEach(sourceId => mapSource(rootId, sourceId, sources))
 
     // TODO: remove mapping signals
     // node.signals.push(...owner.signals.map(createSignalNode))
@@ -181,10 +143,7 @@ export function mapNewOwner(rootId: NodeID, owner: Readonly<MappedOwner>): Graph
 }
 
 export function mapNewRoot(rootId: NodeID, owner: Readonly<MappedOwner>): GraphOwner {
-  NodeMap[rootId] = {
-    owners: {},
-    signals: {},
-  }
+  NodeMap[rootId] = { owners: {}, signals: {} }
   return mapNewOwner(rootId, owner)
 }
 
@@ -290,7 +249,7 @@ export function reconcileNode(rootId: NodeID, mapped: MappedOwner, node: GraphOw
   reconcileChildren(rootId, mapped.children, node.children)
   // TODO: remove mapping signals
   // reconcileSignals(mapped.signals, node.signals)
-  reconcileArrayByIds(mapped.sources, node.sources, mapSource.bind(void 0, rootId))
+  // reconcileArrayByIds(mapped.sources, node.sources, mapSource.bind(void 0, rootId))
 
   // reconcile signal observers
   // if (mapped.signal) {

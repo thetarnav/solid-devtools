@@ -7,7 +7,7 @@ import manifest from "./manifest"
 import path from "path"
 
 export default defineConfig({
-  plugins: [solidPlugin(), vanillaExtractPlugin(), crx({ manifest })],
+  plugins: [solidPlugin({ hot: false }), vanillaExtractPlugin(), crx({ manifest })],
   resolve: {
     alias: {
       "@solid-devtools/shared": path.resolve(__dirname, "..", "shared", "src"),

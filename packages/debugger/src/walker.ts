@@ -160,7 +160,7 @@ function mapOwner(owner: SolidOwner, type?: NodeType): MappedOwner {
     name,
     type,
     children: mapChildren(owner),
-    sources: markNodesID(owner.sources),
+    sources: owner.sources ? owner.sources.length : 0,
   }
 }
 

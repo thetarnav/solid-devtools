@@ -2,7 +2,7 @@ import { createEffect, For, JSX, onCleanup } from "solid-js"
 import { TransitionGroup, animateExit, animateEnter } from "@otonashixav/solid-flip"
 import { createHover } from "@solid-aria/interactions"
 import { GraphOwner, NodeType } from "@solid-devtools/shared/graph"
-import { HighlightText, Signals, ValueNode } from "../signal/signalNode"
+import { HighlightText } from "../signal/signalNode"
 import { useHighlights } from "../ctx/highlights"
 import * as styles from "./OwnerNode.css"
 
@@ -16,22 +16,22 @@ export function OwnerChildren(props: { children: GraphOwner[] }) {
 
 export function OwnerNode(props: { owner: GraphOwner }): JSX.Element {
   const { owner } = props
-  const { name, type } = owner
+  const { name, type, id } = owner
   const children = () => owner.children
-  const rerun = () => owner.updated
   const typeName = NodeType[type]
 
   const { hoverProps, isHovered } = createHover({})
 
   const {
     highlightNodeSources,
-    highlightSignalObservers,
     isObserverHighlighted,
-    isOwnerFocused,
+    useComputationUpdatedSelector,
+    useOwnerFocusedSelector,
     handleFocus,
   } = useHighlights()
 
-  const isFocused = isOwnerFocused.bind(null, owner)
+  const isUpdated = type !== NodeType.Root ? useComputationUpdatedSelector(id) : () => false
+  const isFocused = useOwnerFocusedSelector(owner)
   const isHighlighted = isObserverHighlighted.bind(null, owner)
   onCleanup(() => isFocused() && handleFocus(null))
 
@@ -58,7 +58,7 @@ export function OwnerNode(props: { owner: GraphOwner }): JSX.Element {
         <div class={styles.header.containerShadow}></div>
         <div class={styles.header.nameContainer}>
           <HighlightText
-            strong={rerun()}
+            strong={isUpdated()}
             light={isHighlighted()}
             bgColor
             class={styles.header.highlight}
@@ -74,7 +74,7 @@ export function OwnerNode(props: { owner: GraphOwner }): JSX.Element {
       <div
         class={styles.childrenContainer}
         style={{
-          opacity: rerun() ? 0.3 : 1,
+          opacity: isUpdated() ? 0.3 : 1,
         }}
       >
         <OwnerChildren children={children()} />

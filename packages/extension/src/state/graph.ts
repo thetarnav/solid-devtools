@@ -16,44 +16,53 @@ import {
   mapNewRoot,
   reconcileNode,
   removeRootFromMap,
-  resetComputationRerun,
-  updateComputation,
 } from "./reconcile"
 
 const exports = createRoot(() => {
   const [graphs, setGraphs] = createStore<GraphRoot[]>([])
 
+  const [updatedComputations, setUpdatedComputations] = createSignal<NodeID[]>([])
+
   let lastHoveredNode: null | GraphOwner | GraphSignal = null
-  const [highlightedObservers, setHighlightedObservers] = createSignal<GraphOwner[]>([])
-  const [highlightedSources, setHighlightedSources] = createSignal<GraphSignal[]>([])
+  // const [highlightedObservers, setHighlightedObservers] = createSignal<GraphOwner[]>([])
+  // const [highlightedSources, setHighlightedSources] = createSignal<GraphSignal[]>([])
   const [focused, setFocused] = createSignal<GraphOwner | null>(null)
-  const isFocused = createSelector<GraphOwner | null, GraphOwner>(focused)
+  const ownerFocusedSelector = createSelector<GraphOwner | null, GraphOwner>(focused)
+
+  const computationUpdatedSelector = createSelector(updatedComputations, (id, arr) =>
+    arr.includes(id),
+  )
 
   const highlights: HighlightContextState = {
+    useComputationUpdatedSelector: id => computationUpdatedSelector.bind(void 0, id),
+    handleFocus: setFocused,
+    useOwnerFocusedSelector: owner => ownerFocusedSelector.bind(void 0, owner),
     highlightSignalObservers(signal, highlight) {
-      if (highlight) {
-        setHighlightedObservers(signal.observers)
-        lastHoveredNode = signal
-      } else if (lastHoveredNode === signal) {
-        setHighlightedObservers([])
-      }
+      // TODO
+      // if (highlight) {
+      //   setHighlightedObservers(signal.observers)
+      //   lastHoveredNode = signal
+      // } else if (lastHoveredNode === signal) {
+      //   setHighlightedObservers([])
+      // }
     },
     highlightNodeSources(owner, highlight) {
-      if (highlight) {
-        setHighlightedSources(owner.sources)
-        lastHoveredNode = owner
-      } else if (lastHoveredNode === owner) {
-        setHighlightedSources([])
-      }
+      // TODO
+      // if (highlight) {
+      //   setHighlightedSources(owner.sources)
+      //   lastHoveredNode = owner
+      // } else if (lastHoveredNode === owner) {
+      //   setHighlightedSources([])
+      // }
     },
-    isObserverHighlighted: createSelector(highlightedObservers, (owner: GraphOwner, list) =>
-      list.includes(owner),
-    ),
-    isSourceHighlighted: createSelector(highlightedSources, (signal: GraphSignal, list) =>
-      list.includes(signal),
-    ),
-    handleFocus: setFocused,
-    isOwnerFocused: isFocused,
+    // isObserverHighlighted: createSelector(highlightedObservers, (owner: GraphOwner, list) =>
+    //   list.includes(owner),
+    // ),
+    isObserverHighlighted: () => false,
+    isSourceHighlighted: () => false,
+    // isSourceHighlighted: createSelector(highlightedSources, (signal: GraphSignal, list) =>
+    //   list.includes(signal),
+    // ),
   }
 
   const removeRoot = (proxy: GraphRoot[], id: NodeID): void => {
@@ -64,16 +73,16 @@ const exports = createRoot(() => {
     removeRootFromMap(id)
   }
   const updateRoot = (proxy: GraphRoot[], { id, tree }: SerialisedTreeRoot): void => {
-    const index = proxy.findIndex(r => r.id === id)
+    const root = proxy.find(r => r.id === id)
     // reconcile existing root
-    if (index !== -1) reconcileNode(id, tree, proxy[index].tree)
+    if (root) reconcileNode(id, tree, root.tree)
     // insert new root
     else proxy.push({ id, tree: mapNewRoot(id, tree) })
   }
 
   onRuntimeMessage("GraphUpdate", ({ removed, updated }) => {
     batch(() => {
-      resetComputationRerun()
+      setUpdatedComputations([])
       setGraphs(
         produce(proxy => {
           removed.forEach(id => removeRoot(proxy, id))
@@ -81,18 +90,24 @@ const exports = createRoot(() => {
         }),
       )
     })
-
     afterGraphUpdate()
   })
 
   onRuntimeMessage("ResetPanel", () => {
-    setGraphs([])
+    batch(() => {
+      setUpdatedComputations([])
+      setGraphs([])
+    })
     disposeAllNodes()
     afterGraphUpdate()
   })
 
   onRuntimeMessage("ComputationsUpdate", updates => {
-    updates.forEach(({ rootId, nodeId }) => updateComputation(rootId, nodeId))
+    setUpdatedComputations(prev => {
+      const copy = prev.slice()
+      updates.forEach(({ rootId, nodeId }) => copy.push(nodeId))
+      return [...new Set(copy)]
+    })
   })
 
   let init = true

@@ -87,6 +87,7 @@ importers:
       '@solid-primitives/immutable': ^0.1.0
       '@solid-primitives/props': ^2.2.1
       '@solid-primitives/rootless': ^1.1.2
+      '@solid-primitives/set': ^0.2.1
       '@solid-primitives/utils': ^3.0.1
       '@types/chrome': ^0.0.193
       '@vanilla-extract/css': ^1.7.2
@@ -105,6 +106,7 @@ importers:
       '@solid-primitives/immutable': 0.1.0_solid-js@1.4.8
       '@solid-primitives/props': 2.2.1_solid-js@1.4.8
       '@solid-primitives/rootless': 1.1.2_solid-js@1.4.8
+      '@solid-primitives/set': 0.2.1_solid-js@1.4.8
       '@solid-primitives/utils': 3.0.1_solid-js@1.4.8
       '@vanilla-extract/css': 1.7.2
       solid-js: 1.4.8
@@ -4129,6 +4131,15 @@ packages:
     peerDependencies:
       solid-js: ^1.4.0
     dependencies:
+      solid-js: 1.4.8
+    dev: false
+
+  /@solid-primitives/set/0.2.1_solid-js@1.4.8:
+    resolution: {integrity: sha512-ku81+R4Jb5fHgifd6cygXKSK2i7lzjJRfwvuqvUG1TG2asR1VqOqXpRRzBug16Q2djInKsB4R8+/tz3sSXKSOw==}
+    peerDependencies:
+      solid-js: ^1.3.0
+    dependencies:
+      '@solid-primitives/utils': 3.0.1_solid-js@1.4.8
       solid-js: 1.4.8
     dev: false
 

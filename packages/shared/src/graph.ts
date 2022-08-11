@@ -130,7 +130,7 @@ export interface MappedOwner {
   name: string
   type: NodeType
   children: MappedOwner[]
-  sources: NodeID[]
+  sources: number
 }
 
 export interface MappedSignal {
@@ -171,9 +171,7 @@ export interface GraphOwner {
   readonly name: string
   readonly type: NodeType
   readonly dispose: VoidFunction
-  readonly updated: boolean
-  readonly setUpdate: (value: boolean) => void
-  sources: GraphSignal[]
+  readonly sources: number
   readonly children: GraphOwner[]
 }
 

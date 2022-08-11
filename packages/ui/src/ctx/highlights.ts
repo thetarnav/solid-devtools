@@ -1,6 +1,6 @@
-import { GraphOwner, GraphSignal } from "@solid-devtools/shared/graph"
+import { GraphOwner, GraphSignal, NodeID } from "@solid-devtools/shared/graph"
 import { createContext, useContext } from "solid-js"
-import type { ContextProviderComponent } from "solid-js/types/reactive/signal"
+import type { Accessor, ContextProviderComponent } from "solid-js/types/reactive/signal"
 
 export type HighlightContextState = {
   highlightSignalObservers: (signal: GraphSignal, highlight: boolean) => void
@@ -8,7 +8,8 @@ export type HighlightContextState = {
   handleFocus: (owner: GraphOwner | null) => void
   isObserverHighlighted: (owner: GraphOwner) => boolean
   isSourceHighlighted: (signal: GraphSignal) => boolean
-  isOwnerFocused: (owner: GraphOwner) => boolean
+  useOwnerFocusedSelector: (owner: GraphOwner) => Accessor<boolean>
+  useComputationUpdatedSelector: (id: NodeID) => Accessor<boolean>
 }
 
 const HighlightsContext = createContext<HighlightContextState>()
