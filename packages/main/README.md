@@ -34,6 +34,8 @@ import "solid-devtools"
 // and that's it!
 ```
 
+Importing `"solid-devtools"` package is attaching the [debugger](https://github.com/thetarnav/solid-devtools/tree/main/packages/debugger#readme) to your application and runs [extension-adapter](https://github.com/thetarnav/solid-devtools/tree/main/packages/extension-adapter#readme). In other words, it is creating a platform for other devtools to use. It doesn't provide any functionality by itself.
+
 ### Using the locator package
 
 The `solid-devtools` package comes with the [Locator](https://github.com/thetarnav/solid-devtools/tree/main/packages/locator#readme) package included. It's not neccessary to use it! But you can.
