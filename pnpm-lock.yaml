@@ -41,7 +41,7 @@ importers:
   packages/debugger:
     specifiers:
       '@solid-devtools/shared': workspace:^0.4.0
-      '@solid-devtools/transform': ^0.5.0
+      '@solid-devtools/transform': ^0.6.0
       '@solid-primitives/event-bus': ^0.1.0
       '@solid-primitives/immutable': ^0.1.0
       '@solid-primitives/memo': ^0.3.0
@@ -140,9 +140,9 @@ importers:
 
   packages/locator:
     specifiers:
-      '@solid-devtools/debugger': ^0.4.0
+      '@solid-devtools/debugger': ^0.4.1
       '@solid-devtools/shared': workspace:^0.4.0
-      '@solid-devtools/transform': ^0.5.0
+      '@solid-devtools/transform': ^0.6.0
       '@solid-primitives/bounds': ^0.0.100
       '@solid-primitives/event-listener': ^2.2.1
       '@solid-primitives/keyboard': ^0.0.100
@@ -209,10 +209,10 @@ importers:
 
   packages/main:
     specifiers:
-      '@solid-devtools/debugger': ^0.4.0
+      '@solid-devtools/debugger': ^0.4.1
       '@solid-devtools/extension-adapter': ^0.10.0
-      '@solid-devtools/locator': ^0.10.0
-      '@solid-devtools/transform': ^0.5.0
+      '@solid-devtools/locator': ^0.10.1
+      '@solid-devtools/transform': ^0.6.0
       '@testing-library/jest-dom': ^5.16.4
       jest: ^28.1.3
       jest-environment-jsdom: ^28.1.3
@@ -316,7 +316,7 @@ importers:
       '@otonashixav/solid-flip': ^0.10.5
       '@solid-aria/interactions': ^0.1.4
       '@solid-devtools/shared': workspace:^0.4.0
-      '@solid-devtools/transform': ^0.5.0
+      '@solid-devtools/transform': ^0.6.0
       '@solid-primitives/bounds': ^0.0.101
       '@solid-primitives/event-listener': ^2.2.1
       '@solid-primitives/keyboard': ^1.0.1
@@ -358,7 +358,7 @@ importers:
 
   playgrounds/clock:
     specifiers:
-      solid-devtools: ^0.10.0
+      solid-devtools: ^0.10.1
       solid-js: ^1.4.8
       typescript: ^4.7.4
       vite: ^3.0.4
@@ -374,9 +374,9 @@ importers:
   playgrounds/sandbox:
     specifiers:
       '@solid-devtools/logger': ^0.3.0
-      '@solid-devtools/transform': ^0.5.0
+      '@solid-devtools/transform': ^0.6.0
       '@solid-primitives/timer': ^1.3.1
-      solid-devtools: ^0.10.0
+      solid-devtools: ^0.10.1
       solid-js: ^1.4.8
       typescript: ^4.7.4
       vite: ^3.0.4
@@ -395,9 +395,9 @@ importers:
   playgrounds/start:
     specifiers:
       '@solid-devtools/logger': ^0.3.0
-      '@solid-devtools/transform': ^0.5.0
+      '@solid-devtools/transform': ^0.6.0
       solid-app-router: ^0.4.2
-      solid-devtools: ^0.10.0
+      solid-devtools: ^0.10.1
       solid-js: ^1.4.8
       solid-meta: ^0.27.5
       solid-start: next
@@ -5198,7 +5198,7 @@ packages:
     dev: true
 
   /concat-map/0.0.1:
-    resolution: {integrity: sha1-2Klr13/Wjfd5OnMDajug1UBdR3s=}
+    resolution: {integrity: sha512-/Srv4dswyQNBfohGpz9o6Yb3Gz3SrUDqBH5rTuhGR7ahtlbYKnVxw2bCFMRljaA7EXHaXZ8wsHdodFvbkhKmqg==}
     dev: true
 
   /connect-injector/0.4.4:
