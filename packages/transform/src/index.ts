@@ -40,8 +40,8 @@ const devtoolsPlugin = (options: DevtoolsPluginOptions = {}): PluginOption => {
 
       // plugins that should only run on .tsx/.jsx files in development
       if (jsxLocation && isJSX) plugins.push(jsxLocationPlugin)
+      if (name) plugins.push(namePlugin) // must come before wrapStores
       if (wrapStores) plugins.push(wrapStoresPlugin)
-      if (name) plugins.push(namePlugin)
 
       if (plugins.length === 0) return
 
