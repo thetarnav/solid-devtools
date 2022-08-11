@@ -6,7 +6,9 @@
 
 # @solid-devtools/transform
 
-Vite plugin for transforming SolidJS code in development to enhance solid-devtools usage.
+A babel transform plugin for vite for transforming Solid code. For development — debugging purposes only.
+
+It can do very useful things for you: Wrap stores to let the debugger observe them. Automatically name signals, memos and stroes. It's also required by the [Locator](https://github.com/thetarnav/solid-devtools/tree/main/packages/locator#readme) package to allow for going to the source code of the components.
 
 ## Getting Started
 
