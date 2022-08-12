@@ -61,26 +61,26 @@ describe("walkSolidTree", () => {
     expect(tree).toEqual({
       id: "0",
       name: UNNAMED,
-      sources: [],
+      sources: 0,
       type: NodeType.Root,
       children: [
         {
           id: "1",
           name: "e0",
-          sources: [],
+          sources: 0,
           type: NodeType.Effect,
           children: [
             {
               id: "2",
               name: "c0",
-              sources: ["3"],
+              sources: 1,
               type: NodeType.Computation,
               children: [],
             },
             {
-              id: "4",
+              id: "3",
               name: "c1",
-              sources: [],
+              sources: 0,
               type: NodeType.Computation,
               children: [],
             },
@@ -206,32 +206,32 @@ describe("walkSolidTree", () => {
       expect(tree).toEqual({
         id: "0",
         name: UNNAMED,
-        sources: [],
+        sources: 0,
         type: NodeType.Root,
         children: [
           {
             id: "1",
             name: "WRAPPER",
-            sources: ["ff"],
+            sources: 1,
             type: NodeType.Computation,
             children: [
               {
                 id: "ff",
                 name: "focused",
-                sources: ["5"],
+                sources: 1,
                 type: NodeType.Memo,
                 children: [
                   {
                     id: "3",
                     name: "memo",
-                    sources: [],
+                    sources: 0,
                     type: NodeType.Memo,
                     children: [],
                   },
                   {
                     id: "4",
                     name: "render",
-                    sources: ["3"],
+                    sources: 1,
                     type: NodeType.Render,
                     children: [],
                   },
