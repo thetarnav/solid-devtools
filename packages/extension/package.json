@@ -26,6 +26,7 @@
     "@solid-devtools/shared": "workspace:^0.4.0",
     "@solid-devtools/ui": "0.6.0",
     "@solid-primitives/context": "^0.1.0",
+    "@solid-primitives/destructure": "^0.1.1",
     "@solid-primitives/immutable": "^0.1.0",
     "@solid-primitives/props": "^2.2.1",
     "@solid-primitives/rootless": "^1.1.2",
