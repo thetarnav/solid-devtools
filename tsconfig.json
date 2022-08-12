@@ -14,7 +14,6 @@
     "isolatedModules": true,
     "skipLibCheck": true,
     "types": ["node", "jest"],
-    "baseUrl": ".",
     "paths": {
       "solid-devtools": ["./packages/main/src/index.ts"],
       // "@solid-devtools/shared/*": ["./packages/shared/src/*"],

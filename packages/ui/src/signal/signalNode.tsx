@@ -28,7 +28,7 @@ export const SignalNode: Component<{ signal: GraphSignal }> = ({ signal }) => {
       <div class={styles.SignalNode.name}>
         {signal.name} ({signal.id})
       </div>
-      <ValueNode value={signal.value} updated={signal.updated} highlighted={isHighlighted()} />
+      <ValueNode value={signal.value} updated={false} highlighted={isHighlighted()} />
     </div>
   )
 }

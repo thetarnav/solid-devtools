@@ -1,8 +1,7 @@
 import { createEffect, createRoot, on } from "solid-js"
-import { NodeID } from "@solid-devtools/shared/graph"
 import { createRuntimeMessanger } from "../../shared/messanger"
 import { handleComputationsUpdate, handleGraphUpdate, resetGraph } from "./graph"
-import { focusedMeta, updateDetails } from "./details"
+import { focused, focusedRootId, updateDetails } from "./details"
 
 export const { onRuntimeMessage, postRuntimeMessage } = createRuntimeMessanger()
 postRuntimeMessage("ForceUpdate")
@@ -24,9 +23,14 @@ onRuntimeMessage("OwnerDetailsUpdate", details => {
 })
 
 createRoot(() => {
-  createEffect(on(focusedMeta, postFocusedOwner, { defer: true }))
+  createEffect(
+    on(
+      [focused, focusedRootId],
+      ([owner, rootId]) => {
+        if (owner && rootId) postRuntimeMessage("SetFocusedOwner", { ownerId: owner?.id, rootId })
+        else postRuntimeMessage("SetFocusedOwner", null)
+      },
+      { defer: true },
+    ),
+  )
 })
-
-export function postFocusedOwner(payload: { rootId: NodeID; ownerId: NodeID } | null) {
-  postRuntimeMessage("SetFocusedOwner", payload)
-}

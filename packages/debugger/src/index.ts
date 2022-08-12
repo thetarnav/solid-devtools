@@ -13,8 +13,6 @@ export type {
   BatchComputationUpdatesHandler,
 } from "./plugin"
 
-export type { TargetIDE, TargetURLFunction } from "@solid-devtools/locator"
-
 export { attachDebugger } from "./roots"
 
 export {

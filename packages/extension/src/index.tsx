@@ -1,12 +1,27 @@
 import { render } from "solid-js/web"
-import { Component, For } from "solid-js"
-import { HighlightsProvider, OwnerNode, Splitter, Scrollable } from "@solid-devtools/ui"
+import { Component, For, Show } from "solid-js"
+import { HighlightsProvider, OwnerNode, Splitter, Scrollable, Skeleton } from "@solid-devtools/ui"
 import { graphs, highlights } from "./state/graph"
-import { focused } from "./state/details"
+import { focused, details } from "./state/details"
 import "./state/bridge"
 
 import * as styles from "./styles.css"
 import "@solid-devtools/ui/css"
+
+const DetailsPanel: Component = () => {
+  return (
+    // ! Transition component is brokey
+    // <Transition
+    //   onEnter={fadeIn}
+    //   onExit={fadeOut}
+    //   mode="outin"
+    // >
+    <Show when={details()} fallback={<Skeleton />}>
+      <div>Hello</div>
+    </Show>
+    // </Transition>
+  )
+}
 
 const App: Component = () => {
   return (
@@ -19,7 +34,7 @@ const App: Component = () => {
         <div class={styles.content}>
           <Splitter
             onToggle={() => highlights.handleFocus(null)}
-            side={focused() ? <p>There is absolutely nothing here :)</p> : undefined}
+            side={focused() && <DetailsPanel />}
           >
             <Scrollable>
               <For each={graphs}>{root => <OwnerNode owner={root.tree} />}</For>

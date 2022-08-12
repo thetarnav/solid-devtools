@@ -2,7 +2,7 @@ import { getOwner as _getOwner } from "solid-js"
 import { JsonValue } from "type-fest"
 import { Many } from "@solid-primitives/utils"
 import { Owner as _Owner, SignalState as _SignalState, Computation as _Computation } from "./solid"
-import { INTERNAL } from "./variables"
+import { INTERNAL, NOTFOUND } from "./variables"
 
 export enum NodeType {
   Component,
@@ -182,22 +182,16 @@ export interface GraphOwner {
   readonly children: GraphOwner[]
 }
 
-export interface GraphSignal {
-  readonly id: NodeID
-  readonly name: string
-  readonly dispose?: VoidFunction
-  readonly updated: boolean
-  readonly setUpdate: (value: boolean) => void
-  readonly value: JsonValue
-  readonly setValue: (value: unknown) => void
-  readonly observers: GraphOwner[]
-}
+// this one is the same for now
+export type GraphSignal = MappedSignal
+
+export type OwnerPath = (GraphOwner | typeof NOTFOUND)[]
 
 export interface OwnerDetails {
   readonly id: NodeID
   readonly name: string
   readonly type: NodeType
-  readonly path: GraphOwner[]
-  readonly signals: GraphSignal[]
+  readonly path: OwnerPath
+  readonly signals: Record<NodeID, GraphSignal>
   // TODO: more to come
 }

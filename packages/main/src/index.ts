@@ -12,6 +12,6 @@ export {
   registerDebuggerPlugin,
   makeSolidUpdateListener,
 } from "@solid-devtools/debugger"
-export type { PluginFactory, TargetIDE, TargetURLFunction } from "@solid-devtools/debugger"
+export type { PluginFactory } from "@solid-devtools/debugger"
 
 export * from "@solid-devtools/locator"
