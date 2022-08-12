@@ -2,7 +2,7 @@ import { createEffect, createRoot, on } from "solid-js"
 import { NodeID } from "@solid-devtools/shared/graph"
 import { createRuntimeMessanger } from "../../shared/messanger"
 import { handleComputationsUpdate, handleGraphUpdate, resetGraph } from "./graph"
-import { focusedMeta } from "./details"
+import { focusedMeta, updateDetails } from "./details"
 
 export const { onRuntimeMessage, postRuntimeMessage } = createRuntimeMessanger()
 postRuntimeMessage("ForceUpdate")
@@ -17,6 +17,10 @@ onRuntimeMessage("ResetPanel", () => {
 
 onRuntimeMessage("ComputationsUpdate", updates => {
   handleComputationsUpdate(updates.map(u => u.nodeId))
+})
+
+onRuntimeMessage("OwnerDetailsUpdate", details => {
+  updateDetails(details)
 })
 
 createRoot(() => {

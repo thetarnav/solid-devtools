@@ -14,7 +14,7 @@ import { createLazyMemo } from "@solid-primitives/memo"
 import {
   MappedComponent,
   MappedRoot,
-  OwnerDetails,
+  MappedOwnerDetails,
   SolidOwner,
   MappedOwner,
   RootsUpdates,
@@ -47,7 +47,7 @@ export type SetFocusedOwner = (payload: { rootId: NodeID; ownerId: NodeID } | nu
 export type FocusedState = Readonly<
   | { id: null; rootId: null; owner: null; updated: false; details: null }
   | { id: NodeID; rootId: NodeID; owner: null; updated: false; details: null }
-  | { id: NodeID; rootId: NodeID; owner: SolidOwner; updated: boolean; details: OwnerDetails }
+  | { id: NodeID; rootId: NodeID; owner: SolidOwner; updated: boolean; details: MappedOwnerDetails }
 >
 
 export type SignaledRoot = {
@@ -196,7 +196,10 @@ const exported = createInternalRoot(() => {
     }
   }
 
-  const setFocusedOwnerDetails = (newOwner: SolidOwner | null, newDetails: OwnerDetails | null) => {
+  const setFocusedOwnerDetails = (
+    newOwner: SolidOwner | null,
+    newDetails: MappedOwnerDetails | null,
+  ) => {
     if (newOwner && newDetails) {
       setFocusedState(prev => ({
         id: prev.id!,
@@ -209,7 +212,7 @@ const exported = createInternalRoot(() => {
   }
 
   const focusedRootId = createMemo(() => focusedState().rootId)
-  const focusedId = createMemo(() => focusedState().rootId)
+  const focusedId = createMemo(() => focusedState().id)
 
   //
   // Computation updates:

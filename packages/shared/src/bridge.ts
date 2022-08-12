@@ -1,5 +1,5 @@
 import { JsonValue } from "type-fest"
-import { BatchComputationUpdate, NodeID, RootsUpdates } from "./graph"
+import { BatchComputationUpdate, MappedOwnerDetails, NodeID, RootsUpdates } from "./graph"
 import { log } from "./utils"
 
 export const LOG_MESSAGES = false
@@ -14,6 +14,7 @@ export interface Messages {
   ForceUpdate: void
   /** devtools -> adapter: request for details of owner details opened in the side-panel */
   SetFocusedOwner: null | { rootId: NodeID; ownerId: NodeID }
+  OwnerDetailsUpdate: MappedOwnerDetails
 }
 
 export interface SignalUpdatePayload {

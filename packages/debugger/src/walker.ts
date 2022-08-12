@@ -6,7 +6,7 @@ import {
   MappedSignal,
   SolidSignal,
   MappedComponent,
-  OwnerDetails,
+  MappedOwnerDetails,
   NodeID,
 } from "@solid-devtools/shared/graph"
 import {
@@ -37,7 +37,7 @@ let OnComputationUpdate: ComputationUpdateHandler
 let GatherComponents: boolean
 let Components: MappedComponent[] = []
 let FocusedOwner: SolidOwner | null = null
-let FocusedOwnerDetails: OwnerDetails | null = null
+let FocusedOwnerDetails: MappedOwnerDetails | null = null
 
 const WALKER = Symbol("walker")
 
@@ -102,7 +102,7 @@ function collectOwnerDetails(owner: SolidOwner): void {
   const signals = mapOwnerSignals(owner)
   signals.push.apply(signals, mapOwnerMemos(owner))
 
-  const details: OwnerDetails = {
+  const details: MappedOwnerDetails = {
     // id, name and type are already set in mapOwner
     id: owner.sdtId!,
     name: owner.sdtName!,
@@ -178,7 +178,7 @@ export function walkSolidTree(
 ): {
   tree: MappedOwner
   components: MappedComponent[]
-  focusedOwnerDetails: OwnerDetails | null
+  focusedOwnerDetails: MappedOwnerDetails | null
   focusedOwner: SolidOwner | null
 } {
   // set the globals to be available for this walk cycle

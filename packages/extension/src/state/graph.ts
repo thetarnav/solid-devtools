@@ -55,7 +55,7 @@ export function afterGraphUpdate() {
 
 export function findOwnerRootId(owner: GraphOwner): NodeID {
   for (const rootId in NodeMap) {
-    const owners = NodeMap[rootId].owners
+    const owners = NodeMap[rootId]
     for (const id in owners) {
       if (id === owner.id + "") return rootId
     }

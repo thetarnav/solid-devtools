@@ -149,7 +149,7 @@ export type MappedComponent = {
   resolved: Many<HTMLElement>
 }
 
-export interface OwnerDetails {
+export interface MappedOwnerDetails {
   id: NodeID
   name: string
   type: NodeType
@@ -191,4 +191,13 @@ export interface GraphSignal {
   readonly value: JsonValue
   readonly setValue: (value: unknown) => void
   readonly observers: GraphOwner[]
+}
+
+export interface OwnerDetails {
+  readonly id: NodeID
+  readonly name: string
+  readonly type: NodeType
+  readonly path: GraphOwner[]
+  readonly signals: GraphSignal[]
+  // TODO: more to come
 }

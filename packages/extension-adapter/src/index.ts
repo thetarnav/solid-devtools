@@ -5,6 +5,7 @@ import {
   postWindowMessage,
   startListeningWindowMessages,
 } from "@solid-devtools/shared/bridge"
+import { warn } from "@solid-devtools/shared/utils"
 
 startListeningWindowMessages()
 
@@ -13,6 +14,7 @@ const extensionAdapterFactory: PluginFactory = ({
   rootsUpdates,
   handleComputationsUpdate,
   setFocusedOwner,
+  focusedState,
 }) => {
   const [enabled, setEnabled] = createSignal(false)
 
@@ -28,8 +30,17 @@ const extensionAdapterFactory: PluginFactory = ({
     postWindowMessage("GraphUpdate", rootsUpdates())
   })
 
+  // send the computation updates
   handleComputationsUpdate(updates => {
     postWindowMessage("ComputationsUpdate", updates)
+  })
+
+  // send the focused owner details
+  createEffect(() => {
+    const details = focusedState().details
+    if (details) {
+      postWindowMessage("OwnerDetailsUpdate", details)
+    }
   })
 
   return { enabled }
@@ -41,7 +52,7 @@ let registered = false
  * Registers the extension adapter with the debugger.
  */
 export function useExtensionAdapter() {
-  if (registered) return console.warn("Extension adapter already registered")
+  if (registered) return warn("Extension adapter already registered")
   registered = true
   registerDebuggerPlugin(data => {
     const { enabled } = extensionAdapterFactory(data)

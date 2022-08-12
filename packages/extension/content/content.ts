@@ -20,6 +20,8 @@ onWindowMessage("GraphUpdate", graph => postPortMessage("GraphUpdate", graph))
 
 onWindowMessage("ComputationsUpdate", payload => postPortMessage("ComputationsUpdate", payload))
 
+onWindowMessage("OwnerDetailsUpdate", payload => postPortMessage("OwnerDetailsUpdate", payload))
+
 onPortMessage("PanelVisibility", visible => postWindowMessage("PanelVisibility", visible))
 
 once(onPortMessage, "ForceUpdate", () => postWindowMessage("ForceUpdate"))

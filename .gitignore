@@ -20,6 +20,9 @@ lerna-debug.log
 # solid
 .solid
 
+# tsup
+tsup.config.bundled*.*
+
 # VSC Settings
 .vscode/settings.json
 
@@ -34,3 +37,5 @@ Thumbs.db
 
 # chrome extension private key file
 *.pem
+
+
