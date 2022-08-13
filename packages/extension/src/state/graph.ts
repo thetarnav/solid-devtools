@@ -10,7 +10,7 @@ import {
   MappedOwner,
   RootsUpdates,
 } from "@solid-devtools/shared/graph"
-import { deleteKey, disposeAll } from "./utils"
+import { createUpdatedSelector, deleteKey, disposeAll } from "./utils"
 import { setFocused, useOwnerFocusedSelector } from "./details"
 
 const NodeMap: Record<NodeID, Record<NodeID, GraphOwner>> = {}
@@ -143,18 +143,15 @@ export function reconcileNode(rootId: NodeID, mapped: MappedOwner, node: GraphOw
 const exports = createRoot(() => {
   const [graphs, setGraphs] = createStore<GraphRoot[]>([])
 
-  const [updatedComputations, setUpdatedComputations] = createSignal<NodeID[]>([])
+  const [useComputationUpdatedSelector, addUpdatedComputations, clearUpdatedComputations] =
+    createUpdatedSelector()
 
   let lastHoveredNode: null | GraphOwner | GraphSignal = null
   // const [highlightedObservers, setHighlightedObservers] = createSignal<GraphOwner[]>([])
   // const [highlightedSources, setHighlightedSources] = createSignal<GraphSignal[]>([])
 
-  const computationUpdatedSelector = createSelector(updatedComputations, (id, arr) =>
-    arr.includes(id),
-  )
-
   const highlights: HighlightContextState = {
-    useComputationUpdatedSelector: id => computationUpdatedSelector.bind(void 0, id),
+    useComputationUpdatedSelector,
     handleFocus: setFocused,
     useOwnerFocusedSelector,
     highlightSignalObservers(signal, highlight) {
@@ -202,7 +199,7 @@ const exports = createRoot(() => {
 
   function handleGraphUpdate({ removed, updated }: RootsUpdates) {
     batch(() => {
-      setUpdatedComputations([])
+      clearUpdatedComputations()
       setGraphs(
         produce(proxy => {
           removed.forEach(id => removeRoot(proxy, id))
@@ -214,15 +211,12 @@ const exports = createRoot(() => {
   }
 
   function handleComputationsUpdate(nodeIds: NodeID[]) {
-    setUpdatedComputations(prev => {
-      const appended = [...prev, ...nodeIds]
-      return [...new Set(appended)]
-    })
+    addUpdatedComputations(nodeIds)
   }
 
   function resetGraph() {
     batch(() => {
-      setUpdatedComputations([])
+      clearUpdatedComputations()
       setGraphs([])
     })
     disposeAllNodes()

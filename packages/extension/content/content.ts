@@ -18,7 +18,9 @@ onWindowMessage("SolidOnPage", () => postPortMessage("SolidOnPage"))
 
 onWindowMessage("GraphUpdate", graph => postPortMessage("GraphUpdate", graph))
 
-onWindowMessage("ComputationsUpdate", payload => postPortMessage("ComputationsUpdate", payload))
+onWindowMessage("ComputationUpdates", payload => postPortMessage("ComputationUpdates", payload))
+
+onWindowMessage("SignalUpdates", payload => postPortMessage("SignalUpdates", payload))
 
 onWindowMessage("OwnerDetailsUpdate", payload => postPortMessage("OwnerDetailsUpdate", payload))
 

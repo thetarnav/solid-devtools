@@ -12,7 +12,8 @@ startListeningWindowMessages()
 const extensionAdapterFactory: PluginFactory = ({
   forceTriggerUpdate,
   rootsUpdates,
-  handleComputationsUpdate,
+  handleComputationUpdates,
+  handleSignalUpdates,
   setFocusedOwner,
   focusedState,
 }) => {
@@ -31,8 +32,13 @@ const extensionAdapterFactory: PluginFactory = ({
   })
 
   // send the computation updates
-  handleComputationsUpdate(updates => {
-    postWindowMessage("ComputationsUpdate", updates)
+  handleComputationUpdates(updates => {
+    postWindowMessage("ComputationUpdates", updates)
+  })
+
+  // send the signal updates
+  handleSignalUpdates(updates => {
+    postWindowMessage("SignalUpdates", updates)
   })
 
   // send the focused owner details

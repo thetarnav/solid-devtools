@@ -1,21 +1,33 @@
 import { createEffect, createRoot, on } from "solid-js"
 import { createRuntimeMessanger } from "../../shared/messanger"
 import { handleComputationsUpdate, handleGraphUpdate, resetGraph } from "./graph"
-import { focused, focusedRootId, updateDetails } from "./details"
+import {
+  focused,
+  focusedRootId,
+  handleSignalUpdates,
+  updateDetails,
+  handleGraphUpdate as detailsHandleGraphUpdate,
+} from "./details"
 
 export const { onRuntimeMessage, postRuntimeMessage } = createRuntimeMessanger()
 postRuntimeMessage("ForceUpdate")
 
 onRuntimeMessage("GraphUpdate", update => {
   handleGraphUpdate(update)
+  detailsHandleGraphUpdate()
 })
 
 onRuntimeMessage("ResetPanel", () => {
   resetGraph()
+  detailsHandleGraphUpdate()
 })
 
-onRuntimeMessage("ComputationsUpdate", updates => {
+onRuntimeMessage("ComputationUpdates", updates => {
   handleComputationsUpdate(updates.map(u => u.nodeId))
+})
+
+onRuntimeMessage("SignalUpdates", updates => {
+  handleSignalUpdates(updates)
 })
 
 onRuntimeMessage("OwnerDetailsUpdate", details => {

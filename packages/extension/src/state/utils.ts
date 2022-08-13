@@ -1,3 +1,4 @@
+import { Accessor, createSelector, createSignal } from "solid-js"
 import { NodeID } from "@solid-devtools/shared/graph"
 import { mutateFilter } from "@solid-devtools/shared/utils"
 
@@ -27,4 +28,23 @@ export function reconcileArrayByIds<T extends { id: NodeID }>(
   }
   mutateFilter(array, o => !removed.includes(o))
   for (id of ids) intersection.includes(id) || mapFunc(id, array)
+}
+
+export function createUpdatedSelector(): [
+  useSelector: (id: NodeID) => Accessor<boolean>,
+  addUpdated: (ids: readonly NodeID[]) => void,
+  clear: VoidFunction,
+] {
+  const [updated, setUpdated] = createSignal<NodeID[]>([])
+  const selector = createSelector(updated, (id, arr) => arr.includes(id))
+  return [
+    id => selector.bind(void 0, id),
+    ids => {
+      setUpdated(prev => {
+        const appended = [...prev, ...ids]
+        return [...new Set(appended)]
+      })
+    },
+    () => setUpdated([]),
+  ]
 }

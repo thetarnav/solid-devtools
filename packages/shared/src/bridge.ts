@@ -1,5 +1,4 @@
-import { JsonValue } from "type-fest"
-import { BatchComputationUpdate, MappedOwnerDetails, NodeID, RootsUpdates } from "./graph"
+import { ComputationUpdate, MappedOwnerDetails, NodeID, RootsUpdates, SignalUpdate } from "./graph"
 import { log } from "./utils"
 
 export const LOG_MESSAGES = false
@@ -10,17 +9,12 @@ export interface Messages {
   PanelVisibility: boolean
   ResetPanel: void
   GraphUpdate: RootsUpdates
-  ComputationsUpdate: BatchComputationUpdate[]
+  ComputationUpdates: ComputationUpdate[]
+  SignalUpdates: SignalUpdate[]
   ForceUpdate: void
   /** devtools -> adapter: request for details of owner details opened in the side-panel */
   SetFocusedOwner: null | { rootId: NodeID; ownerId: NodeID }
   OwnerDetailsUpdate: MappedOwnerDetails
-}
-
-export interface SignalUpdatePayload {
-  id: NodeID
-  value: JsonValue
-  oldValue: JsonValue
 }
 
 export type PostMessageFn = <K extends keyof Messages>(

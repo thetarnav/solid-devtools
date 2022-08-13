@@ -46,9 +46,13 @@ chrome.runtime.onConnect.addListener(newPort => {
   addCleanup(onPortMessage("GraphUpdate", graph => postRuntimeMessage("GraphUpdate", graph)))
 
   addCleanup(
-    onPortMessage("ComputationsUpdate", payload =>
-      postRuntimeMessage("ComputationsUpdate", payload),
+    onPortMessage("ComputationUpdates", payload =>
+      postRuntimeMessage("ComputationUpdates", payload),
     ),
+  )
+
+  addCleanup(
+    onPortMessage("SignalUpdates", payload => postRuntimeMessage("SignalUpdates", payload)),
   )
 
   addCleanup(

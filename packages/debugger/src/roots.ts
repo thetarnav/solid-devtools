@@ -17,7 +17,7 @@ import {
   onUpdate,
   updateRoot,
   removeRoot,
-  handleSignalUpdate,
+  pushSignalUpdate,
   focusedRootId,
   setFocusedOwnerDetails,
   focusedId,
@@ -57,7 +57,7 @@ export function createGraphRoot(owner: SolidRoot): void {
       const { tree, components, focusedOwner, focusedOwnerDetails } = untrack(() =>
         walkSolidTree(owner, {
           onComputationUpdate,
-          onSignalUpdate: handleSignalUpdate,
+          onSignalUpdate: pushSignalUpdate,
           rootId,
           focusedId: focusedId(),
           gatherComponents: gatherComponents(),

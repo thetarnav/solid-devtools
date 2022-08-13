@@ -100,7 +100,12 @@ export type DebuggerContext =
     }
   | typeof INTERNAL
 
-export type BatchComputationUpdate = { rootId: NodeID; nodeId: NodeID }
+export type ComputationUpdate = { rootId: NodeID; nodeId: NodeID }
+
+export type SignalUpdate = {
+  id: NodeID
+  value: JsonValue
+}
 
 export type ValueUpdateListener = (newValue: unknown, oldValue: unknown) => void
 
@@ -192,6 +197,7 @@ export interface OwnerDetails {
   readonly name: string
   readonly type: NodeType
   readonly path: OwnerPath
+  readonly rawPath: NodeID[]
   readonly signals: Record<NodeID, GraphSignal>
   // TODO: more to come
 }
