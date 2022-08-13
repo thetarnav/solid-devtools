@@ -68,4 +68,5 @@ export const content = style({
   overflow: "hidden",
   width: "max-content",
   height: "max-content",
+  minWidth: "100%",
 })
