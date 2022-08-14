@@ -60,7 +60,10 @@ It can do very useful things for you: Wrap stores to let the debugger observe th
 
 ### [Chrome Extension](./packages/extension#readme)
 
-Not-yet-public Chrome extension for visualizing and interacting with Solid's reactivity graph.
+Very very early developemnt.
+
+Chrome devtools extension for debugging Solid applications.
+It allows for visualizing and interacting with Solid's reactivity graph, as well as inspecting component state and hierarchy.
 
 ### [Extension Adapter](./packages/extension-adapter#readme)
 
