@@ -20,7 +20,6 @@ export default defineManifest({
     type: "module",
   },
   permissions: [],
-  host_permissions: ["file:///*", "http://*/*", "https://*/*"],
   action: {
     default_icon: {
       "16": "assets/icons/solid-gray-16.png",
