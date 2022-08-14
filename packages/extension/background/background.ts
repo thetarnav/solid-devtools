@@ -1,28 +1,29 @@
 import { createCallbackStack } from "@solid-primitives/utils"
-import { once } from "@solid-devtools/shared/bridge"
+import { log } from "@solid-devtools/shared/utils"
 import {
   createPortMessanger,
   createRuntimeMessanger,
   DEVTOOLS_CONTENT_PORT,
 } from "../shared/messanger"
 
-console.log("background script working")
+log("background script working")
 
 const { onRuntimeMessage, postRuntimeMessage } = createRuntimeMessanger()
 
 let port: chrome.runtime.Port | undefined
 let lastDocumentId: string | undefined
+
+// state reused between panels
 let panelVisibility = false
 let solidOnPage = false
 
 const { push: addCleanup, execute: clearListeners } = createCallbackStack()
 
 chrome.runtime.onConnect.addListener(newPort => {
-  if (newPort.name !== DEVTOOLS_CONTENT_PORT)
-    return console.log("Ignored connection:", newPort.name)
+  if (newPort.name !== DEVTOOLS_CONTENT_PORT) return log("Ignored connection:", newPort.name)
 
   if (port) {
-    console.log(`Switching BG Ports: ${port.sender?.documentId} -> ${newPort.sender?.documentId}`)
+    log(`Switching BG Ports: ${port.sender?.documentId} -> ${newPort.sender?.documentId}`)
     postRuntimeMessage("ResetPanel")
     clearListeners()
   }
@@ -45,7 +46,19 @@ chrome.runtime.onConnect.addListener(newPort => {
   addCleanup(onPortMessage("GraphUpdate", graph => postRuntimeMessage("GraphUpdate", graph)))
 
   addCleanup(
-    onPortMessage("BatchedUpdate", payload => postRuntimeMessage("BatchedUpdate", payload)),
+    onPortMessage("ComputationUpdates", payload =>
+      postRuntimeMessage("ComputationUpdates", payload),
+    ),
+  )
+
+  addCleanup(
+    onPortMessage("SignalUpdates", payload => postRuntimeMessage("SignalUpdates", payload)),
+  )
+
+  addCleanup(
+    onPortMessage("OwnerDetailsUpdate", payload =>
+      postRuntimeMessage("OwnerDetailsUpdate", payload),
+    ),
   )
 
   addCleanup(
@@ -57,9 +70,13 @@ chrome.runtime.onConnect.addListener(newPort => {
 
   // make sure the devtools script will be triggered to create devtools panel
   addCleanup(
-    once(onRuntimeMessage, "DevtoolsScriptConnected", () => {
+    onRuntimeMessage("DevtoolsScriptConnected", () => {
       if (solidOnPage) postRuntimeMessage("SolidOnPage")
     }),
+  )
+
+  addCleanup(
+    onRuntimeMessage("SetFocusedOwner", ownerId => postPortMessage("SetFocusedOwner", ownerId)),
   )
 
   addCleanup(onRuntimeMessage("ForceUpdate", () => postPortMessage("ForceUpdate")))

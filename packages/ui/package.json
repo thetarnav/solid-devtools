@@ -35,12 +35,19 @@
     "./theme": {
       "import": "./dist/theme/index.js",
       "require": "./dist/theme/index.cjs"
+    },
+    "./animation": {
+      "import": "./dist/animation/index.js",
+      "require": "./dist/animation/index.cjs"
     }
   },
   "typesVersions": {
     "*": {
       "theme": [
         "./dist/theme/index.d.ts"
+      ],
+      "animation": [
+        "./dist/animation/index.d.ts"
       ]
     }
   },
@@ -68,11 +75,13 @@
     "@solid-primitives/keyboard": "^1.0.1",
     "@solid-primitives/props": "^2.2.1",
     "@solid-primitives/resize-observer": "^2.0.3",
+    "@solid-primitives/timer": "^1.3.1",
     "@solid-primitives/utils": "^3.0.1",
     "@vanilla-extract/css": "^1.7.2",
     "@vanilla-extract/dynamic": "^2.0.2",
     "@vanilla-extract/private": "^1.0.3",
-    "csstype": "^3.1.0"
+    "csstype": "^3.1.0",
+    "solid-transition-group": "^0.0.10"
   },
   "peerDependencies": {
     "solid-js": "^1.4.4"

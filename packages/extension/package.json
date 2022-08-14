@@ -26,12 +26,15 @@
     "@solid-devtools/shared": "workspace:^0.4.0",
     "@solid-devtools/ui": "0.6.0",
     "@solid-primitives/context": "^0.1.0",
+    "@solid-primitives/destructure": "^0.1.1",
     "@solid-primitives/immutable": "^0.1.0",
     "@solid-primitives/props": "^2.2.1",
     "@solid-primitives/rootless": "^1.1.2",
+    "@solid-primitives/set": "^0.2.1",
     "@solid-primitives/utils": "^3.0.1",
     "@vanilla-extract/css": "^1.7.2",
     "solid-js": "^1.4.8",
+    "solid-transition-group": "^0.0.10",
     "type-fest": "^2.18.0"
   },
   "packageManager": "pnpm@7.8.0"

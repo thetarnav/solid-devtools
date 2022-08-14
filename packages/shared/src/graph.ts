@@ -1,9 +1,8 @@
 import { getOwner as _getOwner } from "solid-js"
 import { JsonValue } from "type-fest"
 import { Many } from "@solid-primitives/utils"
-import { UpdateType } from "./bridge"
 import { Owner as _Owner, SignalState as _SignalState, Computation as _Computation } from "./solid"
-import { INTERNAL } from "./variables"
+import { INTERNAL, NOTFOUND } from "./variables"
 
 export enum NodeType {
   Component,
@@ -16,21 +15,25 @@ export enum NodeType {
   Root,
 }
 
+export type NodeID = string & {}
+
 //
 // "Signal___" — owner/signals/etc. objects in the Solid's internal owner graph
 //
 
 declare module "solid-js/types/reactive/signal" {
   interface SignalState<T> {
-    sdtId?: number
+    sdtId?: NodeID
+    sdtName?: string
   }
   interface Owner {
-    sdtId?: number
+    sdtId?: NodeID
+    sdtName?: string
     sdtType?: NodeType
     ownedRoots?: Set<SolidRoot>
   }
   interface Computation<Init, Next> {
-    sdtId?: number
+    sdtId?: NodeID
     sdtType?: NodeType
     ownedRoots?: Set<SolidRoot>
     onValueUpdate?: Record<symbol, ValueUpdateListener>
@@ -91,29 +94,18 @@ export const getOwner = _getOwner as () => SolidOwner | null
 
 export type DebuggerContext =
   | {
-      rootId: number
+      rootId: NodeID
       triggerRootUpdate: VoidFunction
       forceRootUpdate: VoidFunction
     }
   | typeof INTERNAL
 
-export type BatchedUpdate =
-  | {
-      type: UpdateType.Signal
-      payload: SignalUpdatePayload
-    }
-  | {
-      type: UpdateType.Computation
-      payload: number
-    }
+export type ComputationUpdate = { rootId: NodeID; nodeId: NodeID }
 
-export interface SignalUpdatePayload {
-  id: number
-  value: unknown
-  oldValue: unknown
+export type SignalUpdate = {
+  id: NodeID
+  value: JsonValue
 }
-
-export type BatchUpdateListener = (updates: BatchedUpdate[]) => void
 
 export type ValueUpdateListener = (newValue: unknown, oldValue: unknown) => void
 
@@ -123,38 +115,57 @@ export type ValueUpdateListener = (newValue: unknown, oldValue: unknown) => void
 //
 
 export interface MappedRoot {
-  id: number
+  id: NodeID
   tree: MappedOwner
   components: MappedComponent[]
 }
 
 export interface SerialisedTreeRoot {
-  id: number
+  id: NodeID
   tree: MappedOwner
-  components?: undefined
+}
+
+export type RootsUpdates = {
+  readonly removed: NodeID[]
+  readonly updated: SerialisedTreeRoot[]
 }
 
 export interface MappedOwner {
-  id: number
+  id: NodeID
   name: string
   type: NodeType
-  signals: MappedSignal[]
   children: MappedOwner[]
-  sources: number[]
-  signal?: MappedSignal
+  sources: number
 }
 
 export interface MappedSignal {
+  type: NodeType.Signal | NodeType.Memo
   name: string
-  id: number
-  observers: number[]
+  id: NodeID
+  observers: NodeID[]
   value: JsonValue
 }
 
 export type MappedComponent = {
   name: string
-  // ! HTMLElements aren't JSON serialisable
+  /**
+   * ! HTMLElements aren't JSON serialisable
+   */
   resolved: Many<HTMLElement>
+}
+
+export interface MappedOwnerDetails {
+  id: NodeID
+  name: string
+  type: NodeType
+  path: NodeID[]
+  signals: MappedSignal[]
+  /** for computations */
+  value?: JsonValue
+  /** for computations */
+  sources?: NodeID[]
+  /** for memos */
+  observers?: NodeID[]
 }
 
 //
@@ -162,31 +173,31 @@ export type MappedComponent = {
 // They are meant to be "reactive" — wrapped with a store
 //
 
+export interface GraphRoot {
+  readonly id: NodeID
+  readonly tree: GraphOwner
+}
+
 export interface GraphOwner {
-  readonly id: number
+  readonly id: NodeID
   readonly name: string
   readonly type: NodeType
   readonly dispose: VoidFunction
-  readonly updated: boolean
-  readonly setUpdate: (value: boolean) => void
-  sources: GraphSignal[]
+  readonly sources: number
   readonly children: GraphOwner[]
-  readonly signals: GraphSignal[]
-  signal?: GraphSignal
 }
 
-export interface GraphSignal {
-  readonly id: number
+// this one is the same for now
+export type GraphSignal = MappedSignal
+
+export type OwnerPath = (GraphOwner | typeof NOTFOUND)[]
+
+export interface OwnerDetails {
+  readonly id: NodeID
   readonly name: string
-  readonly dispose?: VoidFunction
-  readonly updated: boolean
-  readonly setUpdate: (value: boolean) => void
-  readonly value: JsonValue
-  readonly setValue: (value: unknown) => void
-  readonly observers: GraphOwner[]
-}
-
-export interface GraphRoot {
-  readonly id: number
-  readonly tree: GraphOwner
+  readonly type: NodeType
+  readonly path: OwnerPath
+  readonly rawPath: NodeID[]
+  readonly signals: Record<NodeID, GraphSignal>
+  // TODO: more to come
 }

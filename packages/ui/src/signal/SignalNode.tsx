@@ -1,9 +1,9 @@
 import { Component, createEffect, For, JSX, ParentComponent, Show, splitProps } from "solid-js"
 import { combineProps } from "@solid-primitives/props"
 import { GraphSignal } from "@solid-devtools/shared/graph"
-import { useHighlights } from "../ctx/highlights"
+import { useHighlights, useSignalContext } from "../ctx/highlights"
 import { createHover } from "@solid-aria/interactions"
-import * as styles from "./styles.css"
+import * as styles from "./SignalNode.css"
 import { hexToRgb, theme } from "../theme"
 
 export const Signals: Component<{ each: GraphSignal[] }> = props => {
@@ -17,6 +17,10 @@ export const Signals: Component<{ each: GraphSignal[] }> = props => {
 }
 
 export const SignalNode: Component<{ signal: GraphSignal }> = ({ signal }) => {
+  const { useUpdatedSelector } = useSignalContext()
+
+  const isUpdated = useUpdatedSelector(signal.id)
+
   const { highlightSignalObservers, isSourceHighlighted } = useHighlights()
   const isHighlighted = isSourceHighlighted.bind(null, signal)
 
@@ -26,9 +30,10 @@ export const SignalNode: Component<{ signal: GraphSignal }> = ({ signal }) => {
   return (
     <div class={styles.SignalNode.container} {...hoverProps}>
       <div class={styles.SignalNode.name}>
-        {signal.name} ({signal.id})
+        {signal.name}
+        {/* <span class={styles.SignalNode.id}>#{signal.id}</span> */}
       </div>
-      <ValueNode value={signal.value} updated={signal.updated} highlighted={isHighlighted()} />
+      <ValueNode value={signal.value} updated={isUpdated()} highlighted={isHighlighted()} />
     </div>
   )
 }

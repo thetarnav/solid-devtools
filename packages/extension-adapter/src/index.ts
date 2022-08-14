@@ -1,67 +1,70 @@
-import { createEffect, createSignal, onCleanup } from "solid-js"
-import { registerDebuggerPlugin, PluginFactory, getSafeValue } from "@solid-devtools/debugger"
+import { createEffect, createSignal } from "solid-js"
+import { registerDebuggerPlugin, PluginFactory } from "@solid-devtools/debugger"
 import {
-  BatchedUpdate,
   onWindowMessage,
   postWindowMessage,
   startListeningWindowMessages,
-  UpdateType,
 } from "@solid-devtools/shared/bridge"
-import type { SerialisedTreeRoot } from "@solid-devtools/shared/graph"
-import { getArrayDiffById } from "@solid-devtools/shared/diff"
+import { warn } from "@solid-devtools/shared/utils"
 
 startListeningWindowMessages()
 
 const extensionAdapterFactory: PluginFactory = ({
   forceTriggerUpdate,
-  serialisedRoots,
-  makeBatchUpdateListener,
+  rootsUpdates,
+  handleComputationUpdates,
+  handleSignalUpdates,
+  setFocusedOwner,
+  focusedState,
 }) => {
   const [enabled, setEnabled] = createSignal(false)
 
   postWindowMessage("SolidOnPage")
 
   // update the graph only if the devtools panel is in view
-  onCleanup(onWindowMessage("PanelVisibility", setEnabled))
-  onCleanup(onWindowMessage("ForceUpdate", forceTriggerUpdate))
+  onWindowMessage("PanelVisibility", setEnabled)
+  onWindowMessage("ForceUpdate", forceTriggerUpdate)
+  onWindowMessage("SetFocusedOwner", setFocusedOwner)
 
-  // diff the roots array, and send only the changed roots (edited, deleted, added)
-  createEffect((prev: SerialisedTreeRoot[]) => {
-    const _roots = serialisedRoots()
-    const diff = getArrayDiffById(prev, _roots)
-    postWindowMessage("GraphUpdate", diff)
-    return _roots
-  }, [])
+  // diff the roots, and send only the changed roots (edited, deleted, added)
+  createEffect(() => {
+    postWindowMessage("GraphUpdate", rootsUpdates())
+  })
 
-  makeBatchUpdateListener(updates => {
-    // serialize the updates and send them to the devtools panel
-    const safeUpdates = updates.map(({ type, payload }) => ({
-      type,
-      payload:
-        type === UpdateType.Computation
-          ? payload
-          : {
-              id: payload.id,
-              value: getSafeValue(payload.value),
-              oldValue: getSafeValue(payload.oldValue),
-            },
-    })) as BatchedUpdate[]
-    postWindowMessage("BatchedUpdate", safeUpdates)
+  // send the computation updates
+  handleComputationUpdates(updates => {
+    postWindowMessage("ComputationUpdates", updates)
+  })
+
+  // send the signal updates
+  handleSignalUpdates(updates => {
+    postWindowMessage("SignalUpdates", updates)
+  })
+
+  // send the focused owner details
+  createEffect(() => {
+    const details = focusedState().details
+    if (details) {
+      postWindowMessage("OwnerDetailsUpdate", details)
+    }
   })
 
   return { enabled }
 }
 
+let registered = false
+
 /**
  * Registers the extension adapter with the debugger.
  */
 export function useExtensionAdapter() {
+  if (registered) return warn("Extension adapter already registered")
+  registered = true
   registerDebuggerPlugin(data => {
     const { enabled } = extensionAdapterFactory(data)
     return {
       enabled,
-      trackSignals: enabled,
-      trackBatchedUpdates: enabled,
+      observeComputations: enabled,
     }
   })
 }

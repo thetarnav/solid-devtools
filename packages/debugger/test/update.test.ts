@@ -5,6 +5,7 @@ import {
   makeSolidUpdateListener,
   makeCreateRootListener,
   observeValueUpdate,
+  removeValueUpdateObserver,
 } from "../src/update"
 import { createInternalRoot } from "../src/utils"
 
@@ -100,7 +101,7 @@ describe("observeValueUpdate", () => {
       const symbol = Symbol()
       let last_prev: unknown
       let last_value: unknown
-      const unsub = observeValueUpdate(
+      observeValueUpdate(
         signal,
         (value, prev) => {
           last_prev = prev
@@ -116,7 +117,7 @@ describe("observeValueUpdate", () => {
       expect(last_prev).toBe(0)
       expect(last_value).toBe(1)
 
-      unsub()
+      removeValueUpdateObserver(signal, symbol)
 
       setCount(2)
       expect(last_prev).toBe(0)

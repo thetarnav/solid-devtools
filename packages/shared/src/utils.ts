@@ -1,5 +1,24 @@
-export function log(...args: any[]) {
-  console.log("%csolid-devtools", "color: #fff; background: #2c4f7c; padding: 1px 4px;", ...args)
+const getLogLabel = () => [
+  `%c${formatTime()} %csolid-devtools`,
+  "color: gray",
+  "color: #fff; background: #2c4f7c; padding: 1px 4px;",
+]
+
+export function log(...args: any[]): void {
+  console.log(...getLogLabel(), ...args)
+}
+export function warn(...args: any[]): void {
+  console.warn(...getLogLabel(), ...args)
+}
+
+export function formatTime(d: Date = new Date()): string {
+  return (
+    ("0" + d.getHours()).slice(-2) +
+    ":" +
+    ("0" + d.getMinutes()).slice(-2) +
+    ":" +
+    ("0" + d.getSeconds()).slice(-2)
+  )
 }
 
 export function callArrayProp<

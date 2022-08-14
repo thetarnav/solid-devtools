@@ -13,15 +13,19 @@ export const SignalNode = {
   container: style({
     display: "flex",
     alignItems: "center",
-    paddingLeft: spacing[1],
-    paddingRight: spacing[1],
     height: spacing[5],
   }),
   name: style({
     width: spacing[36],
-    fontStyle: "italic",
     color: color.gray[800],
+    fontWeight: 500,
   }),
+  // id: style({
+  //   fontSize: spacing[3],
+  //   color: color.gray[500],
+  //   fontWeight: 400,
+  //   textTransform: "uppercase",
+  // }),
 }
 
 export const ValueNode = style({

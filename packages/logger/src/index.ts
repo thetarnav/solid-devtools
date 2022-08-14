@@ -10,6 +10,8 @@ import {
   isSolidMemo,
   interceptComputationRerun,
   lookupOwner,
+  makeValueUpdateListener,
+  removeValueUpdateObserver,
 } from "@solid-devtools/debugger"
 import { SignalState, Owner } from "@solid-devtools/shared/solid"
 import {
@@ -122,23 +124,23 @@ export function debugComputation(
     updateListeners.forEach(unsub => unsub())
     updateListeners = []
     sources.forEach(source => {
-      const unsub = observeValueUpdate(
+      observeValueUpdate(
         source,
         value => signalUpdates.push({ ...getNodeState(source), value }),
         SYMBOL,
       )
-      updateListeners.push(unsub)
+      updateListeners.push(() => removeValueUpdateObserver(source, SYMBOL))
     })
   }
 
   // this is for logging the initial state after the first callback execution
   // the "value" property is monkey patched for one function execution
   if (initialRun) {
-    const removeValueObserver = observeValueUpdate(
+    observeValueUpdate(
       owner,
       value => {
         const timeElapsed = time()
-        removeValueObserver()
+        removeValueUpdateObserver(owner, SYMBOL)
         const sources = owner.sources ? dedupeArray(owner.sources) : []
 
         logComputation(getComputationCreatedLabel(typeName, name, timeElapsed), {
@@ -311,7 +313,7 @@ export function debugSignal(
   }
 
   // Value Update
-  const stopListening = observeValueUpdate(
+  makeValueUpdateListener(
     signal,
     (value, prev) => {
       logSignalValueUpdate(
@@ -323,7 +325,6 @@ export function debugSignal(
     },
     SYMBOL,
   )
-  if (getOwner()) onCleanup(stopListening)
 
   if (trackObservers) {
     // Observers Change

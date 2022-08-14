@@ -17,6 +17,7 @@ import {
   SolidSignal,
   SolidMemo,
   getOwner,
+  NodeID,
 } from "@solid-devtools/shared/graph"
 import { INTERNAL, UNNAMED } from "@solid-devtools/shared/variables"
 import { trimString } from "@solid-devtools/shared/utils"
@@ -193,29 +194,23 @@ export function getFunctionSources(fn: () => unknown): SolidSignal[] {
 }
 
 let LAST_ID = 0
-export const getNewSdtId = () => LAST_ID++
+export const getNewSdtId = (): NodeID => (LAST_ID++).toString(16)
 
+export function markOwnerName(o: SolidOwner): string {
+  if (o.sdtName !== undefined) return o.sdtName
+  return (o.sdtName = getNodeName(o))
+}
 export function markOwnerType(o: SolidOwner, type?: NodeType): NodeType {
   if (o.sdtType !== undefined) return o.sdtType
-  else return (o.sdtType = type ?? getOwnerType(o))
+  return (o.sdtType = type ?? getOwnerType(o))
 }
-export function markNodeID(o: { sdtId?: number }): number {
+export function markNodeID(o: { sdtId?: NodeID }): NodeID {
   if (o.sdtId !== undefined) return o.sdtId
-  else return (o.sdtId = getNewSdtId())
+  return (o.sdtId = getNewSdtId())
 }
-export function markNodesID(nodes?: { sdtId?: number }[] | null): number[] {
+export function markNodesID(nodes?: { sdtId?: NodeID }[] | null): NodeID[] {
   if (!nodes || !nodes.length) return []
   return nodes.map(markNodeID)
-}
-
-/**
- * Adds SubRoot object to `ownedRoots` property of owner
- * @returns a function to remove from the `ownedRoots` property
- */
-export function addRootToOwnedRoots(parent: SolidOwner, root: SolidRoot): VoidFunction {
-  const ownedRoots = parent.ownedRoots ?? (parent.ownedRoots = new Set())
-  ownedRoots.add(root)
-  return (): void => void ownedRoots.delete(root)
 }
 
 /**

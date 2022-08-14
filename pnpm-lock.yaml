@@ -84,9 +84,11 @@ importers:
       '@solid-devtools/shared': workspace:^0.4.0
       '@solid-devtools/ui': 0.6.0
       '@solid-primitives/context': ^0.1.0
+      '@solid-primitives/destructure': ^0.1.1
       '@solid-primitives/immutable': ^0.1.0
       '@solid-primitives/props': ^2.2.1
       '@solid-primitives/rootless': ^1.1.2
+      '@solid-primitives/set': ^0.2.1
       '@solid-primitives/utils': ^3.0.1
       '@types/chrome': ^0.0.193
       '@vanilla-extract/css': ^1.7.2
@@ -94,6 +96,7 @@ importers:
       esbuild-plugin-solid: ^0.4.2
       rimraf: ^3.0.2
       solid-js: ^1.4.8
+      solid-transition-group: ^0.0.10
       type-fest: ^2.18.0
       typescript: ^4.7.4
       vite: ^3.0.4
@@ -102,12 +105,15 @@ importers:
       '@solid-devtools/shared': link:../shared
       '@solid-devtools/ui': link:../ui
       '@solid-primitives/context': 0.1.0_solid-js@1.4.8
+      '@solid-primitives/destructure': 0.1.1_solid-js@1.4.8
       '@solid-primitives/immutable': 0.1.0_solid-js@1.4.8
       '@solid-primitives/props': 2.2.1_solid-js@1.4.8
       '@solid-primitives/rootless': 1.1.2_solid-js@1.4.8
+      '@solid-primitives/set': 0.2.1_solid-js@1.4.8
       '@solid-primitives/utils': 3.0.1_solid-js@1.4.8
       '@vanilla-extract/css': 1.7.2
       solid-js: 1.4.8
+      solid-transition-group: 0.0.10_solid-js@1.4.8
       type-fest: 2.18.0
     devDependencies:
       '@crxjs/vite-plugin': 1.0.13_vite@3.0.4
@@ -261,12 +267,14 @@ importers:
 
   packages/shared:
     specifiers:
+      '@solid-primitives/event-bus': ^0.1.0
       '@solid-primitives/utils': ^3.0.1
       solid-js: ^1.4.8
       tsup: ^6.2.1
       type-fest: ^2.18.0
       typescript: ^4.7.4
     dependencies:
+      '@solid-primitives/event-bus': 0.1.0_solid-js@1.4.8
       '@solid-primitives/utils': 3.0.1_solid-js@1.4.8
       solid-js: 1.4.8
       type-fest: 2.18.0
@@ -322,6 +330,7 @@ importers:
       '@solid-primitives/keyboard': ^1.0.1
       '@solid-primitives/props': ^2.2.1
       '@solid-primitives/resize-observer': ^2.0.3
+      '@solid-primitives/timer': ^1.3.1
       '@solid-primitives/utils': ^3.0.1
       '@vanilla-extract/css': ^1.7.2
       '@vanilla-extract/dynamic': ^2.0.2
@@ -331,6 +340,7 @@ importers:
       esbuild: ^0.14.53
       esbuild-plugin-solid: ^0.4.2
       solid-js: ^1.4.8
+      solid-transition-group: ^0.0.10
       tsup: ^6.2.1
       typescript: ^4.7.4
     dependencies:
@@ -342,11 +352,13 @@ importers:
       '@solid-primitives/keyboard': 1.0.1_solid-js@1.4.8
       '@solid-primitives/props': 2.2.1_solid-js@1.4.8
       '@solid-primitives/resize-observer': 2.0.3_solid-js@1.4.8
+      '@solid-primitives/timer': 1.3.1_solid-js@1.4.8
       '@solid-primitives/utils': 3.0.1_solid-js@1.4.8
       '@vanilla-extract/css': 1.7.2
       '@vanilla-extract/dynamic': 2.0.2
       '@vanilla-extract/private': 1.0.3
       csstype: 3.1.0
+      solid-transition-group: 0.0.10_solid-js@1.4.8
     devDependencies:
       '@solid-devtools/transform': link:../transform
       '@vanilla-extract/esbuild-plugin': 2.1.0
@@ -3997,6 +4009,15 @@ packages:
       solid-js: 1.4.8
     dev: false
 
+  /@solid-primitives/destructure/0.1.1_solid-js@1.4.8:
+    resolution: {integrity: sha512-d8uHXWIGt+8E+6bdtIrwi6IvT1uKmzZkS6lus413appV9E3O8oA1HSHfJDXbeb7MmLDibkjPGukL2jqlpVIxrQ==}
+    peerDependencies:
+      solid-js: ^1.3.0
+    dependencies:
+      '@solid-primitives/utils': 3.0.1_solid-js@1.4.8
+      solid-js: 1.4.8
+    dev: false
+
   /@solid-primitives/event-bus/0.1.0_solid-js@1.4.8:
     resolution: {integrity: sha512-++j99s/wf2zTljNrYbrFR/oiykL/778seNpKbwCXiiGMVthq9QKp9mA4hl3M9XvXBQEpaXgQsSZOz6zqZHBpRw==}
     peerDependencies:
@@ -4127,6 +4148,15 @@ packages:
     peerDependencies:
       solid-js: ^1.4.0
     dependencies:
+      solid-js: 1.4.8
+    dev: false
+
+  /@solid-primitives/set/0.2.1_solid-js@1.4.8:
+    resolution: {integrity: sha512-ku81+R4Jb5fHgifd6cygXKSK2i7lzjJRfwvuqvUG1TG2asR1VqOqXpRRzBug16Q2djInKsB4R8+/tz3sSXKSOw==}
+    peerDependencies:
+      solid-js: ^1.3.0
+    dependencies:
+      '@solid-primitives/utils': 3.0.1_solid-js@1.4.8
       solid-js: 1.4.8
     dev: false
 
@@ -4929,6 +4959,16 @@ packages:
       semver: 7.3.7
     dev: true
 
+  /bundle-require/3.0.4_esbuild@0.14.51:
+    resolution: {integrity: sha512-VXG6epB1yrLAvWVQpl92qF347/UXmncQj7J3U8kZEbdVZ1ZkQyr4hYeL/9RvcE8vVVdp53dY78Fd/3pqfRqI1A==}
+    engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
+    peerDependencies:
+      esbuild: '>=0.13'
+    dependencies:
+      esbuild: 0.14.51
+      load-tsconfig: 0.2.3
+    dev: true
+
   /bundle-require/3.0.4_esbuild@0.14.53:
     resolution: {integrity: sha512-VXG6epB1yrLAvWVQpl92qF347/UXmncQj7J3U8kZEbdVZ1ZkQyr4hYeL/9RvcE8vVVdp53dY78Fd/3pqfRqI1A==}
     engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
@@ -5536,7 +5576,7 @@ packages:
     dev: true
 
   /ee-first/1.1.1:
-    resolution: {integrity: sha512-WMwm9LhRUo+WUaRN+vRuETqG89IgZphVSNkdFgeb6sS/E4OrDIN7t48CAewSHXc6C8lefD8KKfr5vY61brQlow==}
+    resolution: {integrity: sha1-WQxhFWsK4vTwJVcyoViyZrxWsh0=}
     dev: true
 
   /electron-to-chromium/1.4.139:
@@ -9419,6 +9459,14 @@ packages:
       - supports-color
     dev: true
 
+  /solid-transition-group/0.0.10_solid-js@1.4.8:
+    resolution: {integrity: sha512-b3O9z6BUP60CG1WnTdqFuvHms0reDNYwQF+eAEEaSaoDEmiOu9+Lu7zQgWGySJjaAdSAClhmFCmx/eAjQgfIoA==}
+    peerDependencies:
+      solid-js: ^1.0.0
+    dependencies:
+      solid-js: 1.4.8
+    dev: false
+
   /source-map-js/1.0.2:
     resolution: {integrity: sha512-R0XvVJ9WusLiqTCEiGCmICCMplcCkIwwR11mOSD9CR5u+IXYdiseeEuXCVAjS54zqwkLcPNnmU4OeJ6tUrWhDw==}
     engines: {node: '>=0.10.0'}
@@ -9904,11 +9952,11 @@ packages:
       typescript:
         optional: true
     dependencies:
-      bundle-require: 3.0.4_esbuild@0.14.53
+      bundle-require: 3.0.4_esbuild@0.14.51
       cac: 6.7.12
       chokidar: 3.5.3
       debug: 4.3.4
-      esbuild: 0.14.53
+      esbuild: 0.14.51
       execa: 5.1.1
       globby: 11.1.0
       joycon: 3.1.1
@@ -10246,7 +10294,7 @@ packages:
     dev: true
 
   /utils-merge/1.0.1:
-    resolution: {integrity: sha512-pMZTvIkT1d+TFGvDOqodOclx0QWkkgi6Tdoa8gC8ffGAAqz9pzPTZWAybbsHHoED/ztMtkv/VoYTYyShUn81hA==}
+    resolution: {integrity: sha1-n5VxD1CiZ5R7LMwSR0HBAoQn5xM=}
     engines: {node: '>= 0.4.0'}
     dev: true
 

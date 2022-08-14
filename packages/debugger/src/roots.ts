@@ -3,15 +3,28 @@ import { throttle } from "@solid-primitives/scheduled"
 import {
   DebuggerContext,
   getOwner,
+  NodeID,
   NodeType,
   SolidOwner,
   SolidRoot,
 } from "@solid-devtools/shared/graph"
-import { UpdateType } from "@solid-devtools/shared/bridge"
-import { batchUpdate, ComputationUpdateHandler, SignalUpdateHandler } from "./batchUpdates"
-import { walkSolidTree } from "./walker"
+import { INTERNAL } from "@solid-devtools/shared/variables"
+import { Owner } from "@solid-devtools/shared/solid"
+import { clearOwnerObservers, ComputationUpdateHandler, walkSolidTree } from "./walker"
 import {
-  addRootToOwnedRoots,
+  enabled,
+  onForceUpdate,
+  onUpdate,
+  updateRoot,
+  removeRoot,
+  pushSignalUpdate,
+  focusedRootId,
+  setFocusedOwnerDetails,
+  focusedId,
+  gatherComponents,
+  pushComputationUpdate,
+} from "./plugin"
+import {
   createInternalRoot,
   getDebuggerContext,
   getNewSdtId,
@@ -21,9 +34,10 @@ import {
   removeDebuggerContext,
   setDebuggerContext,
 } from "./utils"
-import { enabled, debuggerConfig, onForceUpdate, onUpdate, updateRoot, removeRoot } from "./plugin"
-import { INTERNAL } from "@solid-devtools/shared/variables"
-import { Owner } from "@solid-devtools/shared/solid"
+
+const RootMap: Record<NodeID, { update: VoidFunction; forceUpdate: VoidFunction }> = {}
+export const forceRootUpdate = (rootId: NodeID) => RootMap[rootId].forceUpdate()
+export const triggerRootUpdate = (rootId: NodeID) => RootMap[rootId].update()
 
 export function createGraphRoot(owner: SolidRoot): void {
   // setup the debugger in a separate root, so that it doesn't walk and track itself
@@ -32,29 +46,34 @@ export function createGraphRoot(owner: SolidRoot): void {
 
     const rootId = getNewSdtId()
 
-    const onComputationUpdate: ComputationUpdateHandler = payload => {
-      if (!debuggerConfig.trackBatchedUpdates || owner.isDisposed) return
+    const onComputationUpdate: ComputationUpdateHandler = (rootId, nodeId) => {
+      if (owner.isDisposed) return
       if (enabled()) triggerRootUpdate()
-      batchUpdate({ type: UpdateType.Computation, payload })
-    }
-    const onSignalUpdate: SignalUpdateHandler = payload => {
-      if (!debuggerConfig.trackBatchedUpdates || owner.isDisposed) return
-      batchUpdate({ type: UpdateType.Signal, payload })
+      pushComputationUpdate(rootId, nodeId)
     }
 
     const forceRootUpdate = () => {
       if (owner.isDisposed) return
-      const { tree, components } = untrack(
-        walkSolidTree.bind(void 0, owner, {
-          ...debuggerConfig,
+      const { tree, components, focusedOwner, focusedOwnerDetails } = untrack(() =>
+        walkSolidTree(owner, {
           onComputationUpdate,
-          onSignalUpdate,
+          onSignalUpdate: pushSignalUpdate,
           rootId,
+          focusedId: focusedId(),
+          gatherComponents: gatherComponents(),
         }),
       )
+      if (untrack(focusedRootId) === rootId) {
+        setFocusedOwnerDetails(focusedOwner, focusedOwnerDetails)
+      }
       updateRoot({ id: rootId, tree, components })
     }
     const triggerRootUpdate = throttle(forceRootUpdate, 350)
+
+    RootMap[rootId] = {
+      update: triggerRootUpdate,
+      forceUpdate: forceRootUpdate,
+    }
 
     onUpdate(triggerRootUpdate)
     onForceUpdate(forceRootUpdate)
@@ -68,6 +87,8 @@ export function createGraphRoot(owner: SolidRoot): void {
       removeDebuggerContext(owner)
       removeRoot(rootId)
       owner.isDisposed = true
+      clearOwnerObservers(owner)
+      delete RootMap[rootId]
     })
   })
 }
@@ -113,6 +134,7 @@ export function attachDebugger(_owner: Owner = getOwner()!): void {
         } else {
           removeFromOwned()
           removeOwnCleanup()
+          // TODO the focused owner should be reattached to the new root
           createGraphRoot(root)
         }
       }
@@ -127,6 +149,16 @@ export function attachDebugger(_owner: Owner = getOwner()!): void {
     // seperated from existing debugger roots
     else createGraphRoot(root)
   })
+}
+
+/**
+ * Adds SubRoot object to `ownedRoots` property of owner
+ * @returns a function to remove from the `ownedRoots` property
+ */
+function addRootToOwnedRoots(parent: SolidOwner, root: SolidRoot): VoidFunction {
+  const ownedRoots = parent.ownedRoots ?? (parent.ownedRoots = new Set())
+  ownedRoots.add(root)
+  return (): void => void ownedRoots.delete(root)
 }
 
 /**

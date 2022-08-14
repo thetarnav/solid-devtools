@@ -18,12 +18,16 @@ onWindowMessage("SolidOnPage", () => postPortMessage("SolidOnPage"))
 
 onWindowMessage("GraphUpdate", graph => postPortMessage("GraphUpdate", graph))
 
-onWindowMessage("BatchedUpdate", payload => postPortMessage("BatchedUpdate", payload))
+onWindowMessage("ComputationUpdates", payload => postPortMessage("ComputationUpdates", payload))
+
+onWindowMessage("SignalUpdates", payload => postPortMessage("SignalUpdates", payload))
+
+onWindowMessage("OwnerDetailsUpdate", payload => postPortMessage("OwnerDetailsUpdate", payload))
 
 onPortMessage("PanelVisibility", visible => postWindowMessage("PanelVisibility", visible))
 
-once(onPortMessage, "DevtoolsScriptConnected", () => postWindowMessage("DevtoolsScriptConnected"))
-
 once(onPortMessage, "ForceUpdate", () => postWindowMessage("ForceUpdate"))
+
+onPortMessage("SetFocusedOwner", ownerId => postWindowMessage("SetFocusedOwner", ownerId))
 
 export {}
