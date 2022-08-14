@@ -1,15 +1,6 @@
 import { defineConfig } from "tsup"
 
-const entries = [
-  "cursor",
-  "bridge",
-  "diff",
-  "graph",
-  "solid",
-  "utils",
-  "variables",
-  "emitter",
-] as const
+const entries = ["cursor", "bridge", "diff", "graph", "solid", "utils", "variables"] as const
 const entryPaths = entries.map(entry => `src/${entry}.ts`)
 
 export default defineConfig(config => ({
