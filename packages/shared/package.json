@@ -60,11 +60,6 @@
       "import": "./dist/variables.js",
       "require": "./dist/variables.cjs",
       "types": "./dist/variables.d.ts"
-    },
-    "./emitter": {
-      "import": "./dist/emitter.js",
-      "require": "./dist/emitter.cjs",
-      "types": "./dist/emitter.d.ts"
     }
   },
   "typesVersions": {
@@ -89,9 +84,6 @@
       ],
       "variables": [
         "./dist/variables.d.ts"
-      ],
-      "emitter": [
-        "./dist/emitter.d.ts"
       ]
     }
   },
