@@ -8,14 +8,14 @@ import {
   OwnerNode,
   Splitter,
   Scrollable,
-  Skeleton,
   Signals,
 } from "@solid-devtools/ui"
 import { highlights, graphs } from "./state/graph"
 import { focused, details, useUpdatedSignalsSelector } from "./state/details"
 import * as styles from "./styles.css"
+import { Transition } from "solid-transition-group"
 
-const DetailsPanel: Component<{ details: OwnerDetails }> = props => {
+const DetailsContent: Component<{ details: OwnerDetails }> = props => {
   const { name, id, type, path, signals } = destructure(() => props.details)
 
   return (
@@ -48,6 +48,18 @@ const DetailsPanel: Component<{ details: OwnerDetails }> = props => {
   )
 }
 
+const DetailsPanel: Component<{}> = props => {
+  return (
+    <Show when={focused()}>
+      <div class={styles.details.transitionWrapper}>
+        <Transition name="fade">
+          <Show when={details()}>{details => <DetailsContent details={details} />}</Show>
+        </Transition>
+      </div>
+    </Show>
+  )
+}
+
 const App: Component = () => {
   return (
     <HighlightsProvider value={highlights}>
@@ -57,17 +69,7 @@ const App: Component = () => {
           <p>Number of Roots: {Object.keys(graphs).length}</p>
         </header>
         <div class={styles.content}>
-          <Splitter
-            onToggle={() => highlights.handleFocus(null)}
-            side={
-              focused() && (
-                // TODO: remove skeleton — fade out the contents instead
-                <Show when={details()} fallback={<Skeleton />}>
-                  <DetailsPanel details={details()!} />
-                </Show>
-              )
-            }
-          >
+          <Splitter onToggle={() => highlights.handleFocus(null)} side={<DetailsPanel />}>
             <Scrollable>
               <For each={graphs}>{root => <OwnerNode owner={root.tree} />}</For>
             </Scrollable>

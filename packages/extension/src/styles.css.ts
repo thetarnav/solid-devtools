@@ -1,5 +1,16 @@
-import { style } from "@vanilla-extract/css"
-import { theme, spacing, color, rounded } from "@solid-devtools/ui/theme"
+import { style, globalStyle } from "@vanilla-extract/css"
+import { spacing, color, rounded, inset } from "@solid-devtools/ui/theme"
+
+// TODO: move to UI styles
+globalStyle(".fade-enter, .fade-exit-to", {
+  opacity: 0,
+})
+globalStyle(".fade-enter-active, .fade-exit-active", {
+  transition: "opacity .3s ease",
+})
+// globalStyle(".fade-enter-active", {
+//   transitionDelay: ".1s",
+// })
 
 export const app = style({
   height: "100vh",
@@ -19,7 +30,12 @@ export const content = style({
 })
 
 export const details = {
+  transitionWrapper: style({
+    position: "relative",
+  }),
   root: style({
+    position: "absolute",
+    ...inset(0),
     padding: spacing[4],
   }),
   pathWrapper: style({
