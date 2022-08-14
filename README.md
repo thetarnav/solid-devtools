@@ -22,7 +22,7 @@ the rest of packages together to provide a
 common experience for users.
 It is a recommended and easy way to get started.
 
-See [README](./packages/main#readme) for more information.
+[**See README for more information.**](./packages/main#readme)
 
 ## Available Devtools
 
