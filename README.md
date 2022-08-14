@@ -13,6 +13,10 @@ To change the way you write, debug and understand your SolidJS applications and 
 And also to experiment with ways of visualizing
 and interacting with Solid's reactivity graph.
 
+## How to start?
+
+[**See this brilliant article that will guide you though the process.**](https://dev.to/mbarzeev/taking-solidjs-dev-tools-for-a-spin-44m2)
+
 ## Main Devtools package
 
 ###### `solid-devtools`
@@ -60,7 +64,7 @@ It can do very useful things for you: Wrap stores to let the debugger observe th
 
 ### [Chrome Extension](./packages/extension#readme)
 
-Very very early developemnt.
+🚧 In very very early development. 🚧
 
 Chrome devtools extension for debugging Solid applications.
 It allows for visualizing and interacting with Solid's reactivity graph, as well as inspecting component state and hierarchy.
