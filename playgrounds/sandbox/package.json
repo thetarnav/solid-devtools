@@ -4,8 +4,8 @@
   "private": true,
   "description": "",
   "scripts": {
-    "start": "vite",
-    "dev": "vite",
+    "start": "vite --port 3000",
+    "dev": "pnpm start",
     "build": "vite build",
     "serve": "vite preview"
   },
