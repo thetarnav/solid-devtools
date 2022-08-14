@@ -10,10 +10,10 @@
   "type": "module",
   "main": "./dist/index.js",
   "devDependencies": {
-    "@solid-devtools/logger": "^0.3.0",
-    "@solid-devtools/transform": "^0.6.0",
+    "@solid-devtools/logger": "^0.4.0",
+    "@solid-devtools/transform": "^0.6.1",
     "solid-app-router": "^0.4.2",
-    "solid-devtools": "^0.10.1",
+    "solid-devtools": "^0.11.0",
     "solid-js": "^1.4.8",
     "solid-meta": "^0.27.5",
     "solid-start": "next",

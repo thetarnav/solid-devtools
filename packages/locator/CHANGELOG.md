@@ -1,5 +1,18 @@
 # @solid-devtools/locator
 
+## 0.11.0
+
+### Minor Changes
+
+- 41b4b7b: This one will be a major rewrite of the debugger, API available in plugins and the reconciliation on the extension.
+  Now the walked tree will now include information about computation observers, value, signals, sources. All this will be available only for the "focused" owner—new API for getting details about a specific owner.
+
+### Patch Changes
+
+- Updated dependencies [41b4b7b]
+  - @solid-devtools/debugger@0.5.0
+  - @solid-devtools/shared@0.5.0
+
 ## 0.10.1
 
 ### Patch Changes
