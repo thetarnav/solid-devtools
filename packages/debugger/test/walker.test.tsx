@@ -1,4 +1,5 @@
 import { getOwner, NodeType, SolidOwner } from "@solid-devtools/shared/graph"
+import { ValueType } from "@solid-devtools/shared/serialize"
 import { UNNAMED } from "@solid-devtools/shared/variables"
 import {
   createComputed,
@@ -248,10 +249,22 @@ describe("walkSolidTree", () => {
         type: NodeType.Memo,
         path: ["0", "1"],
         signals: [
-          { type: NodeType.Signal, id: "2", name: "count", observers: [], value: 0 },
-          { type: NodeType.Memo, id: "3", name: "memo", observers: ["4"], value: 0 },
+          {
+            type: NodeType.Signal,
+            id: "2",
+            name: "count",
+            observers: [],
+            value: { type: ValueType.Number, value: 0 },
+          },
+          {
+            type: NodeType.Memo,
+            id: "3",
+            name: "memo",
+            observers: ["4"],
+            value: { type: ValueType.Number, value: 0 },
+          },
         ],
-        value: "value",
+        value: { type: ValueType.String, value: "value" },
         sources: ["5"],
         observers: ["1"],
       })

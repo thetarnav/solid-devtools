@@ -1,3 +1,5 @@
+import { JsonValue } from "type-fest"
+
 export const INFINITY = "__$sdt-Infinity__"
 export const NEGATIVE_INFINITY = "__$sdt-NegativeInfinity__"
 export const NAN = "__$sdt-NaN__"
@@ -52,4 +54,12 @@ export function encodePreview(value: unknown): EncodedPreview {
   const name = s.slice(8, -1)
   if (name === "Object") return { type: ValueType.Object }
   return { type: ValueType.Instance, name }
+}
+
+const literalTypes = ["bigint", "number", "boolean", "string", "undefined"]
+
+/** @deprecated */
+export function getSafeValue(value: unknown): JsonValue {
+  if (literalTypes.includes(typeof value)) return value as JsonValue
+  return value + ""
 }

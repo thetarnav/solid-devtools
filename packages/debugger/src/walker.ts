@@ -9,10 +9,10 @@ import {
   MappedOwnerDetails,
   NodeID,
 } from "@solid-devtools/shared/graph"
+import { encodePreview } from "@solid-devtools/shared/serialize"
 import {
   getNodeName,
   getNodeType,
-  getSafeValue,
   isSolidComputation,
   isSolidMemo,
   markNodeID,
@@ -22,11 +22,7 @@ import {
 } from "./utils"
 import { observeComputationUpdate, observeValueUpdate, removeValueUpdateObserver } from "./update"
 
-export type SignalUpdateHandler = (payload: {
-  value: unknown
-  oldValue: unknown
-  id: NodeID
-}) => void
+export type SignalUpdateHandler = (nodeId: NodeID, value: unknown) => void
 export type ComputationUpdateHandler = (rootId: NodeID, nodeId: NodeID) => void
 
 // Globals set before each walker cycle
@@ -50,7 +46,7 @@ function observeValue(node: SolidSignal) {
   const id = markNodeID(node)
   // OnSignalUpdate will change
   const handler = OnSignalUpdate
-  observeValueUpdate(node, (value, oldValue) => handler({ id, value, oldValue }), WALKER)
+  observeValueUpdate(node, value => handler(id, value), WALKER)
 }
 
 function createSignalNode(node: SolidSignal): MappedSignal {
@@ -59,7 +55,7 @@ function createSignalNode(node: SolidSignal): MappedSignal {
     name: getNodeName(node),
     id: markNodeID(node),
     observers: markNodesID(node.observers),
-    value: getSafeValue(node.value),
+    value: encodePreview(node.value),
   }
 }
 
@@ -112,7 +108,7 @@ function collectOwnerDetails(owner: SolidOwner): void {
   }
 
   if (isSolidComputation(owner)) {
-    details.value = getSafeValue(owner.value)
+    details.value = encodePreview(owner.value)
     details.sources = markNodesID(owner.sources)
     if (isSolidMemo(owner)) {
       details.observers = markNodesID(owner.observers)

@@ -39,7 +39,6 @@ export {
   onOwnerCleanup,
   onParentCleanup,
   getFunctionSources,
-  getSafeValue,
   createUnownedRoot,
   createInternalRoot,
 } from "./utils"

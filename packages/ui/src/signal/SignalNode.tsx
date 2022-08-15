@@ -5,6 +5,7 @@ import { useHighlights, useSignalContext } from "../ctx/highlights"
 import { createHover } from "@solid-aria/interactions"
 import * as styles from "./SignalNode.css"
 import { hexToRgb, theme } from "../theme"
+import { EncodedPreview, ValueType } from "@solid-devtools/shared/serialize"
 
 export const Signals: Component<{ each: GraphSignal[] }> = props => {
   return (
@@ -33,15 +34,15 @@ export const SignalNode: Component<{ signal: GraphSignal }> = ({ signal }) => {
         {signal.name}
         {/* <span class={styles.SignalNode.id}>#{signal.id}</span> */}
       </div>
-      <ValueNode value={signal.value} updated={isUpdated()} highlighted={isHighlighted()} />
+      <ValuePreview encoded={signal.value()} updated={isUpdated()} highlighted={isHighlighted()} />
     </div>
   )
 }
 
-export const ValueNode: Component<{
+export const ValuePreview: Component<{
   updated?: boolean
   highlighted?: boolean
-  value: unknown
+  encoded: EncodedPreview
 }> = props => {
   return (
     <HighlightText
@@ -51,7 +52,7 @@ export const ValueNode: Component<{
       textColor
       class={styles.ValueNode}
     >
-      {JSON.stringify(props.value)}
+      {ValueType[props.encoded.type]}
     </HighlightText>
   )
 }

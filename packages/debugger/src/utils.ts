@@ -6,7 +6,6 @@ import {
   createSignal,
   runWithOwner,
 } from "solid-js"
-import { JsonValue } from "type-fest"
 import { AnyFunction, AnyObject, noop, warn } from "@solid-primitives/utils"
 import {
   DebuggerContext,
@@ -77,13 +76,6 @@ export const getOwnerType = (o: Readonly<SolidOwner>): NodeType => {
     return NodeType.Render
   }
   return NodeType.Computation
-}
-
-const literalTypes = ["bigint", "number", "boolean", "string", "undefined"]
-
-export function getSafeValue(value: unknown): JsonValue {
-  if (literalTypes.includes(typeof value)) return value as JsonValue
-  return value + ""
 }
 
 /**

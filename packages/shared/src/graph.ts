@@ -1,8 +1,8 @@
-import { getOwner as _getOwner } from "solid-js"
-import { JsonValue } from "type-fest"
-import { Many } from "@solid-primitives/utils"
+import { Accessor, getOwner as _getOwner } from "solid-js"
+import { Many, Modify } from "@solid-primitives/utils"
 import { Owner as _Owner, SignalState as _SignalState, Computation as _Computation } from "./solid"
 import { INTERNAL, NOTFOUND } from "./variables"
+import { EncodedPreview } from "./serialize"
 
 export enum NodeType {
   Component,
@@ -102,11 +102,6 @@ export type DebuggerContext =
 
 export type ComputationUpdate = { rootId: NodeID; nodeId: NodeID }
 
-export type SignalUpdate = {
-  id: NodeID
-  value: JsonValue
-}
-
 export type ValueUpdateListener = (newValue: unknown, oldValue: unknown) => void
 
 //
@@ -143,7 +138,7 @@ export interface MappedSignal {
   name: string
   id: NodeID
   observers: NodeID[]
-  value: JsonValue
+  value: EncodedPreview
 }
 
 export type MappedComponent = {
@@ -161,11 +156,16 @@ export interface MappedOwnerDetails {
   path: NodeID[]
   signals: MappedSignal[]
   /** for computations */
-  value?: JsonValue
+  value?: EncodedPreview
   /** for computations */
   sources?: NodeID[]
   /** for memos */
   observers?: NodeID[]
+}
+
+export type SignalUpdate = {
+  id: NodeID
+  value: EncodedPreview
 }
 
 //
@@ -187,8 +187,13 @@ export interface GraphOwner {
   readonly children: GraphOwner[]
 }
 
-// this one is the same for now
-export type GraphSignal = MappedSignal
+export type GraphSignal = Modify<
+  MappedSignal,
+  {
+    readonly value: Accessor<EncodedPreview>
+    readonly setValue: (value: EncodedPreview) => void
+  }
+>
 
 export type OwnerPath = (GraphOwner | typeof NOTFOUND)[]
 

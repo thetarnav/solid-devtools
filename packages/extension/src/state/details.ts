@@ -1,7 +1,8 @@
-import { Accessor, batch, createRoot, createSelector, untrack } from "solid-js"
+import { Accessor, batch, createRoot, createSelector, createSignal, untrack } from "solid-js"
 import { createStore, produce } from "solid-js/store"
 import {
   GraphOwner,
+  GraphSignal,
   MappedOwnerDetails,
   MappedSignal,
   NodeID,
@@ -16,7 +17,7 @@ import { createUpdatedSelector } from "./utils"
 
 function reconcileSignals(
   newSignals: readonly MappedSignal[],
-  signals: Record<NodeID, MappedSignal>,
+  signals: Record<NodeID, GraphSignal>,
 ): void {
   if (!newSignals.length && !signals.length) return
   const intersection: MappedSignal[] = []
@@ -35,13 +36,14 @@ function reconcileSignals(
   }
   // map new signals
   for (const newSignal of newSignals) {
-    if (!intersection.includes(newSignal)) signals[newSignal.id] = newSignal
+    if (!intersection.includes(newSignal)) signals[newSignal.id] = createSignalNode(newSignal)
   }
 }
 
-// function createSignalNode(raw: Readonly<MappedSignal>): GraphSignal {
-//   return { ...raw }
-// }
+function createSignalNode(raw: Readonly<MappedSignal>): GraphSignal {
+  const [value, setValue] = createSignal(raw.value)
+  return { ...raw, value, setValue }
+}
 
 export type OwnerDetailsState =
   | { focused: null; rootId: null; details: null }
@@ -73,7 +75,7 @@ const exports = createRoot(() => {
     setState("details", prev => {
       if (prev === null) {
         const signals: OwnerDetails["signals"] = {}
-        raw.signals.forEach(signal => (signals[signal.id] = signal))
+        raw.signals.forEach(signal => (signals[signal.id] = createSignalNode(signal)))
         return {
           id: raw.id,
           name: raw.name,
@@ -111,9 +113,7 @@ const exports = createRoot(() => {
         "signals",
         produce(proxy => {
           for (const update of updates) {
-            const signal = proxy[update.id]
-            if (!signal) continue
-            signal.value = update.value
+            proxy[update.id]?.setValue(update.value)
           }
         }),
       )
