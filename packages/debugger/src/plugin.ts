@@ -22,10 +22,11 @@ import {
   ComputationUpdate,
   SignalUpdate,
 } from "@solid-devtools/shared/graph"
-import { createConsumers, createInternalRoot, getSafeValue } from "./utils"
+import { createConsumers, createInternalRoot } from "./utils"
 import { clearOwnerObservers, ComputationUpdateHandler, SignalUpdateHandler } from "./walker"
 import { forceRootUpdate } from "./roots"
 import { throttle } from "@solid-primitives/scheduled"
+import { encodePreview } from "@solid-devtools/shared/serialize"
 
 /*
 DETAILS:
@@ -206,9 +207,9 @@ const exported = createInternalRoot(() => {
       emitSignalUpdates(updates)
     })
 
-    const pushComputationUpdate: SignalUpdateHandler = ({ id, value }) => {
+    const pushComputationUpdate: SignalUpdateHandler = (id, value) => {
       if (!untrack(focusedId)) return
-      signalUpdates.push({ id, value: getSafeValue(value) })
+      signalUpdates.push({ id, value: encodePreview(value) })
       triggerComputationUpdateEmit()
     }
 

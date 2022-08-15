@@ -1,16 +1,5 @@
-import { style, globalStyle } from "@vanilla-extract/css"
+import { style } from "@vanilla-extract/css"
 import { spacing, color, rounded, inset } from "@solid-devtools/ui/theme"
-
-// TODO: move to UI styles
-globalStyle(".fade-enter, .fade-exit-to", {
-  opacity: 0,
-})
-globalStyle(".fade-enter-active, .fade-exit-active", {
-  transition: "opacity .3s ease",
-})
-// globalStyle(".fade-enter-active", {
-//   transitionDelay: ".1s",
-// })
 
 export const app = style({
   height: "100vh",

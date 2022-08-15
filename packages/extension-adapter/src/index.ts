@@ -22,7 +22,13 @@ const extensionAdapterFactory: PluginFactory = ({
   postWindowMessage("SolidOnPage")
 
   // update the graph only if the devtools panel is in view
-  onWindowMessage("PanelVisibility", setEnabled)
+  onWindowMessage("PanelVisibility", v => {
+    if (!v) return setEnabled(false)
+    const current = enabled()
+    // the panel might have been closed and opened again—in that case we want to update the graph
+    if (current) forceTriggerUpdate()
+    else setEnabled(true)
+  })
   onWindowMessage("ForceUpdate", forceTriggerUpdate)
   onWindowMessage("SetFocusedOwner", setFocusedOwner)
 

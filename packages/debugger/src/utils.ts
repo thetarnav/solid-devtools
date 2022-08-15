@@ -6,7 +6,6 @@ import {
   createSignal,
   runWithOwner,
 } from "solid-js"
-import { JsonValue } from "type-fest"
 import { AnyFunction, AnyObject, noop, warn } from "@solid-primitives/utils"
 import {
   DebuggerContext,
@@ -25,7 +24,8 @@ import { Owner, RootFunction } from "@solid-devtools/shared/solid"
 
 export const isSolidComputation = (o: Readonly<SolidOwner>): o is SolidComputation => "fn" in o
 
-export const isSolidMemo = (o: Readonly<SolidOwner>): o is SolidMemo => _isMemo(o)
+export const isSolidMemo = (o: Readonly<SolidOwner>): o is SolidMemo =>
+  "sdtType" in o ? o.sdtType === NodeType.Memo : _isMemo(o) && !fnMatchesRefresh(o.fn!)
 
 export const isSolidOwner = (o: Readonly<SolidOwner> | SolidSignal): o is SolidOwner => "owned" in o
 
@@ -67,7 +67,7 @@ export const getOwnerType = (o: Readonly<SolidOwner>): NodeType => {
   // Precompiled components do not start with "_Hot$$"
   // we need a way to identify imported (3rd party) vs user components
   if (_isComponent(o)) return NodeType.Component
-  if (isSolidMemo(o)) {
+  if (_isMemo(o)) {
     if (fnMatchesRefresh(o.fn)) return NodeType.Refresh
     return NodeType.Memo
   }
@@ -77,13 +77,6 @@ export const getOwnerType = (o: Readonly<SolidOwner>): NodeType => {
     return NodeType.Render
   }
   return NodeType.Computation
-}
-
-const literalTypes = ["bigint", "number", "boolean", "string", "undefined"]
-
-export function getSafeValue(value: unknown): JsonValue {
-  if (literalTypes.includes(typeof value)) return value as JsonValue
-  return value + ""
 }
 
 /**

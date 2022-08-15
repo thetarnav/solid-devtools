@@ -2,9 +2,9 @@ import { createEffect, For, JSX, onCleanup } from "solid-js"
 import { TransitionGroup, animateExit, animateEnter } from "@otonashixav/solid-flip"
 import { createHover } from "@solid-aria/interactions"
 import { GraphOwner, NodeType } from "@solid-devtools/shared/graph"
-import { HighlightText } from "../signal/SignalNode"
 import { useHighlights } from "../ctx/highlights"
 import * as styles from "./OwnerNode.css"
+import { HighlightText } from "../highlight/Highlight"
 
 export function OwnerChildren(props: { children: GraphOwner[] }) {
   return (

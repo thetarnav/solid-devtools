@@ -1,3 +1,46 @@
+// current theme is based on the tailwind default theme
+// colors: https://github.com/tailwindlabs/tailwindcss/blob/master/src/public/colors.js
+// spacing and other values: https://github.com/tailwindlabs/tailwindcss/blob/master/stubs/defaultConfig.stub.js
+
+const cyan = {
+  50: "#ecfeff",
+  100: "#cffafe",
+  200: "#a5f3fc",
+  300: "#67e8f9",
+  400: "#22d3ee",
+  500: "#06b6d4",
+  600: "#0891b2",
+  700: "#0e7490",
+  800: "#155e75",
+  900: "#164e63",
+}
+
+const amber = {
+  50: "#fffbeb",
+  100: "#fef3c7",
+  200: "#fde68a",
+  300: "#fcd34d",
+  400: "#fbbf24",
+  500: "#f59e0b",
+  600: "#d97706",
+  700: "#b45309",
+  800: "#92400e",
+  900: "#78350f",
+}
+
+const gray = {
+  50: "#fafafa",
+  100: "#f4f4f5",
+  200: "#e4e4e7",
+  300: "#d4d4d8",
+  400: "#a1a1aa",
+  500: "#71717a",
+  600: "#52525b",
+  700: "#3f3f46",
+  800: "#27272a",
+  900: "#18181b",
+}
+
 export const theme = {
   color: {
     inherit: "inherit",
@@ -5,42 +48,11 @@ export const theme = {
     transparent: "transparent",
     black: "#000",
     white: "#fff",
-    cyan: {
-      50: "#ecfeff",
-      100: "#cffafe",
-      200: "#a5f3fc",
-      300: "#67e8f9",
-      400: "#22d3ee",
-      500: "#06b6d4",
-      600: "#0891b2",
-      700: "#0e7490",
-      800: "#155e75",
-      900: "#164e63",
-    },
-    amber: {
-      50: "#fffbeb",
-      100: "#fef3c7",
-      200: "#fde68a",
-      300: "#fcd34d",
-      400: "#fbbf24",
-      500: "#f59e0b",
-      600: "#d97706",
-      700: "#b45309",
-      800: "#92400e",
-      900: "#78350f",
-    },
-    gray: {
-      50: "#fafafa",
-      100: "#f4f4f5",
-      200: "#e4e4e7",
-      300: "#d4d4d8",
-      400: "#a1a1aa",
-      500: "#71717a",
-      600: "#52525b",
-      700: "#3f3f46",
-      800: "#27272a",
-      900: "#18181b",
-    },
+    cyan,
+    amber,
+    gray,
+    green: "#16a34a",
+    disabled: gray[500],
   },
   spacing: {
     px: "1px",
@@ -53,6 +65,7 @@ export const theme = {
     3: "0.75rem",
     3.5: "0.875rem",
     4: "1rem",
+    4.5: "1.125rem",
     5: "1.25rem",
     6: "1.5rem",
     7: "1.75rem",
@@ -107,6 +120,11 @@ export const theme = {
     500: "500ms",
     700: "700ms",
     1000: "1000ms",
+  },
+  font: {
+    sans: "ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji'",
+    serif: "ui-serif, Georgia, Cambria, 'Times New Roman', Times, serif",
+    mono: "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace",
   },
 } as const
 

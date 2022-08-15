@@ -1,7 +1,7 @@
 import { defineConfig } from "tsup"
+import pkq from "./package.json"
 
-const entries = ["cursor", "bridge", "diff", "graph", "solid", "utils", "variables"] as const
-const entryPaths = entries.map(entry => `src/${entry}.ts`)
+const entryPaths = Object.keys(pkq.exports).map(path => `src/${path.substring(2)}.ts`)
 
 export default defineConfig(config => ({
   clean: config.watch ? false : true,

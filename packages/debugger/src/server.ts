@@ -6,7 +6,7 @@ import { createRoot } from "solid-js"
 
 export { NodeType, getOwner } from "@solid-devtools/shared/graph"
 
-export { getSafeValue, createUnownedRoot } from "./index"
+export { createUnownedRoot } from "./index"
 
 export const Debugger: typeof API.Debugger = props => props.children
 

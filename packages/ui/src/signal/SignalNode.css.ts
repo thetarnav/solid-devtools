@@ -1,11 +1,12 @@
 import { style } from "@vanilla-extract/css"
-import { insetX, insetY, rounded, theme, transition } from "../theme"
-
-const { spacing, color } = theme
+import { color, spacing, theme } from "../theme"
+import { CSSPropertiesWithVars } from "@vanilla-extract/css/dist/declarations/src/types"
 
 export const Signals = {
   container: style({
-    margin: `${spacing[1]} 0`,
+    display: "flex",
+    flexDirection: "column",
+    gap: spacing[0.5],
   }),
 }
 
@@ -13,40 +14,72 @@ export const SignalNode = {
   container: style({
     display: "flex",
     alignItems: "center",
-    height: spacing[5],
+    height: spacing[4.5],
   }),
   name: style({
-    width: spacing[36],
+    minWidth: spacing[24],
     color: color.gray[800],
-    fontWeight: 500,
+    fontWeight: 600,
+    fontFamily: theme.font.mono,
   }),
-  // id: style({
-  //   fontSize: spacing[3],
-  //   color: color.gray[500],
-  //   fontWeight: 400,
-  //   textTransform: "uppercase",
-  // }),
 }
 
-export const ValueNode = style({
-  color: color.amber[600],
+export const ValuePreview = style({
   minWidth: spacing[4],
-  height: spacing[5],
+  height: spacing[4.5],
+  color: color.gray[800],
+  fontFamily: theme.font.mono,
+  fontWeight: 600,
 })
 
-export const HighlightText = {
-  span: style({
-    position: "relative",
-    display: "flex",
-    alignItems: "center",
-    ...transition("background-color"),
-  }),
-  highlight: style({
-    position: "absolute",
-    zIndex: -1,
-    ...insetX(`-${spacing[1]}`),
-    ...insetY(0),
-    ...rounded(),
-    ...transition("background-color"),
-  }),
+export const ValueString = style({
+  color: color.green,
+})
+export const ValueNumber = style({
+  color: color.cyan[600],
+})
+export const ValueBoolean = style({
+  // the checkbox is not clickable now
+  pointerEvents: "none",
+})
+
+const bracketsStyles: CSSPropertiesWithVars = {
+  fontWeight: 800,
+  color: color.gray[800],
 }
+export const ValueObject = style({
+  color: color.disabled,
+  ":before": {
+    ...bracketsStyles,
+    content: `{`,
+  },
+  ":after": {
+    ...bracketsStyles,
+    content: "}",
+  },
+})
+
+export const EmptyArray = style({
+  color: color.disabled,
+})
+
+export const ValueFunction = style({
+  fontStyle: "italic",
+})
+
+export const Nullable = style({
+  color: color.disabled,
+})
+
+export const ValueElement = style({
+  color: color.amber[600],
+  textTransform: "lowercase",
+  ":before": {
+    color: color.disabled,
+    content: `<`,
+  },
+  ":after": {
+    color: color.disabled,
+    content: "/>",
+  },
+})
