@@ -1,5 +1,15 @@
 # @solid-devtools/extension-adapter
 
+## 0.11.1
+
+### Patch Changes
+
+- 1503a23: Fix missing graph after reopening devtools.
+- Updated dependencies [f49854b]
+- Updated dependencies [bde03b4]
+  - @solid-devtools/debugger@0.5.1
+  - @solid-devtools/shared@0.5.1
+
 ## 0.11.0
 
 ### Minor Changes

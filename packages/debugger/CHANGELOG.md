@@ -1,5 +1,14 @@
 # @solid-devtools/debugger
 
+## 0.5.1
+
+### Patch Changes
+
+- f49854b: Add UI components for displaying signal value previews. Display signalvalue previews in the owener details panel.
+- Updated dependencies [f49854b]
+- Updated dependencies [bde03b4]
+  - @solid-devtools/shared@0.5.1
+
 ## 0.5.0
 
 ### Minor Changes
