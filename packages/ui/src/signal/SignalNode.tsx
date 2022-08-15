@@ -1,4 +1,4 @@
-import { Component, createEffect, createMemo, For, Show } from "solid-js"
+import { Component, createEffect, createMemo, For, Match, Show, Switch } from "solid-js"
 import { GraphSignal } from "@solid-devtools/shared/graph"
 import { useHighlights, useSignalContext } from "../ctx/highlights"
 import { createHover } from "@solid-aria/interactions"
@@ -15,42 +15,62 @@ type ValueComponent<K extends ValueType> = Component<
   K extends keyof EncodedPreviewPayloadMap ? { value: EncodedPreviewPayloadMap[K] } : {}
 >
 
-const StringValuePreview: ValueComponent<ValueType.String> = props => {
-  return <span class={styles.ValueString}>"{props.value}"</span>
-}
+const StringValuePreview: ValueComponent<ValueType.String> = props => (
+  <span class={styles.ValueString}>"{props.value}"</span>
+)
 
 const NumberValuePreview: ValueComponent<ValueType.Number> = props => {
-  return <span class={styles.ValueNumber}>{props.value}</span>
+  const value = () => {
+    switch (props.value) {
+      case "__$sdt-NaN__":
+        return "NaN"
+      case "__$sdt-Infinity__":
+        return "Infinity"
+      case "__$sdt-NegativeInfinity__":
+        return "-Infinity"
+      default:
+        return props.value
+    }
+  }
+  return <span class={styles.ValueNumber}>{value()}</span>
 }
 
-const BooleanValuePreview: ValueComponent<ValueType.Boolean> = props => {
-  return (
-    <input
-      type="checkbox"
-      class={styles.ValueBoolean}
-      onClick={e => e.preventDefault()}
-      checked={props.value}
-    ></input>
-  )
-}
+const BooleanValuePreview: ValueComponent<ValueType.Boolean> = props => (
+  <input
+    type="checkbox"
+    class={styles.ValueBoolean}
+    onClick={e => e.preventDefault()}
+    checked={props.value}
+  ></input>
+)
 
-const ObjectValuePreview: ValueComponent<ValueType.Object> = props => {
-  return <span class={styles.ValueObject}>…</span>
-}
+const ObjectValuePreview: ValueComponent<ValueType.Object> = props => (
+  <span class={styles.ValueObject}>…</span>
+)
 
-const ArrayValuePreview: ValueComponent<ValueType.Array> = props => {
-  return (
-    <Show when={props.value > 0} fallback={<span class={styles.EmptyArray}>Empty Array</span>}>
-      <span>Array [{props.value}]</span>
-    </Show>
-  )
-}
+const ArrayValuePreview: ValueComponent<ValueType.Array> = props => (
+  <Show when={props.value > 0} fallback={<span class={styles.EmptyArray}>Empty Array</span>}>
+    <span>Array [{props.value}]</span>
+  </Show>
+)
 
-const FunctionValuePreview: ValueComponent<ValueType.Function> = props => {
-  return (
-    <span class={styles.ValueFunction}>{props.value ? `f ${props.value}()` : "function()"}</span>
-  )
-}
+const FunctionValuePreview: ValueComponent<ValueType.Function> = props => (
+  <span class={styles.ValueFunction}>{props.value ? `f ${props.value}()` : "function()"}</span>
+)
+
+const NullableValuePreview: Component<{ value: null | undefined }> = props => (
+  <span class={styles.Nullable}>{props.value === null ? "null" : "undefined"}</span>
+)
+
+const SymbolValuePreview: ValueComponent<ValueType.Symbol> = props => (
+  <span>Symbol({props.value})</span>
+)
+
+const InstanceValuePreview: ValueComponent<ValueType.Instance> = props => <span>{props.value}</span>
+
+const ElementValuePreview: ValueComponent<ValueType.Element> = props => (
+  <span class={styles.ValueElement}>{props.value}</span>
+)
 
 const ValuePreview: Component<{
   updated?: boolean
@@ -60,19 +80,29 @@ const ValuePreview: Component<{
   const Value = createMemo(() => {
     switch (props.value.type) {
       case ValueType.String:
-        return <StringValuePreview {...props.value} />
+        return <StringValuePreview value={props.value.value} />
       case ValueType.Number:
-        return <NumberValuePreview {...props.value} />
+        return <NumberValuePreview value={props.value.value} />
       case ValueType.Boolean:
-        return <BooleanValuePreview {...props.value} />
+        return <BooleanValuePreview value={props.value.value} />
       case ValueType.Object:
         return <ObjectValuePreview />
       case ValueType.Array:
-        return <ArrayValuePreview {...props.value} />
+        return <ArrayValuePreview value={props.value.value} />
       case ValueType.Function:
-        return <FunctionValuePreview {...props.value} />
-      default:
-        return <span>{ValueType[props.value.type]}</span>
+        return <FunctionValuePreview value={props.value.value} />
+      case ValueType.Null:
+        return <NullableValuePreview value={null} />
+      case ValueType.Undefined:
+        return <NullableValuePreview value={undefined} />
+      case ValueType.Symbol:
+        return <SymbolValuePreview value={props.value.value} />
+      case ValueType.Instance:
+        return <InstanceValuePreview value={props.value.value} />
+      case ValueType.Element:
+        return <ElementValuePreview value={props.value.value} />
+      // default:
+      //   return <span>{ValueType[props.value.type]}</span>
     }
   })
 

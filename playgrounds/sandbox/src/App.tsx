@@ -82,6 +82,9 @@ const App: Component = () => {
   const [count, setCount] = createSignal(0)
   const [showEven, setShowEven] = createSignal(false)
   const fnSig = createSignal(() => {})
+  const nullSig = createSignal(null)
+  const symbolSig = createSignal(Symbol("hello-symbol"))
+  const mapSig = createSignal(new Map())
 
   const objmemo = createMemo(() => {
     return {

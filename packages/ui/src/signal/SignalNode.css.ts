@@ -66,3 +66,20 @@ export const EmptyArray = style({
 export const ValueFunction = style({
   fontStyle: "italic",
 })
+
+export const Nullable = style({
+  color: color.disabled,
+})
+
+export const ValueElement = style({
+  color: color.amber[600],
+  textTransform: "lowercase",
+  ":before": {
+    color: color.disabled,
+    content: `<`,
+  },
+  ":after": {
+    color: color.disabled,
+    content: "/>",
+  },
+})
