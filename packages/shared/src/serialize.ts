@@ -16,7 +16,7 @@ export enum ValueType {
   Instance,
 }
 
-export type SerializedPreview =
+export type EncodedPreview =
   | { type: ValueType.Array; length: number }
   | { type: ValueType.Object }
   | {
@@ -32,7 +32,7 @@ export type SerializedPreview =
   | { type: ValueType.Element; name: string }
   | { type: ValueType.Instance; name: string }
 
-export function serializePreview(value: unknown): SerializedPreview {
+export function encodePreview(value: unknown): EncodedPreview {
   if (typeof value === "number") {
     if (value === Infinity) return { type: ValueType.Number, value: INFINITY }
     if (value === -Infinity) return { type: ValueType.Number, value: NEGATIVE_INFINITY }

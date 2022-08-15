@@ -1,15 +1,15 @@
 import {
-  serializePreview,
+  encodePreview,
   ValueType,
   INFINITY,
   NEGATIVE_INFINITY,
   NAN,
-  SerializedPreview,
+  EncodedPreview,
 } from "../src/serialize"
 
 const _testFunction = () => {}
 
-const serializePreviewExpectations: [string, unknown, SerializedPreview][] = [
+const encodePreviewExpectations: [string, unknown, EncodedPreview][] = [
   ["Infinity", Infinity, { type: ValueType.Number, value: INFINITY }],
   ["Negative Infinity", -Infinity, { type: ValueType.Number, value: NEGATIVE_INFINITY }],
   ["NaN", NaN, { type: ValueType.Number, value: NAN }],
@@ -37,10 +37,10 @@ const serializePreviewExpectations: [string, unknown, SerializedPreview][] = [
   ["Set", new Set(), { type: ValueType.Instance, name: "Set" }],
 ]
 
-describe("serializePreview", () => {
-  for (const [testName, value, expectation] of serializePreviewExpectations) {
+describe("encodePreview", () => {
+  for (const [testName, value, expectation] of encodePreviewExpectations) {
     test(testName, () => {
-      const s = serializePreview(value)
+      const s = encodePreview(value)
       expect(s).toEqual(expectation)
       expect(JSON.parse(JSON.stringify(s))).toEqual(s)
     })
