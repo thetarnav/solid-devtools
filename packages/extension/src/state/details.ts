@@ -41,8 +41,8 @@ function reconcileSignals(
 }
 
 function createSignalNode(raw: Readonly<MappedSignal>): GraphSignal {
-  const [value, setValue] = createSignal(raw.value)
-  return { ...raw, value, setValue }
+  // const [value, setValue] = createSignal(raw.value)
+  return { ...raw }
 }
 
 export type OwnerDetailsState =
@@ -113,7 +113,11 @@ const exports = createRoot(() => {
         "signals",
         produce(proxy => {
           for (const update of updates) {
-            proxy[update.id]?.setValue(update.value)
+            const signal = proxy[update.id]
+            if (!signal) return
+            signal.value.type = update.value.type
+            if ("value" in update.value) (signal.value as any).value = update.value.value
+            else delete (signal.value as any).value
           }
         }),
       )

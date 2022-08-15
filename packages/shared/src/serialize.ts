@@ -18,21 +18,22 @@ export enum ValueType {
   Instance,
 }
 
-export type EncodedPreview =
-  | { type: ValueType.Array; length: number }
-  | { type: ValueType.Object }
-  | {
-      type: ValueType.Number
-      value: number | typeof INFINITY | typeof NEGATIVE_INFINITY | typeof NAN
-    }
-  | { type: ValueType.Boolean; value: boolean }
-  | { type: ValueType.String; value: string }
-  | { type: ValueType.Null }
-  | { type: ValueType.Undefined }
-  | { type: ValueType.Symbol; name: string }
-  | { type: ValueType.Function; name: string }
-  | { type: ValueType.Element; name: string }
-  | { type: ValueType.Instance; name: string }
+export type EncodedPreviewPayloadMap = {
+  [ValueType.Array]: number
+  [ValueType.Number]: number | typeof INFINITY | typeof NEGATIVE_INFINITY | typeof NAN
+  [ValueType.Boolean]: boolean
+  [ValueType.String]: string
+  [ValueType.Symbol]: string
+  [ValueType.Function]: string
+  [ValueType.Element]: string
+  [ValueType.Instance]: string
+}
+
+export type EncodedPreview = {
+  [K in ValueType]: { type: K } & (K extends keyof EncodedPreviewPayloadMap
+    ? { value: EncodedPreviewPayloadMap[K] }
+    : {})
+}[ValueType]
 
 export function encodePreview(value: unknown): EncodedPreview {
   if (typeof value === "number") {
@@ -45,15 +46,15 @@ export function encodePreview(value: unknown): EncodedPreview {
   if (typeof value === "string") return { type: ValueType.String, value }
   if (value === null) return { type: ValueType.Null }
   if (value === undefined) return { type: ValueType.Undefined }
-  if (typeof value === "symbol") return { type: ValueType.Symbol, name: value.description ?? "" }
-  if (typeof value === "function") return { type: ValueType.Function, name: value.name }
-  if (value instanceof HTMLElement) return { type: ValueType.Element, name: value.tagName }
-  if (Array.isArray(value)) return { type: ValueType.Array, length: value.length }
+  if (typeof value === "symbol") return { type: ValueType.Symbol, value: value.description ?? "" }
+  if (typeof value === "function") return { type: ValueType.Function, value: value.name }
+  if (value instanceof HTMLElement) return { type: ValueType.Element, value: value.tagName }
+  if (Array.isArray(value)) return { type: ValueType.Array, value: value.length }
 
   const s = Object.prototype.toString.call(value)
   const name = s.slice(8, -1)
   if (name === "Object") return { type: ValueType.Object }
-  return { type: ValueType.Instance, name }
+  return { type: ValueType.Instance, value: name }
 }
 
 const literalTypes = ["bigint", "number", "boolean", "string", "undefined"]

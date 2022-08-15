@@ -52,9 +52,9 @@ const DetailsPanel: Component<{}> = props => {
   return (
     <Show when={focused()}>
       <div class={styles.details.transitionWrapper}>
-        <Transition name="fade">
-          <Show when={details()}>{details => <DetailsContent details={details} />}</Show>
-        </Transition>
+        {/* <Transition name="fade"> */}
+        <Show when={details()}>{details => <DetailsContent details={details} />}</Show>
+        {/* </Transition> */}
       </div>
     </Show>
   )

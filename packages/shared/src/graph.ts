@@ -187,13 +187,7 @@ export interface GraphOwner {
   readonly children: GraphOwner[]
 }
 
-export type GraphSignal = Modify<
-  MappedSignal,
-  {
-    readonly value: Accessor<EncodedPreview>
-    readonly setValue: (value: EncodedPreview) => void
-  }
->
+export type GraphSignal = MappedSignal
 
 export type OwnerPath = (GraphOwner | typeof NOTFOUND)[]
 
