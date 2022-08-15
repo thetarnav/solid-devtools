@@ -10,7 +10,6 @@ import {
 } from "./details"
 
 export const { onRuntimeMessage, postRuntimeMessage } = createRuntimeMessanger()
-postRuntimeMessage("ForceUpdate")
 
 onRuntimeMessage("GraphUpdate", update => {
   handleGraphUpdate(update)

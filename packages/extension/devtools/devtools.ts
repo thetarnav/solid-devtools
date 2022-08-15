@@ -2,7 +2,7 @@ import { createRuntimeMessanger } from "../shared/messanger"
 import { once } from "@solid-devtools/shared/bridge"
 import { log } from "@solid-devtools/shared/utils"
 
-log("devtools script working")
+log("Devtools script working.")
 
 const { onRuntimeMessage, postRuntimeMessage } = createRuntimeMessanger()
 
@@ -11,12 +11,13 @@ postRuntimeMessage("DevtoolsScriptConnected")
 let panel: chrome.devtools.panels.ExtensionPanel | undefined
 
 once(onRuntimeMessage, "SolidOnPage", async () => {
-  if (panel) return console.log("Panel already exists")
+  if (panel) return log("Panel already exists.")
 
-  console.log("Solid on page – creating panel")
+  log("Solid on page – creating panel...")
   try {
     panel = await createPanel()
-    console.log("panel", panel)
+    log("Panel created.")
+    // console.log("panel", panel)
     panel.onShown.addListener(onPanelShown)
     panel.onHidden.addListener(onPanelHidden)
   } catch (error) {
