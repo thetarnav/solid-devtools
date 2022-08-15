@@ -1,5 +1,19 @@
 # solid-devtools-extension
 
+## 0.6.0
+
+### Minor Changes
+
+- f49854b: Add UI components for displaying signal value previews. Display signalvalue previews in the owener details panel.
+
+### Patch Changes
+
+- 1503a23: Fix missing graph after reopening devtools.
+- Updated dependencies [f49854b]
+- Updated dependencies [bde03b4]
+  - @solid-devtools/ui@0.8.0
+  - @solid-devtools/shared@0.5.1
+
 ## 0.5.0
 
 ### Minor Changes
