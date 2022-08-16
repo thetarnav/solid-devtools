@@ -1,5 +1,13 @@
 # solid-devtools-extension
 
+## 0.6.1
+
+### Patch Changes
+
+- 9bad4dd: Sort signals (memos last)
+- Updated dependencies [9bad4dd]
+  - @solid-devtools/ui@0.8.1
+
 ## 0.6.0
 
 ### Minor Changes
