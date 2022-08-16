@@ -1,18 +1,9 @@
 {
+  "extends": "./configs/tsconfig.base.json",
   "compilerOptions": {
-    "strict": true,
-    "target": "ESNext",
-    "module": "ESNext",
     "lib": ["DOM", "DOM.Iterable", "ESNext"],
-    "moduleResolution": "node",
-    "allowSyntheticDefaultImports": true,
-    "resolveJsonModule": true,
-    "esModuleInterop": true,
     "jsx": "preserve",
     "jsxImportSource": "solid-js",
-    "noEmit": true,
-    "isolatedModules": true,
-    "skipLibCheck": true,
     "types": ["node", "jest"],
     "paths": {
       "solid-devtools": ["./packages/main/src/index.ts"],

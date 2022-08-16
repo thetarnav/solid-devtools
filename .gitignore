@@ -38,4 +38,4 @@ Thumbs.db
 # chrome extension private key file
 *.pem
 
-
+packages/extension/dist.zip

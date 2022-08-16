@@ -24,11 +24,23 @@ jobs:
       - name: Install Dependencies
         run: pnpm install --no-frozen-lockfile
 
+      - name: Build and Test
+        run: pnpm build-test
+
+      - name: Upload & release Extension
+        uses: mnao305/chrome-extension-upload@3.0.0
+        with:
+          file-path: packages/extension/dist.zip
+          extension-id: kmcfjchnmmaeeagadbhoofajiopoceel
+          client-id: ${{ secrets.CLIENT_ID }}
+          client-secret: ${{ secrets.CLIENT_SECRET }}
+          refresh-token: ${{ secrets.REFRESH_TOKEN }}
+
       - name: Publish to npm
         id: changesets
         uses: changesets/action@v1
         with:
-          publish: pnpm run release
+          publish: pnpm run ci:publish
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
