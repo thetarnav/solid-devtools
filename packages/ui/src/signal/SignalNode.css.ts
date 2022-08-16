@@ -21,6 +21,10 @@ export const SignalNode = {
     color: color.gray[800],
     fontWeight: 600,
     fontFamily: theme.font.mono,
+    ":after": {
+      content: ":",
+      color: color.disabled,
+    },
   }),
 }
 

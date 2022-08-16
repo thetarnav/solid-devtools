@@ -143,7 +143,8 @@ export const SignalNode: Component<{ signal: GraphSignal }> = ({ signal }) => {
   return (
     <div class={styles.SignalNode.container} {...hoverProps}>
       <div class={styles.SignalNode.name}>
-        {signal.name}:{/* <span class={styles.SignalNode.id}>#{signal.id}</span> */}
+        {signal.name}
+        {/* <span class={styles.SignalNode.id}>#{signal.id}</span> */}
       </div>
       <ValuePreview value={signal.value} updated={isUpdated()} highlighted={isHighlighted()} />
     </div>
