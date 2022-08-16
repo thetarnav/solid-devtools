@@ -7,7 +7,8 @@ import {
   EncodedPreviewPayloadMap,
   ValueType,
 } from "@solid-devtools/shared/serialize"
-import { theme } from "../theme"
+import * as Icon from "~/icons"
+import { color, theme } from "~/theme"
 import { HighlightText } from "../highlight/Highlight"
 import * as styles from "./SignalNode.css"
 
@@ -136,6 +137,7 @@ export const Signals: Component<{ each: GraphSignal[] }> = props => {
 }
 
 export const SignalNode: Component<{ signal: GraphSignal }> = ({ signal }) => {
+  const { type } = signal
   const { useUpdatedSelector } = useSignalContext()
 
   const isUpdated = useUpdatedSelector(signal.id)
@@ -148,6 +150,13 @@ export const SignalNode: Component<{ signal: GraphSignal }> = ({ signal }) => {
 
   return (
     <div class={styles.SignalNode.container} {...hoverProps}>
+      <div class={styles.SignalNode.icon}>
+        {type === NodeType.Memo ? (
+          <Icon.Memo bgColor={color.amber[400]} />
+        ) : (
+          <div class={styles.SignalNode.signalDot} />
+        )}
+      </div>
       <div class={styles.SignalNode.name}>
         {signal.name}
         {/* <span class={styles.SignalNode.id}>#{signal.id}</span> */}

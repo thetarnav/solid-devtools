@@ -1,5 +1,5 @@
 import { style } from "@vanilla-extract/css"
-import { color, spacing, theme } from "../theme"
+import { centerChild, color, spacing, theme } from "../theme"
 import { CSSPropertiesWithVars } from "@vanilla-extract/css/dist/declarations/src/types"
 
 export const Signals = {
@@ -16,7 +16,20 @@ export const SignalNode = {
     alignItems: "center",
     height: spacing[4.5],
   }),
+  icon: style({
+    height: "100%",
+    width: spacing[4.5],
+    marginRight: spacing[1],
+    ...centerChild,
+  }),
+  signalDot: style({
+    width: spacing[1],
+    height: spacing[1],
+    borderRadius: "50%",
+    backgroundColor: color.amber[400],
+  }),
   name: style({
+    height: "100%",
     minWidth: spacing[24],
     color: color.gray[800],
     fontWeight: 600,
@@ -30,7 +43,7 @@ export const SignalNode = {
 
 export const ValuePreview = style({
   minWidth: spacing[4],
-  height: spacing[4.5],
+  height: "100%",
   color: color.gray[800],
   fontFamily: theme.font.mono,
   fontWeight: 600,

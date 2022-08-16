@@ -4,6 +4,6 @@ import { vanillaExtractPlugin } from "@vanilla-extract/esbuild-plugin"
 export default defineConfig(
   "tsx",
   undefined,
-  ["theme/index.ts", "animation/index.ts"],
+  ["theme/index.ts", "animation/index.ts", "icons/index.tsx"],
   [vanillaExtractPlugin()],
 )

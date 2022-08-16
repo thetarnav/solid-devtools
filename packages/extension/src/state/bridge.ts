@@ -11,6 +11,11 @@ import {
 
 export const { onRuntimeMessage, postRuntimeMessage } = createRuntimeMessanger()
 
+// in development — force update the graph on load to work with hot reloading
+if (import.meta.env.DEV) {
+  postRuntimeMessage("ForceUpdate")
+}
+
 onRuntimeMessage("GraphUpdate", update => {
   handleGraphUpdate(update)
   detailsHandleGraphUpdate()

@@ -39,6 +39,10 @@
     "./animation": {
       "import": "./dist/animation/index.js",
       "require": "./dist/animation/index.cjs"
+    },
+    "./icons": {
+      "import": "./dist/icons/index.js",
+      "require": "./dist/icons/index.cjs"
     }
   },
   "typesVersions": {
@@ -48,6 +52,9 @@
       ],
       "animation": [
         "./dist/animation/index.d.ts"
+      ],
+      "icons": [
+        "./dist/icons/index.d.ts"
       ]
     }
   },
