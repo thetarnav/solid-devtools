@@ -1,5 +1,11 @@
 # @solid-devtools/logger
 
+## 0.4.1
+
+### Patch Changes
+
+- e904193: Test patch.
+
 ## 0.4.0
 
 ### Minor Changes
