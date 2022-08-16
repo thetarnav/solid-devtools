@@ -1,5 +1,5 @@
-import { Component, createEffect, createMemo, For, Match, Show, Switch } from "solid-js"
-import { GraphSignal } from "@solid-devtools/shared/graph"
+import { Component, createEffect, createMemo, For, Show } from "solid-js"
+import { GraphSignal, NodeType } from "@solid-devtools/shared/graph"
 import { useHighlights, useSignalContext } from "../ctx/highlights"
 import { createHover } from "@solid-aria/interactions"
 import {
@@ -120,10 +120,16 @@ const ValuePreview: Component<{
 }
 
 export const Signals: Component<{ each: GraphSignal[] }> = props => {
+  const sorted = createMemo(() =>
+    props.each.slice().sort((a, b) => {
+      if (a.type === b.type) return a.id > b.id ? 1 : -1
+      return a.type === NodeType.Memo ? 1 : -1
+    }),
+  )
   return (
     <Show when={props.each.length}>
       <div class={styles.Signals.container}>
-        <For each={props.each}>{signal => <SignalNode signal={signal} />}</For>
+        <For each={sorted()}>{signal => <SignalNode signal={signal} />}</For>
       </div>
     </Show>
   )

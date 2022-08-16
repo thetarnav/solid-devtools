@@ -13,7 +13,6 @@ import {
 import { highlights, graphs } from "./state/graph"
 import { focused, details, useUpdatedSignalsSelector } from "./state/details"
 import * as styles from "./styles.css"
-import { Transition } from "solid-transition-group"
 
 const DetailsContent: Component<{ details: OwnerDetails }> = props => {
   const { name, id, type, path, signals } = destructure(() => props.details)
