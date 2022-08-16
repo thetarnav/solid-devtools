@@ -18,7 +18,6 @@
     "release": "pnpm run build-test && changeset publish",
     "version-packages": "changeset version && pnpm i",
     "ci:version": "changeset version && pnpm i --no-frozen-lockfile && git add .",
-    "ci:publish": "changeset publish",
     "update-deps": "taze -w -r && pnpm i"
   },
   "devDependencies": {
@@ -31,7 +30,6 @@
     "babel-preset-solid": "^1.4.8",
     "esbuild": "^0.14.53",
     "esbuild-plugin-solid": "^0.4.2",
-    "jiti": "^1.14.0",
     "prettier": "2.7.0",
     "solid-js": "^1.4.8",
     "taze": "^0.7.6",
