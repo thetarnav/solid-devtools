@@ -4,8 +4,7 @@ import { version } from "./package.json"
 export default defineManifest({
   manifest_version: 3,
   name: "Solid Devtools",
-  description:
-    "Chrome Developer Tools extension for debugging SolidJS applications. It allows for visualizing and interacting with Solid's reactivity graph, as well as inspecting component state and hierarchy.",
+  description: "Chrome Developer Tools extension for debugging SolidJS applications.",
   homepage_url: "https://github.com/thetarnav/solid-devtools",
   version,
   author: "Damian Tarnawski",
