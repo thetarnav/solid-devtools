@@ -4,7 +4,7 @@
 
 # Solid Devtools
 
-Reactivity Debugger & Devtools Chrome Extension for SolidJS.
+Library of developer tools for debugging and visualizing Solid's reactivity, reactivity debugger & Devtools Chrome Extension for SolidJS applications.
 
 ## Why?
 
@@ -66,8 +66,7 @@ It can do very useful things for you: Wrap stores to let the debugger observe th
 
 🚧 In very very early development. 🚧
 
-Chrome devtools extension for debugging Solid applications.
-It allows for visualizing and interacting with Solid's reactivity graph, as well as inspecting component state and hierarchy.
+Chrome Developer Tools extension for debugging SolidJS applications. It allows for visualizing and interacting with Solid's reactivity graph, as well as inspecting component state and hierarchy.
 
 ### [Extension Adapter](./packages/extension-adapter#readme)
 
