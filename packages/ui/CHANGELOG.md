@@ -1,5 +1,11 @@
 # @solid-devtools/ui
 
+## 0.8.1
+
+### Patch Changes
+
+- 9bad4dd: Sort signals (memos last)
+
 ## 0.8.0
 
 ### Minor Changes

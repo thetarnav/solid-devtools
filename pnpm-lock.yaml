@@ -84,7 +84,7 @@ importers:
     specifiers:
       '@crxjs/vite-plugin': ^1.0.13
       '@solid-devtools/shared': workspace:^0.5.1
-      '@solid-devtools/ui': 0.8.0
+      '@solid-devtools/ui': 0.8.1
       '@solid-primitives/context': ^0.1.0
       '@solid-primitives/destructure': ^0.1.1
       '@solid-primitives/immutable': ^0.1.0
@@ -5197,7 +5197,7 @@ packages:
     dev: true
 
   /concat-map/0.0.1:
-    resolution: {integrity: sha1-2Klr13/Wjfd5OnMDajug1UBdR3s=}
+    resolution: {integrity: sha512-/Srv4dswyQNBfohGpz9o6Yb3Gz3SrUDqBH5rTuhGR7ahtlbYKnVxw2bCFMRljaA7EXHaXZ8wsHdodFvbkhKmqg==}
     dev: true
 
   /connect-injector/0.4.4:
