@@ -1,5 +1,13 @@
 # solid-devtools-extension
 
+## 0.6.2
+
+### Patch Changes
+
+- c408963: Add memo icon and listing decorations for signals.
+- Updated dependencies [c408963]
+  - @solid-devtools/ui@0.8.2
+
 ## 0.6.1
 
 ### Patch Changes

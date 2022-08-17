@@ -1,5 +1,11 @@
 # @solid-devtools/ui
 
+## 0.8.2
+
+### Patch Changes
+
+- c408963: Add memo icon and listing decorations for signals.
+
 ## 0.8.1
 
 ### Patch Changes

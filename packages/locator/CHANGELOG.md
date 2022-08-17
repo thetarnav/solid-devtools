@@ -1,5 +1,11 @@
 # @solid-devtools/locator
 
+## 0.11.2
+
+### Patch Changes
+
+- 0c1892f: Use windows path regex only for windows. (Related #66)
+
 ## 0.11.0
 
 ### Minor Changes
