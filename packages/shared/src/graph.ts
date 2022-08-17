@@ -1,8 +1,8 @@
-import { Accessor, getOwner as _getOwner } from "solid-js"
-import { Many, Modify } from "@solid-primitives/utils"
+import { getOwner as _getOwner } from "solid-js"
+import { Many } from "@solid-primitives/utils"
 import { Owner as _Owner, SignalState as _SignalState, Computation as _Computation } from "./solid"
 import { INTERNAL, NOTFOUND } from "./variables"
-import { EncodedPreview } from "./serialize"
+import { EncodedValue } from "./serialize"
 
 export enum NodeType {
   Component,
@@ -138,7 +138,7 @@ export interface MappedSignal {
   name: string
   id: NodeID
   observers: NodeID[]
-  value: EncodedPreview
+  value: EncodedValue
 }
 
 export type MappedComponent = {
@@ -156,7 +156,7 @@ export interface MappedOwnerDetails {
   path: NodeID[]
   signals: MappedSignal[]
   /** for computations */
-  value?: EncodedPreview
+  value?: EncodedValue
   /** for computations */
   sources?: NodeID[]
   /** for memos */
@@ -165,7 +165,7 @@ export interface MappedOwnerDetails {
 
 export type SignalUpdate = {
   id: NodeID
-  value: EncodedPreview
+  value: EncodedValue
 }
 
 //

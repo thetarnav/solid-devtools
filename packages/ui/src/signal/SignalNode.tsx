@@ -1,20 +1,14 @@
 import { Component, createEffect, createMemo, For, Show } from "solid-js"
 import { GraphSignal, NodeType } from "@solid-devtools/shared/graph"
-import { useHighlights, useSignalContext } from "../ctx/highlights"
 import { createHover } from "@solid-aria/interactions"
-import {
-  EncodedPreview,
-  EncodedPreviewPayloadMap,
-  ValueType,
-} from "@solid-devtools/shared/serialize"
+import { EncodedValue, EncodedValueOf, ValueType } from "@solid-devtools/shared/serialize"
 import * as Icon from "~/icons"
 import { color, theme } from "~/theme"
+import { useHighlights, useSignalContext } from "../ctx/highlights"
 import { HighlightText } from "../highlight/Highlight"
 import * as styles from "./SignalNode.css"
 
-type ValueComponent<K extends ValueType> = Component<
-  K extends keyof EncodedPreviewPayloadMap ? { value: EncodedPreviewPayloadMap[K] } : {}
->
+type ValueComponent<K extends ValueType> = Component<Omit<EncodedValueOf<K>, "type">>
 
 const StringValuePreview: ValueComponent<ValueType.String> = props => (
   <span class={styles.ValueString}>"{props.value}"</span>
@@ -76,7 +70,7 @@ const ElementValuePreview: ValueComponent<ValueType.Element> = props => (
 const ValuePreview: Component<{
   updated?: boolean
   highlighted?: boolean
-  value: EncodedPreview
+  value: EncodedValue
 }> = props => {
   const Value = createMemo(() => {
     switch (props.value.type) {

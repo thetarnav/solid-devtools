@@ -9,7 +9,7 @@ import {
   MappedOwnerDetails,
   NodeID,
 } from "@solid-devtools/shared/graph"
-import { encodePreview } from "@solid-devtools/shared/serialize"
+import { encodeValue } from "@solid-devtools/shared/serialize"
 import {
   getNodeName,
   getNodeType,
@@ -55,7 +55,7 @@ function createSignalNode(node: SolidSignal): MappedSignal {
     name: getNodeName(node),
     id: markNodeID(node),
     observers: markNodesID(node.observers),
-    value: encodePreview(node.value),
+    value: encodeValue(node.value),
   }
 }
 
@@ -108,7 +108,7 @@ function collectOwnerDetails(owner: SolidOwner): void {
   }
 
   if (isSolidComputation(owner)) {
-    details.value = encodePreview(owner.value)
+    details.value = encodeValue(owner.value)
     details.sources = markNodesID(owner.sources)
     if (isSolidMemo(owner)) {
       details.observers = markNodesID(owner.observers)

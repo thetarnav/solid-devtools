@@ -26,7 +26,7 @@ import { createConsumers, createInternalRoot } from "./utils"
 import { clearOwnerObservers, ComputationUpdateHandler, SignalUpdateHandler } from "./walker"
 import { forceRootUpdate } from "./roots"
 import { throttle } from "@solid-primitives/scheduled"
-import { encodePreview } from "@solid-devtools/shared/serialize"
+import { encodeValue } from "@solid-devtools/shared/serialize"
 
 /*
 DETAILS:
@@ -209,7 +209,7 @@ const exported = createInternalRoot(() => {
 
     const pushComputationUpdate: SignalUpdateHandler = (id, value) => {
       if (!untrack(focusedId)) return
-      signalUpdates.push({ id, value: encodePreview(value) })
+      signalUpdates.push({ id, value: encodeValue(value) })
       triggerComputationUpdateEmit()
     }
 

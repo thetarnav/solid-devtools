@@ -1,5 +1,3 @@
-import { JsonValue } from "type-fest"
-
 export const INFINITY = "__$sdt-Infinity__"
 export const NEGATIVE_INFINITY = "__$sdt-NegativeInfinity__"
 export const NAN = "__$sdt-NaN__"
@@ -29,13 +27,27 @@ export type EncodedPreviewPayloadMap = {
   [ValueType.Instance]: string
 }
 
-export type EncodedPreview = {
-  [K in ValueType]: { type: K } & (K extends keyof EncodedPreviewPayloadMap
-    ? { value: EncodedPreviewPayloadMap[K] }
-    : {})
+type PreviewPayloadOf<K extends ValueType> = K extends keyof EncodedPreviewPayloadMap
+  ? { value: EncodedPreviewPayloadMap[K] }
+  : {}
+
+export type EncodedValueOf<K extends ValueType, Deep extends boolean = false> = {
+  type: K
+} & (Deep extends true
+  ? K extends ValueType.Array
+    ? { value: EncodedValue<true>[] }
+    : K extends ValueType.Object
+    ? { value: Record<string, EncodedValue<true>> }
+    : PreviewPayloadOf<K>
+  : PreviewPayloadOf<K>)
+
+export type EncodedValue<Deep extends boolean = false> = {
+  [K in ValueType]: EncodedValueOf<K, Deep>
 }[ValueType]
 
-export function encodePreview(value: unknown): EncodedPreview {
+export function encodeValue<Deep extends boolean>(value: unknown, deep: Deep): EncodedValue<Deep>
+export function encodeValue(value: unknown): EncodedValue<false>
+export function encodeValue<Deep extends boolean>(value: unknown, deep?: Deep): EncodedValue<Deep> {
   if (typeof value === "number") {
     if (value === Infinity) return { type: ValueType.Number, value: INFINITY }
     if (value === -Infinity) return { type: ValueType.Number, value: NEGATIVE_INFINITY }
@@ -49,18 +61,28 @@ export function encodePreview(value: unknown): EncodedPreview {
   if (typeof value === "symbol") return { type: ValueType.Symbol, value: value.description ?? "" }
   if (typeof value === "function") return { type: ValueType.Function, value: value.name }
   if (value instanceof HTMLElement) return { type: ValueType.Element, value: value.tagName }
-  if (Array.isArray(value)) return { type: ValueType.Array, value: value.length }
+
+  if (Array.isArray(value))
+    return {
+      type: ValueType.Array,
+      value: deep ? value.map(item => encodeValue(item, true)) : value.length,
+    }
 
   const s = Object.prototype.toString.call(value)
   const name = s.slice(8, -1)
-  if (name === "Object") return { type: ValueType.Object }
+  if (name === "Object") {
+    const obj = value as Record<PropertyKey, unknown>
+    const type = ValueType.Object
+    return !deep
+      ? { type }
+      : {
+          type,
+          value: Object.keys(obj).reduce((acc, key) => {
+            acc[key] = encodeValue(obj[key], true)
+            return acc
+          }, {} as Record<string, EncodedValue<true>>),
+        }
+  }
+
   return { type: ValueType.Instance, value: name }
-}
-
-const literalTypes = ["bigint", "number", "boolean", "string", "undefined"]
-
-/** @deprecated */
-export function getSafeValue(value: unknown): JsonValue {
-  if (literalTypes.includes(typeof value)) return value as JsonValue
-  return value + ""
 }
