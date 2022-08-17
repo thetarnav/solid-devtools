@@ -1,21 +1,19 @@
 import { MappedComponent } from "@solid-devtools/shared/graph"
 import { LOCATION_ATTRIBUTE_NAME } from "@solid-devtools/shared/variables"
-import { isMac } from "@solid-primitives/platform"
+import { isWindows } from "@solid-primitives/platform"
 import { SelectedComponent } from "."
 import { ElementLocation } from "./goToSource"
 
 const LOC_ATTR_REGEX_WIN = /^((?:[^\\/:*?"<>|]+\\)*[^\\/:*?"<>|]+):([0-9]+):([0-9]+)$/
-const LOC_ATTR_REGEX_MAC = /^((?:[^\\:*?"<>|]+\/)*[^\\/:*?"<>|]+):([0-9]+):([0-9]+)$/
+const LOC_ATTR_REGEX_UNIX = /^((?:[^\\:*?"<>|]+\/)*[^\\/:*?"<>|]+):([0-9]+):([0-9]+)$/
+
+const LOC_ATTR_REGEX = isWindows ? LOC_ATTR_REGEX_WIN : LOC_ATTR_REGEX_UNIX
 
 export function getLocationFromAttribute(value: string): ElementLocation | null {
-  const match = value.match(isMac ? LOC_ATTR_REGEX_MAC : LOC_ATTR_REGEX_WIN)
+  const match = value.match(LOC_ATTR_REGEX)
   if (!match) return null
   const [, filePath, line, column] = match
-  return {
-    filePath,
-    line: +line,
-    column: +column,
-  }
+  return { filePath, line: +line, column: +column }
 }
 
 export function getLocationFromElement(element: Element): ElementLocation | null {
@@ -52,12 +50,7 @@ export function findComponent(
     const cached = findComponentCache.get(el)
     if (cached !== undefined) {
       checked.forEach(cel => findComponentCache.set(cel, cached))
-      return cached
-        ? {
-            ...cached,
-            location: location ?? cached.location,
-          }
-        : null
+      return cached ? { ...cached, location: location ?? cached.location } : null
     }
 
     checked.push(el)
@@ -68,11 +61,7 @@ export function findComponent(
         (Array.isArray(comp.resolved) && comp.resolved.some(e => e === el)) ||
         el === comp.resolved
       ) {
-        const obj = {
-          name: comp.name,
-          element: el,
-          location,
-        }
+        const obj = { name: comp.name, element: el, location }
         checked.forEach(cel => findComponentCache.set(cel, obj))
         return obj
       }
