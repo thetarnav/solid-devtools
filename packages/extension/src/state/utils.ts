@@ -5,10 +5,6 @@ import { mutateFilter } from "@solid-devtools/shared/utils"
 export const dispose = (o: { dispose?: VoidFunction }) => o.dispose?.()
 export const disposeAll = (list: { dispose?: VoidFunction }[]) => list.forEach(dispose)
 
-export function deleteKey<K extends PropertyKey>(this: { [_ in K]?: unknown }, key: K) {
-  delete this[key]
-}
-
 /**
  * Reconciles an array by mutating it. Diffs items by "id" prop. And uses {@link mapFunc} for creating new items.
  * Use for dynamic arrays that can change entirely. Like sources or observers.
@@ -40,10 +36,7 @@ export function createUpdatedSelector(): [
   return [
     id => selector.bind(void 0, id),
     ids => {
-      setUpdated(prev => {
-        const appended = [...prev, ...ids]
-        return [...new Set(appended)]
-      })
+      setUpdated(prev => [...new Set([...prev, ...ids])])
     },
     () => setUpdated([]),
   ]

@@ -5,7 +5,7 @@ import { EncodedValue, EncodedValueOf, ValueType } from "@solid-devtools/shared/
 import * as Icon from "~/icons"
 import { color, theme } from "~/theme"
 import { useHighlights, useSignalContext } from "../ctx/highlights"
-import { HighlightText } from "../highlight/Highlight"
+import { Highlight } from "../highlight/Highlight"
 import * as styles from "./SignalNode.css"
 
 type ValueComponent<K extends ValueType> = Component<Omit<EncodedValueOf<K>, "type">>
@@ -102,15 +102,9 @@ const ValuePreview: Component<{
   })
 
   return (
-    <HighlightText
-      strong={props.updated}
-      light={props.highlighted}
-      bgColor={theme.color.amber[400]}
-      textColor
-      class={styles.ValuePreview}
-    >
+    <Highlight strong={props.updated} light={props.highlighted} signal class={styles.ValuePreview}>
       <Value />
-    </HighlightText>
+    </Highlight>
   )
 }
 
@@ -143,7 +137,14 @@ export const SignalNode: Component<{ signal: GraphSignal }> = ({ signal }) => {
   createEffect(() => highlightSignalObservers(signal, isHovered()))
 
   return (
-    <div class={styles.SignalNode.container} {...hoverProps}>
+    <div
+      class={styles.SignalNode.container}
+      {...hoverProps}
+      onClick={() => {
+        console.log("HELLOs")
+      }}
+    >
+      <div class={styles.SignalNode.highlight} />
       <div class={styles.SignalNode.icon}>
         {type === NodeType.Memo ? (
           <Icon.Memo bgColor={color.amber[400]} />

@@ -10,7 +10,7 @@ import {
   MappedOwner,
   RootsUpdates,
 } from "@solid-devtools/shared/graph"
-import { createUpdatedSelector, deleteKey, disposeAll } from "./utils"
+import { createUpdatedSelector, disposeAll } from "./utils"
 import { setFocused, useOwnerFocusedSelector } from "./details"
 
 const NodeMap: Record<NodeID, Record<NodeID, GraphOwner>> = {}
@@ -52,7 +52,7 @@ const addOwnerToMap = (rootId: NodeID, node: GraphOwner) => {
   const id = node.id
   const owners = NodeMap[rootId]
   owners[id] = node
-  onCleanup(deleteKey.bind(owners, id))
+  onCleanup(() => delete owners[id])
   const toAdd = observersToAddLazy[id]
   if (toAdd) {
     toAdd.forEach(f => f(node))

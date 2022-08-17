@@ -4,7 +4,7 @@ import { createHover } from "@solid-aria/interactions"
 import { GraphOwner, NodeType } from "@solid-devtools/shared/graph"
 import { useHighlights } from "../ctx/highlights"
 import * as styles from "./OwnerNode.css"
-import { HighlightText } from "../highlight/Highlight"
+import { Highlight } from "../highlight/Highlight"
 
 export function OwnerChildren(props: { children: GraphOwner[] }) {
   return (
@@ -57,14 +57,9 @@ export function OwnerNode(props: { owner: GraphOwner }): JSX.Element {
       >
         <div class={styles.header.containerShadow}></div>
         <div class={styles.header.nameContainer}>
-          <HighlightText
-            strong={isUpdated()}
-            light={isHighlighted()}
-            bgColor
-            class={styles.header.highlight}
-          >
+          <Highlight strong={isUpdated()} light={isHighlighted()} class={styles.header.highlight}>
             {type === NodeType.Component ? `<${name}>` : name}
-          </HighlightText>
+          </Highlight>
           <div class={styles.header.type}>{typeName}</div>
         </div>
         {/* {signal && <ValueNode value={signal.value} updated={signal.updated} />} */}

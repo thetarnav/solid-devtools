@@ -1,6 +1,7 @@
 import { style } from "@vanilla-extract/css"
-import { centerChild, color, spacing, theme } from "../theme"
+import { centerChild, color, hexToRgbValue, spacing, theme } from "../theme"
 import { CSSPropertiesWithVars } from "@vanilla-extract/css/dist/declarations/src/types"
+import { createHighlightStyles } from "~/mixins"
 
 export const Signals = {
   container: style({
@@ -10,12 +11,26 @@ export const Signals = {
   }),
 }
 
+const { container, highlight, bgColorVar, bgOpacityVar } = createHighlightStyles()
+
 export const SignalNode = {
-  container: style({
-    display: "flex",
-    alignItems: "center",
-    height: spacing[4.5],
-  }),
+  container: style([
+    container,
+    {
+      width: "100%",
+      display: "flex",
+      alignItems: "center",
+      height: spacing[4.5],
+      cursor: "pointer",
+      vars: {
+        [bgColorVar]: hexToRgbValue(color.gray[200]),
+      },
+      ":hover": {
+        vars: { [bgOpacityVar]: "1" },
+      },
+    },
+  ]),
+  highlight: style([highlight, {}]),
   icon: style({
     height: "100%",
     width: spacing[4.5],
@@ -44,6 +59,8 @@ export const SignalNode = {
 export const ValuePreview = style({
   minWidth: spacing[4],
   height: "100%",
+  display: "flex",
+  alignItems: "center",
   color: color.gray[800],
   fontFamily: theme.font.mono,
   fontWeight: 600,
