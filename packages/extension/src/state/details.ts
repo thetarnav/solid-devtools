@@ -1,4 +1,4 @@
-import { Accessor, batch, createRoot, createSelector, untrack } from "solid-js"
+import { Accessor, batch, createRoot, createSelector, createSignal, untrack } from "solid-js"
 import { createStore, produce } from "solid-js/store"
 import {
   GraphOwner,
@@ -13,7 +13,7 @@ import { warn } from "@solid-devtools/shared/utils"
 import { NOTFOUND } from "@solid-devtools/shared/variables"
 import { findOwnerById, findOwnerRootId } from "./graph"
 import { arrayEquals, Mutable } from "@solid-primitives/utils"
-import { createUpdatedSelector } from "./utils"
+import { createArrayIncludesSelector, createArraySetToggle, createUpdatedSelector } from "./utils"
 
 function reconcileSignals(
   newSignals: readonly MappedSignal[],
@@ -57,8 +57,11 @@ const nullState = { focused: null, rootId: null, details: null } as const
 
 const exports = createRoot(() => {
   const [state, setState] = createStore<OwnerDetailsState>({ ...nullState })
+  const focused = () => state.focused,
+    focusedRootId = () => state.rootId,
+    details = () => state.details
 
-  const ownerFocusedSelector = createSelector<GraphOwner | null, GraphOwner>(() => state.focused)
+  const ownerFocusedSelector = createSelector<GraphOwner | null, GraphOwner>(focused)
   const useOwnerFocusedSelector = (owner: GraphOwner): Accessor<boolean> =>
     ownerFocusedSelector.bind(void 0, owner)
 
@@ -69,7 +72,7 @@ const exports = createRoot(() => {
   }
 
   function updateDetails(raw: MappedOwnerDetails): void {
-    const rootId = untrack(() => state.rootId)
+    const rootId = untrack(focusedRootId)
     if (!rootId) return warn("OwnerDetailsUpdate: rootId is null")
 
     setState("details", prev => {
@@ -105,7 +108,7 @@ const exports = createRoot(() => {
   }
 
   function handleSignalUpdates(updates: SignalUpdate[]): void {
-    if (!untrack(() => state.details)) return
+    if (!untrack(details)) return
     batch(() => {
       addUpdated(updates.map(u => u.id))
       setState(
@@ -124,16 +127,22 @@ const exports = createRoot(() => {
     })
   }
 
+  const [focusedSignals, setFocusedSignals] = createSignal<NodeID[]>([])
+  const toggleSignalFocus = createArraySetToggle(focusedSignals, setFocusedSignals)
+  const useFocusedSignalSelector = createArrayIncludesSelector(focusedSignals)
+
   return {
-    focused: () => state.focused,
-    focusedRootId: () => state.rootId,
-    details: () => state.details,
+    focused,
+    focusedRootId,
+    details,
     setFocused,
     useOwnerFocusedSelector,
     useUpdatedSignalsSelector: useUpdatedSelector,
     updateDetails,
     handleSignalUpdates,
     handleGraphUpdate,
+    toggleSignalFocus,
+    useFocusedSignalSelector,
   }
 })
 export const {
@@ -146,4 +155,6 @@ export const {
   updateDetails,
   handleSignalUpdates,
   handleGraphUpdate,
+  toggleSignalFocus,
+  useFocusedSignalSelector,
 } = exports

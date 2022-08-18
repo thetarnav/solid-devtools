@@ -1,12 +1,22 @@
-import { Component, createEffect, createMemo, For, Show } from "solid-js"
-import { GraphSignal, NodeType } from "@solid-devtools/shared/graph"
+import {
+  Accessor,
+  Component,
+  createContext,
+  createEffect,
+  createMemo,
+  For,
+  Show,
+  useContext,
+} from "solid-js"
+import { GraphSignal, NodeID, NodeType } from "@solid-devtools/shared/graph"
 import { createHover } from "@solid-aria/interactions"
 import { EncodedValue, EncodedValueOf, ValueType } from "@solid-devtools/shared/serialize"
 import * as Icon from "~/icons"
-import { color, theme } from "~/theme"
-import { useHighlights, useSignalContext } from "../ctx/highlights"
+import { color } from "~/theme"
+import { useHighlights } from "../ctx/highlights"
 import { Highlight } from "../highlight/Highlight"
 import * as styles from "./SignalNode.css"
+import clsx from "clsx"
 
 type ValueComponent<K extends ValueType> = Component<Omit<EncodedValueOf<K>, "type">>
 
@@ -124,11 +134,28 @@ export const Signals: Component<{ each: GraphSignal[] }> = props => {
   )
 }
 
-export const SignalNode: Component<{ signal: GraphSignal }> = ({ signal }) => {
-  const { type } = signal
-  const { useUpdatedSelector } = useSignalContext()
+export type SignalContextState = {
+  useUpdatedSelector: (id: NodeID) => Accessor<boolean>
+  toggleSignalFocus: (signal: NodeID, focused?: boolean) => void
+  useFocusedSelector: (id: NodeID) => Accessor<boolean>
+}
 
-  const isUpdated = useUpdatedSelector(signal.id)
+const SignalContext = createContext<SignalContextState>()
+
+export const SignalContextProvider = SignalContext.Provider
+
+const useSignalContext = (): SignalContextState => {
+  const ctx = useContext(SignalContext)
+  if (!ctx) throw "SignalContext wasn't provided."
+  return ctx
+}
+
+export const SignalNode: Component<{ signal: GraphSignal }> = ({ signal }) => {
+  const { type, id } = signal
+  const { useUpdatedSelector, toggleSignalFocus, useFocusedSelector } = useSignalContext()
+
+  const isUpdated = useUpdatedSelector(id)
+  const isFocused = useFocusedSelector(id)
 
   const { highlightSignalObservers, isSourceHighlighted } = useHighlights()
   const isHighlighted = isSourceHighlighted.bind(null, signal)
@@ -138,11 +165,9 @@ export const SignalNode: Component<{ signal: GraphSignal }> = ({ signal }) => {
 
   return (
     <div
-      class={styles.SignalNode.container}
+      class={clsx(styles.SignalNode.container, isFocused() && styles.SignalNode.containerFocused)}
       {...hoverProps}
-      onClick={() => {
-        console.log("HELLOs")
-      }}
+      onClick={() => toggleSignalFocus(id)}
     >
       <div class={styles.SignalNode.highlight} />
       <div class={styles.SignalNode.icon}>

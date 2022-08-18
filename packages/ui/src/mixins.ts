@@ -1,8 +1,13 @@
-import { createVar, style } from "@vanilla-extract/css"
+import { createVar, fallbackVar, style } from "@vanilla-extract/css"
 import { CSSVarFunction } from "@vanilla-extract/private"
 import { insetX, insetY, rounded, spacing, transition } from "./theme"
 
-export function createHighlightStyles(): {
+export function createHighlightStyles(
+  transitionProperty:
+    | "opacity"
+    | "background-color"
+    | ("opacity" | "background-color")[] = "opacity",
+): {
   container: string
   highlight: string
   bgColorVar: CSSVarFunction
@@ -22,8 +27,9 @@ export function createHighlightStyles(): {
     ...insetX(`-${spacing[1]}`),
     ...insetY(0),
     ...rounded(),
-    ...transition("background-color"),
-    backgroundColor: `rgb(${bgColorVar} / ${bgOpacityVar})`,
+    ...transition(transitionProperty),
+    backgroundColor: bgColorVar,
+    opacity: fallbackVar(bgOpacityVar, "0"),
   })
 
   return { container, highlight, bgColorVar, bgOpacityVar }

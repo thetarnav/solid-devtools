@@ -1,7 +1,7 @@
 import { JSX, ParentComponent, splitProps } from "solid-js"
 import { combineProps } from "@solid-primitives/props"
 import { clsx } from "clsx"
-import { color, hexToRgbValue } from "../theme"
+import { color } from "../theme"
 import * as styles from "./Highlight.css"
 import { assignInlineVars } from "@vanilla-extract/dynamic"
 
@@ -24,7 +24,7 @@ export const Highlight: ParentComponent<
       <div
         class={styles.highlight}
         style={assignInlineVars({
-          [styles.bgColorVar]: hexToRgbValue(props.signal ? color.amber[400] : color.cyan[400]),
+          [styles.bgColorVar]: props.signal ? color.amber[400] : color.cyan[400],
           [styles.bgOpacityVar]: props.strong ? "0.7" : props.light ? "0.4" : "0",
         })}
       ></div>
