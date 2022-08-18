@@ -127,6 +127,8 @@ const exports = createRoot(() => {
     })
   }
 
+  let onSignalSelect: ((id: NodeID, selected: boolean) => void) | undefined
+  const setOnSignalSelect = (fn: typeof onSignalSelect) => (onSignalSelect = fn)
   const [focusedSignals, setFocusedSignals] = createSignal<NodeID[]>([])
   const toggleSignalFocus = createArraySetToggle(focusedSignals, setFocusedSignals)
   const useFocusedSignalSelector = createArrayIncludesSelector(focusedSignals)
@@ -143,6 +145,7 @@ const exports = createRoot(() => {
     handleGraphUpdate,
     toggleSignalFocus,
     useFocusedSignalSelector,
+    setOnSignalSelect,
   }
 })
 export const {
@@ -157,4 +160,5 @@ export const {
   handleGraphUpdate,
   toggleSignalFocus,
   useFocusedSignalSelector,
+  setOnSignalSelect,
 } = exports

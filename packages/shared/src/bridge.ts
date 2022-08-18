@@ -13,11 +13,11 @@ export interface Messages {
   SignalUpdates: SignalUpdate[]
   ForceUpdate: void
   /** devtools -> adapter: request for details of owner details opened in the side-panel */
-  SetFocusedOwner: null | { rootId: NodeID; ownerId: NodeID }
+  SetSelectedOwner: null | { rootId: NodeID; ownerId: NodeID }
   /** adapter -> devtools: send updates to the owner details */
   OwnerDetailsUpdate: MappedOwnerDetails
   /** devtools -> adapter: request for signal details — subscribe or unsubscribe */
-  SetSignalSubscription: { signalId: NodeID; subscribe: boolean }
+  SetSelectedSignal: { id: NodeID; selected: boolean }
 }
 
 export type PostMessageFn = <K extends keyof Messages>(

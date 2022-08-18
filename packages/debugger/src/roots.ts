@@ -18,11 +18,10 @@ import {
   updateRoot,
   removeRoot,
   pushSignalUpdate,
-  focusedRootId,
   setFocusedOwnerDetails,
-  focusedId,
   gatherComponents,
   pushComputationUpdate,
+  focusedState,
 } from "./plugin"
 import {
   createInternalRoot,
@@ -59,11 +58,11 @@ export function createGraphRoot(owner: SolidRoot): void {
           onComputationUpdate,
           onSignalUpdate: pushSignalUpdate,
           rootId,
-          focusedId: focusedId(),
+          focusedId: focusedState.id,
           gatherComponents: gatherComponents(),
         }),
       )
-      if (untrack(focusedRootId) === rootId) {
+      if (untrack(() => focusedState.rootId) === rootId) {
         setFocusedOwnerDetails(focusedOwner, focusedOwnerDetails)
       }
       updateRoot({ id: rootId, tree, components })

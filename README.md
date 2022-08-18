@@ -100,3 +100,9 @@ Previous attempts/experiments that inspire this project:
 - fictitious/[solid-devtools](https://github.com/fictitious/solid-devtools)
 - CM-Tech/[solid-debugger](https://github.com/CM-Tech/solid-debugger)
 - [Go to Component Devtools](https://gist.github.com/nksaraf/def81fada4ac8d5a3c2e7cad0cd4933a)
+
+Similar projects from other frameworks:
+
+- [Svelte Devtools](https://github.com/sveltejs/svelte-devtools)
+- [Vue Devtools](https://github.com/vuejs/devtools)
+- [MobX Devtools](https://github.com/mobxjs/mobx-devtools)

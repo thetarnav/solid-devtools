@@ -76,7 +76,10 @@ chrome.runtime.onConnect.addListener(newPort => {
   )
 
   addCleanup(
-    onRuntimeMessage("SetFocusedOwner", ownerId => postPortMessage("SetFocusedOwner", ownerId)),
+    onRuntimeMessage("SetSelectedOwner", payload => postPortMessage("SetSelectedOwner", payload)),
+  )
+  addCleanup(
+    onRuntimeMessage("SetSelectedSignal", payload => postPortMessage("SetSelectedSignal", payload)),
   )
 
   addCleanup(onRuntimeMessage("ForceUpdate", () => postPortMessage("ForceUpdate")))

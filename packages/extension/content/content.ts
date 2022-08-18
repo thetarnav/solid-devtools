@@ -28,6 +28,8 @@ onPortMessage("PanelVisibility", visible => postWindowMessage("PanelVisibility",
 
 once(onPortMessage, "ForceUpdate", () => postWindowMessage("ForceUpdate"))
 
-onPortMessage("SetFocusedOwner", ownerId => postWindowMessage("SetFocusedOwner", ownerId))
+onPortMessage("SetSelectedOwner", payload => postWindowMessage("SetSelectedOwner", payload))
+
+onPortMessage("SetSelectedSignal", payload => postWindowMessage("SetSelectedSignal", payload))
 
 export {}

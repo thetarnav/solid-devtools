@@ -7,6 +7,7 @@ import {
   handleSignalUpdates,
   updateDetails,
   handleGraphUpdate as detailsHandleGraphUpdate,
+  setOnSignalSelect,
 } from "./details"
 
 export const { onRuntimeMessage, postRuntimeMessage } = createRuntimeMessanger()
@@ -39,14 +40,20 @@ onRuntimeMessage("OwnerDetailsUpdate", details => {
 })
 
 createRoot(() => {
+  // toggle selected owner
   createEffect(
     on(
       [focused, focusedRootId],
       ([owner, rootId]) => {
-        if (owner && rootId) postRuntimeMessage("SetFocusedOwner", { ownerId: owner?.id, rootId })
-        else postRuntimeMessage("SetFocusedOwner", null)
+        const payload = owner && rootId ? { ownerId: owner.id, rootId } : null
+        postRuntimeMessage("SetSelectedOwner", payload)
       },
       { defer: true },
     ),
   )
+
+  // toggle selected signals
+  setOnSignalSelect((id, selected) => {
+    postRuntimeMessage("SetSelectedSignal", { id, selected })
+  })
 })

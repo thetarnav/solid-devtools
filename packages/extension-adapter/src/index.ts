@@ -16,6 +16,7 @@ const extensionAdapterFactory: PluginFactory = ({
   handleSignalUpdates,
   setFocusedOwner,
   focusedState,
+  setSelectedSignal,
 }) => {
   const [enabled, setEnabled] = createSignal(false)
 
@@ -30,7 +31,8 @@ const extensionAdapterFactory: PluginFactory = ({
     else setEnabled(true)
   })
   onWindowMessage("ForceUpdate", forceTriggerUpdate)
-  onWindowMessage("SetFocusedOwner", setFocusedOwner)
+  onWindowMessage("SetSelectedOwner", setFocusedOwner)
+  onWindowMessage("SetSelectedSignal", setSelectedSignal)
 
   // diff the roots, and send only the changed roots (edited, deleted, added)
   createEffect(() => {
@@ -49,10 +51,8 @@ const extensionAdapterFactory: PluginFactory = ({
 
   // send the focused owner details
   createEffect(() => {
-    const details = focusedState().details
-    if (details) {
-      postWindowMessage("OwnerDetailsUpdate", details)
-    }
+    const details = focusedState.details
+    if (details) postWindowMessage("OwnerDetailsUpdate", details)
   })
 
   return { enabled }

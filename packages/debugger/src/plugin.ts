@@ -2,7 +2,6 @@ import {
   Accessor,
   batch,
   createEffect,
-  createMemo,
   createSignal,
   getOwner,
   runWithOwner,
@@ -11,6 +10,8 @@ import {
 import { createSimpleEmitter } from "@solid-primitives/event-bus"
 import { omit } from "@solid-primitives/immutable"
 import { createLazyMemo } from "@solid-primitives/memo"
+import { createStaticStore } from "@solid-primitives/utils"
+import { throttle } from "@solid-primitives/scheduled"
 import {
   MappedComponent,
   MappedRoot,
@@ -22,11 +23,10 @@ import {
   ComputationUpdate,
   SignalUpdate,
 } from "@solid-devtools/shared/graph"
+import { encodeValue } from "@solid-devtools/shared/serialize"
 import { createConsumers, createInternalRoot } from "./utils"
 import { clearOwnerObservers, ComputationUpdateHandler, SignalUpdateHandler } from "./walker"
 import { forceRootUpdate } from "./roots"
-import { throttle } from "@solid-primitives/scheduled"
-import { encodeValue } from "@solid-devtools/shared/serialize"
 
 /*
 DETAILS:
@@ -70,18 +70,21 @@ export type _SignaledRoot = {
 export type BatchComputationUpdatesHandler = (payload: ComputationUpdate[]) => void
 export type BatchSignalUpdatesHandler = (payload: SignalUpdate[]) => void
 
-export type PluginFactory = (data: {
-  triggerUpdate: VoidFunction
-  forceTriggerUpdate: VoidFunction
-  handleComputationUpdates: (listener: BatchComputationUpdatesHandler) => VoidFunction
-  handleSignalUpdates: (listener: BatchSignalUpdatesHandler) => VoidFunction
-  roots: Accessor<Record<NodeID, SignaledRoot>>
-  serialisedRoots: Accessor<Record<NodeID, MappedOwner>>
-  rootsUpdates: Accessor<RootsUpdates>
-  components: Accessor<MappedComponent[]>
-  setFocusedOwner: SetFocusedOwner
-  focusedState: Accessor<FocusedState>
-}) => {
+export type PluginFactoryData = {
+  readonly triggerUpdate: VoidFunction
+  readonly forceTriggerUpdate: VoidFunction
+  readonly handleComputationUpdates: (listener: BatchComputationUpdatesHandler) => VoidFunction
+  readonly handleSignalUpdates: (listener: BatchSignalUpdatesHandler) => VoidFunction
+  readonly roots: Accessor<Record<NodeID, SignaledRoot>>
+  readonly serialisedRoots: Accessor<Record<NodeID, MappedOwner>>
+  readonly rootsUpdates: Accessor<RootsUpdates>
+  readonly components: Accessor<MappedComponent[]>
+  readonly setFocusedOwner: SetFocusedOwner
+  readonly focusedState: FocusedState
+  readonly setSelectedSignal: (payload: { id: NodeID; selected: boolean }) => void
+}
+
+export type PluginFactory = (data: PluginFactoryData) => {
   enabled?: Accessor<boolean>
   observeComputations?: Accessor<boolean>
   gatherComponents?: Accessor<boolean>
@@ -172,17 +175,12 @@ const exported = createInternalRoot(() => {
   //
   // Focused Owner details:
   //
-  const [focusedState, setFocusedState] = createSignal<FocusedState>(nullFocusedState)
-
-  // TODO: focused state probably should consist of multiple singlas
-  const focusedRootId = createMemo(() => focusedState().rootId)
-  const focusedId = createMemo(() => focusedState().id)
-  const ficusedOwner = createMemo(() => focusedState().owner)
+  const [focusedState, setFocusedState] = createStaticStore<FocusedState>(nullFocusedState)
 
   // make sure we don't keep the listeners around
   createEffect((prev: SolidOwner | null = null) => {
     if (prev) clearOwnerObservers(prev)
-    return ficusedOwner()
+    return focusedState.owner
   })
 
   //
@@ -208,7 +206,7 @@ const exported = createInternalRoot(() => {
     })
 
     const pushComputationUpdate: SignalUpdateHandler = (id, value) => {
-      if (!untrack(focusedId)) return
+      if (!untrack(() => focusedState.id)) return
       signalUpdates.push({ id, value: encodeValue(value) })
       triggerComputationUpdateEmit()
     }
@@ -218,7 +216,7 @@ const exported = createInternalRoot(() => {
 
   const setFocusedOwner: SetFocusedOwner = payload => {
     if (!payload) return setFocusedState(nullFocusedState)
-    const { id } = untrack(focusedState)
+    const id = untrack(() => focusedState.id)
     if (id === payload.ownerId) return
     setFocusedState({
       id: payload.ownerId,
@@ -243,6 +241,21 @@ const exported = createInternalRoot(() => {
         details: newDetails,
       }))
     } else setFocusedState(nullFocusedState)
+  }
+
+  //
+  // Selected Signals:
+  //
+  const selectedSignalIds: Set<NodeID> = new Set()
+
+  const setSelectedSignal: PluginFactoryData["setSelectedSignal"] = ({ id, selected }) => {
+    if (selected) {
+      if (selectedSignalIds.has(id)) return
+      selectedSignalIds.add(id)
+      // TODO: run add logic
+    } else {
+      selectedSignalIds.delete(id)
+    }
   }
 
   //
@@ -287,20 +300,22 @@ const exported = createInternalRoot(() => {
     }, []),
   )
 
+  const pluginData: PluginFactoryData = {
+    handleComputationUpdates,
+    handleSignalUpdates,
+    roots,
+    serialisedRoots,
+    rootsUpdates,
+    components,
+    triggerUpdate,
+    forceTriggerUpdate,
+    setFocusedOwner,
+    focusedState,
+    setSelectedSignal,
+  }
   function registerDebuggerPlugin(factory: PluginFactory) {
     runWithOwner(owner, () => {
-      const { enabled, gatherComponents, observeComputations } = factory({
-        handleComputationUpdates,
-        handleSignalUpdates,
-        roots,
-        serialisedRoots,
-        rootsUpdates,
-        components,
-        triggerUpdate,
-        forceTriggerUpdate,
-        setFocusedOwner,
-        focusedState,
-      })
+      const { enabled, gatherComponents, observeComputations } = factory(pluginData)
       enabled && addDebuggerConsumer(enabled)
       gatherComponents && addGatherComponentsConsumer(gatherComponents)
       observeComputations && addObserveComputationsConsumer(observeComputations)
@@ -310,39 +325,27 @@ const exported = createInternalRoot(() => {
   return {
     onUpdate,
     onForceUpdate,
-    triggerUpdate,
-    forceTriggerUpdate,
     enabled,
-    roots,
-    setRoots,
     registerDebuggerPlugin,
     updateRoot,
     removeRoot,
     gatherComponents,
     pushSignalUpdate,
-    setFocusedOwner,
     setFocusedOwnerDetails,
-    focusedRootId,
-    focusedId,
+    focusedState,
     pushComputationUpdate,
   }
 })
 export const {
   onUpdate,
   onForceUpdate,
-  triggerUpdate,
-  forceTriggerUpdate,
   enabled,
   gatherComponents,
-  roots,
-  setRoots,
   registerDebuggerPlugin,
   updateRoot,
   removeRoot,
   pushSignalUpdate,
-  setFocusedOwner,
   setFocusedOwnerDetails,
-  focusedRootId,
-  focusedId,
+  focusedState,
   pushComputationUpdate,
 } = exported

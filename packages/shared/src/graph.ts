@@ -3,6 +3,7 @@ import { Many } from "@solid-primitives/utils"
 import { Owner as _Owner, SignalState as _SignalState, Computation as _Computation } from "./solid"
 import { INTERNAL, NOTFOUND } from "./variables"
 import { EncodedValue } from "./serialize"
+import { Merge } from "type-fest"
 
 export enum NodeType {
   Component,
@@ -187,7 +188,12 @@ export interface GraphOwner {
   readonly children: GraphOwner[]
 }
 
-export type GraphSignal = MappedSignal
+export type GraphSignal = Merge<
+  Readonly<MappedSignal>,
+  {
+    readonly deepValue?: EncodedValue<true>
+  }
+>
 
 export type OwnerPath = (GraphOwner | typeof NOTFOUND)[]
 
