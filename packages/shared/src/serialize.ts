@@ -18,6 +18,7 @@ export enum ValueType {
 
 export type EncodedPreviewPayloadMap = {
   [ValueType.Array]: number
+  [ValueType.Object]: number
   [ValueType.Number]: number | typeof INFINITY | typeof NEGATIVE_INFINITY | typeof NAN
   [ValueType.Boolean]: boolean
   [ValueType.String]: string
@@ -27,19 +28,18 @@ export type EncodedPreviewPayloadMap = {
   [ValueType.Instance]: string
 }
 
-type PreviewPayloadOf<K extends ValueType> = K extends keyof EncodedPreviewPayloadMap
-  ? { value: EncodedPreviewPayloadMap[K] }
-  : { value?: undefined }
-
 export type EncodedValueOf<K extends ValueType, Deep extends boolean = false> = {
   type: K
-} & (Deep extends true
-  ? K extends ValueType.Array
-    ? { value: EncodedValue<true>[] }
-    : K extends ValueType.Object
-    ? { value: Record<string, EncodedValue<true>> }
-    : PreviewPayloadOf<K>
-  : PreviewPayloadOf<K>)
+} & (K extends keyof EncodedPreviewPayloadMap
+  ? { value: EncodedPreviewPayloadMap[K] }
+  : { value?: undefined }) &
+  (Deep extends true
+    ? K extends ValueType.Object
+      ? { children: Record<string, EncodedValue<true>> }
+      : K extends ValueType.Array
+      ? { children: EncodedValue<true>[] }
+      : { children?: undefined }
+    : { children?: undefined })
 
 export type EncodedValue<Deep extends boolean = false> = {
   [K in ValueType]: EncodedValueOf<K, Deep>
@@ -62,26 +62,29 @@ export function encodeValue<Deep extends boolean>(value: unknown, deep?: Deep): 
   if (typeof value === "function") return { type: ValueType.Function, value: value.name }
   if (value instanceof HTMLElement) return { type: ValueType.Element, value: value.tagName }
 
-  if (Array.isArray(value))
-    return {
-      type: ValueType.Array,
-      value: deep ? value.map(item => encodeValue(item, true)) : value.length,
-    }
+  if (Array.isArray(value)) {
+    const payload = { type: ValueType.Array, value: value.length } as EncodedValueOf<
+      ValueType.Array,
+      boolean
+    >
+    if (deep) payload.children = value.map(item => encodeValue(item, true))
+    return payload
+  }
 
   const s = Object.prototype.toString.call(value)
   const name = s.slice(8, -1)
   if (name === "Object") {
     const obj = value as Record<PropertyKey, unknown>
-    const type = ValueType.Object
-    return !deep
-      ? { type }
-      : {
-          type,
-          value: Object.keys(obj).reduce((acc, key) => {
-            acc[key] = encodeValue(obj[key], true)
-            return acc
-          }, {} as Record<string, EncodedValue<true>>),
-        }
+    const payload = { type: ValueType.Object, value: Object.keys(obj).length } as EncodedValueOf<
+      ValueType.Object,
+      boolean
+    >
+    if (deep)
+      payload.children = Object.keys(obj).reduce<Record<string, EncodedValue<true>>>((acc, key) => {
+        acc[key] = encodeValue(obj[key], true)
+        return acc
+      }, {})
+    return payload
   }
 
   return { type: ValueType.Instance, value: name }

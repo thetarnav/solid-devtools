@@ -28,8 +28,8 @@ const encodePreviewExpectations: [string, unknown, EncodedValue<false>][] = [
   ["Element a", document.createElement("a"), { type: ValueType.Element, value: "A" }],
   ["Array empty", [], { type: ValueType.Array, value: 0 }],
   ["Array", [1, 2, 3], { type: ValueType.Array, value: 3 }],
-  ["Object empty", {}, { type: ValueType.Object }],
-  ["Object", { a: 1, b: 2, c: 3 }, { type: ValueType.Object }],
+  ["Object empty", {}, { type: ValueType.Object, value: 0 }],
+  ["Object", { a: 1, b: 2, c: 3 }, { type: ValueType.Object, value: 3 }],
   ["Date", new Date(), { type: ValueType.Instance, value: "Date" }],
   ["Error", new Error(), { type: ValueType.Instance, value: "Error" }],
   ["Map", new Map(), { type: ValueType.Instance, value: "Map" }],
@@ -48,13 +48,14 @@ describe("encodeValue Preview", () => {
 })
 
 const encodeDeepExpectations: [string, unknown, EncodedValue<true>][] = [
-  ["Array empty", [], { type: ValueType.Array, value: [] }],
+  ["Array empty", [], { type: ValueType.Array, value: 0, children: [] }],
   [
     "Array shallow",
     [1, 2, 3],
     {
       type: ValueType.Array,
-      value: [
+      value: 3,
+      children: [
         { type: ValueType.Number, value: 1 },
         { type: ValueType.Number, value: 2 },
         { type: ValueType.Number, value: 3 },
@@ -66,26 +67,37 @@ const encodeDeepExpectations: [string, unknown, EncodedValue<true>][] = [
     [[1, { foo: "bar" }], 2, { map: new Map() }],
     {
       type: ValueType.Array,
-      value: [
+      value: 3,
+      children: [
         {
           type: ValueType.Array,
-          value: [
+          value: 2,
+          children: [
             { type: ValueType.Number, value: 1 },
-            { type: ValueType.Object, value: { foo: { type: ValueType.String, value: "bar" } } },
+            {
+              type: ValueType.Object,
+              value: 1,
+              children: { foo: { type: ValueType.String, value: "bar" } },
+            },
           ],
         },
         { type: ValueType.Number, value: 2 },
-        { type: ValueType.Object, value: { map: { type: ValueType.Instance, value: "Map" } } },
+        {
+          type: ValueType.Object,
+          value: 1,
+          children: { map: { type: ValueType.Instance, value: "Map" } },
+        },
       ],
     },
   ],
-  ["Object empty", {}, { type: ValueType.Object, value: {} }],
+  ["Object empty", {}, { type: ValueType.Object, value: 0, children: {} }],
   [
     "Object shallow",
     { a: 1, b: 2, c: 3 },
     {
       type: ValueType.Object,
-      value: {
+      value: 3,
+      children: {
         a: { type: ValueType.Number, value: 1 },
         b: { type: ValueType.Number, value: 2 },
         c: { type: ValueType.Number, value: 3 },
@@ -97,16 +109,26 @@ const encodeDeepExpectations: [string, unknown, EncodedValue<true>][] = [
     { a: [1, { foo: "bar" }], b: 2, c: { map: new Map() } },
     {
       type: ValueType.Object,
-      value: {
+      value: 3,
+      children: {
         a: {
           type: ValueType.Array,
-          value: [
+          value: 2,
+          children: [
             { type: ValueType.Number, value: 1 },
-            { type: ValueType.Object, value: { foo: { type: ValueType.String, value: "bar" } } },
+            {
+              type: ValueType.Object,
+              value: 1,
+              children: { foo: { type: ValueType.String, value: "bar" } },
+            },
           ],
         },
         b: { type: ValueType.Number, value: 2 },
-        c: { type: ValueType.Object, value: { map: { type: ValueType.Instance, value: "Map" } } },
+        c: {
+          type: ValueType.Object,
+          value: 1,
+          children: { map: { type: ValueType.Instance, value: "Map" } },
+        },
       },
     },
   ],

@@ -14,6 +14,7 @@ import { NOTFOUND } from "@solid-devtools/shared/variables"
 import { findOwnerById, findOwnerRootId } from "./graph"
 import { arrayEquals, Mutable } from "@solid-primitives/utils"
 import { createArrayIncludesSelector, createArraySetToggle, createUpdatedSelector } from "./utils"
+import { EncodedValue } from "@solid-devtools/shared/serialize"
 
 function reconcileSignals(
   newSignals: readonly MappedSignal[],
@@ -38,6 +39,32 @@ function reconcileSignals(
   for (const newSignal of newSignals) {
     if (!intersection.includes(newSignal)) signals[newSignal.id] = createSignalNode(newSignal)
   }
+}
+
+function reconcileValue(proxy: EncodedValue<boolean>, next: EncodedValue<boolean>) {
+  proxy.type = next.type
+  // value is a literal, so we can just assign it
+  if (next.value) proxy.value = next.value
+  else delete proxy.value
+  if (next.children) {
+    // add new children
+    if (!proxy.children) (proxy as EncodedValue<boolean>).children = next.children
+    // reconcile children
+    else {
+      for (const key of Object.keys(proxy.children) as never[]) {
+        // remove child
+        if (!next.children[key]) delete proxy.children[key]
+        // update child
+        else reconcileValue(proxy.children[key], next.children[key])
+      }
+      for (const key of Object.keys(next.children) as never[]) {
+        // add child
+        if (!proxy.children[key]) proxy.children[key] = next.children[key]
+      }
+    }
+  }
+  // remove children
+  else delete proxy.children
 }
 
 function createSignalNode(raw: Readonly<MappedSignal>): GraphSignal {
@@ -118,9 +145,7 @@ const exports = createRoot(() => {
           for (const update of updates) {
             const signal = proxy[update.id]
             if (!signal) return
-            signal.value.type = update.value.type
-            if ("value" in update.value) signal.value.value = update.value.value
-            else delete signal.value.value
+            reconcileValue(signal.value, update.value)
           }
         }),
       )

@@ -76,8 +76,8 @@ const ElementValuePreview: ValueComponent<ValueType.Element> = props => (
 
 const CollapsableObjectPreview: Component<{
   value:
-    | EncodedValueOf<ValueType.Object, true>["value"]
-    | EncodedValueOf<ValueType.Array, true>["value"]
+    | EncodedValueOf<ValueType.Object, true>["children"]
+    | EncodedValueOf<ValueType.Array, true>["children"]
 }> = props => (
   <ul class={styles.collapsable.list}>
     <Key each={Object.entries(props.value)} by={0}>
@@ -94,13 +94,14 @@ const CollapsableObjectPreview: Component<{
   </ul>
 )
 
-const ObjectValuePreview: Component<{
-  value: EncodedValueOf<ValueType.Object, boolean>["value"]
-}> = props => {
+const ObjectValuePreview: ValueComponent<ValueType.Object> = props => {
   return (
-    <Show when={props.value} fallback={<span class={styles.ValueObject}>…</span>}>
-      {value => <CollapsableObjectPreview value={value} />}
-    </Show>
+    <Switch>
+      <Match when={!props.children || props.value === 0}>
+        <span class={styles.ValueObject}>…</span>
+      </Match>
+      <Match when={props.children}>{value => <CollapsableObjectPreview value={value} />}</Match>
+    </Switch>
   )
 }
 
@@ -110,16 +111,12 @@ const ArrayHead: Component<{ value: number }> = props => (
   </Show>
 )
 
-const ArrayValuePreview: Component<{
-  value: EncodedValueOf<ValueType.Array, boolean>["value"]
-}> = props => (
+const ArrayValuePreview: ValueComponent<ValueType.Array> = props => (
   <Switch>
-    <Match when={typeof props.value === "number" && props.value}>
-      {length => <ArrayHead value={length} />}
+    <Match when={!props.children || props.value === 0}>
+      <ArrayHead value={props.value} />
     </Match>
-    <Match when={typeof props.value === "object" && props.value}>
-      {value => <CollapsableObjectPreview value={value} />}
-    </Match>
+    <Match when={props.children}>{value => <CollapsableObjectPreview value={value} />}</Match>
   </Switch>
 )
 
@@ -133,9 +130,9 @@ const ValuePreview: Component<{ value: EncodedValue<boolean> }> = props =>
       case ValueType.Boolean:
         return <BooleanValuePreview value={props.value.value} />
       case ValueType.Object:
-        return <ObjectValuePreview value={props.value.value} />
+        return <ObjectValuePreview value={props.value.value} children={props.value.children} />
       case ValueType.Array:
-        return <ArrayValuePreview value={props.value.value} />
+        return <ArrayValuePreview value={props.value.value} children={props.value.children} />
       case ValueType.Function:
         return <FunctionValuePreview value={props.value.value} />
       case ValueType.Null:
