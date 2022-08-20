@@ -10,7 +10,12 @@ import {
 } from "@solid-devtools/shared/graph"
 import { INTERNAL } from "@solid-devtools/shared/variables"
 import { Owner } from "@solid-devtools/shared/solid"
-import { clearOwnerObservers, ComputationUpdateHandler, walkSolidTree } from "./walker"
+import {
+  clearOwnerObservers,
+  ComputationUpdateHandler,
+  SignalUpdateHandler,
+  walkSolidTree,
+} from "./walker"
 import {
   enabled,
   onForceUpdate,
@@ -47,8 +52,13 @@ export function createGraphRoot(owner: SolidRoot): void {
 
     const onComputationUpdate: ComputationUpdateHandler = (rootId, nodeId) => {
       if (owner.isDisposed) return
-      if (enabled()) triggerRootUpdate()
+      if (untrack(enabled)) triggerRootUpdate()
       pushComputationUpdate(rootId, nodeId)
+    }
+
+    const onSignalUpdate: SignalUpdateHandler = (nodeId, value) => {
+      if (owner.isDisposed) return
+      pushSignalUpdate(nodeId, value)
     }
 
     const forceRootUpdate = () => {
@@ -57,7 +67,7 @@ export function createGraphRoot(owner: SolidRoot): void {
         untrack(() =>
           walkSolidTree(owner, {
             onComputationUpdate,
-            onSignalUpdate: pushSignalUpdate,
+            onSignalUpdate,
             rootId,
             focusedId: focusedState.id,
             gatherComponents: gatherComponents(),

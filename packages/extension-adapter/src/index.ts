@@ -27,8 +27,10 @@ const extensionAdapterFactory: PluginFactory = ({
     if (!v) return setEnabled(false)
     const current = enabled()
     // the panel might have been closed and opened again—in that case we want to update the graph
-    if (current) forceTriggerUpdate()
-    else setEnabled(true)
+    if (current) {
+      setFocusedOwner(null)
+      forceTriggerUpdate()
+    } else setEnabled(true)
   })
   onWindowMessage("ForceUpdate", forceTriggerUpdate)
   onWindowMessage("SetSelectedOwner", setFocusedOwner)

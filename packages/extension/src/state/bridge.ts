@@ -44,6 +44,15 @@ onRuntimeMessage("SignalValue", update => {
   handleSignalUpdates([update], false)
 })
 
+// let visibility = false
+// onRuntimeMessage("PanelVisibility", newVisibility => {
+//   visibility = newVisibility
+//   if (visibility) {
+//     // panel
+//   }
+//   log("PanelVisibility", visibility)
+// })
+
 createRoot(() => {
   // toggle selected owner
   createEffect(

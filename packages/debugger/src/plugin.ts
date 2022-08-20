@@ -180,9 +180,16 @@ const exported = createInternalRoot(() => {
   //
   const [focusedState, setFocusedState] = createStaticStore<FocusedState>(NULL_SELECTED_STATE)
 
+  createEffect(() => {
+    if (!enabled() && focusedState.owner) clearOwnerObservers(focusedState.owner)
+  })
+
   // make sure we don't keep the listeners around
   createEffect((prev: SolidOwner | null = null) => {
-    if (prev) clearOwnerObservers(prev)
+    if (prev) {
+      selectedSignalIds.clear()
+      clearOwnerObservers(prev)
+    }
     return focusedState.owner
   })
 
@@ -233,7 +240,7 @@ const exported = createInternalRoot(() => {
   //
   const [handleSignalUpdates, _pushSignalUpdate] = createBatchedUpdateEmitter<SignalUpdate>()
   const pushSignalUpdate: SignalUpdateHandler = (id, value) => {
-    if (!untrack(() => focusedState.id)) return
+    if (!untrack(enabled) || !untrack(() => focusedState.id)) return
     const isSelected = selectedSignalIds.has(id)
     const payload: SignalUpdate = { id, value: encodeValue(value, isSelected) }
     _pushSignalUpdate(payload)
@@ -245,7 +252,7 @@ const exported = createInternalRoot(() => {
   const [handleComputationUpdates, _pushComputationUpdate] =
     createBatchedUpdateEmitter<ComputationUpdate>()
   const pushComputationUpdate: ComputationUpdateHandler = (rootId, id) => {
-    if (!untrack(observeComputations)) return
+    if (!untrack(enabled) || !untrack(observeComputations)) return
     _pushComputationUpdate({ rootId, id })
   }
 
