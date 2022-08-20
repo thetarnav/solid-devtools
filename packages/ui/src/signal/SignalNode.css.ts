@@ -19,7 +19,7 @@ export const Signals = {
 
 const { container, highlight, bgColorVar, bgOpacityVar } = createHighlightStyles("background-color")
 
-export const SignalNode = {
+export const ValueRow = {
   container: style([
     container,
     {
@@ -33,9 +33,6 @@ export const SignalNode = {
         [bgColorVar]: "transparent",
         [bgOpacityVar]: "1",
       },
-      ":hover": {
-        vars: { [bgColorVar]: color.gray[200] },
-      },
     },
   ]),
   containerFocused: style({
@@ -43,41 +40,45 @@ export const SignalNode = {
       [bgColorVar]: color.gray[100],
     },
   }),
+  containerHovered: style({
+    vars: { [bgColorVar]: color.gray[200] },
+  }),
   highlight: style([highlight, {}]),
-  name: {
-    container: style({
-      display: "flex",
-      alignItems: "center",
-      height: RowHeight,
-    }),
-    icon: style({
-      height: RowHeight,
-      width: RowHeight,
-      marginRight: spacing[1],
-      ...centerChild,
-    }),
-    signalDot: style({
-      width: spacing[1],
-      height: spacing[1],
-      borderRadius: "50%",
-      backgroundColor: color.amber[400],
-    }),
-    name: style({
-      height: RowHeight,
-      minWidth: "5ch",
-      marginRight: "2ch",
-      color: color.gray[800],
-      fontWeight: 600,
-      fontFamily: theme.font.mono,
-      ":after": {
-        content: ":",
-        color: color.disabled,
-      },
-    }),
-    highlight: style({
-      display: "inline-block",
-    }),
-  },
+}
+
+export const ValueName = {
+  container: style({
+    display: "flex",
+    alignItems: "center",
+    height: RowHeight,
+  }),
+  icon: style({
+    height: RowHeight,
+    width: RowHeight,
+    marginRight: spacing[1],
+    ...centerChild,
+  }),
+  signalDot: style({
+    width: spacing[1],
+    height: spacing[1],
+    borderRadius: "50%",
+    backgroundColor: color.amber[400],
+  }),
+  name: style({
+    height: RowHeight,
+    minWidth: "5ch",
+    marginRight: "2ch",
+    color: color.gray[800],
+    fontWeight: 600,
+    fontFamily: theme.font.mono,
+    ":after": {
+      content: ":",
+      color: color.disabled,
+    },
+  }),
+  highlight: style({
+    display: "inline-block",
+  }),
 }
 
 export const baseValue = style({

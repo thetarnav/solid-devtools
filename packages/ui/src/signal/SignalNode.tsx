@@ -2,7 +2,6 @@ import {
   Accessor,
   Component,
   createContext,
-  createEffect,
   createMemo,
   createSignal,
   For,
@@ -16,7 +15,6 @@ import {
 } from "solid-js"
 import { Key } from "@solid-primitives/keyed"
 import { GraphSignal, NodeID, NodeType } from "@solid-devtools/shared/graph"
-import { createHover } from "@solid-aria/interactions"
 import { EncodedValue, EncodedValueOf, ValueType } from "@solid-devtools/shared/serialize"
 import * as Icon from "~/icons"
 import { color } from "~/theme"
@@ -80,31 +78,28 @@ const CollapsableObjectPreview: Component<{
   value:
     | EncodedValueOf<ValueType.Object, true>["value"]
     | EncodedValueOf<ValueType.Array, true>["value"]
-  extended?: boolean
-  array?: boolean
-}> = props => {
-  const [collapsed, setCollapsed] = createSignal(!(props.extended === true))
-  return (
-    <ul class={styles.collapsable.list}>
-      <Key each={Object.entries(props.value)} by={0}>
-        {keyvalue => (
-          <ValueRow selected={!collapsed()}>
+}> = props => (
+  <ul class={styles.collapsable.list}>
+    <Key each={Object.entries(props.value)} by={0}>
+      {keyvalue => {
+        const [extended, setExtended] = createSignal(false)
+        return (
+          <ValueRow selected={extended()}>
             <ValueName>{keyvalue()[0]}</ValueName>
             <ValuePreview value={keyvalue()[1]} />
           </ValueRow>
-        )}
-      </Key>
-    </ul>
-  )
-}
+        )
+      }}
+    </Key>
+  </ul>
+)
 
 const ObjectValuePreview: Component<{
   value: EncodedValueOf<ValueType.Object, boolean>["value"]
-  topmost?: boolean
 }> = props => {
   return (
     <Show when={props.value} fallback={<span class={styles.ValueObject}>…</span>}>
-      {value => <CollapsableObjectPreview value={value} extended={props.topmost} />}
+      {value => <CollapsableObjectPreview value={value} />}
     </Show>
   )
 }
@@ -117,21 +112,19 @@ const ArrayHead: Component<{ value: number }> = props => (
 
 const ArrayValuePreview: Component<{
   value: EncodedValueOf<ValueType.Array, boolean>["value"]
-  topmost?: boolean
 }> = props => (
   <Switch>
     <Match when={typeof props.value === "number" && props.value}>
       {length => <ArrayHead value={length} />}
     </Match>
     <Match when={typeof props.value === "object" && props.value}>
-      {value => <CollapsableObjectPreview value={value} extended={props.topmost} array />}
+      {value => <CollapsableObjectPreview value={value} />}
     </Match>
   </Switch>
 )
 
-const ValuePreview: Component<{ value: EncodedValue<boolean>; topmost?: boolean }> = props => {
-  const { topmost } = props
-  return createMemo(() => {
+const ValuePreview: Component<{ value: EncodedValue<boolean> }> = props =>
+  createMemo(() => {
     switch (props.value.type) {
       case ValueType.String:
         return <StringValuePreview value={props.value.value} />
@@ -140,9 +133,9 @@ const ValuePreview: Component<{ value: EncodedValue<boolean>; topmost?: boolean 
       case ValueType.Boolean:
         return <BooleanValuePreview value={props.value.value} />
       case ValueType.Object:
-        return <ObjectValuePreview value={props.value.value} topmost={topmost} />
+        return <ObjectValuePreview value={props.value.value} />
       case ValueType.Array:
-        return <ArrayValuePreview value={props.value.value} topmost={topmost} />
+        return <ArrayValuePreview value={props.value.value} />
       case ValueType.Function:
         return <FunctionValuePreview value={props.value.value} />
       case ValueType.Null:
@@ -159,13 +152,12 @@ const ValuePreview: Component<{ value: EncodedValue<boolean>; topmost?: boolean 
       //   return <span>{ValueType[props.value.type]}</span>
     }
   })
-}
 
 const ValueName: ParentComponent<{ type?: NodeType.Signal | NodeType.Memo | null }> = props => {
   const IconComponent = createMemo(() => {
     switch (props.type) {
       case NodeType.Signal:
-        return <div class={styles.SignalNode.name.signalDot} />
+        return <div class={styles.ValueName.signalDot} />
       case NodeType.Memo:
         return <Icon.Memo bgColor={color.amber[400]} />
       default:
@@ -174,25 +166,35 @@ const ValueName: ParentComponent<{ type?: NodeType.Signal | NodeType.Memo | null
   })
 
   return (
-    <div class={styles.SignalNode.name.container}>
-      <div class={styles.SignalNode.name.icon}>{<IconComponent />}</div>
-      <div class={styles.SignalNode.name.name}>{props.children}</div>
+    <div class={styles.ValueName.container}>
+      <div class={styles.ValueName.icon}>{<IconComponent />}</div>
+      <div class={styles.ValueName.name}>{props.children}</div>
     </div>
   )
 }
 
 const ValueRow: ParentComponent<{ selected: boolean } & JSX.IntrinsicElements["li"]> = props => {
   const [, attrs] = splitProps(props, ["selected", "children", "class"])
+  const [isHovered, setIsHovered] = createSignal(false)
   return (
     <li
       {...attrs}
       class={clsx(
-        styles.SignalNode.container,
-        props.selected && styles.SignalNode.containerFocused,
+        styles.ValueRow.container,
+        props.selected && styles.ValueRow.containerFocused,
+        isHovered() && styles.ValueRow.containerHovered,
         props.class,
       )}
+      onPointerOver={e => {
+        e.stopPropagation()
+        setIsHovered(true)
+      }}
+      onPointerOut={e => {
+        e.stopPropagation()
+        setIsHovered(false)
+      }}
     >
-      <div class={styles.SignalNode.highlight} />
+      <div class={styles.ValueRow.highlight} />
       {props.children}
     </li>
   )
@@ -240,22 +242,22 @@ export const SignalNode: Component<{ signal: GraphSignal }> = ({ signal }) => {
   const { highlightSignalObservers, isSourceHighlighted } = useHighlights()
   const isHighlighted = isSourceHighlighted.bind(null, signal)
 
-  const { hoverProps, isHovered } = createHover()
-  createEffect(() => highlightSignalObservers(signal, isHovered()))
+  // const { hoverProps, isHovered } = createHover()
+  // createEffect(() => highlightSignalObservers(signal, isHovered()))
 
   return (
-    <ValueRow selected={isFocused()} {...hoverProps} onClick={() => toggleSignalFocus(id)}>
+    <ValueRow selected={isFocused()} onClick={() => toggleSignalFocus(id)}>
       <ValueName type={type}>
         <Highlight
           strong={isUpdated()}
           light={isHighlighted()}
           signal
-          class={styles.SignalNode.name.highlight}
+          class={styles.ValueName.highlight}
         >
           {signal.name}
         </Highlight>
       </ValueName>
-      <ValuePreview value={signal.value} topmost />
+      <ValuePreview value={signal.value} />
     </ValueRow>
   )
 }
