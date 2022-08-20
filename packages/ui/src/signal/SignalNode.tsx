@@ -6,8 +6,11 @@ import {
   createMemo,
   createSignal,
   For,
+  JSX,
   Match,
+  ParentComponent,
   Show,
+  splitProps,
   Switch,
   useContext,
 } from "solid-js"
@@ -62,10 +65,12 @@ const NullableValuePreview: Component<{ value: null | undefined }> = props => (
 )
 
 const SymbolValuePreview: ValueComponent<ValueType.Symbol> = props => (
-  <span>Symbol({props.value})</span>
+  <span class={styles.baseValue}>Symbol({props.value})</span>
 )
 
-const InstanceValuePreview: ValueComponent<ValueType.Instance> = props => <span>{props.value}</span>
+const InstanceValuePreview: ValueComponent<ValueType.Instance> = props => (
+  <span class={styles.baseValue}>{props.value}</span>
+)
 
 const ElementValuePreview: ValueComponent<ValueType.Element> = props => (
   <span class={styles.ValueElement}>{props.value}</span>
@@ -80,20 +85,16 @@ const CollapsableObjectPreview: Component<{
 }> = props => {
   const [collapsed, setCollapsed] = createSignal(!(props.extended === true))
   return (
-    <div>
-      <div>{"["}</div>
-      <ul>
-        <Key each={Object.entries(props.value)} by={0}>
-          {keyvalue => (
-            <li>
-              <div>{keyvalue()[0]}</div>
-              <ValuePreview value={keyvalue()[1]} />
-            </li>
-          )}
-        </Key>
-      </ul>
-      <div>{"]"}</div>
-    </div>
+    <ul class={styles.collapsable.list}>
+      <Key each={Object.entries(props.value)} by={0}>
+        {keyvalue => (
+          <ValueRow selected={!collapsed()}>
+            <ValueName>{keyvalue()[0]}</ValueName>
+            <ValuePreview value={keyvalue()[1]} />
+          </ValueRow>
+        )}
+      </Key>
+    </ul>
   )
 }
 
@@ -110,7 +111,7 @@ const ObjectValuePreview: Component<{
 
 const ArrayHead: Component<{ value: number }> = props => (
   <Show when={props.value > 0} fallback={<span class={styles.EmptyArray}>Empty Array</span>}>
-    <span>Array [{props.value}]</span>
+    <span class={styles.baseValue}>Array [{props.value}]</span>
   </Show>
 )
 
@@ -160,6 +161,43 @@ const ValuePreview: Component<{ value: EncodedValue<boolean>; topmost?: boolean 
   })
 }
 
+const ValueName: ParentComponent<{ type?: NodeType.Signal | NodeType.Memo | null }> = props => {
+  const IconComponent = createMemo(() => {
+    switch (props.type) {
+      case NodeType.Signal:
+        return <div class={styles.SignalNode.name.signalDot} />
+      case NodeType.Memo:
+        return <Icon.Memo bgColor={color.amber[400]} />
+      default:
+        return null
+    }
+  })
+
+  return (
+    <div class={styles.SignalNode.name.container}>
+      <div class={styles.SignalNode.name.icon}>{<IconComponent />}</div>
+      <div class={styles.SignalNode.name.name}>{props.children}</div>
+    </div>
+  )
+}
+
+const ValueRow: ParentComponent<{ selected: boolean } & JSX.IntrinsicElements["li"]> = props => {
+  const [, attrs] = splitProps(props, ["selected", "children", "class"])
+  return (
+    <li
+      {...attrs}
+      class={clsx(
+        styles.SignalNode.container,
+        props.selected && styles.SignalNode.containerFocused,
+        props.class,
+      )}
+    >
+      <div class={styles.SignalNode.highlight} />
+      {props.children}
+    </li>
+  )
+}
+
 export const Signals: Component<{ each: GraphSignal[] }> = props => {
   const sorted = createMemo(() =>
     props.each.slice().sort((a, b) => {
@@ -169,9 +207,9 @@ export const Signals: Component<{ each: GraphSignal[] }> = props => {
   )
   return (
     <Show when={props.each.length}>
-      <div class={styles.Signals.container}>
+      <ul class={styles.Signals.container}>
         <For each={sorted()}>{signal => <SignalNode signal={signal} />}</For>
-      </div>
+      </ul>
     </Show>
   )
 }
@@ -206,27 +244,18 @@ export const SignalNode: Component<{ signal: GraphSignal }> = ({ signal }) => {
   createEffect(() => highlightSignalObservers(signal, isHovered()))
 
   return (
-    <div
-      class={clsx(styles.SignalNode.container, isFocused() && styles.SignalNode.containerFocused)}
-      {...hoverProps}
-      onClick={() => toggleSignalFocus(id)}
-    >
-      <div class={styles.SignalNode.highlight} />
-      <div class={styles.SignalNode.icon}>
-        {type === NodeType.Memo ? (
-          <Icon.Memo bgColor={color.amber[400]} />
-        ) : (
-          <div class={styles.SignalNode.signalDot} />
-        )}
-      </div>
-      <div class={styles.SignalNode.name}>
-        {signal.name}
-        {/* <span class={styles.SignalNode.id}>#{signal.id}</span> */}
-      </div>
-
-      <Highlight strong={isUpdated()} light={isHighlighted()} signal class={styles.ValuePreview}>
-        <ValuePreview value={signal.value} topmost />
-      </Highlight>
-    </div>
+    <ValueRow selected={isFocused()} {...hoverProps} onClick={() => toggleSignalFocus(id)}>
+      <ValueName type={type}>
+        <Highlight
+          strong={isUpdated()}
+          light={isHighlighted()}
+          signal
+          class={styles.SignalNode.name.highlight}
+        >
+          {signal.name}
+        </Highlight>
+      </ValueName>
+      <ValuePreview value={signal.value} topmost />
+    </ValueRow>
   )
 }
