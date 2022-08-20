@@ -1,3 +1,4 @@
+import { untrack } from "solid-js"
 import { noop, onRootCleanup } from "@solid-primitives/utils"
 import { Observable, Observer as ObjectObserver } from "object-observer"
 import {
@@ -106,7 +107,7 @@ export function observeComputationUpdate(owner: SolidComputation, onRun: VoidFun
   // patch owner
   owner.onComputationUpdate = onRun
   interceptComputationRerun(owner, fn => {
-    owner.onComputationUpdate!()
+    untrack(owner.onComputationUpdate!)
     fn()
   })
 }

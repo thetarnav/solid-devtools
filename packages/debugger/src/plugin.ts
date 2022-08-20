@@ -1,12 +1,4 @@
-import {
-  Accessor,
-  batch,
-  createEffect,
-  createSignal,
-  getOwner,
-  runWithOwner,
-  untrack,
-} from "solid-js"
+import { Accessor, batch, createSignal, getOwner, runWithOwner, untrack } from "solid-js"
 import { createSimpleEmitter } from "@solid-primitives/event-bus"
 import { omit } from "@solid-primitives/immutable"
 import { createLazyMemo } from "@solid-primitives/memo"
@@ -25,7 +17,7 @@ import {
 } from "@solid-devtools/shared/graph"
 import { EncodedValue, encodeValue } from "@solid-devtools/shared/serialize"
 import { createBatchedUpdateEmitter, createConsumers, createInternalRoot } from "./utils"
-import { clearOwnerObservers, ComputationUpdateHandler, SignalUpdateHandler } from "./walker"
+import { ComputationUpdateHandler, SignalUpdateHandler } from "./walker"
 import { forceRootUpdate } from "./roots"
 import { Merge } from "type-fest"
 
@@ -179,19 +171,6 @@ const exported = createInternalRoot(() => {
   // Focused Owner details:
   //
   const [focusedState, setFocusedState] = createStaticStore<FocusedState>(NULL_SELECTED_STATE)
-
-  createEffect(() => {
-    if (!enabled() && focusedState.owner) clearOwnerObservers(focusedState.owner)
-  })
-
-  // make sure we don't keep the listeners around
-  createEffect((prev: SolidOwner | null = null) => {
-    if (prev) {
-      selectedSignalIds.clear()
-      clearOwnerObservers(prev)
-    }
-    return focusedState.owner
-  })
 
   const setFocusedOwner: SetFocusedOwner = payload => {
     if (!payload) return setFocusedState(NULL_SELECTED_STATE)

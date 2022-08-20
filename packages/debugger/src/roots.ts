@@ -61,8 +61,12 @@ export function createGraphRoot(owner: SolidRoot): void {
       pushSignalUpdate(nodeId, value)
     }
 
+    let lastFocusedOwner: SolidOwner | null = null
+
     const forceRootUpdate = () => {
       if (owner.isDisposed) return
+      // make sure we don't keep the listeners around
+      lastFocusedOwner && clearOwnerObservers(lastFocusedOwner)
       const { tree, components, focusedOwner, focusedOwnerDetails, focusedOwnerSignalMap } =
         untrack(() =>
           walkSolidTree(owner, {
@@ -73,6 +77,7 @@ export function createGraphRoot(owner: SolidRoot): void {
             gatherComponents: gatherComponents(),
           }),
         )
+      lastFocusedOwner = focusedOwner
       if (untrack(() => focusedState.rootId) === rootId) {
         setFocusedOwnerDetails(focusedOwner, focusedOwnerDetails, focusedOwnerSignalMap)
       }
@@ -88,8 +93,12 @@ export function createGraphRoot(owner: SolidRoot): void {
     onUpdate(triggerRootUpdate)
     onForceUpdate(forceRootUpdate)
 
-    // force trigger update when enabled changes to true
-    createEffect(() => enabled() && forceRootUpdate())
+    createEffect(() => {
+      // force trigger update when enabled changes to true
+      if (enabled()) forceRootUpdate()
+      // stop listeneing to signals when the debugger is disabled
+      else lastFocusedOwner && clearOwnerObservers(lastFocusedOwner)
+    })
 
     setDebuggerContext(owner, { rootId, triggerRootUpdate, forceRootUpdate })
 
@@ -97,7 +106,7 @@ export function createGraphRoot(owner: SolidRoot): void {
       removeDebuggerContext(owner)
       removeRoot(rootId)
       owner.isDisposed = true
-      clearOwnerObservers(owner)
+      lastFocusedOwner && clearOwnerObservers(lastFocusedOwner)
       delete RootMap[rootId]
     })
   })
