@@ -32,7 +32,10 @@ const extensionAdapterFactory: PluginFactory = ({
   })
   onWindowMessage("ForceUpdate", forceTriggerUpdate)
   onWindowMessage("SetSelectedOwner", setFocusedOwner)
-  onWindowMessage("SetSelectedSignal", setSelectedSignal)
+  onWindowMessage("SetSelectedSignal", ({ id, selected }) => {
+    const value = setSelectedSignal({ id, selected })
+    if (value) postWindowMessage("SignalValue", { id, value })
+  })
 
   // diff the roots, and send only the changed roots (edited, deleted, added)
   createEffect(() => {

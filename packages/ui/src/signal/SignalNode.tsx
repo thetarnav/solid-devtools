@@ -4,10 +4,14 @@ import {
   createContext,
   createEffect,
   createMemo,
+  createSignal,
   For,
+  Match,
   Show,
+  Switch,
   useContext,
 } from "solid-js"
+import { Key } from "@solid-primitives/keyed"
 import { GraphSignal, NodeID, NodeType } from "@solid-devtools/shared/graph"
 import { createHover } from "@solid-aria/interactions"
 import { EncodedValue, EncodedValueOf, ValueType } from "@solid-devtools/shared/serialize"
@@ -18,7 +22,7 @@ import { Highlight } from "../highlight/Highlight"
 import * as styles from "./SignalNode.css"
 import clsx from "clsx"
 
-type ValueComponent<K extends ValueType> = Component<Omit<EncodedValueOf<K>, "type">>
+type ValueComponent<K extends ValueType> = Component<Omit<EncodedValueOf<K, boolean>, "type">>
 
 const StringValuePreview: ValueComponent<ValueType.String> = props => (
   <span class={styles.ValueString}>"{props.value}"</span>
@@ -49,16 +53,6 @@ const BooleanValuePreview: ValueComponent<ValueType.Boolean> = props => (
   ></input>
 )
 
-const ObjectValuePreview: ValueComponent<ValueType.Object> = props => (
-  <span class={styles.ValueObject}>…</span>
-)
-
-const ArrayValuePreview: ValueComponent<ValueType.Array> = props => (
-  <Show when={props.value > 0} fallback={<span class={styles.EmptyArray}>Empty Array</span>}>
-    <span>Array [{props.value}]</span>
-  </Show>
-)
-
 const FunctionValuePreview: ValueComponent<ValueType.Function> = props => (
   <span class={styles.ValueFunction}>{props.value ? `f ${props.value}()` : "function()"}</span>
 )
@@ -77,12 +71,66 @@ const ElementValuePreview: ValueComponent<ValueType.Element> = props => (
   <span class={styles.ValueElement}>{props.value}</span>
 )
 
-const ValuePreview: Component<{
-  updated?: boolean
-  highlighted?: boolean
-  value: EncodedValue
+const CollapsableObjectPreview: Component<{
+  value:
+    | EncodedValueOf<ValueType.Object, true>["value"]
+    | EncodedValueOf<ValueType.Array, true>["value"]
+  extended?: boolean
+  array?: boolean
 }> = props => {
-  const Value = createMemo(() => {
+  const [collapsed, setCollapsed] = createSignal(!(props.extended === true))
+  return (
+    <div>
+      <div>{"["}</div>
+      <ul>
+        <Key each={Object.entries(props.value)} by={0}>
+          {keyvalue => (
+            <li>
+              <div>{keyvalue()[0]}</div>
+              <ValuePreview value={keyvalue()[1]} />
+            </li>
+          )}
+        </Key>
+      </ul>
+      <div>{"]"}</div>
+    </div>
+  )
+}
+
+const ObjectValuePreview: Component<{
+  value: EncodedValueOf<ValueType.Object, boolean>["value"]
+  topmost?: boolean
+}> = props => {
+  return (
+    <Show when={props.value} fallback={<span class={styles.ValueObject}>…</span>}>
+      {value => <CollapsableObjectPreview value={value} extended={props.topmost} />}
+    </Show>
+  )
+}
+
+const ArrayHead: Component<{ value: number }> = props => (
+  <Show when={props.value > 0} fallback={<span class={styles.EmptyArray}>Empty Array</span>}>
+    <span>Array [{props.value}]</span>
+  </Show>
+)
+
+const ArrayValuePreview: Component<{
+  value: EncodedValueOf<ValueType.Array, boolean>["value"]
+  topmost?: boolean
+}> = props => (
+  <Switch>
+    <Match when={typeof props.value === "number" && props.value}>
+      {length => <ArrayHead value={length} />}
+    </Match>
+    <Match when={typeof props.value === "object" && props.value}>
+      {value => <CollapsableObjectPreview value={value} extended={props.topmost} array />}
+    </Match>
+  </Switch>
+)
+
+const ValuePreview: Component<{ value: EncodedValue<boolean>; topmost?: boolean }> = props => {
+  const { topmost } = props
+  return createMemo(() => {
     switch (props.value.type) {
       case ValueType.String:
         return <StringValuePreview value={props.value.value} />
@@ -91,9 +139,9 @@ const ValuePreview: Component<{
       case ValueType.Boolean:
         return <BooleanValuePreview value={props.value.value} />
       case ValueType.Object:
-        return <ObjectValuePreview />
+        return <ObjectValuePreview value={props.value.value} topmost={topmost} />
       case ValueType.Array:
-        return <ArrayValuePreview value={props.value.value} />
+        return <ArrayValuePreview value={props.value.value} topmost={topmost} />
       case ValueType.Function:
         return <FunctionValuePreview value={props.value.value} />
       case ValueType.Null:
@@ -110,12 +158,6 @@ const ValuePreview: Component<{
       //   return <span>{ValueType[props.value.type]}</span>
     }
   })
-
-  return (
-    <Highlight strong={props.updated} light={props.highlighted} signal class={styles.ValuePreview}>
-      <Value />
-    </Highlight>
-  )
 }
 
 export const Signals: Component<{ each: GraphSignal[] }> = props => {
@@ -181,7 +223,10 @@ export const SignalNode: Component<{ signal: GraphSignal }> = ({ signal }) => {
         {signal.name}
         {/* <span class={styles.SignalNode.id}>#{signal.id}</span> */}
       </div>
-      <ValuePreview value={signal.value} updated={isUpdated()} highlighted={isHighlighted()} />
+
+      <Highlight strong={isUpdated()} light={isHighlighted()} signal class={styles.ValuePreview}>
+        <ValuePreview value={signal.value} topmost />
+      </Highlight>
     </div>
   )
 }

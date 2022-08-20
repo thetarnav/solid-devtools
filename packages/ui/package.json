@@ -80,6 +80,7 @@
     "@solid-primitives/bounds": "^0.0.101",
     "@solid-primitives/event-listener": "^2.2.1",
     "@solid-primitives/keyboard": "^1.0.1",
+    "@solid-primitives/keyed": "^1.0.1",
     "@solid-primitives/props": "^2.2.1",
     "@solid-primitives/resize-observer": "^2.0.3",
     "@solid-primitives/timer": "^1.3.1",

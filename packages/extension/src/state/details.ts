@@ -107,10 +107,10 @@ const exports = createRoot(() => {
     clearUpdated()
   }
 
-  function handleSignalUpdates(updates: SignalUpdate[]): void {
+  function handleSignalUpdates(updates: SignalUpdate[], isUpdate = true): void {
     if (!untrack(details)) return
     batch(() => {
-      addUpdated(updates.map(u => u.id))
+      isUpdate && addUpdated(updates.map(u => u.id))
       setState(
         "details",
         "signals",
@@ -119,8 +119,8 @@ const exports = createRoot(() => {
             const signal = proxy[update.id]
             if (!signal) return
             signal.value.type = update.value.type
-            if ("value" in update.value) (signal.value as any).value = update.value.value
-            else delete (signal.value as any).value
+            if ("value" in update.value) signal.value.value = update.value.value
+            else delete signal.value.value
           }
         }),
       )
@@ -129,9 +129,17 @@ const exports = createRoot(() => {
 
   let onSignalSelect: ((id: NodeID, selected: boolean) => void) | undefined
   const setOnSignalSelect = (fn: typeof onSignalSelect) => (onSignalSelect = fn)
+  // ? should this be a field in the GraphSignal?
+  // there is no use for checking the selector outside of the ui part
   const [focusedSignals, setFocusedSignals] = createSignal<NodeID[]>([])
   const toggleSignalFocus = createArraySetToggle(focusedSignals, setFocusedSignals)
   const useFocusedSignalSelector = createArrayIncludesSelector(focusedSignals)
+
+  function handleToggleSignalFocus(item: NodeID, state?: boolean) {
+    if (state === undefined) state = !untrack(useFocusedSignalSelector(item))
+    toggleSignalFocus(item, state)
+    onSignalSelect?.(item, state)
+  }
 
   return {
     focused,
@@ -143,7 +151,7 @@ const exports = createRoot(() => {
     updateDetails,
     handleSignalUpdates,
     handleGraphUpdate,
-    toggleSignalFocus,
+    toggleSignalFocus: handleToggleSignalFocus,
     useFocusedSignalSelector,
     setOnSignalSelect,
   }

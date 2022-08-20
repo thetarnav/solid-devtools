@@ -53,17 +53,18 @@ export function createGraphRoot(owner: SolidRoot): void {
 
     const forceRootUpdate = () => {
       if (owner.isDisposed) return
-      const { tree, components, focusedOwner, focusedOwnerDetails } = untrack(() =>
-        walkSolidTree(owner, {
-          onComputationUpdate,
-          onSignalUpdate: pushSignalUpdate,
-          rootId,
-          focusedId: focusedState.id,
-          gatherComponents: gatherComponents(),
-        }),
-      )
+      const { tree, components, focusedOwner, focusedOwnerDetails, focusedOwnerSignalMap } =
+        untrack(() =>
+          walkSolidTree(owner, {
+            onComputationUpdate,
+            onSignalUpdate: pushSignalUpdate,
+            rootId,
+            focusedId: focusedState.id,
+            gatherComponents: gatherComponents(),
+          }),
+        )
       if (untrack(() => focusedState.rootId) === rootId) {
-        setFocusedOwnerDetails(focusedOwner, focusedOwnerDetails)
+        setFocusedOwnerDetails(focusedOwner, focusedOwnerDetails, focusedOwnerSignalMap)
       }
       updateRoot({ id: rootId, tree, components })
     }

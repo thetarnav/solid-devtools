@@ -26,14 +26,15 @@ export type SignalUpdateHandler = (nodeId: NodeID, value: unknown) => void
 export type ComputationUpdateHandler = (rootId: NodeID, nodeId: NodeID) => void
 
 // Globals set before each walker cycle
-let FocusedId: NodeID | null = null
+let FocusedId: NodeID | null
 let RootId: NodeID
 let OnSignalUpdate: SignalUpdateHandler
 let OnComputationUpdate: ComputationUpdateHandler
 let GatherComponents: boolean
 let Components: MappedComponent[] = []
-let FocusedOwner: SolidOwner | null = null
-let FocusedOwnerDetails: MappedOwnerDetails | null = null
+let FocusedOwner: SolidOwner | null
+let FocusedOwnerDetails: MappedOwnerDetails | null
+let FocusedOwnerSignalMap: Record<NodeID, SolidSignal>
 
 const WALKER = Symbol("walker")
 
@@ -49,33 +50,17 @@ function observeValue(node: SolidSignal) {
   observeValueUpdate(node, value => handler(id, value), WALKER)
 }
 
-function createSignalNode(node: SolidSignal): MappedSignal {
+function mapSignalNode(node: SolidSignal): MappedSignal {
+  const id = markNodeID(node)
+  FocusedOwnerSignalMap[id] = node
+  observeValue(node)
   return {
     type: getNodeType(node) as NodeType.Memo | NodeType.Signal,
     name: getNodeName(node),
-    id: markNodeID(node),
+    id,
     observers: markNodesID(node.observers),
     value: encodeValue(node.value),
   }
-}
-
-function mapOwnerSignals(owner: SolidOwner): MappedSignal[] {
-  if (!owner.sourceMap) return []
-  return Object.values(owner.sourceMap).map(raw => {
-    observeValue(raw)
-    return createSignalNode(raw)
-  })
-}
-
-function mapOwnerMemos(owner: SolidOwner): MappedSignal[] {
-  const memos: MappedSignal[] = []
-  if (!owner.owned) return memos
-  owner.owned.forEach(child => {
-    if (!isSolidMemo(child)) return
-    observeValue(child)
-    memos.push(createSignalNode(child))
-  })
-  return memos
 }
 
 export function clearOwnerObservers(owner: SolidOwner): void {
@@ -94,9 +79,13 @@ function collectOwnerDetails(owner: SolidOwner): void {
     current = current.owner
   }
 
-  // get signals and memos
-  const signals = mapOwnerSignals(owner)
-  signals.push.apply(signals, mapOwnerMemos(owner))
+  // map signals
+  const signals = owner.sourceMap ? Object.values(owner.sourceMap).map(mapSignalNode) : []
+  // map memos
+  owner.owned?.forEach(child => {
+    if (!isSolidMemo(child)) return
+    signals.push(mapSignalNode(child))
+  })
 
   const details: MappedOwnerDetails = {
     // id, name and type are already set in mapOwner
@@ -176,6 +165,7 @@ export function walkSolidTree(
   components: MappedComponent[]
   focusedOwnerDetails: MappedOwnerDetails | null
   focusedOwner: SolidOwner | null
+  focusedOwnerSignalMap: Record<NodeID, SolidSignal>
 } {
   // set the globals to be available for this walk cycle
   FocusedId = config.focusedId
@@ -183,12 +173,16 @@ export function walkSolidTree(
   OnSignalUpdate = config.onSignalUpdate
   OnComputationUpdate = config.onComputationUpdate
   GatherComponents = config.gatherComponents
+  FocusedOwner = null
+  FocusedOwnerDetails = null
+  FocusedOwnerSignalMap = {}
   if (GatherComponents) Components = []
 
   const tree = mapOwner(owner)
   const components = Components
   const focusedOwner = FocusedOwner
   const focusedOwnerDetails = FocusedOwnerDetails
+  const focusedOwnerSignalMap = FocusedOwnerSignalMap
 
-  return { tree, components, focusedOwner, focusedOwnerDetails }
+  return { tree, components, focusedOwner, focusedOwnerDetails, focusedOwnerSignalMap }
 }

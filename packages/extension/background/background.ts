@@ -61,6 +61,8 @@ chrome.runtime.onConnect.addListener(newPort => {
     ),
   )
 
+  addCleanup(onPortMessage("SignalValue", payload => postRuntimeMessage("SignalValue", payload)))
+
   addCleanup(
     onRuntimeMessage("PanelVisibility", visibility => {
       panelVisibility = visibility

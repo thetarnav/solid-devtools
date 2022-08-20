@@ -11,7 +11,6 @@ import { createSimpleEmitter } from "@solid-primitives/event-bus"
 import { omit } from "@solid-primitives/immutable"
 import { createLazyMemo } from "@solid-primitives/memo"
 import { createStaticStore } from "@solid-primitives/utils"
-import { throttle } from "@solid-primitives/scheduled"
 import {
   MappedComponent,
   MappedRoot,
@@ -22,11 +21,13 @@ import {
   NodeID,
   ComputationUpdate,
   SignalUpdate,
+  SolidSignal,
 } from "@solid-devtools/shared/graph"
-import { encodeValue } from "@solid-devtools/shared/serialize"
-import { createConsumers, createInternalRoot } from "./utils"
+import { EncodedValue, encodeValue } from "@solid-devtools/shared/serialize"
+import { createBatchedUpdateEmitter, createConsumers, createInternalRoot } from "./utils"
 import { clearOwnerObservers, ComputationUpdateHandler, SignalUpdateHandler } from "./walker"
 import { forceRootUpdate } from "./roots"
+import { Merge } from "type-fest"
 
 /*
 DETAILS:
@@ -46,11 +47,26 @@ DETAILS:
 
 export type SetFocusedOwner = (payload: { rootId: NodeID; ownerId: NodeID } | null) => void
 
-export type FocusedState = Readonly<
-  | { id: null; rootId: null; owner: null; updated: false; details: null }
-  | { id: NodeID; rootId: NodeID; owner: null; updated: false; details: null }
-  | { id: NodeID; rootId: NodeID; owner: SolidOwner; updated: boolean; details: MappedOwnerDetails }
->
+const NULL_SELECTED_STATE = {
+  id: null,
+  rootId: null,
+  owner: null,
+  updated: false,
+  details: null,
+  signalMap: {} as Record<NodeID, SolidSignal>,
+} as const
+
+export type FocusedState =
+  | typeof NULL_SELECTED_STATE
+  | Merge<typeof NULL_SELECTED_STATE, { readonly id: NodeID; readonly rootId: NodeID }>
+  | {
+      readonly id: NodeID
+      readonly rootId: NodeID
+      readonly owner: SolidOwner
+      readonly updated: boolean
+      readonly details: MappedOwnerDetails
+      readonly signalMap: Record<NodeID, SolidSignal>
+    }
 
 export type SignaledRoot = {
   readonly id: NodeID
@@ -81,7 +97,10 @@ export type PluginFactoryData = {
   readonly components: Accessor<MappedComponent[]>
   readonly setFocusedOwner: SetFocusedOwner
   readonly focusedState: FocusedState
-  readonly setSelectedSignal: (payload: { id: NodeID; selected: boolean }) => void
+  readonly setSelectedSignal: (payload: {
+    id: NodeID
+    selected: boolean
+  }) => EncodedValue<boolean> | null
 }
 
 export type PluginFactory = (data: PluginFactoryData) => {
@@ -90,17 +109,7 @@ export type PluginFactory = (data: PluginFactoryData) => {
   gatherComponents?: Accessor<boolean>
 }
 
-const nullFocusedState = {
-  id: null,
-  rootId: null,
-  owner: null,
-  updated: false,
-  details: null,
-} as const
-
 const exported = createInternalRoot(() => {
-  const owner = getOwner()!
-
   /** throttled global update */
   const [onUpdate, triggerUpdate] = createSimpleEmitter()
   /** forced — immediate global update */
@@ -161,13 +170,7 @@ const exported = createInternalRoot(() => {
       const [components, setComponents] = createSignal(newRoot.components)
       setRoots(map => ({
         ...map,
-        [rootId]: {
-          id: rootId,
-          tree,
-          setTree,
-          components,
-          setComponents,
-        },
+        [rootId]: { id: rootId, tree, setTree, components, setComponents },
       }))
     }
   }
@@ -175,7 +178,7 @@ const exported = createInternalRoot(() => {
   //
   // Focused Owner details:
   //
-  const [focusedState, setFocusedState] = createStaticStore<FocusedState>(nullFocusedState)
+  const [focusedState, setFocusedState] = createStaticStore<FocusedState>(NULL_SELECTED_STATE)
 
   // make sure we don't keep the listeners around
   createEffect((prev: SolidOwner | null = null) => {
@@ -183,47 +186,14 @@ const exported = createInternalRoot(() => {
     return focusedState.owner
   })
 
-  //
-  // Signal updates:
-  //
-  // TODO: abstract it to a separate module
-  const [handleSignalUpdates, pushSignalUpdate] = (() => {
-    const [handleSignalUpdates, emitSignalUpdates] = createSimpleEmitter<SignalUpdate[]>()
-    const signalUpdates: SignalUpdate[] = []
-
-    const triggerComputationUpdateEmit = throttle(() => {
-      // dedupe computation updates
-      const updatedNodes = new Set<NodeID>()
-      const updates: SignalUpdate[] = []
-      for (let i = signalUpdates.length - 1; i >= 0; i--) {
-        const update = signalUpdates[i]
-        if (updatedNodes.has(update.id)) continue
-        updatedNodes.add(update.id)
-        updates.push(update)
-      }
-      signalUpdates.length = 0
-      emitSignalUpdates(updates)
-    })
-
-    const pushComputationUpdate: SignalUpdateHandler = (id, value) => {
-      if (!untrack(() => focusedState.id)) return
-      signalUpdates.push({ id, value: encodeValue(value) })
-      triggerComputationUpdateEmit()
-    }
-
-    return [handleSignalUpdates, pushComputationUpdate]
-  })()
-
   const setFocusedOwner: SetFocusedOwner = payload => {
-    if (!payload) return setFocusedState(nullFocusedState)
+    if (!payload) return setFocusedState(NULL_SELECTED_STATE)
     const id = untrack(() => focusedState.id)
     if (id === payload.ownerId) return
     setFocusedState({
+      ...NULL_SELECTED_STATE,
       id: payload.ownerId,
       rootId: payload.rootId,
-      owner: null,
-      updated: false,
-      details: null,
     })
     forceRootUpdate(payload.rootId)
   }
@@ -231,6 +201,7 @@ const exported = createInternalRoot(() => {
   const setFocusedOwnerDetails = (
     newOwner: SolidOwner | null,
     newDetails: MappedOwnerDetails | null,
+    newSignalMap: Record<NodeID, SolidSignal>,
   ) => {
     if (newOwner && newDetails) {
       setFocusedState(prev => ({
@@ -239,56 +210,44 @@ const exported = createInternalRoot(() => {
         owner: newOwner,
         updated: prev.owner === newOwner,
         details: newDetails,
+        signalMap: newSignalMap,
       }))
-    } else setFocusedState(nullFocusedState)
+    } else setFocusedState(NULL_SELECTED_STATE)
   }
 
   //
   // Selected Signals:
   //
   const selectedSignalIds: Set<NodeID> = new Set()
-
   const setSelectedSignal: PluginFactoryData["setSelectedSignal"] = ({ id, selected }) => {
-    if (selected) {
-      if (selectedSignalIds.has(id)) return
-      selectedSignalIds.add(id)
-      // TODO: run add logic
-    } else {
-      selectedSignalIds.delete(id)
-    }
+    const signalMap = untrack(() => focusedState.signalMap)
+    const signal = signalMap[id] as SolidSignal | undefined
+    if (!signal) return null
+    if (selected) selectedSignalIds.add(id)
+    else selectedSignalIds.delete(id)
+    return encodeValue(signal.value, selected)
+  }
+
+  //
+  // Signal updates:
+  //
+  const [handleSignalUpdates, _pushSignalUpdate] = createBatchedUpdateEmitter<SignalUpdate>()
+  const pushSignalUpdate: SignalUpdateHandler = (id, value) => {
+    if (!untrack(() => focusedState.id)) return
+    const isSelected = selectedSignalIds.has(id)
+    const payload: SignalUpdate = { id, value: encodeValue(value, isSelected) }
+    _pushSignalUpdate(payload)
   }
 
   //
   // Computation updates:
   //
-  // TODO: abstract it to a separate module
-  const [handleComputationUpdates, pushComputationUpdate] = (() => {
-    const [handleComputationUpdates, emitComputationUpdates] =
-      createSimpleEmitter<ComputationUpdate[]>()
-    const computationUpdates: ComputationUpdate[] = []
-
-    const triggerComputationUpdateEmit = throttle(() => {
-      // dedupe computation updates
-      const updatedNodes = new Set<NodeID>()
-      const updates: ComputationUpdate[] = []
-      for (let i = computationUpdates.length - 1; i >= 0; i--) {
-        const update = computationUpdates[i]
-        if (updatedNodes.has(update.nodeId)) continue
-        updatedNodes.add(update.nodeId)
-        updates.push(update)
-      }
-      computationUpdates.length = 0
-      emitComputationUpdates(updates)
-    })
-
-    const pushComputationUpdate: ComputationUpdateHandler = (rootId, nodeId) => {
-      if (!untrack(observeComputations)) return
-      computationUpdates.push({ rootId, nodeId })
-      triggerComputationUpdateEmit()
-    }
-
-    return [handleComputationUpdates, pushComputationUpdate]
-  })()
+  const [handleComputationUpdates, _pushComputationUpdate] =
+    createBatchedUpdateEmitter<ComputationUpdate>()
+  const pushComputationUpdate: ComputationUpdateHandler = (rootId, id) => {
+    if (!untrack(observeComputations)) return
+    _pushComputationUpdate({ rootId, id })
+  }
 
   //
   // Components:
@@ -313,6 +272,7 @@ const exported = createInternalRoot(() => {
     focusedState,
     setSelectedSignal,
   }
+  const owner = getOwner()!
   function registerDebuggerPlugin(factory: PluginFactory) {
     runWithOwner(owner, () => {
       const { enabled, gatherComponents, observeComputations } = factory(pluginData)

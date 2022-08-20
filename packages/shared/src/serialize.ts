@@ -29,7 +29,7 @@ export type EncodedPreviewPayloadMap = {
 
 type PreviewPayloadOf<K extends ValueType> = K extends keyof EncodedPreviewPayloadMap
   ? { value: EncodedPreviewPayloadMap[K] }
-  : {}
+  : { value?: undefined }
 
 export type EncodedValueOf<K extends ValueType, Deep extends boolean = false> = {
   type: K

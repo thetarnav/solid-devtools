@@ -18,6 +18,8 @@ export interface Messages {
   OwnerDetailsUpdate: MappedOwnerDetails
   /** devtools -> adapter: request for signal details — subscribe or unsubscribe */
   SetSelectedSignal: { id: NodeID; selected: boolean }
+  /** adapter -> devtools: signal deep value */
+  SignalValue: SignalUpdate
 }
 
 export type PostMessageFn = <K extends keyof Messages>(

@@ -28,7 +28,7 @@ onRuntimeMessage("ResetPanel", () => {
 })
 
 onRuntimeMessage("ComputationUpdates", updates => {
-  handleComputationsUpdate(updates.map(u => u.nodeId))
+  handleComputationsUpdate(updates.map(u => u.id))
 })
 
 onRuntimeMessage("SignalUpdates", updates => {
@@ -37,6 +37,11 @@ onRuntimeMessage("SignalUpdates", updates => {
 
 onRuntimeMessage("OwnerDetailsUpdate", details => {
   updateDetails(details)
+})
+
+onRuntimeMessage("SignalValue", update => {
+  // updates the signal value but without causing it to highlight
+  handleSignalUpdates([update], false)
 })
 
 createRoot(() => {

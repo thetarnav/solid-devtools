@@ -3,7 +3,6 @@ import { Many } from "@solid-primitives/utils"
 import { Owner as _Owner, SignalState as _SignalState, Computation as _Computation } from "./solid"
 import { INTERNAL, NOTFOUND } from "./variables"
 import { EncodedValue } from "./serialize"
-import { Merge } from "type-fest"
 
 export enum NodeType {
   Component,
@@ -101,7 +100,7 @@ export type DebuggerContext =
     }
   | typeof INTERNAL
 
-export type ComputationUpdate = { rootId: NodeID; nodeId: NodeID }
+export type ComputationUpdate = { rootId: NodeID; id: NodeID }
 
 export type ValueUpdateListener = (newValue: unknown, oldValue: unknown) => void
 
@@ -139,7 +138,7 @@ export interface MappedSignal {
   name: string
   id: NodeID
   observers: NodeID[]
-  value: EncodedValue
+  value: EncodedValue<false>
 }
 
 export type MappedComponent = {
@@ -166,7 +165,7 @@ export interface MappedOwnerDetails {
 
 export type SignalUpdate = {
   id: NodeID
-  value: EncodedValue
+  value: EncodedValue<boolean>
 }
 
 //
@@ -188,12 +187,13 @@ export interface GraphOwner {
   readonly children: GraphOwner[]
 }
 
-export type GraphSignal = Merge<
-  Readonly<MappedSignal>,
-  {
-    readonly deepValue?: EncodedValue<true>
-  }
->
+export type GraphSignal = {
+  readonly type: NodeType.Signal | NodeType.Memo
+  readonly name: string
+  readonly id: NodeID
+  readonly observers: NodeID[]
+  readonly value: EncodedValue<boolean>
+}
 
 export type OwnerPath = (GraphOwner | typeof NOTFOUND)[]
 

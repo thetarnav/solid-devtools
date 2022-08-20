@@ -20,7 +20,9 @@ import {
 } from "@solid-devtools/shared/graph"
 import { INTERNAL, UNNAMED } from "@solid-devtools/shared/variables"
 import { trimString } from "@solid-devtools/shared/utils"
-import { Owner, RootFunction } from "@solid-devtools/shared/solid"
+import { RootFunction } from "@solid-devtools/shared/solid"
+import { createSimpleEmitter, GenericListen } from "@solid-primitives/event-bus"
+import { throttle } from "@solid-primitives/scheduled"
 
 export const isSolidComputation = (o: Readonly<SolidOwner>): o is SolidComputation => "fn" in o
 
@@ -220,7 +222,10 @@ export function createConsumers(): [
 
 let SkipInternalRoot: RootFunction<unknown> | null = null
 
-export function createInternalRoot<T>(fn: RootFunction<T>, detachedOwner?: Owner): T {
+/**
+ * Sold's `createRoot` primitive that won't be tracked by the debugger.
+ */
+export const createInternalRoot: typeof createRoot = (fn, detachedOwner) => {
   SkipInternalRoot = fn
   const v = createRoot(dispose => {
     const owner = getOwner() as SolidRoot
@@ -234,4 +239,38 @@ export const skipInternalRoot = () => {
   const skip = !!SkipInternalRoot
   if (skip) SkipInternalRoot = null
   return skip
+}
+
+/**
+ * Batches series of updates to a single array of updates.
+ *
+ * The updates are deduped by `id` property
+ */
+export function createBatchedUpdateEmitter<T extends { id: NodeID }>(): [
+  handleUpdates: GenericListen<[T[]]>,
+  pushUpdate: (update: T) => void,
+] {
+  const [handleUpdates, emitUpdates] = createSimpleEmitter<T[]>()
+  const updates: T[] = []
+
+  const triggerUpdateEmit = throttle(() => {
+    // dedupe updates
+    const ids = new Set<NodeID>()
+    const deduped: T[] = []
+    for (let i = updates.length - 1; i >= 0; i--) {
+      const update = updates[i]
+      if (ids.has(update.id)) continue
+      ids.add(update.id)
+      deduped.push(update)
+    }
+    updates.length = 0
+    emitUpdates(deduped)
+  })
+
+  const pushUpdate: (update: T) => void = update => {
+    updates.push(update)
+    triggerUpdateEmit()
+  }
+
+  return [handleUpdates, pushUpdate]
 }
