@@ -17,9 +17,13 @@ To change the way you write, debug and understand your SolidJS applications and 
 And also to experiment with ways of visualizing
 and interacting with Solid's reactivity graph.
 
-## How to start?
+## [The Chrome Extension](./packages/extension#readme)
 
-[**See this brilliant article that will guide you though the process.**](https://dev.to/mbarzeev/taking-solidjs-dev-tools-for-a-spin-44m2)
+🚧 In very very early development. 🚧
+
+Chrome Developer Tools extension for debugging SolidJS applications. It allows for visualizing and interacting with Solid's reactivity graph, as well as inspecting component state and hierarchy.
+
+[**See the guide on setting started**](https://github.com/thetarnav/solid-devtools/tree/main/packages/extension#how-do-i-try-it-out)
 
 ## Main Devtools package
 
@@ -37,13 +41,6 @@ It is a recommended and easy way to get started.
 Most of the present packages are not much more then just ideas and experiments. Some in progress, and some very much in progress.
 But few of them can help you in your work already, and a man can dream, so this is what's out there waiting:
 
-### [Debugger](./packages/debugger#readme)
-
-###### `@solid-devtools/debugger`
-
-A runtime library, used to get information and track changes of the Solid's reactivity graph.
-It's a cornerstone of the rest of the packages.
-
 ### [Locator](./packages/locator#readme)
 
 ###### `@solid-devtools/locator`
@@ -58,6 +55,13 @@ For debugging only the pinpoint places parts of the Solid's reactivity graph you
 
 Provides a variaty of debugging utilities for logging the state and lifecycle of the nodes of reactivity graph to the browser console.
 
+### [Debugger](./packages/debugger#readme)
+
+###### `@solid-devtools/debugger`
+
+A runtime library, used to get information and track changes of the Solid's reactivity graph.
+It's a cornerstone of the rest of the packages.
+
 ### [Transform](./packages/transform/)
 
 ###### `@solid-devtools/transform`
@@ -65,12 +69,6 @@ Provides a variaty of debugging utilities for logging the state and lifecycle of
 A babel transform plugin for vite for transforming Solid code. For development — debugging purposes only.
 
 It can do very useful things for you: Wrap stores to let the debugger observe them. Automatically name signals, memos and stroes. It's also required by the [Locator](./packages/locator#readme) package to allow for going to the source code of the components.
-
-### [Chrome Extension](./packages/extension#readme)
-
-🚧 In very very early development. 🚧
-
-Chrome Developer Tools extension for debugging SolidJS applications. It allows for visualizing and interacting with Solid's reactivity graph, as well as inspecting component state and hierarchy.
 
 ### [Extension Adapter](./packages/extension-adapter#readme)
 
