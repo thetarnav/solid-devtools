@@ -4,6 +4,10 @@
 
 # Solid Devtools
 
+[![pnpm](https://img.shields.io/badge/maintained%20with-pnpm-cc00ff.svg?style=for-the-badge&logo=pnpm)](https://pnpm.io/)
+[![turborepo](https://img.shields.io/badge/built%20with-turborepo-cc00ff.svg?style=for-the-badge&logo=turborepo)](https://turborepo.org/)
+[![npm](https://img.shields.io/npm/dw/@solid-devtools/debugger?style=for-the-badge)](https://www.npmjs.com/package/solid-devtools)
+
 Library of developer tools, reactivity debugger & Devtools Chrome extension for visualizing SolidJS reactivity graph.
 
 ## Why?
