@@ -1,5 +1,11 @@
 # solid-devtools-extension
 
+## 0.7.1
+
+### Patch Changes
+
+- 7f69ca4: Add warning about adapter-extension version mismatches.
+
 ## 0.7.0
 
 ### Minor Changes
