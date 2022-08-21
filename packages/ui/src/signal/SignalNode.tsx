@@ -82,42 +82,69 @@ const CollapsableObjectPreview: Component<{
   <ul class={styles.collapsable.list}>
     <Key each={Object.entries(props.value)} by={0}>
       {keyvalue => {
-        const [extended, setExtended] = createSignal(false)
+        // TODO: is <Key> necessary here? the values should be reconciled by the key anyway
+        // key will be static, because <Key> is using it as a key
+        const key = keyvalue()[0]
+        const value = () => keyvalue()[1]
         return (
-          <ValueRow selected={extended()}>
-            <ValueName>{keyvalue()[0]}</ValueName>
-            <ValuePreview value={keyvalue()[1]} />
-          </ValueRow>
+          <Show
+            when={value().type === ValueType.Object || value().type === ValueType.Array}
+            fallback={
+              <ValueRow>
+                <ValueName>{key}</ValueName>
+                <ValuePreview value={value()} />
+              </ValueRow>
+            }
+          >
+            {() => {
+              const [extended, setExtended] = createSignal(false)
+              return (
+                <ValueRow
+                  selected={false}
+                  onClick={e => {
+                    e.stopPropagation()
+                    setExtended(p => !p)
+                  }}
+                >
+                  <ValueName>{key}</ValueName>
+                  <ObjectValuePreview
+                    {...(value() as
+                      | EncodedValueOf<ValueType.Object, true>
+                      | EncodedValueOf<ValueType.Array, true>)}
+                    extended={extended()}
+                  />
+                </ValueRow>
+              )
+            }}
+          </Show>
         )
       }}
     </Key>
   </ul>
 )
 
-const ObjectValuePreview: ValueComponent<ValueType.Object> = props => {
-  return (
-    <Switch>
-      <Match when={!props.children || props.value === 0}>
-        <span class={styles.ValueObject}>…</span>
-      </Match>
-      <Match when={props.children}>{value => <CollapsableObjectPreview value={value} />}</Match>
-    </Switch>
-  )
-}
+const ObjectValuePreview: Component<
+  EncodedValueOf<ValueType.Object | ValueType.Array, boolean> & { extended?: boolean }
+> = props => (
+  <Switch>
+    <Match when={!props.children || props.value === 0 || props.extended === false}>
+      <Switch>
+        <Match when={props.type === ValueType.Object}>
+          <span class={styles.ValueObject}>…</span>
+        </Match>
+        <Match when={props.type === ValueType.Array}>
+          <ArrayHead value={props.value} />
+        </Match>
+      </Switch>
+    </Match>
+    <Match when={props.children}>{value => <CollapsableObjectPreview value={value} />}</Match>
+  </Switch>
+)
 
 const ArrayHead: Component<{ value: number }> = props => (
   <Show when={props.value > 0} fallback={<span class={styles.EmptyArray}>Empty Array</span>}>
     <span class={styles.baseValue}>Array [{props.value}]</span>
   </Show>
-)
-
-const ArrayValuePreview: ValueComponent<ValueType.Array> = props => (
-  <Switch>
-    <Match when={!props.children || props.value === 0}>
-      <ArrayHead value={props.value} />
-    </Match>
-    <Match when={props.children}>{value => <CollapsableObjectPreview value={value} />}</Match>
-  </Switch>
 )
 
 const ValuePreview: Component<{ value: EncodedValue<boolean> }> = props =>
@@ -130,9 +157,8 @@ const ValuePreview: Component<{ value: EncodedValue<boolean> }> = props =>
       case ValueType.Boolean:
         return <BooleanValuePreview value={props.value.value} />
       case ValueType.Object:
-        return <ObjectValuePreview value={props.value.value} children={props.value.children} />
       case ValueType.Array:
-        return <ArrayValuePreview value={props.value.value} children={props.value.children} />
+        return <ObjectValuePreview {...props.value} />
       case ValueType.Function:
         return <FunctionValuePreview value={props.value.value} />
       case ValueType.Null:
@@ -170,8 +196,18 @@ const ValueName: ParentComponent<{ type?: NodeType.Signal | NodeType.Memo | null
   )
 }
 
-const ValueRow: ParentComponent<{ selected: boolean } & JSX.IntrinsicElements["li"]> = props => {
+const ValueRow: ParentComponent<{ selected?: boolean } & JSX.IntrinsicElements["li"]> = props => {
   const [, attrs] = splitProps(props, ["selected", "children", "class"])
+
+  // early return if this value in not selectable (if undefined, this shouldn't be assigned again)
+  if (props.selected === undefined) {
+    return (
+      <li {...attrs} class={clsx(styles.ValueRow.container, props.class)}>
+        {props.children}
+      </li>
+    )
+  }
+
   const [isHovered, setIsHovered] = createSignal(false)
   return (
     <li
