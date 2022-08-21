@@ -1,5 +1,18 @@
 # @solid-devtools/extension-adapter
 
+## 0.12.0
+
+### Minor Changes
+
+- b5e9776: Select signals and send encoded nested values of objects and arrays.
+
+### Patch Changes
+
+- Updated dependencies [78b06a6]
+- Updated dependencies [b5e9776]
+  - @solid-devtools/debugger@0.6.0
+  - @solid-devtools/shared@0.6.0
+
 ## 0.11.1
 
 ### Patch Changes

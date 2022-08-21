@@ -1,5 +1,22 @@
 # solid-devtools-extension
 
+## 0.7.0
+
+### Minor Changes
+
+- 7b6ac08: Display nested signal values as a collapsable tree.
+- b5e9776: Select signals and send encoded nested values of objects and arrays.
+
+### Patch Changes
+
+- 756d0f7: Selecting Signals
+- Updated dependencies [756d0f7]
+- Updated dependencies [7b6ac08]
+- Updated dependencies [78b06a6]
+- Updated dependencies [b5e9776]
+  - @solid-devtools/ui@0.9.0
+  - @solid-devtools/shared@0.6.0
+
 ## 0.6.2
 
 ### Patch Changes

@@ -40,8 +40,8 @@ importers:
 
   packages/debugger:
     specifiers:
-      '@solid-devtools/shared': workspace:^0.5.1
-      '@solid-devtools/transform': ^0.6.1
+      '@solid-devtools/shared': workspace:^0.6.0
+      '@solid-devtools/transform': ^0.6.2
       '@solid-primitives/event-bus': ^0.1.0
       '@solid-primitives/immutable': ^0.1.0
       '@solid-primitives/memo': ^0.3.0
@@ -81,8 +81,8 @@ importers:
   packages/extension:
     specifiers:
       '@crxjs/vite-plugin': ^1.0.13
-      '@solid-devtools/shared': workspace:^0.5.1
-      '@solid-devtools/ui': 0.8.2
+      '@solid-devtools/shared': workspace:^0.6.0
+      '@solid-devtools/ui': 0.9.0
       '@solid-primitives/context': ^0.1.0
       '@solid-primitives/destructure': ^0.1.1
       '@solid-primitives/immutable': ^0.1.0
@@ -129,8 +129,8 @@ importers:
 
   packages/extension-adapter:
     specifiers:
-      '@solid-devtools/debugger': ^0.5.1
-      '@solid-devtools/shared': workspace:^0.5.1
+      '@solid-devtools/debugger': ^0.6.0
+      '@solid-devtools/shared': workspace:^0.6.0
       '@solid-primitives/utils': ^3.0.1
       solid-js: ^1.4.8
       tsup: ^6.2.1
@@ -148,9 +148,9 @@ importers:
 
   packages/locator:
     specifiers:
-      '@solid-devtools/debugger': ^0.5.0
-      '@solid-devtools/shared': workspace:^0.5.0
-      '@solid-devtools/transform': ^0.6.1
+      '@solid-devtools/debugger': ^0.6.0
+      '@solid-devtools/shared': workspace:^0.6.0
+      '@solid-devtools/transform': ^0.6.2
       '@solid-primitives/bounds': ^0.0.100
       '@solid-primitives/event-listener': ^2.2.1
       '@solid-primitives/keyboard': ^0.0.100
@@ -192,8 +192,8 @@ importers:
 
   packages/logger:
     specifiers:
-      '@solid-devtools/debugger': ^0.5.0
-      '@solid-devtools/shared': workspace:^0.5.0
+      '@solid-devtools/debugger': ^0.6.0
+      '@solid-devtools/shared': workspace:^0.6.0
       '@solid-primitives/utils': ^3.0.1
       '@testing-library/jest-dom': ^5.16.4
       jest: ^28.1.3
@@ -217,10 +217,10 @@ importers:
 
   packages/main:
     specifiers:
-      '@solid-devtools/debugger': ^0.5.0
-      '@solid-devtools/extension-adapter': ^0.11.0
-      '@solid-devtools/locator': ^0.11.0
-      '@solid-devtools/transform': ^0.6.1
+      '@solid-devtools/debugger': ^0.6.0
+      '@solid-devtools/extension-adapter': ^0.12.0
+      '@solid-devtools/locator': ^0.12.0
+      '@solid-devtools/transform': ^0.6.2
       '@testing-library/jest-dom': ^5.16.4
       jest: ^28.1.3
       jest-environment-jsdom: ^28.1.3
@@ -299,7 +299,7 @@ importers:
       '@babel/plugin-syntax-typescript': ^7.18.6
       '@babel/traverse': ^7.18.10
       '@babel/types': ^7.18.10
-      '@solid-devtools/shared': workspace:^0.5.0
+      '@solid-devtools/shared': workspace:^0.6.0
       '@types/babel__core': ^7.1.19
       '@types/babel__generator': ^7.6.4
       '@types/babel__traverse': ^7.17.1
@@ -331,8 +331,8 @@ importers:
     specifiers:
       '@otonashixav/solid-flip': ^0.10.5
       '@solid-aria/interactions': ^0.1.4
-      '@solid-devtools/shared': workspace:^0.5.1
-      '@solid-devtools/transform': ^0.6.1
+      '@solid-devtools/shared': workspace:^0.6.0
+      '@solid-devtools/transform': ^0.6.2
       '@solid-primitives/bounds': ^0.0.101
       '@solid-primitives/event-listener': ^2.2.1
       '@solid-primitives/keyboard': ^1.0.1
@@ -382,7 +382,7 @@ importers:
 
   playgrounds/clock:
     specifiers:
-      solid-devtools: ^0.11.0
+      solid-devtools: ^0.12.0
       solid-js: ^1.4.8
       typescript: ^4.7.4
       vite: ^3.0.4
@@ -397,10 +397,10 @@ importers:
 
   playgrounds/sandbox:
     specifiers:
-      '@solid-devtools/logger': ^0.4.1
-      '@solid-devtools/transform': ^0.6.1
+      '@solid-devtools/logger': ^0.4.2
+      '@solid-devtools/transform': ^0.6.2
       '@solid-primitives/timer': ^1.3.1
-      solid-devtools: ^0.11.0
+      solid-devtools: ^0.12.0
       solid-js: ^1.4.8
       typescript: ^4.7.4
       vite: ^3.0.4
@@ -418,10 +418,10 @@ importers:
 
   playgrounds/start:
     specifiers:
-      '@solid-devtools/logger': ^0.4.1
-      '@solid-devtools/transform': ^0.6.1
+      '@solid-devtools/logger': ^0.4.2
+      '@solid-devtools/transform': ^0.6.2
       solid-app-router: ^0.4.2
-      solid-devtools: ^0.11.0
+      solid-devtools: ^0.12.0
       solid-js: ^1.4.8
       solid-meta: ^0.27.5
       solid-start: next
