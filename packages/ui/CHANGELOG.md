@@ -1,5 +1,20 @@
 # @solid-devtools/ui
 
+## 0.9.0
+
+### Minor Changes
+
+- 7b6ac08: Display nested signal values as a collapsable tree.
+- b5e9776: Select signals and send encoded nested values of objects and arrays.
+
+### Patch Changes
+
+- 756d0f7: Selecting Signals
+- 78b06a6: Rename types and function for encodung values. Add option to encode nested structures. (Arrays and objects for now).
+- Updated dependencies [78b06a6]
+- Updated dependencies [b5e9776]
+  - @solid-devtools/shared@0.6.0
+
 ## 0.8.2
 
 ### Patch Changes

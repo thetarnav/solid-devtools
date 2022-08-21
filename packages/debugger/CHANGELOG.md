@@ -1,5 +1,18 @@
 # @solid-devtools/debugger
 
+## 0.6.0
+
+### Minor Changes
+
+- b5e9776: Select signals and send encoded nested values of objects and arrays.
+
+### Patch Changes
+
+- 78b06a6: Rename types and function for encodung values. Add option to encode nested structures. (Arrays and objects for now).
+- Updated dependencies [78b06a6]
+- Updated dependencies [b5e9776]
+  - @solid-devtools/shared@0.6.0
+
 ## 0.5.1
 
 ### Patch Changes
