@@ -17,7 +17,7 @@ export const Signals = {
   }),
 }
 
-const { container, highlight, bgColorVar, bgOpacityVar } = createHighlightStyles("background-color")
+const { container, highlight, bgColorVar, bgOpacityVar } = createHighlightStyles()
 
 export const ValueRow = {
   container: style([
@@ -30,20 +30,25 @@ export const ValueRow = {
       // height: spacing[4.5],
       cursor: "pointer",
       vars: {
-        [bgColorVar]: "transparent",
-        [bgOpacityVar]: "1",
+        [bgColorVar]: color.gray[300],
+        [bgOpacityVar]: "0",
       },
     },
   ]),
   containerFocused: style({
     vars: {
-      [bgColorVar]: color.gray[100],
+      [bgOpacityVar]: "0.2",
     },
   }),
   containerHovered: style({
-    vars: { [bgColorVar]: color.gray[200] },
+    vars: { [bgOpacityVar]: "0.3" },
   }),
-  highlight: style([highlight, {}]),
+  highlight: style([
+    highlight,
+    {
+      border: `1px solid ${color.gray[400]}`,
+    },
+  ]),
 }
 
 export const ValueName = {
@@ -111,12 +116,6 @@ export const collapsable = {
   }),
 }
 
-export const EmptyArray = style([
-  baseValue,
-  {
-    color: color.disabled,
-  },
-])
 export const ValueString = style({
   minHeight: RowHeight,
   color: color.green,

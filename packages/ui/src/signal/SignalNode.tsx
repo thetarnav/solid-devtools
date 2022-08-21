@@ -74,6 +74,28 @@ const ElementValuePreview: ValueComponent<ValueType.Element> = props => (
   <span class={styles.ValueElement}>{props.value}</span>
 )
 
+const ObjectValuePreview: Component<
+  EncodedValueOf<ValueType.Object | ValueType.Array, boolean> & { extended?: boolean }
+> = props => (
+  <Switch>
+    <Match when={!props.children || props.value === 0 || props.extended === false}>
+      <Show
+        when={props.value > 0}
+        fallback={
+          <span class={styles.Nullable}>
+            Empty {props.type === ValueType.Array ? "Array" : "Object"}
+          </span>
+        }
+      >
+        <span class={styles.baseValue}>
+          {props.type === ValueType.Array ? "Array" : "Object"} [{props.value}]
+        </span>
+      </Show>
+    </Match>
+    <Match when={props.children}>{value => <CollapsableObjectPreview value={value} />}</Match>
+  </Switch>
+)
+
 const CollapsableObjectPreview: Component<{
   value:
     | EncodedValueOf<ValueType.Object, true>["children"]
@@ -121,30 +143,6 @@ const CollapsableObjectPreview: Component<{
       }}
     </Key>
   </ul>
-)
-
-const ObjectValuePreview: Component<
-  EncodedValueOf<ValueType.Object | ValueType.Array, boolean> & { extended?: boolean }
-> = props => (
-  <Switch>
-    <Match when={!props.children || props.value === 0 || props.extended === false}>
-      <Switch>
-        <Match when={props.type === ValueType.Object}>
-          <span class={styles.ValueObject}>…</span>
-        </Match>
-        <Match when={props.type === ValueType.Array}>
-          <ArrayHead value={props.value} />
-        </Match>
-      </Switch>
-    </Match>
-    <Match when={props.children}>{value => <CollapsableObjectPreview value={value} />}</Match>
-  </Switch>
-)
-
-const ArrayHead: Component<{ value: number }> = props => (
-  <Show when={props.value > 0} fallback={<span class={styles.EmptyArray}>Empty Array</span>}>
-    <span class={styles.baseValue}>Array [{props.value}]</span>
-  </Show>
 )
 
 const ValuePreview: Component<{ value: EncodedValue<boolean> }> = props =>
