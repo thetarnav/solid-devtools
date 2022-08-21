@@ -2,13 +2,18 @@ import { Many } from "@solid-primitives/utils"
 import { Property } from "csstype"
 import { spacing, theme } from "."
 
-export function hexToRgb(hex: string, alpha?: number) {
+export function hexToRgbValue(hex: string) {
   var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex)
   if (!result) return hex
   const r = parseInt(result[1], 16),
     g = parseInt(result[2], 16),
     b = parseInt(result[3], 16)
-  return alpha === undefined ? `rgb(${r},${g},${b})` : `rgba(${r},${g},${b}, ${alpha})`
+  return `${r} ${g} ${b}`
+}
+
+export function hexToRgb(hex: string, alpha?: number) {
+  const value = hexToRgbValue(hex)
+  return alpha === undefined ? `rgb(${value})` : `rgb(${value} / ${alpha})`
 }
 
 export const insetX = (n: string | keyof typeof spacing) => {

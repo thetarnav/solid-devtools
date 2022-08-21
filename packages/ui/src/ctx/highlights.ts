@@ -2,20 +2,6 @@ import { GraphOwner, GraphSignal, NodeID } from "@solid-devtools/shared/graph"
 import { createContext, useContext } from "solid-js"
 import type { Accessor, ContextProviderComponent } from "solid-js/types/reactive/signal"
 
-export type SignalContextState = {
-  useUpdatedSelector: (id: NodeID) => Accessor<boolean>
-}
-
-const SignalContext = createContext<SignalContextState>()
-
-export const SignalContextProvider = SignalContext.Provider
-
-export const useSignalContext = (): SignalContextState => {
-  const ctx = useContext(SignalContext)
-  if (!ctx) throw "SignalContext wasn't provided."
-  return ctx
-}
-
 export type HighlightContextState = {
   highlightSignalObservers: (signal: GraphSignal, highlight: boolean) => void
   highlightNodeSources: (owner: GraphOwner, highlight: boolean) => void

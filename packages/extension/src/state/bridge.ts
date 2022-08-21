@@ -7,6 +7,7 @@ import {
   handleSignalUpdates,
   updateDetails,
   handleGraphUpdate as detailsHandleGraphUpdate,
+  setOnSignalSelect,
 } from "./details"
 
 export const { onRuntimeMessage, postRuntimeMessage } = createRuntimeMessanger()
@@ -27,7 +28,7 @@ onRuntimeMessage("ResetPanel", () => {
 })
 
 onRuntimeMessage("ComputationUpdates", updates => {
-  handleComputationsUpdate(updates.map(u => u.nodeId))
+  handleComputationsUpdate(updates.map(u => u.id))
 })
 
 onRuntimeMessage("SignalUpdates", updates => {
@@ -38,15 +39,35 @@ onRuntimeMessage("OwnerDetailsUpdate", details => {
   updateDetails(details)
 })
 
+onRuntimeMessage("SignalValue", update => {
+  // updates the signal value but without causing it to highlight
+  handleSignalUpdates([update], false)
+})
+
+// let visibility = false
+// onRuntimeMessage("PanelVisibility", newVisibility => {
+//   visibility = newVisibility
+//   if (visibility) {
+//     // panel
+//   }
+//   log("PanelVisibility", visibility)
+// })
+
 createRoot(() => {
+  // toggle selected owner
   createEffect(
     on(
       [focused, focusedRootId],
       ([owner, rootId]) => {
-        if (owner && rootId) postRuntimeMessage("SetFocusedOwner", { ownerId: owner?.id, rootId })
-        else postRuntimeMessage("SetFocusedOwner", null)
+        const payload = owner && rootId ? { ownerId: owner.id, rootId } : null
+        postRuntimeMessage("SetSelectedOwner", payload)
       },
       { defer: true },
     ),
   )
+
+  // toggle selected signals
+  setOnSignalSelect((id, selected) => {
+    postRuntimeMessage("SetSelectedSignal", { id, selected })
+  })
 })

@@ -194,13 +194,16 @@ describe("walkSolidTree", () => {
         { name: "WRAPPER" },
       )
 
-      const { tree, focusedOwner, focusedOwnerDetails } = walkSolidTree(getOwner()!, {
-        rootId: "0",
-        focusedId: "ff",
-        onComputationUpdate: () => {},
-        onSignalUpdate: () => {},
-        gatherComponents: false,
-      })
+      const { tree, focusedOwner, focusedOwnerDetails, focusedOwnerSignalMap } = walkSolidTree(
+        getOwner()!,
+        {
+          rootId: "0",
+          focusedId: "ff",
+          onComputationUpdate: () => {},
+          onSignalUpdate: () => {},
+          gatherComponents: false,
+        },
+      )
 
       expect(owner).toBe(focusedOwner)
 
@@ -268,6 +271,11 @@ describe("walkSolidTree", () => {
         sources: ["5"],
         observers: ["1"],
       })
+
+      expect(focusedOwnerSignalMap).toHaveProperty("2")
+      expect(focusedOwnerSignalMap).toHaveProperty("3")
+      expect(focusedOwnerSignalMap["2"].sdtId).toBe("2")
+      expect(focusedOwnerSignalMap["3"].sdtId).toBe("3")
 
       dispose()
     }))

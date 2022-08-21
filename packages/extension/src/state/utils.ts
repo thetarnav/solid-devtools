@@ -1,13 +1,10 @@
-import { Accessor, createSelector, createSignal } from "solid-js"
+import { Accessor, createSelector, createSignal, Setter, untrack } from "solid-js"
 import { NodeID } from "@solid-devtools/shared/graph"
 import { mutateFilter } from "@solid-devtools/shared/utils"
+import { push, splice } from "@solid-primitives/immutable"
 
 export const dispose = (o: { dispose?: VoidFunction }) => o.dispose?.()
 export const disposeAll = (list: { dispose?: VoidFunction }[]) => list.forEach(dispose)
-
-export function deleteKey<K extends PropertyKey>(this: { [_ in K]?: unknown }, key: K) {
-  delete this[key]
-}
 
 /**
  * Reconciles an array by mutating it. Diffs items by "id" prop. And uses {@link mapFunc} for creating new items.
@@ -30,21 +27,46 @@ export function reconcileArrayByIds<T extends { id: NodeID }>(
   for (id of ids) intersection.includes(id) || mapFunc(id, array)
 }
 
+/**
+ *
+ * @param array
+ * @param setter
+ * @returns a boolean indicating if the item was added (adding already existing item will return `false`)
+ */
+export function createArraySetToggle<T>(
+  array: Accessor<readonly T[]>,
+  setter: Setter<readonly T[]>,
+): (item: T, state?: boolean) => boolean {
+  return (item, state) => {
+    const prev = untrack(array)
+    const index = prev.indexOf(item)
+    if (index === -1) {
+      if (state === undefined || state) {
+        setter(prev => push(prev, item))
+        return true
+      }
+    } else if (state === undefined || !state) setter(prev => splice(prev, index, 1))
+    return false
+  }
+}
+
+export function createArrayIncludesSelector<T>(
+  array: Accessor<readonly T[]>,
+): (item: T) => Accessor<boolean> {
+  const selector = createSelector(array, (id, arr) => arr.includes(id))
+  return item => selector.bind(void 0, item)
+}
+
 export function createUpdatedSelector(): [
   useSelector: (id: NodeID) => Accessor<boolean>,
   addUpdated: (ids: readonly NodeID[]) => void,
   clear: VoidFunction,
 ] {
   const [updated, setUpdated] = createSignal<NodeID[]>([])
-  const selector = createSelector(updated, (id, arr) => arr.includes(id))
+  const useSelector = createArrayIncludesSelector(updated)
   return [
-    id => selector.bind(void 0, id),
-    ids => {
-      setUpdated(prev => {
-        const appended = [...prev, ...ids]
-        return [...new Set(appended)]
-      })
-    },
+    useSelector,
+    ids => setUpdated(prev => [...new Set([...prev, ...ids])]),
     () => setUpdated([]),
   ]
 }

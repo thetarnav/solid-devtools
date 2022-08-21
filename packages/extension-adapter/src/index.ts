@@ -16,6 +16,7 @@ const extensionAdapterFactory: PluginFactory = ({
   handleSignalUpdates,
   setFocusedOwner,
   focusedState,
+  setSelectedSignal,
 }) => {
   const [enabled, setEnabled] = createSignal(false)
 
@@ -26,11 +27,17 @@ const extensionAdapterFactory: PluginFactory = ({
     if (!v) return setEnabled(false)
     const current = enabled()
     // the panel might have been closed and opened again—in that case we want to update the graph
-    if (current) forceTriggerUpdate()
-    else setEnabled(true)
+    if (current) {
+      setFocusedOwner(null)
+      forceTriggerUpdate()
+    } else setEnabled(true)
   })
   onWindowMessage("ForceUpdate", forceTriggerUpdate)
-  onWindowMessage("SetFocusedOwner", setFocusedOwner)
+  onWindowMessage("SetSelectedOwner", setFocusedOwner)
+  onWindowMessage("SetSelectedSignal", ({ id, selected }) => {
+    const value = setSelectedSignal({ id, selected })
+    if (value) postWindowMessage("SignalValue", { id, value })
+  })
 
   // diff the roots, and send only the changed roots (edited, deleted, added)
   createEffect(() => {
@@ -49,10 +56,8 @@ const extensionAdapterFactory: PluginFactory = ({
 
   // send the focused owner details
   createEffect(() => {
-    const details = focusedState().details
-    if (details) {
-      postWindowMessage("OwnerDetailsUpdate", details)
-    }
+    const details = focusedState.details
+    if (details) postWindowMessage("OwnerDetailsUpdate", details)
   })
 
   return { enabled }

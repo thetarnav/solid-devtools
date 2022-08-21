@@ -1,33 +1,34 @@
 import { JSX, ParentComponent, splitProps } from "solid-js"
 import { combineProps } from "@solid-primitives/props"
-import { hexToRgb, theme } from "../theme"
+import { clsx } from "clsx"
+import { color } from "../theme"
 import * as styles from "./Highlight.css"
+import { assignInlineVars } from "@vanilla-extract/dynamic"
 
-export const HighlightText: ParentComponent<
+const localPropKeys = ["signal", "strong", "light"] as const
+
+export const Highlight: ParentComponent<
   {
-    textColor?: string | true
-    bgColor?: string | true
+    signal?: boolean
     strong?: boolean
     light?: boolean
-  } & JSX.HTMLAttributes<HTMLSpanElement>
+  } & JSX.HTMLAttributes<HTMLDivElement>
 > = props => {
-  const bg = props.bgColor === true ? theme.color.cyan[400] : props.bgColor
-  const color = props.textColor === true ? theme.color.black : props.textColor
-  const bgStrong = bg ? hexToRgb(bg, 0.7) : null
-  const bgLight = bg ? hexToRgb(bg, 0.4) : null
-  const colorStrong = color ? hexToRgb(color, 0.7) : null
-  const colorLight = color ? hexToRgb(color, 0.4) : null
-  const [, attrs] = splitProps(props, ["textColor", "bgColor", "strong", "light"])
+  const [, attrs] = splitProps(props, localPropKeys)
   return (
-    <span
-      {...combineProps(attrs, { class: styles.span })}
-      style={{ color: props.strong ? colorStrong : props.light ? colorLight : null }}
+    <div
+      {...combineProps(attrs, {
+        class: clsx(styles.container, props.strong && styles.setColor),
+      })}
     >
       <div
         class={styles.highlight}
-        style={{ "background-color": props.strong ? bgStrong : props.light ? bgLight : null }}
+        style={assignInlineVars({
+          [styles.bgColorVar]: props.signal ? color.amber[400] : color.cyan[400],
+          [styles.bgOpacityVar]: props.strong ? "0.7" : props.light ? "0.4" : "0",
+        })}
       ></div>
       {props.children}
-    </span>
+    </div>
   )
 }

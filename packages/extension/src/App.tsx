@@ -11,7 +11,13 @@ import {
   Signals,
 } from "@solid-devtools/ui"
 import { highlights, graphs } from "./state/graph"
-import { focused, details, useUpdatedSignalsSelector } from "./state/details"
+import {
+  focused,
+  details,
+  useUpdatedSignalsSelector,
+  toggleSignalFocus,
+  useFocusedSignalSelector,
+} from "./state/details"
 import * as styles from "./styles.css"
 
 const DetailsContent: Component<{ details: OwnerDetails }> = props => {
@@ -38,6 +44,8 @@ const DetailsContent: Component<{ details: OwnerDetails }> = props => {
         <SignalContextProvider
           value={{
             useUpdatedSelector: useUpdatedSignalsSelector,
+            toggleSignalFocus: toggleSignalFocus,
+            useFocusedSelector: useFocusedSignalSelector,
           }}
         >
           <Signals each={Object.values(signals())} />

@@ -4,10 +4,7 @@ import {
   postWindowMessage,
   startListeningWindowMessages,
 } from "@solid-devtools/shared/bridge"
-import { log } from "@solid-devtools/shared/utils"
 import { createPortMessanger, DEVTOOLS_CONTENT_PORT } from "../shared/messanger"
-
-log("content script working")
 
 const port = chrome.runtime.connect({ name: DEVTOOLS_CONTENT_PORT })
 
@@ -24,10 +21,14 @@ onWindowMessage("SignalUpdates", payload => postPortMessage("SignalUpdates", pay
 
 onWindowMessage("OwnerDetailsUpdate", payload => postPortMessage("OwnerDetailsUpdate", payload))
 
+onWindowMessage("SignalValue", payload => postPortMessage("SignalValue", payload))
+
 onPortMessage("PanelVisibility", visible => postWindowMessage("PanelVisibility", visible))
 
 once(onPortMessage, "ForceUpdate", () => postWindowMessage("ForceUpdate"))
 
-onPortMessage("SetFocusedOwner", ownerId => postWindowMessage("SetFocusedOwner", ownerId))
+onPortMessage("SetSelectedOwner", payload => postWindowMessage("SetSelectedOwner", payload))
+
+onPortMessage("SetSelectedSignal", payload => postWindowMessage("SetSelectedSignal", payload))
 
 export {}
