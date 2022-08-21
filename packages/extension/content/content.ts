@@ -4,14 +4,45 @@ import {
   postWindowMessage,
   startListeningWindowMessages,
 } from "@solid-devtools/shared/bridge"
+import { warn } from "@solid-devtools/shared/utils"
 import { createPortMessanger, DEVTOOLS_CONTENT_PORT } from "../shared/messanger"
+
+const toVersionTuple = (version: string) =>
+  version.split(".").map(Number) as [number, number, number]
+
+const extVersion = chrome.runtime.getManifest().version
+const wantedAdapterVersion = __ADAPTER_VERSION__
 
 const port = chrome.runtime.connect({ name: DEVTOOLS_CONTENT_PORT })
 
 startListeningWindowMessages()
 const { postPortMessage, onPortMessage } = createPortMessanger(port)
 
-onWindowMessage("SolidOnPage", () => postPortMessage("SolidOnPage"))
+onWindowMessage("SolidOnPage", adapterVersion => {
+  console.log(
+    "🚧 %csolid-devtools%c is in early development! 🚧\nPlease report any bugs to https://github.com/thetarnav/solid-devtools/issues",
+    "color: #fff; background: rgba(181, 111, 22, 0.7); padding: 1px 4px;",
+    "color: #e38b1b",
+  )
+
+  const adapterTuple = toVersionTuple(adapterVersion)
+  const wantedTuple = toVersionTuple(wantedAdapterVersion)
+
+  // match only major and minor version
+  for (let i = 0; i < 2; i++) {
+    if (adapterTuple[i] !== wantedTuple[i]) {
+      warn(
+        `${i === 0 ? "MAJOR" : "MINOR"} VERSION MISMATCH!
+Extension version: ${extVersion}
+Adapter version: ${adapterVersion}
+Wanted adapter version: ${wantedAdapterVersion}`,
+      )
+      break
+    }
+  }
+
+  postPortMessage("SolidOnPage")
+})
 
 onWindowMessage("GraphUpdate", graph => postPortMessage("GraphUpdate", graph))
 

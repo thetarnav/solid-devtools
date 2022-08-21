@@ -1,3 +1,3 @@
 import defineConfig from "../../configs/tsup.config"
 
-export default defineConfig("tsx", true)
+export default defineConfig({ extension: "tsx", server: true })

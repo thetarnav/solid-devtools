@@ -1,3 +1,3 @@
 import defineConfig from "../../configs/tsup.config"
 
-export default defineConfig("ts", true, ["vite"])
+export default defineConfig({ extension: "ts", server: true, additionalEntries: ["vite"] })

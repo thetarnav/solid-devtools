@@ -20,7 +20,7 @@ const extensionAdapterFactory: PluginFactory = ({
 }) => {
   const [enabled, setEnabled] = createSignal(false)
 
-  postWindowMessage("SolidOnPage")
+  postWindowMessage("SolidOnPage", process.env.VERSION!)
 
   // update the graph only if the devtools panel is in view
   onWindowMessage("PanelVisibility", v => {

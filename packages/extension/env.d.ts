@@ -6,4 +6,5 @@ declare global {
       documentId: string
     }
   }
+  const __ADAPTER_VERSION__: string
 }

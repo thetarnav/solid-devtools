@@ -10,8 +10,7 @@
       // "@solid-devtools/shared/*": ["./packages/shared/src/*"],
       "@solid-devtools/debugger": ["./packages/debugger/src/index.ts"],
       "@solid-devtools/logger": ["./packages/logger/src/index.ts"],
-      "@solid-devtools/locator": ["./packages/locator/src/index.tsx"],
-      "@solid-devtools/extension-adapter": ["./packages/extension-adapter/src/index.ts"]
+      "@solid-devtools/locator": ["./packages/locator/src/index.tsx"]
     }
   },
   "exclude": ["node_modules", "**/dist/**/*"]

@@ -4,7 +4,9 @@ import { log } from "./utils"
 export const LOG_MESSAGES = false
 
 export interface Messages {
-  SolidOnPage: void
+  // adapter -> content -> devtools.html
+  // the `string` payload is the extension-adapter version
+  SolidOnPage: string
   DevtoolsScriptConnected: void
   PanelVisibility: boolean
   ResetPanel: void

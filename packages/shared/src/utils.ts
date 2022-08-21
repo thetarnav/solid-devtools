@@ -1,6 +1,5 @@
 const getLogLabel = () => [
-  `%c${formatTime()} %csolid-devtools`,
-  "color: gray",
+  `%csolid-devtools`,
   "color: #fff; background: #2c4f7c; padding: 1px 4px;",
 ]
 
