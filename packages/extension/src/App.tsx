@@ -11,17 +11,11 @@ import {
   OwnerPath,
 } from "@solid-devtools/ui"
 import { highlights, graphs } from "./state/graph"
-import {
-  focused,
-  details,
-  useUpdatedSignalsSelector,
-  toggleSignalFocus,
-  useFocusedSignalSelector,
-} from "./state/details"
+import { focused, details, useUpdatedSignalsSelector, toggleSignalFocus } from "./state/details"
 import * as styles from "./styles.css"
 
 const DetailsContent: Component<{ details: Graph.OwnerDetails }> = props => {
-  const { name, id, type, path, signals } = destructure(() => props.details)
+  const { name, id, type, signals } = destructure(() => props.details)
 
   return (
     <div class={styles.details.root}>
@@ -36,7 +30,6 @@ const DetailsContent: Component<{ details: Graph.OwnerDetails }> = props => {
           value={{
             useUpdatedSelector: useUpdatedSignalsSelector,
             toggleSignalFocus: toggleSignalFocus,
-            useFocusedSelector: useFocusedSignalSelector,
           }}
         >
           <Signals each={Object.values(signals())} />

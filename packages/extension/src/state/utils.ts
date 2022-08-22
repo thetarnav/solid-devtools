@@ -1,7 +1,6 @@
-import { Accessor, createSelector, createSignal, Setter, untrack } from "solid-js"
+import { Accessor, createSelector, createSignal } from "solid-js"
 import { NodeID } from "@solid-devtools/shared/graph"
 import { mutateFilter } from "@solid-devtools/shared/utils"
-import { push, splice } from "@solid-primitives/immutable"
 
 export const dispose = (o: { dispose?: VoidFunction }) => o.dispose?.()
 export const disposeAll = (list: { dispose?: VoidFunction }[]) => list.forEach(dispose)
@@ -27,29 +26,6 @@ export function reconcileArrayByIds<T extends { id: NodeID }>(
   for (id of ids) intersection.includes(id) || mapFunc(id, array)
 }
 
-/**
- *
- * @param array
- * @param setter
- * @returns a boolean indicating if the item was added (adding already existing item will return `false`)
- */
-export function createArraySetToggle<T>(
-  array: Accessor<readonly T[]>,
-  setter: Setter<readonly T[]>,
-): (item: T, state?: boolean) => boolean {
-  return (item, state) => {
-    const prev = untrack(array)
-    const index = prev.indexOf(item)
-    if (index === -1) {
-      if (state === undefined || state) {
-        setter(prev => push(prev, item))
-        return true
-      }
-    } else if (state === undefined || !state) setter(prev => splice(prev, index, 1))
-    return false
-  }
-}
-
 export function createArrayIncludesSelector<T>(
   array: Accessor<readonly T[]>,
 ): (item: T) => Accessor<boolean> {
@@ -70,3 +46,26 @@ export function createUpdatedSelector(): [
     () => setUpdated([]),
   ]
 }
+
+// /**
+//  *
+//  * @param array
+//  * @param setter
+//  * @returns a boolean indicating if the item was added (adding already existing item will return `false`)
+//  */
+//  export function createArraySetToggle<T>(
+//   array: Accessor<readonly T[]>,
+//   setter: Setter<readonly T[]>,
+// ): (item: T, state?: boolean) => boolean {
+//   return (item, state) => {
+//     const prev = untrack(array)
+//     const index = prev.indexOf(item)
+//     if (index === -1) {
+//       if (state === undefined || state) {
+//         setter(prev => push(prev, item))
+//         return true
+//       }
+//     } else if (state === undefined || !state) setter(prev => splice(prev, index, 1))
+//     return false
+//   }
+// }

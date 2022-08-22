@@ -206,6 +206,7 @@ export namespace Graph {
     readonly id: NodeID
     readonly observers: NodeID[]
     readonly value: EncodedValue<boolean>
+    readonly selected: boolean
   }
 
   export type Path = (Owner | typeof NOTFOUND)[]

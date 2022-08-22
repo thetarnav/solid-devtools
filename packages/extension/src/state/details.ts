@@ -1,11 +1,11 @@
-import { Accessor, batch, createRoot, createSelector, createSignal, untrack } from "solid-js"
+import { Accessor, batch, createRoot, createSelector, untrack } from "solid-js"
 import { createStore, produce } from "solid-js/store"
 import { Mapped, Graph, NodeID, SignalUpdate } from "@solid-devtools/shared/graph"
 import { warn } from "@solid-devtools/shared/utils"
 import { NOTFOUND } from "@solid-devtools/shared/variables"
 import { findOwnerById, findOwnerRootId } from "./graph"
 import { arrayEquals, Mutable } from "@solid-primitives/utils"
-import { createArrayIncludesSelector, createArraySetToggle, createUpdatedSelector } from "./utils"
+import { createUpdatedSelector } from "./utils"
 import { EncodedValue } from "@solid-devtools/shared/serialize"
 
 function reconcileSignals(
@@ -60,19 +60,26 @@ function reconcileValue(proxy: EncodedValue<boolean>, next: EncodedValue<boolean
 }
 
 function createSignalNode(raw: Readonly<Mapped.Signal>): Graph.Signal {
-  // const [value, setValue] = createSignal(raw.value)
-  return { ...raw }
+  return { ...raw, selected: false }
 }
 
-export type OwnerDetailsState =
+export type OwnerDetailsState = (
   | { focused: null; rootId: null; details: null }
   | {
       focused: Graph.Owner
       rootId: NodeID
       details: Graph.OwnerDetails | null
     }
+) & {
+  selectedSignals: NodeID[]
+}
 
-const nullState = { focused: null, rootId: null, details: null } as const
+const nullState = {
+  focused: null,
+  rootId: null,
+  details: null,
+  selectedSignals: [] as NodeID[],
+} as const
 
 const exports = createRoot(() => {
   const [state, setState] = createStore<OwnerDetailsState>({ ...nullState })
@@ -144,18 +151,13 @@ const exports = createRoot(() => {
     })
   }
 
+  /** variable for a callback in bridge.ts */
   let onSignalSelect: ((id: NodeID, selected: boolean) => void) | undefined
   const setOnSignalSelect = (fn: typeof onSignalSelect) => (onSignalSelect = fn)
-  // ? should this be a field in the GraphSignal?
-  // there is no use for checking the selector outside of the ui part
-  const [focusedSignals, setFocusedSignals] = createSignal<NodeID[]>([])
-  const toggleSignalFocus = createArraySetToggle(focusedSignals, setFocusedSignals)
-  const useFocusedSignalSelector = createArrayIncludesSelector(focusedSignals)
 
-  function handleToggleSignalFocus(item: NodeID, state?: boolean) {
-    if (state === undefined) state = !untrack(useFocusedSignalSelector(item))
-    toggleSignalFocus(item, state)
-    onSignalSelect?.(item, state)
+  function toggleSignalFocus(id: NodeID, selected?: boolean) {
+    setState("details", "signals", id, "selected", p => (selected = selected ?? !p))
+    onSignalSelect!(id, selected!)
   }
 
   return {
@@ -168,8 +170,7 @@ const exports = createRoot(() => {
     updateDetails,
     handleSignalUpdates,
     handleGraphUpdate,
-    toggleSignalFocus: handleToggleSignalFocus,
-    useFocusedSignalSelector,
+    toggleSignalFocus,
     setOnSignalSelect,
   }
 })
@@ -184,6 +185,5 @@ export const {
   handleSignalUpdates,
   handleGraphUpdate,
   toggleSignalFocus,
-  useFocusedSignalSelector,
   setOnSignalSelect,
 } = exports

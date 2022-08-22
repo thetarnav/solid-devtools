@@ -250,7 +250,6 @@ export const Signals: Component<{ each: Graph.Signal[] }> = props => {
 export type SignalContextState = {
   useUpdatedSelector: (id: NodeID) => Accessor<boolean>
   toggleSignalFocus: (signal: NodeID, focused?: boolean) => void
-  useFocusedSelector: (id: NodeID) => Accessor<boolean>
 }
 
 const SignalContext = createContext<SignalContextState>()
@@ -265,10 +264,9 @@ const useSignalContext = (): SignalContextState => {
 
 export const SignalNode: Component<{ signal: Graph.Signal }> = ({ signal }) => {
   const { type, id } = signal
-  const { useUpdatedSelector, toggleSignalFocus, useFocusedSelector } = useSignalContext()
+  const { useUpdatedSelector, toggleSignalFocus } = useSignalContext()
 
   const isUpdated = useUpdatedSelector(id)
-  const isFocused = useFocusedSelector(id)
 
   const { highlightSignalObservers, isSourceHighlighted } = useHighlights()
   const isHighlighted = isSourceHighlighted.bind(null, signal)
@@ -277,7 +275,7 @@ export const SignalNode: Component<{ signal: Graph.Signal }> = ({ signal }) => {
   // createEffect(() => highlightSignalObservers(signal, isHovered()))
 
   return (
-    <ValueRow selected={isFocused()} onClick={() => toggleSignalFocus(id)}>
+    <ValueRow selected={signal.selected} onClick={() => toggleSignalFocus(id)}>
       <ValueName type={type}>
         <Highlight
           strong={isUpdated()}
