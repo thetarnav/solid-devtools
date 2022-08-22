@@ -24,22 +24,22 @@ jobs:
         with:
           languages: javascript
 
-    - name: Perform CodeQL Analysis
-      uses: github/codeql-action/analyze@v1
-      with:
-        upload: false
-        output: sarif-results
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v1
+        with:
+          upload: false
+          output: sarif-results
 
-    - name: filter-sarif
-      uses: advanced-security/filter-sarif@main
-      with:
-        patterns: |
-          -**/playgrounds/**/*.*
-          -**/*.test.*
-        input: sarif-results/javascript.sarif
-        output: sarif-results/javascript.sarif
+      - name: filter-sarif
+        uses: advanced-security/filter-sarif@main
+        with:
+          patterns: |
+            -**/playgrounds/**/*.*
+            -**/*.test.*
+          input: sarif-results/javascript.sarif
+          output: sarif-results/javascript.sarif
 
-    - name: Upload SARIF
-      uses: github/codeql-action/upload-sarif@v1
-      with:
-        sarif_file: sarif-results/javascript.sarif
+      - name: Upload SARIF
+        uses: github/codeql-action/upload-sarif@v1
+        with:
+          sarif_file: sarif-results/javascript.sarif
