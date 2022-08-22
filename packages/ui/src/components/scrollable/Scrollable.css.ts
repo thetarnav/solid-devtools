@@ -1,5 +1,5 @@
 import { style, styleVariants } from "@vanilla-extract/css"
-import { color, hexToRgb, inset, spacing } from "../theme"
+import { color, hexToRgb, inset, spacing } from "~/theme"
 
 const containerBase = style({
   height: "100%",

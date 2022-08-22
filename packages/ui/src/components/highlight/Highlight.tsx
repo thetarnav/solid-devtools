@@ -1,7 +1,7 @@
 import { JSX, ParentComponent, splitProps } from "solid-js"
 import { combineProps } from "@solid-primitives/props"
 import { clsx } from "clsx"
-import { color } from "../theme"
+import { color } from "~/theme"
 import * as styles from "./Highlight.css"
 import { assignInlineVars } from "@vanilla-extract/dynamic"
 

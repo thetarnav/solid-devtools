@@ -1,6 +1,6 @@
 import { style } from "@vanilla-extract/css"
-import { centerChild, color, spacing, theme } from "../theme"
 import { CSSPropertiesWithVars } from "@vanilla-extract/css/dist/declarations/src/types"
+import { centerChild, color, spacing, theme } from "~/theme"
 import { createHighlightStyles } from "~/mixins"
 
 const RowHeight = spacing[4.5]

@@ -1,6 +1,6 @@
 import { style } from "@vanilla-extract/css"
 import { createHighlightStyles } from "~/mixins"
-import { color } from "../theme"
+import { color } from "~/theme"
 
 export const { container, highlight, bgColorVar, bgOpacityVar } = createHighlightStyles()
 

@@ -2,11 +2,11 @@ import "./styles.css"
 
 export * from "./theme"
 
-export { OwnerChildren, OwnerNode } from "./owner/OwnerNode"
-export { SignalNode, Signals, SignalContextProvider } from "./signal/SignalNode"
-export type { SignalContextState } from "./signal/SignalNode"
-export { Splitter } from "./splitter/Splitter"
-export { Scrollable } from "./scrollable/Scrollable"
-export { Skeleton } from "./loading/Skeleton"
+export { OwnerChildren, OwnerNode } from "./components/owner/OwnerNode"
+export { SignalNode, Signals, SignalContextProvider } from "./components/signal/SignalNode"
+export type { SignalContextState } from "./components/signal/SignalNode"
+export { Splitter } from "./components/splitter/Splitter"
+export { Scrollable } from "./components/scrollable/Scrollable"
+export { Skeleton } from "./components/loading/Skeleton"
 
 export * from "./ctx/highlights"
