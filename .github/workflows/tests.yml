@@ -4,12 +4,7 @@ on: [push]
 
 jobs:
   build:
-    runs-on: ${{ matrix.operating-system }}
-
-    strategy:
-      matrix:
-        node-version: [16.x, 17.x]
-        operating-system: [ubuntu-latest]
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repo
@@ -19,10 +14,10 @@ jobs:
 
       - uses: pnpm/action-setup@v2.2.2
 
-      - name: Setup Node.js environment ${{ matrix.node-version }}
+      - name: Setup Node.js environment 16.x
         uses: actions/setup-node@v3
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: 16.x
           cache: pnpm
 
       - name: Install dependencies
