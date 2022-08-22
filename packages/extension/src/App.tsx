@@ -1,7 +1,6 @@
 import { Component, For, Show } from "solid-js"
 import { destructure } from "@solid-primitives/destructure"
 import { NodeType, Graph } from "@solid-devtools/shared/graph"
-import { NOTFOUND } from "@solid-devtools/shared/variables"
 import {
   HighlightsProvider,
   SignalContextProvider,
@@ -9,6 +8,7 @@ import {
   Splitter,
   Scrollable,
   Signals,
+  OwnerPath,
 } from "@solid-devtools/ui"
 import { highlights, graphs } from "./state/graph"
 import {
@@ -25,15 +25,6 @@ const DetailsContent: Component<{ details: Graph.OwnerDetails }> = props => {
 
   return (
     <div class={styles.details.root}>
-      <div class={styles.details.pathWrapper}>
-        <For each={path()}>
-          {owner => (
-            <div class={styles.details.pathItem}>
-              {owner === NOTFOUND ? "_NOT_FOUND_" : owner.name}
-            </div>
-          )}
-        </For>
-      </div>
       <header class={styles.details.header}>
         <h1 class={styles.details.h1}>
           {name()} <span class={styles.details.id}>#{id()}</span>
@@ -55,18 +46,6 @@ const DetailsContent: Component<{ details: Graph.OwnerDetails }> = props => {
   )
 }
 
-const DetailsPanel: Component<{}> = props => {
-  return (
-    <Show when={focused()}>
-      <div class={styles.details.transitionWrapper}>
-        {/* <Transition name="fade"> */}
-        <Show when={details()}>{details => <DetailsContent details={details} />}</Show>
-        {/* </Transition> */}
-      </div>
-    </Show>
-  )
-}
-
 const App: Component = () => {
   return (
     <HighlightsProvider value={highlights}>
@@ -76,10 +55,28 @@ const App: Component = () => {
           <p>Number of Roots: {Object.keys(graphs).length}</p>
         </header>
         <div class={styles.content}>
-          <Splitter onToggle={() => highlights.handleFocus(null)} side={<DetailsPanel />}>
-            <Scrollable>
-              <For each={graphs}>{root => <OwnerNode owner={root.tree} />}</For>
-            </Scrollable>
+          <Splitter
+            onToggle={() => highlights.handleFocus(null)}
+            side={
+              <Show when={focused()}>
+                <div>
+                  <Show when={details()}>{details => <DetailsContent details={details} />}</Show>
+                </div>
+              </Show>
+            }
+          >
+            <div class={styles.graphWrapper}>
+              <Scrollable>
+                <For each={graphs}>{root => <OwnerNode owner={root.tree} />}</For>
+              </Scrollable>
+              <div class={styles.path}>
+                <div class={styles.pathInner}>
+                  <Show when={details()?.path}>
+                    <OwnerPath path={details()?.path!} />
+                  </Show>
+                </div>
+              </div>
+            </div>
           </Splitter>
         </div>
       </div>

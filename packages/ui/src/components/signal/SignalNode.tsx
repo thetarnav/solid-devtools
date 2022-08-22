@@ -180,7 +180,7 @@ const ValueName: ParentComponent<{ type?: NodeType.Signal | NodeType.Memo | null
       case NodeType.Signal:
         return <div class={styles.ValueName.signalDot} />
       case NodeType.Memo:
-        return <Icon.Memo bgColor={color.amber[400]} />
+        return <Icon.Memo bgColor={color.amber[400]} class={styles.ValueName.icon} />
       default:
         return null
     }
@@ -188,7 +188,7 @@ const ValueName: ParentComponent<{ type?: NodeType.Signal | NodeType.Memo | null
 
   return (
     <div class={styles.ValueName.container}>
-      <div class={styles.ValueName.icon}>{<IconComponent />}</div>
+      <div class={styles.ValueName.iconWrapper}>{<IconComponent />}</div>
       <div class={styles.ValueName.name}>{props.children}</div>
     </div>
   )

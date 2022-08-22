@@ -52,7 +52,7 @@ export function getSignalName(signal: Readonly<Solid.Signal>): string {
 
 export function getNodeName(o: Readonly<Solid.Signal | Solid.Owner>): string {
   const name = isSolidOwner(o) ? getOwnerName(o) : getSignalName(o)
-  return trimString(name, 20)
+  return trimString(name, 16)
 }
 
 export function getNodeType(o: Readonly<Solid.Signal | Solid.Owner>): NodeType {

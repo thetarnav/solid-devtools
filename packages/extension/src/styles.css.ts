@@ -1,5 +1,5 @@
 import { style } from "@vanilla-extract/css"
-import { spacing, color, rounded, inset } from "@solid-devtools/ui/theme"
+import { spacing, color, insetX } from "@solid-devtools/ui/theme"
 
 export const app = style({
   height: "100vh",
@@ -18,38 +18,37 @@ export const content = style({
   overflow: "hidden",
 })
 
-export const details = {
-  transitionWrapper: style({
-    position: "relative",
-  }),
-  root: style({
-    position: "absolute",
-    ...inset(0),
-    padding: spacing[4],
-  }),
-  pathWrapper: style({
-    display: "flex",
-    flexWrap: "wrap",
-    marginBottom: spacing[4],
-  }),
-  pathItem: style({
-    position: "relative",
-    padding: `${spacing[0.5]} ${spacing[1]}`,
-    marginRight: spacing[4],
-    marginBottom: spacing[1],
-    ":last-child": {
-      marginRight: 0,
-    },
-    ...rounded(),
-    backgroundColor: color.gray[200],
+export const graphWrapper = style({
+  height: "100%",
+  width: "100%",
+  overflow: "hidden",
+  display: "flex",
+  flexDirection: "column",
+})
 
-    selectors: {
-      "&:not(:last-child):after": {
-        content: ">",
-        position: "absolute",
-        right: `-${spacing[3]}`,
-      },
-    },
+export const path = style({
+  flexShrink: 0,
+  height: spacing[4],
+  width: "100%",
+  position: "relative",
+})
+export const pathInner = style({
+  position: "absolute",
+  zIndex: 1,
+  bottom: 0,
+  ...insetX(0),
+  minHeight: spacing[4],
+  width: "100%",
+  display: "flex",
+  alignItems: "center",
+  padding: `${spacing[0.5]} ${spacing[2]}`,
+  borderTop: `1px solid ${color.gray[200]}`,
+  backgroundColor: color.gray[50],
+})
+
+export const details = {
+  root: style({
+    padding: spacing[4],
   }),
   header: style({
     marginBottom: spacing[4],

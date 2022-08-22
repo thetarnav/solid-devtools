@@ -57,7 +57,7 @@ export const ValueName = {
     alignItems: "center",
     height: RowHeight,
   }),
-  icon: style({
+  iconWrapper: style({
     height: RowHeight,
     width: RowHeight,
     marginRight: spacing[1],
@@ -68,6 +68,10 @@ export const ValueName = {
     height: spacing[1],
     borderRadius: "50%",
     backgroundColor: color.amber[400],
+  }),
+  icon: style({
+    height: spacing[4],
+    width: spacing[4],
   }),
   name: style({
     height: RowHeight,
