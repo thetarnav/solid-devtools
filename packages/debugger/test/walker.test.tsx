@@ -1,4 +1,4 @@
-import { getOwner, NodeType, SolidOwner } from "@solid-devtools/shared/graph"
+import { getOwner, NodeType, Solid } from "@solid-devtools/shared/graph"
 import { ValueType } from "@solid-devtools/shared/serialize"
 import { UNNAMED } from "@solid-devtools/shared/variables"
 import {
@@ -171,7 +171,7 @@ describe("walkSolidTree", () => {
       const walkSolidTree = getModule()
       const [s, setS] = createSignal(0, { name: "source" })
 
-      let owner!: SolidOwner
+      let owner!: Solid.Owner
 
       createComputed(
         () => {

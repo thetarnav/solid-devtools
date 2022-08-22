@@ -1,4 +1,4 @@
-import { SolidOwner, getOwner, NodeType } from "@solid-devtools/shared/graph"
+import { Solid, getOwner, NodeType } from "@solid-devtools/shared/graph"
 import {
   createComponent,
   createComputed,
@@ -12,7 +12,7 @@ import { getFunctionSources, getOwnerType, onDispose } from "../src/utils"
 
 describe("getOwnerType", () => {
   it("identifies Component", () => {
-    let owner!: SolidOwner
+    let owner!: Solid.Owner
     createRoot(dispose => {
       createComponent(() => {
         owner = getOwner()!

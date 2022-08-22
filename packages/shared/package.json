@@ -46,11 +46,6 @@
       "require": "./dist/graph.cjs",
       "types": "./dist/graph.d.ts"
     },
-    "./solid": {
-      "import": "./dist/solid.js",
-      "require": "./dist/solid.cjs",
-      "types": "./dist/solid.d.ts"
-    },
     "./utils": {
       "import": "./dist/utils.js",
       "require": "./dist/utils.cjs",
@@ -80,9 +75,6 @@
       ],
       "graph": [
         "./dist/graph.d.ts"
-      ],
-      "solid": [
-        "./dist/solid.d.ts"
       ],
       "utils": [
         "./dist/utils.d.ts"

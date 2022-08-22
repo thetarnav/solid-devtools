@@ -4,16 +4,12 @@ import { omit } from "@solid-primitives/immutable"
 import { createLazyMemo } from "@solid-primitives/memo"
 import { createStaticStore } from "@solid-primitives/utils"
 import {
-  MappedComponent,
-  MappedRoot,
-  MappedOwnerDetails,
-  SolidOwner,
-  MappedOwner,
+  Mapped,
+  Solid,
   RootsUpdates,
   NodeID,
   ComputationUpdate,
   SignalUpdate,
-  SolidSignal,
 } from "@solid-devtools/shared/graph"
 import { EncodedValue, encodeValue } from "@solid-devtools/shared/serialize"
 import { createBatchedUpdateEmitter, createConsumers, createInternalRoot } from "./utils"
@@ -45,7 +41,7 @@ const NULL_SELECTED_STATE = {
   owner: null,
   updated: false,
   details: null,
-  signalMap: {} as Record<NodeID, SolidSignal>,
+  signalMap: {} as Record<NodeID, Solid.Signal>,
 } as const
 
 export type FocusedState =
@@ -54,25 +50,25 @@ export type FocusedState =
   | {
       readonly id: NodeID
       readonly rootId: NodeID
-      readonly owner: SolidOwner
+      readonly owner: Solid.Owner
       readonly updated: boolean
-      readonly details: MappedOwnerDetails
-      readonly signalMap: Record<NodeID, SolidSignal>
+      readonly details: Mapped.OwnerDetails
+      readonly signalMap: Record<NodeID, Solid.Signal>
     }
 
 export type SignaledRoot = {
   readonly id: NodeID
-  readonly tree: Accessor<MappedOwner>
-  readonly components: Accessor<MappedComponent[]>
+  readonly tree: Accessor<Mapped.Owner>
+  readonly components: Accessor<Mapped.Component[]>
 }
 
 /** @internal */
 export type _SignaledRoot = {
   id: NodeID
-  tree: Accessor<MappedOwner>
-  setTree: (tree: MappedOwner) => void
-  components: Accessor<MappedComponent[]>
-  setComponents: (components: MappedComponent[]) => void
+  tree: Accessor<Mapped.Owner>
+  setTree: (tree: Mapped.Owner) => void
+  components: Accessor<Mapped.Component[]>
+  setComponents: (components: Mapped.Component[]) => void
 }
 
 export type BatchComputationUpdatesHandler = (payload: ComputationUpdate[]) => void
@@ -84,9 +80,9 @@ export type PluginFactoryData = {
   readonly handleComputationUpdates: (listener: BatchComputationUpdatesHandler) => VoidFunction
   readonly handleSignalUpdates: (listener: BatchSignalUpdatesHandler) => VoidFunction
   readonly roots: Accessor<Record<NodeID, SignaledRoot>>
-  readonly serialisedRoots: Accessor<Record<NodeID, MappedOwner>>
+  readonly serialisedRoots: Accessor<Record<NodeID, Mapped.Owner>>
   readonly rootsUpdates: Accessor<RootsUpdates>
-  readonly components: Accessor<MappedComponent[]>
+  readonly components: Accessor<Mapped.Component[]>
   readonly setFocusedOwner: SetFocusedOwner
   readonly focusedState: FocusedState
   readonly setSelectedSignal: (payload: {
@@ -119,8 +115,8 @@ const exported = createInternalRoot(() => {
   //
   const [roots, setRoots] = createSignal<Record<NodeID, _SignaledRoot>>({})
 
-  const serialisedRoots = createLazyMemo<Record<NodeID, MappedOwner>>(() => {
-    const serialisedRoots: Record<NodeID, MappedOwner> = {}
+  const serialisedRoots = createLazyMemo<Record<NodeID, Mapped.Owner>>(() => {
+    const serialisedRoots: Record<NodeID, Mapped.Owner> = {}
     for (const [id, root] of Object.entries(roots())) {
       serialisedRoots[id] = root.tree()
     }
@@ -147,7 +143,7 @@ const exported = createInternalRoot(() => {
     setRoots(map => omit(map, rootId))
   }
 
-  function updateRoot(newRoot: MappedRoot): void {
+  function updateRoot(newRoot: Mapped.Root): void {
     const rootMap = untrack(roots)
     const rootId = newRoot.id
     const root = rootMap[rootId]
@@ -185,9 +181,9 @@ const exported = createInternalRoot(() => {
   }
 
   const setFocusedOwnerDetails = (
-    newOwner: SolidOwner | null,
-    newDetails: MappedOwnerDetails | null,
-    newSignalMap: Record<NodeID, SolidSignal>,
+    newOwner: Solid.Owner | null,
+    newDetails: Mapped.OwnerDetails | null,
+    newSignalMap: Record<NodeID, Solid.Signal>,
   ) => {
     if (newOwner && newDetails) {
       setFocusedState(prev => ({
@@ -207,7 +203,7 @@ const exported = createInternalRoot(() => {
   const selectedSignalIds: Set<NodeID> = new Set()
   const setSelectedSignal: PluginFactoryData["setSelectedSignal"] = ({ id, selected }) => {
     const signalMap = untrack(() => focusedState.signalMap)
-    const signal = signalMap[id] as SolidSignal | undefined
+    const signal = signalMap[id] as Solid.Signal | undefined
     if (!signal) return null
     if (selected) selectedSignalIds.add(id)
     else selectedSignalIds.delete(id)
@@ -238,8 +234,8 @@ const exported = createInternalRoot(() => {
   //
   // Components:
   //
-  const components = createLazyMemo<MappedComponent[]>(() =>
-    Object.values(roots()).reduce((arr: MappedComponent[], root) => {
+  const components = createLazyMemo<Mapped.Component[]>(() =>
+    Object.values(roots()).reduce((arr: Mapped.Component[], root) => {
       arr.push.apply(arr, root.components())
       return arr
     }, []),

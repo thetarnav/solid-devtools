@@ -1,5 +1,5 @@
 import { noop } from "@solid-primitives/utils"
-import { SolidComputation, SolidMemo, SolidOwner, SolidRoot } from "@solid-devtools/shared/graph"
+import { Solid } from "@solid-devtools/shared/graph"
 import { UNNAMED } from "@solid-devtools/shared/variables"
 import * as API from "./index"
 import { createRoot } from "solid-js"
@@ -28,10 +28,11 @@ export const removeValueUpdateObserver: typeof API.removeValueUpdateObserver = n
 export const getOwnerType: typeof API.getOwnerType = () => 0
 export const getNodeType: typeof API.getNodeType = () => 0
 export const getNodeName: typeof API.getNodeName = () => UNNAMED
-export const isSolidComputation: typeof API.isSolidComputation = (o): o is SolidComputation => false
-export const isSolidMemo: typeof API.isSolidMemo = (o): o is SolidMemo => false
-export const isSolidOwner: typeof API.isSolidOwner = (o): o is SolidOwner => false
-export const isSolidRoot: typeof API.isSolidRoot = (o): o is SolidRoot => false
+export const isSolidComputation: typeof API.isSolidComputation = (o): o is Solid.Computation =>
+  false
+export const isSolidMemo: typeof API.isSolidMemo = (o): o is Solid.Memo => false
+export const isSolidOwner: typeof API.isSolidOwner = (o): o is Solid.Owner => false
+export const isSolidRoot: typeof API.isSolidRoot = (o): o is Solid.Root => false
 export const onOwnerCleanup: typeof API.onOwnerCleanup = () => noop
 export const onParentCleanup: typeof API.onParentCleanup = () => noop
 export const getFunctionSources: typeof API.getFunctionSources = () => []

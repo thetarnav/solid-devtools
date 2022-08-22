@@ -2,7 +2,7 @@
 // to gen a overview of how to style console messages
 
 import { getNodeName, getNodeType, getOwnerType, isSolidMemo } from "@solid-devtools/debugger"
-import { NodeType, SolidComputation, SolidOwner, SolidSignal } from "@solid-devtools/shared/graph"
+import { NodeType, Solid } from "@solid-devtools/shared/graph"
 import { dedupeArray } from "@solid-devtools/shared/utils"
 import { getDiffMap, getStackDiffMap } from "./utils"
 
@@ -22,11 +22,11 @@ export type NodeStateWithValue = {
 export const UNUSED = Symbol("unused")
 
 export type ComputationState = {
-  owned: SolidComputation[]
-  owner: SolidOwner | NodeState | null | typeof UNUSED
+  owned: Solid.Computation[]
+  owner: Solid.Owner | NodeState | null | typeof UNUSED
   prev: unknown | typeof UNUSED
   value: unknown | typeof UNUSED
-  sources: (SolidComputation | SolidSignal)[]
+  sources: (Solid.Computation | Solid.Signal)[]
   causedBy: NodeStateWithValue[] | null
 }
 
@@ -51,7 +51,7 @@ export function getValueSpecifier(v: unknown) {
   return ""
 }
 
-export function getNodeState(owner: SolidOwner | SolidSignal | NodeState): NodeState {
+export function getNodeState(owner: Solid.Owner | Solid.Signal | NodeState): NodeState {
   if ("type" in owner && "typeName" in owner && "name" in owner) return owner
   const type = getNodeType(owner)
   return {
@@ -61,7 +61,7 @@ export function getNodeState(owner: SolidOwner | SolidSignal | NodeState): NodeS
   }
 }
 export function getNodeStateWithValue(
-  owner: SolidComputation | SolidSignal | NodeStateWithValue,
+  owner: Solid.Computation | Solid.Signal | NodeStateWithValue,
 ): NodeStateWithValue {
   if ("type" in owner && "typeName" in owner && "name" in owner) return owner
   const type = getNodeType(owner)
@@ -192,8 +192,8 @@ export const logComputation = (groupLabel: string[], state: Readonly<Computation
 
 export function logOwned(
   ownerState: NodeState,
-  owned: Readonly<SolidComputation[]>,
-  prevOwned: Readonly<SolidComputation[]>,
+  owned: Readonly<Solid.Computation[]>,
+  prevOwned: Readonly<Solid.Computation[]>,
 ) {
   console.groupCollapsed(
     `Owned by the %c${ownerState.name}%c ${ownerState.typeName}:`,
@@ -219,13 +219,13 @@ export function logOwned(
   console.groupEnd()
 }
 
-export function logSignalsInitialValues(signals: SolidSignal[]) {
+export function logSignalsInitialValues(signals: Solid.Signal[]) {
   console.groupCollapsed("Signals initial values:")
   signals.forEach(logSignalValue)
   console.groupEnd()
 }
 
-export function logInitialValue(node: SolidSignal | NodeStateWithValue): void {
+export function logInitialValue(node: Solid.Signal | NodeStateWithValue): void {
   const { type, typeName, value, name } = getNodeStateWithValue(node)
   console.log(
     `%c${typeName} %c${name}%c initial value ${inGray("=")}${getValueSpecifier(value)}`,
@@ -236,7 +236,7 @@ export function logInitialValue(node: SolidSignal | NodeStateWithValue): void {
   )
 }
 
-export function logSignalValue(signal: SolidSignal | NodeStateWithValue): void {
+export function logSignalValue(signal: Solid.Signal | NodeStateWithValue): void {
   const { type, typeName, name, value } = getNodeStateWithValue(signal)
   console.log(
     `${inGray(typeName)} %c${name}%c ${inGray("=")}${getValueSpecifier(value)}`,
@@ -250,7 +250,7 @@ export function logSignalValueUpdate(
   { name, type }: NodeState,
   value: unknown,
   prev: unknown,
-  observers?: SolidComputation[],
+  observers?: Solid.Computation[],
 ): void {
   console.groupCollapsed(
     `%c${name}%c updated ${inGray("=")}${getValueSpecifier(value)}`,
@@ -263,7 +263,7 @@ export function logSignalValueUpdate(
   console.groupEnd()
 }
 
-function logCausedUpdates(observers: SolidComputation[]): void {
+function logCausedUpdates(observers: Solid.Computation[]): void {
   if (!observers.length) return
   console.groupCollapsed(inGray("Caused Updates:"), observers.length)
   logOwnerList(observers)
@@ -272,8 +272,8 @@ function logCausedUpdates(observers: SolidComputation[]): void {
 
 export function logObservers(
   signalName: string,
-  observers: SolidComputation[],
-  prevObservers: SolidComputation[],
+  observers: Solid.Computation[],
+  prevObservers: Solid.Computation[],
 ): void {
   const label = [
     `%c${signalName}%c observers changed:`,
@@ -287,7 +287,7 @@ export function logObservers(
   console.groupEnd()
 }
 
-function logOwnersDiff<T extends SolidOwner>(
+function logOwnersDiff<T extends Solid.Owner>(
   from: readonly T[],
   to: readonly T[],
   diff: "thorow" | "stack",
@@ -320,7 +320,7 @@ function logOwnersDiff<T extends SolidOwner>(
   )
 }
 
-export function logOwnerList<T extends SolidOwner>(
+export function logOwnerList<T extends Solid.Owner>(
   owners: readonly T[],
   logGroup?: (owner: T) => void,
 ): void {

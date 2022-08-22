@@ -1,12 +1,12 @@
 import { createEffect, For, JSX, onCleanup } from "solid-js"
 import { TransitionGroup, animateExit, animateEnter } from "@otonashixav/solid-flip"
 import { createHover } from "@solid-aria/interactions"
-import { GraphOwner, NodeType } from "@solid-devtools/shared/graph"
+import { Graph, NodeType } from "@solid-devtools/shared/graph"
 import { useHighlights } from "~/ctx/highlights"
 import * as styles from "./OwnerNode.css"
 import { Highlight } from "../highlight/Highlight"
 
-export function OwnerChildren(props: { children: GraphOwner[] }) {
+export function OwnerChildren(props: { children: Graph.Owner[] }) {
   return (
     <TransitionGroup enter={animateEnter()} exit={animateExit()}>
       <For each={props.children}>{o => <OwnerNode owner={o} />}</For>
@@ -14,7 +14,7 @@ export function OwnerChildren(props: { children: GraphOwner[] }) {
   )
 }
 
-export function OwnerNode(props: { owner: GraphOwner }): JSX.Element {
+export function OwnerNode(props: { owner: Graph.Owner }): JSX.Element {
   const { owner } = props
   const { name, type, id } = owner
   const children = () => owner.children

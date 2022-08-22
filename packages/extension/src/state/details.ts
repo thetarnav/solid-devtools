@@ -1,14 +1,6 @@
 import { Accessor, batch, createRoot, createSelector, createSignal, untrack } from "solid-js"
 import { createStore, produce } from "solid-js/store"
-import {
-  GraphOwner,
-  GraphSignal,
-  MappedOwnerDetails,
-  MappedSignal,
-  NodeID,
-  OwnerDetails,
-  SignalUpdate,
-} from "@solid-devtools/shared/graph"
+import { Mapped, Graph, NodeID, SignalUpdate } from "@solid-devtools/shared/graph"
 import { warn } from "@solid-devtools/shared/utils"
 import { NOTFOUND } from "@solid-devtools/shared/variables"
 import { findOwnerById, findOwnerRootId } from "./graph"
@@ -17,11 +9,11 @@ import { createArrayIncludesSelector, createArraySetToggle, createUpdatedSelecto
 import { EncodedValue } from "@solid-devtools/shared/serialize"
 
 function reconcileSignals(
-  newSignals: readonly MappedSignal[],
-  signals: Record<NodeID, GraphSignal>,
+  newSignals: readonly Mapped.Signal[],
+  signals: Record<NodeID, Graph.Signal>,
 ): void {
   if (!newSignals.length && !signals.length) return
-  const intersection: MappedSignal[] = []
+  const intersection: Mapped.Signal[] = []
   for (const id in signals) {
     const newSignal = newSignals.find(s => s.id === id)
     if (newSignal) {
@@ -67,7 +59,7 @@ function reconcileValue(proxy: EncodedValue<boolean>, next: EncodedValue<boolean
   else delete proxy.children
 }
 
-function createSignalNode(raw: Readonly<MappedSignal>): GraphSignal {
+function createSignalNode(raw: Readonly<Mapped.Signal>): Graph.Signal {
   // const [value, setValue] = createSignal(raw.value)
   return { ...raw }
 }
@@ -75,9 +67,9 @@ function createSignalNode(raw: Readonly<MappedSignal>): GraphSignal {
 export type OwnerDetailsState =
   | { focused: null; rootId: null; details: null }
   | {
-      focused: GraphOwner
+      focused: Graph.Owner
       rootId: NodeID
-      details: OwnerDetails | null
+      details: Graph.OwnerDetails | null
     }
 
 const nullState = { focused: null, rootId: null, details: null } as const
@@ -88,23 +80,23 @@ const exports = createRoot(() => {
     focusedRootId = () => state.rootId,
     details = () => state.details
 
-  const ownerFocusedSelector = createSelector<GraphOwner | null, GraphOwner>(focused)
-  const useOwnerFocusedSelector = (owner: GraphOwner): Accessor<boolean> =>
+  const ownerFocusedSelector = createSelector<Graph.Owner | null, Graph.Owner>(focused)
+  const useOwnerFocusedSelector = (owner: Graph.Owner): Accessor<boolean> =>
     ownerFocusedSelector.bind(void 0, owner)
 
-  function setFocused(owner: GraphOwner | null) {
+  function setFocused(owner: Graph.Owner | null) {
     if (owner === untrack(() => state.focused)) return
     if (!owner) return setState({ ...nullState })
     setState({ focused: owner, rootId: findOwnerRootId(owner), details: null })
   }
 
-  function updateDetails(raw: MappedOwnerDetails): void {
+  function updateDetails(raw: Mapped.OwnerDetails): void {
     const rootId = untrack(focusedRootId)
     if (!rootId) return warn("OwnerDetailsUpdate: rootId is null")
 
     setState("details", prev => {
       if (prev === null) {
-        const signals: OwnerDetails["signals"] = {}
+        const signals: Graph.OwnerDetails["signals"] = {}
         raw.signals.forEach(signal => (signals[signal.id] = createSignalNode(signal)))
         return {
           id: raw.id,
@@ -115,7 +107,7 @@ const exports = createRoot(() => {
           signals,
         }
       }
-      return produce<Mutable<OwnerDetails>>(proxy => {
+      return produce<Mutable<Graph.OwnerDetails>>(proxy => {
         // update path
         if (!arrayEquals(proxy.rawPath, raw.path)) {
           const newPath = raw.path.map(id => findOwnerById(rootId, id) ?? NOTFOUND)

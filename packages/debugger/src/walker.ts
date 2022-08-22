@@ -1,14 +1,5 @@
 import { resolveElements } from "@solid-primitives/refs"
-import {
-  MappedOwner,
-  NodeType,
-  SolidOwner,
-  MappedSignal,
-  SolidSignal,
-  MappedComponent,
-  MappedOwnerDetails,
-  NodeID,
-} from "@solid-devtools/shared/graph"
+import { NodeType, NodeID, Solid, Mapped } from "@solid-devtools/shared/graph"
 import { encodeValue } from "@solid-devtools/shared/serialize"
 import {
   getNodeName,
@@ -31,26 +22,26 @@ let RootId: NodeID
 let OnSignalUpdate: SignalUpdateHandler
 let OnComputationUpdate: ComputationUpdateHandler
 let GatherComponents: boolean
-let Components: MappedComponent[] = []
-let FocusedOwner: SolidOwner | null
-let FocusedOwnerDetails: MappedOwnerDetails | null
-let FocusedOwnerSignalMap: Record<NodeID, SolidSignal>
+let Components: Mapped.Component[] = []
+let FocusedOwner: Solid.Owner | null
+let FocusedOwnerDetails: Mapped.OwnerDetails | null
+let FocusedOwnerSignalMap: Record<NodeID, Solid.Signal>
 
 const WALKER = Symbol("walker")
 
-function observeComputation(owner: SolidOwner, id: NodeID) {
+function observeComputation(owner: Solid.Owner, id: NodeID) {
   if (isSolidComputation(owner))
     observeComputationUpdate(owner, OnComputationUpdate.bind(void 0, RootId, id))
 }
 
-function observeValue(node: SolidSignal) {
+function observeValue(node: Solid.Signal) {
   const id = markNodeID(node)
   // OnSignalUpdate will change
   const handler = OnSignalUpdate
   observeValueUpdate(node, value => handler(id, value), WALKER)
 }
 
-function mapSignalNode(node: SolidSignal): MappedSignal {
+function mapSignalNode(node: Solid.Signal): Mapped.Signal {
   const id = markNodeID(node)
   FocusedOwnerSignalMap[id] = node
   observeValue(node)
@@ -63,16 +54,16 @@ function mapSignalNode(node: SolidSignal): MappedSignal {
   }
 }
 
-export function clearOwnerObservers(owner: SolidOwner): void {
+export function clearOwnerObservers(owner: Solid.Owner): void {
   if (owner.sourceMap)
     Object.values(owner.sourceMap).forEach(node => removeValueUpdateObserver(node, WALKER))
   if (owner.owned) owner.owned.forEach(node => removeValueUpdateObserver(node, WALKER))
 }
 
-function collectOwnerDetails(owner: SolidOwner): void {
+function collectOwnerDetails(owner: Solid.Owner): void {
   // get owner path
   const path: NodeID[] = []
-  let current: SolidOwner | null = owner.owner
+  let current: Solid.Owner | null = owner.owner
   while (current) {
     // * after we flatten the tree, we'll know the length of the path — no need to use unshift then
     path.unshift(markNodeID(current))
@@ -87,7 +78,7 @@ function collectOwnerDetails(owner: SolidOwner): void {
     signals.push(mapSignalNode(child))
   })
 
-  const details: MappedOwnerDetails = {
+  const details: Mapped.OwnerDetails = {
     // id, name and type are already set in mapOwner
     id: owner.sdtId!,
     name: owner.sdtName!,
@@ -108,8 +99,8 @@ function collectOwnerDetails(owner: SolidOwner): void {
   FocusedOwnerDetails = details
 }
 
-function mapChildren({ owned, ownedRoots }: Readonly<SolidOwner>): MappedOwner[] {
-  const children: MappedOwner[] = []
+function mapChildren({ owned, ownedRoots }: Readonly<Solid.Owner>): Mapped.Owner[] {
+  const children: Mapped.Owner[] = []
 
   if (owned)
     children.push.apply(
@@ -126,7 +117,7 @@ function mapChildren({ owned, ownedRoots }: Readonly<SolidOwner>): MappedOwner[]
   return children
 }
 
-function mapOwner(owner: SolidOwner, type?: NodeType): MappedOwner {
+function mapOwner(owner: Solid.Owner, type?: NodeType): Mapped.Owner {
   type = markOwnerType(owner, type)
   const id = markNodeID(owner)
   const name = markOwnerName(owner)
@@ -158,14 +149,14 @@ export type WalkerConfig = {
 }
 
 export function walkSolidTree(
-  owner: SolidOwner,
+  owner: Solid.Owner,
   config: WalkerConfig,
 ): {
-  tree: MappedOwner
-  components: MappedComponent[]
-  focusedOwnerDetails: MappedOwnerDetails | null
-  focusedOwner: SolidOwner | null
-  focusedOwnerSignalMap: Record<NodeID, SolidSignal>
+  tree: Mapped.Owner
+  components: Mapped.Component[]
+  focusedOwnerDetails: Mapped.OwnerDetails | null
+  focusedOwner: Solid.Owner | null
+  focusedOwnerSignalMap: Record<NodeID, Solid.Signal>
 } {
   // set the globals to be available for this walk cycle
   FocusedId = config.focusedId

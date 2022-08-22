@@ -1,13 +1,7 @@
 import { untrack } from "solid-js"
 import { noop, onRootCleanup } from "@solid-primitives/utils"
 import { Observable, Observer as ObjectObserver } from "object-observer"
-import {
-  SignalState,
-  SolidComputation,
-  SolidRoot,
-  ValueUpdateListener,
-} from "@solid-devtools/shared/graph"
-import { Owner } from "@solid-devtools/shared/solid"
+import { Solid, Core, ValueUpdateListener } from "@solid-devtools/shared/graph"
 import { WINDOW_WRAP_STORE_PROPERTY } from "@solid-devtools/shared/variables"
 import { skipInternalRoot } from "./utils"
 
@@ -43,7 +37,7 @@ export function makeSolidUpdateListener(onUpdate: VoidFunction): VoidFunction {
 // AFTER CREATE ROOT
 //
 
-export type AfterCrateRoot = (root: SolidRoot) => void
+export type AfterCrateRoot = (root: Solid.Root) => void
 
 const CreateRootListeners = new Set<AfterCrateRoot>()
 
@@ -56,7 +50,7 @@ const CreateRootListeners = new Set<AfterCrateRoot>()
   if (typeof window._$afterCreateRoot === "function") {
     CreateRootListeners.add(window._$afterCreateRoot)
   }
-  window._$afterCreateRoot = runListeners as (root: Owner) => void
+  window._$afterCreateRoot = runListeners as (root: Core.Owner) => void
 }
 
 /**
@@ -101,7 +95,7 @@ export function makeStoreObserver(state: object, onUpdate: ObjectObserver): Void
 /**
  * Wraps the fn prop of owner object to trigger handler whenever the computation is executed.
  */
-export function observeComputationUpdate(owner: SolidComputation, onRun: VoidFunction): void {
+export function observeComputationUpdate(owner: Solid.Computation, onRun: VoidFunction): void {
   // owner already patched
   if (owner.onComputationUpdate) return void (owner.onComputationUpdate = onRun)
   // patch owner
@@ -129,7 +123,7 @@ export function observeComputationUpdate(owner: SolidComputation, onRun: VoidFun
  * ```
  */
 export function interceptComputationRerun(
-  owner: SolidComputation,
+  owner: Solid.Computation,
   onRun: <T>(execute: () => T, prev: T) => void,
 ): void {
   const _fn = owner.fn
@@ -151,7 +145,7 @@ export function interceptComputationRerun(
  * Patches the owner/signal value, firing the callback on each update immediately as it happened.
  */
 export function observeValueUpdate(
-  node: SignalState,
+  node: Solid.SignalState,
   onUpdate: ValueUpdateListener,
   symbol: symbol,
 ): void {
@@ -172,12 +166,12 @@ export function observeValueUpdate(
   })
 }
 
-export function removeValueUpdateObserver(node: SignalState, symbol: symbol): void {
+export function removeValueUpdateObserver(node: Solid.SignalState, symbol: symbol): void {
   if (node.onValueUpdate) delete node.onValueUpdate[symbol]
 }
 
 export function makeValueUpdateListener(
-  node: SignalState,
+  node: Solid.SignalState,
   onUpdate: ValueUpdateListener,
   symbol: symbol,
 ): void {

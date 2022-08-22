@@ -1,4 +1,4 @@
-import { getOwner, SolidRoot } from "@solid-devtools/shared/graph"
+import { getOwner, Solid } from "@solid-devtools/shared/graph"
 import { createComputed, createRoot, createSignal } from "solid-js"
 import {
   interceptComputationRerun,
@@ -37,7 +37,7 @@ describe("makeSolidUpdateListener", () => {
 describe("makeCreateRootListener", () => {
   it("listens to new roots", () =>
     createRoot(dispose => {
-      const captured: SolidRoot[] = []
+      const captured: Solid.Root[] = []
       makeCreateRootListener(root => captured.push(root))
 
       const o = createRoot(f => {

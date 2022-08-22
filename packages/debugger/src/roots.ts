@@ -5,11 +5,10 @@ import {
   getOwner,
   NodeID,
   NodeType,
-  SolidOwner,
-  SolidRoot,
+  Solid,
+  Core,
 } from "@solid-devtools/shared/graph"
 import { INTERNAL } from "@solid-devtools/shared/variables"
-import { Owner } from "@solid-devtools/shared/solid"
 import {
   clearOwnerObservers,
   ComputationUpdateHandler,
@@ -43,7 +42,7 @@ const RootMap: Record<NodeID, { update: VoidFunction; forceUpdate: VoidFunction 
 export const forceRootUpdate = (rootId: NodeID) => RootMap[rootId].forceUpdate()
 export const triggerRootUpdate = (rootId: NodeID) => RootMap[rootId].update()
 
-export function createGraphRoot(owner: SolidRoot): void {
+export function createGraphRoot(owner: Solid.Root): void {
   // setup the debugger in a separate root, so that it doesn't walk and track itself
   createInternalRoot(dispose => {
     onOwnerCleanup(owner, dispose)
@@ -61,7 +60,7 @@ export function createGraphRoot(owner: SolidRoot): void {
       pushSignalUpdate(nodeId, value)
     }
 
-    let lastFocusedOwner: SolidOwner | null = null
+    let lastFocusedOwner: Solid.Owner | null = null
 
     const forceRootUpdate = () => {
       if (owner.isDisposed) return
@@ -124,8 +123,8 @@ export function createGraphRoot(owner: SolidRoot): void {
  * 	reattachOwner();
  * });
  */
-export function attachDebugger(_owner: Owner = getOwner()!): void {
-  let owner = _owner as SolidOwner
+export function attachDebugger(_owner: Core.Owner = getOwner()!): void {
+  let owner = _owner as Solid.Owner
   if (!owner)
     return console.warn(
       "reatachOwner helper should be used synchronously inside createRoot callback body.",
@@ -174,7 +173,7 @@ export function attachDebugger(_owner: Owner = getOwner()!): void {
  * Adds SubRoot object to `ownedRoots` property of owner
  * @returns a function to remove from the `ownedRoots` property
  */
-function addRootToOwnedRoots(parent: SolidOwner, root: SolidRoot): VoidFunction {
+function addRootToOwnedRoots(parent: Solid.Owner, root: Solid.Root): VoidFunction {
   const ownedRoots = parent.ownedRoots ?? (parent.ownedRoots = new Set())
   ownedRoots.add(root)
   return (): void => void ownedRoots.delete(root)
@@ -187,10 +186,10 @@ function addRootToOwnedRoots(parent: SolidOwner, root: SolidRoot): VoidFunction 
  * @returns `{ owner: SolidOwner; root: SolidRoot }`
  */
 function findClosestAliveParent(
-  owner: SolidOwner,
-): { owner: SolidOwner; root: SolidRoot } | { owner: null; root: null } {
-  let disposed: SolidRoot | null = null
-  let closestAliveRoot: SolidRoot | null = null
+  owner: Solid.Owner,
+): { owner: Solid.Owner; root: Solid.Root } | { owner: null; root: null } {
+  let disposed: Solid.Root | null = null
+  let closestAliveRoot: Solid.Root | null = null
   let current = owner
   while (current.owner && !closestAliveRoot) {
     current = current.owner
@@ -208,10 +207,10 @@ function findClosestAliveParent(
  * The callback is run only for roots that haven't been handled before.
  */
 function forEachLookupRoot(
-  owner: SolidOwner,
-  callback: (root: SolidRoot, ctx: DebuggerContext | undefined) => void,
+  owner: Solid.Owner,
+  callback: (root: Solid.Root, ctx: DebuggerContext | undefined) => void,
 ): void {
-  const roots: SolidRoot[] = []
+  const roots: Solid.Root[] = []
   let ctx: DebuggerContext | undefined
   do {
     // check if it's a root/subroot
@@ -225,7 +224,7 @@ function forEachLookupRoot(
         ctx = INTERNAL
         break
       }
-      roots.push(owner as SolidRoot)
+      roots.push(owner as Solid.Root)
     }
     owner = owner.owner!
   } while (owner)

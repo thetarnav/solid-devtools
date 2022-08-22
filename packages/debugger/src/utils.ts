@@ -10,28 +10,25 @@ import { AnyFunction, AnyObject, noop, warn } from "@solid-primitives/utils"
 import {
   DebuggerContext,
   NodeType,
-  SolidComputation,
-  SolidOwner,
-  SolidRoot,
-  SolidSignal,
-  SolidMemo,
+  Solid,
+  Core,
   getOwner,
   NodeID,
 } from "@solid-devtools/shared/graph"
 import { INTERNAL, UNNAMED } from "@solid-devtools/shared/variables"
 import { trimString } from "@solid-devtools/shared/utils"
-import { RootFunction } from "@solid-devtools/shared/solid"
 import { createSimpleEmitter, GenericListen } from "@solid-primitives/event-bus"
 import { throttle } from "@solid-primitives/scheduled"
 
-export const isSolidComputation = (o: Readonly<SolidOwner>): o is SolidComputation => "fn" in o
+export const isSolidComputation = (o: Readonly<Solid.Owner>): o is Solid.Computation => "fn" in o
 
-export const isSolidMemo = (o: Readonly<SolidOwner>): o is SolidMemo =>
+export const isSolidMemo = (o: Readonly<Solid.Owner>): o is Solid.Memo =>
   "sdtType" in o ? o.sdtType === NodeType.Memo : _isMemo(o) && !fnMatchesRefresh(o.fn!)
 
-export const isSolidOwner = (o: Readonly<SolidOwner> | SolidSignal): o is SolidOwner => "owned" in o
+export const isSolidOwner = (o: Readonly<Solid.Owner> | Solid.Signal): o is Solid.Owner =>
+  "owned" in o
 
-export const isSolidRoot = (o: Readonly<SolidOwner>): o is SolidRoot =>
+export const isSolidRoot = (o: Readonly<Solid.Owner>): o is Solid.Root =>
   o.sdtType === NodeType.Root || !isSolidComputation(o)
 
 const _isComponent = (o: Readonly<AnyObject>): boolean => "componentName" in o
@@ -43,27 +40,27 @@ const fnMatchesRefresh = (fn: AnyFunction): boolean =>
   (fn + "").replace(/[\n\t]/g, "").replace(/ +/g, " ") ===
   "() => { const c = source(); if (c) { return untrack(() => c(props)); } return undefined; }"
 
-export function getOwnerName(owner: Readonly<SolidOwner>): string {
+export function getOwnerName(owner: Readonly<Solid.Owner>): string {
   const { name, componentName: component } = owner
   if (component && typeof component === "string")
     return component.startsWith("_Hot$$") ? component.slice(6) : component
   return name || UNNAMED
 }
-export function getSignalName(signal: Readonly<SolidSignal>): string {
+export function getSignalName(signal: Readonly<Solid.Signal>): string {
   return signal.name || UNNAMED
 }
 
-export function getNodeName(o: Readonly<SolidSignal | SolidOwner>): string {
+export function getNodeName(o: Readonly<Solid.Signal | Solid.Owner>): string {
   const name = isSolidOwner(o) ? getOwnerName(o) : getSignalName(o)
   return trimString(name, 20)
 }
 
-export function getNodeType(o: Readonly<SolidSignal | SolidOwner>): NodeType {
+export function getNodeType(o: Readonly<Solid.Signal | Solid.Owner>): NodeType {
   if (isSolidOwner(o)) return getOwnerType(o)
   return NodeType.Signal
 }
 
-export const getOwnerType = (o: Readonly<SolidOwner>): NodeType => {
+export const getOwnerType = (o: Readonly<Solid.Owner>): NodeType => {
   if (typeof o.sdtType !== "undefined") return o.sdtType
   if (!isSolidComputation(o)) return NodeType.Root
   // Precompiled components do not start with "_Hot$$"
@@ -85,10 +82,10 @@ export const getOwnerType = (o: Readonly<SolidOwner>): NodeType => {
  * helper to getting to an owner that you want — walking downwards
  */
 export function findOwner(
-  root: SolidOwner,
-  predicate: (owner: SolidOwner) => boolean,
-): SolidOwner | null {
-  const queue: SolidOwner[] = [root]
+  root: Solid.Owner,
+  predicate: (owner: Solid.Owner) => boolean,
+): Solid.Owner | null {
+  const queue: Solid.Owner[] = [root]
   for (const owner of queue) {
     if (predicate(owner)) return owner
     if (Array.isArray(owner.owned)) queue.push(...owner.owned)
@@ -97,9 +94,9 @@ export function findOwner(
 }
 
 export function lookupOwner(
-  owner: SolidOwner,
-  predicate: (owner: SolidOwner) => boolean,
-): SolidOwner | null {
+  owner: Solid.Owner,
+  predicate: (owner: Solid.Owner) => boolean,
+): Solid.Owner | null {
   do {
     if (predicate(owner)) return owner
     owner = owner.owner!
@@ -107,14 +104,14 @@ export function lookupOwner(
   return null
 }
 
-export function setDebuggerContext(owner: SolidRoot, ctx: DebuggerContext): void {
+export function setDebuggerContext(owner: Solid.Root, ctx: DebuggerContext): void {
   owner.sdtContext = ctx
 }
-export function getDebuggerContext(owner: SolidOwner): DebuggerContext | undefined {
+export function getDebuggerContext(owner: Solid.Owner): DebuggerContext | undefined {
   while (!owner.sdtContext && owner.owner) owner = owner.owner
   return owner.sdtContext
 }
-export function removeDebuggerContext(owner: SolidOwner): void {
+export function removeDebuggerContext(owner: Solid.Owner): void {
   delete owner.sdtContext
 }
 
@@ -123,7 +120,11 @@ export function removeDebuggerContext(owner: SolidOwner): void {
  * @param prepend add the callback to the front of the stack, instead of pushing, fot it to be called before other cleanup callbacks.
  * @returns a function to remove the cleanup callback
  */
-export function onOwnerCleanup(owner: SolidOwner, fn: VoidFunction, prepend = false): VoidFunction {
+export function onOwnerCleanup(
+  owner: Solid.Owner,
+  fn: VoidFunction,
+  prepend = false,
+): VoidFunction {
   if (owner.cleanups === null) owner.cleanups = [fn]
   else if (prepend) owner.cleanups.splice(0, 0, fn)
   else owner.cleanups.push(fn)
@@ -136,7 +137,7 @@ export function onOwnerCleanup(owner: SolidOwner, fn: VoidFunction, prepend = fa
  * @returns a function to remove the cleanup callback
  */
 export function onParentCleanup(
-  owner: SolidOwner,
+  owner: Solid.Owner,
   fn: VoidFunction,
   prepend = false,
 ): VoidFunction {
@@ -170,8 +171,8 @@ export function createUnownedRoot<T>(fn: (dispose: VoidFunction) => T): T {
   return runWithOwner(null as any, () => createRoot(fn))
 }
 
-export function getFunctionSources(fn: () => unknown): SolidSignal[] {
-  let nodes: SolidSignal[] | undefined
+export function getFunctionSources(fn: () => unknown): Solid.Signal[] {
+  let nodes: Solid.Signal[] | undefined
   let init = true
   runWithOwner(null as any, () =>
     createRoot(dispose =>
@@ -191,11 +192,11 @@ export function getFunctionSources(fn: () => unknown): SolidSignal[] {
 let LAST_ID = 0
 export const getNewSdtId = (): NodeID => (LAST_ID++).toString(16)
 
-export function markOwnerName(o: SolidOwner): string {
+export function markOwnerName(o: Solid.Owner): string {
   if (o.sdtName !== undefined) return o.sdtName
   return (o.sdtName = getNodeName(o))
 }
-export function markOwnerType(o: SolidOwner, type?: NodeType): NodeType {
+export function markOwnerType(o: Solid.Owner, type?: NodeType): NodeType {
   if (o.sdtType !== undefined) return o.sdtType
   return (o.sdtType = type ?? getOwnerType(o))
 }
@@ -220,7 +221,7 @@ export function createConsumers(): [
   return [enabled, consumer => setConsumers(p => [...p, consumer])]
 }
 
-let SkipInternalRoot: RootFunction<unknown> | null = null
+let SkipInternalRoot: Core.RootFunction<unknown> | null = null
 
 /**
  * Sold's `createRoot` primitive that won't be tracked by the debugger.
@@ -228,7 +229,7 @@ let SkipInternalRoot: RootFunction<unknown> | null = null
 export const createInternalRoot: typeof createRoot = (fn, detachedOwner) => {
   SkipInternalRoot = fn
   const v = createRoot(dispose => {
-    const owner = getOwner() as SolidRoot
+    const owner = getOwner() as Solid.Root
     setDebuggerContext(owner, INTERNAL)
     return fn(dispose)
   }, detachedOwner)

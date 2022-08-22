@@ -1,6 +1,6 @@
 import { Component, For, Show } from "solid-js"
 import { destructure } from "@solid-primitives/destructure"
-import { NodeType, OwnerDetails } from "@solid-devtools/shared/graph"
+import { NodeType, Graph } from "@solid-devtools/shared/graph"
 import { NOTFOUND } from "@solid-devtools/shared/variables"
 import {
   HighlightsProvider,
@@ -20,7 +20,7 @@ import {
 } from "./state/details"
 import * as styles from "./styles.css"
 
-const DetailsContent: Component<{ details: OwnerDetails }> = props => {
+const DetailsContent: Component<{ details: Graph.OwnerDetails }> = props => {
   const { name, id, type, path, signals } = destructure(() => props.details)
 
   return (

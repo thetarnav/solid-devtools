@@ -1,4 +1,4 @@
-import { ComputationUpdate, MappedOwnerDetails, NodeID, RootsUpdates, SignalUpdate } from "./graph"
+import { ComputationUpdate, Mapped, NodeID, RootsUpdates, SignalUpdate } from "./graph"
 import { log } from "./utils"
 
 export const LOG_MESSAGES = false
@@ -17,7 +17,7 @@ export interface Messages {
   /** devtools -> adapter: request for details of owner details opened in the side-panel */
   SetSelectedOwner: null | { rootId: NodeID; ownerId: NodeID }
   /** adapter -> devtools: send updates to the owner details */
-  OwnerDetailsUpdate: MappedOwnerDetails
+  OwnerDetailsUpdate: Mapped.OwnerDetails
   /** devtools -> adapter: request for signal details — subscribe or unsubscribe */
   SetSelectedSignal: { id: NodeID; selected: boolean }
   /** adapter -> devtools: signal deep value */

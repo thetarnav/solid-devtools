@@ -1,22 +1,14 @@
 import { batch, createRoot, onCleanup } from "solid-js"
 import { createStore, produce } from "solid-js/store"
 import { HighlightContextState } from "@solid-devtools/ui"
-import {
-  GraphOwner,
-  GraphSignal,
-  GraphRoot,
-  SerialisedTreeRoot,
-  NodeID,
-  MappedOwner,
-  RootsUpdates,
-} from "@solid-devtools/shared/graph"
+import { NodeID, RootsUpdates, Mapped, Graph } from "@solid-devtools/shared/graph"
 import { createUpdatedSelector, disposeAll } from "./utils"
 import { setFocused, useOwnerFocusedSelector } from "./details"
 
-const NodeMap: Record<NodeID, Record<NodeID, GraphOwner>> = {}
+const NodeMap: Record<NodeID, Record<NodeID, Graph.Owner>> = {}
 
 // TODO: map source/observers length separately, as these won't always resolve
-let observersToAddLazy: Record<NodeID, ((source: GraphOwner) => void)[]> = {}
+let observersToAddLazy: Record<NodeID, ((source: Graph.Owner) => void)[]> = {}
 
 export function disposeAllNodes() {
   for (const { owners, signals } of Object.values(NodeMap)) {
@@ -34,7 +26,7 @@ export function afterGraphUpdate() {
   observersToAddLazy = {}
 }
 
-export function findOwnerRootId(owner: GraphOwner): NodeID {
+export function findOwnerRootId(owner: Graph.Owner): NodeID {
   for (const rootId in NodeMap) {
     const owners = NodeMap[rootId]
     for (const id in owners) {
@@ -44,11 +36,11 @@ export function findOwnerRootId(owner: GraphOwner): NodeID {
   throw "ROOT_ID_NOT_FOUND"
 }
 
-export function findOwnerById(rootId: NodeID, id: NodeID): GraphOwner | undefined {
+export function findOwnerById(rootId: NodeID, id: NodeID): Graph.Owner | undefined {
   return NodeMap[rootId][id]
 }
 
-const addOwnerToMap = (rootId: NodeID, node: GraphOwner) => {
+const addOwnerToMap = (rootId: NodeID, node: Graph.Owner) => {
   const id = node.id
   const owners = NodeMap[rootId]
   owners[id] = node
@@ -60,7 +52,7 @@ const addOwnerToMap = (rootId: NodeID, node: GraphOwner) => {
   }
 }
 
-// function mapObserver(rootId: NodeID, id: NodeID, mutable: GraphOwner[]) {
+// function mapObserver(rootId: NodeID, id: NodeID, mutable: Graph.Owner[]) {
 //   const node = NodeMap[rootId][id]
 //   if (node) mutable.push(node)
 //   else pushToArrayProp(observersToAddLazy, id, owner => mutable.push(owner))
@@ -70,12 +62,12 @@ const addOwnerToMap = (rootId: NodeID, node: GraphOwner) => {
  * maps the raw owner tree to be placed into the reactive graph store
  * this is for new branches – owners that just have been created
  */
-export function mapNewOwner(rootId: NodeID, owner: Readonly<MappedOwner>): GraphOwner {
+export function mapNewOwner(rootId: NodeID, owner: Readonly<Mapped.Owner>): Graph.Owner {
   // wrap with root that will be disposed together with the rest of the tree
   // TODO do we need disposing?
   return createRoot(dispose => {
-    const children: GraphOwner[] = []
-    const node: GraphOwner = { ...owner, children, dispose }
+    const children: Graph.Owner[] = []
+    const node: Graph.Owner = { ...owner, children, dispose }
     addOwnerToMap(rootId, node)
 
     // TODO: remove mapping signals
@@ -90,7 +82,7 @@ export function mapNewOwner(rootId: NodeID, owner: Readonly<MappedOwner>): Graph
   })
 }
 
-export function mapNewRoot(rootId: NodeID, owner: Readonly<MappedOwner>): GraphOwner {
+export function mapNewRoot(rootId: NodeID, owner: Readonly<Mapped.Owner>): Graph.Owner {
   NodeMap[rootId] = {}
   return mapNewOwner(rootId, owner)
 }
@@ -101,8 +93,8 @@ export function mapNewRoot(rootId: NodeID, owner: Readonly<MappedOwner>): GraphO
  */
 function reconcileChildren(
   rootId: NodeID,
-  newChildren: MappedOwner[],
-  children: GraphOwner[],
+  newChildren: Mapped.Owner[],
+  children: Graph.Owner[],
 ): void {
   const length = children.length,
     newLength = newChildren.length,
@@ -110,8 +102,8 @@ function reconcileChildren(
 
   let i = 0,
     limit = childrenExtended ? length : newLength,
-    node: GraphOwner,
-    mapped: MappedOwner
+    node: Graph.Owner,
+    mapped: Mapped.Owner
 
   for (; i < limit; i++) {
     node = children[i]
@@ -136,19 +128,19 @@ function reconcileChildren(
   }
 }
 
-export function reconcileNode(rootId: NodeID, mapped: MappedOwner, node: GraphOwner): void {
+export function reconcileNode(rootId: NodeID, mapped: Mapped.Owner, node: Graph.Owner): void {
   reconcileChildren(rootId, mapped.children, node.children)
 }
 
 const exports = createRoot(() => {
-  const [graphs, setGraphs] = createStore<GraphRoot[]>([])
+  const [graphs, setGraphs] = createStore<Graph.Root[]>([])
 
   const [useComputationUpdatedSelector, addUpdatedComputations, clearUpdatedComputations] =
     createUpdatedSelector()
 
-  let lastHoveredNode: null | GraphOwner | GraphSignal = null
-  // const [highlightedObservers, setHighlightedObservers] = createSignal<GraphOwner[]>([])
-  // const [highlightedSources, setHighlightedSources] = createSignal<GraphSignal[]>([])
+  let lastHoveredNode: null | Graph.Owner | Graph.Signal = null
+  // const [highlightedObservers, setHighlightedObservers] = createSignal<Graph.Owner[]>([])
+  // const [highlightedSources, setHighlightedSources] = createSignal<Graph.Signal[]>([])
 
   const highlights: HighlightContextState = {
     useComputationUpdatedSelector,
@@ -172,24 +164,24 @@ const exports = createRoot(() => {
       //   setHighlightedSources([])
       // }
     },
-    // isObserverHighlighted: createSelector(highlightedObservers, (owner: GraphOwner, list) =>
+    // isObserverHighlighted: createSelector(highlightedObservers, (owner: Graph.Owner, list) =>
     //   list.includes(owner),
     // ),
     isObserverHighlighted: () => false,
     isSourceHighlighted: () => false,
-    // isSourceHighlighted: createSelector(highlightedSources, (signal: GraphSignal, list) =>
+    // isSourceHighlighted: createSelector(highlightedSources, (signal: Graph.Signal, list) =>
     //   list.includes(signal),
     // ),
   }
 
-  const removeRoot = (proxy: GraphRoot[], id: NodeID): void => {
+  const removeRoot = (proxy: Graph.Root[], id: NodeID): void => {
     proxy.splice(
       proxy.findIndex(e => e.id === id),
       1,
     )
     removeRootFromMap(id)
   }
-  const updateRoot = (proxy: GraphRoot[], { id, tree }: SerialisedTreeRoot): void => {
+  const updateRoot = (proxy: Graph.Root[], { id, tree }: Mapped.SRoot): void => {
     const root = proxy.find(r => r.id === id)
     // reconcile existing root
     if (root) reconcileNode(id, tree, root.tree)

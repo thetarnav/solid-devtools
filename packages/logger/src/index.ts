@@ -13,14 +13,7 @@ import {
   makeValueUpdateListener,
   removeValueUpdateObserver,
 } from "@solid-devtools/debugger"
-import { SignalState, Owner } from "@solid-devtools/shared/solid"
-import {
-  getOwner,
-  NodeType,
-  SolidComputation,
-  SolidOwner,
-  SolidSignal,
-} from "@solid-devtools/shared/graph"
+import { getOwner, NodeType, Solid, Core } from "@solid-devtools/shared/graph"
 import { dedupeArray, arrayRefEquals } from "@solid-devtools/shared/utils"
 import {
   getComputationCreatedLabel,
@@ -59,10 +52,13 @@ const isSolidProxy = (o: any): boolean => !!o[$PROXY]
 /**
  * @returns true if the node was marked before
  */
-function markDebugNode(o: Owner, type: "computation" | "signals" | "owned"): true | VoidFunction
-function markDebugNode(o: SignalState): true | VoidFunction
 function markDebugNode(
-  o: Owner | SignalState,
+  o: Core.Owner,
+  type: "computation" | "signals" | "owned",
+): true | VoidFunction
+function markDebugNode(o: Core.SignalState): true | VoidFunction
+function markDebugNode(
+  o: Core.Owner | Core.SignalState,
   type?: "computation" | "signals" | "owned",
 ): true | VoidFunction {
   let property: "$debug" | "$debugSignals" | "$debugOwned" | "$debugSignal"
@@ -99,12 +95,12 @@ interface DebugComputationOptions {
  * })
  * ```
  */
-export function debugComputation(owner?: Owner, options?: DebugComputationOptions): void
+export function debugComputation(owner?: Core.Owner, options?: DebugComputationOptions): void
 export function debugComputation(
-  _owner?: Owner,
+  _owner?: Core.Owner,
   { initialRun = true }: DebugComputationOptions = {},
 ): void {
-  const owner = _owner === undefined ? getOwner() : (_owner as SolidOwner)
+  const owner = _owner === undefined ? getOwner() : (_owner as Solid.Owner)
   if (!owner || !isSolidComputation(owner)) return console.warn("owner is not a computation")
 
   if (markDebugNode(owner, "computation") === true) return
@@ -120,7 +116,7 @@ export function debugComputation(
 
   // patches source objects to track their value updates
   // will unsubscribe from previous sources on each call
-  const observeSources = (sources: (SolidComputation | SolidSignal)[]) => {
+  const observeSources = (sources: (Solid.Computation | Solid.Signal)[]) => {
     updateListeners.forEach(unsub => unsub())
     updateListeners = []
     sources.forEach(source => {
@@ -217,9 +213,9 @@ export function debugComputation(
  * }
  * ```
  */
-export function debugOwnerComputations(owner?: Owner): void
-export function debugOwnerComputations(_owner?: Owner): void {
-  const owner = _owner === undefined ? getOwner() : (_owner as SolidOwner)
+export function debugOwnerComputations(owner?: Core.Owner): void
+export function debugOwnerComputations(_owner?: Core.Owner): void {
+  const owner = _owner === undefined ? getOwner() : (_owner as Solid.Owner)
   if (!owner) return console.warn("no owner passed to debugOwnedComputations")
 
   const marked = markDebugNode(owner, "owned")
@@ -231,13 +227,13 @@ export function debugOwnerComputations(_owner?: Owner): void {
     lookupOwner(owner, o => getOwnerType(o) !== NodeType.Refresh)!,
   )
 
-  let prevOwned: SolidComputation[] = []
+  let prevOwned: Solid.Computation[] = []
 
   makeSolidUpdateListener(() => {
     const { owned } = owner
     if (!owned) return
 
-    let computations: SolidComputation[] = []
+    let computations: Solid.Computation[] = []
 
     let i = prevOwned.length
     // owned can only be added
@@ -278,10 +274,10 @@ export interface DebugSignalOptions {
  * ```
  */
 export function debugSignal(
-  source: Accessor<unknown> | SignalState,
+  source: Accessor<unknown> | Core.SignalState,
   options: DebugSignalOptions = {},
 ): void {
-  let signal: SolidSignal
+  let signal: Solid.Signal
 
   if (typeof source === "function") {
     const sources = getFunctionSources(source)
@@ -290,7 +286,7 @@ export function debugSignal(
       return console.warn("More then one signal was passed to debugSignal")
     signal = sources[0]
   } else {
-    signal = source as SolidSignal
+    signal = source as Solid.Signal
   }
 
   if (markDebugNode(signal) === true) return
@@ -303,9 +299,9 @@ export function debugSignal(
   // Initial
   _logInitialValue && logInitialValue({ ...state, value: signal.value })
 
-  let actualObservers: SolidComputation[]
-  let prevObservers: SolidComputation[] = []
-  let actualPrevObservers: SolidComputation[] = []
+  let actualObservers: Solid.Computation[]
+  let prevObservers: Solid.Computation[] = []
+  let actualPrevObservers: Solid.Computation[] = []
 
   if (!signal.observers) {
     signal.observers = []
@@ -364,13 +360,13 @@ export function debugSignal(
  * ```
  */
 export function debugSignals(
-  source: Many<Accessor<unknown>> | SignalState[],
+  source: Many<Accessor<unknown>> | Core.SignalState[],
   options: DebugSignalOptions = {},
 ): void {
-  let signals: SolidSignal[] = []
+  let signals: Solid.Signal[] = []
   asArray(source).forEach(s => {
     if (typeof s === "function") signals.push.apply(signals, getFunctionSources(s))
-    else signals.push(s as SolidSignal)
+    else signals.push(s as Solid.Signal)
   })
   if (signals.length === 0) return console.warn("No signals were passed to debugSignals")
 
@@ -410,19 +406,19 @@ export function debugSignals(
  * }
  * ```
  */
-export function debugOwnerSignals(owner?: Owner, options: DebugSignalOptions = {}) {
+export function debugOwnerSignals(owner?: Core.Owner, options: DebugSignalOptions = {}) {
   owner = getOwner()!
   if (!owner) return console.warn("debugOwnerState found no Owner")
 
   if (markDebugNode(owner, "signals") === true) return
 
-  const solidOwner = owner as SolidOwner
+  const solidOwner = owner as Solid.Owner
 
   let prevSourceListLength = 0
   let prevOwnedLength = 0
 
   makeSolidUpdateListener(() => {
-    const signals: SolidSignal[] = []
+    const signals: Solid.Signal[] = []
 
     let i: number
     // add owned signals

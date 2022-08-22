@@ -1,4 +1,4 @@
-import { MappedComponent } from "@solid-devtools/shared/graph"
+import { Mapped } from "@solid-devtools/shared/graph"
 import { LOCATION_ATTRIBUTE_NAME } from "@solid-devtools/shared/variables"
 import { isWindows } from "@solid-primitives/platform"
 import { SelectedComponent } from "."
@@ -33,7 +33,7 @@ const findComponentCache = new Map<HTMLElement, SelectedComponent | null>()
  * @returns A SelectedComponent or null if no component was found. Selected component contains also a source code location property.
  */
 export function findComponent(
-  comps: MappedComponent[],
+  comps: Mapped.Component[],
   target: HTMLElement | null,
 ): SelectedComponent | null {
   if (!target) return null
