@@ -1,5 +1,14 @@
 # solid-devtools-extension
 
+## 0.7.2
+
+### Patch Changes
+
+- 3b5da1b: Refactor types to use namespaces to avoid name conflicts.
+- Updated dependencies [3b5da1b]
+  - @solid-devtools/shared@0.6.1
+  - @solid-devtools/ui@0.9.1
+
 ## 0.7.1
 
 ### Patch Changes

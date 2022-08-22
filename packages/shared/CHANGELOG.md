@@ -1,5 +1,11 @@
 # solid-devtools-shared
 
+## 0.6.1
+
+### Patch Changes
+
+- 3b5da1b: Refactor types to use namespaces to avoid name conflicts.
+
 ## 0.6.0
 
 ### Minor Changes
