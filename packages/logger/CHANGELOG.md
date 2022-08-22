@@ -1,5 +1,14 @@
 # @solid-devtools/logger
 
+## 0.4.3
+
+### Patch Changes
+
+- 3b5da1b: Refactor types to use namespaces to avoid name conflicts.
+- Updated dependencies [3b5da1b]
+  - @solid-devtools/debugger@0.6.1
+  - @solid-devtools/shared@0.6.1
+
 ## 0.4.2
 
 ### Patch Changes

@@ -1,5 +1,14 @@
 # @solid-devtools/locator
 
+## 0.12.2
+
+### Patch Changes
+
+- 3b5da1b: Refactor types to use namespaces to avoid name conflicts.
+- Updated dependencies [3b5da1b]
+  - @solid-devtools/debugger@0.6.1
+  - @solid-devtools/shared@0.6.1
+
 ## 0.12.0
 
 ### Patch Changes
