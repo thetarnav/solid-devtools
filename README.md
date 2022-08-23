@@ -1,5 +1,5 @@
 <p>
-  <img width="100%" src="https://assets.solidjs.com/banner?type=Solid%20Developer%20Tools&background=tiles&project=%20" alt="Solid Developer Tools">
+  <img width="100%" src="https://assets.solidjs.com/banner?type=Developer%20Tools&background=tiles&project=%20" alt="Solid Developer Tools">
 </p>
 
 # Solid Developer Tools
