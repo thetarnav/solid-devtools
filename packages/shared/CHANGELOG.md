@@ -1,5 +1,11 @@
 # solid-devtools-shared
 
+## 0.6.2
+
+### Patch Changes
+
+- 787f505: Move signal "selected" state to the signal object. Fixes a bug with signals staying selected after reopening the same owner details.
+
 ## 0.6.1
 
 ### Patch Changes

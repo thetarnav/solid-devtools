@@ -1,5 +1,17 @@
 # solid-devtools-extension
 
+## 0.7.3
+
+### Patch Changes
+
+- 1d1729a: Move the path component under the structure graph. Improve the path component styles.
+- 787f505: Move signal "selected" state to the signal object. Fixes a bug with signals staying selected after reopening the same owner details.
+- b5f2e4a: Include selected owner in the displayed path.
+- Updated dependencies [1d1729a]
+- Updated dependencies [787f505]
+  - @solid-devtools/ui@0.9.2
+  - @solid-devtools/shared@0.6.2
+
 ## 0.7.2
 
 ### Patch Changes
