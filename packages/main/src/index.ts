@@ -1,5 +1,5 @@
 import { attachDebugger, makeCreateRootListener } from "@solid-devtools/debugger"
-import { useExtensionAdapter } from "@solid-devtools/extension-adapter"
+import { useExtensionAdapter } from "@solid-devtools/ext-adapter"
 
 makeCreateRootListener(root => attachDebugger(root))
 

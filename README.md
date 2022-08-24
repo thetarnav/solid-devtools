@@ -70,9 +70,9 @@ A babel transform plugin for vite for transforming Solid code. For development â
 
 It can do very useful things for you: Wrap stores to let the debugger observe them. Automatically name signals, memos and stroes. It's also required by the [Locator](./packages/locator#readme) package to allow for going to the source code of the components.
 
-### [Extension Adapter](./packages/extension-adapter#readme)
+### [Extension Adapter](./packages/ext-adapter#readme)
 
-###### `@solid-devtools/extension-adapter`
+###### `@solid-devtools/ext-adapter`
 
 A runtime library connecting the [Debugger](./packages/debugger#readme) with [Chrome Extension](./packages/extension#readme).
 

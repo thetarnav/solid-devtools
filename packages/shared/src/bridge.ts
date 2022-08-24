@@ -5,7 +5,7 @@ export const LOG_MESSAGES = false
 
 export interface Messages {
   // adapter -> content -> devtools.html
-  // the `string` payload is the extension-adapter version
+  // the `string` payload is the ext-adapter version
   SolidOnPage: string
   DevtoolsScriptConnected: void
   PanelVisibility: boolean

@@ -78,10 +78,29 @@ importers:
       tsup: 6.2.1_6oasmw356qmm23djlsjgkwvrtm
       typescript: 4.7.4
 
+  packages/ext-adapter:
+    specifiers:
+      '@solid-devtools/debugger': ^0.6.0
+      '@solid-devtools/shared': workspace:^0.6.0
+      '@solid-primitives/utils': ^3.0.1
+      solid-js: ^1.4.8
+      tsup: ^6.2.1
+      type-fest: ^2.18.0
+      typescript: ^4.7.4
+    dependencies:
+      '@solid-devtools/debugger': link:../debugger
+      '@solid-devtools/shared': link:../shared
+      '@solid-primitives/utils': 3.0.1_solid-js@1.4.8
+      type-fest: 2.18.0
+    devDependencies:
+      solid-js: 1.4.8
+      tsup: 6.2.1_typescript@4.7.4
+      typescript: 4.7.4
+
   packages/extension:
     specifiers:
       '@crxjs/vite-plugin': ^1.0.13
-      '@solid-devtools/extension-adapter': ^0.12.1
+      '@solid-devtools/ext-adapter': ^0.12.1
       '@solid-devtools/shared': workspace:^0.6.2
       '@solid-devtools/ui': 0.9.2
       '@solid-primitives/context': ^0.1.0
@@ -119,7 +138,7 @@ importers:
       type-fest: 2.18.0
     devDependencies:
       '@crxjs/vite-plugin': 1.0.13_vite@3.0.4
-      '@solid-devtools/extension-adapter': link:../extension-adapter
+      '@solid-devtools/ext-adapter': link:../ext-adapter
       '@types/chrome': 0.0.193
       '@vanilla-extract/vite-plugin': 3.3.0_vite@3.0.4
       esbuild-plugin-solid: 0.4.2_2kfujm2k3bdcdbulf5i4mpvgfy
@@ -128,25 +147,6 @@ importers:
       vite: 3.0.4
       vite-plugin-solid: 2.3.0_solid-js@1.4.8+vite@3.0.4
       zip-a-folder: 1.1.5
-
-  packages/extension-adapter:
-    specifiers:
-      '@solid-devtools/debugger': ^0.6.0
-      '@solid-devtools/shared': workspace:^0.6.0
-      '@solid-primitives/utils': ^3.0.1
-      solid-js: ^1.4.8
-      tsup: ^6.2.1
-      type-fest: ^2.18.0
-      typescript: ^4.7.4
-    dependencies:
-      '@solid-devtools/debugger': link:../debugger
-      '@solid-devtools/shared': link:../shared
-      '@solid-primitives/utils': 3.0.1_solid-js@1.4.8
-      type-fest: 2.18.0
-    devDependencies:
-      solid-js: 1.4.8
-      tsup: 6.2.1_typescript@4.7.4
-      typescript: 4.7.4
 
   packages/locator:
     specifiers:
@@ -220,7 +220,7 @@ importers:
   packages/main:
     specifiers:
       '@solid-devtools/debugger': ^0.6.0
-      '@solid-devtools/extension-adapter': ^0.12.0
+      '@solid-devtools/ext-adapter': ^0.12.0
       '@solid-devtools/locator': ^0.13.0
       '@solid-devtools/transform': ^0.6.2
       '@testing-library/jest-dom': ^5.16.4
@@ -232,7 +232,7 @@ importers:
       typescript: ^4.7.4
     dependencies:
       '@solid-devtools/debugger': link:../debugger
-      '@solid-devtools/extension-adapter': link:../extension-adapter
+      '@solid-devtools/ext-adapter': link:../ext-adapter
       '@solid-devtools/locator': link:../locator
       '@solid-devtools/transform': link:../transform
     devDependencies:
@@ -5553,7 +5553,7 @@ packages:
     dev: true
 
   /ee-first/1.1.1:
-    resolution: {integrity: sha512-WMwm9LhRUo+WUaRN+vRuETqG89IgZphVSNkdFgeb6sS/E4OrDIN7t48CAewSHXc6C8lefD8KKfr5vY61brQlow==}
+    resolution: {integrity: sha1-WQxhFWsK4vTwJVcyoViyZrxWsh0=}
     dev: true
 
   /electron-to-chromium/1.4.139:
@@ -10355,7 +10355,7 @@ packages:
     dev: true
 
   /utils-merge/1.0.1:
-    resolution: {integrity: sha512-pMZTvIkT1d+TFGvDOqodOclx0QWkkgi6Tdoa8gC8ffGAAqz9pzPTZWAybbsHHoED/ztMtkv/VoYTYyShUn81hA==}
+    resolution: {integrity: sha1-n5VxD1CiZ5R7LMwSR0HBAoQn5xM=}
     engines: {node: '>= 0.4.0'}
     dev: true
 

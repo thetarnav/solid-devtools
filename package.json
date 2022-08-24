@@ -7,7 +7,7 @@
   "contributors": [],
   "scripts": {
     "dev:ext": "pnpm -dir packages/extension run dev",
-    "dev:ext-deps": "turbo run dev --filter=@solid-devtools/shared --filter=@solid-devtools/ui --filter=@solid-devtools/extension-adapter",
+    "dev:ext-deps": "turbo run dev --filter=@solid-devtools/shared --filter=@solid-devtools/ui --filter=@solid-devtools/ext-adapter",
     "dev:sandbox": "pnpm -dir playgrounds/sandbox run dev",
     "build": "turbo run build --filter=!./playgrounds/*",
     "test": "turbo run test --filter=!./playgrounds/*",

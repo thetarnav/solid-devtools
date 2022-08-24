@@ -1,4 +1,4 @@
-# @solid-devtools/extension-adapter
+# @solid-devtools/ext-adapter
 
 ## 0.12.1
 

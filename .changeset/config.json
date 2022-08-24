@@ -1,16 +1,16 @@
 {
-	"$schema": "https://unpkg.com/@changesets/config@2.0.0/schema.json",
-	"changelog": "@changesets/cli/changelog",
-	"commit": false,
-	"fixed": [],
-	"linked": [["@solid-devtools/extension-adapter", "@solid-devtools/locator", "solid-devtools"]],
-	"access": "public",
-	"baseBranch": "main",
-	"updateInternalDependencies": "patch",
-	"ignore": [
-		"solid-devtools-clock-playground",
-		"solid-devtools-sandbox-playground",
-		"solid-devtools-start-playground",
-		"solid-devtools-todomvc-playground"
-	]
+  "$schema": "https://unpkg.com/@changesets/config@2.0.0/schema.json",
+  "changelog": "@changesets/cli/changelog",
+  "commit": false,
+  "fixed": [],
+  "linked": [["@solid-devtools/ext-adapter", "@solid-devtools/locator", "solid-devtools"]],
+  "access": "public",
+  "baseBranch": "main",
+  "updateInternalDependencies": "patch",
+  "ignore": [
+    "solid-devtools-clock-playground",
+    "solid-devtools-sandbox-playground",
+    "solid-devtools-start-playground",
+    "solid-devtools-todomvc-playground"
+  ]
 }

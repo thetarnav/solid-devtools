@@ -12,7 +12,7 @@ export default defineConfig({
       "@shared": path.resolve(pathToPackages, "shared"),
       "@ui": path.resolve(pathToPackages, "ui", "src"),
       "@solid-devtools/locator": path.resolve(pathToPackages, "locator", "src"),
-      "@solid-devtools/extension-adapter": path.resolve(pathToPackages, "extension-adapter", "src"),
+      "@solid-devtools/ext-adapter": path.resolve(pathToPackages, "ext-adapter", "src"),
     },
   },
   build: {

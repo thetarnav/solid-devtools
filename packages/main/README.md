@@ -9,7 +9,7 @@
 The main package of Solid Devtools. It contains the following subpackages:
 
 - [Debugger](https://github.com/thetarnav/solid-devtools/tree/main/packages/debugger#readme) _(automatically enabled)_
-- [Extension Adapter](https://github.com/thetarnav/solid-devtools/tree/main/packages/extension-adapter#readme) _(automatically enabled)_
+- [Extension Adapter](https://github.com/thetarnav/solid-devtools/tree/main/packages/ext-adapter#readme) _(automatically enabled)_
 - [Locator](https://github.com/thetarnav/solid-devtools/tree/main/packages/locator#readme) — [How to use it](#using-the-locator-package)
 - [Babel Plugin](https://github.com/thetarnav/solid-devtools/tree/main/packages/transform#readme) — [How to use it](#enabling-the-babel-plugin)
 
@@ -34,7 +34,7 @@ import "solid-devtools"
 // and that's it!
 ```
 
-Importing `"solid-devtools"` package is attaching the [debugger](https://github.com/thetarnav/solid-devtools/tree/main/packages/debugger#readme) to your application and runs [extension-adapter](https://github.com/thetarnav/solid-devtools/tree/main/packages/extension-adapter#readme). In other words, it is creating a platform for other devtools to use. It doesn't provide any functionality by itself.
+Importing `"solid-devtools"` package is attaching the [debugger](https://github.com/thetarnav/solid-devtools/tree/main/packages/debugger#readme) to your application and runs [ext-adapter](https://github.com/thetarnav/solid-devtools/tree/main/packages/ext-adapter#readme). In other words, it is creating a platform for other devtools to use. It doesn't provide any functionality by itself.
 
 ### Using the locator package
 
