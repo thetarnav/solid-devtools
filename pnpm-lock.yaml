@@ -81,6 +81,7 @@ importers:
   packages/ext-adapter:
     specifiers:
       '@solid-devtools/debugger': ^0.6.0
+      '@solid-devtools/locator': workspace:^0.13.0
       '@solid-devtools/shared': workspace:^0.6.0
       '@solid-primitives/utils': ^3.0.1
       solid-js: ^1.4.8
@@ -89,6 +90,7 @@ importers:
       typescript: ^4.7.4
     dependencies:
       '@solid-devtools/debugger': link:../debugger
+      '@solid-devtools/locator': link:../locator
       '@solid-devtools/shared': link:../shared
       '@solid-primitives/utils': 3.0.1_solid-js@1.4.8
       type-fest: 2.18.0

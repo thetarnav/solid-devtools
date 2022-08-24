@@ -1,5 +1,6 @@
 import { createEffect, createSignal } from "solid-js"
 import { registerDebuggerPlugin, PluginFactory } from "@solid-devtools/debugger"
+import "@solid-devtools/locator"
 import {
   onWindowMessage,
   postWindowMessage,

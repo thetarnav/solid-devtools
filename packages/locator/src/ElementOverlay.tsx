@@ -1,6 +1,7 @@
 import { animate } from "motion"
 import { Component, createComputed, createMemo, Show, on, createEffect } from "solid-js"
 import { clsx } from "clsx"
+import { Portal } from "solid-js/web"
 
 const styles = /*css*/ `
 .element-overlay {
@@ -65,7 +66,7 @@ const styles = /*css*/ `
 }
 `
 
-export const ElementOverlay: Component<{
+export interface ElementOverlayProps {
   left: number | null
   top: number | null
   width: number | null
@@ -73,7 +74,17 @@ export const ElementOverlay: Component<{
   name: string | undefined
   tag: string | undefined
   selected: boolean
-}> = props => {
+}
+
+export function attachElementOverlay(props: ElementOverlayProps) {
+  return (
+    <Portal useShadow>
+      <ElementOverlay {...props} />
+    </Portal>
+  )
+}
+
+const ElementOverlay: Component<ElementOverlayProps> = props => {
   const left = createMemo<number>(prev => (props.left === null ? prev : props.left), 0)
   const top = createMemo<number>(prev => (props.top === null ? prev : props.top), 0)
   const width = createMemo<number>(prev => (props.width === null ? prev : props.width), 0)

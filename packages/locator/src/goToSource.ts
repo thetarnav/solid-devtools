@@ -1,3 +1,5 @@
+import { WINDOW_PROJECTPATH_PROPERTY } from "@solid-devtools/shared/variables"
+
 export type TargetIDE = "vscode" | "webstorm" | "atom" | "vscode-insiders"
 
 export type ElementLocation = {
@@ -29,7 +31,16 @@ function getTargetURL(target: TargetIDE | TargetURLFunction, data: SourceCodeDat
   return targetIDEMap[target](data)
 }
 
-export function openCodeSource(target: TargetIDE | TargetURLFunction, data: SourceCodeData): void {
+export function openSourceCode(target: TargetIDE | TargetURLFunction, data: SourceCodeData): void {
   const url = getTargetURL(target, data)
   if (typeof url === "string") window.open(url, "_blank")
+}
+
+export function openProjectSource(
+  target: TargetIDE | TargetURLFunction,
+  location: Omit<SourceCodeData, "projectPath">,
+): void {
+  // project path comes from a babel plugin injecting hte value to the window object
+  const projectPath = (window as any)[WINDOW_PROJECTPATH_PROPERTY]
+  openSourceCode(target, { ...location, projectPath })
 }

@@ -1,10 +1,10 @@
 /* @refresh reload */
 import { render } from "solid-js/web"
-import { useLocatorPlugin } from "solid-devtools"
+import { useLocator } from "solid-devtools"
 
 import App from "./App"
 
-useLocatorPlugin({
+useLocator({
   targetIDE: "vscode",
 })
 
