@@ -1,4 +1,12 @@
-import { createComputed, createEffect, createMemo, createSignal, on, onCleanup } from "solid-js"
+import {
+  createComputed,
+  createEffect,
+  createMemo,
+  createSignal,
+  on,
+  onCleanup,
+  createRoot,
+} from "solid-js"
 import { Portal } from "solid-js/web"
 import { createElementBounds } from "@solid-primitives/bounds"
 import {
@@ -14,6 +22,7 @@ import { clearFindComponentCache, findComponent } from "./findComponent"
 import { makeHoverElementListener } from "./hoverElement"
 import { openCodeSource, SourceCodeData, TargetIDE, TargetURLFunction } from "./goToSource"
 import { ElementOverlay } from "./ElementOverlay"
+import { createDerivedSignal } from "./derived"
 
 export type SelectedComponent = {
   name: string
@@ -28,7 +37,9 @@ export type LocatorOptions = {
   key?: KbdKey
 }
 
-const [selected, setSelected] = createSignal<SelectedComponent | null>(null)
+const [selected, setSelected] = createRoot(() =>
+  createDerivedSignal<SelectedComponent | null>(null),
+)
 
 function openSelectedComponentSource(target: TargetIDE | TargetURLFunction): void {
   const comp = selected()
@@ -47,7 +58,6 @@ export function useLocatorPlugin({ targetIDE, key = "Alt" }: LocatorOptions): vo
     createEffect(() => setInLocatorMode(isHoldingKey()))
 
     onCleanup(setHoverTarget.bind(void 0, null))
-    onCleanup(setSelected.bind(void 0, null))
 
     attachLocator()
 
@@ -56,17 +66,18 @@ export function useLocatorPlugin({ targetIDE, key = "Alt" }: LocatorOptions): vo
     createComputed(on(components, clearFindComponentCache))
 
     createComputed(() => {
-      if (!inLocatorMode()) setSelected(null)
-      else {
-        // defferred computed inside of computed
-        // this is to prevent calculating selected with old components array
-        // data flow: enable inLocatorMode() -> trigger outer computed -> components() updated -> trigger defferred computed
-        createComputed(
-          on([components, hoverTarget], inputs => setSelected(findComponent(...inputs)), {
-            defer: true,
-          }),
-        )
-      }
+      if (!inLocatorMode()) return
+      // defferred computed inside of computed
+      // this is to prevent calculating selected with old components array
+      // data flow: enable inLocatorMode() -> trigger computed -> components() updated -> trigger memo
+      let init = true
+      setSelected(
+        createMemo<SelectedComponent | null>(() => {
+          const [componentRefs, targetRefs] = [components(), hoverTarget()]
+          if (init) return (init = false) || null
+          return findComponent(componentRefs, targetRefs)
+        }),
+      )
     })
 
     if (targetIDE) {
