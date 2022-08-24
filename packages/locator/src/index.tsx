@@ -6,7 +6,7 @@ import {
   stopPropagation,
   preventDefault,
 } from "@solid-primitives/event-listener"
-import { makeKeyHoldListener } from "@solid-primitives/keyboard"
+import { createKeyHold, KbdKey } from "@solid-primitives/keyboard"
 import { registerDebuggerPlugin } from "@solid-devtools/debugger"
 import { WINDOW_PROJECTPATH_PROPERTY } from "@solid-devtools/shared/variables"
 import { createElementCursor } from "@solid-devtools/shared/cursor"
@@ -14,7 +14,6 @@ import { clearFindComponentCache, findComponent } from "./findComponent"
 import { makeHoverElementListener } from "./hoverElement"
 import { openCodeSource, SourceCodeData, TargetIDE, TargetURLFunction } from "./goToSource"
 import { ElementOverlay } from "./ElementOverlay"
-import { sheet } from "./twind"
 
 export type SelectedComponent = {
   name: string
@@ -26,11 +25,10 @@ export type { TargetIDE, TargetURLFunction } from "./goToSource"
 
 export type LocatorOptions = {
   targetIDE?: false | TargetIDE | TargetURLFunction
-  key?: "altKey" | "ctrlKey" | "metaKey" | "shiftKey" | (string & {})
+  key?: KbdKey
 }
 
-const [selected, setSelected] = createSignal<SelectedComponent | null>(null, { internal: true })
-const [hoverTarget, setHoverTarget] = createSignal<HTMLElement | null>(null, { internal: true })
+const [selected, setSelected] = createSignal<SelectedComponent | null>(null)
 
 function openSelectedComponentSource(target: TargetIDE | TargetURLFunction): void {
   const comp = selected()
@@ -40,11 +38,13 @@ function openSelectedComponentSource(target: TargetIDE | TargetURLFunction): voi
   openCodeSource(target, { ...comp.location, projectPath })
 }
 
-export function useLocatorPlugin({ targetIDE, key = "altKey" }: LocatorOptions): void {
+export function useLocatorPlugin({ targetIDE, key = "Alt" }: LocatorOptions): void {
   registerDebuggerPlugin(({ components }) => {
     const [inLocatorMode, setInLocatorMode] = createSignal(false)
+    const [hoverTarget, setHoverTarget] = createSignal<HTMLElement | null>(null)
 
-    makeKeyHoldListener(key, setInLocatorMode, { preventDefault: true })
+    const isHoldingKey = createKeyHold(key, { preventDefault: true })
+    createEffect(() => setInLocatorMode(isHoldingKey()))
 
     onCleanup(setHoverTarget.bind(void 0, null))
     onCleanup(setSelected.bind(void 0, null))
@@ -95,7 +95,7 @@ function attachLocator() {
   const bounds = createElementBounds(highlightElement)
 
   return (
-    <Portal useShadow ref={({ shadowRoot }) => (shadowRoot.adoptedStyleSheets = [sheet.target])}>
+    <Portal useShadow>
       <ElementOverlay
         tag={highlightElement()?.tagName.toLocaleLowerCase()}
         selected={!!selected()}

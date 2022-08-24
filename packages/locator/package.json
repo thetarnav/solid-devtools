@@ -61,13 +61,13 @@
   "dependencies": {
     "@solid-devtools/debugger": "^0.6.1",
     "@solid-devtools/shared": "workspace:^0.6.1",
-    "@solid-primitives/bounds": "^0.0.100",
+    "@solid-primitives/bounds": "^0.0.101",
     "@solid-primitives/event-listener": "^2.2.1",
-    "@solid-primitives/keyboard": "^0.0.100",
+    "@solid-primitives/keyboard": "^1.0.1",
     "@solid-primitives/platform": "^0.0.100",
     "@solid-primitives/utils": "^3.0.1",
-    "motion": "^10.13.1",
-    "twind": "^0.16.17"
+    "clsx": "^1.2.1",
+    "motion": "^10.14.1"
   },
   "peerDependencies": {
     "solid-js": "^1.4.4"

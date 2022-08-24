@@ -153,32 +153,32 @@ importers:
       '@solid-devtools/debugger': ^0.6.1
       '@solid-devtools/shared': workspace:^0.6.1
       '@solid-devtools/transform': ^0.6.2
-      '@solid-primitives/bounds': ^0.0.100
+      '@solid-primitives/bounds': ^0.0.101
       '@solid-primitives/event-listener': ^2.2.1
-      '@solid-primitives/keyboard': ^0.0.100
+      '@solid-primitives/keyboard': ^1.0.1
       '@solid-primitives/platform': ^0.0.100
       '@solid-primitives/utils': ^3.0.1
       '@testing-library/jest-dom': ^5.16.4
+      clsx: ^1.2.1
       esbuild: ^0.14.53
       esbuild-plugin-solid: ^0.4.2
       jest: ^28.1.3
       jest-environment-jsdom: ^28.1.3
-      motion: ^10.13.1
+      motion: ^10.14.1
       solid-js: ^1.4.8
       ts-node: ^10.9.1
       tsup: ^6.2.1
-      twind: ^0.16.17
       typescript: ^4.7.4
     dependencies:
       '@solid-devtools/debugger': link:../debugger
       '@solid-devtools/shared': link:../shared
-      '@solid-primitives/bounds': 0.0.100_solid-js@1.4.8
+      '@solid-primitives/bounds': 0.0.101_solid-js@1.4.8
       '@solid-primitives/event-listener': 2.2.1_solid-js@1.4.8
-      '@solid-primitives/keyboard': 0.0.100_solid-js@1.4.8
+      '@solid-primitives/keyboard': 1.0.1_solid-js@1.4.8
       '@solid-primitives/platform': 0.0.100_solid-js@1.4.8
       '@solid-primitives/utils': 3.0.1_solid-js@1.4.8
-      motion: 10.13.1
-      twind: 0.16.17_typescript@4.7.4
+      clsx: 1.2.1
+      motion: 10.14.1
     optionalDependencies:
       '@solid-devtools/transform': link:../transform
     devDependencies:
@@ -343,7 +343,7 @@ importers:
       '@solid-primitives/resize-observer': ^2.0.3
       '@solid-primitives/timer': ^1.3.1
       '@solid-primitives/utils': ^3.0.1
-      '@vanilla-extract/css': ^1.7.2
+      '@vanilla-extract/css': ^1.7.3
       '@vanilla-extract/dynamic': ^2.0.2
       '@vanilla-extract/esbuild-plugin': ^2.1.0
       '@vanilla-extract/private': ^1.0.3
@@ -367,7 +367,7 @@ importers:
       '@solid-primitives/resize-observer': 2.0.3_solid-js@1.4.8
       '@solid-primitives/timer': 1.3.1_solid-js@1.4.8
       '@solid-primitives/utils': 3.0.1_solid-js@1.4.8
-      '@vanilla-extract/css': 1.7.2
+      '@vanilla-extract/css': 1.7.3
       '@vanilla-extract/dynamic': 2.0.2
       '@vanilla-extract/private': 1.0.3
       clsx: 1.2.1
@@ -3566,64 +3566,64 @@ packages:
       read-yaml-file: 1.1.0
     dev: true
 
-  /@motionone/animation/10.13.1:
-    resolution: {integrity: sha512-dxQ+1wWxL6iFHDy1uv6hhcPjIdOg36eDT56jN4LI7Z5HZRyLpq8x1t7JFQclo/IEIb+6Bk4atmyinGFdXVECuA==}
+  /@motionone/animation/10.14.0:
+    resolution: {integrity: sha512-h+1sdyBP8vbxEBW5gPFDnj+m2DCqdlAuf2g6Iafb1lcMnqjsRXWlPw1AXgvUMXmreyhqmPbJqoNfIKdytampRQ==}
     dependencies:
-      '@motionone/easing': 10.13.1
-      '@motionone/types': 10.13.0
-      '@motionone/utils': 10.13.1
+      '@motionone/easing': 10.14.0
+      '@motionone/types': 10.14.0
+      '@motionone/utils': 10.14.0
       tslib: 2.4.0
     dev: false
 
-  /@motionone/dom/10.13.1:
-    resolution: {integrity: sha512-zjfX+AGMIt/fIqd/SL1Lj93S6AiJsEA3oc5M9VkUr+Gz+juRmYN1vfvZd6MvEkSqEjwPQgcjN7rGZHrDB9APfQ==}
+  /@motionone/dom/10.14.1:
+    resolution: {integrity: sha512-KdlWDm267Befu90Q4WqFrowTT6XdnIU2Mum/xCF3I03X6jROMwR+gZj9axYoGQfx5lndUyHbzqDglLaYXWzAfQ==}
     dependencies:
-      '@motionone/animation': 10.13.1
-      '@motionone/generators': 10.13.1
-      '@motionone/types': 10.13.0
-      '@motionone/utils': 10.13.1
+      '@motionone/animation': 10.14.0
+      '@motionone/generators': 10.14.0
+      '@motionone/types': 10.14.0
+      '@motionone/utils': 10.14.0
       hey-listen: 1.0.8
       tslib: 2.4.0
     dev: false
 
-  /@motionone/easing/10.13.1:
-    resolution: {integrity: sha512-INEsInHHDHVgx0dp5qlXi1lMXBqYicgLMMSn3zfGzaIvcaEbI1Uz8BoyNV4BiclTupG7RYIh+T6BU83ZcEe74g==}
+  /@motionone/easing/10.14.0:
+    resolution: {integrity: sha512-2vUBdH9uWTlRbuErhcsMmt1jvMTTqvGmn9fHq8FleFDXBlHFs5jZzHJT9iw+4kR1h6a4SZQuCf72b9ji92qNYA==}
     dependencies:
-      '@motionone/utils': 10.13.1
+      '@motionone/utils': 10.14.0
       tslib: 2.4.0
     dev: false
 
-  /@motionone/generators/10.13.1:
-    resolution: {integrity: sha512-+HK5u2YcNJCckTTqfOLgSVcrWv2z1dVwrSZEMVJuAh0EnWEWGDJRvMBoPc0cFf/osbkA2Rq9bH2+vP0Ex/D8uw==}
+  /@motionone/generators/10.14.0:
+    resolution: {integrity: sha512-6kRHezoFfIjFN7pPpaxmkdZXD36tQNcyJe3nwVqwJ+ZfC0e3rFmszR8kp9DEVFs9QL/akWjuGPSLBI1tvz+Vjg==}
     dependencies:
-      '@motionone/types': 10.13.0
-      '@motionone/utils': 10.13.1
+      '@motionone/types': 10.14.0
+      '@motionone/utils': 10.14.0
       tslib: 2.4.0
     dev: false
 
-  /@motionone/svelte/10.13.1:
-    resolution: {integrity: sha512-9d73nH4Uow0zC68ubSRYbmN/e2V7t16dSoDrBU1TfY2fue4ol+NJo8cd8ptT+5RRKmslmB3fg4swmDcGkOslJA==}
+  /@motionone/svelte/10.14.1:
+    resolution: {integrity: sha512-v4w2POtz04UgY1FspuRC753nvl9Ehw3o8twYeD2tkM4SAj9qW1WaX1q6jOtrFI7fjBP3qMzB1fOEl38sbeOu4g==}
     dependencies:
-      '@motionone/dom': 10.13.1
+      '@motionone/dom': 10.14.1
       tslib: 2.4.0
     dev: false
 
-  /@motionone/types/10.13.0:
-    resolution: {integrity: sha512-qegk4qg8U1N9ZwAJ187BG3TkZz1k9LP/pvNtCSlqdq/PMUDKlCFG4ZnjJ481P0IOH/vIw1OzIbKIuyg0A3rk9g==}
+  /@motionone/types/10.14.0:
+    resolution: {integrity: sha512-3bNWyYBHtVd27KncnJLhksMFQ5o2MSdk1cA/IZqsHtA9DnRM1SYgN01CTcJ8Iw8pCXF5Ocp34tyAjY7WRpOJJQ==}
     dev: false
 
-  /@motionone/utils/10.13.1:
-    resolution: {integrity: sha512-TjDPTIppaf3ofBXQv4ZzAketJgN0sclALXfZ6mfrkjJkOy83mLls9744F+6S+VKCpBmvbZcBY4PQfrfhAfeMtA==}
+  /@motionone/utils/10.14.0:
+    resolution: {integrity: sha512-sLWBLPzRqkxmOTRzSaD3LFQXCPHvDzyHJ1a3VP9PRzBxyVd2pv51/gMOsdAcxQ9n+MIeGJnxzXBYplUHKj4jkw==}
     dependencies:
-      '@motionone/types': 10.13.0
+      '@motionone/types': 10.14.0
       hey-listen: 1.0.8
       tslib: 2.4.0
     dev: false
 
-  /@motionone/vue/10.13.1:
-    resolution: {integrity: sha512-Zg0FnLWVLFhpAd3fh3avkTgbYITE75ldgwh2VMz346uwOpKz2gPHyYq5CmoW/wzUMvfCMfjy1dqmzZThii71ew==}
+  /@motionone/vue/10.14.1:
+    resolution: {integrity: sha512-C4RMJAbYSBmcUBcyTEOxPE2nkJRCewOfWgPnlCsYfVrV6J9+b11mdC67Z+LL1zped9dnr1jlG0uIST6r2WP8Pg==}
     dependencies:
-      '@motionone/dom': 10.13.1
+      '@motionone/dom': 10.14.1
       tslib: 2.4.0
     dev: false
 
@@ -3881,17 +3881,6 @@ packages:
       solid-js: 1.4.8
     dev: false
 
-  /@solid-primitives/bounds/0.0.100_solid-js@1.4.8:
-    resolution: {integrity: sha512-UkIzY2FHow7zZzacrqByOMYxFTpg3mLnyZ0rVOxLlJP4G0/E+ig+ulh5tlTssRuxvs54m9dEOHkG7Is6DUNPEQ==}
-    peerDependencies:
-      solid-js: ^1.4.0
-    dependencies:
-      '@solid-primitives/event-listener': 2.2.1_solid-js@1.4.8
-      '@solid-primitives/resize-observer': 2.0.2_solid-js@1.4.8
-      '@solid-primitives/utils': 2.1.1_solid-js@1.4.8
-      solid-js: 1.4.8
-    dev: false
-
   /@solid-primitives/bounds/0.0.101_solid-js@1.4.8:
     resolution: {integrity: sha512-lxn5iwueU2xMEGteJoTcaIuGEAfAQvKcYKImJ3HSjO3Qu3iFERfCU1Oi5VBsIfLk8JA4582/ISuAcDiGTAVSCw==}
     peerDependencies:
@@ -3945,15 +3934,6 @@ packages:
       '@solid-primitives/utils': 1.5.2_solid-js@1.4.8
     transitivePeerDependencies:
       - solid-js
-    dev: false
-
-  /@solid-primitives/keyboard/0.0.100_solid-js@1.4.8:
-    resolution: {integrity: sha512-rdQdpOvHm6zde3lapYYT0xwiTvnQtMszHjia7u6qrb5VJLnw77wa9YigJNjdL8YYRcl6NLKZg/wLr5yfjqKVJA==}
-    peerDependencies:
-      solid-js: ^1.4.0
-    dependencies:
-      '@solid-primitives/event-listener': 2.2.1_solid-js@1.4.8
-      solid-js: 1.4.8
     dev: false
 
   /@solid-primitives/keyboard/1.0.1_solid-js@1.4.8:
@@ -4010,17 +3990,6 @@ packages:
       '@solid-primitives/immutable': 0.1.0_solid-js@1.4.8
       '@solid-primitives/rootless': 1.1.0_solid-js@1.4.8
       '@solid-primitives/utils': 1.5.2_solid-js@1.4.8
-      solid-js: 1.4.8
-    dev: false
-
-  /@solid-primitives/resize-observer/2.0.2_solid-js@1.4.8:
-    resolution: {integrity: sha512-TAOKoRwCp2ovN9jFgca/BkPA4IRYO1/SNJ9zZr95cuOTI9j8BR2N1h4+Py5gehq1ZCFryatIB5/7qrqXpZus/w==}
-    peerDependencies:
-      solid-js: ^1.4.0
-    dependencies:
-      '@solid-primitives/event-listener': 2.2.1_solid-js@1.4.8
-      '@solid-primitives/rootless': 1.1.2_solid-js@1.4.8
-      '@solid-primitives/utils': 2.1.1_solid-js@1.4.8
       solid-js: 1.4.8
     dev: false
 
@@ -4335,6 +4304,22 @@ packages:
       escape-string-regexp: 4.0.0
       media-query-parser: 2.0.2
       outdent: 0.8.0
+    dev: false
+
+  /@vanilla-extract/css/1.7.3:
+    resolution: {integrity: sha512-ZwfNvk9LjVdsHON4bNAGXBu0dPo4e1RlgghnW1A4lcQruvFU7zdq+wEqodrX3O0D2qRkupOGgjAbTSddwqKoQA==}
+    dependencies:
+      '@emotion/hash': 0.8.0
+      '@vanilla-extract/private': 1.0.3
+      chalk: 4.1.2
+      css-what: 5.1.0
+      cssesc: 3.0.0
+      csstype: 3.1.0
+      deep-object-diff: 1.1.7
+      deepmerge: 4.2.2
+      escape-string-regexp: 4.0.0
+      media-query-parser: 2.0.2
+      outdent: 0.8.0
 
   /@vanilla-extract/dynamic/2.0.2:
     resolution: {integrity: sha512-U4nKaEQ8Kuz+exXEr51DUpyaOuzo24/S/k1YbDPQR06cYcNjQqvwFRnwWtZ+9ImocqM1wTKtzrdUgSTtLGIwAg==}
@@ -4351,7 +4336,7 @@ packages:
   /@vanilla-extract/integration/5.0.0:
     resolution: {integrity: sha512-HwglsIxGYtV4IXFfyQ6GzZLFoaWaW+QkNx8UhXbgsCWUoPqpSbioukCOA+SuSuzsIcEZ3hkD0Y5ixITQNtnzjQ==}
     dependencies:
-      '@vanilla-extract/css': 1.7.2
+      '@vanilla-extract/css': 1.7.3
       esbuild: 0.11.23
       eval: 0.1.6
       find-up: 5.0.0
@@ -5212,7 +5197,7 @@ packages:
     dev: true
 
   /concat-map/0.0.1:
-    resolution: {integrity: sha512-/Srv4dswyQNBfohGpz9o6Yb3Gz3SrUDqBH5rTuhGR7ahtlbYKnVxw2bCFMRljaA7EXHaXZ8wsHdodFvbkhKmqg==}
+    resolution: {integrity: sha1-2Klr13/Wjfd5OnMDajug1UBdR3s=}
     dev: true
 
   /connect-injector/0.4.4:
@@ -5568,7 +5553,7 @@ packages:
     dev: true
 
   /ee-first/1.1.1:
-    resolution: {integrity: sha512-WMwm9LhRUo+WUaRN+vRuETqG89IgZphVSNkdFgeb6sS/E4OrDIN7t48CAewSHXc6C8lefD8KKfr5vY61brQlow==}
+    resolution: {integrity: sha1-WQxhFWsK4vTwJVcyoViyZrxWsh0=}
     dev: true
 
   /electron-to-chromium/1.4.139:
@@ -8346,15 +8331,15 @@ packages:
     hasBin: true
     dev: true
 
-  /motion/10.13.1:
-    resolution: {integrity: sha512-MPTlDUiIhB5q/KGt3LPykAelJMZ6EM5xNr/zL21PlD68TLsNY0ox8rPiXfTUzjCh5BV04+8RLkjhnj/UNInH6w==}
+  /motion/10.14.1:
+    resolution: {integrity: sha512-WM9il2OBsyBqFt9ewVU0KXkftGrQh8xIuRJGntM6YXIKPfhM2vswRMsPaiVaPB8ujPgG2gefj5MQc8bMSD81dQ==}
     dependencies:
-      '@motionone/animation': 10.13.1
-      '@motionone/dom': 10.13.1
-      '@motionone/svelte': 10.13.1
-      '@motionone/types': 10.13.0
-      '@motionone/utils': 10.13.1
-      '@motionone/vue': 10.13.1
+      '@motionone/animation': 10.14.0
+      '@motionone/dom': 10.14.1
+      '@motionone/svelte': 10.14.1
+      '@motionone/types': 10.14.0
+      '@motionone/utils': 10.14.0
+      '@motionone/vue': 10.14.1
     dev: false
 
   /mri/1.2.0:
@@ -10370,7 +10355,7 @@ packages:
     dev: true
 
   /utils-merge/1.0.1:
-    resolution: {integrity: sha512-pMZTvIkT1d+TFGvDOqodOclx0QWkkgi6Tdoa8gC8ffGAAqz9pzPTZWAybbsHHoED/ztMtkv/VoYTYyShUn81hA==}
+    resolution: {integrity: sha1-n5VxD1CiZ5R7LMwSR0HBAoQn5xM=}
     engines: {node: '>= 0.4.0'}
     dev: true
 

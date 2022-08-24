@@ -1,6 +1,69 @@
 import { animate } from "motion"
 import { Component, createComputed, createMemo, Show, on, createEffect } from "solid-js"
-import { tw } from "./twind"
+import { clsx } from "clsx"
+
+const styles = /*css*/ `
+.element-overlay {
+  position: fixed;
+  z-index: 9999;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  transition-duration: 100ms;
+  transition-property: transform, opacity, width, height;
+  --color: 14 116 144;
+}
+.border {
+  position: absolute;
+  top: -4px;
+  left: -4px;
+  right: -4px;
+  bottom: -4px;
+  border: 2px solid rgb(var(--color) / 0.8);
+  background-color: rgb(var(--color) / 0.3);
+  border-radius: 0.25rem;
+}
+.name-container {
+  position: absolute;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  color: white;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+  font-size: 0.875rem;
+  line-height: 1rem;
+}
+.name-container.bottom {
+  top: 100%;
+}
+.name-container.top {
+  bottom: 100%;
+}
+.name-animated-container {
+  position: relative;
+  margin: 0.75rem auto;
+  padding: 0.25rem 0.5rem;
+}
+.name-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgb(var(--color) / 0.8);
+  border-radius: 0.25rem;
+}
+.name-text {
+  position: absolute;
+}
+.name-text span {
+  color: #a5f3fc;
+}
+.name-invisible {
+  visibility: hidden;
+}
+`
 
 export const ElementOverlay: Component<{
   left: number | null
@@ -19,53 +82,50 @@ export const ElementOverlay: Component<{
   const placeOnTop = createMemo(() => top() > window.innerHeight / 2)
 
   return (
-    <div
-      class={tw`fixed z-9999 top-0 left-0 pointer-events-none transition-all duration-100`}
-      style={{
-        transform: transform(),
-        width: width() + "px",
-        height: height() + "px",
-        opacity: props.selected ? 1 : 0,
-      }}
-    >
+    <>
+      <style>{styles}</style>
       <div
-        class={tw`absolute -inset-2 rounded border-2 border-cyan-800 border-opacity-80 bg-cyan-800 bg-opacity-30`}
-      />
-      <Show when={!!props.name}>
-        <div
-          class={tw`absolute ${
-            placeOnTop() ? "bottom-full" : "top-full"
-          } inset-x-0 flex justify-center`}
-        >
-          <div
-            class={tw`relative my-3 py-1 px-2`}
-            ref={el => {
-              let prevY = 0
-              createComputed(
-                on(placeOnTop, () => (prevY = el.getBoundingClientRect().top), { defer: true }),
-              )
-              createEffect(
-                on(
-                  placeOnTop,
-                  () => {
-                    const currY = el.getBoundingClientRect().top
-                    animate(el, { y: [prevY - currY, 0] }, { duration: 0.15 })
-                  },
-                  { defer: true },
-                ),
-              )
-            }}
-          >
-            <div class={tw`absolute inset-0 bg-cyan-900 bg-opacity-80 rounded`}></div>
-            <div class={tw`absolute text-cyan-50 font-mono text-sm leading-4`}>
-              {props.name}: <span class={tw`text-cyan-200`}>{props.tag}</span>
-            </div>
-            <div class={tw`font-mono text-sm leading-4 invisible`}>
-              {props.name}: {props.tag}
+        class="element-overlay"
+        style={{
+          transform: transform(),
+          width: width() + "px",
+          height: height() + "px",
+          opacity: props.selected ? 1 : 0,
+        }}
+      >
+        <div class="border" />
+        <Show when={!!props.name}>
+          <div class={clsx("name-container", placeOnTop() ? "top" : "bottom")}>
+            <div
+              class="name-animated-container"
+              ref={el => {
+                let prevY = 0
+                createComputed(
+                  on(placeOnTop, () => (prevY = el.getBoundingClientRect().top), { defer: true }),
+                )
+                createEffect(
+                  on(
+                    placeOnTop,
+                    () => {
+                      const currY = el.getBoundingClientRect().top
+                      animate(el, { y: [prevY - currY, 0] }, { duration: 0.15 })
+                    },
+                    { defer: true },
+                  ),
+                )
+              }}
+            >
+              <div class="name-background"></div>
+              <div class="name-text">
+                {props.name}: <span>{props.tag}</span>
+              </div>
+              <div class="name-invisible">
+                {props.name}: {props.tag}
+              </div>
             </div>
           </div>
-        </div>
-      </Show>
-    </div>
+        </Show>
+      </div>
+    </>
   )
 }
