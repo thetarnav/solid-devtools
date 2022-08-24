@@ -221,7 +221,7 @@ importers:
     specifiers:
       '@solid-devtools/debugger': ^0.6.0
       '@solid-devtools/extension-adapter': ^0.12.0
-      '@solid-devtools/locator': ^0.12.0
+      '@solid-devtools/locator': ^0.13.0
       '@solid-devtools/transform': ^0.6.2
       '@testing-library/jest-dom': ^5.16.4
       jest: ^28.1.3
@@ -384,7 +384,7 @@ importers:
 
   playgrounds/clock:
     specifiers:
-      solid-devtools: ^0.12.0
+      solid-devtools: ^0.13.0
       solid-js: ^1.4.8
       typescript: ^4.7.4
       vite: ^3.0.4
@@ -402,7 +402,7 @@ importers:
       '@solid-devtools/logger': ^0.4.3
       '@solid-devtools/transform': ^0.6.2
       '@solid-primitives/timer': ^1.3.1
-      solid-devtools: ^0.12.0
+      solid-devtools: ^0.13.0
       solid-js: ^1.4.8
       typescript: ^4.7.4
       vite: ^3.0.4
@@ -423,7 +423,7 @@ importers:
       '@solid-devtools/logger': ^0.4.3
       '@solid-devtools/transform': ^0.6.2
       solid-app-router: ^0.4.2
-      solid-devtools: ^0.12.0
+      solid-devtools: ^0.13.0
       solid-js: ^1.4.8
       solid-meta: ^0.27.5
       solid-start: next
@@ -5553,7 +5553,7 @@ packages:
     dev: true
 
   /ee-first/1.1.1:
-    resolution: {integrity: sha1-WQxhFWsK4vTwJVcyoViyZrxWsh0=}
+    resolution: {integrity: sha512-WMwm9LhRUo+WUaRN+vRuETqG89IgZphVSNkdFgeb6sS/E4OrDIN7t48CAewSHXc6C8lefD8KKfr5vY61brQlow==}
     dev: true
 
   /electron-to-chromium/1.4.139:
@@ -10355,7 +10355,7 @@ packages:
     dev: true
 
   /utils-merge/1.0.1:
-    resolution: {integrity: sha1-n5VxD1CiZ5R7LMwSR0HBAoQn5xM=}
+    resolution: {integrity: sha512-pMZTvIkT1d+TFGvDOqodOclx0QWkkgi6Tdoa8gC8ffGAAqz9pzPTZWAybbsHHoED/ztMtkv/VoYTYyShUn81hA==}
     engines: {node: '>= 0.4.0'}
     dev: true
 

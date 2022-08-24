@@ -1,5 +1,11 @@
 # @solid-devtools/locator
 
+## 0.13.0
+
+### Minor Changes
+
+- ff85d4c: Remove twind in favour of raw <style> tag. Fixes #33 and #51
+
 ## 0.12.2
 
 ### Patch Changes
