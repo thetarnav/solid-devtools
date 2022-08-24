@@ -1,5 +1,12 @@
 # solid-devtools
 
+## 0.13.0
+
+### Patch Changes
+
+- Updated dependencies [ff85d4c]
+  - @solid-devtools/locator@0.13.0
+
 ## 0.12.0
 
 ### Patch Changes

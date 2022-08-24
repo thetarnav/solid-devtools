@@ -1,6 +1,6 @@
 {
   "name": "@solid-devtools/locator",
-  "version": "0.12.2",
+  "version": "0.13.0",
   "description": "On-page overlay for localisating SolidJS components, and revealing them in your code editor.",
   "license": "MIT",
   "author": "Damian Tarnawski <gthetarnav@gmail.com>",
