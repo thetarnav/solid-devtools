@@ -97,13 +97,13 @@ useLocatorPlugin({
 
 #### `key`
 
-Holding which key should enable the locator overlay? It's `"altKey"` by default — <kbd>Alt</kbd> on Windows, and <kbd>Option</kbd> or <kbd>⌥</kbd> on macOS.
+Holding which key should enable the locator overlay? It's `"Alt"` by default — <kbd>Alt</kbd> on Windows, and <kbd>Option</kbd> or <kbd>⌥</kbd> on macOS.
 
-Key options: `"altKey"`, `"ctrlKey"`, `"metaKey"`, `"shiftKey"` or `string` to be compared with `e.key` property.
+Key options: `"Alt"`, `"Control"`, `"Mete"`, `"Shift"` or `string` to be compared with `e.key` property.
 
 ```tsx
 useLocatorPlugin({
-  key: "ctrlKey",
+  key: "Control",
 })
 ```
 
