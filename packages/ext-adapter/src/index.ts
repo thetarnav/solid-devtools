@@ -1,5 +1,5 @@
-import { createEffect, createSignal } from "solid-js"
-import { registerDebuggerPlugin, PluginFactory } from "@solid-devtools/debugger"
+import { createEffect, createSignal, untrack } from "solid-js"
+import { registerDebuggerPlugin, PluginFactory, NodeType } from "@solid-devtools/debugger"
 import { registerLocatorPlugin } from "@solid-devtools/locator"
 import {
   onWindowMessage,
@@ -61,16 +61,52 @@ const extensionAdapterFactory: PluginFactory = ({
     if (details) postWindowMessage("OwnerDetailsUpdate", details)
   })
 
-  const { selected: selectedComponent } = registerLocatorPlugin({
+  const { selected: selectedComponent, setTargetElement } = registerLocatorPlugin({
     enabled,
     onClick: (e, data) => {
+      e.preventDefault()
+      e.stopPropagation()
       console.log("onClick", e, data)
       return false
     },
   })
 
-  createEffect(() => {
-    console.log("selectedComponent", selectedComponent())
+  createEffect<HTMLElement | undefined>(p => {
+    const type = focusedState.details?.type
+    if (type !== NodeType.Component) {
+      setTargetElement(current => {
+        if (current && current === p) return null
+        else return current
+      })
+      return
+    }
+    const v = focusedState.owner?.value
+    if (!v) {
+      setTargetElement(current => {
+        if (current && current === p) return null
+        else return current
+      })
+      return
+    }
+    if (typeof v !== "function") {
+      setTargetElement(current => {
+        if (current && current === p) return null
+        else return current
+      })
+      return
+    }
+    const element = untrack(() => v())
+    if (!(element instanceof HTMLElement)) {
+      setTargetElement(current => {
+        if (current && current === p) return null
+        else return current
+      })
+      return
+    }
+    return setTargetElement(element)
+    // console.log(element)
+
+    // console.log("selectedComponent", selectedComponent())
   })
 
   return { enabled }
