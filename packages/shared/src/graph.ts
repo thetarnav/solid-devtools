@@ -132,7 +132,7 @@ export namespace Mapped {
   export interface Root {
     id: NodeID
     tree: Owner
-    components: Component[]
+    components: Record<NodeID, Component>
   }
 
   /** serialised (without components) */

@@ -60,16 +60,13 @@ export type FocusedState =
 export type SignaledRoot = {
   readonly id: NodeID
   readonly tree: Accessor<Mapped.Owner>
-  readonly components: Accessor<Mapped.Component[]>
+  readonly components: Accessor<Record<NodeID, Mapped.Component>>
 }
 
 /** @internal */
-export type _SignaledRoot = {
-  id: NodeID
-  tree: Accessor<Mapped.Owner>
-  setTree: (tree: Mapped.Owner) => void
-  components: Accessor<Mapped.Component[]>
-  setComponents: (components: Mapped.Component[]) => void
+export type _SignaledRoot = SignaledRoot & {
+  readonly setTree: (tree: Mapped.Owner) => void
+  readonly setComponents: (components: Record<NodeID, Mapped.Component>) => void
 }
 
 export type BatchComputationUpdatesHandler = (payload: ComputationUpdate[]) => void
@@ -83,7 +80,7 @@ export type PluginFactoryData = {
   readonly roots: Accessor<Record<NodeID, SignaledRoot>>
   readonly serialisedRoots: Accessor<Record<NodeID, Mapped.Owner>>
   readonly rootsUpdates: Accessor<RootsUpdates>
-  readonly components: Accessor<Mapped.Component[]>
+  readonly componentList: Accessor<Mapped.Component[]>
   readonly setFocusedOwner: SetFocusedOwner
   readonly focusedState: FocusedState
   readonly setSelectedSignal: (payload: {
@@ -235,9 +232,9 @@ const exported = createInternalRoot(() => {
   //
   // Components:
   //
-  const components = createLazyMemo<Mapped.Component[]>(() =>
+  const componentList = createLazyMemo<Mapped.Component[]>(() =>
     Object.values(roots()).reduce((arr: Mapped.Component[], root) => {
-      arr.push.apply(arr, root.components())
+      arr.push.apply(arr, Object.values(root.components()))
       return arr
     }, []),
   )
@@ -248,7 +245,7 @@ const exported = createInternalRoot(() => {
     roots,
     serialisedRoots,
     rootsUpdates,
-    components,
+    componentList,
     triggerUpdate,
     forceTriggerUpdate,
     setFocusedOwner,

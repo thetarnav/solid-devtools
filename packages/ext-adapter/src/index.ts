@@ -1,5 +1,5 @@
-import { createEffect, createSignal, untrack } from "solid-js"
-import { registerDebuggerPlugin, PluginFactory, NodeType } from "@solid-devtools/debugger"
+import { createEffect, createSignal } from "solid-js"
+import { registerDebuggerPlugin, PluginFactory } from "@solid-devtools/debugger"
 import { registerLocatorPlugin } from "@solid-devtools/locator"
 import {
   onWindowMessage,
@@ -13,6 +13,7 @@ startListeningWindowMessages()
 const extensionAdapterFactory: PluginFactory = ({
   forceTriggerUpdate,
   rootsUpdates,
+  roots,
   handleComputationUpdates,
   handleSignalUpdates,
   setFocusedOwner,
@@ -71,49 +72,28 @@ const extensionAdapterFactory: PluginFactory = ({
     },
   })
 
-  createEffect<HTMLElement | undefined>(p => {
-    const type = focusedState.details?.type
-    if (type !== NodeType.Component) {
-      setTargetElement(current => {
-        if (current && current === p) return null
-        else return current
-      })
-      return
+  onWindowMessage("HighlightElement", payload => {
+    if ("rootId" in payload) {
+      // highlight component
+      const { rootId, componentId } = payload
+      const root = roots()[rootId]
+      if (!root) return warn("No root found", rootId)
+      const component = root.components()[componentId]
+      if (!component) return warn("No component found", componentId)
+      const el = component.resolved
+      // TODO: if both element and component is known, there is no need to search for it.
+      if (el instanceof HTMLElement) setTargetElement(el)
+    } else {
+      // highlight signal
+      // TODO
     }
-    const v = focusedState.owner?.value
-    if (!v) {
-      setTargetElement(current => {
-        if (current && current === p) return null
-        else return current
-      })
-      return
-    }
-    if (typeof v !== "function") {
-      setTargetElement(current => {
-        if (current && current === p) return null
-        else return current
-      })
-      return
-    }
-    const element = untrack(() => v())
-    if (!(element instanceof HTMLElement)) {
-      setTargetElement(current => {
-        if (current && current === p) return null
-        else return current
-      })
-      return
-    }
-    return setTargetElement(element)
-    // console.log(element)
-
-    // console.log("selectedComponent", selectedComponent())
+    // TODO: un-highlight
   })
 
   return { enabled }
 }
 
 let registered = false
-
 /**
  * Registers the extension adapter with the debugger.
  */

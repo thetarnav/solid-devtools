@@ -22,7 +22,7 @@ let RootId: NodeID
 let OnSignalUpdate: SignalUpdateHandler
 let OnComputationUpdate: ComputationUpdateHandler
 let GatherComponents: boolean
-let Components: Mapped.Component[] = []
+let Components: Record<NodeID, Mapped.Component> = {}
 let FocusedOwner: Solid.Owner | null
 let FocusedOwnerDetails: Mapped.OwnerDetails | null
 let FocusedOwnerSignalMap: Record<NodeID, Solid.Signal>
@@ -128,7 +128,7 @@ function mapOwner(owner: Solid.Owner, type?: NodeType): Mapped.Owner {
 
   if (GatherComponents && type === NodeType.Component) {
     const resolved = resolveElements(owner.value)
-    if (resolved) Components.push({ name, resolved })
+    if (resolved) Components[id] = { name, resolved }
   }
 
   return {
@@ -153,7 +153,7 @@ export function walkSolidTree(
   config: WalkerConfig,
 ): {
   tree: Mapped.Owner
-  components: Mapped.Component[]
+  components: Record<NodeID, Mapped.Component>
   focusedOwnerDetails: Mapped.OwnerDetails | null
   focusedOwner: Solid.Owner | null
   focusedOwnerSignalMap: Record<NodeID, Solid.Signal>
@@ -167,7 +167,7 @@ export function walkSolidTree(
   FocusedOwner = null
   FocusedOwnerDetails = null
   FocusedOwnerSignalMap = {}
-  if (GatherComponents) Components = []
+  Components = {}
 
   const tree = mapOwner(owner)
   const components = Components

@@ -84,6 +84,10 @@ chrome.runtime.onConnect.addListener(newPort => {
     onRuntimeMessage("SetSelectedSignal", payload => postPortMessage("SetSelectedSignal", payload)),
   )
 
+  addCleanup(
+    onRuntimeMessage("HighlightElement", payload => postPortMessage("HighlightElement", payload)),
+  )
+
   addCleanup(onRuntimeMessage("ForceUpdate", () => postPortMessage("ForceUpdate")))
 })
 

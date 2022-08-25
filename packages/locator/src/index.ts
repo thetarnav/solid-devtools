@@ -53,7 +53,7 @@ const exports = createInternalRoot(() => {
   const [targetElement, setTargetElement] = createSignal<HTMLElement | null>(null)
   let selected!: Accessor<SelectedComponent | null>
 
-  registerDebuggerPlugin(({ components }) => {
+  registerDebuggerPlugin(({ componentList }) => {
     let init = true
     let prevComponents: Mapped.Component[] = []
 
@@ -63,7 +63,7 @@ const exports = createInternalRoot(() => {
         ;(init = true), (prevComponents = [])
         return null
       }
-      const [componentRefs, targetRefs] = [components(), targetElement()]
+      const [componentRefs, targetRefs] = [componentList(), targetElement()]
       if (init) return (init = false) || null
       if (prevComponents !== componentRefs) {
         clearFindComponentCache()

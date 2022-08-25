@@ -22,6 +22,8 @@ export interface Messages {
   SetSelectedSignal: { id: NodeID; selected: boolean }
   /** adapter -> devtools: signal deep value */
   SignalValue: SignalUpdate
+  /** devtools -> adapter: user hovered over component/element signal in devtools panel */
+  HighlightElement: { rootId: NodeID; componentId: NodeID } | { signalId: NodeID }
 }
 
 export type PostMessageFn = <K extends keyof Messages>(

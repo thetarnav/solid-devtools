@@ -25,6 +25,7 @@ onWindowMessage("SolidOnPage", adapterVersion => {
     "color: #e38b1b",
   )
 
+  // warn if the matching adapter version is not the same minor version range as the actual adapter
   const adapterTuple = toVersionTuple(adapterVersion)
   const wantedTuple = toVersionTuple(wantedAdapterVersion)
 
@@ -35,7 +36,7 @@ onWindowMessage("SolidOnPage", adapterVersion => {
         `${i === 0 ? "MAJOR" : "MINOR"} VERSION MISMATCH!
 Extension version: ${extVersion}
 Adapter version: ${adapterVersion}
-Wanted adapter version: ${wantedAdapterVersion}`,
+Matching adapter version: ${wantedAdapterVersion}`,
       )
       break
     }
@@ -61,5 +62,7 @@ once(onPortMessage, "ForceUpdate", () => postWindowMessage("ForceUpdate"))
 onPortMessage("SetSelectedOwner", payload => postWindowMessage("SetSelectedOwner", payload))
 
 onPortMessage("SetSelectedSignal", payload => postWindowMessage("SetSelectedSignal", payload))
+
+onPortMessage("HighlightElement", payload => postWindowMessage("HighlightElement", payload))
 
 export {}
