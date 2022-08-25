@@ -1,4 +1,4 @@
-import { getOwner, NodeType, Solid } from "@solid-devtools/shared/graph"
+import { getOwner, Mapped, NodeType, Solid } from "@solid-devtools/shared/graph"
 import { ValueType } from "@solid-devtools/shared/serialize"
 import { UNNAMED } from "@solid-devtools/shared/variables"
 import {
@@ -90,7 +90,7 @@ describe("walkSolidTree", () => {
       ],
     })
     expect(tree).toEqual(JSON.parse(JSON.stringify(tree)))
-    expect(components).toEqual([])
+    expect(components).toEqual({})
     expect(focusedOwner).toBe(null)
     expect(focusedOwnerDetails).toBe(null)
   })
@@ -152,16 +152,19 @@ describe("walkSolidTree", () => {
         gatherComponents: true,
       })
 
-      expect(components.length).toBe(7)
+      expect(Object.keys(components).length).toBe(7)
 
-      for (let i = 0; i < 6; i++) {
-        const comp = components[i]
-        expect(comp.name).toBe("TestComponent")
-        expect(comp.resolved).toBeInstanceOf(HTMLDivElement)
-      }
+      let testCompsLength = 0
+      let btn!: Mapped.Component
+      Object.values(components).forEach(c => {
+        if (c.name === "TestComponent" && c.resolved instanceof HTMLDivElement) testCompsLength++
+        else btn = c
+      })
+      expect(testCompsLength).toBe(6)
 
-      expect(components[6].name).toBe("Button")
-      expect(components[6].resolved).toBeInstanceOf(HTMLButtonElement)
+      expect(btn).toBeTruthy()
+      expect(btn.name).toBe("Button")
+      expect(btn.resolved).toBeInstanceOf(HTMLButtonElement)
 
       dispose()
     }))
