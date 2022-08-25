@@ -1,6 +1,6 @@
 import { createEffect, createSignal } from "solid-js"
 import { registerDebuggerPlugin, PluginFactory } from "@solid-devtools/debugger"
-import "@solid-devtools/locator"
+import { registerLocatorPlugin } from "@solid-devtools/locator"
 import {
   onWindowMessage,
   postWindowMessage,
@@ -59,6 +59,18 @@ const extensionAdapterFactory: PluginFactory = ({
   createEffect(() => {
     const details = focusedState.details
     if (details) postWindowMessage("OwnerDetailsUpdate", details)
+  })
+
+  const { selected: selectedComponent } = registerLocatorPlugin({
+    enabled,
+    onClick: (e, data) => {
+      console.log("onClick", e, data)
+      return false
+    },
+  })
+
+  createEffect(() => {
+    console.log("selectedComponent", selectedComponent())
   })
 
   return { enabled }

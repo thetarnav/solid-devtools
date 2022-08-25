@@ -13,7 +13,7 @@ export type SourceCodeData = ElementLocation & {
   element: HTMLElement
 }
 
-export type TargetURLFunction = (data: SourceCodeData) => string | false
+export type TargetURLFunction = (data: SourceCodeData) => string | void
 
 const targetIDEMap: Record<TargetIDE, (data: SourceCodeData) => string> = {
   vscode: ({ projectPath, filePath, line, column }) =>
@@ -26,21 +26,20 @@ const targetIDEMap: Record<TargetIDE, (data: SourceCodeData) => string> = {
     `webstorm://open?file=${projectPath}/${filePath}&line=${line}&column=${column}`,
 }
 
-function getTargetURL(target: TargetIDE | TargetURLFunction, data: SourceCodeData): string | false {
+function getTargetURL(target: TargetIDE | TargetURLFunction, data: SourceCodeData): string | void {
   if (typeof target === "function") return target(data)
   return targetIDEMap[target](data)
+}
+
+export function getFullSourceCodeData(
+  data: Omit<SourceCodeData, "projectPath">,
+): SourceCodeData | null {
+  const projectPath = (window as any)[WINDOW_PROJECTPATH_PROPERTY]
+  if (!projectPath) return null
+  return { ...data, projectPath }
 }
 
 export function openSourceCode(target: TargetIDE | TargetURLFunction, data: SourceCodeData): void {
   const url = getTargetURL(target, data)
   if (typeof url === "string") window.open(url, "_blank")
-}
-
-export function openProjectSource(
-  target: TargetIDE | TargetURLFunction,
-  location: Omit<SourceCodeData, "projectPath">,
-): void {
-  // project path comes from a babel plugin injecting hte value to the window object
-  const projectPath = (window as any)[WINDOW_PROJECTPATH_PROPERTY]
-  openSourceCode(target, { ...location, projectPath })
 }

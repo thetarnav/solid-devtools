@@ -12,7 +12,8 @@ import {
   SignalUpdate,
 } from "@solid-devtools/shared/graph"
 import { EncodedValue, encodeValue } from "@solid-devtools/shared/serialize"
-import { createBatchedUpdateEmitter, createConsumers, createInternalRoot } from "./utils"
+import { createConsumers } from "@solid-devtools/shared/primitives"
+import { createBatchedUpdateEmitter, createInternalRoot } from "./utils"
 import { ComputationUpdateHandler, SignalUpdateHandler } from "./walker"
 import { forceRootUpdate } from "./roots"
 import { Merge } from "type-fest"

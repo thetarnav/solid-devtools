@@ -209,18 +209,6 @@ export function markNodesID(nodes?: { sdtId?: NodeID }[] | null): NodeID[] {
   return nodes.map(markNodeID)
 }
 
-/**
- * Reactive array reducer — if at least one consumer (boolean signal) is enabled — the returned result will the `true`.
- */
-export function createConsumers(): [
-  needed: Accessor<boolean>,
-  addConsumer: (consumer: Accessor<boolean>) => void,
-] {
-  const [consumers, setConsumers] = createSignal<Accessor<boolean>[]>([], { name: "consumers" })
-  const enabled = createMemo<boolean>(() => consumers().some(consumer => consumer()))
-  return [enabled, consumer => setConsumers(p => [...p, consumer])]
-}
-
 let SkipInternalRoot: Core.RootFunction<unknown> | null = null
 
 /**

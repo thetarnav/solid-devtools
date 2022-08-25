@@ -157,6 +157,7 @@ importers:
       '@solid-devtools/transform': ^0.6.2
       '@solid-primitives/bounds': ^0.0.101
       '@solid-primitives/event-listener': ^2.2.1
+      '@solid-primitives/immutable': ^0.1.1
       '@solid-primitives/keyboard': ^1.0.1
       '@solid-primitives/platform': ^0.0.100
       '@solid-primitives/utils': ^3.0.1
@@ -176,6 +177,7 @@ importers:
       '@solid-devtools/shared': link:../shared
       '@solid-primitives/bounds': 0.0.101_solid-js@1.4.8
       '@solid-primitives/event-listener': 2.2.1_solid-js@1.4.8
+      '@solid-primitives/immutable': 0.1.1_solid-js@1.4.8
       '@solid-primitives/keyboard': 1.0.1_solid-js@1.4.8
       '@solid-primitives/platform': 0.0.100_solid-js@1.4.8
       '@solid-primitives/utils': 3.0.1_solid-js@1.4.8
@@ -274,6 +276,7 @@ importers:
   packages/shared:
     specifiers:
       '@solid-primitives/event-bus': ^0.1.0
+      '@solid-primitives/immutable': ^0.1.1
       '@solid-primitives/utils': ^3.0.1
       '@testing-library/jest-dom': ^5.16.4
       jest: ^28.1.3
@@ -284,6 +287,7 @@ importers:
       typescript: ^4.7.4
     dependencies:
       '@solid-primitives/event-bus': 0.1.0_solid-js@1.4.8
+      '@solid-primitives/immutable': 0.1.1_solid-js@1.4.8
       '@solid-primitives/utils': 3.0.1_solid-js@1.4.8
       solid-js: 1.4.8
       type-fest: 2.18.0
@@ -3916,7 +3920,7 @@ packages:
     peerDependencies:
       solid-js: ^1.3.1
     dependencies:
-      '@solid-primitives/immutable': 0.1.0_solid-js@1.4.8
+      '@solid-primitives/immutable': 0.1.1_solid-js@1.4.8
       '@solid-primitives/utils': 1.5.2_solid-js@1.4.8
       solid-js: 1.4.8
     dev: false
@@ -3934,6 +3938,14 @@ packages:
     resolution: {integrity: sha512-vKA318tb65h6f9mizF/x7ep9CxhtCtD6HMm5XVpRE+KrujgwyWB3DAVxmJ0lM4v4cImc7jvwBWvYirpnupe11A==}
     dependencies:
       '@solid-primitives/utils': 1.5.2_solid-js@1.4.8
+    transitivePeerDependencies:
+      - solid-js
+    dev: false
+
+  /@solid-primitives/immutable/0.1.1_solid-js@1.4.8:
+    resolution: {integrity: sha512-wHtydBmr7G7ZKkMSgcM5vjqhAIVgFrlWMtu1AbhpDpQ8ogC6Y3kryDY87ydAys6TBSC3vSL7fOt6iZnwvX4YJA==}
+    dependencies:
+      '@solid-primitives/utils': 3.0.1_solid-js@1.4.8
     transitivePeerDependencies:
       - solid-js
     dev: false

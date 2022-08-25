@@ -60,6 +60,11 @@
       "import": "./dist/serialize.js",
       "require": "./dist/serialize.cjs",
       "types": "./dist/serialize.d.ts"
+    },
+    "./primitives": {
+      "import": "./dist/primitives.js",
+      "require": "./dist/primitives.cjs",
+      "types": "./dist/primitives.d.ts"
     }
   },
   "typesVersions": {
@@ -84,6 +89,9 @@
       ],
       "serialize": [
         "./dist/serialize.d.ts"
+      ],
+      "primitives": [
+        "./dist/primitives.d.ts"
       ]
     }
   },
@@ -100,6 +108,7 @@
   },
   "dependencies": {
     "@solid-primitives/event-bus": "^0.1.0",
+    "@solid-primitives/immutable": "^0.1.1",
     "@solid-primitives/utils": "^3.0.1",
     "solid-js": "^1.4.8",
     "type-fest": "^2.18.0"

@@ -1,5 +1,25 @@
-import { Accessor, createMemo, getOwner, createSignal, onCleanup } from "solid-js"
+import { Accessor, createMemo, createSignal, getOwner, onCleanup } from "solid-js"
 import type { MemoOptions } from "solid-js/types/reactive/signal"
+import { remove } from "@solid-primitives/immutable"
+import { onRootCleanup } from "@solid-primitives/utils"
+
+/**
+ * Reactive array reducer — if at least one consumer (boolean signal) is enabled — the returned result will the `true`.
+ */
+export function createConsumers(): [
+  needed: Accessor<boolean>,
+  addConsumer: (consumer: Accessor<boolean>) => void,
+] {
+  const [consumers, setConsumers] = createSignal<Accessor<boolean>[]>([], { name: "consumers" })
+  const enabled = createMemo<boolean>(() => consumers().some(consumer => consumer()))
+  return [
+    enabled,
+    consumer => {
+      setConsumers(p => [...p, consumer])
+      onRootCleanup(() => setConsumers(p => remove(p, consumer)))
+    },
+  ]
+}
 
 // TODO: contribute to @solid-primitives/memo
 
