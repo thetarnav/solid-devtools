@@ -11,7 +11,9 @@
 Chrome devtools extension for debugging Solid applications.
 It allows for visualizing and interacting with Solid's reactivity graph, as well as inspecting component state and hierarchy.
 
-https://user-images.githubusercontent.com/24491503/185811352-08975c0b-daa3-4ff6-839c-e748d19ad8b3.mp4
+Should work in any application using SolidJS, including SolidStart and Astro.
+
+![screenshot](https://user-images.githubusercontent.com/24491503/186668195-e8de08a6-b381-453a-9fde-683a9b571b89.png)
 
 ## How do I try it out?
 
@@ -24,6 +26,8 @@ The extension is now available on the Chrome Web Store. You can install it when 
 ### 2. Install the npm library
 
 If you think about the Chrome Extension as a **Frontend**, then the [**"solid-devtools"**](<(https://github.com/thetarnav/solid-devtools/blob/main/packages/main#readme)>) package is its **Backend**. It debugs the Solid's reactivity and communicates the updates to the Chrome Extension.
+
+Install the following package:
 
 ```bash
 npm i solid-devtools
@@ -39,7 +43,7 @@ As the extension requires both the extension and the library to work, you need t
 
 ### 3. Import the script
 
-Import `"solid-devtools"` package in your app entry file.
+Import `"solid-devtools"` package in your app entry file. (It's best if the script runs before any application code is executed)
 
 ```ts
 // will automatically find and track all roots in your application
@@ -76,7 +80,7 @@ export default defineConfig({
 
 ### 5. Run the app and play with the devtools!
 
-That's it!
+That's it! A new **"Solid"** panel should appear in your Chrome Devtools.
 
 Thank You for trying out the extension in it's early development stages. We are constantly working on it to make it better, add new features and improve the user experience. We appreciate your feedback and suggestions.
 
