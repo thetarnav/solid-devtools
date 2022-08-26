@@ -2,9 +2,6 @@ import { Accessor, createSelector, createSignal } from "solid-js"
 import { NodeID } from "@solid-devtools/shared/graph"
 import { mutateFilter } from "@solid-devtools/shared/utils"
 
-export const dispose = (o: { dispose?: VoidFunction }) => o.dispose?.()
-export const disposeAll = (list: { dispose?: VoidFunction }[]) => list.forEach(dispose)
-
 /**
  * Reconciles an array by mutating it. Diffs items by "id" prop. And uses {@link mapFunc} for creating new items.
  * Use for dynamic arrays that can change entirely. Like sources or observers.

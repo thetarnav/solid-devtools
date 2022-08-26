@@ -1,80 +1,59 @@
-import { createEffect, For, JSX, onCleanup } from "solid-js"
+import { For, JSX, onCleanup } from "solid-js"
 import { TransitionGroup, animateExit, animateEnter } from "@otonashixav/solid-flip"
-import { createHover } from "@solid-aria/interactions"
 import { Graph, NodeType } from "@solid-devtools/shared/graph"
-import { useHighlights } from "~/ctx/highlights"
+import { useStructure } from "~/ctx/structure"
 import * as styles from "./OwnerNode.css"
 import { Highlight } from "../highlight/Highlight"
+import { assignInlineVars } from "@vanilla-extract/dynamic"
 
-export function OwnerChildren(props: { children: Graph.Owner[] }) {
-  return (
-    <TransitionGroup enter={animateEnter()} exit={animateExit()}>
-      <For each={props.children}>{o => <OwnerNode owner={o} />}</For>
-    </TransitionGroup>
-  )
-}
-
-export function OwnerNode(props: { owner: Graph.Owner }): JSX.Element {
-  const { owner } = props
+export function OwnerNode(props: { owner: Graph.Owner; level: number }): JSX.Element {
+  const { owner, level } = props
   const { name, type, id } = owner
   const children = () => owner.children
   const typeName = NodeType[type]
 
-  const { hoverProps, isHovered } = createHover({})
+  // const { hoverProps, isHovered } = createHover({})
 
-  const {
-    highlightNodeSources,
-    isObserverHighlighted,
-    useComputationUpdatedSelector,
-    useOwnerFocusedSelector,
-    handleFocus,
-  } = useHighlights()
+  const { useUpdatedSelector, useSelectedSelector, handleFocus, toggleHoveredOwner } =
+    useStructure()
 
-  const isUpdated = type !== NodeType.Root ? useComputationUpdatedSelector(id) : () => false
-  const isFocused = useOwnerFocusedSelector(owner)
-  const isHighlighted = isObserverHighlighted.bind(null, owner)
-  onCleanup(() => isFocused() && handleFocus(null))
-
-  createEffect(() => {
-    highlightNodeSources(owner, isHovered())
-  })
-  onCleanup(() => highlightNodeSources(owner, false))
-
-  // TODO: rework the observers highlighting for memos
-  // if (signal) {
-  //   createEffect(() => {
-  //     highlightSignalObservers(signal, isHovered())
-  //   })
-  //   onCleanup(() => highlightSignalObservers(signal, false))
-  // }
+  const isUpdated = type !== NodeType.Root ? useUpdatedSelector(id) : () => false
+  const isSelected = useSelectedSelector(owner)
+  onCleanup(() => isSelected() && handleFocus(null))
 
   return (
-    <div class={styles.container}>
+    <div
+      class={styles.container}
+      style={assignInlineVars({
+        [styles.levelVar]: level + "",
+      })}
+    >
       <div
-        class={styles.header.contailer[isFocused() ? "focused" : "base"]}
-        {...hoverProps}
-        onClick={e => handleFocus(isFocused() ? null : owner)}
+        data-selected={isSelected()}
+        class={styles.header.contailer}
+        // {...hoverProps}
+        onClick={e => handleFocus(isSelected() ? null : owner)}
       >
+        <div class={styles.header.selection} />
         <div class={styles.header.containerShadow}></div>
         <div class={styles.header.nameContainer}>
-          <Highlight strong={isUpdated()} light={isHighlighted()} class={styles.header.highlight}>
-            {type === NodeType.Component ? `<${name}>` : name}
+          {/* TODO: observers and sources highlighting */}
+          <Highlight strong={isUpdated()} light={false} class={styles.header.highlight}>
+            <div class={styles.header.name}>{type === NodeType.Component ? `<${name}>` : name}</div>
           </Highlight>
           <div class={styles.header.type}>{typeName}</div>
         </div>
-        {/* {signal && <ValueNode value={signal.value} updated={signal.updated} />} */}
       </div>
-      {/* <Signals each={signals()} /> */}
-      {/* <Show when={children().length}> */}
       <div
         class={styles.childrenContainer}
         style={{
           opacity: isUpdated() ? 0.3 : 1,
         }}
       >
-        <OwnerChildren children={children()} />
+        <TransitionGroup enter={animateEnter()} exit={animateExit()}>
+          <For each={children()}>{o => <OwnerNode owner={o} level={level + 1} />}</For>
+        </TransitionGroup>
       </div>
-      {/* </Show> */}
     </div>
   )
 }

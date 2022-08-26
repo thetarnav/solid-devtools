@@ -1,36 +1,28 @@
-import { batch, createRoot, onCleanup } from "solid-js"
+import { batch, createRoot } from "solid-js"
 import { createStore, produce } from "solid-js/store"
-import { HighlightContextState } from "@solid-devtools/ui"
 import { NodeID, RootsUpdates, Mapped, Graph } from "@solid-devtools/shared/graph"
-import { createUpdatedSelector, disposeAll } from "./utils"
-import { setFocused, useOwnerFocusedSelector } from "./details"
+import { createUpdatedSelector } from "./utils"
+import { createStaticStore } from "@solid-primitives/utils"
 
 const NodeMap: Record<NodeID, Record<NodeID, Graph.Owner>> = {}
 
-// TODO: map source/observers length separately, as these won't always resolve
-let observersToAddLazy: Record<NodeID, ((source: Graph.Owner) => void)[]> = {}
+function disposeOwner(owner: Graph.Owner): void {
+  delete NodeMap[owner.id]
+  owner.children.forEach(disposeOwner)
+}
 
-export function disposeAllNodes() {
-  for (const { owners, signals } of Object.values(NodeMap)) {
-    disposeAll(Object.values(owners))
-    disposeAll(Object.values(signals))
+function disposeAllNodes(): void {
+  for (const id in NodeMap) {
+    delete NodeMap[id]
   }
 }
 
-export function removeRootFromMap(id: NodeID) {
-  delete NodeMap[id]
-}
-
-export function afterGraphUpdate() {
-  // sources and observers can be added lazily only during one reconciliation
-  observersToAddLazy = {}
-}
-
+// TODO: after graph virtualisation is implemented, rootId should precalculated for visible nodes
 export function findOwnerRootId(owner: Graph.Owner): NodeID {
   for (const rootId in NodeMap) {
     const owners = NodeMap[rootId]
     for (const id in owners) {
-      if (id === owner.id + "") return rootId
+      if (id === owner.id) return rootId
     }
   }
   throw "ROOT_ID_NOT_FOUND"
@@ -40,49 +32,22 @@ export function findOwnerById(rootId: NodeID, id: NodeID): Graph.Owner | undefin
   return NodeMap[rootId][id]
 }
 
-const addOwnerToMap = (rootId: NodeID, node: Graph.Owner) => {
-  const id = node.id
-  const owners = NodeMap[rootId]
-  owners[id] = node
-  onCleanup(() => delete owners[id])
-  const toAdd = observersToAddLazy[id]
-  if (toAdd) {
-    toAdd.forEach(f => f(node))
-    delete observersToAddLazy[id]
-  }
-}
-
-// function mapObserver(rootId: NodeID, id: NodeID, mutable: Graph.Owner[]) {
-//   const node = NodeMap[rootId][id]
-//   if (node) mutable.push(node)
-//   else pushToArrayProp(observersToAddLazy, id, owner => mutable.push(owner))
-// }
-
 /**
  * maps the raw owner tree to be placed into the reactive graph store
  * this is for new branches – owners that just have been created
  */
-export function mapNewOwner(rootId: NodeID, owner: Readonly<Mapped.Owner>): Graph.Owner {
-  // wrap with root that will be disposed together with the rest of the tree
-  // TODO do we need disposing?
-  return createRoot(dispose => {
-    const children: Graph.Owner[] = []
-    const node: Graph.Owner = { ...owner, children, dispose }
-    addOwnerToMap(rootId, node)
+function mapNewOwner(rootId: NodeID, owner: Readonly<Mapped.Owner>): Graph.Owner {
+  const { id } = owner
+  const node: Graph.Owner = {
+    ...owner,
+    children: owner.children.map(child => mapNewOwner(rootId, child)),
+  }
+  NodeMap[rootId][id] = node
 
-    // TODO: remove mapping signals
-    // node.signals.push(...owner.signals.map(createSignalNode))
-    node.children.push(...owner.children.map(child => mapNewOwner(rootId, child)))
-    // if (owner.signal) node.signal = createSignalNode(rootId, owner.signal)
-
-    onCleanup(disposeAll.bind(void 0, node.children))
-    // onCleanup(disposeAll.bind(void 0, node.signals))
-
-    return node
-  })
+  return node
 }
 
-export function mapNewRoot(rootId: NodeID, owner: Readonly<Mapped.Owner>): Graph.Owner {
+function mapNewRoot(rootId: NodeID, owner: Readonly<Mapped.Owner>): Graph.Owner {
   NodeMap[rootId] = {}
   return mapNewOwner(rootId, owner)
 }
@@ -111,7 +76,7 @@ function reconcileChildren(
     if (node.id === mapped.id) reconcileNode(rootId, mapped, node)
     else {
       // dispose old, map new child
-      node.dispose()
+      disposeOwner(node)
       children[i] = mapNewOwner(rootId, mapped)
     }
   }
@@ -119,67 +84,37 @@ function reconcileChildren(
   if (childrenExtended) {
     for (; i < newLength; i++) {
       // dispose old, map new child
-      children[i]?.dispose()
+      disposeOwner(children[i])
       children[i] = mapNewOwner(rootId, newChildren[i])
     }
   } else {
     // dispose old
-    disposeAll(children.splice(i))
+    children.splice(i).forEach(disposeOwner)
   }
 }
 
-export function reconcileNode(rootId: NodeID, mapped: Mapped.Owner, node: Graph.Owner): void {
+function reconcileNode(rootId: NodeID, mapped: Mapped.Owner, node: Graph.Owner): void {
   reconcileChildren(rootId, mapped.children, node.children)
 }
 
 const exports = createRoot(() => {
   const [graphs, setGraphs] = createStore<Graph.Root[]>([])
 
+  const NULL_HOVERED_STATE = { rootId: null, owner: null, element: null } as const
+  const [hovered, setHovered] = createStaticStore<
+    | { readonly rootId: NodeID; readonly owner: Graph.Owner; readonly element: HTMLElement }
+    | typeof NULL_HOVERED_STATE
+  >(NULL_HOVERED_STATE)
+
   const [useComputationUpdatedSelector, addUpdatedComputations, clearUpdatedComputations] =
     createUpdatedSelector()
-
-  let lastHoveredNode: null | Graph.Owner | Graph.Signal = null
-  // const [highlightedObservers, setHighlightedObservers] = createSignal<Graph.Owner[]>([])
-  // const [highlightedSources, setHighlightedSources] = createSignal<Graph.Signal[]>([])
-
-  const highlights: HighlightContextState = {
-    useComputationUpdatedSelector,
-    handleFocus: setFocused,
-    useOwnerFocusedSelector,
-    highlightSignalObservers(signal, highlight) {
-      // TODO
-      // if (highlight) {
-      //   setHighlightedObservers(signal.observers)
-      //   lastHoveredNode = signal
-      // } else if (lastHoveredNode === signal) {
-      //   setHighlightedObservers([])
-      // }
-    },
-    highlightNodeSources(owner, highlight) {
-      // TODO
-      // if (highlight) {
-      //   setHighlightedSources(owner.sources)
-      //   lastHoveredNode = owner
-      // } else if (lastHoveredNode === owner) {
-      //   setHighlightedSources([])
-      // }
-    },
-    // isObserverHighlighted: createSelector(highlightedObservers, (owner: Graph.Owner, list) =>
-    //   list.includes(owner),
-    // ),
-    isObserverHighlighted: () => false,
-    isSourceHighlighted: () => false,
-    // isSourceHighlighted: createSelector(highlightedSources, (signal: Graph.Signal, list) =>
-    //   list.includes(signal),
-    // ),
-  }
 
   const removeRoot = (proxy: Graph.Root[], id: NodeID): void => {
     proxy.splice(
       proxy.findIndex(e => e.id === id),
       1,
     )
-    removeRootFromMap(id)
+    delete NodeMap[id]
   }
   const updateRoot = (proxy: Graph.Root[], { id, tree }: Mapped.SRoot): void => {
     const root = proxy.find(r => r.id === id)
@@ -199,7 +134,6 @@ const exports = createRoot(() => {
         }),
       )
     })
-    afterGraphUpdate()
   }
 
   function handleComputationsUpdate(nodeIds: NodeID[]) {
@@ -210,12 +144,34 @@ const exports = createRoot(() => {
     batch(() => {
       clearUpdatedComputations()
       setGraphs([])
+      setHovered(NULL_HOVERED_STATE)
     })
     disposeAllNodes()
-    afterGraphUpdate()
   }
 
-  return { graphs, highlights, handleGraphUpdate, resetGraph, handleComputationsUpdate }
+  // used in the owner ui node to toggle owner being hovered
+  function toggleHoveredOwner(owner: Graph.Owner, element: HTMLElement, hovered: boolean) {
+    setHovered(p => {
+      if (hovered) return { rootId: findOwnerRootId(owner), owner, element }
+      if (p.owner === owner) return NULL_HOVERED_STATE
+      return p
+    })
+  }
+
+  return {
+    graphs,
+    handleGraphUpdate,
+    resetGraph,
+    handleComputationsUpdate,
+    useComputationUpdatedSelector,
+    toggleHoveredOwner,
+  }
 })
-export const { graphs, highlights, handleGraphUpdate, resetGraph, handleComputationsUpdate } =
-  exports
+export const {
+  graphs,
+  handleGraphUpdate,
+  resetGraph,
+  handleComputationsUpdate,
+  useComputationUpdatedSelector,
+  toggleHoveredOwner,
+} = exports

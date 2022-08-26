@@ -195,7 +195,6 @@ export namespace Graph {
     readonly id: NodeID
     readonly name: string
     readonly type: NodeType
-    readonly dispose: VoidFunction
     readonly sources: number
     readonly children: Owner[]
   }

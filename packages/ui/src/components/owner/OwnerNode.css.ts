@@ -1,60 +1,58 @@
-import { createVar, style, styleVariants } from "@vanilla-extract/css"
+import { createVar, style } from "@vanilla-extract/css"
 import { CSSVarFunction } from "@vanilla-extract/private"
 import { hexToRgb, insetX, insetY, rounded, theme, transition } from "~/theme"
 
 const { spacing, color } = theme
 
 export const container = style({
-  paddingTop: spacing[1],
-  paddingLeft: spacing[1],
   backgroundColor: hexToRgb(color.cyan[200], 0.05),
   color: color.black,
-  borderColor: hexToRgb(color.cyan[900], 0.3),
-  borderStyle: "solid",
-  borderWidth: 0,
-  borderTopWidth: 1,
-  borderLeftWidth: 1,
-  outline: 1,
 })
 
-const opacityVar: CSSVarFunction = createVar()
-
-const headerContainerBase = style({
-  position: "relative",
-  display: "flex",
-  alignItems: "center",
-  paddingRight: spacing[2],
-  paddingLeft: spacing[1],
-  cursor: "pointer",
-  vars: { [opacityVar]: "0" },
-  ...transition("color"),
-})
+const shadowOpacity: CSSVarFunction = createVar()
+export const levelVar: CSSVarFunction = createVar()
 
 export const header = {
-  contailer: styleVariants({
-    base: [headerContainerBase],
-    focused: [
-      headerContainerBase,
-      {
+  contailer: style({
+    height: spacing[5],
+    position: "relative",
+    display: "flex",
+    alignItems: "center",
+    paddingRight: spacing[2],
+    cursor: "pointer",
+    vars: { [shadowOpacity]: "0" },
+    ...transition("color"),
+    ":hover": {
+      vars: { [shadowOpacity]: "0.2" },
+    },
+    selectors: {
+      '&[data-selected="true"]': {
         color: color.white,
-        vars: { [opacityVar]: "1" },
+        vars: { [shadowOpacity]: "1" },
       },
-    ],
+    },
+  }),
+  selection: style({
+    position: "absolute",
   }),
   containerShadow: style({
     position: "absolute",
     zIndex: -1,
-    ...insetY(`-${spacing[0.5]}`),
-    ...insetX(`-${spacing[2]}`),
+    ...insetY(0),
+    ...insetX(1),
     ...rounded(),
     backgroundColor: hexToRgb(color.gray[900], 0.8),
-    opacity: opacityVar,
-    ...transition("opacity"),
+    opacity: shadowOpacity,
+    ...transition("opacity", theme.duration[100]),
   }),
   nameContainer: style({
+    marginLeft: `calc(${levelVar} * ${spacing[4]})`,
     display: "flex",
     alignItems: "center",
-    width: spacing[36],
+    minWidth: spacing[36],
+  }),
+  name: style({
+    paddingBottom: "0.0625rem",
   }),
   highlight: style({
     fontStyle: "italic",
@@ -65,11 +63,22 @@ export const header = {
     fontSize: 10,
     opacity: 0.4,
     userSelect: "none",
+    paddingBottom: "0.0625rem",
   }),
 }
 
 export const childrenContainer = style({
-  paddingLeft: spacing[4],
-  paddingTop: spacing[1],
+  position: "relative",
   ...transition("opacity", theme.duration[500]),
+  ":before": {
+    content: "",
+    position: "absolute",
+    zIndex: -1,
+    top: 0,
+    bottom: 0,
+    left: `calc(${levelVar} * ${spacing[4]} + ${spacing[2]})`,
+    width: "1px",
+    backgroundColor: color.cyan[500],
+    opacity: 0.3,
+  },
 })

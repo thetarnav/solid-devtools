@@ -18,7 +18,6 @@ import { Graph, NodeID, NodeType } from "@solid-devtools/shared/graph"
 import { EncodedValue, EncodedValueOf, ValueType } from "@solid-devtools/shared/serialize"
 import * as Icon from "~/icons"
 import { color } from "~/theme"
-import { useHighlights } from "~/ctx/highlights"
 import { Highlight } from "../highlight/Highlight"
 import * as styles from "./SignalNode.css"
 import clsx from "clsx"
@@ -268,21 +267,10 @@ export const SignalNode: Component<{ signal: Graph.Signal }> = ({ signal }) => {
 
   const isUpdated = useUpdatedSelector(id)
 
-  const { highlightSignalObservers, isSourceHighlighted } = useHighlights()
-  const isHighlighted = isSourceHighlighted.bind(null, signal)
-
-  // const { hoverProps, isHovered } = createHover()
-  // createEffect(() => highlightSignalObservers(signal, isHovered()))
-
   return (
     <ValueRow selected={signal.selected} onClick={() => toggleSignalFocus(id)}>
       <ValueName type={type}>
-        <Highlight
-          strong={isUpdated()}
-          light={isHighlighted()}
-          signal
-          class={styles.ValueName.highlight}
-        >
+        <Highlight strong={isUpdated()} light={false} signal class={styles.ValueName.highlight}>
           {signal.name}
         </Highlight>
       </ValueName>

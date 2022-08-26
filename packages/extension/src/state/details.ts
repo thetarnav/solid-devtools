@@ -87,9 +87,9 @@ const exports = createRoot(() => {
     focusedRootId = () => state.rootId,
     details = () => state.details
 
-  const ownerFocusedSelector = createSelector<Graph.Owner | null, Graph.Owner>(focused)
-  const useOwnerFocusedSelector = (owner: Graph.Owner): Accessor<boolean> =>
-    ownerFocusedSelector.bind(void 0, owner)
+  const ownerSelectedSelector = createSelector<Graph.Owner | null, Graph.Owner>(focused)
+  const useOwnerSelectedSelector = (owner: Graph.Owner): Accessor<boolean> =>
+    ownerSelectedSelector.bind(void 0, owner)
 
   function setFocused(owner: Graph.Owner | null) {
     if (owner === untrack(() => state.focused)) return
@@ -169,7 +169,7 @@ const exports = createRoot(() => {
     focusedRootId,
     details,
     setFocused,
-    useOwnerFocusedSelector,
+    useOwnerSelectedSelector,
     useUpdatedSignalsSelector: useUpdatedSelector,
     updateDetails,
     handleSignalUpdates,
@@ -183,7 +183,7 @@ export const {
   focusedRootId,
   details,
   setFocused,
-  useOwnerFocusedSelector,
+  useOwnerSelectedSelector,
   useUpdatedSignalsSelector,
   updateDetails,
   handleSignalUpdates,
