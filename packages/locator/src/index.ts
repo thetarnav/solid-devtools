@@ -22,7 +22,13 @@ import {
   SelectedComponent,
 } from "./findComponent"
 import { makeHoverElementListener } from "./hoverElement"
-import { SourceCodeData, TargetIDE, TargetURLFunction } from "./goToSource"
+import {
+  getFullSourceCodeData,
+  openSourceCode,
+  SourceCodeData,
+  TargetIDE,
+  TargetURLFunction,
+} from "./goToSource"
 import { attachElementOverlay } from "./ElementOverlay"
 
 export type { TargetIDE, TargetURLFunction } from "./goToSource"
@@ -132,14 +138,18 @@ const exports = createInternalRoot(() => {
         window,
         "click",
         e => {
-          // const comp = selected()
-          // if (!comp) return
-          // const sourceCodeData = comp.location ? getFullSourceCodeData(comp.location) : null
-          // if (runClickInterceptors(e, sourceCodeData) === false || !sourceCodeData) return
-          // if (!targetIDE) return
-          // e.preventDefault()
-          // e.stopPropagation()
-          // openSourceCode(targetIDE, sourceCodeData)
+          const { target } = e
+          if (!(target instanceof HTMLElement)) return
+          const comp = selected().find(({ element }) => target.contains(element))
+          if (!comp) return
+          const sourceCodeData = comp.location
+            ? getFullSourceCodeData(comp.location, comp.element)
+            : null
+          if (runClickInterceptors(e, sourceCodeData) === false || !sourceCodeData) return
+          if (!targetIDE) return
+          e.preventDefault()
+          e.stopPropagation()
+          openSourceCode(targetIDE, sourceCodeData)
         },
         true,
       )

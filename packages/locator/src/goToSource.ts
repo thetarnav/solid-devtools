@@ -32,11 +32,12 @@ function getTargetURL(target: TargetIDE | TargetURLFunction, data: SourceCodeDat
 }
 
 export function getFullSourceCodeData(
-  data: Omit<SourceCodeData, "projectPath">,
+  location: ElementLocation,
+  element: HTMLElement,
 ): SourceCodeData | null {
   const projectPath = (window as any)[WINDOW_PROJECTPATH_PROPERTY]
   if (!projectPath) return null
-  return { ...data, projectPath }
+  return { ...location, projectPath, element }
 }
 
 export function openSourceCode(target: TargetIDE | TargetURLFunction, data: SourceCodeData): void {
