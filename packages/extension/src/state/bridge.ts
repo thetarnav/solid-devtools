@@ -1,6 +1,6 @@
 import { createEffect, createRoot, on } from "solid-js"
 import { createRuntimeMessanger } from "../../shared/messanger"
-import { handleComputationsUpdate, handleGraphUpdate, resetGraph } from "./graph"
+import { handleComputationsUpdate, handleGraphUpdate, hovered, resetGraph } from "./graph"
 import {
   focused,
   focusedRootId,
@@ -9,6 +9,8 @@ import {
   handleGraphUpdate as detailsHandleGraphUpdate,
   setOnSignalSelect,
 } from "./details"
+import { Messages } from "@solid-devtools/shared/bridge"
+import { NodeType } from "@solid-devtools/shared/graph"
 
 export const { onRuntimeMessage, postRuntimeMessage } = createRuntimeMessanger()
 
@@ -65,6 +67,24 @@ createRoot(() => {
       { defer: true },
     ),
   )
+
+  let initHighlight = true
+  // toggle hovered component
+  createEffect<Messages["HighlightElement"] | undefined>(prev => {
+    // tracks
+    const { rootId, owner } = hovered
+    // skip initial value
+    if (initHighlight) return (initHighlight = false) || undefined
+    if (!rootId || !owner) {
+      if (prev) postRuntimeMessage("HighlightElement", null)
+      return
+    }
+    // do not send the same message twice or if the hovered owner is not a component
+    if ((prev && prev.nodeId === owner.id) || owner.type !== NodeType.Component) return prev
+    const payload = { rootId, nodeId: owner.id }
+    postRuntimeMessage("HighlightElement", payload)
+    return payload
+  })
 
   // toggle selected signals
   setOnSignalSelect((id, selected) => {

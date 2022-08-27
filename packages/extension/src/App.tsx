@@ -10,7 +10,12 @@ import {
   Signals,
   OwnerPath,
 } from "@solid-devtools/ui"
-import { graphs, toggleHoveredOwner, useComputationUpdatedSelector } from "./state/graph"
+import {
+  graphs,
+  toggleHoveredOwner,
+  useComputationUpdatedSelector,
+  useHoveredSelector,
+} from "./state/graph"
 import {
   focused,
   details,
@@ -54,6 +59,7 @@ const App: Component = () => {
         useUpdatedSelector: useComputationUpdatedSelector,
         useSelectedSelector: useOwnerSelectedSelector,
         toggleHoveredOwner,
+        useHoveredSelector,
       }}
     >
       <div class={styles.app}>

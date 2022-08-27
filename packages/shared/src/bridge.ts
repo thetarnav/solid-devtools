@@ -23,7 +23,7 @@ export interface Messages {
   /** adapter -> devtools: signal deep value */
   SignalValue: SignalUpdate
   /** devtools -> adapter: user hovered over component/element signal in devtools panel */
-  HighlightElement: { rootId: NodeID; componentId: NodeID } | { signalId: NodeID }
+  HighlightElement: { rootId: NodeID; nodeId: NodeID } | null
 }
 
 export type PostMessageFn = <K extends keyof Messages>(

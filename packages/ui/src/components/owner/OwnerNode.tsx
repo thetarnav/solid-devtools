@@ -12,30 +12,33 @@ export function OwnerNode(props: { owner: Graph.Owner; level: number }): JSX.Ele
   const children = () => owner.children
   const typeName = NodeType[type]
 
-  // const { hoverProps, isHovered } = createHover({})
-
-  const { useUpdatedSelector, useSelectedSelector, handleFocus, toggleHoveredOwner } =
-    useStructure()
+  const {
+    useUpdatedSelector,
+    useSelectedSelector,
+    handleFocus,
+    toggleHoveredOwner,
+    useHoveredSelector,
+  } = useStructure()
 
   const isUpdated = type !== NodeType.Root ? useUpdatedSelector(id) : () => false
+
   const isSelected = useSelectedSelector(owner)
   onCleanup(() => isSelected() && handleFocus(null))
 
+  const isHovered = useHoveredSelector(id)
+  onCleanup(() => toggleHoveredOwner(owner, false))
+
   return (
-    <div
-      class={styles.container}
-      style={assignInlineVars({
-        [styles.levelVar]: level + "",
-      })}
-    >
+    <div class={styles.container} style={assignInlineVars({ [styles.levelVar]: level + "" })}>
       <div
+        data-hovered={isHovered()}
         data-selected={isSelected()}
         class={styles.header.contailer}
-        // {...hoverProps}
         onClick={e => handleFocus(isSelected() ? null : owner)}
+        onMouseEnter={() => toggleHoveredOwner(owner, true)}
+        onMouseLeave={() => toggleHoveredOwner(owner, false)}
       >
-        <div class={styles.header.selection} />
-        <div class={styles.header.containerShadow}></div>
+        <div class={styles.header.selection}></div>
         <div class={styles.header.nameContainer}>
           {/* TODO: observers and sources highlighting */}
           <Highlight strong={isUpdated()} light={false} class={styles.header.highlight}>

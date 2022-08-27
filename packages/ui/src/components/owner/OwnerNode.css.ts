@@ -22,10 +22,10 @@ export const header = {
     cursor: "pointer",
     vars: { [shadowOpacity]: "0" },
     ...transition("color"),
-    ":hover": {
-      vars: { [shadowOpacity]: "0.2" },
-    },
     selectors: {
+      '&[data-hovered="true"]': {
+        vars: { [shadowOpacity]: "0.2" },
+      },
       '&[data-selected="true"]': {
         color: color.white,
         vars: { [shadowOpacity]: "1" },
@@ -33,9 +33,6 @@ export const header = {
     },
   }),
   selection: style({
-    position: "absolute",
-  }),
-  containerShadow: style({
     position: "absolute",
     zIndex: -1,
     ...insetY(0),

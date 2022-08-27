@@ -73,13 +73,14 @@ const extensionAdapterFactory: PluginFactory = ({
   })
 
   onWindowMessage("HighlightElement", payload => {
+    if (!payload) return setTargetElement(null)
     if ("rootId" in payload) {
       // highlight component
-      const { rootId, componentId } = payload
+      const { rootId, nodeId } = payload
       const root = roots()[rootId]
       if (!root) return warn("No root found", rootId)
-      const component = root.components()[componentId]
-      if (!component) return warn("No component found", componentId)
+      const component = root.components()[nodeId]
+      if (!component) return warn("No component found", nodeId)
       const el = component.resolved
       // TODO: if both element and component is known, there is no need to search for it.
       if (el instanceof HTMLElement) setTargetElement(el)

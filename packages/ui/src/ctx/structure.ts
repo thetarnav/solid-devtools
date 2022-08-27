@@ -6,7 +6,8 @@ export type StructureContextState = {
   handleFocus: (owner: Graph.Owner | null) => void
   useUpdatedSelector: (id: NodeID) => Accessor<boolean>
   useSelectedSelector: (owner: Graph.Owner) => Accessor<boolean>
-  toggleHoveredOwner: (owner: Graph.Owner, element: HTMLElement, hovered: boolean) => void
+  toggleHoveredOwner: (owner: Graph.Owner, hovered: boolean) => void
+  useHoveredSelector: (id: NodeID) => Accessor<boolean>
 }
 
 const StructureContext = createContext<StructureContextState>()

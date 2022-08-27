@@ -1,5 +1,5 @@
-import { Accessor, createMemo, createSignal, getOwner, onCleanup } from "solid-js"
-import type { MemoOptions } from "solid-js/types/reactive/signal"
+import type { EqualityCheckerFunction, MemoOptions } from "solid-js/types/reactive/signal"
+import { Accessor, createMemo, createSignal, getOwner, onCleanup, createSelector } from "solid-js"
 import { remove } from "@solid-primitives/immutable"
 import { onRootCleanup } from "@solid-primitives/utils"
 
@@ -48,4 +48,12 @@ export function createDerivedSignal<T>(fallback?: T, options?: MemoOptions<T>): 
       return setSource(() => newSource)
     },
   ]
+}
+
+export function createBoundSelector<T, U>(
+  source: Accessor<T>,
+  fn?: EqualityCheckerFunction<T, U>,
+): [useSelector: (item: U) => Accessor<boolean>, selector: (item: U) => boolean] {
+  const selector = createSelector(source, fn)
+  return [item => selector.bind(void 0, item), selector]
 }

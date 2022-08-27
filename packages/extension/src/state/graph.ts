@@ -3,6 +3,7 @@ import { createStore, produce } from "solid-js/store"
 import { NodeID, RootsUpdates, Mapped, Graph } from "@solid-devtools/shared/graph"
 import { createUpdatedSelector } from "./utils"
 import { createStaticStore } from "@solid-primitives/utils"
+import { createBoundSelector } from "@solid-devtools/shared/primitives"
 
 const NodeMap: Record<NodeID, Record<NodeID, Graph.Owner>> = {}
 
@@ -83,8 +84,6 @@ function reconcileChildren(
 
   if (childrenExtended) {
     for (; i < newLength; i++) {
-      // dispose old, map new child
-      disposeOwner(children[i])
       children[i] = mapNewOwner(rootId, newChildren[i])
     }
   } else {
@@ -100,20 +99,12 @@ function reconcileNode(rootId: NodeID, mapped: Mapped.Owner, node: Graph.Owner):
 const exports = createRoot(() => {
   const [graphs, setGraphs] = createStore<Graph.Root[]>([])
 
-  const NULL_HOVERED_STATE = { rootId: null, owner: null, element: null } as const
-  const [hovered, setHovered] = createStaticStore<
-    | { readonly rootId: NodeID; readonly owner: Graph.Owner; readonly element: HTMLElement }
-    | typeof NULL_HOVERED_STATE
-  >(NULL_HOVERED_STATE)
-
   const [useComputationUpdatedSelector, addUpdatedComputations, clearUpdatedComputations] =
     createUpdatedSelector()
 
   const removeRoot = (proxy: Graph.Root[], id: NodeID): void => {
-    proxy.splice(
-      proxy.findIndex(e => e.id === id),
-      1,
-    )
+    const index = proxy.findIndex(e => e.id === id)
+    proxy.splice(index, 1)
     delete NodeMap[id]
   }
   const updateRoot = (proxy: Graph.Root[], { id, tree }: Mapped.SRoot): void => {
@@ -140,6 +131,24 @@ const exports = createRoot(() => {
     addUpdatedComputations(nodeIds)
   }
 
+  const NULL_HOVERED_STATE = { rootId: null, owner: null } as const
+  const [hovered, setHovered] = createStaticStore<
+    { readonly rootId: NodeID; readonly owner: Graph.Owner } | typeof NULL_HOVERED_STATE
+  >(NULL_HOVERED_STATE)
+
+  const [useHoveredSelector] = createBoundSelector<NodeID | undefined, NodeID>(
+    () => hovered.owner?.id,
+  )
+
+  // used in the owner ui node to toggle owner being hovered
+  function toggleHoveredOwner(owner: Graph.Owner, hovered: boolean) {
+    setHovered(p => {
+      if (hovered) return { rootId: findOwnerRootId(owner), owner }
+      if (p.owner === owner) return NULL_HOVERED_STATE
+      return p
+    })
+  }
+
   function resetGraph() {
     batch(() => {
       clearUpdatedComputations()
@@ -149,15 +158,6 @@ const exports = createRoot(() => {
     disposeAllNodes()
   }
 
-  // used in the owner ui node to toggle owner being hovered
-  function toggleHoveredOwner(owner: Graph.Owner, element: HTMLElement, hovered: boolean) {
-    setHovered(p => {
-      if (hovered) return { rootId: findOwnerRootId(owner), owner, element }
-      if (p.owner === owner) return NULL_HOVERED_STATE
-      return p
-    })
-  }
-
   return {
     graphs,
     handleGraphUpdate,
@@ -165,6 +165,8 @@ const exports = createRoot(() => {
     handleComputationsUpdate,
     useComputationUpdatedSelector,
     toggleHoveredOwner,
+    useHoveredSelector,
+    hovered,
   }
 })
 export const {
@@ -174,4 +176,6 @@ export const {
   handleComputationsUpdate,
   useComputationUpdatedSelector,
   toggleHoveredOwner,
+  useHoveredSelector,
+  hovered,
 } = exports
