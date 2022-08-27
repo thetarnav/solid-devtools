@@ -1,8 +1,13 @@
 import { Mapped } from "@solid-devtools/shared/graph"
 import { LOCATION_ATTRIBUTE_NAME } from "@solid-devtools/shared/variables"
 import { isWindows } from "@solid-primitives/platform"
-import { SelectedComponent } from "."
 import { ElementLocation } from "./goToSource"
+
+export type SelectedComponent = {
+  name: string
+  element: HTMLElement
+  location: ElementLocation | null
+}
 
 const LOC_ATTR_REGEX_WIN = /^((?:[^\\/:*?"<>|]+\\)*[^\\/:*?"<>|]+):([0-9]+):([0-9]+)$/
 const LOC_ATTR_REGEX_UNIX = /^((?:[^\\:*?"<>|]+\/)*[^\\/:*?"<>|]+):([0-9]+):([0-9]+)$/
@@ -34,23 +39,32 @@ const findComponentCache = new Map<HTMLElement, SelectedComponent | null>()
  */
 export function findComponent(
   comps: Mapped.Component[],
-  target: HTMLElement | null,
+  target: HTMLElement,
 ): SelectedComponent | null {
-  if (!target) return null
   const checked: HTMLElement[] = []
   const toCheck = [target]
-  let location: SelectedComponent["location"] = null
+  let location: ElementLocation | null = null
+  let element: HTMLElement | null = null
 
   for (const el of toCheck) {
     if (!location) {
       const loc = getLocationFromElement(el)
-      if (loc) location = { ...loc, element: el }
+      if (loc) {
+        location = loc
+        element = el
+      }
     }
 
     const cached = findComponentCache.get(el)
     if (cached !== undefined) {
       checked.forEach(cel => findComponentCache.set(cel, cached))
-      return cached ? { ...cached, location: location ?? cached.location } : null
+      return cached
+        ? {
+            name: cached.name,
+            location: location ?? cached.location,
+            element: element ?? cached.element,
+          }
+        : null
     }
 
     checked.push(el)
@@ -61,7 +75,7 @@ export function findComponent(
         (Array.isArray(comp.resolved) && comp.resolved.some(e => e === el)) ||
         el === comp.resolved
       ) {
-        const obj = { name: comp.name, element: el, location }
+        const obj = { name: comp.name, element: element ?? el, location }
         checked.forEach(cel => findComponentCache.set(cel, obj))
         return obj
       }

@@ -36,7 +36,8 @@ export function OwnerNode(props: { owner: Graph.Owner; level: number }): JSX.Ele
         class={styles.header.contailer}
         onClick={e => handleFocus(isSelected() ? null : owner)}
         onMouseEnter={() => toggleHoveredOwner(owner, true)}
-        onMouseLeave={() => toggleHoveredOwner(owner, false)}
+        // onMouseLeave is fired in the next tick for the onMouseEnter of other node fired earlier
+        onMouseLeave={() => setTimeout(() => toggleHoveredOwner(owner, false))}
       >
         <div class={styles.header.selection}></div>
         <div class={styles.header.nameContainer}>

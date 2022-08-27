@@ -78,6 +78,7 @@
     "@solid-aria/interactions": "^0.1.4",
     "@solid-devtools/shared": "workspace:^0.6.2",
     "@solid-primitives/bounds": "^0.0.101",
+    "@solid-primitives/cursor": "^0.0.100",
     "@solid-primitives/event-listener": "^2.2.1",
     "@solid-primitives/keyboard": "^1.0.1",
     "@solid-primitives/keyed": "^1.0.1",

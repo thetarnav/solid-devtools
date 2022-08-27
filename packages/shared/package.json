@@ -31,11 +31,6 @@
       "require": "./dist/bridge.cjs",
       "types": "./dist/bridge.d.ts"
     },
-    "./cursor": {
-      "import": "./dist/cursor.js",
-      "require": "./dist/cursor.cjs",
-      "types": "./dist/cursor.d.ts"
-    },
     "./diff": {
       "import": "./dist/diff.js",
       "require": "./dist/diff.cjs",
@@ -71,9 +66,6 @@
     "*": {
       "bridge": [
         "./dist/bridge.d.ts"
-      ],
-      "cursor": [
-        "./dist/cursor.d.ts"
       ],
       "diff": [
         "./dist/diff.d.ts"

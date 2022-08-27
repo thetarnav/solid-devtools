@@ -1,6 +1,6 @@
 import { createEffect, createSignal } from "solid-js"
 import { registerDebuggerPlugin, PluginFactory } from "@solid-devtools/debugger"
-import { registerLocatorPlugin } from "@solid-devtools/locator"
+import { registerLocatorPlugin, setLocatorTarget } from "@solid-devtools/locator"
 import {
   onWindowMessage,
   postWindowMessage,
@@ -62,7 +62,7 @@ const extensionAdapterFactory: PluginFactory = ({
     if (details) postWindowMessage("OwnerDetailsUpdate", details)
   })
 
-  const { selected: selectedComponent, setTargetElement } = registerLocatorPlugin({
+  registerLocatorPlugin({
     enabled,
     onClick: (e, data) => {
       e.preventDefault()
@@ -73,7 +73,7 @@ const extensionAdapterFactory: PluginFactory = ({
   })
 
   onWindowMessage("HighlightElement", payload => {
-    if (!payload) return setTargetElement(null)
+    if (!payload) return setLocatorTarget(null)
     if ("rootId" in payload) {
       // highlight component
       const { rootId, nodeId } = payload
@@ -81,14 +81,11 @@ const extensionAdapterFactory: PluginFactory = ({
       if (!root) return warn("No root found", rootId)
       const component = root.components()[nodeId]
       if (!component) return warn("No component found", nodeId)
-      const el = component.resolved
-      // TODO: if both element and component is known, there is no need to search for it.
-      if (el instanceof HTMLElement) setTargetElement(el)
+      setLocatorTarget(component)
     } else {
       // highlight signal
       // TODO
     }
-    // TODO: un-highlight
   })
 
   return { enabled }

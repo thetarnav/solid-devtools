@@ -75,12 +75,12 @@ createRoot(() => {
     const { rootId, owner } = hovered
     // skip initial value
     if (initHighlight) return (initHighlight = false) || undefined
-    if (!rootId || !owner) {
+    if (!rootId || !owner || owner.type !== NodeType.Component) {
       if (prev) postRuntimeMessage("HighlightElement", null)
       return
     }
-    // do not send the same message twice or if the hovered owner is not a component
-    if ((prev && prev.nodeId === owner.id) || owner.type !== NodeType.Component) return prev
+    // do not send the same message twice
+    if (prev && prev.nodeId === owner.id) return prev
     const payload = { rootId, nodeId: owner.id }
     postRuntimeMessage("HighlightElement", payload)
     return payload
