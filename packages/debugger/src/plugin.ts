@@ -14,7 +14,7 @@ import {
 import { EncodedValue, encodeValue } from "@solid-devtools/shared/serialize"
 import { createConsumers } from "@solid-devtools/shared/primitives"
 import { createBatchedUpdateEmitter, createInternalRoot } from "./utils"
-import { ComputationUpdateHandler, SignalUpdateHandler } from "./walker"
+import { ComputationUpdateHandler, SignalUpdateHandler, WalkerSelectedResult } from "./walker"
 import { forceRootUpdate } from "./roots"
 import { Merge } from "type-fest"
 
@@ -178,20 +178,10 @@ const exported = createInternalRoot(() => {
     forceRootUpdate(payload.rootId)
   }
 
-  const setFocusedOwnerDetails = (
-    newOwner: Solid.Owner | null,
-    newDetails: Mapped.OwnerDetails | null,
-    newSignalMap: Record<NodeID, Solid.Signal>,
-  ) => {
-    if (newOwner && newDetails) {
-      setFocusedState(prev => ({
-        id: prev.id!,
-        rootId: prev.rootId!,
-        owner: newOwner,
-        updated: prev.owner === newOwner,
-        details: newDetails,
-        signalMap: newSignalMap,
-      }))
+  const setSelectedDetails = (payload: WalkerSelectedResult) => {
+    if (payload.details) {
+      const { owner, details, signalMap } = payload
+      setFocusedState(prev => ({ owner, updated: prev.owner === owner, details, signalMap }))
     } else setFocusedState(NULL_SELECTED_STATE)
   }
 
@@ -271,7 +261,7 @@ const exported = createInternalRoot(() => {
     removeRoot,
     gatherComponents,
     pushSignalUpdate,
-    setFocusedOwnerDetails,
+    setSelectedDetails,
     focusedState,
     pushComputationUpdate,
   }
@@ -285,7 +275,7 @@ export const {
   updateRoot,
   removeRoot,
   pushSignalUpdate,
-  setFocusedOwnerDetails,
+  setSelectedDetails,
   focusedState,
   pushComputationUpdate,
 } = exported

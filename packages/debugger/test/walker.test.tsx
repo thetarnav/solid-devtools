@@ -49,11 +49,11 @@ describe("walkSolidTree", () => {
       return [dispose, getOwner()!]
     })
 
-    const { tree, components, focusedOwner, focusedOwnerDetails } = walkSolidTree(owner, {
+    const { tree, components, selected } = walkSolidTree(owner, {
       onComputationUpdate: () => {},
       onSignalUpdate: () => {},
       rootId: "ff",
-      focusedId: null,
+      selectedId: null,
       gatherComponents: false,
     })
 
@@ -91,8 +91,12 @@ describe("walkSolidTree", () => {
     })
     expect(tree).toEqual(JSON.parse(JSON.stringify(tree)))
     expect(components).toEqual({})
-    expect(focusedOwner).toBe(null)
-    expect(focusedOwnerDetails).toBe(null)
+    expect(selected).toEqual({
+      details: null,
+      owner: null,
+      signalMap: {},
+      elementsMap: {},
+    })
   })
 
   it("listen to computation updates", () =>
@@ -108,7 +112,7 @@ describe("walkSolidTree", () => {
         onComputationUpdate: (rootId, id) => capturedComputationUpdates.push([rootId, id]),
         onSignalUpdate: () => {},
         rootId: "ff",
-        focusedId: null,
+        selectedId: null,
         gatherComponents: false,
       })
 
@@ -148,7 +152,7 @@ describe("walkSolidTree", () => {
         onComputationUpdate: () => {},
         onSignalUpdate: () => {},
         rootId: "ff",
-        focusedId: null,
+        selectedId: null,
         gatherComponents: true,
       })
 
@@ -197,18 +201,15 @@ describe("walkSolidTree", () => {
         { name: "WRAPPER" },
       )
 
-      const { tree, focusedOwner, focusedOwnerDetails, focusedOwnerSignalMap } = walkSolidTree(
-        getOwner()!,
-        {
-          rootId: "0",
-          focusedId: "ff",
-          onComputationUpdate: () => {},
-          onSignalUpdate: () => {},
-          gatherComponents: false,
-        },
-      )
+      const { tree, selected } = walkSolidTree(getOwner()!, {
+        rootId: "0",
+        selectedId: "ff",
+        onComputationUpdate: () => {},
+        onSignalUpdate: () => {},
+        gatherComponents: false,
+      })
 
-      expect(owner).toBe(focusedOwner)
+      expect(owner).toBe(selected.owner)
 
       expect(tree).toEqual({
         id: "0",
@@ -249,7 +250,7 @@ describe("walkSolidTree", () => {
         ],
       })
 
-      expect(focusedOwnerDetails).toEqual({
+      expect(selected.details).toEqual({
         id: "ff",
         name: "focused",
         type: NodeType.Memo,
@@ -275,10 +276,10 @@ describe("walkSolidTree", () => {
         observers: ["1"],
       })
 
-      expect(focusedOwnerSignalMap).toHaveProperty("2")
-      expect(focusedOwnerSignalMap).toHaveProperty("3")
-      expect(focusedOwnerSignalMap["2"].sdtId).toBe("2")
-      expect(focusedOwnerSignalMap["3"].sdtId).toBe("3")
+      expect(selected.signalMap).toHaveProperty("2")
+      expect(selected.signalMap).toHaveProperty("3")
+      expect(selected.signalMap["2"].sdtId).toBe("2")
+      expect(selected.signalMap["3"].sdtId).toBe("3")
 
       dispose()
     }))

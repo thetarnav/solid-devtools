@@ -24,8 +24,12 @@ const encodePreviewExpectations: [string, unknown, EncodedValue<false>][] = [
   ["Symbol", Symbol(), { type: ValueType.Symbol, value: "" }],
   ["Function", () => {}, { type: ValueType.Function, value: "" }],
   ["Named Function", _testFunction, { type: ValueType.Function, value: "_testFunction" }],
-  ["Element div", document.createElement("div"), { type: ValueType.Element, value: "DIV" }],
-  ["Element a", document.createElement("a"), { type: ValueType.Element, value: "A" }],
+  [
+    "Element div",
+    document.createElement("div"),
+    { type: ValueType.Element, value: { name: "DIV" } },
+  ],
+  ["Element a", document.createElement("a"), { type: ValueType.Element, value: { name: "A" } }],
   ["Array empty", [], { type: ValueType.Array, value: 0 }],
   ["Array", [1, 2, 3], { type: ValueType.Array, value: 3 }],
   ["Object empty", {}, { type: ValueType.Object, value: 0 }],
@@ -40,7 +44,7 @@ const encodePreviewExpectations: [string, unknown, EncodedValue<false>][] = [
 describe("encodeValue Preview", () => {
   for (const [testName, value, expectation] of encodePreviewExpectations) {
     test(testName, () => {
-      const s = encodeValue(value)
+      const s = encodeValue(value, false)
       expect(s).toEqual(expectation)
       expect(JSON.parse(JSON.stringify(s))).toEqual(s)
     })
@@ -142,4 +146,39 @@ describe("encodeValue Deep", () => {
       expect(JSON.parse(JSON.stringify(s))).toEqual(s)
     })
   }
+})
+
+describe("save elements to a map", () => {
+  const div1 = document.createElement("div")
+  const a1 = document.createElement("a")
+  const div2 = document.createElement("div")
+
+  const elMapExpectations: [string, unknown, EncodedValue<true>][] = [
+    ["Element div", div1, { type: ValueType.Element, value: { name: "DIV", id: 0 } }],
+    ["Element a", a1, { type: ValueType.Element, value: { name: "A", id: 1 } }],
+    [
+      "Element in object",
+      { el: div2 },
+      {
+        type: ValueType.Object,
+        value: 1,
+        children: { el: { type: ValueType.Element, value: { name: "DIV", id: 2 } } },
+      },
+    ],
+  ]
+
+  const map: Record<number, HTMLElement> = {}
+  for (const [testName, value, expectation] of elMapExpectations) {
+    test(testName, () => {
+      const s = encodeValue(value, true, map)
+      expect(s).toEqual(expectation)
+      expect(JSON.parse(JSON.stringify(s))).toEqual(s)
+    })
+  }
+  test("map containing correct values", () => {
+    expect(Object.keys(map).length).toBe(3)
+    expect(map[0]).toBe(div1)
+    expect(map[1]).toBe(a1)
+    expect(map[2]).toBe(div2)
+  })
 })

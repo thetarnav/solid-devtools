@@ -24,7 +24,7 @@ export type EncodedPreviewPayloadMap = {
   [ValueType.String]: string
   [ValueType.Symbol]: string
   [ValueType.Function]: string
-  [ValueType.Element]: string
+  [ValueType.Element]: { name: string; id?: number }
   [ValueType.Instance]: string
 }
 
@@ -45,9 +45,13 @@ export type EncodedValue<Deep extends boolean = false> = {
   [K in ValueType]: EncodedValueOf<K, Deep>
 }[ValueType]
 
-export function encodeValue<Deep extends boolean>(value: unknown, deep: Deep): EncodedValue<Deep>
-export function encodeValue(value: unknown): EncodedValue<false>
-export function encodeValue<Deep extends boolean>(value: unknown, deep?: Deep): EncodedValue<Deep> {
+let lastId = 0
+
+export function encodeValue<Deep extends boolean>(
+  value: unknown,
+  deep: Deep,
+  elementMap?: Record<number, HTMLElement>,
+): EncodedValue<Deep> {
   if (typeof value === "number") {
     if (value === Infinity) return { type: ValueType.Number, value: INFINITY }
     if (value === -Infinity) return { type: ValueType.Number, value: NEGATIVE_INFINITY }
@@ -60,14 +64,21 @@ export function encodeValue<Deep extends boolean>(value: unknown, deep?: Deep): 
   if (value === undefined) return { type: ValueType.Undefined }
   if (typeof value === "symbol") return { type: ValueType.Symbol, value: value.description ?? "" }
   if (typeof value === "function") return { type: ValueType.Function, value: value.name }
-  if (value instanceof HTMLElement) return { type: ValueType.Element, value: value.tagName }
+  if (value instanceof HTMLElement) {
+    if (elementMap) {
+      const id = lastId++
+      elementMap[id] = value
+      return { type: ValueType.Element, value: { name: value.tagName, id } }
+    }
+    return { type: ValueType.Element, value: { name: value.tagName } }
+  }
 
   if (Array.isArray(value)) {
     const payload = { type: ValueType.Array, value: value.length } as EncodedValueOf<
       ValueType.Array,
       boolean
     >
-    if (deep) payload.children = value.map(item => encodeValue(item, true))
+    if (deep) payload.children = value.map(item => encodeValue(item, true, elementMap))
     return payload
   }
 
@@ -81,7 +92,7 @@ export function encodeValue<Deep extends boolean>(value: unknown, deep?: Deep): 
     >
     if (deep)
       payload.children = Object.keys(obj).reduce<Record<string, EncodedValue<true>>>((acc, key) => {
-        acc[key] = encodeValue(obj[key], true)
+        acc[key] = encodeValue(obj[key], true, elementMap)
         return acc
       }, {})
     return payload

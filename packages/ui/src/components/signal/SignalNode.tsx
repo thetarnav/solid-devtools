@@ -70,7 +70,7 @@ const InstanceValuePreview: ValueComponent<ValueType.Instance> = props => (
 )
 
 const ElementValuePreview: ValueComponent<ValueType.Element> = props => (
-  <span class={styles.ValueElement}>{props.value}</span>
+  <span class={styles.ValueElement}>{props.value.name}</span>
 )
 
 const ObjectValuePreview: Component<
