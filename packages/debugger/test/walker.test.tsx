@@ -90,7 +90,7 @@ describe("walkSolidTree", () => {
       ],
     })
     expect(tree).toEqual(JSON.parse(JSON.stringify(tree)))
-    expect(components).toEqual({})
+    expect(components).toEqual([])
     expect(selected).toEqual({
       details: null,
       owner: null,
@@ -156,11 +156,11 @@ describe("walkSolidTree", () => {
         gatherComponents: true,
       })
 
-      expect(Object.keys(components).length).toBe(7)
+      expect(components.length).toBe(7)
 
       let testCompsLength = 0
       let btn!: Mapped.Component
-      Object.values(components).forEach(c => {
+      components.forEach(c => {
         if (c.name === "TestComponent" && c.resolved instanceof HTMLDivElement) testCompsLength++
         else btn = c
       })
