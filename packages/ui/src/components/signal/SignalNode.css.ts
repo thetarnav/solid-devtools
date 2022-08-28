@@ -17,34 +17,33 @@ export const Signals = {
   }),
 }
 
-const { container, highlight, bgColorVar, bgOpacityVar } = createHighlightStyles()
+const valueRowHighlight = createHighlightStyles()
 
 export const ValueRow = {
   container: style([
-    container,
+    valueRowHighlight.container,
     {
       width: "100%",
       display: "flex",
       flexWrap: "wrap",
       alignItems: "flex-start",
-      // height: spacing[4.5],
       cursor: "pointer",
       vars: {
-        [bgColorVar]: color.gray[300],
-        [bgOpacityVar]: "0",
+        [valueRowHighlight.bgColorVar]: color.gray[300],
+        [valueRowHighlight.bgOpacityVar]: "0",
       },
     },
   ]),
   containerFocused: style({
     vars: {
-      [bgOpacityVar]: "0.2",
+      [valueRowHighlight.bgOpacityVar]: "0.2",
     },
   }),
   containerHovered: style({
-    vars: { [bgOpacityVar]: "0.3" },
+    vars: { [valueRowHighlight.bgOpacityVar]: "0.3" },
   }),
   highlight: style([
-    highlight,
+    valueRowHighlight.highlight,
     {
       border: `1px solid ${color.gray[400]}`,
     },
@@ -148,18 +147,34 @@ export const Nullable = style([
     color: color.disabled,
   },
 ])
-export const ValueElement = style([
-  baseValue,
-  {
-    color: color.amber[600],
-    textTransform: "lowercase",
-    ":before": {
-      color: color.disabled,
-      content: `<`,
+
+const elHighlight = createHighlightStyles()
+
+export const ValueElement = {
+  container: style([
+    baseValue,
+    elHighlight.container,
+    {
+      color: color.amber[600],
+      textTransform: "lowercase",
+      vars: {
+        [elHighlight.bgColorVar]: color.gray[300],
+        [elHighlight.bgOpacityVar]: "0",
+      },
+      ":hover": {
+        vars: {
+          [elHighlight.bgOpacityVar]: "0.6",
+        },
+      },
+      ":before": {
+        color: color.disabled,
+        content: `<`,
+      },
+      ":after": {
+        color: color.disabled,
+        content: "/>",
+      },
     },
-    ":after": {
-      color: color.disabled,
-      content: "/>",
-    },
-  },
-])
+  ]),
+  highlight: elHighlight.highlight,
+}

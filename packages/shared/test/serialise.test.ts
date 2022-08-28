@@ -154,15 +154,15 @@ describe("save elements to a map", () => {
   const div2 = document.createElement("div")
 
   const elMapExpectations: [string, unknown, EncodedValue<true>][] = [
-    ["Element div", div1, { type: ValueType.Element, value: { name: "DIV", id: 0 } }],
-    ["Element a", a1, { type: ValueType.Element, value: { name: "A", id: 1 } }],
+    ["Element div", div1, { type: ValueType.Element, value: { name: "DIV", id: "0" } }],
+    ["Element a", a1, { type: ValueType.Element, value: { name: "A", id: "1" } }],
     [
       "Element in object",
       { el: div2 },
       {
         type: ValueType.Object,
         value: 1,
-        children: { el: { type: ValueType.Element, value: { name: "DIV", id: 2 } } },
+        children: { el: { type: ValueType.Element, value: { name: "DIV", id: "2" } } },
       },
     ],
   ]

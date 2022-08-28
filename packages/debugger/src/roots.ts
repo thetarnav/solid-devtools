@@ -37,6 +37,7 @@ import {
   removeDebuggerContext,
   setDebuggerContext,
 } from "./utils"
+import { untrackedCallback } from "@solid-devtools/shared/primitives"
 
 const RootMap: Record<NodeID, { update: VoidFunction; forceUpdate: VoidFunction }> = {}
 export const forceRootUpdate = (rootId: NodeID) => RootMap[rootId].forceUpdate()
@@ -62,23 +63,22 @@ export function createGraphRoot(owner: Solid.Root): void {
 
     let lastSelectedOwner: Solid.Owner | null = null
 
-    const forceRootUpdate = () => {
+    const forceRootUpdate: VoidFunction = untrackedCallback(() => {
       if (owner.isDisposed) return
       // make sure we don't keep the listeners around
       lastSelectedOwner && clearOwnerObservers(lastSelectedOwner)
-      const { tree, components, selected } = untrack(() =>
-        walkSolidTree(owner, {
-          onComputationUpdate,
-          onSignalUpdate,
-          rootId,
-          selectedId: focusedState.id,
-          gatherComponents: gatherComponents(),
-        }),
-      )
+      const { tree, components, selected } = walkSolidTree(owner, {
+        onComputationUpdate,
+        onSignalUpdate,
+        rootId,
+        selectedId: focusedState.id,
+        gatherComponents: gatherComponents(),
+        elementMap: focusedState.elementMap,
+      })
       lastSelectedOwner = selected.owner
-      if (untrack(() => focusedState.rootId) === rootId) setSelectedDetails(selected)
+      if (focusedState.rootId === rootId) setSelectedDetails(selected)
       updateRoot({ id: rootId, tree, components })
-    }
+    })
     const triggerRootUpdate = throttle(forceRootUpdate, 350)
 
     RootMap[rootId] = {

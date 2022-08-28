@@ -26,7 +26,7 @@ let Components: Record<NodeID, Mapped.Component> = {}
 let SelectedOwner: Solid.Owner | null
 let SelectedDetails: Mapped.OwnerDetails | null
 let SelectedSignalMap: Record<NodeID, Solid.Signal>
-let ElementsMap: Record<number, HTMLElement>
+let ElementMap: Record<NodeID, HTMLElement>
 
 const WALKER = Symbol("walker")
 
@@ -51,7 +51,7 @@ function mapSignalNode(node: Solid.Signal): Mapped.Signal {
     name: getNodeName(node),
     id,
     observers: markNodesID(node.observers),
-    value: encodeValue(node.value, false, ElementsMap),
+    value: encodeValue(node.value, false, ElementMap),
   }
 }
 
@@ -89,7 +89,7 @@ function collectOwnerDetails(owner: Solid.Owner): void {
   }
 
   if (isSolidComputation(owner)) {
-    details.value = encodeValue(owner.value, false, ElementsMap)
+    details.value = encodeValue(owner.value, false, ElementMap)
     details.sources = markNodesID(owner.sources)
     if (isSolidMemo(owner)) {
       details.observers = markNodesID(owner.observers)
@@ -147,6 +147,7 @@ export type WalkerConfig = {
   onComputationUpdate: ComputationUpdateHandler
   gatherComponents: boolean
   selectedId: NodeID | null
+  elementMap?: Record<NodeID, HTMLElement>
 }
 
 export type WalkerSelectedResult = (
@@ -154,7 +155,7 @@ export type WalkerSelectedResult = (
   | { details: null; owner: null }
 ) & {
   signalMap: Record<NodeID, Solid.Signal>
-  elementsMap: Record<number, HTMLElement>
+  elementMap: Record<NodeID, HTMLElement>
 }
 
 export function walkSolidTree(
@@ -175,14 +176,14 @@ export function walkSolidTree(
   SelectedDetails = null
   SelectedSignalMap = {}
   Components = {}
-  ElementsMap = {}
+  ElementMap = config.elementMap ?? {}
 
   const tree = mapOwner(owner)
   const components = Components
   const focusedOwner = SelectedOwner
   const focusedOwnerDetails = SelectedDetails
   const focusedOwnerSignalMap = SelectedSignalMap
-  const elementsMap = ElementsMap
+  const elementMap = ElementMap
 
   return {
     tree,
@@ -191,7 +192,7 @@ export function walkSolidTree(
       details: focusedOwnerDetails,
       owner: focusedOwner,
       signalMap: focusedOwnerSignalMap,
-      elementsMap,
+      elementMap,
     },
   }
 }

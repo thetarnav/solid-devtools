@@ -1,7 +1,18 @@
 import type { EqualityCheckerFunction, MemoOptions } from "solid-js/types/reactive/signal"
-import { Accessor, createMemo, createSignal, getOwner, onCleanup, createSelector } from "solid-js"
+import {
+  Accessor,
+  createMemo,
+  createSignal,
+  getOwner,
+  onCleanup,
+  createSelector,
+  untrack,
+} from "solid-js"
 import { remove } from "@solid-primitives/immutable"
-import { onRootCleanup } from "@solid-primitives/utils"
+import { AnyFunction, onRootCleanup } from "@solid-primitives/utils"
+
+export const untrackedCallback = <Fn extends AnyFunction>(fn: Fn): Fn =>
+  ((...a: Parameters<Fn>) => untrack<ReturnType<Fn>>(fn.bind(void 0, ...a))) as any
 
 /**
  * Reactive array reducer — if at least one consumer (boolean signal) is enabled — the returned result will the `true`.

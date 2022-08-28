@@ -8,6 +8,7 @@ import {
   updateDetails,
   handleGraphUpdate as detailsHandleGraphUpdate,
   setOnSignalSelect,
+  hoveredElement,
 } from "./details"
 import { Messages } from "@solid-devtools/shared/bridge"
 import { NodeType } from "@solid-devtools/shared/graph"
@@ -69,21 +70,32 @@ createRoot(() => {
   )
 
   let initHighlight = true
-  // toggle hovered component
+  // toggle hovered html element
   createEffect<Messages["HighlightElement"] | undefined>(prev => {
     // tracks
     const { rootId, owner } = hovered
+    const elId = hoveredElement()
+
     // skip initial value
     if (initHighlight) return (initHighlight = false) || undefined
-    if (!rootId || !owner || owner.type !== NodeType.Component) {
-      if (prev) postRuntimeMessage("HighlightElement", null)
-      return
+
+    // handle component
+    if (rootId && owner && owner.type === NodeType.Component) {
+      // do not send the same message twice
+      if (prev && typeof prev === "object" && prev.nodeId === owner.id) return prev
+      const payload = { rootId, nodeId: owner.id }
+      postRuntimeMessage("HighlightElement", payload)
+      return payload
     }
-    // do not send the same message twice
-    if (prev && prev.nodeId === owner.id) return prev
-    const payload = { rootId, nodeId: owner.id }
-    postRuntimeMessage("HighlightElement", payload)
-    return payload
+    // handle element
+    if (elId) {
+      // do not send the same message twice
+      if (typeof prev === "string" && prev === elId) return prev
+      postRuntimeMessage("HighlightElement", elId)
+      return elId
+    }
+    // no element or component
+    if (prev) postRuntimeMessage("HighlightElement", null)
   })
 
   // toggle selected signals

@@ -24,7 +24,7 @@ export type EncodedPreviewPayloadMap = {
   [ValueType.String]: string
   [ValueType.Symbol]: string
   [ValueType.Function]: string
-  [ValueType.Element]: { name: string; id?: number }
+  [ValueType.Element]: { name: string; id?: string }
   [ValueType.Instance]: string
 }
 
@@ -50,7 +50,7 @@ let lastId = 0
 export function encodeValue<Deep extends boolean>(
   value: unknown,
   deep: Deep,
-  elementMap?: Record<number, HTMLElement>,
+  elementMap?: Record<string, HTMLElement>,
 ): EncodedValue<Deep> {
   if (typeof value === "number") {
     if (value === Infinity) return { type: ValueType.Number, value: INFINITY }
@@ -66,7 +66,7 @@ export function encodeValue<Deep extends boolean>(
   if (typeof value === "function") return { type: ValueType.Function, value: value.name }
   if (value instanceof HTMLElement) {
     if (elementMap) {
-      const id = lastId++
+      const id = (lastId++).toString()
       elementMap[id] = value
       return { type: ValueType.Element, value: { name: value.tagName, id } }
     }

@@ -23,6 +23,7 @@ import {
   toggleSignalFocus,
   setFocused,
   useOwnerSelectedSelector,
+  setHoveredElement,
 } from "./state/details"
 import * as styles from "./styles.css"
 
@@ -42,6 +43,7 @@ const DetailsContent: Component<{ details: Graph.OwnerDetails }> = props => {
           value={{
             useUpdatedSelector: useUpdatedSignalsSelector,
             toggleSignalFocus: toggleSignalFocus,
+            setHoveredElement,
           }}
         >
           <Signals each={Object.values(signals())} />

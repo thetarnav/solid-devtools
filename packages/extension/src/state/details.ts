@@ -1,4 +1,4 @@
-import { Accessor, batch, createRoot, createSelector, untrack } from "solid-js"
+import { Accessor, batch, createRoot, createSelector, createSignal, untrack } from "solid-js"
 import { createStore, produce } from "solid-js/store"
 import { Mapped, Graph, NodeID, SignalUpdate } from "@solid-devtools/shared/graph"
 import { warn } from "@solid-devtools/shared/utils"
@@ -21,6 +21,7 @@ function reconcileSignals(
       // reconcile signal observers
       signal.observers.length = 0
       signal.observers.push.apply(signal.observers, newSignal.observers)
+
       intersection.push(newSignal)
     } else {
       // remove signal
@@ -164,6 +165,11 @@ const exports = createRoot(() => {
     onSignalSelect!(id, selected!)
   }
 
+  //
+  // HOVERED ELEMENT
+  //
+  const [hoveredElement, setHoveredElement] = createSignal<string | null>(null)
+
   return {
     focused,
     focusedRootId,
@@ -176,6 +182,8 @@ const exports = createRoot(() => {
     handleGraphUpdate,
     toggleSignalFocus,
     setOnSignalSelect,
+    hoveredElement,
+    setHoveredElement,
   }
 })
 export const {
@@ -190,4 +198,6 @@ export const {
   handleGraphUpdate,
   toggleSignalFocus,
   setOnSignalSelect,
+  hoveredElement,
+  setHoveredElement,
 } = exports

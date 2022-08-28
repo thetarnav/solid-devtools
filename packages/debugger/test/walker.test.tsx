@@ -1,4 +1,4 @@
-import { getOwner, Mapped, NodeType, Solid } from "@solid-devtools/shared/graph"
+import { getOwner, Mapped, NodeID, NodeType, Solid } from "@solid-devtools/shared/graph"
 import { ValueType } from "@solid-devtools/shared/serialize"
 import { UNNAMED } from "@solid-devtools/shared/variables"
 import {
@@ -95,7 +95,7 @@ describe("walkSolidTree", () => {
       details: null,
       owner: null,
       signalMap: {},
-      elementsMap: {},
+      elementMap: {},
     })
   })
 
@@ -179,6 +179,8 @@ describe("walkSolidTree", () => {
       const [s, setS] = createSignal(0, { name: "source" })
 
       let owner!: Solid.Owner
+      const div = document.createElement("div")
+      const elementMap: Record<NodeID, HTMLElement> = {}
 
       createComputed(
         () => {
@@ -187,7 +189,7 @@ describe("walkSolidTree", () => {
               owner = getOwner()!
               owner.sdtId = "ff"
               s()
-              createSignal(0, { name: "count" })
+              createSignal(div, { name: "element" })
               const memo = createMemo(() => 0, undefined, { name: "memo" })
               createRenderEffect(memo, undefined, { name: "render" })
               return "value"
@@ -207,6 +209,7 @@ describe("walkSolidTree", () => {
         onComputationUpdate: () => {},
         onSignalUpdate: () => {},
         gatherComponents: false,
+        elementMap,
       })
 
       expect(owner).toBe(selected.owner)
@@ -259,9 +262,9 @@ describe("walkSolidTree", () => {
           {
             type: NodeType.Signal,
             id: "2",
-            name: "count",
+            name: "element",
             observers: [],
-            value: { type: ValueType.Number, value: 0 },
+            value: { type: ValueType.Element, value: { name: "DIV", id: "0" } },
           },
           {
             type: NodeType.Memo,
@@ -280,6 +283,11 @@ describe("walkSolidTree", () => {
       expect(selected.signalMap).toHaveProperty("3")
       expect(selected.signalMap["2"].sdtId).toBe("2")
       expect(selected.signalMap["3"].sdtId).toBe("3")
+
+      expect(selected.elementMap).toBe(elementMap)
+      expect(Object.keys(elementMap).length).toBe(1)
+      expect(elementMap).toHaveProperty("0")
+      expect(elementMap["0"]).toBe(div)
 
       dispose()
     }))

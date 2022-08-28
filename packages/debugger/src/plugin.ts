@@ -12,11 +12,10 @@ import {
   SignalUpdate,
 } from "@solid-devtools/shared/graph"
 import { EncodedValue, encodeValue } from "@solid-devtools/shared/serialize"
-import { createConsumers } from "@solid-devtools/shared/primitives"
+import { createConsumers, untrackedCallback } from "@solid-devtools/shared/primitives"
 import { createBatchedUpdateEmitter, createInternalRoot } from "./utils"
 import { ComputationUpdateHandler, SignalUpdateHandler, WalkerSelectedResult } from "./walker"
 import { forceRootUpdate } from "./roots"
-import { Merge } from "type-fest"
 
 /*
 DETAILS:
@@ -36,26 +35,25 @@ DETAILS:
 
 export type SetFocusedOwner = (payload: { rootId: NodeID; ownerId: NodeID } | null) => void
 
-const NULL_SELECTED_STATE = {
+export type FocusedState = Readonly<
+  {
+    signalMap: Record<NodeID, Solid.Signal>
+    elementMap: Record<NodeID, HTMLElement>
+  } & (
+    | { id: null; rootId: null; owner: null; details: null }
+    | { id: NodeID; rootId: NodeID; owner: null; details: null }
+    | { id: NodeID; rootId: NodeID; owner: Solid.Owner; details: Mapped.OwnerDetails }
+  )
+>
+
+const getNullFocusedState = (): FocusedState => ({
   id: null,
   rootId: null,
   owner: null,
-  updated: false,
   details: null,
-  signalMap: {} as Record<NodeID, Solid.Signal>,
-} as const
-
-export type FocusedState =
-  | typeof NULL_SELECTED_STATE
-  | Merge<typeof NULL_SELECTED_STATE, { readonly id: NodeID; readonly rootId: NodeID }>
-  | {
-      readonly id: NodeID
-      readonly rootId: NodeID
-      readonly owner: Solid.Owner
-      readonly updated: boolean
-      readonly details: Mapped.OwnerDetails
-      readonly signalMap: Record<NodeID, Solid.Signal>
-    }
+  signalMap: {},
+  elementMap: {},
+})
 
 export type SignaledRoot = {
   readonly id: NodeID
@@ -164,14 +162,14 @@ const exported = createInternalRoot(() => {
   //
   // Focused Owner details:
   //
-  const [focusedState, setFocusedState] = createStaticStore<FocusedState>(NULL_SELECTED_STATE)
+  const [focusedState, setFocusedState] = createStaticStore(getNullFocusedState())
 
   const setFocusedOwner: SetFocusedOwner = payload => {
-    if (!payload) return setFocusedState(NULL_SELECTED_STATE)
+    if (!payload) return setFocusedState(getNullFocusedState())
     const id = untrack(() => focusedState.id)
     if (id === payload.ownerId) return
     setFocusedState({
-      ...NULL_SELECTED_STATE,
+      ...getNullFocusedState(),
       id: payload.ownerId,
       rootId: payload.rootId,
     })
@@ -179,35 +177,30 @@ const exported = createInternalRoot(() => {
   }
 
   const setSelectedDetails = (payload: WalkerSelectedResult) => {
-    if (payload.details) {
-      const { owner, details, signalMap } = payload
-      setFocusedState(prev => ({ owner, updated: prev.owner === owner, details, signalMap }))
-    } else setFocusedState(NULL_SELECTED_STATE)
+    setFocusedState(payload.details ? payload : getNullFocusedState())
   }
 
   //
   // Selected Signals:
   //
   const selectedSignalIds: Set<NodeID> = new Set()
-  const setSelectedSignal: PluginFactoryData["setSelectedSignal"] = ({ id, selected }) => {
-    const signalMap = untrack(() => focusedState.signalMap)
-    const signal = signalMap[id] as Solid.Signal | undefined
-    if (!signal) return null
-    if (selected) selectedSignalIds.add(id)
-    else selectedSignalIds.delete(id)
-    return encodeValue(signal.value, selected)
-  }
+  const setSelectedSignal: PluginFactoryData["setSelectedSignal"] = untrackedCallback(
+    ({ id, selected }) => {
+      const { signalMap, elementMap } = focusedState
+      const signal = signalMap[id] as Solid.Signal | undefined
+      if (!signal) return null
+      if (selected) selectedSignalIds.add(id)
+      else selectedSignalIds.delete(id)
+      return encodeValue(signal.value, selected, elementMap)
+    },
+  )
 
-  //
-  // Signal updates:
-  //
   const [handleSignalUpdates, _pushSignalUpdate] = createBatchedUpdateEmitter<SignalUpdate>()
-  const pushSignalUpdate: SignalUpdateHandler = (id, value) => {
-    if (!untrack(enabled) || !untrack(() => focusedState.id)) return
+  const pushSignalUpdate: SignalUpdateHandler = untrackedCallback((id, value) => {
+    if (!enabled() || !focusedState.id) return
     const isSelected = selectedSignalIds.has(id)
-    const payload: SignalUpdate = { id, value: encodeValue(value, isSelected) }
-    _pushSignalUpdate(payload)
-  }
+    _pushSignalUpdate({ id, value: encodeValue(value, isSelected, focusedState.elementMap) })
+  })
 
   //
   // Computation updates:

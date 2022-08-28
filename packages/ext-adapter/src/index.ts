@@ -74,17 +74,20 @@ const extensionAdapterFactory: PluginFactory = ({
 
   onWindowMessage("HighlightElement", payload => {
     if (!payload) return setLocatorTarget(null)
-    if ("rootId" in payload) {
-      // highlight component
+    // highlight component
+    if (typeof payload === "object") {
       const { rootId, nodeId } = payload
       const root = roots()[rootId]
       if (!root) return warn("No root found", rootId)
       const component = root.components()[nodeId]
       if (!component) return warn("No component found", nodeId)
       setLocatorTarget(component)
-    } else {
-      // highlight signal
-      // TODO
+    }
+    // highlight element
+    else {
+      const element = focusedState.elementMap[payload]
+      if (!element) return warn("No element found", payload)
+      setLocatorTarget(element)
     }
   })
 
