@@ -58,13 +58,13 @@ const getNullFocusedState = (): FocusedState => ({
 export type SignaledRoot = {
   readonly id: NodeID
   readonly tree: Accessor<Mapped.Owner>
-  readonly components: Accessor<Record<NodeID, Mapped.Component>>
+  readonly components: Accessor<Mapped.Component[]>
 }
 
 /** @internal */
 export type _SignaledRoot = SignaledRoot & {
   readonly setTree: (tree: Mapped.Owner) => void
-  readonly setComponents: (components: Record<NodeID, Mapped.Component>) => void
+  readonly setComponents: (components: Mapped.Component[]) => void
 }
 
 export type BatchComputationUpdatesHandler = (payload: ComputationUpdate[]) => void
@@ -217,7 +217,7 @@ const exported = createInternalRoot(() => {
   //
   const componentList = createLazyMemo<Mapped.Component[]>(() =>
     Object.values(roots()).reduce((arr: Mapped.Component[], root) => {
-      arr.push.apply(arr, Object.values(root.components()))
+      arr.push.apply(arr, root.components())
       return arr
     }, []),
   )

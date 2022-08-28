@@ -132,7 +132,9 @@ export namespace Mapped {
   export interface Root {
     id: NodeID
     tree: Owner
-    components: Record<NodeID, Component>
+    // components is an array instead of an object to preserve the order (nesting) of the components,
+    // this helps the locator find the most nested component first
+    components: Component[]
   }
 
   /** serialised (without components) */
@@ -158,6 +160,7 @@ export namespace Mapped {
   }
 
   export type Component = {
+    id: NodeID
     name: string
     /**
      * ! HTMLElements aren't JSON serialisable

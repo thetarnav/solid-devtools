@@ -60,7 +60,7 @@ const App: Component = () => {
         handleFocus: setFocused,
         useUpdatedSelector: useComputationUpdatedSelector,
         useSelectedSelector: useOwnerSelectedSelector,
-        toggleHoveredOwner,
+        toggleHoveredOwner: (owner, state) => toggleHoveredOwner(owner, state, true),
         useHoveredSelector,
       }}
     >

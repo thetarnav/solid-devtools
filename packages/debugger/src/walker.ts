@@ -22,7 +22,7 @@ let RootId: NodeID
 let OnSignalUpdate: SignalUpdateHandler
 let OnComputationUpdate: ComputationUpdateHandler
 let GatherComponents: boolean
-let Components: Record<NodeID, Mapped.Component> = {}
+let Components: Mapped.Component[] = []
 let SelectedOwner: Solid.Owner | null
 let SelectedDetails: Mapped.OwnerDetails | null
 let SelectedSignalMap: Record<NodeID, Solid.Signal>
@@ -129,7 +129,7 @@ function mapOwner(owner: Solid.Owner, type?: NodeType): Mapped.Owner {
 
   if (GatherComponents && type === NodeType.Component) {
     const resolved = resolveElements(owner.value)
-    if (resolved) Components[id] = { name, resolved }
+    if (resolved) Components.push({ id, name, resolved })
   }
 
   return {
@@ -163,7 +163,7 @@ export function walkSolidTree(
   config: WalkerConfig,
 ): {
   tree: Mapped.Owner
-  components: Record<NodeID, Mapped.Component>
+  components: Mapped.Component[]
   selected: WalkerSelectedResult
 } {
   // set the globals to be available for this walk cycle
@@ -175,7 +175,7 @@ export function walkSolidTree(
   SelectedOwner = null
   SelectedDetails = null
   SelectedSignalMap = {}
-  Components = {}
+  Components = []
   ElementMap = config.elementMap ?? {}
 
   const tree = mapOwner(owner)

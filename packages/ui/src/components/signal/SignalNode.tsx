@@ -88,8 +88,6 @@ const ElementValuePreview: ValueComponent<ValueType.Element> = props => {
 
   onCleanup(() => toggleHovered(false))
 
-  console.log("props.value", props.value)
-
   return (
     <span
       class={styles.ValueElement.container}

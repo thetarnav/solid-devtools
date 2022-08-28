@@ -1,6 +1,12 @@
 import { createEffect, createRoot, on } from "solid-js"
 import { createRuntimeMessanger } from "../../shared/messanger"
-import { handleComputationsUpdate, handleGraphUpdate, hovered, resetGraph } from "./graph"
+import {
+  handleComputationsUpdate,
+  handleGraphUpdate,
+  hovered,
+  resetGraph,
+  toggleHoveredOwner,
+} from "./graph"
 import {
   focused,
   focusedRootId,
@@ -69,11 +75,16 @@ createRoot(() => {
     ),
   )
 
+  onRuntimeMessage("SetHoveredOwner", ({ state, nodeId }) => {
+    // do not sync this state back to the adapter
+    toggleHoveredOwner(nodeId, state, false)
+  })
+
   let initHighlight = true
   // toggle hovered html element
   createEffect<Messages["HighlightElement"] | undefined>(prev => {
     // tracks
-    const { rootId, owner } = hovered
+    const { rootId, owner, sync } = hovered()
     const elId = hoveredElement()
 
     // skip initial value
@@ -81,8 +92,8 @@ createRoot(() => {
 
     // handle component
     if (rootId && owner && owner.type === NodeType.Component) {
-      // do not send the same message twice
-      if (prev && typeof prev === "object" && prev.nodeId === owner.id) return prev
+      // do not send the same message twice & skip state without the `sync` flag
+      if ((prev && typeof prev === "object" && prev.nodeId === owner.id) || !sync) return prev
       const payload = { rootId, nodeId: owner.id }
       postRuntimeMessage("HighlightElement", payload)
       return payload

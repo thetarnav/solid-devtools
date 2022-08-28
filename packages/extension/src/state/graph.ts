@@ -1,8 +1,7 @@
-import { batch, createRoot } from "solid-js"
+import { batch, createRoot, createSignal } from "solid-js"
 import { createStore, produce } from "solid-js/store"
 import { NodeID, RootsUpdates, Mapped, Graph } from "@solid-devtools/shared/graph"
 import { createUpdatedSelector } from "./utils"
-import { createStaticStore } from "@solid-primitives/utils"
 import { createBoundSelector } from "@solid-devtools/shared/primitives"
 
 const NodeMap: Record<NodeID, Record<NodeID, Graph.Owner>> = {}
@@ -32,6 +31,13 @@ export function findOwnerRootId(owner: Graph.Owner): NodeID {
 export function findOwnerById(rootId: NodeID, id: NodeID): Graph.Owner | undefined {
   return NodeMap[rootId][id]
 }
+
+// export function findOwnerByOwnerId(nodeId: NodeID): Graph.Owner | undefined {
+//   for (const rootId in NodeMap) {
+//     const node = Object.values(NodeMap[rootId]).find(owner => owner.id === nodeId)
+//     if (node) return node
+//   }
+// }
 
 /**
  * maps the raw owner tree to be placed into the reactive graph store
@@ -131,20 +137,36 @@ const exports = createRoot(() => {
     addUpdatedComputations(nodeIds)
   }
 
-  const NULL_HOVERED_STATE = { rootId: null, owner: null } as const
-  const [hovered, setHovered] = createStaticStore<
-    { readonly rootId: NodeID; readonly owner: Graph.Owner } | typeof NULL_HOVERED_STATE
+  const NULL_HOVERED_STATE = { rootId: null, owner: null, sync: false } as const
+  const [hovered, setHovered] = createSignal<
+    Readonly<{ rootId: NodeID; owner: Graph.Owner; sync: boolean }> | typeof NULL_HOVERED_STATE
   >(NULL_HOVERED_STATE)
 
   const [useHoveredSelector] = createBoundSelector<NodeID | undefined, NodeID>(
-    () => hovered.owner?.id,
+    () => hovered().owner?.id,
   )
 
-  // used in the owner ui node to toggle owner being hovered
-  function toggleHoveredOwner(owner: Graph.Owner, hovered: boolean) {
+  /**
+   * used in the owner ui node to toggle owner being hovered &
+   * by the bridge to get the hovered component from the locator package
+   * @param who owner or it's id
+   * @param hovered `boolean`
+   * @param sync should this change be synced to the bridge
+   */
+  function toggleHoveredOwner(who: Graph.Owner | NodeID, hovered: boolean, sync: boolean): void {
     setHovered(p => {
-      if (hovered) return { rootId: findOwnerRootId(owner), owner }
-      if (p.owner === owner) return NULL_HOVERED_STATE
+      if (typeof who === "string") {
+        if (hovered) {
+          for (const rootId in NodeMap) {
+            const owner = Object.values(NodeMap[rootId]).find(owner => owner.id === who)
+            if (owner) return { owner, rootId, sync }
+          }
+        } else if (p.owner && p.owner.id === who) return NULL_HOVERED_STATE
+      } else {
+        if (hovered) return { rootId: findOwnerRootId(who), owner: who, sync }
+        // match ids because owner can be a proxy
+        else if (p.owner && p.owner.id === who.id) return NULL_HOVERED_STATE
+      }
       return p
     })
   }

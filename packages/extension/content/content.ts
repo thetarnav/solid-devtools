@@ -55,6 +55,8 @@ onWindowMessage("OwnerDetailsUpdate", payload => postPortMessage("OwnerDetailsUp
 
 onWindowMessage("SignalValue", payload => postPortMessage("SignalValue", payload))
 
+onWindowMessage("SetHoveredOwner", payload => postPortMessage("SetHoveredOwner", payload))
+
 onPortMessage("PanelVisibility", visible => postWindowMessage("PanelVisibility", visible))
 
 once(onPortMessage, "ForceUpdate", () => postWindowMessage("ForceUpdate"))

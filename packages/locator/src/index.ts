@@ -15,12 +15,7 @@ import { registerDebuggerPlugin, createInternalRoot } from "@solid-devtools/debu
 import { createConsumers } from "@solid-devtools/shared/primitives"
 import { Mapped } from "@solid-devtools/shared/graph"
 import { warn } from "@solid-devtools/shared/utils"
-import {
-  clearFindComponentCache,
-  findComponent,
-  getLocationFromElement,
-  SelectedComponent,
-} from "./findComponent"
+import { findComponent, getLocationFromElement, SelectedComponent } from "./findComponent"
 import { makeHoverElementListener } from "./hoverElement"
 import {
   getFullSourceCodeData,
@@ -32,6 +27,7 @@ import {
 import { attachElementOverlay } from "./ElementOverlay"
 
 export type { TargetIDE, TargetURLFunction } from "./goToSource"
+export type { SelectedComponent } from "./findComponent"
 
 export type LocatorOptions = {
   /** Choose in which IDE the component source code should be revealed. */
@@ -40,9 +36,13 @@ export type LocatorOptions = {
   key?: KbdKey
 }
 
-export type ClickMiddleware = (e: MouseEvent, data: SourceCodeData | null) => false | void
+export type ClickMiddleware = (
+  e: MouseEvent,
+  component: SelectedComponent,
+  data: SourceCodeData | null,
+) => false | void
 
-const exports = createInternalRoot(() => {
+const exported = createInternalRoot(() => {
   const [enabled, addConsumer] = createConsumers()
   const [target, setTarget] = createSignal<HTMLElement | Mapped.Component | null>(null)
 
@@ -52,54 +52,44 @@ const exports = createInternalRoot(() => {
     return { enabled, gatherComponents: enabled }
   })
 
+  // TODO: selected is an array, but it still only selects only one component at a time — only elements with location should be stored as array
+  // TODO: also, rename to "hovered" — to not confuse with selected owners in the extension
   const selected = (() => {
     let init = true
-    let prevComponents: Mapped.Component[] = []
-
     return createMemo<SelectedComponent[]>(() => {
       if (!enabled()) {
         // defferred memo is to prevent calculating selected with old components array
         init = true
-        prevComponents = []
         return []
       }
       const [components, targetRef] = [componentList(), target()]
       if (init) return (init = false) || []
-      if (prevComponents !== components) {
-        clearFindComponentCache()
-        prevComponents = components
-      }
       if (!targetRef) return []
       if (targetRef instanceof HTMLElement) {
         const comp = findComponent(components, targetRef)
         return comp ? [comp] : []
       }
-      const { name, resolved } = targetRef
+      const { name, resolved, id } = targetRef
       const resolvedArr = Array.isArray(resolved) ? resolved : [resolved]
-      return resolvedArr.map(element => ({
-        element,
-        name,
-        location: getLocationFromElement(element),
-      }))
+      return resolvedArr.map(element => {
+        return { id, element, name, location: getLocationFromElement(element) }
+      })
     })
   })()
 
   attachElementOverlay(selected)
 
   const clickInterceptors: ClickMiddleware[] = []
-  function runClickInterceptors(e: MouseEvent, data: SourceCodeData | null) {
+  function runClickInterceptors(...args: Parameters<ClickMiddleware>) {
     for (const interceptor of clickInterceptors) {
-      if (interceptor(e, data) === false) return false
+      if (interceptor(...args) === false) return false
     }
   }
 
   /**
    * Adds a middleware that controlls the locator behavior.
    */
-  function registerLocatorPlugin(data: {
-    enabled: Accessor<boolean>
-    onClick?: ClickMiddleware
-  }): void {
+  function registerPlugin(data: { enabled: Accessor<boolean>; onClick?: ClickMiddleware }): void {
     const { enabled, onClick } = data
     addConsumer(enabled)
     if (onClick) {
@@ -145,7 +135,7 @@ const exports = createInternalRoot(() => {
           const sourceCodeData = comp.location
             ? getFullSourceCodeData(comp.location, comp.element)
             : null
-          if (runClickInterceptors(e, sourceCodeData) === false || !sourceCodeData) return
+          if (runClickInterceptors(e, comp, sourceCodeData) === false || !sourceCodeData) return
           if (!targetIDE) return
           e.preventDefault()
           e.stopPropagation()
@@ -159,9 +149,9 @@ const exports = createInternalRoot(() => {
   const owner = getOwner()!
   return {
     useLocator: (opts: LocatorOptions) => runWithOwner(owner, useLocator.bind(void 0, opts)),
-    registerLocatorPlugin,
-    selectedComponent: selected,
-    setLocatorTarget: setTarget,
+    registerPlugin,
+    setTarget,
+    selected,
   }
 })
-export const { useLocator, registerLocatorPlugin, selectedComponent, setLocatorTarget } = exports
+export const { useLocator, registerPlugin, setTarget, selected } = exported

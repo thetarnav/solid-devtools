@@ -24,6 +24,8 @@ export interface Messages {
   SignalValue: SignalUpdate
   /** devtools -> adapter: user hovered over component/element signal in devtools panel */
   HighlightElement: { rootId: NodeID; nodeId: NodeID } | string | null
+  /** adapter -> devtools: send hovered (by the locator) owner to the extension */
+  SetHoveredOwner: { nodeId: NodeID; state: boolean }
 }
 
 export type PostMessageFn = <K extends keyof Messages>(
