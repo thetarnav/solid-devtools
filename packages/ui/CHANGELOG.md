@@ -1,5 +1,21 @@
 # @solid-devtools/ui
 
+## 0.10.0
+
+### Minor Changes
+
+- 27ffdb1: Highlight components hovered on the extension.
+
+### Patch Changes
+
+- fae3ec0: Highlight hovered signal value elements on the page.
+- Updated dependencies [27ffdb1]
+- Updated dependencies [33e2c17]
+- Updated dependencies [27b98fa]
+- Updated dependencies [fae3ec0]
+- Updated dependencies [15c958b]
+  - @solid-devtools/shared@0.7.0
+
 ## 0.9.2
 
 ### Patch Changes

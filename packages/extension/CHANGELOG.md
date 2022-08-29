@@ -1,5 +1,26 @@
 # solid-devtools-extension
 
+## 0.8.0
+
+### Minor Changes
+
+- 27ffdb1: Highlight components hovered on the extension.
+- fae3ec0: Highlight hovered signal value elements on the page.
+- 15c958b: Highlight components hovered with locator on the extension.
+
+### Patch Changes
+
+- 33e2c17: Disable the extension adapter when the devtools are closed. (#92)
+- 27b98fa: Select components by clicking on them on the page—with the locator enabled.
+- c5cd272: Add support for highlighting Fragments by the Locator package. (#89)
+- Updated dependencies [27ffdb1]
+- Updated dependencies [33e2c17]
+- Updated dependencies [27b98fa]
+- Updated dependencies [fae3ec0]
+- Updated dependencies [15c958b]
+  - @solid-devtools/shared@0.7.0
+  - @solid-devtools/ui@0.10.0
+
 ## 0.7.3
 
 ### Patch Changes
