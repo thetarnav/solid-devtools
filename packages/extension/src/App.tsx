@@ -2,7 +2,7 @@ import { Component, For, Show } from "solid-js"
 import { destructure } from "@solid-primitives/destructure"
 import { NodeType, Graph } from "@solid-devtools/shared/graph"
 import {
-  HighlightsProvider,
+  StructureProvider,
   SignalContextProvider,
   OwnerNode,
   Splitter,
@@ -10,8 +10,21 @@ import {
   Signals,
   OwnerPath,
 } from "@solid-devtools/ui"
-import { highlights, graphs } from "./state/graph"
-import { focused, details, useUpdatedSignalsSelector, toggleSignalFocus } from "./state/details"
+import {
+  graphs,
+  toggleHoveredOwner,
+  useComputationUpdatedSelector,
+  useHoveredSelector,
+} from "./state/graph"
+import {
+  focused,
+  details,
+  useUpdatedSignalsSelector,
+  toggleSignalFocus,
+  setSelectedNode,
+  useOwnerSelectedSelector,
+  setHoveredElement,
+} from "./state/details"
 import * as styles from "./styles.css"
 
 const DetailsContent: Component<{ details: Graph.OwnerDetails }> = props => {
@@ -30,6 +43,7 @@ const DetailsContent: Component<{ details: Graph.OwnerDetails }> = props => {
           value={{
             useUpdatedSelector: useUpdatedSignalsSelector,
             toggleSignalFocus: toggleSignalFocus,
+            setHoveredElement,
           }}
         >
           <Signals each={Object.values(signals())} />
@@ -41,7 +55,15 @@ const DetailsContent: Component<{ details: Graph.OwnerDetails }> = props => {
 
 const App: Component = () => {
   return (
-    <HighlightsProvider value={highlights}>
+    <StructureProvider
+      value={{
+        handleFocus: setSelectedNode,
+        useUpdatedSelector: useComputationUpdatedSelector,
+        useSelectedSelector: useOwnerSelectedSelector,
+        toggleHoveredOwner: (owner, state) => toggleHoveredOwner(owner, state, true),
+        useHoveredSelector,
+      }}
+    >
       <div class={styles.app}>
         <header class={styles.header}>
           <h3>Welcome to Solid Devtools</h3>
@@ -49,7 +71,7 @@ const App: Component = () => {
         </header>
         <div class={styles.content}>
           <Splitter
-            onToggle={() => highlights.handleFocus(null)}
+            onToggle={() => setSelectedNode(null)}
             side={
               <Show when={focused()}>
                 <div>
@@ -60,7 +82,7 @@ const App: Component = () => {
           >
             <div class={styles.graphWrapper}>
               <Scrollable>
-                <For each={graphs}>{root => <OwnerNode owner={root.tree} />}</For>
+                <For each={graphs}>{root => <OwnerNode owner={root.tree} level={0} />}</For>
               </Scrollable>
               <div class={styles.path}>
                 <div class={styles.pathInner}>
@@ -73,7 +95,7 @@ const App: Component = () => {
           </Splitter>
         </div>
       </div>
-    </HighlightsProvider>
+    </StructureProvider>
   )
 }
 

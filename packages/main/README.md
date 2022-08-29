@@ -6,10 +6,12 @@
 
 # solid-devtools
 
-The main package of Solid Devtools. It contains the following subpackages:
+The main package of Solid Devtools. It tracks the changes of the Solid runtime and connects to the [chrome extension](https://github.com/thetarnav/solid-devtools/tree/main/packages/extension#readme) and [other devtools](https://github.com/thetarnav/solid-devtools#available-devtools).
+
+It contains the following subpackages:
 
 - [Debugger](https://github.com/thetarnav/solid-devtools/tree/main/packages/debugger#readme) _(automatically enabled)_
-- [Extension Adapter](https://github.com/thetarnav/solid-devtools/tree/main/packages/extension-adapter#readme) _(automatically enabled)_
+- [Extension Adapter](https://github.com/thetarnav/solid-devtools/tree/main/packages/ext-adapter#readme) _(automatically enabled)_
 - [Locator](https://github.com/thetarnav/solid-devtools/tree/main/packages/locator#readme) — [How to use it](#using-the-locator-package)
 - [Babel Plugin](https://github.com/thetarnav/solid-devtools/tree/main/packages/transform#readme) — [How to use it](#enabling-the-babel-plugin)
 
@@ -34,13 +36,19 @@ import "solid-devtools"
 // and that's it!
 ```
 
-Importing `"solid-devtools"` package is attaching the [debugger](https://github.com/thetarnav/solid-devtools/tree/main/packages/debugger#readme) to your application and runs [extension-adapter](https://github.com/thetarnav/solid-devtools/tree/main/packages/extension-adapter#readme). In other words, it is creating a platform for other devtools to use. It doesn't provide any functionality by itself.
+Importing `"solid-devtools"` package is attaching the [debugger](https://github.com/thetarnav/solid-devtools/tree/main/packages/debugger#readme) to your application and runs [ext-adapter](https://github.com/thetarnav/solid-devtools/tree/main/packages/ext-adapter#readme). In other words, it is creating a platform for other devtools to use. It doesn't provide any functionality by itself.
 
 ### Using the locator package
 
 The `solid-devtools` package comes with the [Locator](https://github.com/thetarnav/solid-devtools/tree/main/packages/locator#readme) package included. It's not neccessary to use it! But you can.
 
 [**Follow this guide of the locator package**](https://github.com/thetarnav/solid-devtools/tree/main/packages/locator#Getting-Started)
+
+### Using the chrome extension
+
+`solid-devtools` will execute the [ext-adapter](https://github.com/thetarnav/solid-devtools/tree/main/packages/ext-adapter#readme) script on load, which will connect the debugger to the chrome extension. Now you can use the chrome extension to debug your application.
+
+[**Follow this guide to setup the chrome extension**](https://github.com/thetarnav/solid-devtools/tree/main/packages/extension#how-do-i-try-it-out)
 
 ### Enabling the Babel plugin
 
@@ -55,12 +63,12 @@ To enable it you need to add it to plugins array in your `.vite.config.js` file:
 // vite.config.ts
 
 import { defineConfig } from "vite"
-import solidPlugin from "vite-plugin-solid"
-import devtoolsPlugin from "solid-devtools/vite"
-// or: import devtoolsPlugin from "@solid-devtools/transform"
+import solid from "vite-plugin-solid"
+import devtools from "solid-devtools/vite"
+// or: import devtools from "@solid-devtools/transform"
 
 export default defineConfig({
-  plugins: [devtoolsPlugin(), solidPlugin()],
+  plugins: [devtools(), solid()],
 })
 ```
 

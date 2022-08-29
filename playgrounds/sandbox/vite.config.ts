@@ -19,9 +19,9 @@ export default defineConfig({
     alias: {
       // used inside packages/debugger
       "solid-devtools": resolvePackage("main", "src"),
-      "@solid-devtools/debugger": resolvePackage("debugger", "src"),
+      // "@solid-devtools/debugger": resolvePackage("debugger", "src"),
       "@solid-devtools/logger": resolvePackage("logger", "src"),
-      "@solid-devtools/locator": resolvePackage("locator", "src"),
+      // "@solid-devtools/locator": resolvePackage("locator", "src"),
     },
   },
   build: {

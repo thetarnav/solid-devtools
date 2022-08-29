@@ -5,9 +5,10 @@ export const LOG_MESSAGES = false
 
 export interface Messages {
   // adapter -> content -> devtools.html
-  // the `string` payload is the extension-adapter version
+  // the `string` payload is the ext-adapter version
   SolidOnPage: string
-  DevtoolsScriptConnected: void
+  // devtools -> bacground: number is a tab id
+  DevtoolsScriptConnected: number
   PanelVisibility: boolean
   ResetPanel: void
   GraphUpdate: RootsUpdates
@@ -15,13 +16,19 @@ export interface Messages {
   SignalUpdates: SignalUpdate[]
   ForceUpdate: void
   /** devtools -> adapter: request for details of owner details opened in the side-panel */
-  SetSelectedOwner: null | { rootId: NodeID; ownerId: NodeID }
+  SetSelectedOwner: null | { rootId: NodeID; nodeId: NodeID }
+  /** adapter -> devtools: send component clicked with the locator to the extension */
+  SendSelectedOwner: { rootId: NodeID; nodeId: NodeID }
   /** adapter -> devtools: send updates to the owner details */
   OwnerDetailsUpdate: Mapped.OwnerDetails
   /** devtools -> adapter: request for signal details — subscribe or unsubscribe */
   SetSelectedSignal: { id: NodeID; selected: boolean }
   /** adapter -> devtools: signal deep value */
   SignalValue: SignalUpdate
+  /** devtools -> adapter: user hovered over component/element signal in devtools panel */
+  HighlightElement: { rootId: NodeID; nodeId: NodeID } | string | null
+  /** adapter -> devtools: send hovered (by the locator) owner to the extension */
+  SetHoveredOwner: { nodeId: NodeID; state: boolean }
 }
 
 export type PostMessageFn = <K extends keyof Messages>(

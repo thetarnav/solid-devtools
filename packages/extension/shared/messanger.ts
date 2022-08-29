@@ -3,6 +3,7 @@ import { LOG_MESSAGES, OnMessageFn, PostMessageFn, Messages } from "@solid-devto
 import { log } from "@solid-devtools/shared/utils"
 
 export const DEVTOOLS_CONTENT_PORT = "DEVTOOLS_CONTENT_PORT"
+export const DEVTOOLS_CONNECTION_NAME = "SOLID_DEVTOOLS"
 
 export function createPortMessanger(port: chrome.runtime.Port): {
   postPortMessage: PostMessageFn

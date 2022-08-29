@@ -84,11 +84,15 @@ const App: Component = () => {
   const fnSig = createSignal(() => {})
   const nullSig = createSignal(null)
   const symbolSig = createSignal(Symbol("hello-symbol"))
+  const [header, setHeader] = createSignal(
+    <h1 onClick={() => setHeader(<h1>Call that an easter egg</h1>)}>Welcome to the Sandbox</h1>,
+  )
 
   const objmemo = createMemo(() => {
     return {
       foo: "bar",
       count: count(),
+      header: header(),
     }
   })
 
@@ -104,7 +108,7 @@ const App: Component = () => {
 
   return (
     <>
-      <h1>Welcome to the Sandbox</h1>
+      {header()}
       <div>
         <header>
           <Button onClick={() => setCount(p => ++p)} text={`Count: ${count()}`} />

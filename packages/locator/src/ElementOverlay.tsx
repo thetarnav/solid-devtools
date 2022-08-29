@@ -1,6 +1,19 @@
+import {
+  Component,
+  createComputed,
+  createMemo,
+  Show,
+  on,
+  createEffect,
+  Accessor,
+  Index,
+} from "solid-js"
+import { Portal } from "solid-js/web"
 import { animate } from "motion"
-import { Component, createComputed, createMemo, Show, on, createEffect } from "solid-js"
 import { clsx } from "clsx"
+import { createElementCursor } from "@solid-primitives/cursor"
+import { createElementBounds } from "@solid-primitives/bounds"
+import { SelectedComponent } from "./findComponent"
 
 const styles = /*css*/ `
 .element-overlay {
@@ -10,7 +23,7 @@ const styles = /*css*/ `
   left: 0;
   pointer-events: none;
   transition-duration: 100ms;
-  transition-property: transform, opacity, width, height;
+  transition-property: transform, width, height;
   --color: 14 116 144;
 }
 .border {
@@ -25,6 +38,7 @@ const styles = /*css*/ `
 }
 .name-container {
   position: absolute;
+  z-index: 10000;
   left: 0;
   right: 0;
   display: flex;
@@ -42,7 +56,7 @@ const styles = /*css*/ `
 }
 .name-animated-container {
   position: relative;
-  margin: 0.75rem auto;
+  margin: 0.5rem auto;
   padding: 0.25rem 0.5rem;
 }
 .name-background {
@@ -65,15 +79,37 @@ const styles = /*css*/ `
 }
 `
 
-export const ElementOverlay: Component<{
+export interface ElementOverlayProps {
   left: number | null
   top: number | null
   width: number | null
   height: number | null
   name: string | undefined
   tag: string | undefined
-  selected: boolean
-}> = props => {
+}
+
+export function attachElementOverlay(selected: Accessor<SelectedComponent[]>) {
+  return (
+    <Portal useShadow>
+      <Index each={selected()}>
+        {component => {
+          // set pointer cursor to selected component
+          createElementCursor(() => component().element, "pointer")
+          const bounds = createElementBounds(() => component().element)
+          return (
+            <ElementOverlay
+              {...bounds}
+              tag={component().element.tagName.toLocaleLowerCase()}
+              name={component().name}
+            />
+          )
+        }}
+      </Index>
+    </Portal>
+  )
+}
+
+const ElementOverlay: Component<ElementOverlayProps> = props => {
   const left = createMemo<number>(prev => (props.left === null ? prev : props.left), 0)
   const top = createMemo<number>(prev => (props.top === null ? prev : props.top), 0)
   const width = createMemo<number>(prev => (props.width === null ? prev : props.width), 0)
@@ -90,7 +126,6 @@ export const ElementOverlay: Component<{
           transform: transform(),
           width: width() + "px",
           height: height() + "px",
-          opacity: props.selected ? 1 : 0,
         }}
       >
         <div class="border" />

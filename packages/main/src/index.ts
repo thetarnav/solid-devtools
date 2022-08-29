@@ -1,5 +1,5 @@
 import { attachDebugger, makeCreateRootListener } from "@solid-devtools/debugger"
-import { useExtensionAdapter } from "@solid-devtools/extension-adapter"
+import { useExtensionAdapter } from "@solid-devtools/ext-adapter"
 
 makeCreateRootListener(root => attachDebugger(root))
 
@@ -14,4 +14,5 @@ export {
 } from "@solid-devtools/debugger"
 export type { PluginFactory } from "@solid-devtools/debugger"
 
-export * from "@solid-devtools/locator"
+export { useLocator } from "@solid-devtools/locator"
+export type { LocatorOptions, TargetIDE, TargetURLFunction } from "@solid-devtools/locator"

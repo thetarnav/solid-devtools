@@ -4,8 +4,6 @@ import { UNNAMED } from "@solid-devtools/shared/variables"
 import * as API from "./index"
 import { createRoot } from "solid-js"
 
-export { NodeType, getOwner } from "@solid-devtools/shared/graph"
-
 export { createUnownedRoot } from "./index"
 
 export const Debugger: typeof API.Debugger = props => props.children

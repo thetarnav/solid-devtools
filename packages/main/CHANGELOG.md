@@ -14,7 +14,7 @@
 - Updated dependencies [78b06a6]
 - Updated dependencies [b5e9776]
   - @solid-devtools/debugger@0.6.0
-  - @solid-devtools/extension-adapter@0.12.0
+  - @solid-devtools/ext-adapter@0.12.0
   - @solid-devtools/locator@0.12.0
   - @solid-devtools/transform@0.6.2
 
@@ -29,7 +29,7 @@
 
 - Updated dependencies [41b4b7b]
   - @solid-devtools/debugger@0.5.0
-  - @solid-devtools/extension-adapter@0.11.0
+  - @solid-devtools/ext-adapter@0.11.0
   - @solid-devtools/locator@0.11.0
   - @solid-devtools/transform@0.6.1
 
@@ -48,7 +48,7 @@
 
 - Updated dependencies [2beeb22]
   - @solid-devtools/debugger@0.4.0
-  - @solid-devtools/extension-adapter@0.10.0
+  - @solid-devtools/ext-adapter@0.10.0
   - @solid-devtools/locator@0.10.0
   - @solid-devtools/transform@0.5.0
 
@@ -68,7 +68,7 @@
   - @solid-devtools/transform@0.4.0
   - @solid-devtools/debugger@0.3.0
   - @solid-devtools/locator@0.8.2
-  - @solid-devtools/extension-adapter@0.8.2
+  - @solid-devtools/ext-adapter@0.8.2
 
 ## 0.8.1
 
@@ -78,7 +78,7 @@
 - Updated dependencies [fdb09bc]
   - @solid-devtools/transform@0.3.1
   - @solid-devtools/debugger@0.2.3
-  - @solid-devtools/extension-adapter@0.8.1
+  - @solid-devtools/ext-adapter@0.8.1
   - @solid-devtools/locator@0.8.1
 
 ## 0.8.0
@@ -101,7 +101,7 @@
 - Updated dependencies [a8d0354]
   - @solid-devtools/transform@0.2.1
   - @solid-devtools/debugger@0.2.2
-  - @solid-devtools/extension-adapter@0.7.2
+  - @solid-devtools/ext-adapter@0.7.2
   - @solid-devtools/locator@0.7.2
 
 ## 0.7.1
@@ -135,7 +135,7 @@
 - Updated dependencies [24ccd14]
 - Updated dependencies [892d87e]
   - @solid-devtools/debugger@0.2.0
-  - @solid-devtools/extension-adapter@0.6.0
+  - @solid-devtools/ext-adapter@0.6.0
   - @solid-devtools/locator@0.6.0
 
 ## 0.5.0
@@ -150,7 +150,7 @@
 
 - Updated dependencies [2bb429a]
   - @solid-devtools/debugger@0.1.0
-  - @solid-devtools/extension-adapter@0.5.0
+  - @solid-devtools/ext-adapter@0.5.0
   - @solid-devtools/locator@0.5.0
 
 ## 0.4.3
@@ -180,7 +180,7 @@
 ### Patch Changes
 
 - Updated dependencies [e9847ec]
-  - @solid-devtools/extension-adapter@0.4.0
+  - @solid-devtools/ext-adapter@0.4.0
   - @solid-devtools/locator@0.4.0
 
 ## 0.3.0
@@ -201,7 +201,7 @@
 - 8f5f6e5: Change package export map to avoid shipping code to production
 - Updated dependencies [7f0a2ca]
 - Updated dependencies [8f5f6e5]
-  - @solid-devtools/extension-adapter@0.2.9
+  - @solid-devtools/ext-adapter@0.2.9
   - solid-devtools@0.2.9
 
 ## 0.2.8
@@ -251,5 +251,5 @@
 ### Patch Changes
 
 - Updated dependencies [8e17085]
-  - @solid-devtools/extension-adapter@0.1.0
+  - @solid-devtools/ext-adapter@0.1.0
   - @solid-devtools/locator@0.1.0

@@ -31,11 +31,6 @@
       "require": "./dist/bridge.cjs",
       "types": "./dist/bridge.d.ts"
     },
-    "./cursor": {
-      "import": "./dist/cursor.js",
-      "require": "./dist/cursor.cjs",
-      "types": "./dist/cursor.d.ts"
-    },
     "./diff": {
       "import": "./dist/diff.js",
       "require": "./dist/diff.cjs",
@@ -60,15 +55,17 @@
       "import": "./dist/serialize.js",
       "require": "./dist/serialize.cjs",
       "types": "./dist/serialize.d.ts"
+    },
+    "./primitives": {
+      "import": "./dist/primitives.js",
+      "require": "./dist/primitives.cjs",
+      "types": "./dist/primitives.d.ts"
     }
   },
   "typesVersions": {
     "*": {
       "bridge": [
         "./dist/bridge.d.ts"
-      ],
-      "cursor": [
-        "./dist/cursor.d.ts"
       ],
       "diff": [
         "./dist/diff.d.ts"
@@ -84,6 +81,9 @@
       ],
       "serialize": [
         "./dist/serialize.d.ts"
+      ],
+      "primitives": [
+        "./dist/primitives.d.ts"
       ]
     }
   },
@@ -100,6 +100,7 @@
   },
   "dependencies": {
     "@solid-primitives/event-bus": "^0.1.0",
+    "@solid-primitives/immutable": "^0.1.1",
     "@solid-primitives/utils": "^3.0.1",
     "solid-js": "^1.4.8",
     "type-fest": "^2.18.0"

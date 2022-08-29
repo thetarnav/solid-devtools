@@ -1,4 +1,4 @@
-import { Accessor, batch, createRoot, createSelector, untrack } from "solid-js"
+import { Accessor, batch, createRoot, createSelector, createSignal, untrack } from "solid-js"
 import { createStore, produce } from "solid-js/store"
 import { Mapped, Graph, NodeID, SignalUpdate } from "@solid-devtools/shared/graph"
 import { warn } from "@solid-devtools/shared/utils"
@@ -7,6 +7,8 @@ import { findOwnerById, findOwnerRootId } from "./graph"
 import { arrayEquals, Mutable } from "@solid-primitives/utils"
 import { createUpdatedSelector } from "./utils"
 import { EncodedValue } from "@solid-devtools/shared/serialize"
+import { Messages } from "@solid-devtools/shared/bridge"
+import { untrackedCallback } from "@solid-devtools/shared/primitives"
 
 function reconcileSignals(
   newSignals: readonly Mapped.Signal[],
@@ -21,6 +23,7 @@ function reconcileSignals(
       // reconcile signal observers
       signal.observers.length = 0
       signal.observers.push.apply(signal.observers, newSignal.observers)
+
       intersection.push(newSignal)
     } else {
       // remove signal
@@ -65,21 +68,15 @@ function createSignalNode(raw: Readonly<Mapped.Signal>): Graph.Signal {
 
 export type OwnerDetailsState = (
   | { focused: null; rootId: null; details: null }
-  | {
-      focused: Graph.Owner
-      rootId: NodeID
-      details: Graph.OwnerDetails | null
-    }
-) & {
-  selectedSignals: NodeID[]
-}
+  | { focused: Graph.Owner; rootId: NodeID; details: Graph.OwnerDetails | null }
+) & { selectedSignals: NodeID[] }
 
-const nullState = {
+const nullState: OwnerDetailsState = {
   focused: null,
   rootId: null,
   details: null,
-  selectedSignals: [] as NodeID[],
-} as const
+  selectedSignals: [],
+}
 
 const exports = createRoot(() => {
   const [state, setState] = createStore<OwnerDetailsState>({ ...nullState })
@@ -87,15 +84,25 @@ const exports = createRoot(() => {
     focusedRootId = () => state.rootId,
     details = () => state.details
 
-  const ownerFocusedSelector = createSelector<Graph.Owner | null, Graph.Owner>(focused)
-  const useOwnerFocusedSelector = (owner: Graph.Owner): Accessor<boolean> =>
-    ownerFocusedSelector.bind(void 0, owner)
+  const ownerSelectedSelector = createSelector<Graph.Owner | null, Graph.Owner>(focused)
+  const useOwnerSelectedSelector = (owner: Graph.Owner): Accessor<boolean> =>
+    ownerSelectedSelector.bind(void 0, owner)
 
-  function setFocused(owner: Graph.Owner | null) {
-    if (owner === untrack(() => state.focused)) return
-    if (!owner) return setState({ ...nullState })
-    setState({ focused: owner, rootId: findOwnerRootId(owner), details: null })
-  }
+  const setSelectedNode: (data: Graph.Owner | null | Messages["SendSelectedOwner"]) => void =
+    untrackedCallback(data => {
+      if (!data) setState({ ...nullState })
+      else if ("name" in data) {
+        // compare ids because state.focused is a proxy
+        if (!state.focused || data.id !== state.focused.id)
+          setState({ focused: data, rootId: findOwnerRootId(data), details: null })
+      } else {
+        const { nodeId, rootId } = data
+        const owner = findOwnerById(rootId, nodeId)
+        // compare ids because state.focused is a proxy
+        if (owner && (!state.focused || owner.id !== state.focused.id))
+          setState({ focused: owner, rootId, details: null })
+      }
+    })
 
   function mapRawPath(rootId: NodeID, rawPath: readonly NodeID[]): Graph.Path {
     const path = rawPath.map(id => findOwnerById(rootId, id) ?? NOTFOUND)
@@ -164,30 +171,39 @@ const exports = createRoot(() => {
     onSignalSelect!(id, selected!)
   }
 
+  //
+  // HOVERED ELEMENT
+  //
+  const [hoveredElement, setHoveredElement] = createSignal<string | null>(null)
+
   return {
     focused,
     focusedRootId,
     details,
-    setFocused,
-    useOwnerFocusedSelector,
+    setSelectedNode,
+    useOwnerSelectedSelector,
     useUpdatedSignalsSelector: useUpdatedSelector,
     updateDetails,
     handleSignalUpdates,
     handleGraphUpdate,
     toggleSignalFocus,
     setOnSignalSelect,
+    hoveredElement,
+    setHoveredElement,
   }
 })
 export const {
   focused,
   focusedRootId,
   details,
-  setFocused,
-  useOwnerFocusedSelector,
+  setSelectedNode,
+  useOwnerSelectedSelector,
   useUpdatedSignalsSelector,
   updateDetails,
   handleSignalUpdates,
   handleGraphUpdate,
   toggleSignalFocus,
   setOnSignalSelect,
+  hoveredElement,
+  setHoveredElement,
 } = exports

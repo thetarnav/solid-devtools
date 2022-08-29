@@ -17,15 +17,16 @@ export type SignalUpdateHandler = (nodeId: NodeID, value: unknown) => void
 export type ComputationUpdateHandler = (rootId: NodeID, nodeId: NodeID) => void
 
 // Globals set before each walker cycle
-let FocusedId: NodeID | null
+let SelectedId: NodeID | null
 let RootId: NodeID
 let OnSignalUpdate: SignalUpdateHandler
 let OnComputationUpdate: ComputationUpdateHandler
 let GatherComponents: boolean
 let Components: Mapped.Component[] = []
-let FocusedOwner: Solid.Owner | null
-let FocusedOwnerDetails: Mapped.OwnerDetails | null
-let FocusedOwnerSignalMap: Record<NodeID, Solid.Signal>
+let SelectedOwner: Solid.Owner | null
+let SelectedDetails: Mapped.OwnerDetails | null
+let SelectedSignalMap: Record<NodeID, Solid.Signal>
+let ElementMap: Record<NodeID, HTMLElement>
 
 const WALKER = Symbol("walker")
 
@@ -43,14 +44,14 @@ function observeValue(node: Solid.Signal) {
 
 function mapSignalNode(node: Solid.Signal): Mapped.Signal {
   const id = markNodeID(node)
-  FocusedOwnerSignalMap[id] = node
+  SelectedSignalMap[id] = node
   observeValue(node)
   return {
     type: getNodeType(node) as NodeType.Memo | NodeType.Signal,
     name: getNodeName(node),
     id,
     observers: markNodesID(node.observers),
-    value: encodeValue(node.value),
+    value: encodeValue(node.value, false, ElementMap),
   }
 }
 
@@ -88,15 +89,15 @@ function collectOwnerDetails(owner: Solid.Owner): void {
   }
 
   if (isSolidComputation(owner)) {
-    details.value = encodeValue(owner.value)
+    details.value = encodeValue(owner.value, false, ElementMap)
     details.sources = markNodesID(owner.sources)
     if (isSolidMemo(owner)) {
       details.observers = markNodesID(owner.observers)
     }
   }
 
-  FocusedOwner = owner
-  FocusedOwnerDetails = details
+  SelectedOwner = owner
+  SelectedDetails = details
 }
 
 function mapChildren({ owned, ownedRoots }: Readonly<Solid.Owner>): Mapped.Owner[] {
@@ -122,13 +123,13 @@ function mapOwner(owner: Solid.Owner, type?: NodeType): Mapped.Owner {
   const id = markNodeID(owner)
   const name = markOwnerName(owner)
 
-  if (id === FocusedId) collectOwnerDetails(owner)
+  if (id === SelectedId) collectOwnerDetails(owner)
 
   observeComputation(owner, id)
 
   if (GatherComponents && type === NodeType.Component) {
-    const resolved = resolveElements(owner.value)
-    if (resolved) Components.push({ name, resolved })
+    const element = resolveElements(owner.value)
+    if (element) Components.push({ id, name, element, rootId: RootId })
   }
 
   return {
@@ -145,7 +146,16 @@ export type WalkerConfig = {
   onSignalUpdate: SignalUpdateHandler
   onComputationUpdate: ComputationUpdateHandler
   gatherComponents: boolean
-  focusedId: NodeID | null
+  selectedId: NodeID | null
+  elementMap?: Record<NodeID, HTMLElement>
+}
+
+export type WalkerSelectedResult = (
+  | { details: Mapped.OwnerDetails; owner: Solid.Owner }
+  | { details: null; owner: null }
+) & {
+  signalMap: Record<NodeID, Solid.Signal>
+  elementMap: Record<NodeID, HTMLElement>
 }
 
 export function walkSolidTree(
@@ -154,26 +164,35 @@ export function walkSolidTree(
 ): {
   tree: Mapped.Owner
   components: Mapped.Component[]
-  focusedOwnerDetails: Mapped.OwnerDetails | null
-  focusedOwner: Solid.Owner | null
-  focusedOwnerSignalMap: Record<NodeID, Solid.Signal>
+  selected: WalkerSelectedResult
 } {
   // set the globals to be available for this walk cycle
-  FocusedId = config.focusedId
+  SelectedId = config.selectedId
   RootId = config.rootId
   OnSignalUpdate = config.onSignalUpdate
   OnComputationUpdate = config.onComputationUpdate
   GatherComponents = config.gatherComponents
-  FocusedOwner = null
-  FocusedOwnerDetails = null
-  FocusedOwnerSignalMap = {}
-  if (GatherComponents) Components = []
+  SelectedOwner = null
+  SelectedDetails = null
+  SelectedSignalMap = {}
+  Components = []
+  ElementMap = config.elementMap ?? {}
 
   const tree = mapOwner(owner)
   const components = Components
-  const focusedOwner = FocusedOwner
-  const focusedOwnerDetails = FocusedOwnerDetails
-  const focusedOwnerSignalMap = FocusedOwnerSignalMap
+  const focusedOwner = SelectedOwner
+  const focusedOwnerDetails = SelectedDetails
+  const focusedOwnerSignalMap = SelectedSignalMap
+  const elementMap = ElementMap
 
-  return { tree, components, focusedOwner, focusedOwnerDetails, focusedOwnerSignalMap }
+  return {
+    tree,
+    components,
+    selected: {
+      details: focusedOwnerDetails,
+      owner: focusedOwner,
+      signalMap: focusedOwnerSignalMap,
+      elementMap,
+    },
+  }
 }

@@ -2,7 +2,7 @@ import { createEffect, createSignal, batch, For, Component } from "solid-js"
 import { $RAW, reconcile, unwrap } from "solid-js/store"
 import { createStore, Store, SetStoreFunction } from "solid-js/store"
 import { debugProps } from "@solid-devtools/logger"
-import { makeStoreObserver } from "@solid-devtools/debugger"
+// import { makeStoreObserver } from "@solid-devtools/debugger"
 
 export function createLocalStore<T extends object>(
   name: string,
@@ -50,7 +50,7 @@ const Todos: Component = () => {
   const [newTitle, setTitle] = createSignal("")
   const [todos, setTodos] = createLocalStore<TodoItem[]>("todos", [])
 
-  makeStoreObserver(todos, console.log)
+  // makeStoreObserver(todos, console.log)
 
   // debugStore(todos)
 

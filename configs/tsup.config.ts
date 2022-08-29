@@ -8,12 +8,14 @@ export default ({
   additionalEntries = [],
   additionalPlugins = [],
   overwrite,
+  jsx,
 }: {
   extension?: "tsx" | "ts"
   server?: boolean
   additionalEntries?: string[]
   additionalPlugins?: Plugin[]
   overwrite?: (overrideOptions: Options) => Options
+  jsx?: boolean
 } = {}) => {
   const entry = `src/index.${extension}`
   const baseEntries = server ? [entry, `src/server.${extension}`] : [entry]
@@ -31,7 +33,9 @@ export default ({
       entryPoints: [...baseEntries, ...mappedAdditionalEntries],
       // solidPlugin() returns an incompatible plugin type from 0.14.53 esbuild version
       esbuildPlugins:
-        extension === "tsx" ? [solidPlugin() as any, ...additionalPlugins] : additionalPlugins,
+        extension === "tsx" || jsx
+          ? [solidPlugin() as any, ...additionalPlugins]
+          : additionalPlugins,
     }
     return overwrite ? overwrite(options) : options
   })

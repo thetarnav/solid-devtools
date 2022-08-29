@@ -1,8 +1,15 @@
-import { Mapped } from "@solid-devtools/shared/graph"
+import { Mapped, NodeID } from "@solid-devtools/shared/graph"
 import { LOCATION_ATTRIBUTE_NAME } from "@solid-devtools/shared/variables"
 import { isWindows } from "@solid-primitives/platform"
-import { SelectedComponent } from "."
 import { ElementLocation } from "./goToSource"
+
+export type SelectedComponent = {
+  id: NodeID
+  rootId: NodeID
+  name: string
+  element: HTMLElement
+  location: ElementLocation | null
+}
 
 const LOC_ATTR_REGEX_WIN = /^((?:[^\\/:*?"<>|]+\\)*[^\\/:*?"<>|]+):([0-9]+):([0-9]+)$/
 const LOC_ATTR_REGEX_UNIX = /^((?:[^\\:*?"<>|]+\/)*[^\\/:*?"<>|]+):([0-9]+):([0-9]+)$/
@@ -23,6 +30,9 @@ export function getLocationFromElement(element: Element): ElementLocation | null
 
 const findComponentCache = new Map<HTMLElement, SelectedComponent | null>()
 
+// for comparison — clear cache when component list changes
+let prevComponents: Mapped.Component[] = []
+
 /**
  * Given an array of components and a HTML Element, find the closest component that contains the element.
  *
@@ -34,46 +44,45 @@ const findComponentCache = new Map<HTMLElement, SelectedComponent | null>()
  */
 export function findComponent(
   comps: Mapped.Component[],
-  target: HTMLElement | null,
+  target: HTMLElement,
 ): SelectedComponent | null {
-  if (!target) return null
+  if (prevComponents !== comps) {
+    findComponentCache.clear()
+    prevComponents = comps
+  }
+
   const checked: HTMLElement[] = []
   const toCheck = [target]
-  let location: SelectedComponent["location"] = null
+  let location: ElementLocation | null = null
+  let element: HTMLElement | null = null
 
   for (const el of toCheck) {
     if (!location) {
       const loc = getLocationFromElement(el)
-      if (loc) location = { ...loc, element: el }
+      if (loc) {
+        location = loc
+        element = el
+      }
     }
 
     const cached = findComponentCache.get(el)
     if (cached !== undefined) {
       checked.forEach(cel => findComponentCache.set(cel, cached))
-      return cached ? { ...cached, location: location ?? cached.location } : null
+      return cached
+        ? { ...cached, location: location ?? cached.location, element: element ?? cached.element }
+        : null
     }
-
-    checked.push(el)
 
     for (let i = comps.length - 1; i >= 0; i--) {
       const comp = comps[i]
-      if (
-        (Array.isArray(comp.resolved) && comp.resolved.some(e => e === el)) ||
-        el === comp.resolved
-      ) {
-        const obj = { name: comp.name, element: el, location }
+      const { element: resolved } = comp
+      if ((Array.isArray(resolved) && resolved.some(e => e === el)) || el === resolved) {
+        const obj = { ...comp, element: element ?? el, location }
         checked.forEach(cel => findComponentCache.set(cel, obj))
         return obj
       }
     }
     el.parentElement && toCheck.push(el.parentElement)
   }
-
-  checked.forEach(cel => findComponentCache.set(cel, null))
   return null
 }
-
-/**
- * Clear the find component cache.
- */
-export const clearFindComponentCache = () => findComponentCache.clear()

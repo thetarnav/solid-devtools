@@ -1,9 +1,7 @@
-import { Accessor, createSelector, createSignal } from "solid-js"
+import { Accessor, createSignal } from "solid-js"
 import { NodeID } from "@solid-devtools/shared/graph"
 import { mutateFilter } from "@solid-devtools/shared/utils"
-
-export const dispose = (o: { dispose?: VoidFunction }) => o.dispose?.()
-export const disposeAll = (list: { dispose?: VoidFunction }[]) => list.forEach(dispose)
+import { createBoundSelector } from "@solid-devtools/shared/primitives"
 
 /**
  * Reconciles an array by mutating it. Diffs items by "id" prop. And uses {@link mapFunc} for creating new items.
@@ -26,20 +24,13 @@ export function reconcileArrayByIds<T extends { id: NodeID }>(
   for (id of ids) intersection.includes(id) || mapFunc(id, array)
 }
 
-export function createArrayIncludesSelector<T>(
-  array: Accessor<readonly T[]>,
-): (item: T) => Accessor<boolean> {
-  const selector = createSelector(array, (id, arr) => arr.includes(id))
-  return item => selector.bind(void 0, item)
-}
-
 export function createUpdatedSelector(): [
   useSelector: (id: NodeID) => Accessor<boolean>,
   addUpdated: (ids: readonly NodeID[]) => void,
   clear: VoidFunction,
 ] {
   const [updated, setUpdated] = createSignal<NodeID[]>([])
-  const useSelector = createArrayIncludesSelector(updated)
+  const [useSelector] = createBoundSelector(updated, (id: NodeID, arr) => arr.includes(id))
   return [
     useSelector,
     ids => setUpdated(prev => [...new Set([...prev, ...ids])]),

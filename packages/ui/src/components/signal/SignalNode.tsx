@@ -7,7 +7,9 @@ import {
   For,
   JSX,
   Match,
+  onCleanup,
   ParentComponent,
+  Setter,
   Show,
   splitProps,
   Switch,
@@ -15,10 +17,16 @@ import {
 } from "solid-js"
 import { Key } from "@solid-primitives/keyed"
 import { Graph, NodeID, NodeType } from "@solid-devtools/shared/graph"
-import { EncodedValue, EncodedValueOf, ValueType } from "@solid-devtools/shared/serialize"
+import {
+  EncodedValue,
+  EncodedValueOf,
+  INFINITY,
+  NAN,
+  NEGATIVE_INFINITY,
+  ValueType,
+} from "@solid-devtools/shared/serialize"
 import * as Icon from "~/icons"
 import { color } from "~/theme"
-import { useHighlights } from "~/ctx/highlights"
 import { Highlight } from "../highlight/Highlight"
 import * as styles from "./SignalNode.css"
 import clsx from "clsx"
@@ -32,11 +40,11 @@ const StringValuePreview: ValueComponent<ValueType.String> = props => (
 const NumberValuePreview: ValueComponent<ValueType.Number> = props => {
   const value = () => {
     switch (props.value) {
-      case "__$sdt-NaN__":
+      case NAN:
         return "NaN"
-      case "__$sdt-Infinity__":
+      case INFINITY:
         return "Infinity"
-      case "__$sdt-NegativeInfinity__":
+      case NEGATIVE_INFINITY:
         return "-Infinity"
       default:
         return props.value
@@ -70,9 +78,27 @@ const InstanceValuePreview: ValueComponent<ValueType.Instance> = props => (
   <span class={styles.baseValue}>{props.value}</span>
 )
 
-const ElementValuePreview: ValueComponent<ValueType.Element> = props => (
-  <span class={styles.ValueElement}>{props.value}</span>
-)
+const ElementValuePreview: ValueComponent<ValueType.Element> = props => {
+  const { setHoveredElement } = useSignalContext()
+
+  const toggleHovered = (state: boolean) => {
+    if (props.value.id === undefined) return
+    setHoveredElement(state ? props.value.id : p => (p === props.value.id ? null : p))
+  }
+
+  onCleanup(() => toggleHovered(false))
+
+  return (
+    <span
+      class={styles.ValueElement.container}
+      onMouseEnter={() => toggleHovered(true)}
+      onMouseLeave={() => toggleHovered(false)}
+    >
+      <div class={styles.ValueElement.highlight} />
+      {props.value.name}
+    </span>
+  )
+}
 
 const ObjectValuePreview: Component<
   EncodedValueOf<ValueType.Object | ValueType.Array, boolean> & { extended?: boolean }
@@ -250,6 +276,7 @@ export const Signals: Component<{ each: Graph.Signal[] }> = props => {
 export type SignalContextState = {
   useUpdatedSelector: (id: NodeID) => Accessor<boolean>
   toggleSignalFocus: (signal: NodeID, focused?: boolean) => void
+  setHoveredElement: Setter<string | null>
 }
 
 const SignalContext = createContext<SignalContextState>()
@@ -268,21 +295,10 @@ export const SignalNode: Component<{ signal: Graph.Signal }> = ({ signal }) => {
 
   const isUpdated = useUpdatedSelector(id)
 
-  const { highlightSignalObservers, isSourceHighlighted } = useHighlights()
-  const isHighlighted = isSourceHighlighted.bind(null, signal)
-
-  // const { hoverProps, isHovered } = createHover()
-  // createEffect(() => highlightSignalObservers(signal, isHovered()))
-
   return (
     <ValueRow selected={signal.selected} onClick={() => toggleSignalFocus(id)}>
       <ValueName type={type}>
-        <Highlight
-          strong={isUpdated()}
-          light={isHighlighted()}
-          signal
-          class={styles.ValueName.highlight}
-        >
+        <Highlight strong={isUpdated()} light={false} signal class={styles.ValueName.highlight}>
           {signal.name}
         </Highlight>
       </ValueName>

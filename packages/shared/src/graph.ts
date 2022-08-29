@@ -132,6 +132,8 @@ export namespace Mapped {
   export interface Root {
     id: NodeID
     tree: Owner
+    // components is an array instead of an object to preserve the order (nesting) of the components,
+    // this helps the locator find the most nested component first
     components: Component[]
   }
 
@@ -158,11 +160,13 @@ export namespace Mapped {
   }
 
   export type Component = {
+    id: NodeID
+    rootId: NodeID
     name: string
     /**
      * ! HTMLElements aren't JSON serialisable
      */
-    resolved: Many<HTMLElement>
+    element: Many<HTMLElement>
   }
 
   export interface OwnerDetails {
@@ -195,7 +199,6 @@ export namespace Graph {
     readonly id: NodeID
     readonly name: string
     readonly type: NodeType
-    readonly dispose: VoidFunction
     readonly sources: number
     readonly children: Owner[]
   }

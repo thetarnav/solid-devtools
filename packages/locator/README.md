@@ -12,7 +12,7 @@ A runtime library for locating components on the page, and going to their source
 
 ### Installation
 
-This module is built-in with [`solid-devtools`](https://github.com/thetarnav/solid-devtools/tree/main/packages/main#readme) package.
+This module is built-in with [`solid-devtools`](https://github.com/thetarnav/solid-devtools/tree/main/packages/main#readme) package and integrated with the [chrome extension](https://github.com/thetarnav/solid-devtools/tree/main/packages/extension#readme).
 
 ```bash
 npm i solid-devtools
@@ -46,17 +46,19 @@ export default defineConfig({
 
 ### Enable the Locator plugin
 
-The [`solid-devtools`](https://github.com/thetarnav/solid-devtools/tree/main/packages/main#readme) package comes together with the locator installed. All you need to do is configure it by calling `useLocatorPlugin` with some options.
+The [`solid-devtools`](https://github.com/thetarnav/solid-devtools/tree/main/packages/main#readme) package comes together with the locator installed. All you need to do is configure it by calling `useLocator` with some options.
 
 ```ts
-import { useLocatorPlugin } from "solid-devtools"
+import { useLocator } from "solid-devtools"
 
-useLocatorPlugin({
-  targetIDE: "vscode",
-})
+useLocator()
 ```
 
+Locator will not allow you to highlight hovered components on the page and reveal them in the IDE or the Chrome Extension. _(depending of if the extension panel is open or not)_
+
 ### Locator Options
+
+Not passing any options will enable the locator with <kbd>Alt</kbd> as the trigger key and no `targetIDE` selected.
 
 Currently Locator allows for specifying these props:
 
@@ -67,7 +69,7 @@ Choose in which IDE the component source code should be revealed.
 Out-of-the-box options: `vscode`, `atom`, `webstorm` and `vscode-insiders`
 
 ```ts
-useLocatorPlugin({
+useLocator({
   targetIDE: "vscode",
 })
 ```
@@ -77,7 +79,7 @@ useLocatorPlugin({
 To target custom URLs (e.g. Github files) the `targetIDE` option accepts an function returning a `string` or `false`.
 
 ```ts
-useLocatorPlugin({
+useLocator({
   targetIDE: ({ filePath, line }) =>
     // will navigate to this link when clicking
     `https://github.com/thetarnav/solid-devtools/blob/main/playgrounds/sandbox/${filePath}#L${line}`,
@@ -87,7 +89,7 @@ useLocatorPlugin({
 Returning `false` will prevent calling `window.open` to navigate to URL, and let you handle the click yourself.
 
 ```ts
-useLocatorPlugin({
+useLocator({
   targetIDE({ projectPath, filePath, line, column, element }) {
     console.log({ projectPath, filePath, line, column, element })
     return false
@@ -102,7 +104,7 @@ Holding which key should enable the locator overlay? It's `"Alt"` by default —
 Key options: `"Alt"`, `"Control"`, `"Mete"`, `"Shift"` or `string` to be compared with `e.key` property.
 
 ```tsx
-useLocatorPlugin({
+useLocator({
   key: "Control",
 })
 ```

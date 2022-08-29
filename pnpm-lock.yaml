@@ -78,10 +78,31 @@ importers:
       tsup: 6.2.1_6oasmw356qmm23djlsjgkwvrtm
       typescript: 4.7.4
 
+  packages/ext-adapter:
+    specifiers:
+      '@solid-devtools/debugger': workspace:^0.6.1
+      '@solid-devtools/locator': workspace:^0.13.0
+      '@solid-devtools/shared': workspace:^0.6.2
+      '@solid-primitives/utils': ^3.0.1
+      solid-js: ^1.4.8
+      tsup: ^6.2.1
+      type-fest: ^2.18.0
+      typescript: ^4.7.4
+    dependencies:
+      '@solid-devtools/debugger': link:../debugger
+      '@solid-devtools/locator': link:../locator
+      '@solid-devtools/shared': link:../shared
+      '@solid-primitives/utils': 3.0.1_solid-js@1.4.8
+      type-fest: 2.18.0
+    devDependencies:
+      solid-js: 1.4.8
+      tsup: 6.2.1_typescript@4.7.4
+      typescript: 4.7.4
+
   packages/extension:
     specifiers:
       '@crxjs/vite-plugin': ^1.0.13
-      '@solid-devtools/extension-adapter': ^0.12.1
+      '@solid-devtools/ext-adapter': ^0.12.1
       '@solid-devtools/shared': workspace:^0.6.2
       '@solid-devtools/ui': 0.9.2
       '@solid-primitives/context': ^0.1.0
@@ -119,7 +140,7 @@ importers:
       type-fest: 2.18.0
     devDependencies:
       '@crxjs/vite-plugin': 1.0.13_vite@3.0.4
-      '@solid-devtools/extension-adapter': link:../extension-adapter
+      '@solid-devtools/ext-adapter': link:../ext-adapter
       '@types/chrome': 0.0.193
       '@vanilla-extract/vite-plugin': 3.3.0_vite@3.0.4
       esbuild-plugin-solid: 0.4.2_2kfujm2k3bdcdbulf5i4mpvgfy
@@ -129,32 +150,15 @@ importers:
       vite-plugin-solid: 2.3.0_solid-js@1.4.8+vite@3.0.4
       zip-a-folder: 1.1.5
 
-  packages/extension-adapter:
-    specifiers:
-      '@solid-devtools/debugger': ^0.6.0
-      '@solid-devtools/shared': workspace:^0.6.0
-      '@solid-primitives/utils': ^3.0.1
-      solid-js: ^1.4.8
-      tsup: ^6.2.1
-      type-fest: ^2.18.0
-      typescript: ^4.7.4
-    dependencies:
-      '@solid-devtools/debugger': link:../debugger
-      '@solid-devtools/shared': link:../shared
-      '@solid-primitives/utils': 3.0.1_solid-js@1.4.8
-      type-fest: 2.18.0
-    devDependencies:
-      solid-js: 1.4.8
-      tsup: 6.2.1_typescript@4.7.4
-      typescript: 4.7.4
-
   packages/locator:
     specifiers:
       '@solid-devtools/debugger': ^0.6.1
       '@solid-devtools/shared': workspace:^0.6.1
       '@solid-devtools/transform': ^0.6.2
       '@solid-primitives/bounds': ^0.0.101
+      '@solid-primitives/cursor': ^0.0.100
       '@solid-primitives/event-listener': ^2.2.1
+      '@solid-primitives/immutable': ^0.1.1
       '@solid-primitives/keyboard': ^1.0.1
       '@solid-primitives/platform': ^0.0.100
       '@solid-primitives/utils': ^3.0.1
@@ -173,7 +177,9 @@ importers:
       '@solid-devtools/debugger': link:../debugger
       '@solid-devtools/shared': link:../shared
       '@solid-primitives/bounds': 0.0.101_solid-js@1.4.8
+      '@solid-primitives/cursor': 0.0.100_solid-js@1.4.8
       '@solid-primitives/event-listener': 2.2.1_solid-js@1.4.8
+      '@solid-primitives/immutable': 0.1.1_solid-js@1.4.8
       '@solid-primitives/keyboard': 1.0.1_solid-js@1.4.8
       '@solid-primitives/platform': 0.0.100_solid-js@1.4.8
       '@solid-primitives/utils': 3.0.1_solid-js@1.4.8
@@ -220,7 +226,7 @@ importers:
   packages/main:
     specifiers:
       '@solid-devtools/debugger': ^0.6.0
-      '@solid-devtools/extension-adapter': ^0.12.0
+      '@solid-devtools/ext-adapter': ^0.12.0
       '@solid-devtools/locator': ^0.13.0
       '@solid-devtools/transform': ^0.6.2
       '@testing-library/jest-dom': ^5.16.4
@@ -232,7 +238,7 @@ importers:
       typescript: ^4.7.4
     dependencies:
       '@solid-devtools/debugger': link:../debugger
-      '@solid-devtools/extension-adapter': link:../extension-adapter
+      '@solid-devtools/ext-adapter': link:../ext-adapter
       '@solid-devtools/locator': link:../locator
       '@solid-devtools/transform': link:../transform
     devDependencies:
@@ -272,6 +278,7 @@ importers:
   packages/shared:
     specifiers:
       '@solid-primitives/event-bus': ^0.1.0
+      '@solid-primitives/immutable': ^0.1.1
       '@solid-primitives/utils': ^3.0.1
       '@testing-library/jest-dom': ^5.16.4
       jest: ^28.1.3
@@ -282,6 +289,7 @@ importers:
       typescript: ^4.7.4
     dependencies:
       '@solid-primitives/event-bus': 0.1.0_solid-js@1.4.8
+      '@solid-primitives/immutable': 0.1.1_solid-js@1.4.8
       '@solid-primitives/utils': 3.0.1_solid-js@1.4.8
       solid-js: 1.4.8
       type-fest: 2.18.0
@@ -336,6 +344,7 @@ importers:
       '@solid-devtools/shared': workspace:^0.6.2
       '@solid-devtools/transform': ^0.6.2
       '@solid-primitives/bounds': ^0.0.101
+      '@solid-primitives/cursor': ^0.0.100
       '@solid-primitives/event-listener': ^2.2.1
       '@solid-primitives/keyboard': ^1.0.1
       '@solid-primitives/keyed': ^1.0.1
@@ -360,6 +369,7 @@ importers:
       '@solid-aria/interactions': 0.1.4_solid-js@1.4.8
       '@solid-devtools/shared': link:../shared
       '@solid-primitives/bounds': 0.0.101_solid-js@1.4.8
+      '@solid-primitives/cursor': 0.0.100_solid-js@1.4.8
       '@solid-primitives/event-listener': 2.2.1_solid-js@1.4.8
       '@solid-primitives/keyboard': 1.0.1_solid-js@1.4.8
       '@solid-primitives/keyed': 1.0.1_solid-js@1.4.8
@@ -3900,6 +3910,15 @@ packages:
       solid-js: 1.4.8
     dev: false
 
+  /@solid-primitives/cursor/0.0.100_solid-js@1.4.8:
+    resolution: {integrity: sha512-XstEQqblHeUfnBoU+wtpx1cfrU+XR2rubyIdO7ARPW8EKHwtO8fRKQsyeyzi9neFl1eCmuy/TZaKs44JH/vSeg==}
+    peerDependencies:
+      solid-js: ^1.4.0
+    dependencies:
+      '@solid-primitives/utils': 3.0.1_solid-js@1.4.8
+      solid-js: 1.4.8
+    dev: false
+
   /@solid-primitives/destructure/0.1.1_solid-js@1.4.8:
     resolution: {integrity: sha512-d8uHXWIGt+8E+6bdtIrwi6IvT1uKmzZkS6lus413appV9E3O8oA1HSHfJDXbeb7MmLDibkjPGukL2jqlpVIxrQ==}
     peerDependencies:
@@ -3914,7 +3933,7 @@ packages:
     peerDependencies:
       solid-js: ^1.3.1
     dependencies:
-      '@solid-primitives/immutable': 0.1.0_solid-js@1.4.8
+      '@solid-primitives/immutable': 0.1.1_solid-js@1.4.8
       '@solid-primitives/utils': 1.5.2_solid-js@1.4.8
       solid-js: 1.4.8
     dev: false
@@ -3932,6 +3951,14 @@ packages:
     resolution: {integrity: sha512-vKA318tb65h6f9mizF/x7ep9CxhtCtD6HMm5XVpRE+KrujgwyWB3DAVxmJ0lM4v4cImc7jvwBWvYirpnupe11A==}
     dependencies:
       '@solid-primitives/utils': 1.5.2_solid-js@1.4.8
+    transitivePeerDependencies:
+      - solid-js
+    dev: false
+
+  /@solid-primitives/immutable/0.1.1_solid-js@1.4.8:
+    resolution: {integrity: sha512-wHtydBmr7G7ZKkMSgcM5vjqhAIVgFrlWMtu1AbhpDpQ8ogC6Y3kryDY87ydAys6TBSC3vSL7fOt6iZnwvX4YJA==}
+    dependencies:
+      '@solid-primitives/utils': 3.0.1_solid-js@1.4.8
     transitivePeerDependencies:
       - solid-js
     dev: false
@@ -5553,7 +5580,7 @@ packages:
     dev: true
 
   /ee-first/1.1.1:
-    resolution: {integrity: sha512-WMwm9LhRUo+WUaRN+vRuETqG89IgZphVSNkdFgeb6sS/E4OrDIN7t48CAewSHXc6C8lefD8KKfr5vY61brQlow==}
+    resolution: {integrity: sha1-WQxhFWsK4vTwJVcyoViyZrxWsh0=}
     dev: true
 
   /electron-to-chromium/1.4.139:
@@ -10355,7 +10382,7 @@ packages:
     dev: true
 
   /utils-merge/1.0.1:
-    resolution: {integrity: sha512-pMZTvIkT1d+TFGvDOqodOclx0QWkkgi6Tdoa8gC8ffGAAqz9pzPTZWAybbsHHoED/ztMtkv/VoYTYyShUn81hA==}
+    resolution: {integrity: sha1-n5VxD1CiZ5R7LMwSR0HBAoQn5xM=}
     engines: {node: '>= 0.4.0'}
     dev: true
 
