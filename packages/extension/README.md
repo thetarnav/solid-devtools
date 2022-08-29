@@ -47,6 +47,13 @@ Import `"solid-devtools"` package in your app entry file.
 import "solid-devtools"
 ```
 
+You can also use the Locator pacage here. It now is integrated with the extension. More on that [here](https://github.com/thetarnav/solid-devtools/tree/main/packages/locator#readme).
+
+```ts
+import { useLocator } from "solid-devtools"
+useLocator()
+```
+
 ### 4. Add vite plugin _(Optional)_
 
 The vite plugin is not necessary for the devtools to work, but enabling some of the options, such as `"name"` will improve the debugging experience.

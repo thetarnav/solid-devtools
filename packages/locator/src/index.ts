@@ -151,7 +151,7 @@ const exported = createInternalRoot(() => {
 
   const owner = getOwner()!
   return {
-    useLocator: (opts: LocatorOptions) => runWithOwner(owner, useLocator.bind(void 0, opts)),
+    useLocator: (opts: LocatorOptions = {}) => runWithOwner(owner, useLocator.bind(void 0, opts)),
     registerPlugin,
     setTarget,
     selected,

@@ -80,9 +80,9 @@ importers:
 
   packages/ext-adapter:
     specifiers:
-      '@solid-devtools/debugger': ^0.6.0
+      '@solid-devtools/debugger': workspace:^0.6.1
       '@solid-devtools/locator': workspace:^0.13.0
-      '@solid-devtools/shared': workspace:^0.6.0
+      '@solid-devtools/shared': workspace:^0.6.2
       '@solid-primitives/utils': ^3.0.1
       solid-js: ^1.4.8
       tsup: ^6.2.1
