@@ -161,14 +161,14 @@ describe("walkSolidTree", () => {
       let testCompsLength = 0
       let btn!: Mapped.Component
       components.forEach(c => {
-        if (c.name === "TestComponent" && c.resolved instanceof HTMLDivElement) testCompsLength++
+        if (c.name === "TestComponent" && c.element instanceof HTMLDivElement) testCompsLength++
         else btn = c
       })
       expect(testCompsLength).toBe(6)
 
       expect(btn).toBeTruthy()
       expect(btn.name).toBe("Button")
-      expect(btn.resolved).toBeInstanceOf(HTMLButtonElement)
+      expect(btn.element).toBeInstanceOf(HTMLButtonElement)
 
       dispose()
     }))

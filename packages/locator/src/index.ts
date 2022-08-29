@@ -46,6 +46,9 @@ const exported = createInternalRoot(() => {
   const [enabled, addConsumer] = createConsumers()
   const [target, setTarget] = createSignal<HTMLElement | Mapped.Component | null>(null)
 
+  // TODO: instead of using a list of all components, use a map of lists grouped by rootId
+  // this will remove the need to attach rootId to each component
+  // and should allow for more optimal finsComponent cache management
   let componentList!: Accessor<Mapped.Component[]>
   registerDebuggerPlugin(data => {
     componentList = data.componentList
@@ -69,10 +72,10 @@ const exported = createInternalRoot(() => {
         const comp = findComponent(components, targetRef)
         return comp ? [comp] : []
       }
-      const { name, resolved, id } = targetRef
-      const resolvedArr = Array.isArray(resolved) ? resolved : [resolved]
+      const { element } = targetRef
+      const resolvedArr = Array.isArray(element) ? element : [element]
       return resolvedArr.map(element => {
-        return { id, element, name, location: getLocationFromElement(element) }
+        return { ...targetRef, element, location: getLocationFromElement(element) }
       })
     })
   })()

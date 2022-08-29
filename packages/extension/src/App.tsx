@@ -21,7 +21,7 @@ import {
   details,
   useUpdatedSignalsSelector,
   toggleSignalFocus,
-  setFocused,
+  setSelectedNode,
   useOwnerSelectedSelector,
   setHoveredElement,
 } from "./state/details"
@@ -57,7 +57,7 @@ const App: Component = () => {
   return (
     <StructureProvider
       value={{
-        handleFocus: setFocused,
+        handleFocus: setSelectedNode,
         useUpdatedSelector: useComputationUpdatedSelector,
         useSelectedSelector: useOwnerSelectedSelector,
         toggleHoveredOwner: (owner, state) => toggleHoveredOwner(owner, state, true),
@@ -71,7 +71,7 @@ const App: Component = () => {
         </header>
         <div class={styles.content}>
           <Splitter
-            onToggle={() => setFocused(null)}
+            onToggle={() => setSelectedNode(null)}
             side={
               <Show when={focused()}>
                 <div>

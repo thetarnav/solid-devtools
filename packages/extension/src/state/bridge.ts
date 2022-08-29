@@ -15,6 +15,7 @@ import {
   handleGraphUpdate as detailsHandleGraphUpdate,
   setOnSignalSelect,
   hoveredElement,
+  setSelectedNode,
 } from "./details"
 import { Messages } from "@solid-devtools/shared/bridge"
 import { NodeType } from "@solid-devtools/shared/graph"
@@ -63,12 +64,14 @@ onRuntimeMessage("SignalValue", update => {
 // })
 
 createRoot(() => {
+  onRuntimeMessage("SendSelectedOwner", setSelectedNode)
+
   // toggle selected owner
   createEffect(
     on(
       [focused, focusedRootId],
       ([owner, rootId]) => {
-        const payload = owner && rootId ? { ownerId: owner.id, rootId } : null
+        const payload = owner && rootId ? { nodeId: owner.id, rootId } : null
         postRuntimeMessage("SetSelectedOwner", payload)
       },
       { defer: true },

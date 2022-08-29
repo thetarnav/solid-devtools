@@ -5,6 +5,7 @@ import { ElementLocation } from "./goToSource"
 
 export type SelectedComponent = {
   id: NodeID
+  rootId: NodeID
   name: string
   element: HTMLElement
   location: ElementLocation | null
@@ -73,9 +74,10 @@ export function findComponent(
     }
 
     for (let i = comps.length - 1; i >= 0; i--) {
-      const { resolved, name, id } = comps[i]
+      const comp = comps[i]
+      const { element: resolved } = comp
       if ((Array.isArray(resolved) && resolved.some(e => e === el)) || el === resolved) {
-        const obj = { name, id, element: element ?? el, location }
+        const obj = { ...comp, element: element ?? el, location }
         checked.forEach(cel => findComponentCache.set(cel, obj))
         return obj
       }

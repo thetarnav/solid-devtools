@@ -128,8 +128,8 @@ function mapOwner(owner: Solid.Owner, type?: NodeType): Mapped.Owner {
   observeComputation(owner, id)
 
   if (GatherComponents && type === NodeType.Component) {
-    const resolved = resolveElements(owner.value)
-    if (resolved) Components.push({ id, name, resolved })
+    const element = resolveElements(owner.value)
+    if (element) Components.push({ id, name, element, rootId: RootId })
   }
 
   return {

@@ -33,7 +33,7 @@ DETAILS:
 - component props
 */
 
-export type SetFocusedOwner = (payload: { rootId: NodeID; ownerId: NodeID } | null) => void
+export type SetSelectedOwner = (payload: { rootId: NodeID; nodeId: NodeID } | null) => void
 
 export type FocusedState = Readonly<
   {
@@ -79,7 +79,7 @@ export type PluginFactoryData = {
   readonly serialisedRoots: Accessor<Record<NodeID, Mapped.Owner>>
   readonly rootsUpdates: Accessor<RootsUpdates>
   readonly componentList: Accessor<Mapped.Component[]>
-  readonly setFocusedOwner: SetFocusedOwner
+  readonly setFocusedOwner: SetSelectedOwner
   readonly focusedState: FocusedState
   readonly setSelectedSignal: (payload: {
     id: NodeID
@@ -164,17 +164,13 @@ const exported = createInternalRoot(() => {
   //
   const [focusedState, setFocusedState] = createStaticStore(getNullFocusedState())
 
-  const setFocusedOwner: SetFocusedOwner = payload => {
+  const setFocusedOwner: SetSelectedOwner = untrackedCallback(payload => {
     if (!payload) return setFocusedState(getNullFocusedState())
-    const id = untrack(() => focusedState.id)
-    if (id === payload.ownerId) return
-    setFocusedState({
-      ...getNullFocusedState(),
-      id: payload.ownerId,
-      rootId: payload.rootId,
-    })
-    forceRootUpdate(payload.rootId)
-  }
+    const { rootId, nodeId } = payload
+    if (focusedState.id === nodeId) return
+    setFocusedState({ ...getNullFocusedState(), id: nodeId, rootId })
+    forceRootUpdate(rootId)
+  })
 
   const setSelectedDetails = (payload: WalkerSelectedResult) => {
     setFocusedState(payload.details ? payload : getNullFocusedState())

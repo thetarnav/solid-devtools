@@ -15,7 +15,9 @@ export interface Messages {
   SignalUpdates: SignalUpdate[]
   ForceUpdate: void
   /** devtools -> adapter: request for details of owner details opened in the side-panel */
-  SetSelectedOwner: null | { rootId: NodeID; ownerId: NodeID }
+  SetSelectedOwner: null | { rootId: NodeID; nodeId: NodeID }
+  /** adapter -> devtools: send component clicked with the locator to the extension */
+  SendSelectedOwner: { rootId: NodeID; nodeId: NodeID }
   /** adapter -> devtools: send updates to the owner details */
   OwnerDetailsUpdate: Mapped.OwnerDetails
   /** devtools -> adapter: request for signal details — subscribe or unsubscribe */

@@ -68,6 +68,10 @@ chrome.runtime.onConnect.addListener(newPort => {
   )
 
   addCleanup(
+    onPortMessage("SendSelectedOwner", payload => postRuntimeMessage("SendSelectedOwner", payload)),
+  )
+
+  addCleanup(
     onRuntimeMessage("PanelVisibility", visibility => {
       panelVisibility = visibility
       postPortMessage("PanelVisibility", visibility)

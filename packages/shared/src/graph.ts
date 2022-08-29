@@ -161,11 +161,12 @@ export namespace Mapped {
 
   export type Component = {
     id: NodeID
+    rootId: NodeID
     name: string
     /**
      * ! HTMLElements aren't JSON serialisable
      */
-    resolved: Many<HTMLElement>
+    element: Many<HTMLElement>
   }
 
   export interface OwnerDetails {

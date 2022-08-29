@@ -70,7 +70,8 @@ const extensionAdapterFactory: PluginFactory = ({
     onClick: (e, component) => {
       e.preventDefault()
       e.stopPropagation()
-      console.log(component)
+      const { id, rootId } = component
+      postWindowMessage("SendSelectedOwner", { nodeId: id, rootId })
       return false
     },
   })
