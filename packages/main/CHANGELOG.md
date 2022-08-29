@@ -1,5 +1,25 @@
 # solid-devtools
 
+## 0.14.0
+
+### Minor Changes
+
+- 27ffdb1: Highlight components hovered on the extension.
+
+### Patch Changes
+
+- Updated dependencies [15c958b]
+- Updated dependencies [27ffdb1]
+- Updated dependencies [27b98fa]
+- Updated dependencies [fae3ec0]
+- Updated dependencies [c5cd272]
+- Updated dependencies [d38a555]
+- Updated dependencies [15c958b]
+  - @solid-devtools/debugger@0.7.0
+  - @solid-devtools/ext-adapter@0.14.0
+  - @solid-devtools/locator@0.14.0
+  - @solid-devtools/transform@0.7.0
+
 ## 0.13.0
 
 ### Patch Changes

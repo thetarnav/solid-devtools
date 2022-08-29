@@ -1,5 +1,20 @@
 # @solid-devtools/transform
 
+## 0.7.0
+
+### Minor Changes
+
+- 27ffdb1: Highlight components hovered on the extension.
+
+### Patch Changes
+
+- Updated dependencies [27ffdb1]
+- Updated dependencies [33e2c17]
+- Updated dependencies [27b98fa]
+- Updated dependencies [fae3ec0]
+- Updated dependencies [15c958b]
+  - @solid-devtools/shared@0.7.0
+
 ## 0.6.2
 
 ### Patch Changes
