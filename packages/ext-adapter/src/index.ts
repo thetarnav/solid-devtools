@@ -68,6 +68,7 @@ const extensionAdapterFactory: PluginFactory = ({
   locator.registerPlugin({
     enabled,
     onClick: (e, component) => {
+      if (!enabled()) return
       e.preventDefault()
       e.stopPropagation()
       const { id, rootId } = component

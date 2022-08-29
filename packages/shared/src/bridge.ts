@@ -7,7 +7,8 @@ export interface Messages {
   // adapter -> content -> devtools.html
   // the `string` payload is the ext-adapter version
   SolidOnPage: string
-  DevtoolsScriptConnected: void
+  // devtools -> bacground: number is a tab id
+  DevtoolsScriptConnected: number
   PanelVisibility: boolean
   ResetPanel: void
   GraphUpdate: RootsUpdates
