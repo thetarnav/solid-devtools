@@ -1,5 +1,14 @@
 # solid-devtools-extension
 
+## 0.8.1
+
+### Patch Changes
+
+- a4d099f: Solid 1.5
+- Updated dependencies [a4d099f]
+  - @solid-devtools/shared@0.7.1
+  - @solid-devtools/ui@0.10.1
+
 ## 0.8.0
 
 ### Minor Changes
