@@ -1,5 +1,11 @@
 # solid-devtools-shared
 
+## 0.7.2
+
+### Patch Changes
+
+- f32598e: Remove rootId from mapped components.
+
 ## 0.7.1
 
 ### Patch Changes

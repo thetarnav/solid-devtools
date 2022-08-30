@@ -1,6 +1,6 @@
 {
   "name": "@solid-devtools/locator",
-  "version": "0.14.1",
+  "version": "0.14.2",
   "description": "On-page overlay for localisating SolidJS components, and revealing them in your code editor.",
   "license": "MIT",
   "author": "Damian Tarnawski <gthetarnav@gmail.com>",
@@ -59,8 +59,8 @@
     "typescript": "^4.8.2"
   },
   "dependencies": {
-    "@solid-devtools/debugger": "^0.7.1",
-    "@solid-devtools/shared": "workspace:^0.7.1",
+    "@solid-devtools/debugger": "^0.7.2",
+    "@solid-devtools/shared": "workspace:^0.7.2",
     "@solid-primitives/bounds": "^0.0.101",
     "@solid-primitives/cursor": "^0.0.100",
     "@solid-primitives/event-listener": "^2.2.2",
