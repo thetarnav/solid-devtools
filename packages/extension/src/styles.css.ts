@@ -1,5 +1,15 @@
-import { style } from "@vanilla-extract/css"
-import { spacing, color, insetX } from "@solid-devtools/ui/theme"
+import { createVar, style } from "@vanilla-extract/css"
+import { CSSVarFunction } from "@vanilla-extract/private"
+import {
+  spacing,
+  color,
+  insetX,
+  centerChild,
+  rounded,
+  inset,
+  transition,
+  theme,
+} from "@solid-devtools/ui/theme"
 
 export const app = style({
   height: "100vh",
@@ -12,6 +22,48 @@ export const app = style({
 export const header = style({
   padding: spacing[4],
   backgroundColor: color.gray[100],
+  display: "flex",
+  alignItems: "center",
+  columnGap: spacing[4],
+})
+
+//
+// SELECT ELEMENT
+//
+export const select = style({
+  position: "relative",
+  zIndex: 1,
+  width: spacing[8],
+  height: spacing[8],
+  ...centerChild,
+  color: color.gray[500],
+  ...transition("color"),
+  ":hover": {
+    color: color.gray[700],
+  },
+  ":before": {
+    content: "",
+    position: "absolute",
+    ...inset(0),
+    zIndex: -1,
+    backgroundColor: color.gray[200],
+    border: `1px solid ${color.gray[300]}`,
+    ...rounded("md"),
+    opacity: 0,
+    ...transition("opacity", theme.duration[200]),
+  },
+  selectors: {
+    "&:hover:before": {
+      opacity: 1,
+    },
+    '&[data-selected="true"]': {
+      color: color.cyan[700],
+    },
+  },
+})
+export const selectIcon = style({
+  width: spacing[5],
+  height: spacing[5],
 })
 
 export const content = style({

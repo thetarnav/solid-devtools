@@ -1,4 +1,4 @@
-import { Component, For, Show } from "solid-js"
+import { Component, createSignal, For, Show } from "solid-js"
 import { destructure } from "@solid-primitives/destructure"
 import { NodeType, Graph } from "@solid-devtools/shared/graph"
 import {
@@ -10,6 +10,7 @@ import {
   Signals,
   OwnerPath,
 } from "@solid-devtools/ui"
+import * as Icon from "@solid-devtools/ui/icons"
 import {
   graphs,
   toggleHoveredOwner,
@@ -53,6 +54,16 @@ const DetailsContent: Component<{ details: Graph.OwnerDetails }> = props => {
   )
 }
 
+const SelectComponent: Component<{}> = props => {
+  const [selected, setSelected] = createSignal(false)
+
+  return (
+    <button class={styles.select} data-selected={selected()}>
+      <Icon.Select class={styles.selectIcon} />
+    </button>
+  )
+}
+
 const App: Component = () => {
   return (
     <StructureProvider
@@ -66,8 +77,11 @@ const App: Component = () => {
     >
       <div class={styles.app}>
         <header class={styles.header}>
-          <h3>Welcome to Solid Devtools</h3>
-          <p>Number of Roots: {graphs.length}</p>
+          <SelectComponent />
+          <div>
+            <h3>Welcome to Solid Devtools</h3>
+            <p>Number of Roots: {graphs.length}</p>
+          </div>
         </header>
         <div class={styles.content}>
           <Splitter
