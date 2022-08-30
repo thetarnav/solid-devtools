@@ -5,9 +5,10 @@ export { registerDebuggerPlugin } from "./plugin"
 export type {
   PluginFactory,
   FocusedState,
-  SetSelectedOwner as SetFocusedOwner,
+  SetSelectedOwner,
   SignaledRoot,
   BatchComputationUpdatesHandler,
+  PluginFactoryData,
 } from "./plugin"
 
 export { attachDebugger } from "./roots"

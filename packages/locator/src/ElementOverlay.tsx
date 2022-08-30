@@ -13,7 +13,7 @@ import { animate } from "motion"
 import { clsx } from "clsx"
 import { createElementCursor } from "@solid-primitives/cursor"
 import { createElementBounds } from "@solid-primitives/bounds"
-import { SelectedComponent } from "./findComponent"
+import { HoveredComponent } from "./findComponent"
 
 const styles = /*css*/ `
 .element-overlay {
@@ -88,7 +88,7 @@ export interface ElementOverlayProps {
   tag: string | undefined
 }
 
-export function attachElementOverlay(selected: Accessor<SelectedComponent[]>) {
+export function attachElementOverlay(selected: Accessor<HoveredComponent[]>) {
   return (
     <Portal useShadow>
       <Index each={selected()}>

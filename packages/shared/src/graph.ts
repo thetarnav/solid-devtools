@@ -161,7 +161,6 @@ export namespace Mapped {
 
   export type Component = {
     id: NodeID
-    rootId: NodeID
     name: string
     /**
      * ! HTMLElements aren't JSON serialisable

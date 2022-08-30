@@ -129,7 +129,7 @@ function mapOwner(owner: Solid.Owner, type?: NodeType): Mapped.Owner {
 
   if (GatherComponents && type === NodeType.Component) {
     const element = resolveElements(owner.value)
-    if (element) Components.push({ id, name, element, rootId: RootId })
+    if (element) Components.push({ id, name, element })
   }
 
   return {

@@ -78,7 +78,7 @@ export type PluginFactoryData = {
   readonly roots: Accessor<Record<NodeID, SignaledRoot>>
   readonly serialisedRoots: Accessor<Record<NodeID, Mapped.Owner>>
   readonly rootsUpdates: Accessor<RootsUpdates>
-  readonly componentList: Accessor<Mapped.Component[]>
+  readonly components: Accessor<Record<NodeID, Mapped.Component[]>>
   readonly setFocusedOwner: SetSelectedOwner
   readonly focusedState: FocusedState
   readonly setSelectedSignal: (payload: {
@@ -211,11 +211,11 @@ const exported = createInternalRoot(() => {
   //
   // Components:
   //
-  const componentList = createLazyMemo<Mapped.Component[]>(() =>
-    Object.values(roots()).reduce((arr: Mapped.Component[], root) => {
-      arr.push.apply(arr, root.components())
-      return arr
-    }, []),
+  const components = createLazyMemo(() =>
+    Object.entries(roots()).reduce<Record<NodeID, Mapped.Component[]>>((obj, [rootId, root]) => {
+      obj[rootId] = root.components()
+      return obj
+    }, {}),
   )
 
   const pluginData: PluginFactoryData = {
@@ -224,7 +224,7 @@ const exported = createInternalRoot(() => {
     roots,
     serialisedRoots,
     rootsUpdates,
-    componentList,
+    components,
     triggerUpdate,
     forceTriggerUpdate,
     setFocusedOwner,

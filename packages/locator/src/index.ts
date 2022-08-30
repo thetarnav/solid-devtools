@@ -11,11 +11,15 @@ import { makeEventListener } from "@solid-primitives/event-listener"
 import { createKeyHold, KbdKey } from "@solid-primitives/keyboard"
 import { remove } from "@solid-primitives/immutable"
 import { onRootCleanup } from "@solid-primitives/utils"
-import { registerDebuggerPlugin, createInternalRoot } from "@solid-devtools/debugger"
+import {
+  registerDebuggerPlugin,
+  createInternalRoot,
+  PluginFactoryData,
+} from "@solid-devtools/debugger"
 import { createConsumers } from "@solid-devtools/shared/primitives"
-import { Mapped } from "@solid-devtools/shared/graph"
+import { Mapped, NodeID } from "@solid-devtools/shared/graph"
 import { warn } from "@solid-devtools/shared/utils"
-import { findComponent, getLocationFromElement, SelectedComponent } from "./findComponent"
+import { findComponent, getLocationFromElement, HoveredComponent } from "./findComponent"
 import { makeHoverElementListener } from "./hoverElement"
 import {
   getFullSourceCodeData,
@@ -27,7 +31,7 @@ import {
 import { attachElementOverlay } from "./ElementOverlay"
 
 export type { TargetIDE, TargetURLFunction } from "./goToSource"
-export type { SelectedComponent } from "./findComponent"
+export type { HoveredComponent } from "./findComponent"
 
 export type LocatorOptions = {
   /** Choose in which IDE the component source code should be revealed. */
@@ -38,40 +42,40 @@ export type LocatorOptions = {
 
 export type ClickMiddleware = (
   e: MouseEvent,
-  component: SelectedComponent,
+  component: HoveredComponent,
   data: SourceCodeData | null,
 ) => false | void
 
+export type TargetComponent = Mapped.Component & { rootId: NodeID }
+
 const exported = createInternalRoot(() => {
   const [enabled, addConsumer] = createConsumers()
-  const [target, setTarget] = createSignal<HTMLElement | Mapped.Component | null>(null)
+  const [target, setTarget] = createSignal<HTMLElement | TargetComponent | null>(null)
 
-  // TODO: instead of using a list of all components, use a map of lists grouped by rootId
-  // this will remove the need to attach rootId to each component
-  // and should allow for more optimal finsComponent cache management
-  let componentList!: Accessor<Mapped.Component[]>
+  let components!: PluginFactoryData["components"]
   registerDebuggerPlugin(data => {
-    componentList = data.componentList
+    components = data.components
     return { enabled, gatherComponents: enabled }
   })
 
   // TODO: selected is an array, but it still only selects only one component at a time — only elements with location should be stored as array
-  // TODO: also, rename to "hovered" — to not confuse with selected owners in the extension
-  const selected = (() => {
+  const hoveredComponents = (() => {
     let init = true
-    return createMemo<SelectedComponent[]>(() => {
+    return createMemo<HoveredComponent[]>(() => {
       if (!enabled()) {
         // defferred memo is to prevent calculating selected with old components array
         init = true
         return []
       }
-      const [components, targetRef] = [componentList(), target()]
+      const [componentRefs, targetRef] = [components(), target()]
       if (init) return (init = false) || []
       if (!targetRef) return []
+      // target is an element
       if (targetRef instanceof HTMLElement) {
-        const comp = findComponent(components, targetRef)
+        const comp = findComponent(componentRefs, targetRef)
         return comp ? [comp] : []
       }
+      // target is a component
       const { element } = targetRef
       const resolvedArr = Array.isArray(element) ? element : [element]
       return resolvedArr.map(element => {
@@ -80,7 +84,7 @@ const exported = createInternalRoot(() => {
     })
   })()
 
-  attachElementOverlay(selected)
+  attachElementOverlay(hoveredComponents)
 
   const clickInterceptors: ClickMiddleware[] = []
   function runClickInterceptors(...args: Parameters<ClickMiddleware>) {
@@ -133,7 +137,7 @@ const exported = createInternalRoot(() => {
         e => {
           const { target } = e
           if (!(target instanceof HTMLElement)) return
-          const comp = selected().find(({ element }) => target.contains(element))
+          const comp = hoveredComponents().find(({ element }) => target.contains(element))
           if (!comp) return
           const sourceCodeData = comp.location
             ? getFullSourceCodeData(comp.location, comp.element)
@@ -154,7 +158,7 @@ const exported = createInternalRoot(() => {
     useLocator: (opts: LocatorOptions = {}) => runWithOwner(owner, useLocator.bind(void 0, opts)),
     registerPlugin,
     setTarget,
-    selected,
+    hoveredComponents,
   }
 })
-export const { useLocator, registerPlugin, setTarget, selected } = exported
+export const { useLocator, registerPlugin, setTarget, hoveredComponents } = exported

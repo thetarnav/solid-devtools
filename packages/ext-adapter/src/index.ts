@@ -8,7 +8,6 @@ import {
   startListeningWindowMessages,
 } from "@solid-devtools/shared/bridge"
 import { warn } from "@solid-devtools/shared/utils"
-import { Mapped } from "@solid-devtools/shared/graph"
 
 startListeningWindowMessages()
 
@@ -81,7 +80,7 @@ const extensionAdapterFactory: PluginFactory = ({
   let prevHoverMessage: Messages["SetHoveredOwner"] | null = null
   // listen for op-page components being hovered and send them to the devtools panel
   createEffect(() => {
-    const hovered = locator.selected()[0] as locator.SelectedComponent | undefined
+    const hovered = locator.hoveredComponents()[0] as locator.HoveredComponent | undefined
     if (skipNextHoveredComponent) return (skipNextHoveredComponent = false)
     if (!hovered) {
       if (prevHoverMessage && prevHoverMessage.state)
@@ -96,7 +95,7 @@ const extensionAdapterFactory: PluginFactory = ({
 
   onWindowMessage("HighlightElement", payload => {
     if (!payload) return locator.setTarget(null)
-    let target: Mapped.Component | HTMLElement
+    let target: locator.TargetComponent | HTMLElement
     // highlight component
     if (typeof payload === "object") {
       const { rootId, nodeId } = payload
@@ -104,7 +103,7 @@ const extensionAdapterFactory: PluginFactory = ({
       if (!root) return warn("No root found", rootId)
       const component = root.components().find(c => c.id === nodeId)
       if (!component) return warn("No component found", nodeId)
-      target = component
+      target = { ...component, rootId }
     }
     // highlight element
     else {
