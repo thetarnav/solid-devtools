@@ -40,7 +40,7 @@ importers:
 
   packages/debugger:
     specifiers:
-      '@solid-devtools/shared': workspace:^0.7.1
+      '@solid-devtools/shared': workspace:^0.7.2
       '@solid-devtools/transform': ^0.7.1
       '@solid-primitives/event-bus': ^0.1.2
       '@solid-primitives/immutable': ^0.1.2
@@ -80,9 +80,9 @@ importers:
 
   packages/ext-adapter:
     specifiers:
-      '@solid-devtools/debugger': workspace:^0.7.1
-      '@solid-devtools/locator': workspace:^0.14.1
-      '@solid-devtools/shared': workspace:^0.7.1
+      '@solid-devtools/debugger': workspace:^0.7.2
+      '@solid-devtools/locator': workspace:^0.14.2
+      '@solid-devtools/shared': workspace:^0.7.2
       '@solid-primitives/utils': ^3.0.2
       solid-js: ^1.5.2
       tsup: ^6.2.3
@@ -152,8 +152,8 @@ importers:
 
   packages/locator:
     specifiers:
-      '@solid-devtools/debugger': ^0.7.1
-      '@solid-devtools/shared': workspace:^0.7.1
+      '@solid-devtools/debugger': ^0.7.2
+      '@solid-devtools/shared': workspace:^0.7.2
       '@solid-devtools/transform': ^0.7.1
       '@solid-primitives/bounds': ^0.0.101
       '@solid-primitives/cursor': ^0.0.100
@@ -5791,7 +5791,7 @@ packages:
     dev: true
 
   /ee-first/1.1.1:
-    resolution: {integrity: sha1-WQxhFWsK4vTwJVcyoViyZrxWsh0=}
+    resolution: {integrity: sha512-WMwm9LhRUo+WUaRN+vRuETqG89IgZphVSNkdFgeb6sS/E4OrDIN7t48CAewSHXc6C8lefD8KKfr5vY61brQlow==}
     dev: true
 
   /electron-to-chromium/1.4.139:
@@ -10806,7 +10806,7 @@ packages:
     dev: true
 
   /utils-merge/1.0.1:
-    resolution: {integrity: sha1-n5VxD1CiZ5R7LMwSR0HBAoQn5xM=}
+    resolution: {integrity: sha512-pMZTvIkT1d+TFGvDOqodOclx0QWkkgi6Tdoa8gC8ffGAAqz9pzPTZWAybbsHHoED/ztMtkv/VoYTYyShUn81hA==}
     engines: {node: '>= 0.4.0'}
     dev: true
 

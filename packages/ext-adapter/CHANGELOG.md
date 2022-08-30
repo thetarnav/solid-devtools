@@ -1,5 +1,15 @@
 # @solid-devtools/ext-adapter
 
+## 0.14.2
+
+### Patch Changes
+
+- f32598e: Remove rootId from mapped components.
+- Updated dependencies [f32598e]
+  - @solid-devtools/debugger@0.7.2
+  - @solid-devtools/locator@0.14.2
+  - @solid-devtools/shared@0.7.2
+
 ## 0.14.1
 
 ### Patch Changes
