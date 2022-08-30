@@ -1,6 +1,6 @@
 {
   "name": "@solid-devtools/ui",
-  "version": "0.10.0",
+  "version": "0.10.1",
   "description": "UI Library for visualization of the reactive graph. Powering Solid Devtools.",
   "license": "MIT",
   "author": "Damian Tarnawski <gthetarnav@gmail.com>",
@@ -65,7 +65,7 @@
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
-    "@solid-devtools/transform": "^0.7.0",
+    "@solid-devtools/transform": "^0.7.1",
     "@vanilla-extract/esbuild-plugin": "^2.1.0",
     "esbuild": "^0.14.54",
     "esbuild-plugin-solid": "^0.4.2",
@@ -76,7 +76,7 @@
   "dependencies": {
     "@otonashixav/solid-flip": "^0.10.5",
     "@solid-aria/interactions": "^0.1.4",
-    "@solid-devtools/shared": "workspace:^0.7.0",
+    "@solid-devtools/shared": "workspace:^0.7.1",
     "@solid-primitives/bounds": "^0.0.102",
     "@solid-primitives/cursor": "^0.0.100",
     "@solid-primitives/event-listener": "^2.2.2",
