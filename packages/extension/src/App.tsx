@@ -67,7 +67,7 @@ const App: Component = () => {
       <div class={styles.app}>
         <header class={styles.header}>
           <h3>Welcome to Solid Devtools</h3>
-          <p>Number of Roots: {Object.keys(graphs).length}</p>
+          <p>Number of Roots: {graphs.length}</p>
         </header>
         <div class={styles.content}>
           <Splitter
@@ -75,7 +75,9 @@ const App: Component = () => {
             side={
               <Show when={focused()}>
                 <div>
-                  <Show when={details()}>{details => <DetailsContent details={details} />}</Show>
+                  <Show when={details()} keyed>
+                    {details => <DetailsContent details={details} />}
+                  </Show>
                 </div>
               </Show>
             }

@@ -118,7 +118,9 @@ const ObjectValuePreview: Component<
         </span>
       </Show>
     </Match>
-    <Match when={props.children}>{value => <CollapsableObjectPreview value={value} />}</Match>
+    <Match when={props.children} keyed>
+      {value => <CollapsableObjectPreview value={value} />}
+    </Match>
   </Switch>
 )
 
