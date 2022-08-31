@@ -1,5 +1,13 @@
 # solid-devtools
 
+## 0.15.0
+
+### Patch Changes
+
+- Updated dependencies [623aca6]
+  - @solid-devtools/ext-adapter@0.15.0
+  - @solid-devtools/locator@0.15.0
+
 ## 0.14.1
 
 ### Patch Changes

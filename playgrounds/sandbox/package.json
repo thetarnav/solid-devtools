@@ -19,7 +19,7 @@
   "dependencies": {
     "@solid-devtools/logger": "^0.4.5",
     "@solid-primitives/timer": "^1.3.2",
-    "solid-devtools": "^0.14.1",
+    "solid-devtools": "^0.15.0",
     "solid-js": "^1.5.2"
   }
 }
