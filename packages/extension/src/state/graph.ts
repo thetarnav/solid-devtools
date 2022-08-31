@@ -1,8 +1,8 @@
 import { batch, createRoot, createSignal } from "solid-js"
 import { createStore, produce } from "solid-js/store"
 import { NodeID, RootsUpdates, Mapped, Graph } from "@solid-devtools/shared/graph"
-import { createUpdatedSelector } from "./utils"
 import { createBoundSelector } from "@solid-devtools/shared/primitives"
+import { createUpdatedSelector } from "./utils"
 
 const NodeMap: Record<NodeID, Record<NodeID, Graph.Owner>> = {}
 

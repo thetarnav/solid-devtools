@@ -67,31 +67,20 @@ chrome.runtime.onConnect.addListener(port => {
 
   addCleanup(onPortMessage("GraphUpdate", graph => postRuntimeMessage("GraphUpdate", graph)))
 
-  addCleanup(
-    onPortMessage("ComputationUpdates", payload =>
-      postRuntimeMessage("ComputationUpdates", payload),
-    ),
-  )
+  addCleanup(onPortMessage("ComputationUpdates", e => postRuntimeMessage("ComputationUpdates", e)))
 
-  addCleanup(
-    onPortMessage("SignalUpdates", payload => postRuntimeMessage("SignalUpdates", payload)),
-  )
+  addCleanup(onPortMessage("SignalUpdates", e => postRuntimeMessage("SignalUpdates", e)))
 
-  addCleanup(
-    onPortMessage("OwnerDetailsUpdate", payload =>
-      postRuntimeMessage("OwnerDetailsUpdate", payload),
-    ),
-  )
+  addCleanup(onPortMessage("OwnerDetailsUpdate", e => postRuntimeMessage("OwnerDetailsUpdate", e)))
 
-  addCleanup(onPortMessage("SignalValue", payload => postRuntimeMessage("SignalValue", payload)))
+  addCleanup(onPortMessage("SignalValue", e => postRuntimeMessage("SignalValue", e)))
 
-  addCleanup(
-    onPortMessage("SetHoveredOwner", payload => postRuntimeMessage("SetHoveredOwner", payload)),
-  )
+  addCleanup(onPortMessage("SetHoveredOwner", e => postRuntimeMessage("SetHoveredOwner", e)))
 
-  addCleanup(
-    onPortMessage("SendSelectedOwner", payload => postRuntimeMessage("SendSelectedOwner", payload)),
-  )
+  addCleanup(onPortMessage("SendSelectedOwner", e => postRuntimeMessage("SendSelectedOwner", e)))
+
+  addCleanup(onPortMessage("AdpLocatorMode", e => postRuntimeMessage("AdpLocatorMode", e)))
+  addCleanup(onRuntimeMessage("ExtLocatorMode", e => postPortMessage("ExtLocatorMode", e)))
 
   addCleanup(
     onRuntimeMessage("PanelVisibility", visibility => {
@@ -107,16 +96,10 @@ chrome.runtime.onConnect.addListener(port => {
     }),
   )
 
-  addCleanup(
-    onRuntimeMessage("SetSelectedOwner", payload => postPortMessage("SetSelectedOwner", payload)),
-  )
-  addCleanup(
-    onRuntimeMessage("SetSelectedSignal", payload => postPortMessage("SetSelectedSignal", payload)),
-  )
+  addCleanup(onRuntimeMessage("SetSelectedOwner", e => postPortMessage("SetSelectedOwner", e)))
+  addCleanup(onRuntimeMessage("SetSelectedSignal", e => postPortMessage("SetSelectedSignal", e)))
 
-  addCleanup(
-    onRuntimeMessage("HighlightElement", payload => postPortMessage("HighlightElement", payload)),
-  )
+  addCleanup(onRuntimeMessage("HighlightElement", e => postPortMessage("HighlightElement", e)))
 
   addCleanup(onRuntimeMessage("ForceUpdate", () => postPortMessage("ForceUpdate")))
 })

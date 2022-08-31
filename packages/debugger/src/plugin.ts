@@ -232,6 +232,7 @@ const exported = createInternalRoot(() => {
     setSelectedSignal,
   }
   const owner = getOwner()!
+  // TODO: refactor this to the form used in Locator package
   function registerDebuggerPlugin(factory: PluginFactory) {
     runWithOwner(owner, () => {
       const { enabled, gatherComponents, observeComputations } = factory(pluginData)

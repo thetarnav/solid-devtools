@@ -9,7 +9,9 @@ import {
   Scrollable,
   Signals,
   OwnerPath,
+  ToggleButton,
 } from "@solid-devtools/ui"
+import * as Icon from "@solid-devtools/ui/icons"
 import {
   graphs,
   toggleHoveredOwner,
@@ -25,6 +27,7 @@ import {
   useOwnerSelectedSelector,
   setHoveredElement,
 } from "./state/details"
+import { setExtLocator, locatorEnabled } from "./state/selected"
 import * as styles from "./styles.css"
 
 const DetailsContent: Component<{ details: Graph.OwnerDetails }> = props => {
@@ -53,6 +56,14 @@ const DetailsContent: Component<{ details: Graph.OwnerDetails }> = props => {
   )
 }
 
+const SelectComponent: Component<{}> = props => {
+  return (
+    <ToggleButton class={styles.select} onToggle={setExtLocator} selected={locatorEnabled()}>
+      <Icon.Select class={styles.selectIcon} />
+    </ToggleButton>
+  )
+}
+
 const App: Component = () => {
   return (
     <StructureProvider
@@ -66,8 +77,11 @@ const App: Component = () => {
     >
       <div class={styles.app}>
         <header class={styles.header}>
-          <h3>Welcome to Solid Devtools</h3>
-          <p>Number of Roots: {graphs.length}</p>
+          <SelectComponent />
+          <div>
+            <h3>Welcome to Solid Devtools</h3>
+            <p>Number of Roots: {graphs.length}</p>
+          </div>
         </header>
         <div class={styles.content}>
           <Splitter

@@ -1,24 +1,10 @@
 import { createEffect, createRoot, on } from "solid-js"
-import { createRuntimeMessanger } from "../../shared/messanger"
-import {
-  handleComputationsUpdate,
-  handleGraphUpdate,
-  hovered,
-  resetGraph,
-  toggleHoveredOwner,
-} from "./graph"
-import {
-  focused,
-  focusedRootId,
-  handleSignalUpdates,
-  updateDetails,
-  handleGraphUpdate as detailsHandleGraphUpdate,
-  setOnSignalSelect,
-  hoveredElement,
-  setSelectedNode,
-} from "./details"
 import { Messages } from "@solid-devtools/shared/bridge"
 import { NodeType } from "@solid-devtools/shared/graph"
+import { createRuntimeMessanger } from "../shared/messanger"
+import * as Graph from "./state/graph"
+import * as Details from "./state/details"
+import * as Selected from "./state/selected"
 
 export const { onRuntimeMessage, postRuntimeMessage } = createRuntimeMessanger()
 
@@ -28,30 +14,29 @@ if (import.meta.env.DEV) {
 }
 
 onRuntimeMessage("GraphUpdate", update => {
-  handleGraphUpdate(update)
-  detailsHandleGraphUpdate()
+  Graph.handleGraphUpdate(update)
+  Details.handleGraphUpdate()
 })
 
 onRuntimeMessage("ResetPanel", () => {
-  resetGraph()
-  detailsHandleGraphUpdate()
+  Graph.resetGraph()
+  Details.handleGraphUpdate()
 })
 
 onRuntimeMessage("ComputationUpdates", updates => {
-  handleComputationsUpdate(updates.map(u => u.id))
+  Graph.handleComputationsUpdate(updates.map(u => u.id))
 })
 
 onRuntimeMessage("SignalUpdates", updates => {
-  handleSignalUpdates(updates)
+  Details.handleSignalUpdates(updates)
+})
+onRuntimeMessage("SignalValue", update => {
+  // updates the signal value but without causing it to highlight
+  Details.handleSignalUpdates([update], false)
 })
 
 onRuntimeMessage("OwnerDetailsUpdate", details => {
-  updateDetails(details)
-})
-
-onRuntimeMessage("SignalValue", update => {
-  // updates the signal value but without causing it to highlight
-  handleSignalUpdates([update], false)
+  Details.updateDetails(details)
 })
 
 // let visibility = false
@@ -64,12 +49,19 @@ onRuntimeMessage("SignalValue", update => {
 // })
 
 createRoot(() => {
-  onRuntimeMessage("SendSelectedOwner", setSelectedNode)
+  onRuntimeMessage("AdpLocatorMode", Selected.setOtherLocator)
+  createEffect(
+    on(Selected.extLocatorEnabled, state => postRuntimeMessage("ExtLocatorMode", state), {
+      defer: true,
+    }),
+  )
+
+  onRuntimeMessage("SendSelectedOwner", Details.setSelectedNode)
 
   // toggle selected owner
   createEffect(
     on(
-      [focused, focusedRootId],
+      [Details.focused, Details.focusedRootId],
       ([owner, rootId]) => {
         const payload = owner && rootId ? { nodeId: owner.id, rootId } : null
         postRuntimeMessage("SetSelectedOwner", payload)
@@ -80,15 +72,15 @@ createRoot(() => {
 
   onRuntimeMessage("SetHoveredOwner", ({ state, nodeId }) => {
     // do not sync this state back to the adapter
-    toggleHoveredOwner(nodeId, state, false)
+    Graph.toggleHoveredOwner(nodeId, state, false)
   })
 
   let initHighlight = true
   // toggle hovered html element
   createEffect<Messages["HighlightElement"] | undefined>(prev => {
     // tracks
-    const { rootId, owner, sync } = hovered()
-    const elId = hoveredElement()
+    const { rootId, owner, sync } = Graph.hovered()
+    const elId = Details.hoveredElement()
 
     // skip initial value
     if (initHighlight) return (initHighlight = false) || undefined
@@ -113,7 +105,7 @@ createRoot(() => {
   })
 
   // toggle selected signals
-  setOnSignalSelect((id, selected) => {
+  Details.setOnSignalSelect((id, selected) => {
     postRuntimeMessage("SetSelectedSignal", { id, selected })
   })
 })

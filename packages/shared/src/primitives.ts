@@ -16,6 +16,8 @@ export const untrackedCallback = <Fn extends AnyFunction>(fn: Fn): Fn =>
 
 /**
  * Reactive array reducer — if at least one consumer (boolean signal) is enabled — the returned result will the `true`.
+ *
+ * For **IOC**
  */
 export function createConsumers(): [
   needed: Accessor<boolean>,
@@ -40,6 +42,9 @@ export type DerivedSignal<T> = [
 ]
 
 // types from https://github.com/solidjs/solid/blob/main/packages/solid/src/reactive/signal.ts#L374
+/**
+ * For **IOC**
+ */
 export function createDerivedSignal<T>(): DerivedSignal<T>
 export function createDerivedSignal<T>(fallback: T, options?: MemoOptions<T>): DerivedSignal<T>
 export function createDerivedSignal<T>(fallback?: T, options?: MemoOptions<T>): DerivedSignal<T> {

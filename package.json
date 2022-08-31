@@ -30,6 +30,7 @@
     "babel-preset-solid": "^1.5.2",
     "esbuild": "^0.14.54",
     "esbuild-plugin-solid": "^0.4.2",
+    "object-observer": "^5.0.4",
     "prettier": "2.7.0",
     "solid-js": "^1.5.2",
     "taze": "^0.7.6",

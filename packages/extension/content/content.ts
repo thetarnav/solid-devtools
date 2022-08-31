@@ -47,26 +47,29 @@ Matching adapter version: ${wantedAdapterVersion}`,
 
 onWindowMessage("GraphUpdate", graph => postPortMessage("GraphUpdate", graph))
 
-onWindowMessage("ComputationUpdates", payload => postPortMessage("ComputationUpdates", payload))
+onWindowMessage("ComputationUpdates", e => postPortMessage("ComputationUpdates", e))
 
-onWindowMessage("SignalUpdates", payload => postPortMessage("SignalUpdates", payload))
+onWindowMessage("SignalUpdates", e => postPortMessage("SignalUpdates", e))
 
-onWindowMessage("OwnerDetailsUpdate", payload => postPortMessage("OwnerDetailsUpdate", payload))
+onWindowMessage("OwnerDetailsUpdate", e => postPortMessage("OwnerDetailsUpdate", e))
 
-onWindowMessage("SignalValue", payload => postPortMessage("SignalValue", payload))
+onWindowMessage("SignalValue", e => postPortMessage("SignalValue", e))
 
-onWindowMessage("SetHoveredOwner", payload => postPortMessage("SetHoveredOwner", payload))
+onWindowMessage("SetHoveredOwner", e => postPortMessage("SetHoveredOwner", e))
 
-onWindowMessage("SendSelectedOwner", payload => postPortMessage("SendSelectedOwner", payload))
+onWindowMessage("SendSelectedOwner", e => postPortMessage("SendSelectedOwner", e))
 
 onPortMessage("PanelVisibility", visible => postWindowMessage("PanelVisibility", visible))
 
 once(onPortMessage, "ForceUpdate", () => postWindowMessage("ForceUpdate"))
 
-onPortMessage("SetSelectedOwner", payload => postWindowMessage("SetSelectedOwner", payload))
+onPortMessage("SetSelectedOwner", e => postWindowMessage("SetSelectedOwner", e))
 
-onPortMessage("SetSelectedSignal", payload => postWindowMessage("SetSelectedSignal", payload))
+onPortMessage("SetSelectedSignal", e => postWindowMessage("SetSelectedSignal", e))
 
-onPortMessage("HighlightElement", payload => postWindowMessage("HighlightElement", payload))
+onPortMessage("HighlightElement", e => postWindowMessage("HighlightElement", e))
+
+onWindowMessage("AdpLocatorMode", e => postPortMessage("AdpLocatorMode", e))
+onPortMessage("ExtLocatorMode", e => postWindowMessage("ExtLocatorMode", e))
 
 export {}
