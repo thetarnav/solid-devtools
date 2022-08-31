@@ -27,7 +27,7 @@ import {
   useOwnerSelectedSelector,
   setHoveredElement,
 } from "./state/details"
-import { inLocatorMode, setInLocatorMode } from "./state/selected"
+import { setExtLocator, locatorEnabled } from "./state/selected"
 import * as styles from "./styles.css"
 
 const DetailsContent: Component<{ details: Graph.OwnerDetails }> = props => {
@@ -58,7 +58,7 @@ const DetailsContent: Component<{ details: Graph.OwnerDetails }> = props => {
 
 const SelectComponent: Component<{}> = props => {
   return (
-    <ToggleButton class={styles.select} onToggle={setInLocatorMode} selected={inLocatorMode()}>
+    <ToggleButton class={styles.select} onToggle={setExtLocator} selected={locatorEnabled()}>
       <Icon.Select class={styles.selectIcon} />
     </ToggleButton>
   )

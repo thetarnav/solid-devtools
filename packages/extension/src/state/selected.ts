@@ -1,11 +1,15 @@
-import { createRoot, createSignal } from "solid-js"
+import { createMemo, createRoot, createSignal } from "solid-js"
 
 const exported = createRoot(() => {
-  const [inLocatorMode, setInLocatorMode] = createSignal(false)
+  const [extLocatorEnabled, setExtLocator] = createSignal(false)
+  const [otherLocatorEnabled, setOtherLocator] = createSignal(false)
+  const locatorEnabled = createMemo(() => extLocatorEnabled() || otherLocatorEnabled())
 
   return {
-    inLocatorMode,
-    setInLocatorMode,
+    extLocatorEnabled,
+    setExtLocator,
+    locatorEnabled,
+    setOtherLocator,
   }
 })
-export const { inLocatorMode, setInLocatorMode } = exported
+export const { extLocatorEnabled, setExtLocator, locatorEnabled, setOtherLocator } = exported

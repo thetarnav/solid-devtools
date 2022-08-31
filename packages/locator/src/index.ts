@@ -1,12 +1,4 @@
-import {
-  createEffect,
-  createMemo,
-  createSignal,
-  getOwner,
-  runWithOwner,
-  Accessor,
-  onCleanup,
-} from "solid-js"
+import { createEffect, createMemo, createSignal, getOwner, runWithOwner, onCleanup } from "solid-js"
 import { makeEventListener } from "@solid-primitives/event-listener"
 import { createKeyHold, KbdKey } from "@solid-primitives/keyboard"
 import { remove } from "@solid-primitives/immutable"
@@ -49,20 +41,25 @@ export type ClickMiddleware = (
 export type TargetComponent = Mapped.Component & { rootId: NodeID }
 
 const exported = createInternalRoot(() => {
-  const [enabled, addConsumer] = createConsumers()
+  // enables debugger and highlighting components
+  const [highlightingEnabled, addHighlightingSource] = createConsumers()
+  // enables capturing hovered elements
+  const [locatorModeEnabled, addLocatorModeSource] = createConsumers()
+  addHighlightingSource(locatorModeEnabled)
+  // const [inLocatorMode, setLocatorMode] = createSignal(false)
   const [target, setTarget] = createSignal<HTMLElement | TargetComponent | null>(null)
 
   let components!: PluginFactoryData["components"]
   registerDebuggerPlugin(data => {
     components = data.components
-    return { enabled, gatherComponents: enabled }
+    return { enabled: highlightingEnabled, gatherComponents: highlightingEnabled }
   })
 
   // TODO: selected is an array, but it still only selects only one component at a time — only elements with location should be stored as array
-  const hoveredComponents = (() => {
+  const highlightedComponent = (() => {
     let init = true
     return createMemo<HoveredComponent[]>(() => {
-      if (!enabled()) {
+      if (!highlightingEnabled()) {
         // defferred memo is to prevent calculating selected with old components array
         init = true
         return []
@@ -84,7 +81,7 @@ const exported = createInternalRoot(() => {
     })
   })()
 
-  attachElementOverlay(hoveredComponents)
+  attachElementOverlay(highlightedComponent)
 
   const clickInterceptors: ClickMiddleware[] = []
   function runClickInterceptors(...args: Parameters<ClickMiddleware>) {
@@ -92,18 +89,42 @@ const exported = createInternalRoot(() => {
       if (interceptor(...args) === false) return false
     }
   }
-
-  /**
-   * Adds a middleware that controlls the locator behavior.
-   */
-  function registerPlugin(data: { enabled: Accessor<boolean>; onClick?: ClickMiddleware }): void {
-    const { enabled, onClick } = data
-    addConsumer(enabled)
-    if (onClick) {
-      clickInterceptors.push(onClick)
-      onRootCleanup(() => remove(clickInterceptors, onClick))
-    }
+  function addClickInterceptor(interceptor: ClickMiddleware) {
+    clickInterceptors.push(interceptor)
+    onRootCleanup(() => remove(clickInterceptors, interceptor))
   }
+
+  let targetIDE: TargetIDE | TargetURLFunction | undefined
+
+  createEffect(() => {
+    if (!locatorModeEnabled()) return
+
+    // set hovered element as target
+    let lastTarget: HTMLElement | null = null
+    makeHoverElementListener(el => setTarget((lastTarget = el)))
+    onCleanup(() => setTarget(p => (lastTarget === p ? null : p)))
+
+    // go to selected component source code on click
+    makeEventListener(
+      window,
+      "click",
+      e => {
+        const { target } = e
+        if (!(target instanceof HTMLElement)) return
+        const comp = highlightedComponent().find(({ element }) => target.contains(element))
+        if (!comp) return
+        const sourceCodeData = comp.location
+          ? getFullSourceCodeData(comp.location, comp.element)
+          : null
+        if (runClickInterceptors(e, comp, sourceCodeData) === false || !sourceCodeData) return
+        if (!targetIDE) return
+        e.preventDefault()
+        e.stopPropagation()
+        openSourceCode(targetIDE, sourceCodeData)
+      },
+      true,
+    )
+  })
 
   let locatorUsed = false
   /**
@@ -116,49 +137,30 @@ const exported = createInternalRoot(() => {
   function useLocator(options: LocatorOptions): void {
     if (locatorUsed) return warn("useLocator can be used called once.")
     locatorUsed = true
-    const { targetIDE = false, key = "Alt" } = options
-
-    const isHoldingKey = createKeyHold(key, { preventDefault: true })
-    addConsumer(isHoldingKey)
-
-    createEffect(() => {
-      if (!isHoldingKey()) return
-      let lastTarget: HTMLElement | null = null
-      makeHoverElementListener(el => setTarget((lastTarget = el)))
-      onCleanup(() => setTarget(p => (lastTarget === p ? null : p)))
-    })
-
-    // go to selected component source code on click
-    createEffect(() => {
-      if (!isHoldingKey()) return
-      makeEventListener(
-        window,
-        "click",
-        e => {
-          const { target } = e
-          if (!(target instanceof HTMLElement)) return
-          const comp = hoveredComponents().find(({ element }) => target.contains(element))
-          if (!comp) return
-          const sourceCodeData = comp.location
-            ? getFullSourceCodeData(comp.location, comp.element)
-            : null
-          if (runClickInterceptors(e, comp, sourceCodeData) === false || !sourceCodeData) return
-          if (!targetIDE) return
-          e.preventDefault()
-          e.stopPropagation()
-          openSourceCode(targetIDE, sourceCodeData)
-        },
-        true,
-      )
-    })
+    if (options.targetIDE) targetIDE = options.targetIDE
+    const isHoldingKey = createKeyHold(options.key ?? "Alt", { preventDefault: true })
+    addLocatorModeSource(isHoldingKey)
   }
 
   const owner = getOwner()!
   return {
     useLocator: (opts: LocatorOptions = {}) => runWithOwner(owner, useLocator.bind(void 0, opts)),
-    registerPlugin,
     setTarget,
-    hoveredComponents,
+    highlightedComponent,
+    highlightingEnabled,
+    locatorModeEnabled,
+    addClickInterceptor,
+    addHighlightingSource,
+    addLocatorModeSource,
   }
 })
-export const { useLocator, registerPlugin, setTarget, hoveredComponents } = exported
+export const {
+  useLocator,
+  setTarget,
+  highlightedComponent,
+  highlightingEnabled,
+  locatorModeEnabled,
+  addClickInterceptor,
+  addHighlightingSource,
+  addLocatorModeSource,
+} = exported

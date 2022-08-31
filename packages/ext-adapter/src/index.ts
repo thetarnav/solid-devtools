@@ -22,6 +22,7 @@ const extensionAdapterFactory: PluginFactory = ({
   setSelectedSignal,
 }) => {
   const [enabled, setEnabled] = createSignal(false)
+  Locator.addHighlightingSource(enabled)
 
   postWindowMessage("SolidOnPage", process.env.VERSION!)
 
@@ -63,40 +64,32 @@ const extensionAdapterFactory: PluginFactory = ({
     if (details) postWindowMessage("OwnerDetailsUpdate", details)
   })
 
-  // TODO: abstract to a separate package
-  // signal shared between the panel and the extension adapter
-  const [inLocatorMode, setInLocatorMode] = createSignal(false)
-  onWindowMessage("ExtLocatorMode", setInLocatorMode)
+  // TODO: abstract state sharing to a separate package
+  // state of the extension's locator mode
+  const [extLocatorEnabled, setExtLocatorEnabled] = createSignal(false)
+  Locator.addLocatorModeSource(extLocatorEnabled)
+  onWindowMessage("ExtLocatorMode", setExtLocatorEnabled)
   createEffect(
-    on(
-      inLocatorMode,
-      state => {
-        postWindowMessage("AdpLocatorMode", state)
-        // Selected.setInLocatorMode(state)
-        console.log("LocatorMode", state)
-      },
-      { defer: true },
-    ),
+    on(Locator.locatorModeEnabled, state => postWindowMessage("AdpLocatorMode", state), {
+      defer: true,
+    }),
   )
 
   // intercept on-page components clicks and send them to the devtools panel
-  Locator.registerPlugin({
-    enabled,
-    onClick: (e, component) => {
-      if (!enabled()) return
-      e.preventDefault()
-      e.stopPropagation()
-      const { id, rootId } = component
-      postWindowMessage("SendSelectedOwner", { nodeId: id, rootId })
-      return false
-    },
+  Locator.addClickInterceptor((e, component) => {
+    if (!enabled()) return
+    e.preventDefault()
+    e.stopPropagation()
+    const { id, rootId } = component
+    postWindowMessage("SendSelectedOwner", { nodeId: id, rootId })
+    return false
   })
 
   let skipNextHoveredComponent = true
   let prevHoverMessage: Messages["SetHoveredOwner"] | null = null
   // listen for op-page components being hovered and send them to the devtools panel
   createEffect(() => {
-    const hovered = Locator.hoveredComponents()[0] as Locator.HoveredComponent | undefined
+    const hovered = Locator.highlightedComponent()[0] as Locator.HoveredComponent | undefined
     if (skipNextHoveredComponent) return (skipNextHoveredComponent = false)
     if (!hovered) {
       if (prevHoverMessage && prevHoverMessage.state)

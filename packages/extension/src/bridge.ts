@@ -1,4 +1,4 @@
-import { createComputed, createEffect, createRoot, createSignal, on } from "solid-js"
+import { createEffect, createRoot, on } from "solid-js"
 import { Messages } from "@solid-devtools/shared/bridge"
 import { NodeType } from "@solid-devtools/shared/graph"
 import { createRuntimeMessanger } from "../shared/messanger"
@@ -49,20 +49,11 @@ onRuntimeMessage("OwnerDetailsUpdate", details => {
 // })
 
 createRoot(() => {
-  // TODO: abstract to a separate package
-  // signal shared between the panel and the extension adapter
-  const [inLocatorMode, setInLocatorMode] = createSignal(false)
-  createComputed(() => setInLocatorMode(Selected.inLocatorMode))
-  onRuntimeMessage("AdpLocatorMode", setInLocatorMode)
+  onRuntimeMessage("AdpLocatorMode", Selected.setOtherLocator)
   createEffect(
-    on(
-      inLocatorMode,
-      state => {
-        postRuntimeMessage("ExtLocatorMode", state)
-        Selected.setInLocatorMode(state)
-      },
-      { defer: true },
-    ),
+    on(Selected.extLocatorEnabled, state => postRuntimeMessage("ExtLocatorMode", state), {
+      defer: true,
+    }),
   )
 
   onRuntimeMessage("SendSelectedOwner", Details.setSelectedNode)
