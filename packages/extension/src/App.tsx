@@ -9,6 +9,7 @@ import {
   Scrollable,
   Signals,
   OwnerPath,
+  ToggleButton,
 } from "@solid-devtools/ui"
 import * as Icon from "@solid-devtools/ui/icons"
 import {
@@ -58,9 +59,9 @@ const SelectComponent: Component<{}> = props => {
   const [selected, setSelected] = createSignal(false)
 
   return (
-    <button class={styles.select} data-selected={selected()}>
+    <ToggleButton class={styles.select} onToggle={setSelected} selected={selected()}>
       <Icon.Select class={styles.selectIcon} />
-    </button>
+    </ToggleButton>
   )
 }
 
