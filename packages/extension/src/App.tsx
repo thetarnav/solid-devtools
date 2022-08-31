@@ -1,4 +1,4 @@
-import { Component, createSignal, For, Show } from "solid-js"
+import { Component, For, Show } from "solid-js"
 import { destructure } from "@solid-primitives/destructure"
 import { NodeType, Graph } from "@solid-devtools/shared/graph"
 import {
@@ -27,6 +27,7 @@ import {
   useOwnerSelectedSelector,
   setHoveredElement,
 } from "./state/details"
+import { inLocatorMode, setInLocatorMode } from "./state/selected"
 import * as styles from "./styles.css"
 
 const DetailsContent: Component<{ details: Graph.OwnerDetails }> = props => {
@@ -56,10 +57,8 @@ const DetailsContent: Component<{ details: Graph.OwnerDetails }> = props => {
 }
 
 const SelectComponent: Component<{}> = props => {
-  const [selected, setSelected] = createSignal(false)
-
   return (
-    <ToggleButton class={styles.select} onToggle={setSelected} selected={selected()}>
+    <ToggleButton class={styles.select} onToggle={setInLocatorMode} selected={inLocatorMode()}>
       <Icon.Select class={styles.selectIcon} />
     </ToggleButton>
   )

@@ -7,7 +7,7 @@ export interface Messages {
   // adapter -> content -> devtools.html
   // the `string` payload is the ext-adapter version
   SolidOnPage: string
-  // devtools -> bacground: number is a tab id
+  // devtools -> background: number is a tab id
   DevtoolsScriptConnected: number
   PanelVisibility: boolean
   ResetPanel: void
@@ -29,6 +29,10 @@ export interface Messages {
   HighlightElement: { rootId: NodeID; nodeId: NodeID } | string | null
   /** adapter -> devtools: send hovered (by the locator) owner to the extension */
   SetHoveredOwner: { nodeId: NodeID; state: boolean }
+  /** devtools -> adapter: user is selecting component from the page */
+  ExtLocatorMode: boolean
+  /** adapter -> devtools */
+  AdpLocatorMode: boolean
 }
 
 export type PostMessageFn = <K extends keyof Messages>(

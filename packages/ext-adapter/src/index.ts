@@ -1,6 +1,6 @@
-import { createEffect, createSignal } from "solid-js"
+import { createEffect, createSignal, on } from "solid-js"
 import { registerDebuggerPlugin, PluginFactory } from "@solid-devtools/debugger"
-import * as locator from "@solid-devtools/locator"
+import * as Locator from "@solid-devtools/locator"
 import {
   Messages,
   onWindowMessage,
@@ -63,8 +63,24 @@ const extensionAdapterFactory: PluginFactory = ({
     if (details) postWindowMessage("OwnerDetailsUpdate", details)
   })
 
+  // TODO: abstract to a separate package
+  // signal shared between the panel and the extension adapter
+  const [inLocatorMode, setInLocatorMode] = createSignal(false)
+  onWindowMessage("ExtLocatorMode", setInLocatorMode)
+  createEffect(
+    on(
+      inLocatorMode,
+      state => {
+        postWindowMessage("AdpLocatorMode", state)
+        // Selected.setInLocatorMode(state)
+        console.log("LocatorMode", state)
+      },
+      { defer: true },
+    ),
+  )
+
   // intercept on-page components clicks and send them to the devtools panel
-  locator.registerPlugin({
+  Locator.registerPlugin({
     enabled,
     onClick: (e, component) => {
       if (!enabled()) return
@@ -80,7 +96,7 @@ const extensionAdapterFactory: PluginFactory = ({
   let prevHoverMessage: Messages["SetHoveredOwner"] | null = null
   // listen for op-page components being hovered and send them to the devtools panel
   createEffect(() => {
-    const hovered = locator.hoveredComponents()[0] as locator.HoveredComponent | undefined
+    const hovered = Locator.hoveredComponents()[0] as Locator.HoveredComponent | undefined
     if (skipNextHoveredComponent) return (skipNextHoveredComponent = false)
     if (!hovered) {
       if (prevHoverMessage && prevHoverMessage.state)
@@ -94,8 +110,8 @@ const extensionAdapterFactory: PluginFactory = ({
   })
 
   onWindowMessage("HighlightElement", payload => {
-    if (!payload) return locator.setTarget(null)
-    let target: locator.TargetComponent | HTMLElement
+    if (!payload) return Locator.setTarget(null)
+    let target: Locator.TargetComponent | HTMLElement
     // highlight component
     if (typeof payload === "object") {
       const { rootId, nodeId } = payload
@@ -111,7 +127,7 @@ const extensionAdapterFactory: PluginFactory = ({
       if (!element) return warn("No element found", payload)
       target = element
     }
-    locator.setTarget(p => {
+    Locator.setTarget(p => {
       if (p === target) return p
       // prevent creating an infinite loop
       skipNextHoveredComponent = true

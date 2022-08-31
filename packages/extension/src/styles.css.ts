@@ -11,7 +11,7 @@ export const app = style({
 
 export const header = style({
   padding: spacing[4],
-  backgroundColor: color.gray[100],
+  backgroundColor: color.white,
   display: "flex",
   alignItems: "center",
   columnGap: spacing[4],

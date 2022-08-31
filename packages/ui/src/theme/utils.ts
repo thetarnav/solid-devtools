@@ -1,4 +1,6 @@
 import { Many } from "@solid-primitives/utils"
+import { ComplexStyleRule } from "@vanilla-extract/css"
+import { clsx } from "clsx"
 import { Property } from "csstype"
 import { spacing, theme } from "."
 
@@ -55,8 +57,8 @@ export const transition = (
   duration: Property.TransitionDuration = theme.duration[150],
   delay: Property.TransitionDelay = theme.duration[0],
   easing: Property.TransitionTimingFunction = theme.easing.DEFAULT,
-) => ({
-  transitionProperty: property,
+): ComplexStyleRule => ({
+  transitionProperty: clsx(property),
   transitionDuration: duration,
   transitionDelay: delay,
   transitionTimingFunction: easing,
