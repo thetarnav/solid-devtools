@@ -1,5 +1,17 @@
 # @solid-devtools/ext-adapter
 
+## 0.15.0
+
+### Minor Changes
+
+- 623aca6: Add toggle button to the extension that will allow for additional way of toggling the "locator mode". Besides holding "Alt".
+
+### Patch Changes
+
+- Updated dependencies [623aca6]
+  - @solid-devtools/locator@0.15.0
+  - @solid-devtools/shared@0.7.3
+
 ## 0.14.2
 
 ### Patch Changes

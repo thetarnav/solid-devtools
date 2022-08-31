@@ -83,8 +83,8 @@ importers:
   packages/ext-adapter:
     specifiers:
       '@solid-devtools/debugger': workspace:^0.7.2
-      '@solid-devtools/locator': workspace:^0.14.2
-      '@solid-devtools/shared': workspace:^0.7.2
+      '@solid-devtools/locator': workspace:^0.15.0
+      '@solid-devtools/shared': workspace:^0.7.3
       '@solid-primitives/utils': ^3.0.2
       solid-js: ^1.5.2
       tsup: ^6.2.3
@@ -104,9 +104,9 @@ importers:
   packages/extension:
     specifiers:
       '@crxjs/vite-plugin': ^1.0.14
-      '@solid-devtools/ext-adapter': ^0.14.1
-      '@solid-devtools/shared': workspace:^0.7.1
-      '@solid-devtools/ui': 0.10.1
+      '@solid-devtools/ext-adapter': ^0.15.0
+      '@solid-devtools/shared': workspace:^0.7.3
+      '@solid-devtools/ui': 0.10.2
       '@solid-primitives/context': ^0.1.1
       '@solid-primitives/destructure': ^0.1.2
       '@solid-primitives/immutable': ^0.1.2
@@ -157,7 +157,7 @@ importers:
   packages/locator:
     specifiers:
       '@solid-devtools/debugger': ^0.7.2
-      '@solid-devtools/shared': workspace:^0.7.2
+      '@solid-devtools/shared': workspace:^0.7.3
       '@solid-devtools/transform': ^0.7.1
       '@solid-primitives/bounds': ^0.0.101
       '@solid-primitives/cursor': ^0.0.100
@@ -230,8 +230,8 @@ importers:
   packages/main:
     specifiers:
       '@solid-devtools/debugger': ^0.7.1
-      '@solid-devtools/ext-adapter': ^0.14.1
-      '@solid-devtools/locator': ^0.14.1
+      '@solid-devtools/ext-adapter': ^0.15.0
+      '@solid-devtools/locator': ^0.15.0
       '@solid-devtools/transform': ^0.7.1
       '@testing-library/jest-dom': ^5.16.5
       jest: ^28.1.3
@@ -348,7 +348,7 @@ importers:
       '@otonashixav/solid-flip': ^0.10.5
       '@solid-aria/button': ^0.1.3
       '@solid-aria/interactions': ^0.1.4
-      '@solid-devtools/shared': workspace:^0.7.1
+      '@solid-devtools/shared': workspace:^0.7.3
       '@solid-devtools/transform': ^0.7.1
       '@solid-primitives/bounds': ^0.0.102
       '@solid-primitives/cursor': ^0.0.100
@@ -402,7 +402,7 @@ importers:
 
   playgrounds/clock:
     specifiers:
-      solid-devtools: ^0.14.1
+      solid-devtools: ^0.15.0
       solid-js: ^1.5.2
       typescript: ^4.8.2
       vite: ^3.0.9
@@ -420,7 +420,7 @@ importers:
       '@solid-devtools/logger': ^0.4.5
       '@solid-devtools/transform': ^0.7.1
       '@solid-primitives/timer': ^1.3.2
-      solid-devtools: ^0.14.1
+      solid-devtools: ^0.15.0
       solid-js: ^1.5.2
       typescript: ^4.8.2
       vite: ^3.0.9
@@ -441,7 +441,7 @@ importers:
       '@solid-devtools/logger': ^0.4.5
       '@solid-devtools/transform': ^0.7.1
       solid-app-router: ^0.4.2
-      solid-devtools: ^0.14.1
+      solid-devtools: ^0.15.0
       solid-js: ^1.5.2
       solid-meta: ^0.27.5
       solid-start: next
@@ -4911,24 +4911,6 @@ packages:
       - supports-color
     dev: true
 
-  /babel-jest/28.1.3_@babel+core@7.18.13:
-    resolution: {integrity: sha512-epUaPOEWMk3cWX0M/sPvCHHCe9fMFAa/9hXEgKP8nFfNl/jlGkE9ucq9NqkZGXLDduCJYS0UvSlPUwC0S+rH6Q==}
-    engines: {node: ^12.13.0 || ^14.15.0 || ^16.10.0 || >=17.0.0}
-    peerDependencies:
-      '@babel/core': ^7.8.0
-    dependencies:
-      '@babel/core': 7.18.13
-      '@jest/transform': 28.1.3
-      '@types/babel__core': 7.1.19
-      babel-plugin-istanbul: 6.1.1
-      babel-preset-jest: 28.1.3_@babel+core@7.18.13
-      chalk: 4.1.2
-      graceful-fs: 4.2.10
-      slash: 3.0.0
-    transitivePeerDependencies:
-      - supports-color
-    dev: true
-
   /babel-plugin-dynamic-import-node/2.3.3:
     resolution: {integrity: sha512-jZVI+s9Zg3IqA/kdi0i6UDCybUI3aSBLnglhYbSSjKlV7yF1F/5LWv8MakQmvYpnbJDS6fcBL2KzHSxNCMtWSQ==}
     dependencies:
@@ -5114,17 +5096,6 @@ packages:
       '@babel/core': 7.18.10
       babel-plugin-jest-hoist: 28.1.3
       babel-preset-current-node-syntax: 1.0.1_@babel+core@7.18.10
-    dev: true
-
-  /babel-preset-jest/28.1.3_@babel+core@7.18.13:
-    resolution: {integrity: sha512-L+fupJvlWAHbQfn74coNX3zf60LXMJsezNvvx8eIh7iOR1luJ1poxYgQk1F8PYtNq/6QODDHCqsSnTFSWC491A==}
-    engines: {node: ^12.13.0 || ^14.15.0 || ^16.10.0 || >=17.0.0}
-    peerDependencies:
-      '@babel/core': ^7.0.0
-    dependencies:
-      '@babel/core': 7.18.13
-      babel-plugin-jest-hoist: 28.1.3
-      babel-preset-current-node-syntax: 1.0.1_@babel+core@7.18.13
     dev: true
 
   /babel-preset-solid/1.4.2_@babel+core@7.18.2:
@@ -5890,7 +5861,7 @@ packages:
     dev: true
 
   /ee-first/1.1.1:
-    resolution: {integrity: sha1-WQxhFWsK4vTwJVcyoViyZrxWsh0=}
+    resolution: {integrity: sha512-WMwm9LhRUo+WUaRN+vRuETqG89IgZphVSNkdFgeb6sS/E4OrDIN7t48CAewSHXc6C8lefD8KKfr5vY61brQlow==}
     dev: true
 
   /electron-to-chromium/1.4.139:
@@ -7897,11 +7868,11 @@ packages:
       ts-node:
         optional: true
     dependencies:
-      '@babel/core': 7.18.13
+      '@babel/core': 7.18.10
       '@jest/test-sequencer': 28.1.3
       '@jest/types': 28.1.3
       '@types/node': 17.0.45
-      babel-jest: 28.1.3_@babel+core@7.18.13
+      babel-jest: 28.1.3_@babel+core@7.18.10
       chalk: 4.1.2
       ci-info: 3.3.2
       deepmerge: 4.2.2
@@ -7936,11 +7907,11 @@ packages:
       ts-node:
         optional: true
     dependencies:
-      '@babel/core': 7.18.13
+      '@babel/core': 7.18.10
       '@jest/test-sequencer': 28.1.3
       '@jest/types': 28.1.3
       '@types/node': 18.0.0
-      babel-jest: 28.1.3_@babel+core@7.18.13
+      babel-jest: 28.1.3_@babel+core@7.18.10
       chalk: 4.1.2
       ci-info: 3.3.2
       deepmerge: 4.2.2
@@ -10902,7 +10873,7 @@ packages:
     dev: true
 
   /utils-merge/1.0.1:
-    resolution: {integrity: sha1-n5VxD1CiZ5R7LMwSR0HBAoQn5xM=}
+    resolution: {integrity: sha512-pMZTvIkT1d+TFGvDOqodOclx0QWkkgi6Tdoa8gC8ffGAAqz9pzPTZWAybbsHHoED/ztMtkv/VoYTYyShUn81hA==}
     engines: {node: '>= 0.4.0'}
     dev: true
 

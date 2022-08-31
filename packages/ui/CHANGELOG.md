@@ -1,5 +1,13 @@
 # @solid-devtools/ui
 
+## 0.10.2
+
+### Patch Changes
+
+- 623aca6: Add toggle button to the extension that will allow for additional way of toggling the "locator mode". Besides holding "Alt".
+- Updated dependencies [623aca6]
+  - @solid-devtools/shared@0.7.3
+
 ## 0.10.1
 
 ### Patch Changes
