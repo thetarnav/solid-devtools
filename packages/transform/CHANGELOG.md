@@ -1,5 +1,11 @@
 # @solid-devtools/transform
 
+## 0.7.2
+
+### Patch Changes
+
+- bb08df4: Fix export resolution
+
 ## 0.7.1
 
 ### Patch Changes
