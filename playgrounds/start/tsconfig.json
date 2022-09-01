@@ -1,8 +1,13 @@
 {
-  "extends": "../../tsconfig.json",
   "compilerOptions": {
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "node",
+    "jsxImportSource": "solid-js",
+    "jsx": "preserve",
     "types": ["vite/client"],
-    "baseUrl": ".",
     "paths": {
       "~/*": ["./src/*"]
     }

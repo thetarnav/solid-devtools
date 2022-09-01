@@ -1,22 +1,25 @@
-import { Component, Show, createResource } from "solid-js"
-import { useRouteData, RouteDataFunc } from "solid-app-router"
-import fetchAPI from "~/lib/api"
+import { Component, createResource, Show } from "solid-js";
+import { RouteDataArgs, useRouteData } from "solid-start";
+import fetchAPI from "~/lib/api";
 
 interface IUser {
-  error: string
-  id: string
-  created: string
-  karma: number
-  about: string
+  error: string;
+  id: string;
+  created: string;
+  karma: number;
+  about: string;
 }
 
-export const routeData: RouteDataFunc = props => {
-  const [user] = createResource(() => `user/${props.params.id}`, fetchAPI)
-  return user
-}
+export const routeData = (props: RouteDataArgs) => {
+  const [user] = createResource<IUser, string>(
+    () => `user/${props.params.id}`,
+    fetchAPI
+  );
+  return user;
+};
 
 const User: Component = () => {
-  const user = useRouteData<() => IUser>()
+  const user = useRouteData<typeof routeData>();
   return (
     <div class="user-view">
       <Show when={user()}>
@@ -34,13 +37,18 @@ const User: Component = () => {
             </Show>
           </ul>
           <p class="links">
-            <a href={`https://news.ycombinator.com/submitted?id=${user().id}`}>submissions</a> |{" "}
-            <a href={`https://news.ycombinator.com/threads?id=${user().id}`}>comments</a>
+            <a href={`https://news.ycombinator.com/submitted?id=${user().id}`}>
+              submissions
+            </a>{" "}
+            |{" "}
+            <a href={`https://news.ycombinator.com/threads?id=${user().id}`}>
+              comments
+            </a>
           </p>
         </Show>
       </Show>
     </div>
-  )
-}
+  );
+};
 
-export default User
+export default User;
