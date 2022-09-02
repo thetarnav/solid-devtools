@@ -1,5 +1,11 @@
 # solid-devtools-extension
 
+## 0.8.3
+
+### Patch Changes
+
+- dca9f9d: Fix some locator realted bugs.
+
 ## 0.8.2
 
 ### Patch Changes
