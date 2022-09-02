@@ -1,5 +1,13 @@
 # @solid-devtools/ext-adapter
 
+## 0.15.1
+
+### Patch Changes
+
+- dca9f9d: Fix some locator realted bugs.
+- Updated dependencies [dca9f9d]
+  - @solid-devtools/locator@0.15.1
+
 ## 0.15.0
 
 ### Minor Changes

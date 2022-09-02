@@ -83,7 +83,7 @@ importers:
   packages/ext-adapter:
     specifiers:
       '@solid-devtools/debugger': workspace:^0.7.2
-      '@solid-devtools/locator': workspace:^0.15.0
+      '@solid-devtools/locator': workspace:^0.15.1
       '@solid-devtools/shared': workspace:^0.7.3
       '@solid-primitives/utils': ^3.0.2
       solid-js: ^1.5.2
@@ -104,7 +104,7 @@ importers:
   packages/extension:
     specifiers:
       '@crxjs/vite-plugin': ^1.0.14
-      '@solid-devtools/ext-adapter': ^0.15.0
+      '@solid-devtools/ext-adapter': ^0.15.1
       '@solid-devtools/shared': workspace:^0.7.3
       '@solid-devtools/ui': 0.10.2
       '@solid-primitives/context': ^0.1.1

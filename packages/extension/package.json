@@ -1,6 +1,6 @@
 {
   "name": "solid-devtools-extension",
-  "version": "0.8.2",
+  "version": "0.8.3",
   "private": true,
   "license": "MIT",
   "author": "Damian Tarnawski <gthetarnav@gmail.com>",
@@ -14,7 +14,7 @@
   },
   "devDependencies": {
     "@crxjs/vite-plugin": "^1.0.14",
-    "@solid-devtools/ext-adapter": "^0.15.0",
+    "@solid-devtools/ext-adapter": "^0.15.1",
     "@types/chrome": "^0.0.193",
     "@vanilla-extract/vite-plugin": "^3.3.1",
     "esbuild-plugin-solid": "^0.4.2",
