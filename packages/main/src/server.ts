@@ -1,7 +1,7 @@
 export {
   Debugger,
   attachDebugger,
-  registerDebuggerPlugin,
+  useDebugger,
   makeSolidUpdateListener,
 } from "@solid-devtools/debugger"
 

@@ -1,14 +1,13 @@
 import { ParentComponent } from "solid-js"
 import { attachDebugger } from "./roots"
 
-export { registerDebuggerPlugin } from "./plugin"
+export { useDebugger } from "./plugin"
 export type {
-  PluginFactory,
   FocusedState,
   SetSelectedOwner,
   SignaledRoot,
   BatchComputationUpdatesHandler,
-  PluginFactoryData,
+  PluginData,
 } from "./plugin"
 
 export { attachDebugger } from "./roots"

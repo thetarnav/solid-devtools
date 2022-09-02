@@ -1,4 +1,4 @@
-import { Accessor, batch, createSignal, getOwner, runWithOwner, untrack } from "solid-js"
+import { Accessor, batch, createSignal, untrack } from "solid-js"
 import { createSimpleEmitter } from "@solid-primitives/event-bus"
 import { omit } from "@solid-primitives/immutable"
 import { createLazyMemo } from "@solid-primitives/memo"
@@ -70,7 +70,7 @@ export type _SignaledRoot = SignaledRoot & {
 export type BatchComputationUpdatesHandler = (payload: ComputationUpdate[]) => void
 export type BatchSignalUpdatesHandler = (payload: SignalUpdate[]) => void
 
-export type PluginFactoryData = {
+export type PluginData = {
   readonly triggerUpdate: VoidFunction
   readonly forceTriggerUpdate: VoidFunction
   readonly handleComputationUpdates: (listener: BatchComputationUpdatesHandler) => VoidFunction
@@ -85,12 +85,6 @@ export type PluginFactoryData = {
     id: NodeID
     selected: boolean
   }) => EncodedValue<boolean> | null
-}
-
-export type PluginFactory = (data: PluginFactoryData) => {
-  enabled?: Accessor<boolean>
-  observeComputations?: Accessor<boolean>
-  gatherComponents?: Accessor<boolean>
 }
 
 const exported = createInternalRoot(() => {
@@ -180,7 +174,7 @@ const exported = createInternalRoot(() => {
   // Selected Signals:
   //
   const selectedSignalIds: Set<NodeID> = new Set()
-  const setSelectedSignal: PluginFactoryData["setSelectedSignal"] = untrackedCallback(
+  const setSelectedSignal: PluginData["setSelectedSignal"] = untrackedCallback(
     ({ id, selected }) => {
       const { signalMap, elementMap } = focusedState
       const signal = signalMap[id] as Solid.Signal | undefined
@@ -218,7 +212,7 @@ const exported = createInternalRoot(() => {
     }, {}),
   )
 
-  const pluginData: PluginFactoryData = {
+  const pluginData: PluginData = {
     handleComputationUpdates,
     handleSignalUpdates,
     roots,
@@ -231,22 +225,23 @@ const exported = createInternalRoot(() => {
     focusedState,
     setSelectedSignal,
   }
-  const owner = getOwner()!
-  // TODO: refactor this to the form used in Locator package
-  function registerDebuggerPlugin(factory: PluginFactory) {
-    runWithOwner(owner, () => {
-      const { enabled, gatherComponents, observeComputations } = factory(pluginData)
-      enabled && addDebuggerConsumer(enabled)
-      gatherComponents && addGatherComponentsConsumer(gatherComponents)
-      observeComputations && addObserveComputationsConsumer(observeComputations)
-    })
+  function useDebugger(options: {
+    enabled?: Accessor<boolean>
+    observeComputations?: Accessor<boolean>
+    gatherComponents?: Accessor<boolean>
+  }): PluginData {
+    const { enabled, observeComputations, gatherComponents } = options
+    enabled && addDebuggerConsumer(enabled)
+    gatherComponents && addGatherComponentsConsumer(gatherComponents)
+    observeComputations && addObserveComputationsConsumer(observeComputations)
+    return pluginData
   }
 
   return {
     onUpdate,
     onForceUpdate,
     enabled,
-    registerDebuggerPlugin,
+    useDebugger,
     updateRoot,
     removeRoot,
     gatherComponents,
@@ -261,7 +256,7 @@ export const {
   onForceUpdate,
   enabled,
   gatherComponents,
-  registerDebuggerPlugin,
+  useDebugger,
   updateRoot,
   removeRoot,
   pushSignalUpdate,

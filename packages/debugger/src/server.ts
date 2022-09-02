@@ -10,7 +10,26 @@ export const Debugger: typeof API.Debugger = props => props.children
 
 export const attachDebugger: typeof API.attachDebugger = noop
 
-export const registerDebuggerPlugin: typeof API.registerDebuggerPlugin = noop
+export const useDebugger: typeof API.useDebugger = () => ({
+  triggerUpdate: noop,
+  forceTriggerUpdate: noop,
+  handleComputationUpdates: () => noop,
+  handleSignalUpdates: () => noop,
+  roots: () => ({}),
+  serialisedRoots: () => ({}),
+  rootsUpdates: () => ({ removed: [], updated: [] }),
+  components: () => ({}),
+  setFocusedOwner: noop,
+  focusedState: {
+    details: null,
+    elementMap: {},
+    id: null,
+    owner: null,
+    rootId: null,
+    signalMap: {},
+  },
+  setSelectedSignal: () => ({} as any),
+})
 
 // update
 export const makeSolidUpdateListener: typeof API.makeSolidUpdateListener = () => noop

@@ -3,11 +3,7 @@ import { makeEventListener } from "@solid-primitives/event-listener"
 import { createKeyHold, KbdKey } from "@solid-primitives/keyboard"
 import { remove } from "@solid-primitives/immutable"
 import { onRootCleanup } from "@solid-primitives/utils"
-import {
-  registerDebuggerPlugin,
-  createInternalRoot,
-  PluginFactoryData,
-} from "@solid-devtools/debugger"
+import { useDebugger, createInternalRoot } from "@solid-devtools/debugger"
 import { createConsumers } from "@solid-devtools/shared/primitives"
 import { Mapped, NodeID } from "@solid-devtools/shared/graph"
 import { warn } from "@solid-devtools/shared/utils"
@@ -49,10 +45,9 @@ const exported = createInternalRoot(() => {
   // const [inLocatorMode, setLocatorMode] = createSignal(false)
   const [target, setTarget] = createSignal<HTMLElement | TargetComponent | null>(null)
 
-  let components!: PluginFactoryData["components"]
-  registerDebuggerPlugin(data => {
-    components = data.components
-    return { enabled: highlightingEnabled, gatherComponents: highlightingEnabled }
+  const { components } = useDebugger({
+    enabled: highlightingEnabled,
+    gatherComponents: highlightingEnabled,
   })
 
   // TODO: selected is an array, but it still only selects only one component at a time — only elements with location should be stored as array
