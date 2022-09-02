@@ -45,6 +45,8 @@ Matching adapter version: ${wantedAdapterVersion}`,
   postPortMessage("SolidOnPage")
 })
 
+onWindowMessage("ResetPanel", () => postPortMessage("ResetPanel"))
+
 onWindowMessage("GraphUpdate", graph => postPortMessage("GraphUpdate", graph))
 
 onWindowMessage("ComputationUpdates", e => postPortMessage("ComputationUpdates", e))

@@ -111,7 +111,8 @@ const exported = createInternalRoot(() => {
       e => {
         const { target } = e
         if (!(target instanceof HTMLElement)) return
-        const comp = highlightedComponent().find(({ element }) => target.contains(element))
+        const highlighted = highlightedComponent()
+        const comp = highlighted.find(({ element }) => target.contains(element)) ?? highlighted[0]
         if (!comp) return
         const sourceCodeData = comp.location
           ? getFullSourceCodeData(comp.location, comp.element)

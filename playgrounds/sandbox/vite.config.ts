@@ -9,8 +9,8 @@ const resolvePackage = (...filepath: string[]) => path.resolve(pathToPackages, .
 export default defineConfig({
   plugins: [
     devtoolsPlugin({
-      wrapStores: true,
-      jsxLocation: true,
+      // wrapStores: true,
+      // jsxLocation: true,
       name: true,
     }),
     solidPlugin(),

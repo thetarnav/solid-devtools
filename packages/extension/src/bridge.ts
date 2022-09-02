@@ -21,6 +21,8 @@ onRuntimeMessage("GraphUpdate", update => {
 onRuntimeMessage("ResetPanel", () => {
   Graph.resetGraph()
   Details.handleGraphUpdate()
+  Selected.setOtherLocator(false)
+  Selected.setExtLocator(false)
 })
 
 onRuntimeMessage("ComputationUpdates", updates => {

@@ -11,6 +11,9 @@ import { warn } from "@solid-devtools/shared/utils"
 
 startListeningWindowMessages()
 
+// in case of navigation/page reload, reset the locator mode state in the extension
+postWindowMessage("ResetPanel")
+
 const extensionAdapterFactory: PluginFactory = ({
   forceTriggerUpdate,
   rootsUpdates,
@@ -28,7 +31,11 @@ const extensionAdapterFactory: PluginFactory = ({
 
   // update the graph only if the devtools panel is in view
   onWindowMessage("PanelVisibility", v => {
-    if (!v) return setEnabled(false)
+    if (!v) {
+      setExtLocatorEnabled(false)
+      setEnabled(false)
+      return
+    }
     const current = enabled()
     // the panel might have been closed and opened again—in that case we want to update the graph
     if (current) {

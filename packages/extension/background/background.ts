@@ -38,7 +38,6 @@ chrome.runtime.onConnect.addListener(port => {
 
   if (currentPort) {
     log(`Switching BG Ports: ${currentPort.sender?.documentId} -> ${port.sender?.documentId}`)
-    postRuntimeMessage("ResetPanel")
   }
 
   currentPort = port
@@ -64,6 +63,8 @@ chrome.runtime.onConnect.addListener(port => {
       postPortMessage("PanelVisibility", panelVisibility)
     }),
   )
+
+  addCleanup(onPortMessage("ResetPanel", () => postRuntimeMessage("ResetPanel")))
 
   addCleanup(onPortMessage("GraphUpdate", graph => postRuntimeMessage("GraphUpdate", graph)))
 
