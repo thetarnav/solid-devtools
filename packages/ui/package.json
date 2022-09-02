@@ -65,11 +65,11 @@
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
-    "@solid-devtools/transform": "^0.7.1",
+    "@solid-devtools/transform": "^0.7.2",
     "@vanilla-extract/esbuild-plugin": "^2.1.0",
     "esbuild": "^0.14.54",
     "esbuild-plugin-solid": "^0.4.2",
-    "solid-js": "^1.5.2",
+    "solid-js": "^1.5.4",
     "tsup": "^6.2.3",
     "typescript": "^4.8.2"
   },
