@@ -78,21 +78,29 @@ const InstanceValuePreview: ValueComponent<ValueType.Instance> = props => (
   <span class={styles.baseValue}>{props.value}</span>
 )
 
+export type OnElementHover = (elementId: NodeID, hovered: boolean) => void
+
+const ElementHoverContext = createContext<OnElementHover>()
+
 const ElementValuePreview: ValueComponent<ValueType.Element> = props => {
-  const { setHoveredElement } = useSignalContext()
+  const onHover = useContext(ElementHoverContext)
 
-  const toggleHovered = (state: boolean) => {
-    if (props.value.id === undefined) return
-    setHoveredElement(state ? props.value.id : p => (p === props.value.id ? null : p))
-  }
+  const handleHover =
+    onHover &&
+    ((hovered: boolean) => {
+      if (props.value.id === undefined) return
+      onHover(props.value.id, hovered)
+    })
 
-  onCleanup(() => toggleHovered(false))
+  handleHover && onCleanup(() => handleHover(false))
 
   return (
     <span
       class={styles.ValueElement.container}
-      onMouseEnter={() => toggleHovered(true)}
-      onMouseLeave={() => toggleHovered(false)}
+      {...(handleHover && {
+        onMouseEnter: () => handleHover(true),
+        onMouseLeave: () => handleHover(false),
+      })}
     >
       <div class={styles.ValueElement.highlight} />
       {props.value.name}
@@ -275,6 +283,29 @@ export const Signals: Component<{ each: Graph.Signal[] }> = props => {
   )
 }
 
+export const ValueNode: Component<{
+  value: EncodedValue<boolean>
+  name: string
+  type?: NodeType.Memo | NodeType.Signal | null
+  selected: boolean
+  updated?: boolean
+  onClick?: VoidFunction
+  onElementHover?: OnElementHover
+}> = props => {
+  return (
+    <ValueRow selected={props.selected} onClick={props.onClick}>
+      <ValueName type={props.type}>
+        <Highlight strong={props.updated} light={false} signal class={styles.ValueName.highlight}>
+          {props.name}
+        </Highlight>
+      </ValueName>
+      <ElementHoverContext.Provider value={props.onElementHover}>
+        <ValuePreview value={props.value} />
+      </ElementHoverContext.Provider>
+    </ValueRow>
+  )
+}
+
 export type SignalContextState = {
   useUpdatedSelector: (id: NodeID) => Accessor<boolean>
   toggleSignalFocus: (signal: NodeID, focused?: boolean) => void
@@ -292,19 +323,20 @@ const useSignalContext = (): SignalContextState => {
 }
 
 export const SignalNode: Component<{ signal: Graph.Signal }> = ({ signal }) => {
-  const { type, id } = signal
-  const { useUpdatedSelector, toggleSignalFocus } = useSignalContext()
+  const { type, id, name } = signal
+  const { useUpdatedSelector, toggleSignalFocus, setHoveredElement } = useSignalContext()
 
   const isUpdated = useUpdatedSelector(id)
 
   return (
-    <ValueRow selected={signal.selected} onClick={() => toggleSignalFocus(id)}>
-      <ValueName type={type}>
-        <Highlight strong={isUpdated()} light={false} signal class={styles.ValueName.highlight}>
-          {signal.name}
-        </Highlight>
-      </ValueName>
-      <ValuePreview value={signal.value} />
-    </ValueRow>
+    <ValueNode
+      name={name}
+      type={type}
+      value={signal.value}
+      selected={signal.selected}
+      updated={isUpdated()}
+      onClick={() => toggleSignalFocus(id)}
+      onElementHover={(id, hovered) => setHoveredElement(hovered ? id : p => (p === id ? null : p))}
+    />
   )
 }

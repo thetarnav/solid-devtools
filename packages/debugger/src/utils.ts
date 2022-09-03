@@ -25,9 +25,7 @@ export const isSolidRoot = (o: Readonly<Solid.Owner>): o is Solid.Root =>
   o.sdtType === NodeType.Root || !isSolidComputation(o)
 
 export const isSolidComponent = (o: Readonly<Solid.Owner>): o is Solid.Component =>
-  isSolidComputation(o) && _isComponent(o)
-
-const _isComponent = (o: Readonly<AnyObject>): boolean => "componentName" in o
+  "componentName" in o
 
 const _isMemo = (o: Readonly<AnyObject>): boolean =>
   "value" in o && "comparator" in o && o.pure === true
@@ -61,7 +59,7 @@ export const getOwnerType = (o: Readonly<Solid.Owner>): NodeType => {
   if (!isSolidComputation(o)) return NodeType.Root
   // Precompiled components do not start with "_Hot$$"
   // we need a way to identify imported (3rd party) vs user components
-  if (_isComponent(o)) return NodeType.Component
+  if (isSolidComponent(o)) return NodeType.Component
   if (_isMemo(o)) {
     if (fnMatchesRefresh(o.fn)) return NodeType.Refresh
     return NodeType.Memo
