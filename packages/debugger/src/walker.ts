@@ -1,9 +1,11 @@
+import { $PROXY } from "solid-js"
 import { resolveElements } from "@solid-primitives/refs"
 import { NodeType, NodeID, Solid, Mapped } from "@solid-devtools/shared/graph"
-import { encodeValue } from "@solid-devtools/shared/serialize"
+import { EncodedValue, encodeValue } from "@solid-devtools/shared/serialize"
 import {
   getNodeName,
   getNodeType,
+  isSolidComponent,
   isSolidComputation,
   isSolidMemo,
   markNodeID,
@@ -93,6 +95,24 @@ function collectOwnerDetails(owner: Solid.Owner): void {
     details.sources = markNodesID(owner.sources)
     if (isSolidMemo(owner)) {
       details.observers = markNodesID(owner.observers)
+    }
+    if (isSolidComponent(owner)) {
+      // map component props
+      const { props } = owner
+      const proxy = !!(props as any)[$PROXY]
+      console.log(owner.sdtName, proxy)
+
+      const value = Object.entries(Object.getOwnPropertyDescriptors(props)).reduce(
+        (value, [key, descriptor]) => {
+          value[key] = {
+            signal: proxy || "get" in descriptor,
+            value: encodeValue(descriptor.get?.() ?? descriptor.value, false, ElementMap),
+          }
+          return value
+        },
+        {} as Record<string, { signal: boolean; value: EncodedValue<false> }>,
+      )
+      details.props = { proxy, value }
     }
   }
 

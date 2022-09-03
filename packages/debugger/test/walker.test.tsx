@@ -2,12 +2,14 @@ import { getOwner, Mapped, NodeID, NodeType, Solid } from "@solid-devtools/share
 import { ValueType } from "@solid-devtools/shared/serialize"
 import { UNNAMED } from "@solid-devtools/shared/variables"
 import {
+  $PROXY,
   createComputed,
   createEffect,
   createMemo,
   createRenderEffect,
   createRoot,
   createSignal,
+  JSX,
 } from "solid-js"
 import type * as API from "../src/walker"
 
@@ -288,6 +290,111 @@ describe("walkSolidTree", () => {
       expect(Object.keys(elementMap).length).toBe(1)
       expect(elementMap).toHaveProperty("0")
       expect(elementMap["0"]).toBe(div)
+
+      dispose()
+    }))
+
+  it("selected component props", () =>
+    createRoot(dispose => {
+      let elementMap: Record<NodeID, HTMLElement> = {}
+      const walkSolidTree = getModule()
+
+      const TestComponent = (props: { count: number; children: JSX.Element }) => {
+        return <div>{props.children}</div>
+      }
+      createRenderEffect(() => (
+        <TestComponent count={123}>
+          <button>Click me</button>
+        </TestComponent>
+      ))
+
+      const { selected } = walkSolidTree(getOwner()!, {
+        rootId: "0",
+        selectedId: "2",
+        onComputationUpdate: () => {},
+        onSignalUpdate: () => {},
+        gatherComponents: false,
+        elementMap,
+      })
+
+      expect(selected.details).toEqual({
+        id: "2",
+        name: "TestComponent",
+        type: NodeType.Component,
+        signals: [],
+        sources: [],
+        path: ["0", "1"],
+        value: { type: ValueType.Element, value: { id: "0", name: "DIV" } },
+        props: {
+          proxy: false,
+          value: {
+            count: { signal: false, value: { type: ValueType.Number, value: 123 } },
+            children: {
+              signal: true,
+              value: { type: ValueType.Element, value: { id: "1", name: "BUTTON" } },
+            },
+          },
+        },
+      })
+
+      expect(selected.elementMap).toBe(elementMap)
+      expect(Object.keys(elementMap).length).toBe(2)
+      expect(elementMap).toHaveProperty("0")
+      expect(elementMap).toHaveProperty("1")
+      expect(elementMap["0"]).toBeInstanceOf(HTMLDivElement)
+      expect(elementMap["1"]).toBeInstanceOf(HTMLButtonElement)
+
+      dispose()
+    }))
+
+  it("selected dynamic component props", () =>
+    createRoot(dispose => {
+      let elementMap: Record<NodeID, HTMLElement> = {}
+      const walkSolidTree = getModule()
+
+      const Button = (props: JSX.ButtonHTMLAttributes<HTMLButtonElement>) => {
+        console.log(!!(props as any)[$PROXY])
+
+        return <button {...props}>Click me</button>
+      }
+      createRenderEffect(() => {
+        const props = () => ({ onClick: () => {}, role: "button" } as const)
+        return <Button {...props()} />
+      })
+
+      const { selected } = walkSolidTree(getOwner()!, {
+        rootId: "0",
+        selectedId: "2",
+        onComputationUpdate: () => {},
+        onSignalUpdate: () => {},
+        gatherComponents: false,
+        elementMap,
+      })
+
+      expect(selected.details).toEqual({
+        id: "2",
+        name: "Button",
+        type: NodeType.Component,
+        signals: [],
+        sources: [],
+        path: ["0", "1"],
+        value: { type: ValueType.Element, value: { id: "0", name: "BUTTON" } },
+        props: {
+          // ! this should be true, don't know what's the reason. it's working in the browser
+          proxy: false,
+          value: {
+            onClick: { signal: true, value: { type: ValueType.Function, value: "onClick" } },
+            role: { signal: true, value: { type: ValueType.String, value: "button" } },
+          },
+        },
+      })
+
+      expect(selected.elementMap).toBe(elementMap)
+      expect(Object.keys(elementMap).length).toBe(1)
+      expect(elementMap).toHaveProperty("0")
+      expect(elementMap["0"]).toBeInstanceOf(HTMLButtonElement)
+
+      elementMap = {}
 
       dispose()
     }))

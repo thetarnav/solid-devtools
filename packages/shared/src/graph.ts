@@ -96,6 +96,10 @@ export namespace Solid {
     observers: Computation[] | null
   }
 
+  export interface Component extends Memo {
+    props: Record<string, unknown>
+  }
+
   export type Owner = Computation | Root
 }
 
@@ -173,6 +177,10 @@ export namespace Mapped {
     name: string
     type: NodeType
     path: NodeID[]
+    props?: {
+      proxy: boolean
+      value: Record<string, { signal: boolean; value: EncodedValue<false> }>
+    }
     signals: Signal[]
     /** for computations */
     value?: EncodedValue

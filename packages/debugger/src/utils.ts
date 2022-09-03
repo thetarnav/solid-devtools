@@ -24,6 +24,9 @@ export const isSolidOwner = (o: Readonly<Solid.Owner> | Solid.Signal): o is Soli
 export const isSolidRoot = (o: Readonly<Solid.Owner>): o is Solid.Root =>
   o.sdtType === NodeType.Root || !isSolidComputation(o)
 
+export const isSolidComponent = (o: Readonly<Solid.Owner>): o is Solid.Component =>
+  isSolidComputation(o) && _isComponent(o)
+
 const _isComponent = (o: Readonly<AnyObject>): boolean => "componentName" in o
 
 const _isMemo = (o: Readonly<AnyObject>): boolean =>
