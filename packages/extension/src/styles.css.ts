@@ -62,8 +62,14 @@ export const pathInner = style({
 })
 
 export const details = {
+  scrollWrapper: style({
+    height: "100%",
+    width: "100%",
+    overflow: "hidden",
+  }),
   root: style({
     padding: spacing[4],
+    paddingBottom: spacing[16],
   }),
   header: style({
     marginBottom: spacing[4],
