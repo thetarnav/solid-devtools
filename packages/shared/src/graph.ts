@@ -228,6 +228,7 @@ export namespace Graph {
     readonly path: Path
     readonly rawPath: NodeID[]
     readonly signals: Record<NodeID, Signal>
+    readonly props?: Mapped.OwnerDetails["props"]
     // TODO: more to come
   }
 }

@@ -100,8 +100,6 @@ function collectOwnerDetails(owner: Solid.Owner): void {
       // map component props
       const { props } = owner
       const proxy = !!(props as any)[$PROXY]
-      console.log(owner.sdtName, proxy)
-
       const value = Object.entries(Object.getOwnPropertyDescriptors(props)).reduce(
         (value, [key, descriptor]) => {
           value[key] = {

@@ -66,6 +66,65 @@ function createSignalNode(raw: Readonly<Mapped.Signal>): Graph.Signal {
   return { ...raw, selected: false }
 }
 
+function mapRawPath(rootId: NodeID, rawPath: readonly NodeID[]): Graph.Path {
+  const path = rawPath.map(id => findOwnerById(rootId, id) ?? NOTFOUND)
+  path.push(untrack(focused)!)
+  return path
+}
+
+function createDetails(rootId: NodeID, raw: Readonly<Mapped.OwnerDetails>): Graph.OwnerDetails {
+  const signals = raw.signals.reduce((signals, signal) => {
+    signals[signal.id] = createSignalNode(signal)
+    return signals
+  }, {} as Graph.OwnerDetails["signals"])
+  const path = mapRawPath(rootId, raw.path)
+  const details: Mutable<Graph.OwnerDetails> = {
+    id: raw.id,
+    name: raw.name,
+    type: raw.type,
+    path,
+    rawPath: raw.path,
+    signals,
+  }
+  if ("props" in raw) details.props = raw.props
+  return details
+}
+
+function reconcileDetails(
+  rootId: NodeID,
+  proxy: Mutable<Graph.OwnerDetails>,
+  raw: Readonly<Mapped.OwnerDetails>,
+): void {
+  // update path
+  if (!arrayEquals(proxy.rawPath, raw.path)) {
+    const path = mapRawPath(rootId, raw.path)
+    proxy.rawPath.length = 0
+    proxy.rawPath.push.apply(proxy.rawPath, raw.path)
+    proxy.path.length = 0
+    proxy.path.push.apply(proxy.path, path)
+  }
+  // update signals
+  reconcileSignals(raw.signals, proxy.signals)
+  // update props
+  if (raw.props) {
+    const newProps = raw.props.value
+    proxy.props!.proxy = raw.props.proxy
+    // the props cannot be deleted/added, so we can just update them
+    const props = proxy.props!.value
+    for (const [key, prop] of Object.entries(props)) {
+      const newProp = newProps[key]
+      if (!newProp) delete props[key]
+      else {
+        prop.signal = newProp.signal
+        reconcileValue(prop.value, newProp.value)
+      }
+    }
+    for (const [key, newProp] of Object.entries(newProps)) {
+      if (!props[key]) props[key] = newProp
+    }
+  }
+}
+
 export type OwnerDetailsState = (
   | { focused: null; rootId: null; details: null }
   | { focused: Graph.Owner; rootId: NodeID; details: Graph.OwnerDetails | null }
@@ -104,38 +163,17 @@ const exports = createRoot(() => {
       }
     })
 
-  function mapRawPath(rootId: NodeID, rawPath: readonly NodeID[]): Graph.Path {
-    const path = rawPath.map(id => findOwnerById(rootId, id) ?? NOTFOUND)
-    path.push(untrack(focused)!)
-    return path
-  }
-
   function updateDetails(raw: Mapped.OwnerDetails): void {
     const rootId = untrack(focusedRootId)
     if (!rootId) return warn("OwnerDetailsUpdate: rootId is null")
 
-    setState("details", prev => {
-      // add new details
-      if (prev === null) {
-        const signals: Graph.OwnerDetails["signals"] = {}
-        raw.signals.forEach(signal => (signals[signal.id] = createSignalNode(signal)))
-        const path = mapRawPath(rootId, raw.path)
-        return { id: raw.id, name: raw.name, type: raw.type, path, rawPath: raw.path, signals }
-      }
-      // reconcile details
-      return produce<Mutable<Graph.OwnerDetails>>(proxy => {
-        // update path
-        if (!arrayEquals(proxy.rawPath, raw.path)) {
-          const path = mapRawPath(rootId, raw.path)
-          proxy.rawPath.length = 0
-          proxy.rawPath.push.apply(proxy.rawPath, raw.path)
-          proxy.path.length = 0
-          proxy.path.push.apply(proxy.path, path)
-        }
-        // update signals
-        reconcileSignals(raw.signals, proxy.signals)
-      })(prev)
-    })
+    setState("details", prev =>
+      prev === null
+        ? createDetails(rootId, raw)
+        : produce((proxy: Mutable<Graph.OwnerDetails>) => reconcileDetails(rootId, proxy, raw))(
+            prev,
+          ),
+    )
   }
 
   const [useUpdatedSelector, addUpdated, clearUpdated] = createUpdatedSelector()
