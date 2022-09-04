@@ -81,7 +81,7 @@ export type PluginData = {
   readonly serialisedRoots: Accessor<Record<NodeID, Mapped.Owner>>
   readonly rootsUpdates: Accessor<RootsUpdates>
   readonly components: Accessor<Record<NodeID, Mapped.Component[]>>
-  readonly setFocusedOwner: SetInspectedOwner
+  readonly setInspectedOwner: SetInspectedOwner
   readonly inspected: InspectedState
   readonly setSelectedSignal: (payload: {
     id: NodeID
@@ -100,7 +100,6 @@ const exported = createInternalRoot(() => {
   //
   const [enabled, addDebuggerConsumer] = createConsumers()
   const [gatherComponents, addGatherComponentsConsumer] = createConsumers()
-  const [observeComputations, addObserveComputationsConsumer] = createConsumers()
 
   //
   // Roots:
@@ -168,16 +167,18 @@ const exported = createInternalRoot(() => {
     pushSignalUpdate({ id, value: encodeValue(value, isSelected, inspected.elementMap) })
   })
 
-  function updateInspectedDetails() {
+  const updateInspectedDetails = untrackedCallback(() => {
     const { owner, elementMap } = inspected
     if (!owner) return
     const { details, signalMap } = collectOwnerDetails(owner, { elementMap, signalUpdateHandler })
     setInspected({ details, signalMap })
-  }
+  })
 
   createEffect(() => {
     // make sure we clear the owner observers when the plugin is disabled
     if (!enabled()) lastInspectedOwner && clearOwnerObservers(lastInspectedOwner)
+    // re-observe the owner when the plugin is enabled
+    else updateInspectedDetails()
     createEffect(() => {
       // make sure we clear the owner observers when the owner changes
       const owner = inspected.owner
@@ -223,7 +224,6 @@ const exported = createInternalRoot(() => {
   const [handleComputationUpdates, _pushComputationUpdate] =
     createBatchedUpdateEmitter<ComputationUpdate>()
   const pushComputationUpdate: ComputationUpdateHandler = (rootId, id) => {
-    if (!untrack(enabled) || !untrack(observeComputations)) return
     _pushComputationUpdate({ rootId, id })
   }
 
@@ -246,19 +246,17 @@ const exported = createInternalRoot(() => {
     components,
     triggerUpdate,
     forceTriggerUpdate,
-    setFocusedOwner: setInspectedOwner,
+    setInspectedOwner,
     inspected,
     setSelectedSignal,
   }
   function useDebugger(options: {
     enabled?: Accessor<boolean>
-    observeComputations?: Accessor<boolean>
     gatherComponents?: Accessor<boolean>
   }): PluginData {
-    const { enabled, observeComputations, gatherComponents } = options
+    const { enabled, gatherComponents } = options
     enabled && addDebuggerConsumer(enabled)
     gatherComponents && addGatherComponentsConsumer(gatherComponents)
-    observeComputations && addObserveComputationsConsumer(observeComputations)
     return pluginData
   }
 

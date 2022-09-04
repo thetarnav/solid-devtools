@@ -26,7 +26,7 @@ chrome.runtime.onConnect.addListener(port => {
   if (port.name === DEVTOOLS_CONNECTION_NAME) {
     const disconnectListener = () => {
       panelVisibility = false
-      postPortMessage("PanelVisibility", false)
+      postPortMessage("PanelClosed", true)
       port.onDisconnect.removeListener(disconnectListener)
     }
     port.onDisconnect.addListener(disconnectListener)

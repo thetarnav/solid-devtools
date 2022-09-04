@@ -19,7 +19,7 @@ export const useDebugger: typeof API.useDebugger = () => ({
   serialisedRoots: () => ({}),
   rootsUpdates: () => ({ removed: [], updated: [] }),
   components: () => ({}),
-  setFocusedOwner: noop,
+  setInspectedOwner: noop,
   inspected: {
     details: null,
     elementMap: {},

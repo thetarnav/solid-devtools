@@ -9,7 +9,10 @@ export interface Messages {
   SolidOnPage: string
   // devtools -> background: number is a tab id
   DevtoolsScriptConnected: number
+  /** devtools -> adapter: user switching between Solid devtools and other panel */
   PanelVisibility: boolean
+  /** devtools -> adapter: the chrome devtools got entirely closed */
+  PanelClosed: true
   ResetPanel: void
   GraphUpdate: RootsUpdates
   ComputationUpdates: ComputationUpdate[]

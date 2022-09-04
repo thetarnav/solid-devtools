@@ -22,19 +22,25 @@ createInternalRoot(() => {
   const [enabled, setEnabled] = createSignal(false)
   Locator.addHighlightingSource(enabled)
 
-  // update the graph only if the devtools panel is in view
-  onWindowMessage("PanelVisibility", setEnabled)
-
   const {
     forceTriggerUpdate,
     rootsUpdates,
     roots,
     handleComputationUpdates,
     handleSignalUpdates,
-    setFocusedOwner,
+    setInspectedOwner,
     inspected,
     setSelectedSignal,
-  } = useDebugger({ enabled, observeComputations: enabled })
+  } = useDebugger({ enabled })
+
+  // update the graph only if the devtools panel is in view
+  onWindowMessage("PanelVisibility", setEnabled)
+
+  // disable debugger and reset any state
+  onWindowMessage("PanelClosed", () => {
+    setEnabled(false)
+    setInspectedOwner(null)
+  })
 
   createEffect(() => {
     if (!enabled()) return
@@ -42,10 +48,10 @@ createInternalRoot(() => {
     if (loadedBefore) forceTriggerUpdate()
     else loadedBefore = true
 
-    onCleanup(() => setFocusedOwner(null))
-
     onCleanup(onWindowMessage("ForceUpdate", forceTriggerUpdate))
-    onCleanup(onWindowMessage("SetSelectedOwner", setFocusedOwner))
+
+    onCleanup(onWindowMessage("SetSelectedOwner", setInspectedOwner))
+
     onCleanup(
       onWindowMessage("SetSelectedSignal", ({ id, selected }) => {
         const value = setSelectedSignal({ id, selected })
