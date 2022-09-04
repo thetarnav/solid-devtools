@@ -1,5 +1,5 @@
 import { Component, Show } from "solid-js"
-import { Key } from "@solid-primitives/keyed"
+import { Entries } from "@solid-primitives/keyed"
 import { NodeType, Graph } from "@solid-devtools/shared/graph"
 import { SignalContextProvider, Scrollable, Signals, ValueNode } from "@solid-devtools/ui"
 import {
@@ -23,20 +23,16 @@ const DetailsContent: Component<{ details: Graph.OwnerDetails }> = ({ details })
       {componentProps && (
         <div class={styles.props}>
           <h2>Props {componentProps.proxy && "(dynamic)"}</h2>
-          <Key each={Object.entries(componentProps.value)} by={0}>
-            {keyvalue => {
-              const name = keyvalue()[0]
-              const value = () => keyvalue()[1]
-              return (
-                <ValueNode
-                  name={name}
-                  value={value().value}
-                  type={value().signal ? NodeType.Signal : null}
-                  selected={false}
-                />
-              )
-            }}
-          </Key>
+          <Entries of={componentProps.value}>
+            {(name, value) => (
+              <ValueNode
+                name={name}
+                value={value().value}
+                type={value().signal ? NodeType.Signal : null}
+                selected={false}
+              />
+            )}
+          </Entries>
         </div>
       )}
       <div>

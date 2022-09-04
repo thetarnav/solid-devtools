@@ -15,7 +15,7 @@ import {
   Switch,
   useContext,
 } from "solid-js"
-import { Key } from "@solid-primitives/keyed"
+import { Entries } from "@solid-primitives/keyed"
 import { Graph, NodeID, NodeType } from "@solid-devtools/shared/graph"
 import {
   EncodedValue,
@@ -138,46 +138,40 @@ const CollapsableObjectPreview: Component<{
     | EncodedValueOf<ValueType.Array, true>["children"]
 }> = props => (
   <ul class={styles.collapsable.list}>
-    <Key each={Object.entries(props.value)} by={0}>
-      {keyvalue => {
-        // TODO: is <Key> necessary here? the values should be reconciled by the key anyway
-        // key will be static, because <Key> is using it as a key
-        const key = keyvalue()[0]
-        const value = () => keyvalue()[1]
-        return (
-          <Show
-            when={value().type === ValueType.Object || value().type === ValueType.Array}
-            fallback={
-              <ValueRow>
+    <Entries of={props.value}>
+      {(key, value) => (
+        <Show
+          when={value().type === ValueType.Object || value().type === ValueType.Array}
+          fallback={
+            <ValueRow>
+              <ValueName>{key}</ValueName>
+              <ValuePreview value={value()} />
+            </ValueRow>
+          }
+        >
+          {() => {
+            const [extended, setExtended] = createSignal(false)
+            return (
+              <ValueRow
+                selected={false}
+                onClick={e => {
+                  e.stopPropagation()
+                  setExtended(p => !p)
+                }}
+              >
                 <ValueName>{key}</ValueName>
-                <ValuePreview value={value()} />
+                <ObjectValuePreview
+                  {...(value() as
+                    | EncodedValueOf<ValueType.Object, true>
+                    | EncodedValueOf<ValueType.Array, true>)}
+                  extended={extended()}
+                />
               </ValueRow>
-            }
-          >
-            {() => {
-              const [extended, setExtended] = createSignal(false)
-              return (
-                <ValueRow
-                  selected={false}
-                  onClick={e => {
-                    e.stopPropagation()
-                    setExtended(p => !p)
-                  }}
-                >
-                  <ValueName>{key}</ValueName>
-                  <ObjectValuePreview
-                    {...(value() as
-                      | EncodedValueOf<ValueType.Object, true>
-                      | EncodedValueOf<ValueType.Array, true>)}
-                    extended={extended()}
-                  />
-                </ValueRow>
-              )
-            }}
-          </Show>
-        )
-      }}
-    </Key>
+            )
+          }}
+        </Show>
+      )}
+    </Entries>
   </ul>
 )
 
