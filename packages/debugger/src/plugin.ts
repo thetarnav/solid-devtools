@@ -1,8 +1,9 @@
-import { Accessor, batch, createSignal, untrack } from "solid-js"
+import { Accessor, batch, createEffect, createSignal, untrack } from "solid-js"
 import { createSimpleEmitter } from "@solid-primitives/event-bus"
 import { omit } from "@solid-primitives/immutable"
 import { createLazyMemo } from "@solid-primitives/memo"
 import { createStaticStore } from "@solid-primitives/utils"
+import { throttle } from "@solid-primitives/scheduled"
 import {
   Mapped,
   Solid,
@@ -14,8 +15,10 @@ import {
 import { EncodedValue, encodeValue } from "@solid-devtools/shared/serialize"
 import { createConsumers, untrackedCallback } from "@solid-devtools/shared/primitives"
 import { createBatchedUpdateEmitter, createInternalRoot } from "./utils"
-import { ComputationUpdateHandler, SignalUpdateHandler, WalkerSelectedResult } from "./walker"
-import { forceRootUpdate } from "./roots"
+import { ComputationUpdateHandler } from "./walker"
+import { walkSolidRoot } from "./roots"
+import { clearOwnerObservers, collectOwnerDetails, SignalUpdateHandler } from "./inspect"
+import { makeSolidUpdateListener } from "./update"
 
 /*
 DETAILS:
@@ -33,20 +36,19 @@ DETAILS:
 - component props
 */
 
-export type SetSelectedOwner = (payload: { rootId: NodeID; nodeId: NodeID } | null) => void
+export type SetInspectedOwner = (payload: { rootId: NodeID; nodeId: NodeID } | null) => void
 
-export type FocusedState = Readonly<
+export type InspectedState = Readonly<
   {
     signalMap: Record<NodeID, Solid.Signal>
     elementMap: Record<NodeID, HTMLElement>
   } & (
     | { id: null; rootId: null; owner: null; details: null }
-    | { id: NodeID; rootId: NodeID; owner: null; details: null }
     | { id: NodeID; rootId: NodeID; owner: Solid.Owner; details: Mapped.OwnerDetails }
   )
 >
 
-const getNullFocusedState = (): FocusedState => ({
+const getNullInspected = (): InspectedState => ({
   id: null,
   rootId: null,
   owner: null,
@@ -79,8 +81,8 @@ export type PluginData = {
   readonly serialisedRoots: Accessor<Record<NodeID, Mapped.Owner>>
   readonly rootsUpdates: Accessor<RootsUpdates>
   readonly components: Accessor<Record<NodeID, Mapped.Component[]>>
-  readonly setFocusedOwner: SetSelectedOwner
-  readonly focusedState: FocusedState
+  readonly setFocusedOwner: SetInspectedOwner
+  readonly inspected: InspectedState
   readonly setSelectedSignal: (payload: {
     id: NodeID
     selected: boolean
@@ -154,29 +156,59 @@ const exported = createInternalRoot(() => {
   }
 
   //
-  // Focused Owner details:
+  // Inspected Owner details:
   //
-  const [focusedState, setFocusedState] = createStaticStore(getNullFocusedState())
+  const [inspected, setInspected] = createStaticStore(getNullInspected())
+  let lastInspectedOwner: Solid.Owner | null = null
 
-  const setFocusedOwner: SetSelectedOwner = untrackedCallback(payload => {
-    if (!payload) return setFocusedState(getNullFocusedState())
-    const { rootId, nodeId } = payload
-    if (focusedState.id === nodeId) return
-    setFocusedState({ ...getNullFocusedState(), id: nodeId, rootId })
-    forceRootUpdate(rootId)
+  const [handleSignalUpdates, pushSignalUpdate] = createBatchedUpdateEmitter<SignalUpdate>()
+  const signalUpdateHandler: SignalUpdateHandler = untrackedCallback((id, value) => {
+    if (!enabled() || !inspected.id) return
+    const isSelected = selectedSignalIds.has(id)
+    pushSignalUpdate({ id, value: encodeValue(value, isSelected, inspected.elementMap) })
   })
 
-  const setSelectedDetails = (payload: WalkerSelectedResult) => {
-    setFocusedState(payload.details ? payload : getNullFocusedState())
+  function updateInspectedDetails() {
+    const { owner, elementMap } = inspected
+    if (!owner) return
+    const { details, signalMap } = collectOwnerDetails(owner, { elementMap, signalUpdateHandler })
+    setInspected({ details, signalMap })
   }
 
-  //
-  // Selected Signals:
-  //
+  createEffect(() => {
+    // make sure we clear the owner observers when the plugin is disabled
+    if (!enabled()) lastInspectedOwner && clearOwnerObservers(lastInspectedOwner)
+    createEffect(() => {
+      // make sure we clear the owner observers when the owner changes
+      const owner = inspected.owner
+      if (lastInspectedOwner && lastInspectedOwner !== owner)
+        clearOwnerObservers(lastInspectedOwner)
+      lastInspectedOwner = owner
+
+      // update the owner details whenever there is a change in solid's internals
+      makeSolidUpdateListener(throttle(updateInspectedDetails, 100))
+    })
+  })
+
+  const setInspectedOwner: SetInspectedOwner = untrackedCallback(payload => {
+    if (!payload) return setInspected(getNullInspected())
+    const { rootId, nodeId } = payload
+    if (inspected.id === nodeId) return
+
+    const result = walkSolidRoot(rootId, nodeId)
+    if (!result || !result.inspectedOwner) return setInspected(getNullInspected())
+
+    const owner = result.inspectedOwner
+    const elementMap: Record<NodeID, HTMLElement> = {}
+    const { details, signalMap } = collectOwnerDetails(owner, { elementMap, signalUpdateHandler })
+
+    setInspected({ id: nodeId, rootId, owner, details, signalMap, elementMap })
+  })
+
   const selectedSignalIds: Set<NodeID> = new Set()
   const setSelectedSignal: PluginData["setSelectedSignal"] = untrackedCallback(
     ({ id, selected }) => {
-      const { signalMap, elementMap } = focusedState
+      const { signalMap, elementMap } = inspected
       const signal = signalMap[id] as Solid.Signal | undefined
       if (!signal) return null
       if (selected) selectedSignalIds.add(id)
@@ -184,13 +216,6 @@ const exported = createInternalRoot(() => {
       return encodeValue(signal.value, selected, elementMap)
     },
   )
-
-  const [handleSignalUpdates, _pushSignalUpdate] = createBatchedUpdateEmitter<SignalUpdate>()
-  const pushSignalUpdate: SignalUpdateHandler = untrackedCallback((id, value) => {
-    if (!enabled() || !focusedState.id) return
-    const isSelected = selectedSignalIds.has(id)
-    _pushSignalUpdate({ id, value: encodeValue(value, isSelected, focusedState.elementMap) })
-  })
 
   //
   // Computation updates:
@@ -221,8 +246,8 @@ const exported = createInternalRoot(() => {
     components,
     triggerUpdate,
     forceTriggerUpdate,
-    setFocusedOwner,
-    focusedState,
+    setFocusedOwner: setInspectedOwner,
+    inspected,
     setSelectedSignal,
   }
   function useDebugger(options: {
@@ -245,9 +270,6 @@ const exported = createInternalRoot(() => {
     updateRoot,
     removeRoot,
     gatherComponents,
-    pushSignalUpdate,
-    setSelectedDetails,
-    focusedState,
     pushComputationUpdate,
   }
 })
@@ -259,8 +281,5 @@ export const {
   useDebugger,
   updateRoot,
   removeRoot,
-  pushSignalUpdate,
-  setSelectedDetails,
-  focusedState,
   pushComputationUpdate,
 } = exported

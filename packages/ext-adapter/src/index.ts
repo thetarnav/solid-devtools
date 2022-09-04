@@ -32,7 +32,7 @@ createInternalRoot(() => {
     handleComputationUpdates,
     handleSignalUpdates,
     setFocusedOwner,
-    focusedState,
+    inspected,
     setSelectedSignal,
   } = useDebugger({ enabled, observeComputations: enabled })
 
@@ -70,7 +70,7 @@ createInternalRoot(() => {
 
     // send the focused owner details
     createEffect(() => {
-      const details = focusedState.details
+      const details = inspected.details
       if (details) postWindowMessage("OwnerDetailsUpdate", details)
     })
 
@@ -129,7 +129,7 @@ createInternalRoot(() => {
         }
         // highlight element
         else {
-          const element = focusedState.elementMap[payload]
+          const element = inspected.elementMap[payload]
           if (!element) return warn("No element found", payload)
           target = element
         }
