@@ -3,6 +3,11 @@ const getLogLabel = () => [
   "color: #fff; background: #2c4f7c; padding: 1px 4px;",
 ]
 
+export function info<T>(data: T): T {
+  console.info(...getLogLabel(), data)
+  return data
+}
+
 export function log(...args: any[]): void {
   console.log(...getLogLabel(), ...args)
 }

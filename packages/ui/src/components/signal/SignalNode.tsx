@@ -13,6 +13,7 @@ import {
   Show,
   splitProps,
   Switch,
+  untrack,
   useContext,
 } from "solid-js"
 import { Entries } from "@solid-primitives/keyed"
@@ -25,11 +26,11 @@ import {
   NEGATIVE_INFINITY,
   ValueType,
 } from "@solid-devtools/shared/serialize"
+import clsx from "clsx"
 import * as Icon from "~/icons"
 import { color } from "~/theme"
 import { Highlight } from "../highlight/Highlight"
 import * as styles from "./SignalNode.css"
-import clsx from "clsx"
 
 type ValueComponent<K extends ValueType> = Component<Omit<EncodedValueOf<K, boolean>, "type">>
 
@@ -126,8 +127,8 @@ const ObjectValuePreview: Component<
         </span>
       </Show>
     </Match>
-    <Match when={props.children} keyed>
-      {value => <CollapsableObjectPreview value={value} />}
+    <Match when={props.children}>
+      <CollapsableObjectPreview value={props.children!} />
     </Match>
   </Switch>
 )
@@ -136,44 +137,46 @@ const CollapsableObjectPreview: Component<{
   value:
     | EncodedValueOf<ValueType.Object, true>["children"]
     | EncodedValueOf<ValueType.Array, true>["children"]
-}> = props => (
-  <ul class={styles.collapsable.list}>
-    <Entries of={props.value}>
-      {(key, value) => (
-        <Show
-          when={value().type === ValueType.Object || value().type === ValueType.Array}
-          fallback={
-            <ValueRow>
-              <ValueName>{key}</ValueName>
-              <ValuePreview value={value()} />
-            </ValueRow>
-          }
-        >
-          {() => {
-            const [extended, setExtended] = createSignal(false)
-            return (
-              <ValueRow
-                selected={false}
-                onClick={e => {
-                  e.stopPropagation()
-                  setExtended(p => !p)
-                }}
-              >
+}> = props => {
+  return (
+    <ul class={styles.collapsable.list}>
+      <Entries of={props.value}>
+        {(key, value) => (
+          <Show
+            when={value().type === ValueType.Object || value().type === ValueType.Array}
+            fallback={
+              <ValueRow>
                 <ValueName>{key}</ValueName>
-                <ObjectValuePreview
-                  {...(value() as
-                    | EncodedValueOf<ValueType.Object, true>
-                    | EncodedValueOf<ValueType.Array, true>)}
-                  extended={extended()}
-                />
+                <ValuePreview value={value()} />
               </ValueRow>
-            )
-          }}
-        </Show>
-      )}
-    </Entries>
-  </ul>
-)
+            }
+          >
+            {untrack(() => {
+              const [extended, setExtended] = createSignal(false)
+              return (
+                <ValueRow
+                  selected={false}
+                  onClick={e => {
+                    e.stopPropagation()
+                    setExtended(p => !p)
+                  }}
+                >
+                  <ValueName>{key}</ValueName>
+                  <ObjectValuePreview
+                    {...(value() as
+                      | EncodedValueOf<ValueType.Object, true>
+                      | EncodedValueOf<ValueType.Array, true>)}
+                    extended={extended()}
+                  />
+                </ValueRow>
+              )
+            })}
+          </Show>
+        )}
+      </Entries>
+    </ul>
+  )
+}
 
 const ValuePreview: Component<{ value: EncodedValue<boolean> }> = props =>
   createMemo(() => {
