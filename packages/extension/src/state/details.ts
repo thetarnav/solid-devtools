@@ -72,6 +72,24 @@ function mapRawPath(rootId: NodeID, rawPath: readonly NodeID[]): Graph.Path {
   return path
 }
 
+function reconcileProps(proxy: Graph.Props, raw: Mapped.Props): void {
+  const record = proxy.record
+  const newRecord = raw.record
+  proxy.proxy = raw.proxy
+  // the props cannot be deleted/added, so we can just update them
+  for (const [key, prop] of Object.entries(record)) {
+    const newProp = newRecord[key]
+    if (!newProp) delete record[key]
+    else {
+      prop.signal = newProp.signal
+      reconcileValue(prop.value, newProp.value)
+    }
+  }
+  for (const [key, newProp] of Object.entries(newRecord)) {
+    if (!record[key]) record[key] = { ...newProp, selected: false }
+  }
+}
+
 function createDetails(rootId: NodeID, raw: Readonly<Mapped.OwnerDetails>): Graph.OwnerDetails {
   const signals = raw.signals.reduce((signals, signal) => {
     signals[signal.id] = createSignalNode(signal)
@@ -86,13 +104,13 @@ function createDetails(rootId: NodeID, raw: Readonly<Mapped.OwnerDetails>): Grap
     rawPath: raw.path,
     signals,
   }
-  if ("props" in raw) {
+  if (raw.props) {
     details.props = {
-      proxy: raw.props!.proxy,
-      value: Object.entries(raw.props!.value).reduce((props, [propName, value]) => {
+      proxy: raw.props.proxy,
+      record: Object.entries(raw.props.record).reduce((props, [propName, value]) => {
         props[propName] = { ...value, selected: false }
         return props
-      }, {} as NonNullable<Graph.OwnerDetails["props"]>["value"]),
+      }, {} as Graph.Props["record"]),
     }
   }
   return details
@@ -114,23 +132,7 @@ function reconcileDetails(
   // update signals
   reconcileSignals(raw.signals, proxy.signals)
   // update props
-  if (raw.props) {
-    const newProps = raw.props.value
-    proxy.props!.proxy = raw.props.proxy
-    // the props cannot be deleted/added, so we can just update them
-    const props = proxy.props!.value
-    for (const [key, prop] of Object.entries(props)) {
-      const newProp = newProps[key]
-      if (!newProp) delete props[key]
-      else {
-        prop.signal = newProp.signal
-        reconcileValue(prop.value, newProp.value)
-      }
-    }
-    for (const [key, newProp] of Object.entries(newProps)) {
-      if (!props[key]) props[key] = { ...newProp, selected: false }
-    }
-  }
+  if (raw.props) reconcileProps(proxy.props!, raw.props)
 }
 
 export type OwnerDetailsState =
@@ -206,13 +208,19 @@ const exports = createRoot(() => {
     })
   }
 
+  function handlePropsUpdate(props: Mapped.Props) {
+    setState("details", "props", p =>
+      p ? produce((proxy: Graph.Props) => reconcileProps(proxy, props))(p) : p,
+    )
+  }
+
   /** variable for a callback in bridge.ts */
   let onInspectValue: ((payload: Messages["ToggleInspectedValue"]) => void) | undefined
   const setOnInspectValue = (fn: typeof onInspectValue) => (onInspectValue = fn)
 
-  function togglePropFocus(key: string, selected?: boolean): void {
-    setState("details", "props", "value", key, "selected", p => (selected = selected ?? !p))
-    onInspectValue!({ type: "prop", key, selected: selected! })
+  function togglePropFocus(id: string, selected?: boolean): void {
+    setState("details", "props", "record", id, "selected", p => (selected = selected ?? !p))
+    onInspectValue!({ type: "prop", id, selected: selected! })
   }
   function toggleSignalFocus(id: NodeID, selected?: boolean) {
     setState("details", "signals", id, "selected", p => (selected = selected ?? !p))
@@ -234,6 +242,7 @@ const exports = createRoot(() => {
     updateDetails,
     handleSignalUpdates,
     handleGraphUpdate,
+    handlePropsUpdate,
     toggleSignalFocus,
     togglePropFocus,
     setOnInspectValue,
@@ -251,6 +260,7 @@ export const {
   updateDetails,
   handleSignalUpdates,
   handleGraphUpdate,
+  handlePropsUpdate,
   toggleSignalFocus,
   togglePropFocus,
   setOnInspectValue,

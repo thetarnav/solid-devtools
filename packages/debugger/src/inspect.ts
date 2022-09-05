@@ -1,5 +1,5 @@
 import { Mapped, NodeID, Solid, NodeType } from "@solid-devtools/shared/graph"
-import { EncodedValue, encodeValue } from "@solid-devtools/shared/serialize"
+import { encodeValue } from "@solid-devtools/shared/serialize"
 import { $PROXY } from "solid-js"
 import { observeValueUpdate, removeValueUpdateObserver } from "./update"
 import {
@@ -47,6 +47,29 @@ export function clearOwnerObservers(owner: Solid.Owner): void {
   if (owner.sourceMap)
     Object.values(owner.sourceMap).forEach(node => removeValueUpdateObserver(node, INSPECTOR))
   if (owner.owned) owner.owned.forEach(node => removeValueUpdateObserver(node, INSPECTOR))
+}
+
+export function encodeComponentProps(
+  owner: Solid.Owner,
+  config: { inspectedProps: Set<string>; elementMap: Record<NodeID, HTMLElement> },
+): Mapped.Props | null {
+  if (!isSolidComponent(owner)) return null
+  const { elementMap, inspectedProps } = config
+  const { props } = owner
+  const proxy = !!(props as any)[$PROXY]
+  const record = Object.entries(Object.getOwnPropertyDescriptors(props)).reduce(
+    (record, [key, descriptor]) => {
+      const value = descriptor.get?.() ?? descriptor.value
+      const deep = inspectedProps.has(key)
+      record[key] = {
+        signal: proxy || "get" in descriptor,
+        value: encodeValue(value, deep, elementMap),
+      }
+      return record
+    },
+    {} as Mapped.Props["record"],
+  )
+  return { proxy, record }
 }
 
 export function collectOwnerDetails(
@@ -100,24 +123,9 @@ export function collectOwnerDetails(
     if (isSolidMemo(owner)) {
       details.observers = markNodesID(owner.observers)
     }
-    if (isSolidComponent(owner)) {
-      // map component props
-      const { props } = owner
-      const proxy = !!(props as any)[$PROXY]
-      const value = Object.entries(Object.getOwnPropertyDescriptors(props)).reduce(
-        (record, [key, descriptor]) => {
-          const value = descriptor.get?.() ?? descriptor.value
-          const deep = inspectedProps.has(key)
-          record[key] = {
-            signal: proxy || "get" in descriptor,
-            value: encodeValue(value, deep, elementMap),
-          }
-          return record
-        },
-        {} as Record<string, { signal: boolean; value: EncodedValue<boolean> }>,
-      )
-      details.props = { proxy, value }
-    }
+    // map component props
+    const props = encodeComponentProps(owner, { inspectedProps, elementMap })
+    if (props) details.props = props
   }
 
   return {

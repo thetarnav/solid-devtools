@@ -1,5 +1,5 @@
 import { Accessor, batch, createEffect, createSignal, untrack } from "solid-js"
-import { createSimpleEmitter } from "@solid-primitives/event-bus"
+import { createSimpleEmitter, Listen } from "@solid-primitives/event-bus"
 import { omit } from "@solid-primitives/immutable"
 import { createLazyMemo } from "@solid-primitives/memo"
 import { createStaticStore } from "@solid-primitives/utils"
@@ -17,7 +17,12 @@ import { createConsumers, untrackedCallback } from "@solid-devtools/shared/primi
 import { createBatchedUpdateEmitter, createInternalRoot } from "./utils"
 import { ComputationUpdateHandler } from "./walker"
 import { walkSolidRoot } from "./roots"
-import { clearOwnerObservers, collectOwnerDetails, SignalUpdateHandler } from "./inspect"
+import {
+  clearOwnerObservers,
+  collectOwnerDetails,
+  encodeComponentProps,
+  SignalUpdateHandler,
+} from "./inspect"
 import { makeSolidUpdateListener } from "./update"
 
 /*
@@ -77,6 +82,7 @@ export type PluginData = {
   readonly forceTriggerUpdate: VoidFunction
   readonly handleComputationUpdates: (listener: BatchComputationUpdatesHandler) => VoidFunction
   readonly handleSignalUpdates: (listener: BatchSignalUpdatesHandler) => VoidFunction
+  readonly handlePropsUpdate: Listen<Mapped.Props>
   readonly roots: Accessor<Record<NodeID, SignaledRoot>>
   readonly serialisedRoots: Accessor<Record<NodeID, Mapped.Owner>>
   readonly rootsUpdates: Accessor<RootsUpdates>
@@ -168,6 +174,8 @@ const exported = createInternalRoot(() => {
     pushSignalUpdate({ id, value: encodeValue(value, isSelected, inspected.elementMap) })
   })
 
+  const [handlePropsUpdate, emitPropsUpdate] = createSimpleEmitter<Mapped.Props>()
+
   const updateInspectedDetails = untrackedCallback(() => {
     const { owner, elementMap } = inspected
     if (!owner) return
@@ -177,6 +185,12 @@ const exported = createInternalRoot(() => {
       inspectedProps,
     })
     setInspected({ details, signalMap })
+  })
+  const updateInspectedProps = untrackedCallback(() => {
+    const { owner, elementMap } = inspected
+    if (!owner) return
+    const props = encodeComponentProps(owner, { inspectedProps, elementMap })
+    props && emitPropsUpdate(props)
   })
 
   createEffect(() => {
@@ -192,7 +206,7 @@ const exported = createInternalRoot(() => {
       lastInspectedOwner = owner
 
       // update the owner details whenever there is a change in solid's internals
-      makeSolidUpdateListener(throttle(updateInspectedDetails, 100))
+      makeSolidUpdateListener(throttle(updateInspectedProps, 150))
     })
   })
 
@@ -228,7 +242,7 @@ const exported = createInternalRoot(() => {
   const setInspectedProp: PluginData["setInspectedProp"] = untrackedCallback((key, selected) => {
     if (selected) inspectedProps.add(key)
     else inspectedProps.delete(key)
-    updateInspectedDetails()
+    updateInspectedProps()
   })
 
   //
@@ -253,6 +267,7 @@ const exported = createInternalRoot(() => {
   const pluginData: PluginData = {
     handleComputationUpdates,
     handleSignalUpdates,
+    handlePropsUpdate,
     roots,
     serialisedRoots,
     rootsUpdates,

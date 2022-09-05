@@ -28,6 +28,7 @@ createInternalRoot(() => {
     roots,
     handleComputationUpdates,
     handleSignalUpdates,
+    handlePropsUpdate,
     setInspectedOwner,
     inspected,
     setInspectedSignal,
@@ -63,26 +64,23 @@ createInternalRoot(() => {
         }
         // toggled prop
         else {
-          const { key, selected } = payload
-          setInspectedProp(key, selected)
+          const { id, selected } = payload
+          setInspectedProp(id, selected)
         }
       }),
     )
 
     // diff the roots, and send only the changed roots (edited, deleted, added)
-    createEffect(() => {
-      postWindowMessage("GraphUpdate", rootsUpdates())
-    })
+    createEffect(() => postWindowMessage("GraphUpdate", rootsUpdates()))
 
     // send the computation updates
-    handleComputationUpdates(updates => {
-      postWindowMessage("ComputationUpdates", updates)
-    })
+    handleComputationUpdates(updates => postWindowMessage("ComputationUpdates", updates))
 
     // send the signal updates
-    handleSignalUpdates(updates => {
-      postWindowMessage("SignalUpdates", updates)
-    })
+    handleSignalUpdates(updates => postWindowMessage("SignalUpdates", updates))
+
+    // send the props updates
+    handlePropsUpdate(updates => postWindowMessage("PropsUpdate", updates))
 
     // send the focused owner details
     createEffect(() => {

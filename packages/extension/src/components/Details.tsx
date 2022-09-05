@@ -24,7 +24,7 @@ const DetailsContent: Component<{ details: Graph.OwnerDetails }> = ({ details })
       {componentProps && (
         <div class={styles.props}>
           <h2>Props {componentProps.proxy && "(dynamic)"}</h2>
-          <Entries of={componentProps.value}>
+          <Entries of={componentProps.record}>
             {(name, value) => (
               <ValueNode
                 name={name}

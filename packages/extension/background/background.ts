@@ -71,10 +71,11 @@ chrome.runtime.onConnect.addListener(port => {
   addCleanup(onPortMessage("ComputationUpdates", e => postRuntimeMessage("ComputationUpdates", e)))
 
   addCleanup(onPortMessage("SignalUpdates", e => postRuntimeMessage("SignalUpdates", e)))
+  addCleanup(onPortMessage("SignalValue", e => postRuntimeMessage("SignalValue", e)))
 
   addCleanup(onPortMessage("OwnerDetailsUpdate", e => postRuntimeMessage("OwnerDetailsUpdate", e)))
 
-  addCleanup(onPortMessage("SignalValue", e => postRuntimeMessage("SignalValue", e)))
+  addCleanup(onPortMessage("PropsUpdate", e => postRuntimeMessage("PropsUpdate", e)))
 
   addCleanup(onPortMessage("SetHoveredOwner", e => postRuntimeMessage("SetHoveredOwner", e)))
 

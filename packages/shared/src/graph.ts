@@ -172,15 +172,17 @@ export namespace Mapped {
     element: Many<HTMLElement>
   }
 
+  export type Props = {
+    proxy: boolean
+    record: Record<string, { signal: boolean; value: EncodedValue<boolean> }>
+  }
+
   export interface OwnerDetails {
     id: NodeID
     name: string
     type: NodeType
     path: NodeID[]
-    props?: {
-      proxy: boolean
-      value: Record<string, { signal: boolean; value: EncodedValue<boolean> }>
-    }
+    props?: Props
     signals: Signal[]
     /** for computations */
     value?: EncodedValue
@@ -221,6 +223,11 @@ export namespace Graph {
 
   export type Path = (Owner | typeof NOTFOUND)[]
 
+  export type Props = {
+    proxy: boolean
+    record: Record<string, { selected: boolean; signal: boolean; value: EncodedValue<boolean> }>
+  }
+
   export interface OwnerDetails {
     readonly id: NodeID
     readonly name: string
@@ -228,10 +235,7 @@ export namespace Graph {
     readonly path: Path
     readonly rawPath: NodeID[]
     readonly signals: Record<NodeID, Signal>
-    readonly props?: {
-      proxy: boolean
-      value: Record<string, { selected: boolean; signal: boolean; value: EncodedValue<boolean> }>
-    }
+    readonly props?: Props
     // TODO: more to come
   }
 }
