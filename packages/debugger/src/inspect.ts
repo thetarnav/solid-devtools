@@ -10,6 +10,8 @@ import {
   isSolidMemo,
   markNodeID,
   markNodesID,
+  markOwnerName,
+  markOwnerType,
 } from "./utils"
 
 export type SignalUpdateHandler = (nodeId: NodeID, value: unknown) => void
@@ -85,10 +87,9 @@ export function collectOwnerDetails(
   })
 
   const details: Mapped.OwnerDetails = {
-    // id, name and type are already set in mapOwner
-    id: owner.sdtId!,
-    name: owner.sdtName!,
-    type: owner.sdtType!,
+    id: markNodeID(owner),
+    name: markOwnerName(owner),
+    type: markOwnerType(owner),
     path,
     signals,
   }
