@@ -64,7 +64,7 @@ onWindowMessage("SendSelectedOwner", e => postPortMessage("SendSelectedOwner", e
 onPortMessage("PanelVisibility", e => postWindowMessage("PanelVisibility", e))
 onPortMessage("PanelClosed", e => postWindowMessage("PanelClosed", e))
 
-once(onPortMessage, "ForceUpdate", () => postWindowMessage("ForceUpdate"))
+onPortMessage("ForceUpdate", () => postWindowMessage("ForceUpdate"))
 
 onPortMessage("SetSelectedOwner", e => postWindowMessage("SetSelectedOwner", e))
 
