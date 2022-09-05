@@ -28,7 +28,9 @@ export const useDebugger: typeof API.useDebugger = () => ({
     rootId: null,
     signalMap: {},
   },
-  setSelectedSignal: () => ({} as any),
+  handlePropsUpdate: () => noop,
+  setInspectedSignal: () => null,
+  setInspectedProp: noop,
 })
 
 // update

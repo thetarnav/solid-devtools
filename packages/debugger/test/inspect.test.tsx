@@ -132,7 +132,7 @@ describe("collectOwnerDetails", () => {
         value: { type: ValueType.Element, value: { id: "0", name: "DIV" } },
         props: {
           proxy: false,
-          value: {
+          record: {
             count: { signal: false, value: { type: ValueType.Number, value: 123 } },
             children: {
               signal: true,
@@ -183,7 +183,7 @@ describe("collectOwnerDetails", () => {
         props: {
           // ! this should be true, don't know what's the reason. it's working in the browser
           proxy: false,
-          value: {
+          record: {
             onClick: { signal: true, value: { type: ValueType.Function, value: "onClick" } },
             role: { signal: true, value: { type: ValueType.String, value: "button" } },
           },
@@ -236,7 +236,7 @@ describe("collectOwnerDetails", () => {
         value: { type: ValueType.Element, value: { id: "0", name: "DIV" } },
         props: {
           proxy: false,
-          value: {
+          record: {
             count: { signal: false, value: { type: ValueType.Number, value: 123 } },
             children: {
               signal: true,
