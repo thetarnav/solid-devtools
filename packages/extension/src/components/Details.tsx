@@ -6,6 +6,7 @@ import {
   details,
   useUpdatedSignalsSelector,
   toggleSignalFocus,
+  togglePropFocus,
   setHoveredElement,
 } from "../state/details"
 import * as styles from "./details.css"
@@ -29,7 +30,9 @@ const DetailsContent: Component<{ details: Graph.OwnerDetails }> = ({ details })
                 name={name}
                 value={value().value}
                 type={value().signal ? NodeType.Signal : null}
-                selected={false}
+                selected={value().selected}
+                onClick={() => togglePropFocus(name)}
+                // onElementHover={() => togglePropFocus(name, )}
               />
             )}
           </Entries>

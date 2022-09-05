@@ -30,7 +30,8 @@ createInternalRoot(() => {
     handleSignalUpdates,
     setInspectedOwner,
     inspected,
-    setSelectedSignal,
+    setInspectedSignal,
+    setInspectedProp,
   } = useDebugger({ enabled })
 
   // update the graph only if the devtools panel is in view
@@ -53,9 +54,18 @@ createInternalRoot(() => {
     onCleanup(onWindowMessage("SetSelectedOwner", setInspectedOwner))
 
     onCleanup(
-      onWindowMessage("SetSelectedSignal", ({ id, selected }) => {
-        const value = setSelectedSignal({ id, selected })
-        if (value) postWindowMessage("SignalValue", { id, value })
+      onWindowMessage("ToggleInspectedValue", payload => {
+        // toggled signal
+        if (payload.type === "signal") {
+          const { id, selected } = payload
+          const value = setInspectedSignal(id, selected)
+          if (value) postWindowMessage("SignalValue", { id, value })
+        }
+        // toggled prop
+        else {
+          const { key, selected } = payload
+          setInspectedProp(key, selected)
+        }
       }),
     )
 

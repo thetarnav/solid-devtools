@@ -68,7 +68,7 @@ once(onPortMessage, "ForceUpdate", () => postWindowMessage("ForceUpdate"))
 
 onPortMessage("SetSelectedOwner", e => postWindowMessage("SetSelectedOwner", e))
 
-onPortMessage("SetSelectedSignal", e => postWindowMessage("SetSelectedSignal", e))
+onPortMessage("ToggleInspectedValue", e => postWindowMessage("ToggleInspectedValue", e))
 
 onPortMessage("HighlightElement", e => postWindowMessage("HighlightElement", e))
 

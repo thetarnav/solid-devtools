@@ -98,7 +98,10 @@ chrome.runtime.onConnect.addListener(port => {
   )
 
   addCleanup(onRuntimeMessage("SetSelectedOwner", e => postPortMessage("SetSelectedOwner", e)))
-  addCleanup(onRuntimeMessage("SetSelectedSignal", e => postPortMessage("SetSelectedSignal", e)))
+
+  addCleanup(
+    onRuntimeMessage("ToggleInspectedValue", e => postPortMessage("ToggleInspectedValue", e)),
+  )
 
   addCleanup(onRuntimeMessage("HighlightElement", e => postPortMessage("HighlightElement", e)))
 

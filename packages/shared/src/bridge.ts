@@ -17,6 +17,8 @@ export interface Messages {
   GraphUpdate: RootsUpdates
   ComputationUpdates: ComputationUpdate[]
   SignalUpdates: SignalUpdate[]
+  /** adapter -> devtools: signal deep value */
+  SignalValue: SignalUpdate
   ForceUpdate: void
   /** devtools -> adapter: request for details of owner details opened in the side-panel */
   SetSelectedOwner: null | { rootId: NodeID; nodeId: NodeID }
@@ -24,10 +26,10 @@ export interface Messages {
   SendSelectedOwner: { rootId: NodeID; nodeId: NodeID }
   /** adapter -> devtools: send updates to the owner details */
   OwnerDetailsUpdate: Mapped.OwnerDetails
-  /** devtools -> adapter: request for signal details — subscribe or unsubscribe */
-  SetSelectedSignal: { id: NodeID; selected: boolean }
-  /** adapter -> devtools: signal deep value */
-  SignalValue: SignalUpdate
+  /** devtools -> adapter: request for signal/prop details — subscribe or unsubscribe */
+  ToggleInspectedValue:
+    | { type: "signal"; id: NodeID; selected: boolean }
+    | { type: "prop"; key: NodeID; selected: boolean }
   /** devtools -> adapter: user hovered over component/element signal in devtools panel */
   HighlightElement: { rootId: NodeID; nodeId: NodeID } | string | null
   /** adapter -> devtools: send hovered (by the locator) owner to the extension */

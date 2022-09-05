@@ -86,7 +86,15 @@ function createDetails(rootId: NodeID, raw: Readonly<Mapped.OwnerDetails>): Grap
     rawPath: raw.path,
     signals,
   }
-  if ("props" in raw) details.props = raw.props
+  if ("props" in raw) {
+    details.props = {
+      proxy: raw.props!.proxy,
+      value: Object.entries(raw.props!.value).reduce((props, [propName, value]) => {
+        props[propName] = { ...value, selected: false }
+        return props
+      }, {} as NonNullable<Graph.OwnerDetails["props"]>["value"]),
+    }
+  }
   return details
 }
 
@@ -120,21 +128,19 @@ function reconcileDetails(
       }
     }
     for (const [key, newProp] of Object.entries(newProps)) {
-      if (!props[key]) props[key] = newProp
+      if (!props[key]) props[key] = { ...newProp, selected: false }
     }
   }
 }
 
-export type OwnerDetailsState = (
+export type OwnerDetailsState =
   | { focused: null; rootId: null; details: null }
   | { focused: Graph.Owner; rootId: NodeID; details: Graph.OwnerDetails | null }
-) & { selectedSignals: NodeID[] }
 
 const nullState: OwnerDetailsState = {
   focused: null,
   rootId: null,
   details: null,
-  selectedSignals: [],
 }
 
 const exports = createRoot(() => {
@@ -201,12 +207,16 @@ const exports = createRoot(() => {
   }
 
   /** variable for a callback in bridge.ts */
-  let onSignalSelect: ((id: NodeID, selected: boolean) => void) | undefined
-  const setOnSignalSelect = (fn: typeof onSignalSelect) => (onSignalSelect = fn)
+  let onInspectValue: ((payload: Messages["ToggleInspectedValue"]) => void) | undefined
+  const setOnInspectValue = (fn: typeof onInspectValue) => (onInspectValue = fn)
 
+  function togglePropFocus(key: string, selected?: boolean): void {
+    setState("details", "props", "value", key, "selected", p => (selected = selected ?? !p))
+    onInspectValue!({ type: "prop", key, selected: selected! })
+  }
   function toggleSignalFocus(id: NodeID, selected?: boolean) {
     setState("details", "signals", id, "selected", p => (selected = selected ?? !p))
-    onSignalSelect!(id, selected!)
+    onInspectValue!({ type: "signal", id, selected: selected! })
   }
 
   //
@@ -225,7 +235,8 @@ const exports = createRoot(() => {
     handleSignalUpdates,
     handleGraphUpdate,
     toggleSignalFocus,
-    setOnSignalSelect,
+    togglePropFocus,
+    setOnInspectValue,
     hoveredElement,
     setHoveredElement,
   }
@@ -241,7 +252,8 @@ export const {
   handleSignalUpdates,
   handleGraphUpdate,
   toggleSignalFocus,
-  setOnSignalSelect,
+  togglePropFocus,
+  setOnInspectValue,
   hoveredElement,
   setHoveredElement,
 } = exports

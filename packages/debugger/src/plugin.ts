@@ -83,10 +83,8 @@ export type PluginData = {
   readonly components: Accessor<Record<NodeID, Mapped.Component[]>>
   readonly setInspectedOwner: SetInspectedOwner
   readonly inspected: InspectedState
-  readonly setSelectedSignal: (payload: {
-    id: NodeID
-    selected: boolean
-  }) => EncodedValue<boolean> | null
+  readonly setInspectedSignal: (id: NodeID, selected: boolean) => EncodedValue<boolean> | null
+  readonly setInspectedProp: (key: NodeID, selected: boolean) => void
 }
 
 const exported = createInternalRoot(() => {
@@ -160,17 +158,24 @@ const exported = createInternalRoot(() => {
   const [inspected, setInspected] = createStaticStore(getNullInspected())
   let lastInspectedOwner: Solid.Owner | null = null
 
+  const inspectedSignals: Set<NodeID> = new Set()
+  const inspectedProps: Set<string> = new Set()
+
   const [handleSignalUpdates, pushSignalUpdate] = createBatchedUpdateEmitter<SignalUpdate>()
   const signalUpdateHandler: SignalUpdateHandler = untrackedCallback((id, value) => {
     if (!enabled() || !inspected.id) return
-    const isSelected = selectedSignalIds.has(id)
+    const isSelected = inspectedSignals.has(id)
     pushSignalUpdate({ id, value: encodeValue(value, isSelected, inspected.elementMap) })
   })
 
   const updateInspectedDetails = untrackedCallback(() => {
     const { owner, elementMap } = inspected
     if (!owner) return
-    const { details, signalMap } = collectOwnerDetails(owner, { elementMap, signalUpdateHandler })
+    const { details, signalMap } = collectOwnerDetails(owner, {
+      elementMap,
+      signalUpdateHandler,
+      inspectedProps,
+    })
     setInspected({ details, signalMap })
   })
 
@@ -201,22 +206,30 @@ const exported = createInternalRoot(() => {
 
     const owner = result.inspectedOwner
     const elementMap: Record<NodeID, HTMLElement> = {}
-    const { details, signalMap } = collectOwnerDetails(owner, { elementMap, signalUpdateHandler })
+    inspectedProps.clear()
+    inspectedSignals.clear()
+    const { details, signalMap } = collectOwnerDetails(owner, {
+      elementMap,
+      signalUpdateHandler,
+      inspectedProps,
+    })
 
     setInspected({ id: nodeId, rootId, owner, details, signalMap, elementMap })
   })
 
-  const selectedSignalIds: Set<NodeID> = new Set()
-  const setSelectedSignal: PluginData["setSelectedSignal"] = untrackedCallback(
-    ({ id, selected }) => {
-      const { signalMap, elementMap } = inspected
-      const signal = signalMap[id] as Solid.Signal | undefined
-      if (!signal) return null
-      if (selected) selectedSignalIds.add(id)
-      else selectedSignalIds.delete(id)
-      return encodeValue(signal.value, selected, elementMap)
-    },
-  )
+  const setInspectedSignal: PluginData["setInspectedSignal"] = untrackedCallback((id, selected) => {
+    const { signalMap, elementMap } = inspected
+    const signal = signalMap[id] as Solid.Signal | undefined
+    if (!signal) return null
+    if (selected) inspectedSignals.add(id)
+    else inspectedSignals.delete(id)
+    return encodeValue(signal.value, selected, elementMap)
+  })
+  const setInspectedProp: PluginData["setInspectedProp"] = untrackedCallback((key, selected) => {
+    if (selected) inspectedProps.add(key)
+    else inspectedProps.delete(key)
+    updateInspectedDetails()
+  })
 
   //
   // Computation updates:
@@ -248,7 +261,8 @@ const exported = createInternalRoot(() => {
     forceTriggerUpdate,
     setInspectedOwner,
     inspected,
-    setSelectedSignal,
+    setInspectedSignal,
+    setInspectedProp,
   }
   function useDebugger(options: {
     enabled?: Accessor<boolean>

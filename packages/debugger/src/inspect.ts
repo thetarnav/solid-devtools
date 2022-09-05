@@ -50,6 +50,7 @@ export function clearOwnerObservers(owner: Solid.Owner): void {
 export function collectOwnerDetails(
   owner: Solid.Owner,
   config: {
+    inspectedProps: Set<string>
     elementMap: Record<NodeID, HTMLElement>
     signalUpdateHandler: SignalUpdateHandler
   },
@@ -57,7 +58,7 @@ export function collectOwnerDetails(
   details: Mapped.OwnerDetails
   signalMap: Record<NodeID, Solid.Signal>
 } {
-  const { elementMap, signalUpdateHandler } = config
+  const { elementMap, signalUpdateHandler, inspectedProps } = config
   const signalMap: Record<NodeID, Solid.Signal> = {}
 
   // Set globals
@@ -103,14 +104,16 @@ export function collectOwnerDetails(
       const { props } = owner
       const proxy = !!(props as any)[$PROXY]
       const value = Object.entries(Object.getOwnPropertyDescriptors(props)).reduce(
-        (value, [key, descriptor]) => {
-          value[key] = {
+        (record, [key, descriptor]) => {
+          const value = descriptor.get?.() ?? descriptor.value
+          const deep = inspectedProps.has(key)
+          record[key] = {
             signal: proxy || "get" in descriptor,
-            value: encodeValue(descriptor.get?.() ?? descriptor.value, false, elementMap),
+            value: encodeValue(value, deep, elementMap),
           }
-          return value
+          return record
         },
-        {} as Record<string, { signal: boolean; value: EncodedValue<false> }>,
+        {} as Record<string, { signal: boolean; value: EncodedValue<boolean> }>,
       )
       details.props = { proxy, value }
     }

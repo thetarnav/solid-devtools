@@ -179,7 +179,7 @@ export namespace Mapped {
     path: NodeID[]
     props?: {
       proxy: boolean
-      value: Record<string, { signal: boolean; value: EncodedValue<false> }>
+      value: Record<string, { signal: boolean; value: EncodedValue<boolean> }>
     }
     signals: Signal[]
     /** for computations */
@@ -228,7 +228,10 @@ export namespace Graph {
     readonly path: Path
     readonly rawPath: NodeID[]
     readonly signals: Record<NodeID, Signal>
-    readonly props?: Mapped.OwnerDetails["props"]
+    readonly props?: {
+      proxy: boolean
+      value: Record<string, { selected: boolean; signal: boolean; value: EncodedValue<boolean> }>
+    }
     // TODO: more to come
   }
 }

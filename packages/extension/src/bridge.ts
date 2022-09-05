@@ -107,7 +107,5 @@ createRoot(() => {
   })
 
   // toggle selected signals
-  Details.setOnSignalSelect((id, selected) => {
-    postRuntimeMessage("SetSelectedSignal", { id, selected })
-  })
+  Details.setOnInspectValue(payload => postRuntimeMessage("ToggleInspectedValue", payload))
 })
