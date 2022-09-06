@@ -3,6 +3,7 @@ import { Solid } from "@solid-devtools/shared/graph"
 import { UNNAMED } from "@solid-devtools/shared/variables"
 import * as API from "./index"
 import { createRoot } from "solid-js"
+import { ElementMap } from "@solid-devtools/shared/serialize"
 
 export { createUnownedRoot } from "./index"
 
@@ -22,7 +23,7 @@ export const useDebugger: typeof API.useDebugger = () => ({
   setInspectedOwner: noop,
   inspected: {
     details: null,
-    elementMap: {},
+    elementMap: new ElementMap(),
     id: null,
     owner: null,
     rootId: null,

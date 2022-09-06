@@ -1,4 +1,4 @@
-import { getOwner, NodeID, NodeType, Solid } from "@solid-devtools/shared/graph"
+import { getOwner, NodeType, Solid } from "@solid-devtools/shared/graph"
 import { ValueType } from "@solid-devtools/shared/serialize"
 import {
   createComputed,
@@ -13,6 +13,9 @@ import type * as API from "../src/inspect"
 const getModule = (): typeof API.collectOwnerDetails =>
   require("../src/inspect").collectOwnerDetails
 
+const getElementsMap = (): import("@solid-devtools/shared/serialize").ElementMap =>
+  new (require("@solid-devtools/shared/serialize").ElementMap)()
+
 describe("collectOwnerDetails", () => {
   beforeEach(() => {
     delete (window as any).Solid$$
@@ -26,7 +29,7 @@ describe("collectOwnerDetails", () => {
 
       let owner!: Solid.Owner
       const div = document.createElement("div")
-      const elementMap: Record<NodeID, HTMLElement> = {}
+      const elementMap = getElementsMap()
 
       createComputed(
         () => {
@@ -86,9 +89,7 @@ describe("collectOwnerDetails", () => {
       expect(signalMap["2"].sdtId).toBe("2")
       expect(signalMap["3"].sdtId).toBe("3")
 
-      expect(Object.keys(elementMap).length).toBe(1)
-      expect(elementMap).toHaveProperty("0")
-      expect(elementMap["0"]).toBe(div)
+      expect(elementMap.get("0")).toBe(div)
 
       dispose()
     }))
@@ -97,7 +98,7 @@ describe("collectOwnerDetails", () => {
     const collectOwnerDetails = getModule()
 
     createRoot(dispose => {
-      let elementMap: Record<NodeID, HTMLElement> = {}
+      let elementMap = getElementsMap()
 
       let owner!: Solid.Owner
       const TestComponent = (props: {
@@ -133,28 +134,21 @@ describe("collectOwnerDetails", () => {
         props: {
           proxy: false,
           record: {
-            count: { signal: false, value: { type: ValueType.Number, value: 123 } },
-            children: {
-              signal: true,
-              value: { type: ValueType.Element, value: { id: "1", name: "BUTTON" } },
-            },
-            nested: { signal: false, value: { type: ValueType.Object, value: 2 } },
+            count: { type: ValueType.Number, value: 123 },
+            children: { type: ValueType.Getter, value: "children" },
+            nested: { type: ValueType.Object, value: 2 },
           },
         },
       })
 
-      expect(Object.keys(elementMap).length).toBe(2)
-      expect(elementMap).toHaveProperty("0")
-      expect(elementMap).toHaveProperty("1")
-      expect(elementMap["0"]).toBeInstanceOf(HTMLDivElement)
-      expect(elementMap["1"]).toBeInstanceOf(HTMLButtonElement)
+      expect(elementMap.get("0")).toBeInstanceOf(HTMLDivElement)
     })
   })
 
   it("dynamic component props", () =>
     createRoot(dispose => {
       const collectOwnerDetails = getModule()
-      let elementMap: Record<NodeID, HTMLElement> = {}
+      let elementMap = getElementsMap()
 
       let owner!: Solid.Owner
       const Button = (props: JSX.ButtonHTMLAttributes<HTMLButtonElement>) => {
@@ -184,15 +178,13 @@ describe("collectOwnerDetails", () => {
           // ! this should be true, don't know what's the reason. it's working in the browser
           proxy: false,
           record: {
-            onClick: { signal: true, value: { type: ValueType.Function, value: "onClick" } },
-            role: { signal: true, value: { type: ValueType.String, value: "button" } },
+            onClick: { type: ValueType.Getter, value: "onClick" },
+            role: { type: ValueType.Getter, value: "role" },
           },
         },
       })
 
-      expect(Object.keys(elementMap).length).toBe(1)
-      expect(elementMap).toHaveProperty("0")
-      expect(elementMap["0"]).toBeInstanceOf(HTMLButtonElement)
+      expect(elementMap.get("0")).toBeInstanceOf(HTMLButtonElement)
 
       dispose()
     }))
@@ -201,7 +193,7 @@ describe("collectOwnerDetails", () => {
     const collectOwnerDetails = getModule()
 
     createRoot(dispose => {
-      let elementMap: Record<NodeID, HTMLElement> = {}
+      let elementMap = getElementsMap()
 
       let owner!: Solid.Owner
       const TestComponent = (props: {
@@ -237,31 +229,21 @@ describe("collectOwnerDetails", () => {
         props: {
           proxy: false,
           record: {
-            count: { signal: false, value: { type: ValueType.Number, value: 123 } },
-            children: {
-              signal: true,
-              value: { type: ValueType.Element, value: { id: "1", name: "BUTTON" } },
-            },
+            count: { type: ValueType.Number, value: 123 },
+            children: { type: ValueType.Getter, value: "children" },
             nested: {
-              signal: false,
-              value: {
-                type: ValueType.Object,
-                value: 2,
-                children: {
-                  foo: { type: ValueType.Number, value: 1 },
-                  bar: { type: ValueType.String, value: "2" },
-                },
+              type: ValueType.Object,
+              value: 2,
+              children: {
+                foo: { type: ValueType.Number, value: 1 },
+                bar: { type: ValueType.String, value: "2" },
               },
             },
           },
         },
       })
 
-      expect(Object.keys(elementMap).length).toBe(2)
-      expect(elementMap).toHaveProperty("0")
-      expect(elementMap).toHaveProperty("1")
-      expect(elementMap["0"]).toBeInstanceOf(HTMLDivElement)
-      expect(elementMap["1"]).toBeInstanceOf(HTMLButtonElement)
+      expect(elementMap.get("0")).toBeInstanceOf(HTMLDivElement)
     })
   })
 })
