@@ -80,13 +80,10 @@ function reconcileProps(proxy: Graph.Props, raw: Mapped.Props): void {
   for (const [key, prop] of Object.entries(record)) {
     const newProp = newRecord[key]
     if (!newProp) delete record[key]
-    else {
-      prop.signal = newProp.signal
-      reconcileValue(prop.value, newProp.value)
-    }
+    else reconcileValue(prop.value, newProp)
   }
   for (const [key, newProp] of Object.entries(newRecord)) {
-    if (!record[key]) record[key] = { ...newProp, selected: false }
+    if (!record[key]) record[key] = { value: newProp, selected: false }
   }
 }
 
@@ -108,7 +105,7 @@ function createDetails(rootId: NodeID, raw: Readonly<Mapped.OwnerDetails>): Grap
     details.props = {
       proxy: raw.props.proxy,
       record: Object.entries(raw.props.record).reduce((props, [propName, value]) => {
-        props[propName] = { ...value, selected: false }
+        props[propName] = { value, selected: false }
         return props
       }, {} as Graph.Props["record"]),
     }
@@ -208,11 +205,14 @@ const exports = createRoot(() => {
     })
   }
 
-  function handlePropsUpdate(props: Mapped.Props) {
-    setState("details", "props", p =>
-      p ? produce((proxy: Graph.Props) => reconcileProps(proxy, props))(p) : p,
+  const handlePropsUpdate = untrackedCallback((props: Mapped.Props) => {
+    if (!details() || !details()!.props) return
+    setState(
+      "details",
+      "props",
+      produce(proxy => reconcileProps(proxy!, props)),
     )
-  }
+  })
 
   /** variable for a callback in bridge.ts */
   let onInspectValue: ((payload: Messages["ToggleInspectedValue"]) => void) | undefined
@@ -232,6 +232,10 @@ const exports = createRoot(() => {
   //
   const [hoveredElement, setHoveredElement] = createSignal<string | null>(null)
 
+  function toggleHoveredElement(id: NodeID, selected?: boolean) {
+    setHoveredElement(p => (p === id ? (selected ? id : null) : selected ? id : p))
+  }
+
   return {
     focused,
     focusedRootId,
@@ -247,7 +251,7 @@ const exports = createRoot(() => {
     togglePropFocus,
     setOnInspectValue,
     hoveredElement,
-    setHoveredElement,
+    toggleHoveredElement,
   }
 })
 export const {
@@ -265,5 +269,5 @@ export const {
   togglePropFocus,
   setOnInspectValue,
   hoveredElement,
-  setHoveredElement,
+  toggleHoveredElement,
 } = exports

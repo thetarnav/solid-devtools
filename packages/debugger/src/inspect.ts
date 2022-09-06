@@ -1,5 +1,5 @@
 import { Mapped, NodeID, Solid, NodeType } from "@solid-devtools/shared/graph"
-import { encodeValue } from "@solid-devtools/shared/serialize"
+import { ElementMap, encodeValue, ValueType } from "@solid-devtools/shared/serialize"
 import { $PROXY } from "solid-js"
 import { observeValueUpdate, removeValueUpdateObserver } from "./update"
 import {
@@ -16,16 +16,8 @@ import {
 
 export type SignalUpdateHandler = (nodeId: NodeID, value: unknown) => void
 
-export type WalkerSelectedResult = (
-  | { details: Mapped.OwnerDetails; owner: Solid.Owner }
-  | { details: null; owner: null }
-) & {
-  signalMap: Record<NodeID, Solid.Signal>
-  elementMap: Record<NodeID, HTMLElement>
-}
-
 // Globals set before collecting the owner details
-let $elementMap!: Record<NodeID, HTMLElement>
+let $elementMap!: ElementMap
 let $signalMap!: Record<NodeID, Solid.Signal>
 
 const INSPECTOR = Symbol("inspector")
@@ -51,7 +43,7 @@ export function clearOwnerObservers(owner: Solid.Owner): void {
 
 export function encodeComponentProps(
   owner: Solid.Owner,
-  config: { inspectedProps: Set<string>; elementMap: Record<NodeID, HTMLElement> },
+  config: { inspectedProps: Set<string>; elementMap: ElementMap },
 ): Mapped.Props | null {
   if (!isSolidComponent(owner)) return null
   const { elementMap, inspectedProps } = config
@@ -59,12 +51,10 @@ export function encodeComponentProps(
   const proxy = !!(props as any)[$PROXY]
   const record = Object.entries(Object.getOwnPropertyDescriptors(props)).reduce(
     (record, [key, descriptor]) => {
-      const value = descriptor.get?.() ?? descriptor.value
-      const deep = inspectedProps.has(key)
-      record[key] = {
-        signal: proxy || "get" in descriptor,
-        value: encodeValue(value, deep, elementMap),
-      }
+      record[key] =
+        "get" in descriptor
+          ? { type: ValueType.Getter, value: key }
+          : encodeValue(descriptor.value, inspectedProps.has(key), elementMap)
       return record
     },
     {} as Mapped.Props["record"],
@@ -76,7 +66,7 @@ export function collectOwnerDetails(
   owner: Solid.Owner,
   config: {
     inspectedProps: Set<string>
-    elementMap: Record<NodeID, HTMLElement>
+    elementMap: ElementMap
     signalUpdateHandler: SignalUpdateHandler
   },
 ): {

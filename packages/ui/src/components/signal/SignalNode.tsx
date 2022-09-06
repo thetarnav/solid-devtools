@@ -9,7 +9,6 @@ import {
   Match,
   onCleanup,
   ParentComponent,
-  Setter,
   Show,
   splitProps,
   Switch,
@@ -66,6 +65,9 @@ const BooleanValuePreview: ValueComponent<ValueType.Boolean> = props => (
 const FunctionValuePreview: ValueComponent<ValueType.Function> = props => (
   <span class={styles.ValueFunction}>{props.value ? `f ${props.value}()` : "function()"}</span>
 )
+const GetterValuePreview: ValueComponent<ValueType.Getter> = props => (
+  <span class={styles.ValueFunction}>get {props.value}()</span>
+)
 
 const NullableValuePreview: Component<{ value: null | undefined }> = props => (
   <span class={styles.Nullable}>{props.value === null ? "null" : "undefined"}</span>
@@ -79,9 +81,9 @@ const InstanceValuePreview: ValueComponent<ValueType.Instance> = props => (
   <span class={styles.baseValue}>{props.value}</span>
 )
 
-export type OnElementHover = (elementId: NodeID, hovered: boolean) => void
+export type ToggleElementHover = (elementId: NodeID, hovered?: boolean) => void
 
-const ElementHoverContext = createContext<OnElementHover>()
+const ElementHoverContext = createContext<ToggleElementHover>()
 
 const ElementValuePreview: ValueComponent<ValueType.Element> = props => {
   const onHover = useContext(ElementHoverContext)
@@ -192,6 +194,8 @@ const ValuePreview: Component<{ value: EncodedValue<boolean> }> = props =>
         return <ObjectValuePreview {...props.value} />
       case ValueType.Function:
         return <FunctionValuePreview value={props.value.value} />
+      case ValueType.Getter:
+        return <GetterValuePreview value={props.value.value} />
       case ValueType.Null:
         return <NullableValuePreview value={null} />
       case ValueType.Undefined:
@@ -287,7 +291,7 @@ export const ValueNode: Component<{
   selected: boolean
   updated?: boolean
   onClick?: VoidFunction
-  onElementHover?: OnElementHover
+  onElementHover?: ToggleElementHover
 }> = props => {
   return (
     <ValueRow selected={props.selected} onClick={props.onClick}>
@@ -306,7 +310,7 @@ export const ValueNode: Component<{
 export type SignalContextState = {
   useUpdatedSelector: (id: NodeID) => Accessor<boolean>
   toggleSignalFocus: (signal: NodeID, focused?: boolean) => void
-  setHoveredElement: Setter<string | null>
+  toggleHoveredElement: ToggleElementHover
 }
 
 const SignalContext = createContext<SignalContextState>()
@@ -321,7 +325,7 @@ const useSignalContext = (): SignalContextState => {
 
 export const SignalNode: Component<{ signal: Graph.Signal }> = ({ signal }) => {
   const { type, id, name } = signal
-  const { useUpdatedSelector, toggleSignalFocus, setHoveredElement } = useSignalContext()
+  const { useUpdatedSelector, toggleSignalFocus, toggleHoveredElement } = useSignalContext()
 
   const isUpdated = useUpdatedSelector(id)
 
@@ -333,7 +337,7 @@ export const SignalNode: Component<{ signal: Graph.Signal }> = ({ signal }) => {
       selected={signal.selected}
       updated={isUpdated()}
       onClick={() => toggleSignalFocus(id)}
-      onElementHover={(id, hovered) => setHoveredElement(hovered ? id : p => (p === id ? null : p))}
+      onElementHover={toggleHoveredElement}
     />
   )
 }

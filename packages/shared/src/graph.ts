@@ -174,7 +174,7 @@ export namespace Mapped {
 
   export type Props = {
     proxy: boolean
-    record: Record<string, { signal: boolean; value: EncodedValue<boolean> }>
+    record: Record<string, EncodedValue<boolean>>
   }
 
   export interface OwnerDetails {
@@ -225,7 +225,7 @@ export namespace Graph {
 
   export type Props = {
     proxy: boolean
-    record: Record<string, { selected: boolean; signal: boolean; value: EncodedValue<boolean> }>
+    record: Record<string, { selected: boolean; value: EncodedValue<boolean> }>
   }
 
   export interface OwnerDetails {

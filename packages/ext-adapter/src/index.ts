@@ -143,7 +143,7 @@ createInternalRoot(() => {
         }
         // highlight element
         else {
-          const element = inspected.elementMap[payload]
+          const element = inspected.elementMap.get(payload)
           if (!element) return warn("No element found", payload)
           target = element
         }

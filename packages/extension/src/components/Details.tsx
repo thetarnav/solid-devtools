@@ -7,7 +7,7 @@ import {
   useUpdatedSignalsSelector,
   toggleSignalFocus,
   togglePropFocus,
-  setHoveredElement,
+  toggleHoveredElement,
 } from "../state/details"
 import * as styles from "./details.css"
 
@@ -29,10 +29,9 @@ const DetailsContent: Component<{ details: Graph.OwnerDetails }> = ({ details })
               <ValueNode
                 name={name}
                 value={value().value}
-                type={value().signal ? NodeType.Signal : null}
                 selected={value().selected}
                 onClick={() => togglePropFocus(name)}
-                // onElementHover={() => togglePropFocus(name, )}
+                onElementHover={toggleHoveredElement}
               />
             )}
           </Entries>
@@ -43,8 +42,8 @@ const DetailsContent: Component<{ details: Graph.OwnerDetails }> = ({ details })
         <SignalContextProvider
           value={{
             useUpdatedSelector: useUpdatedSignalsSelector,
-            toggleSignalFocus: toggleSignalFocus,
-            setHoveredElement,
+            toggleSignalFocus,
+            toggleHoveredElement,
           }}
         >
           <Signals each={Object.values(signals)} />

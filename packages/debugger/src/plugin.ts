@@ -12,7 +12,7 @@ import {
   ComputationUpdate,
   SignalUpdate,
 } from "@solid-devtools/shared/graph"
-import { EncodedValue, encodeValue } from "@solid-devtools/shared/serialize"
+import { EncodedValue, encodeValue, ElementMap } from "@solid-devtools/shared/serialize"
 import { createConsumers, untrackedCallback } from "@solid-devtools/shared/primitives"
 import { createBatchedUpdateEmitter, createInternalRoot } from "./utils"
 import { ComputationUpdateHandler } from "./walker"
@@ -46,7 +46,7 @@ export type SetInspectedOwner = (payload: { rootId: NodeID; nodeId: NodeID } | n
 export type InspectedState = Readonly<
   {
     signalMap: Record<NodeID, Solid.Signal>
-    elementMap: Record<NodeID, HTMLElement>
+    elementMap: ElementMap
   } & (
     | { id: null; rootId: null; owner: null; details: null }
     | { id: NodeID; rootId: NodeID; owner: Solid.Owner; details: Mapped.OwnerDetails }
@@ -59,7 +59,7 @@ const getNullInspected = (): InspectedState => ({
   owner: null,
   details: null,
   signalMap: {},
-  elementMap: {},
+  elementMap: new ElementMap(),
 })
 
 export type SignaledRoot = {
@@ -219,7 +219,7 @@ const exported = createInternalRoot(() => {
     if (!result || !result.inspectedOwner) return setInspected(getNullInspected())
 
     const owner = result.inspectedOwner
-    const elementMap: Record<NodeID, HTMLElement> = {}
+    const elementMap = new ElementMap()
     inspectedProps.clear()
     inspectedSignals.clear()
     const { details, signalMap } = collectOwnerDetails(owner, {
