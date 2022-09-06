@@ -21,33 +21,37 @@ const DetailsContent: Component<{ details: Graph.OwnerDetails }> = ({ details })
         </h1>
         <div class={styles.type}>{NodeType[type]}</div>
       </header>
-      {componentProps && (
-        <div class={styles.props}>
-          <h2>Props {componentProps.proxy && "(dynamic)"}</h2>
-          <Entries of={componentProps.record}>
-            {(name, value) => (
-              <ValueNode
-                name={name}
-                value={value().value}
-                selected={value().selected}
-                onClick={() => togglePropFocus(name)}
-                onElementHover={toggleHoveredElement}
-              />
-            )}
-          </Entries>
+      <div class={styles.content}>
+        {componentProps && (
+          <div>
+            <h2 class={styles.h2}>
+              Props {componentProps.proxy && <span class={styles.proxy}>proxy</span>}
+            </h2>
+            <Entries of={componentProps.record}>
+              {(name, value) => (
+                <ValueNode
+                  name={name}
+                  value={value().value}
+                  selected={value().selected}
+                  onClick={() => togglePropFocus(name)}
+                  onElementHover={toggleHoveredElement}
+                />
+              )}
+            </Entries>
+          </div>
+        )}
+        <div>
+          <h2 class={styles.h2}>Signals</h2>
+          <SignalContextProvider
+            value={{
+              useUpdatedSelector: useUpdatedSignalsSelector,
+              toggleSignalFocus,
+              toggleHoveredElement,
+            }}
+          >
+            <Signals each={Object.values(signals)} />
+          </SignalContextProvider>
         </div>
-      )}
-      <div>
-        <h2>Signals</h2>
-        <SignalContextProvider
-          value={{
-            useUpdatedSelector: useUpdatedSignalsSelector,
-            toggleSignalFocus,
-            toggleHoveredElement,
-          }}
-        >
-          <Signals each={Object.values(signals)} />
-        </SignalContextProvider>
       </div>
     </div>
   )

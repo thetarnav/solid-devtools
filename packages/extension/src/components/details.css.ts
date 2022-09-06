@@ -1,4 +1,4 @@
-import { spacing, color } from "@solid-devtools/ui/theme"
+import { spacing, color, rounded } from "@solid-devtools/ui/theme"
 import { style } from "@vanilla-extract/css"
 
 export const scrollWrapper = style({
@@ -21,20 +21,35 @@ export const h1 = style({
   fontSize: spacing[4],
   fontWeight: "bold",
 })
-
 export const id = style({
   fontSize: spacing[3],
   color: color.gray[500],
   fontWeight: 400,
   textTransform: "uppercase",
 })
-
 export const type = style({
-  fontSize: spacing[3],
   color: color.gray[500],
   fontWeight: 400,
 })
 
-export const props = style({
-  marginBottom: spacing[4],
+export const content = style({
+  display: "flex",
+  flexDirection: "column",
+  rowGap: spacing[4],
+})
+
+export const h2 = style({
+  color: color.gray[500],
+  marginBottom: spacing[1],
+})
+
+export const proxy = style({
+  paddingRight: spacing[1],
+  paddingLeft: spacing[1],
+  backgroundColor: color.cyan[100],
+  color: color.cyan[600],
+  textTransform: "uppercase",
+  fontWeight: 700,
+  fontSize: spacing[2.5],
+  ...rounded(),
 })
