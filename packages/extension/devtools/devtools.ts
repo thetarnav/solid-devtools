@@ -6,10 +6,10 @@ log("Devtools script working.")
 
 const { onRuntimeMessage, postRuntimeMessage } = createRuntimeMessanger()
 
-postRuntimeMessage("DevtoolsScriptConnected", chrome.devtools.inspectedWindow.tabId)
-
 // Create a connection to the background page
 chrome.runtime.connect({ name: DEVTOOLS_CONNECTION_NAME })
+
+postRuntimeMessage("DevtoolsScriptConnected", chrome.devtools.inspectedWindow.tabId)
 
 let panel: chrome.devtools.panels.ExtensionPanel | undefined
 
