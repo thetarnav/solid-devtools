@@ -33,12 +33,10 @@ declare module "solid-js/types/reactive/signal" {
     sdtId?: NodeID
     sdtName?: string
     sdtType?: NodeType
-    ownedRoots?: Set<Solid.Root>
   }
   interface Computation<Init, Next> {
     sdtId?: NodeID
     sdtType?: NodeType
-    ownedRoots?: Set<Solid.Root>
     onValueUpdate?: Record<symbol, ValueUpdateListener>
     onComputationUpdate?: VoidFunction
   }
@@ -64,9 +62,9 @@ export namespace Solid {
     owned: Computation[] | null
     owner: Owner | null
     sourceMap?: Record<string, Signal>
-    isDisposed?: boolean
     // Used by the debugger
-    sdtAttached?: true
+    isDisposed?: boolean
+    sdtAttachedTo?: Owner | null
     sdtContext?: DebuggerContext
     // Computation compatibility
     value?: undefined
@@ -117,7 +115,7 @@ export type ComputationUpdate = { rootId: NodeID; id: NodeID }
 
 export type RootsUpdates = {
   removed: NodeID[]
-  updated: Mapped.SRoot[]
+  updated: Mapped.Root[]
 }
 
 export type SignalUpdate = {
@@ -135,15 +133,8 @@ export type ValueUpdateListener = (newValue: unknown, oldValue: unknown) => void
 export namespace Mapped {
   export interface Root {
     id: NodeID
-    tree: Owner
-    // components is an array instead of an object to preserve the order (nesting) of the components,
-    // this helps the locator find the most nested component first
-    components: Component[]
-  }
-
-  /** serialised (without components) */
-  export interface SRoot {
-    id: NodeID
+    // sub-roots will have an owner
+    ownerId?: NodeID
     tree: Owner
   }
 

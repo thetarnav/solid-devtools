@@ -62,7 +62,6 @@
     "@solid-devtools/shared": "workspace:^0.7.2",
     "@solid-primitives/event-bus": "^0.1.2",
     "@solid-primitives/immutable": "^0.1.2",
-    "@solid-primitives/memo": "^1.0.2",
     "@solid-primitives/refs": "^0.3.2",
     "@solid-primitives/scheduled": "^1.0.1",
     "@solid-primitives/utils": "^3.0.2",

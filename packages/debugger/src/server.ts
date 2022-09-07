@@ -16,9 +16,7 @@ export const useDebugger: typeof API.useDebugger = () => ({
   forceTriggerUpdate: noop,
   handleComputationUpdates: () => noop,
   handleSignalUpdates: () => noop,
-  roots: () => ({}),
-  serialisedRoots: () => ({}),
-  rootsUpdates: () => ({ removed: [], updated: [] }),
+  handleStructureUpdates: () => noop,
   components: () => ({}),
   setInspectedOwner: noop,
   inspected: {

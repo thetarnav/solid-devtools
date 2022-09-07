@@ -5,7 +5,6 @@ export { useDebugger } from "./plugin"
 export type {
   InspectedState,
   SetInspectedOwner,
-  SignaledRoot,
   BatchComputationUpdatesHandler,
   PluginData,
 } from "./plugin"

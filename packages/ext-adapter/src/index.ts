@@ -24,11 +24,11 @@ createInternalRoot(() => {
 
   const {
     forceTriggerUpdate,
-    rootsUpdates,
-    roots,
+    components,
     handleComputationUpdates,
     handleSignalUpdates,
     handlePropsUpdate,
+    handleStructureUpdates,
     setInspectedOwner,
     inspected,
     setInspectedSignal,
@@ -70,8 +70,8 @@ createInternalRoot(() => {
       }),
     )
 
-    // diff the roots, and send only the changed roots (edited, deleted, added)
-    createEffect(() => postWindowMessage("GraphUpdate", rootsUpdates()))
+    // send the structure graph updates
+    handleStructureUpdates(updates => postWindowMessage("GraphUpdate", updates))
 
     // send the computation updates
     handleComputationUpdates(updates => postWindowMessage("ComputationUpdates", updates))
@@ -135,9 +135,7 @@ createInternalRoot(() => {
         // highlight component
         if (typeof payload === "object") {
           const { rootId, nodeId } = payload
-          const root = roots()[rootId]
-          if (!root) return warn("No root found", rootId)
-          const component = root.components().find(c => c.id === nodeId)
+          const component = components()[rootId]?.find(c => c.id === nodeId)
           if (!component) return warn("No component found", nodeId)
           target = { ...component, rootId }
         }
