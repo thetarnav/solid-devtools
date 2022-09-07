@@ -6,8 +6,8 @@ import {
   Scrollable,
   OwnerPath,
   ToggleButton,
-} from "@solid-devtools/ui"
-import * as Icon from "@solid-devtools/ui/icons"
+  Icon,
+} from "@/ui"
 import {
   graphs,
   toggleHoveredOwner,

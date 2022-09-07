@@ -26,8 +26,8 @@ import {
   ValueType,
 } from "@solid-devtools/shared/serialize"
 import clsx from "clsx"
-import * as Icon from "~/icons"
-import { color } from "~/theme"
+import { Icon } from "@/ui"
+import { color } from "@/ui/theme"
 import { Highlight } from "../highlight/Highlight"
 import * as styles from "./SignalNode.css"
 

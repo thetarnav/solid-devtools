@@ -1,4 +1,4 @@
-import { spacing, color, rounded } from "@solid-devtools/ui/theme"
+import { spacing, color, rounded } from "@/ui/theme"
 import { style } from "@vanilla-extract/css"
 
 export const scrollWrapper = style({

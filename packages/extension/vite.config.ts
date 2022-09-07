@@ -10,13 +10,11 @@ export default defineConfig({
   plugins: [solidPlugin(), vanillaExtractPlugin(), crx({ manifest })],
   resolve: {
     alias: {
+      "@/": `${__dirname}/src/`,
       // "@solid-devtools/shared": resolve(__dirname, "..", "shared", "src"),
       // "@solid-devtools/ui": path.resolve(__dirname, "..", "ui", "src"),
     },
   },
-  // optimizeDeps: {
-  //   include: ["@solid-primitives/props"],
-  // },
   define: {
     // need to insert the "" quotes manually, because vite just inserts the value as-is.
     __ADAPTER_VERSION__: `"${

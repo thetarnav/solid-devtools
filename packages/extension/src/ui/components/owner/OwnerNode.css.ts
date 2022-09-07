@@ -1,6 +1,6 @@
 import { createVar, style } from "@vanilla-extract/css"
 import { CSSVarFunction } from "@vanilla-extract/private"
-import { hexToRgb, insetX, insetY, rounded, theme, transition } from "~/theme"
+import { hexToRgb, insetX, insetY, rounded, theme, transition } from "@/ui/theme"
 
 const { spacing, color } = theme
 

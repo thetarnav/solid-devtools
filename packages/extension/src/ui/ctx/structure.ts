@@ -1,6 +1,6 @@
 import { Graph, NodeID } from "@solid-devtools/shared/graph"
-import { createContext, useContext } from "solid-js"
-import type { Accessor, ContextProviderComponent } from "solid-js/types/reactive/signal"
+import { createContext, useContext, Accessor } from "solid-js"
+import type { ContextProviderComponent } from "solid-js/types/reactive/signal"
 
 export type StructureContextState = {
   handleFocus: (owner: Graph.Owner | null) => void

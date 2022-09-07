@@ -1,7 +1,7 @@
 import { Component, Show } from "solid-js"
 import { Entries } from "@solid-primitives/keyed"
 import { NodeType, Graph } from "@solid-devtools/shared/graph"
-import { SignalContextProvider, Scrollable, Signals, ValueNode } from "@solid-devtools/ui"
+import { SignalContextProvider, Scrollable, Signals, ValueNode } from "@/ui"
 import {
   details,
   useUpdatedSignalsSelector,

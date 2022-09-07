@@ -1,7 +1,7 @@
 import { Component } from "solid-js"
 import { Graph } from "@solid-devtools/shared/graph"
 import { NOTFOUND } from "@solid-devtools/shared/variables"
-import * as Icon from "~/icons"
+import { Icon } from "@/ui"
 import * as styles from "./Path.css"
 
 export const OwnerPath: Component<{ path: Graph.Path }> = props => {

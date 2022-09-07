@@ -1,5 +1,5 @@
 import { style } from "@vanilla-extract/css"
-import { spacing, color, insetX } from "@solid-devtools/ui/theme"
+import { spacing, color, insetX } from "@/ui/theme"
 
 export const app = style({
   height: "100vh",

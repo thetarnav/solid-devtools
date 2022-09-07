@@ -1,5 +1,5 @@
 import { style } from "@vanilla-extract/css"
-import { centerChild, color, rounded, theme, transition } from "~/theme"
+import { centerChild, color, rounded, theme, transition } from "@/ui/theme"
 
 export const toggleButton = style({
   ...centerChild,

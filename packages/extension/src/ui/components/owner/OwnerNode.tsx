@@ -1,7 +1,7 @@
 import { For, JSX, onCleanup } from "solid-js"
 import { TransitionGroup, animateExit, animateEnter } from "@otonashixav/solid-flip"
 import { Graph, NodeType } from "@solid-devtools/shared/graph"
-import { useStructure } from "~/ctx/structure"
+import { useStructure } from "@/ui/ctx/structure"
 import * as styles from "./OwnerNode.css"
 import { Highlight } from "../highlight/Highlight"
 import { assignInlineVars } from "@vanilla-extract/dynamic"

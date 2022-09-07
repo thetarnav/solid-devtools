@@ -1,6 +1,6 @@
 import { style } from "@vanilla-extract/css"
-import { createHighlightStyles } from "~/mixins"
-import { centerChild, color, rounded, spacing, theme } from "~/theme"
+import { createHighlightStyles } from "@/ui/mixins"
+import { centerChild, color, rounded, spacing, theme } from "@/ui/theme"
 
 export const container = style({
   display: "flex",

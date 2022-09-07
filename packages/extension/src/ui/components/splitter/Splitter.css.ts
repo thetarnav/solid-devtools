@@ -1,6 +1,6 @@
 import { style, styleVariants, createVar } from "@vanilla-extract/css"
 import { CSSVarFunction } from "@vanilla-extract/private"
-import { centerChild, color, spacing } from "~/theme"
+import { centerChild, color, spacing } from "@/ui/theme"
 
 const minWidth = spacing[36]
 const splitWidth = spacing[0.5]
