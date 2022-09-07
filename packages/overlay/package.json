@@ -51,5 +51,5 @@
     "solid-meta": "^0.27.5",
     "twind": "^0.16.17"
   },
-  "packageManager": "pnpm@7.9.0"
+  "packageManager": "pnpm@7.11.0"
 }

@@ -41,5 +41,5 @@
     "solid-transition-group": "^0.0.10",
     "type-fest": "^2.19.0"
   },
-  "packageManager": "pnpm@7.9.0"
+  "packageManager": "pnpm@7.11.0"
 }

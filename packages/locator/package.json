@@ -77,5 +77,5 @@
   "optionalDependencies": {
     "@solid-devtools/transform": "^0.7.2"
   },
-  "packageManager": "pnpm@7.9.0"
+  "packageManager": "pnpm@7.11.0"
 }
