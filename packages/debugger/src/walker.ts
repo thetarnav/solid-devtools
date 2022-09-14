@@ -37,7 +37,7 @@ function mapOwner(owner: Solid.Owner): Mapped.Owner {
     name,
     type,
     children: owner.owned ? owner.owned.map(child => mapOwner(child)) : [],
-    sources: owner.sources ? owner.sources.length : 0,
+    // sources: owner.sources ? owner.sources.length : 0,
   }
 }
 
@@ -68,7 +68,7 @@ export function walkSolidTree(
 
   const root: Mapped.Root = { id: RootId, tree: mapOwner(owner) }
 
-  if (owner.sdtAttachedTo) root.ownerId = markNodeID(owner.sdtAttachedTo)
+  if (owner.sdtAttachedTo) root.attachedTo = markNodeID(owner.sdtAttachedTo)
 
   return { root, inspectedOwner: InspectedOwner, components: Components }
 }

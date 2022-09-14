@@ -1,12 +1,29 @@
 import { batch, createRoot, createSignal } from "solid-js"
 import { createStore, produce } from "solid-js/store"
-import { NodeID, RootsUpdates, Mapped, Graph } from "@solid-devtools/shared/graph"
+import { NodeID, RootsUpdates, Mapped, NodeType } from "@solid-devtools/shared/graph"
 import { createBoundSelector } from "@solid-devtools/shared/primitives"
-import { createUpdatedSelector } from "./utils"
+import { createUpdatedSelector } from "../utils"
 
-const NodeMap: Record<NodeID, Record<NodeID, Graph.Owner>> = {}
+export namespace Structure {
+  export interface Root {
+    readonly id: NodeID
+    // sub-roots will have an owner
+    readonly ownerId?: NodeID
+    readonly tree: Owner
+  }
 
-function disposeOwner(owner: Graph.Owner): void {
+  export interface Owner {
+    readonly id: NodeID
+    readonly name: string
+    readonly type: NodeType
+    readonly sources: number
+    readonly children: Owner[]
+  }
+}
+
+const NodeMap: Record<NodeID, Record<NodeID, Structure.Owner>> = {}
+
+function disposeOwner(owner: Structure.Owner): void {
   delete NodeMap[owner.id]
   owner.children.forEach(disposeOwner)
 }
@@ -18,7 +35,7 @@ function disposeAllNodes(): void {
 }
 
 // TODO: after graph virtualisation is implemented, rootId should precalculated for visible nodes
-export function findOwnerRootId(owner: Graph.Owner): NodeID {
+export function findOwnerRootId(owner: Structure.Owner): NodeID {
   for (const rootId in NodeMap) {
     const owners = NodeMap[rootId]
     for (const id in owners) {
@@ -28,7 +45,7 @@ export function findOwnerRootId(owner: Graph.Owner): NodeID {
   throw "ROOT_ID_NOT_FOUND"
 }
 
-export function findOwnerById(rootId: NodeID, id: NodeID): Graph.Owner | undefined {
+export function findOwnerById(rootId: NodeID, id: NodeID): Structure.Owner | undefined {
   return NodeMap[rootId][id]
 }
 
@@ -43,9 +60,9 @@ export function findOwnerById(rootId: NodeID, id: NodeID): Graph.Owner | undefin
  * maps the raw owner tree to be placed into the reactive graph store
  * this is for new branches – owners that just have been created
  */
-function mapNewOwner(rootId: NodeID, owner: Readonly<Mapped.Owner>): Graph.Owner {
+function mapNewOwner(rootId: NodeID, owner: Readonly<Mapped.Owner>): Structure.Owner {
   const { id } = owner
-  const node: Graph.Owner = {
+  const node: Structure.Owner = {
     ...owner,
     children: owner.children.map(child => mapNewOwner(rootId, child)),
   }
@@ -54,7 +71,7 @@ function mapNewOwner(rootId: NodeID, owner: Readonly<Mapped.Owner>): Graph.Owner
   return node
 }
 
-function mapNewRoot(rootId: NodeID, owner: Readonly<Mapped.Owner>): Graph.Owner {
+function mapNewRoot(rootId: NodeID, owner: Readonly<Mapped.Owner>): Structure.Owner {
   NodeMap[rootId] = {}
   return mapNewOwner(rootId, owner)
 }
@@ -66,7 +83,7 @@ function mapNewRoot(rootId: NodeID, owner: Readonly<Mapped.Owner>): Graph.Owner 
 function reconcileChildren(
   rootId: NodeID,
   newChildren: Mapped.Owner[],
-  children: Graph.Owner[],
+  children: Structure.Owner[],
 ): void {
   const length = children.length,
     newLength = newChildren.length,
@@ -74,7 +91,7 @@ function reconcileChildren(
 
   let i = 0,
     limit = childrenExtended ? length : newLength,
-    node: Graph.Owner,
+    node: Structure.Owner,
     mapped: Mapped.Owner
 
   for (; i < limit; i++) {
@@ -98,22 +115,22 @@ function reconcileChildren(
   }
 }
 
-function reconcileNode(rootId: NodeID, mapped: Mapped.Owner, node: Graph.Owner): void {
+function reconcileNode(rootId: NodeID, mapped: Mapped.Owner, node: Structure.Owner): void {
   reconcileChildren(rootId, mapped.children, node.children)
 }
 
 const exports = createRoot(() => {
-  const [graphs, setGraphs] = createStore<Graph.Root[]>([])
+  const [structure, setStructure] = createStore<Structure.Root[]>([])
 
   const [useComputationUpdatedSelector, addUpdatedComputations, clearUpdatedComputations] =
     createUpdatedSelector()
 
-  const removeRoot = (proxy: Graph.Root[], id: NodeID): void => {
+  const removeRoot = (proxy: Structure.Root[], id: NodeID): void => {
     const index = proxy.findIndex(e => e.id === id)
     proxy.splice(index, 1)
     delete NodeMap[id]
   }
-  const updateRoot = (proxy: Graph.Root[], { id, tree }: Mapped.SRoot): void => {
+  const updateRoot = (proxy: Structure.Root[], { id, tree }: Mapped.Root): void => {
     const root = proxy.find(r => r.id === id)
     // reconcile existing root
     if (root) reconcileNode(id, tree, root.tree)
@@ -124,7 +141,7 @@ const exports = createRoot(() => {
   function handleGraphUpdate({ removed, updated }: RootsUpdates) {
     batch(() => {
       clearUpdatedComputations()
-      setGraphs(
+      setStructure(
         produce(proxy => {
           removed.forEach(id => removeRoot(proxy, id))
           updated.forEach(root => updateRoot(proxy, root))
@@ -139,7 +156,7 @@ const exports = createRoot(() => {
 
   const NULL_HOVERED_STATE = { rootId: null, owner: null, sync: false } as const
   const [hovered, setHovered] = createSignal<
-    Readonly<{ rootId: NodeID; owner: Graph.Owner; sync: boolean }> | typeof NULL_HOVERED_STATE
+    Readonly<{ rootId: NodeID; owner: Structure.Owner; sync: boolean }> | typeof NULL_HOVERED_STATE
   >(NULL_HOVERED_STATE)
 
   const [useHoveredSelector] = createBoundSelector<NodeID | undefined, NodeID>(
@@ -153,7 +170,11 @@ const exports = createRoot(() => {
    * @param hovered `boolean`
    * @param sync should this change be synced to the bridge
    */
-  function toggleHoveredOwner(who: Graph.Owner | NodeID, hovered: boolean, sync: boolean): void {
+  function toggleHoveredOwner(
+    who: Structure.Owner | NodeID,
+    hovered: boolean,
+    sync: boolean,
+  ): void {
     setHovered(p => {
       if (typeof who === "string") {
         if (hovered) {
@@ -174,14 +195,14 @@ const exports = createRoot(() => {
   function resetGraph() {
     batch(() => {
       clearUpdatedComputations()
-      setGraphs([])
+      setStructure([])
       setHovered(NULL_HOVERED_STATE)
     })
     disposeAllNodes()
   }
 
   return {
-    graphs,
+    structure,
     handleGraphUpdate,
     resetGraph,
     handleComputationsUpdate,
@@ -192,7 +213,7 @@ const exports = createRoot(() => {
   }
 })
 export const {
-  graphs,
+  structure,
   handleGraphUpdate,
   resetGraph,
   handleComputationsUpdate,

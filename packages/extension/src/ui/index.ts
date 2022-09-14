@@ -9,5 +9,3 @@ export { OwnerPath } from "./components/owner/Path"
 export * from "./components/button/Button"
 
 export * as Icon from "./icons"
-
-export * from "./ctx/structure"

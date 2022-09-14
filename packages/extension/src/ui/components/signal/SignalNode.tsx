@@ -16,7 +16,7 @@ import {
   useContext,
 } from "solid-js"
 import { Entries } from "@solid-primitives/keyed"
-import { Graph, NodeID, NodeType } from "@solid-devtools/shared/graph"
+import { NodeID, NodeType } from "@solid-devtools/shared/graph"
 import {
   EncodedValue,
   EncodedValueOf,
@@ -28,6 +28,7 @@ import {
 import clsx from "clsx"
 import { Icon } from "@/ui"
 import { color } from "@/ui/theme"
+import { Inspector } from "@/state/inspector"
 import { Highlight } from "../highlight/Highlight"
 import * as styles from "./SignalNode.css"
 
@@ -268,7 +269,7 @@ const ValueRow: ParentComponent<{ selected?: boolean } & JSX.IntrinsicElements["
   )
 }
 
-export const Signals: Component<{ each: Graph.Signal[] }> = props => {
+export const Signals: Component<{ each: Inspector.Signal[] }> = props => {
   const sorted = createMemo(() =>
     props.each.slice().sort((a, b) => {
       if (a.type === b.type) return a.id > b.id ? 1 : -1
@@ -323,7 +324,7 @@ const useSignalContext = (): SignalContextState => {
   return ctx
 }
 
-export const SignalNode: Component<{ signal: Graph.Signal }> = ({ signal }) => {
+export const SignalNode: Component<{ signal: Inspector.Signal }> = ({ signal }) => {
   const { type, id, name } = signal
   const { useUpdatedSelector, toggleSignalFocus, toggleHoveredElement } = useSignalContext()
 

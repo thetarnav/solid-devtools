@@ -1,18 +1,51 @@
 import { Accessor, batch, createRoot, createSelector, createSignal, untrack } from "solid-js"
 import { createStore, produce } from "solid-js/store"
-import { Mapped, Graph, NodeID, SignalUpdate } from "@solid-devtools/shared/graph"
+import { Mapped, NodeID, NodeType, SignalUpdate } from "@solid-devtools/shared/graph"
 import { warn } from "@solid-devtools/shared/utils"
 import { NOTFOUND } from "@solid-devtools/shared/variables"
-import { findOwnerById, findOwnerRootId } from "./graph"
+import structure from "./structure"
+import type { Structure } from "./structure"
 import { arrayEquals, Mutable } from "@solid-primitives/utils"
 import { createUpdatedSelector } from "./utils"
 import { EncodedValue } from "@solid-devtools/shared/serialize"
 import { Messages } from "@solid-devtools/shared/bridge"
 import { untrackedCallback } from "@solid-devtools/shared/primitives"
 
+export namespace Inspector {
+  export type Signal = {
+    readonly type: NodeType.Signal | NodeType.Memo
+    readonly name: string
+    readonly id: NodeID
+    readonly observers: NodeID[]
+    readonly value: EncodedValue<boolean>
+    readonly selected: boolean
+  }
+
+  export type Path = (Structure.Node | typeof NOTFOUND)[]
+
+  export type Props = {
+    readonly proxy: boolean
+    readonly record: Record<
+      string,
+      { readonly selected: boolean; readonly value: EncodedValue<boolean> }
+    >
+  }
+
+  export interface Details {
+    readonly id: NodeID
+    readonly name: string
+    readonly type: NodeType
+    readonly path: Path
+    readonly rawPath: NodeID[]
+    readonly signals: Record<NodeID, Signal>
+    readonly props?: Props
+    // TODO: more to come
+  }
+}
+
 function reconcileSignals(
   newSignals: readonly Mapped.Signal[],
-  signals: Record<NodeID, Graph.Signal>,
+  signals: Record<NodeID, Inspector.Signal>,
 ): void {
   if (!newSignals.length && !signals.length) return
   const intersection: Mapped.Signal[] = []
@@ -62,17 +95,19 @@ function reconcileValue(proxy: EncodedValue<boolean>, next: EncodedValue<boolean
   else delete proxy.children
 }
 
-function createSignalNode(raw: Readonly<Mapped.Signal>): Graph.Signal {
+function createSignalNode(raw: Readonly<Mapped.Signal>): Inspector.Signal {
   return { ...raw, selected: false }
 }
 
-function mapRawPath(rootId: NodeID, rawPath: readonly NodeID[]): Graph.Path {
-  const path = rawPath.map(id => findOwnerById(rootId, id) ?? NOTFOUND)
-  path.push(untrack(focused)!)
-  return path
+function mapRawPath(rootId: NodeID, rawPath: readonly NodeID[]): Inspector.Path {
+  // TODO
+  // const path = rawPath.map(id => findOwnerById(rootId, id) ?? NOTFOUND)
+  // path.push(untrack(focused)!)
+  // return path
+  return []
 }
 
-function reconcileProps(proxy: Graph.Props, raw: Mapped.Props): void {
+function reconcileProps(proxy: Mutable<Inspector.Props>, raw: Mapped.Props): void {
   const record = proxy.record
   const newRecord = raw.record
   proxy.proxy = raw.proxy
@@ -87,13 +122,13 @@ function reconcileProps(proxy: Graph.Props, raw: Mapped.Props): void {
   }
 }
 
-function createDetails(rootId: NodeID, raw: Readonly<Mapped.OwnerDetails>): Graph.OwnerDetails {
+function createDetails(rootId: NodeID, raw: Readonly<Mapped.OwnerDetails>): Inspector.Details {
   const signals = raw.signals.reduce((signals, signal) => {
     signals[signal.id] = createSignalNode(signal)
     return signals
-  }, {} as Graph.OwnerDetails["signals"])
+  }, {} as Inspector.Details["signals"])
   const path = mapRawPath(rootId, raw.path)
-  const details: Mutable<Graph.OwnerDetails> = {
+  const details: Mutable<Inspector.Details> = {
     id: raw.id,
     name: raw.name,
     type: raw.type,
@@ -107,7 +142,7 @@ function createDetails(rootId: NodeID, raw: Readonly<Mapped.OwnerDetails>): Grap
       record: Object.entries(raw.props.record).reduce((props, [propName, value]) => {
         props[propName] = { value, selected: false }
         return props
-      }, {} as Graph.Props["record"]),
+      }, {} as Inspector.Props["record"]),
     }
   }
   return details
@@ -115,7 +150,7 @@ function createDetails(rootId: NodeID, raw: Readonly<Mapped.OwnerDetails>): Grap
 
 function reconcileDetails(
   rootId: NodeID,
-  proxy: Mutable<Graph.OwnerDetails>,
+  proxy: Mutable<Inspector.Details>,
   raw: Readonly<Mapped.OwnerDetails>,
 ): void {
   // update path
@@ -134,7 +169,7 @@ function reconcileDetails(
 
 export type OwnerDetailsState =
   | { focused: null; rootId: null; details: null }
-  | { focused: Graph.Owner; rootId: NodeID; details: Graph.OwnerDetails | null }
+  | { focused: Structure.Node; rootId: NodeID; details: Inspector.Details | null }
 
 const nullState: OwnerDetailsState = {
   focused: null,
@@ -148,24 +183,25 @@ const exports = createRoot(() => {
     focusedRootId = () => state.rootId,
     details = () => state.details
 
-  const ownerSelectedSelector = createSelector<Graph.Owner | null, Graph.Owner>(focused)
-  const useOwnerSelectedSelector = (owner: Graph.Owner): Accessor<boolean> =>
+  const ownerSelectedSelector = createSelector<Structure.Node | null, Structure.Node>(focused)
+  const useOwnerSelectedSelector = (owner: Structure.Node): Accessor<boolean> =>
     ownerSelectedSelector.bind(void 0, owner)
 
-  const setSelectedNode: (data: Graph.Owner | null | Messages["SendSelectedOwner"]) => void =
+  const setSelectedNode: (data: Structure.Node | null | Messages["SendSelectedOwner"]) => void =
     untrackedCallback(data => {
-      if (!data) setState({ ...nullState })
-      else if ("name" in data) {
-        // compare ids because state.focused is a proxy
-        if (!state.focused || data.id !== state.focused.id)
-          setState({ focused: data, rootId: findOwnerRootId(data), details: null })
-      } else {
-        const { nodeId, rootId } = data
-        const owner = findOwnerById(rootId, nodeId)
-        // compare ids because state.focused is a proxy
-        if (owner && (!state.focused || owner.id !== state.focused.id))
-          setState({ focused: owner, rootId, details: null })
-      }
+      // TODO
+      // if (!data) setState({ ...nullState })
+      // else if ("name" in data) {
+      //   // compare ids because state.focused is a proxy
+      //   if (!state.focused || data.id !== state.focused.id)
+      //     setState({ focused: data, rootId: findOwnerRootId(data), details: null })
+      // } else {
+      //   const { nodeId, rootId } = data
+      //   const owner = findOwnerById(rootId, nodeId)
+      //   // compare ids because state.focused is a proxy
+      //   if (owner && (!state.focused || owner.id !== state.focused.id))
+      //     setState({ focused: owner, rootId, details: null })
+      // }
     })
 
   function updateDetails(raw: Mapped.OwnerDetails): void {
@@ -175,7 +211,7 @@ const exports = createRoot(() => {
     setState("details", prev =>
       prev === null
         ? createDetails(rootId, raw)
-        : produce((proxy: Mutable<Graph.OwnerDetails>) => reconcileDetails(rootId, proxy, raw))(
+        : produce((proxy: Mutable<Inspector.Details>) => reconcileDetails(rootId, proxy, raw))(
             prev,
           ),
     )

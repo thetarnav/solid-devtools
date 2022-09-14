@@ -62,7 +62,7 @@ export function createGraphRoot(owner: Solid.Root): void {
       updateRoot(result.root, result.components)
       return result
     })
-    const triggerRootUpdate = throttle(forceRootUpdate, 350)
+    const triggerRootUpdate = throttle(forceRootUpdate, 300)
 
     RootMap[rootId] = forceRootUpdate
 
@@ -110,6 +110,7 @@ export function attachDebugger(_owner: Core.Owner = getOwner()!): void {
 
     // under an existing debugger root
     if (ctx) {
+      const rootId = ctx.rootId
       ctx.triggerRootUpdate()
       let parent = findClosestAliveParent(root)!
       if (!parent.owner) return warn("PARENT_SHOULD_BE_ALIVE")

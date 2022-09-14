@@ -4,13 +4,13 @@ import { hexToRgb, insetX, insetY, rounded, theme, transition } from "@/ui/theme
 
 const { spacing, color } = theme
 
+const shadowOpacity: CSSVarFunction = createVar()
+export const levelVar: CSSVarFunction = createVar()
+
 export const container = style({
   backgroundColor: hexToRgb(color.cyan[200], 0.05),
   color: color.black,
 })
-
-const shadowOpacity: CSSVarFunction = createVar()
-export const levelVar: CSSVarFunction = createVar()
 
 export const header = {
   contailer: style({
@@ -64,7 +64,7 @@ export const header = {
   }),
 }
 
-export const childrenContainer = style({
+export const children = style({
   position: "relative",
   ...transition("opacity", theme.duration[500]),
   ":before": {

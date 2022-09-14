@@ -93,7 +93,7 @@ const [handleStructureUpdates, pushStructureUpdate] = (() => {
     emitStructureUpdate({ updated, removed: [...removedIds] })
     updates.length = 0
     removedIds.clear()
-  })
+  }, 50)
   const pushStructureUpdate = (update: RootUpdate) => {
     if ("removed" in update) removedIds.add(update.removed)
     else if (removedIds.has(update.updated.id)) return

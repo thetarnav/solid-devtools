@@ -2,8 +2,8 @@ import { createEffect, createRoot, on } from "solid-js"
 import { Messages } from "@solid-devtools/shared/bridge"
 import { NodeType } from "@solid-devtools/shared/graph"
 import { createRuntimeMessanger } from "../shared/messanger"
-import * as Graph from "./state/graph"
-import * as Details from "./state/details"
+import { structure } from "./state"
+import * as Details from "./state/inspector"
 import * as Selected from "./state/selected"
 
 export const { onRuntimeMessage, postRuntimeMessage } = createRuntimeMessanger()
@@ -14,19 +14,19 @@ if (import.meta.env.DEV) {
 }
 
 onRuntimeMessage("GraphUpdate", update => {
-  Graph.handleGraphUpdate(update)
+  structure.updateStructure(update)
   Details.handleGraphUpdate()
 })
 
 onRuntimeMessage("ResetPanel", () => {
-  Graph.resetGraph()
+  structure.clearRoots()
   Details.handleGraphUpdate()
   Selected.setOtherLocator(false)
   Selected.setExtLocator(false)
 })
 
 onRuntimeMessage("ComputationUpdates", updates => {
-  Graph.handleComputationsUpdate(updates.map(u => u.id))
+  structure.handleComputationsUpdate(updates.map(u => u.id))
 })
 
 onRuntimeMessage("SignalUpdates", Details.handleSignalUpdates)
@@ -73,24 +73,24 @@ createRoot(() => {
 
   onRuntimeMessage("SetHoveredOwner", ({ state, nodeId }) => {
     // do not sync this state back to the adapter
-    Graph.toggleHoveredOwner(nodeId, state, false)
+    structure.toggleHoveredOwner(nodeId, state, false)
   })
 
   let initHighlight = true
   // toggle hovered html element
   createEffect<Messages["HighlightElement"] | undefined>(prev => {
     // tracks
-    const { rootId, owner, sync } = Graph.hovered()
+    const { rootId, node, sync } = structure.hovered()
     const elId = Details.hoveredElement()
 
     // skip initial value
     if (initHighlight) return (initHighlight = false) || undefined
 
     // handle component
-    if (rootId && owner && owner.type === NodeType.Component) {
+    if (rootId && node && node.type === NodeType.Component) {
       // do not send the same message twice & skip state without the `sync` flag
-      if ((prev && typeof prev === "object" && prev.nodeId === owner.id) || !sync) return prev
-      const payload = { rootId, nodeId: owner.id }
+      if ((prev && typeof prev === "object" && prev.nodeId === node.id) || !sync) return prev
+      const payload = { rootId, nodeId: node.id }
       postRuntimeMessage("HighlightElement", payload)
       return payload
     }

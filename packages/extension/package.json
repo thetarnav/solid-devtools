@@ -9,7 +9,7 @@
     "dev": "vite --port 3333",
     "build": "npm run clean && vite build && node scripts/zip",
     "clean": "rimraf ./dist",
-    "test": "echo \"NOOP TEST\"",
+    "test": "vitest",
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
@@ -22,6 +22,7 @@
     "typescript": "^4.8.2",
     "vite": "^3.1.0",
     "vite-plugin-solid": "^2.3.0",
+    "vitest": "^0.23.2",
     "zip-a-folder": "^1.1.5"
   },
   "dependencies": {

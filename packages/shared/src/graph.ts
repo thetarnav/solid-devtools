@@ -1,6 +1,6 @@
 import { getOwner as _getOwner } from "solid-js"
 import { Many } from "@solid-primitives/utils"
-import { INTERNAL, NOTFOUND } from "./variables"
+import { INTERNAL } from "./variables"
 import { EncodedValue } from "./serialize"
 
 export enum NodeType {
@@ -134,7 +134,7 @@ export namespace Mapped {
   export interface Root {
     id: NodeID
     // sub-roots will have an owner
-    ownerId?: NodeID
+    attachedTo?: NodeID
     tree: Owner
   }
 
@@ -143,7 +143,6 @@ export namespace Mapped {
     name: string
     type: NodeType
     children: Owner[]
-    sources: number
   }
 
   export interface Signal {
@@ -181,52 +180,5 @@ export namespace Mapped {
     sources?: NodeID[]
     /** for memos */
     observers?: NodeID[]
-  }
-}
-
-//
-// "Graph___" — owner/signals/etc. objects handled by the devtools frontend (extension/overlay/ui packages)
-// They are meant to be "reactive" — wrapped with a store
-//
-
-export namespace Graph {
-  export interface Root {
-    readonly id: NodeID
-    readonly tree: Owner
-  }
-
-  export interface Owner {
-    readonly id: NodeID
-    readonly name: string
-    readonly type: NodeType
-    readonly sources: number
-    readonly children: Owner[]
-  }
-
-  export type Signal = {
-    readonly type: NodeType.Signal | NodeType.Memo
-    readonly name: string
-    readonly id: NodeID
-    readonly observers: NodeID[]
-    readonly value: EncodedValue<boolean>
-    readonly selected: boolean
-  }
-
-  export type Path = (Owner | typeof NOTFOUND)[]
-
-  export type Props = {
-    proxy: boolean
-    record: Record<string, { selected: boolean; value: EncodedValue<boolean> }>
-  }
-
-  export interface OwnerDetails {
-    readonly id: NodeID
-    readonly name: string
-    readonly type: NodeType
-    readonly path: Path
-    readonly rawPath: NodeID[]
-    readonly signals: Record<NodeID, Signal>
-    readonly props?: Props
-    // TODO: more to come
   }
 }

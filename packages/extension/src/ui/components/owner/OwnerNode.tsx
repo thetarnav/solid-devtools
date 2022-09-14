@@ -1,16 +1,21 @@
-import { For, JSX, onCleanup } from "solid-js"
-import { TransitionGroup, animateExit, animateEnter } from "@otonashixav/solid-flip"
-import { Graph, NodeType } from "@solid-devtools/shared/graph"
-import { useStructure } from "@/ui/ctx/structure"
-import * as styles from "./OwnerNode.css"
-import { Highlight } from "../highlight/Highlight"
+import { Component, JSX, onCleanup } from "solid-js"
 import { assignInlineVars } from "@vanilla-extract/dynamic"
+import { NodeType } from "@solid-devtools/shared/graph"
+import { Structure } from "@/state/structure/structure-old"
+import { useStructure } from "@/components/Structure"
+import { Highlight } from "../highlight/Highlight"
+import * as styles from "./OwnerNode.css"
 
-export function OwnerNode(props: { owner: Graph.Owner; level: number }): JSX.Element {
-  const { owner, level } = props
+export const OwnerNode: Component<{
+  owner: Structure.Owner
+  children: JSX.Element
+  level: number
+}> = props => {
+  const { owner } = props
   const { name, type, id } = owner
-  const children = () => owner.children
   const typeName = NodeType[type]
+
+  console.log("render", name)
 
   const {
     useUpdatedSelector,
@@ -29,7 +34,7 @@ export function OwnerNode(props: { owner: Graph.Owner; level: number }): JSX.Ele
   onCleanup(() => toggleHoveredOwner(owner, false))
 
   return (
-    <div class={styles.container} style={assignInlineVars({ [styles.levelVar]: level + "" })}>
+    <div class={styles.container} style={assignInlineVars({ [styles.levelVar]: props.level + "" })}>
       <div
         data-hovered={isHovered()}
         data-selected={isSelected()}
@@ -48,16 +53,23 @@ export function OwnerNode(props: { owner: Graph.Owner; level: number }): JSX.Ele
           <div class={styles.header.type}>{typeName}</div>
         </div>
       </div>
-      <div
-        class={styles.childrenContainer}
-        style={{
-          opacity: isUpdated() ? 0.3 : 1,
-        }}
-      >
-        <TransitionGroup enter={animateEnter()} exit={animateExit()}>
-          <For each={children()}>{o => <OwnerNode owner={o} level={level + 1} />}</For>
-        </TransitionGroup>
-      </div>
+      <div class={styles.children}>{props.children}</div>
     </div>
   )
 }
+
+// export function TreeNode(props: { owner: Structure.Owner; level: number }): JSX.Element {
+//   const { owner, level } = props
+//   return (
+//     <div class={styles.container} style={assignInlineVars({ [styles.levelVar]: level + "" })}>
+//       <OwnerNode owner={props.owner} />
+//       <div
+//         class={styles.childrenContainer}
+//       >
+//         <TransitionGroup enter={animateEnter()} exit={animateExit()}>
+//           <For each={children()}>{o => <OwnerNode owner={o} level={level + 1} />}</For>
+//         </TransitionGroup>
+//       </div>
+//     </div>
+//   )
+// }

@@ -1,6 +1,6 @@
 import { Component, Show } from "solid-js"
 import { Entries } from "@solid-primitives/keyed"
-import { NodeType, Graph } from "@solid-devtools/shared/graph"
+import { NodeType } from "@solid-devtools/shared/graph"
 import { SignalContextProvider, Scrollable, Signals, ValueNode } from "@/ui"
 import {
   details,
@@ -8,10 +8,11 @@ import {
   toggleSignalFocus,
   togglePropFocus,
   toggleHoveredElement,
-} from "../state/details"
+  Inspector,
+} from "../state/inspector"
 import * as styles from "./details.css"
 
-const DetailsContent: Component<{ details: Graph.OwnerDetails }> = ({ details }) => {
+const DetailsContent: Component<{ details: Inspector.Details }> = ({ details }) => {
   const { name, id, type, signals, props: componentProps } = details
   return (
     <div class={styles.root}>
