@@ -1,6 +1,5 @@
-import { details, setSelectedNode, useOwnerSelectedSelector } from "@/state/inspector"
-import structure, { Structure } from "@/state/structure"
-import { OwnerNode, OwnerPath, Scrollable } from "@/ui"
+import { structure, inspector, Structure } from "@/state"
+import { OwnerPath, Scrollable } from "@/ui"
 import { NodeID } from "@solid-devtools/shared/graph"
 import { assignInlineVars } from "@vanilla-extract/dynamic"
 import {
@@ -51,17 +50,17 @@ export const useStructure = () => {
 //   )
 // }
 
-const ForTreeNodes: Component<{ tree: TreeNode[]; level: number }> = props => {
-  return () =>
-    props.tree.map(node => (
-      <div class={styles.node} style={assignInlineVars({ [styles.levelVar]: props.level + "" })}>
-        {node.rendered}
-        <div class={styles.children}>
-          <ForTreeNodes tree={node.children} level={props.level + 1} />
-        </div>
-      </div>
-    ))
-}
+// const ForTreeNodes: Component<{ tree: TreeNode[]; level: number }> = props => {
+//   return () =>
+//     props.tree.map(node => (
+//       <div class={styles.node} style={assignInlineVars({ [styles.levelVar]: props.level + "" })}>
+//         {node.rendered}
+//         <div class={styles.children}>
+//           <ForTreeNodes tree={node.children} level={props.level + 1} />
+//         </div>
+//       </div>
+//     ))
+// }
 
 // export function TreeNode(props: { owner: Structure.Owner; level: number }): JSX.Element {
 //   const { owner, level } = props
@@ -128,10 +127,10 @@ export default function StructureView() {
     <div class={styles.wrapper}>
       <StructureContext.Provider
         value={{
-          handleFocus: setSelectedNode,
+          handleFocus: inspector.setSelectedNode,
           // TODO
           useUpdatedSelector: () => () => false,
-          useSelectedSelector: useOwnerSelectedSelector,
+          useSelectedSelector: inspector.useOwnerSelectedSelector,
           // TODO
           toggleHoveredOwner: () => {},
           // TODO
@@ -144,8 +143,8 @@ export default function StructureView() {
       </StructureContext.Provider>
       <div class={styles.path}>
         <div class={styles.pathInner}>
-          <Show when={details()?.path}>
-            <OwnerPath path={details()!.path} />
+          <Show when={inspector.details()?.path}>
+            <OwnerPath path={inspector.details()!.path} />
           </Show>
         </div>
       </div>

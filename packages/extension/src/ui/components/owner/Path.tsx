@@ -1,10 +1,10 @@
 import { Component } from "solid-js"
-import { Graph } from "@solid-devtools/shared/graph"
 import { NOTFOUND } from "@solid-devtools/shared/variables"
 import { Icon } from "@/ui"
+import { Inspector } from "@/state"
 import * as styles from "./Path.css"
 
-export const OwnerPath: Component<{ path: Graph.Path }> = props => {
+export const OwnerPath: Component<{ path: Inspector.Path }> = props => {
   return (
     <div class={styles.container}>
       {props.path.map((node, index) => (

@@ -1,15 +1,17 @@
 import { Component, Show } from "solid-js"
 import { Splitter, ToggleButton, Icon } from "@/ui"
-import { structure } from "./state/structure/structure-old"
-import { focused, setSelectedNode } from "./state/inspector"
-import { setExtLocator, locatorEnabled } from "./state/selected"
+import { inspector, structure, locator } from "@/state"
 import * as styles from "./styles.css"
 import Details from "./components/Details"
 import StructureView from "./components/Structure"
 
 const SelectComponent: Component<{}> = props => {
   return (
-    <ToggleButton class={styles.select} onToggle={setExtLocator} selected={locatorEnabled()}>
+    <ToggleButton
+      class={styles.select}
+      onToggle={locator.setExtLocator}
+      selected={locator.locatorEnabled()}
+    >
       <Icon.Select class={styles.selectIcon} />
     </ToggleButton>
   )
@@ -22,14 +24,14 @@ const App: Component = () => {
         <SelectComponent />
         <div>
           <h3>Welcome to Solid Devtools</h3>
-          <p>Number of Roots: {structure.length}</p>
+          <p>Number of Roots: {structure.roots().length}</p>
         </div>
       </header>
       <div class={styles.content}>
         <Splitter
-          onToggle={() => setSelectedNode(null)}
+          onToggle={() => inspector.setSelectedNode(null)}
           side={
-            <Show when={focused()}>
+            <Show when={inspector.focused()}>
               <Details />
             </Show>
           }

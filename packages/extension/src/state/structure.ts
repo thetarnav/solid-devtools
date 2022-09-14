@@ -1,7 +1,7 @@
 import { batch, createRoot, createSignal } from "solid-js"
 import { Mapped, NodeID, NodeType, RootsUpdates } from "@solid-devtools/shared/graph"
 import { Writable } from "type-fest"
-import { createUpdatedSelector } from "../utils"
+import { createUpdatedSelector } from "./utils"
 
 export namespace Structure {
   export interface Node {
@@ -25,6 +25,33 @@ function removeFromMapList<K, T>(map: Map<K, T[]>, key: K, value: T): void {
   if (index === -1) return
   roots.splice(index, 1)
   if (roots.length === 0) map.delete(key)
+}
+
+function getNodeById(
+  nodeMap: typeof $nodeMap,
+  id: NodeID,
+  rootId: NodeID,
+): Structure.Node | undefined
+function getNodeById(nodeMap: typeof $nodeMap, id: NodeID): Structure.Node | undefined
+function getNodeById(
+  nodeMap: typeof $nodeMap,
+  id: NodeID,
+  rootId?: NodeID,
+): Structure.Node | undefined {
+  if (rootId) {
+    const nodes = nodeMap.get(rootId)
+    if (nodes) {
+      for (const node of nodes) {
+        if (node.id === id) return node
+      }
+    }
+  } else {
+    for (const nodes of nodeMap.values()) {
+      for (const node of nodes) {
+        if (node.id === id) return node
+      }
+    }
+  }
 }
 
 let $attachments: Map<NodeID, Mapped.Root[]>
@@ -65,9 +92,9 @@ export function mapStructureUpdates(config: {
   prev: readonly Structure.Node[]
   removed: readonly NodeID[]
   updated: readonly Mapped.Root[]
-  attachments: Map<NodeID, Mapped.Root[]>
-  mappedRoots: Map<NodeID, Mapped.Root>
-  nodeMap: Map<NodeID, Structure.Node[]>
+  attachments: typeof $attachments
+  mappedRoots: typeof $mappedRoots
+  nodeMap: typeof $nodeMap
 }): Structure.Node[] {
   const { prev, removed, updated, attachments, mappedRoots, nodeMap } = config
   $attachments = attachments
@@ -119,6 +146,8 @@ export function mapStructureUpdates(config: {
 
   const next: Structure.Node[] = Array(order.length)
   for (let i = 0; i < order.length; i++) {
+    console.log(i, order[i])
+
     const { id, tree } = order[i]
     const nodeList: Structure.Node[] = []
     $nodeMap.set(id, nodeList)
@@ -131,11 +160,11 @@ const structure = createRoot(() => {
   const [roots, setRoots] = createSignal<Structure.Node[]>([])
 
   /** parent nodeId : rootId to be attached */
-  const attachments: Map<NodeID, Mapped.Root[]> = new Map()
+  const attachments: typeof $attachments = new Map()
   /** rootId : mappedRoot */
-  const mappedRoots: Map<NodeID, Mapped.Root> = new Map()
+  const mappedRoots: typeof $mappedRoots = new Map()
   /** rootId : list of nodes down in the tree */
-  const nodeMap: Map<NodeID, Structure.Node[]> = new Map()
+  const nodeMap: typeof $nodeMap = new Map()
 
   function updateStructure({ removed, updated }: RootsUpdates) {
     const time = performance.now()
@@ -169,6 +198,7 @@ const structure = createRoot(() => {
     updateStructure,
     handleComputationsUpdate,
     toggleHoveredOwner: (...a: any[]) => {},
+    getNodeById: getNodeById.bind(null, nodeMap),
   }
 })
 export default structure

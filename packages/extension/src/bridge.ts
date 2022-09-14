@@ -2,9 +2,7 @@ import { createEffect, createRoot, on } from "solid-js"
 import { Messages } from "@solid-devtools/shared/bridge"
 import { NodeType } from "@solid-devtools/shared/graph"
 import { createRuntimeMessanger } from "../shared/messanger"
-import { structure } from "./state"
-import * as Details from "./state/inspector"
-import * as Selected from "./state/selected"
+import { structure, inspector, locator } from "@/state"
 
 export const { onRuntimeMessage, postRuntimeMessage } = createRuntimeMessanger()
 
@@ -15,29 +13,29 @@ if (import.meta.env.DEV) {
 
 onRuntimeMessage("GraphUpdate", update => {
   structure.updateStructure(update)
-  Details.handleGraphUpdate()
+  inspector.handleGraphUpdate()
 })
 
 onRuntimeMessage("ResetPanel", () => {
   structure.clearRoots()
-  Details.handleGraphUpdate()
-  Selected.setOtherLocator(false)
-  Selected.setExtLocator(false)
+  inspector.handleGraphUpdate()
+  locator.setOtherLocator(false)
+  locator.setExtLocator(false)
 })
 
 onRuntimeMessage("ComputationUpdates", updates => {
   structure.handleComputationsUpdate(updates.map(u => u.id))
 })
 
-onRuntimeMessage("SignalUpdates", Details.handleSignalUpdates)
+onRuntimeMessage("SignalUpdates", inspector.handleSignalUpdates)
 onRuntimeMessage("SignalValue", update => {
   // updates the signal value but without causing it to highlight
-  Details.handleSignalUpdates([update], false)
+  inspector.handleSignalUpdates([update], false)
 })
-onRuntimeMessage("PropsUpdate", Details.handlePropsUpdate)
+onRuntimeMessage("PropsUpdate", inspector.handlePropsUpdate)
 
 onRuntimeMessage("OwnerDetailsUpdate", details => {
-  Details.updateDetails(details)
+  inspector.updateDetails(details)
 })
 
 // let visibility = false
@@ -50,19 +48,19 @@ onRuntimeMessage("OwnerDetailsUpdate", details => {
 // })
 
 createRoot(() => {
-  onRuntimeMessage("AdpLocatorMode", Selected.setOtherLocator)
+  onRuntimeMessage("AdpLocatorMode", locator.setOtherLocator)
   createEffect(
-    on(Selected.extLocatorEnabled, state => postRuntimeMessage("ExtLocatorMode", state), {
+    on(locator.extLocatorEnabled, state => postRuntimeMessage("ExtLocatorMode", state), {
       defer: true,
     }),
   )
 
-  onRuntimeMessage("SendSelectedOwner", Details.setSelectedNode)
+  onRuntimeMessage("SendSelectedOwner", inspector.setSelectedNode)
 
   // toggle selected owner
   createEffect(
     on(
-      [Details.focused, Details.focusedRootId],
+      [inspector.focused, inspector.focusedRootId],
       ([owner, rootId]) => {
         const payload = owner && rootId ? { nodeId: owner.id, rootId } : null
         postRuntimeMessage("SetSelectedOwner", payload)
@@ -81,7 +79,7 @@ createRoot(() => {
   createEffect<Messages["HighlightElement"] | undefined>(prev => {
     // tracks
     const { rootId, node, sync } = structure.hovered()
-    const elId = Details.hoveredElement()
+    const elId = inspector.hoveredElement()
 
     // skip initial value
     if (initHighlight) return (initHighlight = false) || undefined
@@ -106,5 +104,5 @@ createRoot(() => {
   })
 
   // toggle selected signals
-  Details.setOnInspectValue(payload => postRuntimeMessage("ToggleInspectedValue", payload))
+  inspector.setOnInspectValue(payload => postRuntimeMessage("ToggleInspectedValue", payload))
 })

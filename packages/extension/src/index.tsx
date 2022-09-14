@@ -1,7 +1,5 @@
 import { render } from "solid-js/web"
-import "./state/selected"
-import "./state/structure"
-import "./state/inspector"
+import "./state"
 import "./bridge"
 
 import App from "./App"

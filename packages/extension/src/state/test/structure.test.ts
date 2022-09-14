@@ -1,4 +1,4 @@
-import { mapStructureUpdates, Structure } from "./structure"
+import { mapStructureUpdates, Structure } from "../structure"
 import { describe, expect, it, test } from "vitest"
 import { Mapped, NodeID, NodeType } from "@solid-devtools/shared/graph"
 

@@ -2,14 +2,7 @@ import { Component, Show } from "solid-js"
 import { Entries } from "@solid-primitives/keyed"
 import { NodeType } from "@solid-devtools/shared/graph"
 import { SignalContextProvider, Scrollable, Signals, ValueNode } from "@/ui"
-import {
-  details,
-  useUpdatedSignalsSelector,
-  toggleSignalFocus,
-  togglePropFocus,
-  toggleHoveredElement,
-  Inspector,
-} from "../state/inspector"
+import inspector, { Inspector } from "../state/inspector"
 import * as styles from "./details.css"
 
 const DetailsContent: Component<{ details: Inspector.Details }> = ({ details }) => {
@@ -34,8 +27,8 @@ const DetailsContent: Component<{ details: Inspector.Details }> = ({ details }) 
                   name={name}
                   value={value().value}
                   selected={value().selected}
-                  onClick={() => togglePropFocus(name)}
-                  onElementHover={toggleHoveredElement}
+                  onClick={() => inspector.togglePropFocus(name)}
+                  onElementHover={inspector.toggleHoveredElement}
                 />
               )}
             </Entries>
@@ -45,9 +38,9 @@ const DetailsContent: Component<{ details: Inspector.Details }> = ({ details }) 
           <h2 class={styles.h2}>Signals</h2>
           <SignalContextProvider
             value={{
-              useUpdatedSelector: useUpdatedSignalsSelector,
-              toggleSignalFocus,
-              toggleHoveredElement,
+              useUpdatedSelector: inspector.useUpdatedSignalsSelector,
+              toggleSignalFocus: inspector.toggleSignalFocus,
+              toggleHoveredElement: inspector.toggleHoveredElement,
             }}
           >
             <Signals each={Object.values(signals)} />
@@ -62,7 +55,7 @@ export default function Details() {
   return (
     <div class={styles.scrollWrapper}>
       <Scrollable>
-        <Show when={details()} keyed>
+        <Show when={inspector.details()} keyed>
           {details => <DetailsContent details={details} />}
         </Show>
       </Scrollable>

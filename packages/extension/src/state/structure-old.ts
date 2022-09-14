@@ -2,7 +2,7 @@ import { batch, createRoot, createSignal } from "solid-js"
 import { createStore, produce } from "solid-js/store"
 import { NodeID, RootsUpdates, Mapped, NodeType } from "@solid-devtools/shared/graph"
 import { createBoundSelector } from "@solid-devtools/shared/primitives"
-import { createUpdatedSelector } from "../utils"
+import { createUpdatedSelector } from "./utils"
 
 export namespace Structure {
   export interface Root {

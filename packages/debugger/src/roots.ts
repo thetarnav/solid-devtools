@@ -24,7 +24,7 @@ import {
 import {
   createInternalRoot,
   getDebuggerContext,
-  getNewSdtId,
+  markNodeID,
   isSolidRoot,
   markOwnerType,
   onOwnerCleanup,
@@ -43,7 +43,7 @@ export function createGraphRoot(owner: Solid.Root): void {
   createInternalRoot(dispose => {
     onOwnerCleanup(owner, dispose)
 
-    const rootId = getNewSdtId()
+    const rootId = markNodeID(owner)
 
     const onComputationUpdate: ComputationUpdateHandler = (rootId, nodeId) => {
       if (owner.isDisposed) return
@@ -110,7 +110,6 @@ export function attachDebugger(_owner: Core.Owner = getOwner()!): void {
 
     // under an existing debugger root
     if (ctx) {
-      const rootId = ctx.rootId
       ctx.triggerRootUpdate()
       let parent = findClosestAliveParent(root)!
       if (!parent.owner) return warn("PARENT_SHOULD_BE_ALIVE")

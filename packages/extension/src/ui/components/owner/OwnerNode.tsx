@@ -1,13 +1,13 @@
 import { Component, JSX, onCleanup } from "solid-js"
 import { assignInlineVars } from "@vanilla-extract/dynamic"
 import { NodeType } from "@solid-devtools/shared/graph"
-import { Structure } from "@/state/structure/structure-old"
+import { Structure } from "@/state"
 import { useStructure } from "@/components/Structure"
 import { Highlight } from "../highlight/Highlight"
 import * as styles from "./OwnerNode.css"
 
 export const OwnerNode: Component<{
-  owner: Structure.Owner
+  owner: Structure.Node
   children: JSX.Element
   level: number
 }> = props => {

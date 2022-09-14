@@ -32,13 +32,9 @@ function mapOwner(owner: Solid.Owner): Mapped.Owner {
     if (element) Components.push({ id, name, element })
   }
 
-  return {
-    id,
-    name,
-    type,
-    children: owner.owned ? owner.owned.map(child => mapOwner(child)) : [],
-    // sources: owner.sources ? owner.sources.length : 0,
-  }
+  const children = owner.owned ? owner.owned.map(child => mapOwner(child)) : []
+  return { id, name, type, children }
+  // sources: owner.sources ? owner.sources.length : 0,
 }
 
 export type WalkerResult = {

@@ -177,7 +177,7 @@ const nullState: OwnerDetailsState = {
   details: null,
 }
 
-const exports = createRoot(() => {
+const inspector = createRoot(() => {
   const [state, setState] = createStore<OwnerDetailsState>({ ...nullState })
   const focused = () => state.focused,
     focusedRootId = () => state.rootId,
@@ -290,20 +290,4 @@ const exports = createRoot(() => {
     toggleHoveredElement,
   }
 })
-export const {
-  focused,
-  focusedRootId,
-  details,
-  setSelectedNode,
-  useOwnerSelectedSelector,
-  useUpdatedSignalsSelector,
-  updateDetails,
-  handleSignalUpdates,
-  handleGraphUpdate,
-  handlePropsUpdate,
-  toggleSignalFocus,
-  togglePropFocus,
-  setOnInspectValue,
-  hoveredElement,
-  toggleHoveredElement,
-} = exports
+export default inspector
