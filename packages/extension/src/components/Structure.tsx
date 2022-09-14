@@ -87,39 +87,34 @@ type TreeNode = {
 }
 
 const OwnerTree: Component = () => {
-  // createEffect(() => {
-  //   console.log(JSON.stringify(structure.roots(), null, 2))
-  // })
+  const vh = window.innerHeight
+  const rowH = 1.25 * 16 // 1.25rem
 
-  return ""
-  //   const vh = window.innerHeight
-  //   const rowH = 1.25 * 16 // 1.25rem
+  const tree = createMemo(() => {
+    let i = 0
+    const tree = [] as TreeNode[]
 
-  //   const tree = createMemo(() => {
-  //     let i = 0
-  //     const tree = [] as TreeNode[]
+    function walkNode(owner: Structure.Owner): TreeNode {
+      return createRoot(dispose => {
+        const node: TreeNode = {
+          id: owner.id,
+          rendered: <OwnerNode owner={owner} />,
+          dispose,
+          children: owner.children.map(walkNode),
+        }
+        return node
+      })
+    }
 
-  //     function walkNode(owner: Structure.Owner): TreeNode {
-  //       return createRoot(dispose => {
-  //         const node: TreeNode = {
-  //           id: owner.id,
-  //           rendered: <OwnerNode owner={owner} />,
-  //           dispose,
-  //           children: owner.children.map(walkNode),
-  //         }
-  //         return node
-  //       })
-  //     }
+    for (; i < structure.length; i++) {
+      if (i * rowH > vh) break
+      tree.push(walkNode(structure[i].tree))
+    }
 
-  //     for (; i < structure.length; i++) {
-  //       if (i * rowH > vh) break
-  //       tree.push(walkNode(structure[i].tree))
-  //     }
+    return tree
+  })
 
-  //     return tree
-  //   })
-
-  //   return <ForTreeNodes tree={tree()} level={0} />
+  return <ForTreeNodes tree={tree()} level={0} />
 }
 
 export default function StructureView() {

@@ -102,6 +102,11 @@ describe("mapStructureUpdates", () => {
         id: "10",
         tree: { id: "10", name: "root4", type: NodeType.Root, children: [] },
       },
+      {
+        id: "5",
+        tree: { id: "5", name: "root2", type: NodeType.Root, children: [] },
+        attachedTo: "3",
+      },
     ]
 
     structure = mapStructureUpdates({
@@ -118,35 +123,21 @@ describe("mapStructureUpdates", () => {
         id: "1",
         name: "root",
         type: NodeType.Root,
-        length: 4,
+        length: 3,
         children: [
           {
             id: "3",
             name: "child2",
             type: NodeType.Effect,
-            length: 3,
+            length: 2,
             children: [
               { id: "4", name: "child3", type: NodeType.Component, length: 0, children: [] },
-              {
-                id: "5",
-                name: "root2",
-                type: NodeType.Root,
-                length: 1,
-                children: [
-                  { id: "6", name: "child4", type: NodeType.Component, length: 0, children: [] },
-                ],
-              },
+              { id: "5", name: "root2", type: NodeType.Root, length: 0, children: [] },
             ],
           },
         ],
       },
-      {
-        id: "10",
-        name: "root4",
-        type: NodeType.Root,
-        length: 0,
-        children: [],
-      },
+      { id: "10", name: "root4", type: NodeType.Root, length: 0, children: [] },
     ])
   })
 
@@ -249,7 +240,62 @@ describe("mapStructureUpdates", () => {
           ],
         },
       },
+      {
+        id: "12",
+        tree: { id: "12", name: "root5", type: NodeType.Root, children: [] },
+        attachedTo: "9",
+      },
     ]
+
+    structure = mapStructureUpdates({
+      prev: structure,
+      updated,
+      removed,
+      attachments,
+      mappedRoots,
+      nodeMap,
+    })
+
+    expect(structure).toEqual([
+      {
+        id: "8",
+        name: "root3",
+        type: NodeType.Root,
+        length: 2,
+        children: [
+          {
+            id: "9",
+            name: "child6",
+            type: NodeType.Component,
+            length: 1,
+            children: [{ id: "12", name: "root5", type: NodeType.Root, length: 0, children: [] }],
+          },
+        ],
+      },
+      {
+        id: "5",
+        name: "root2",
+        type: NodeType.Root,
+        length: 3,
+        children: [
+          { id: "6", name: "child4", type: NodeType.Component, length: 0, children: [] },
+          {
+            id: "7",
+            name: "child5",
+            type: NodeType.Refresh,
+            length: 1,
+            children: [
+              { id: "11", name: "child7", type: NodeType.Computation, length: 0, children: [] },
+            ],
+          },
+        ],
+      },
+    ])
+  })
+
+  test("remove attached node", () => {
+    removed = ["12"]
+    updated = []
 
     structure = mapStructureUpdates({
       prev: structure,

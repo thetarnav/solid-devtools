@@ -57,12 +57,15 @@ function getNodeById(
 let $attachments: Map<NodeID, Mapped.Root[]>
 let $mappedRoots: Map<NodeID, Mapped.Root>
 let $nodeMap: Map<NodeID, Structure.Node[]>
+let $nodesLength: number
 
 function mapOwner(
   raw: Readonly<Mapped.Owner>,
   parent: Writable<Structure.Node> | null,
   nodeList: Structure.Node[],
 ): Structure.Node {
+  // TODO length should be removed in prod
+  $nodesLength++
   const { id, name, type, children: rawChildren } = raw
   const subroots = $attachments.get(id)
   let ci = 0
@@ -100,19 +103,23 @@ export function mapStructureUpdates(config: {
   $attachments = attachments
   $mappedRoots = mappedRoots
   $nodeMap = nodeMap
+  $nodesLength = 0
 
   const order: Mapped.Root[] = []
   $nodeMap.clear()
 
+  for (const id of removed) {
+    const mapped = $mappedRoots.get(id)!
+    const { attachedTo } = mapped
+    $mappedRoots.delete(id)
+    if (attachedTo) removeFromMapList($attachments, attachedTo, mapped)
+  }
+
   for (let i = 0; i < prev.length; i++) {
     const id = prev[i].id
-    let mapped = $mappedRoots.get(id)!
-
+    let mapped = $mappedRoots.get(id)
     // REMOVED top level roots
-    if (removed.includes(id)) {
-      $mappedRoots.delete(id)
-      continue
-    }
+    if (!mapped) continue
 
     // UPDATED top level roots
     for (const updatedRoot of updated)
@@ -132,9 +139,7 @@ export function mapStructureUpdates(config: {
         // ATTACHED root
         const oldMapped = $mappedRoots.get(id)!
         const oldAttachedTo = oldMapped.attachedTo
-        if (oldAttachedTo !== attachedTo) {
-          removeFromMapList($attachments, oldAttachedTo, oldMapped)
-        } else continue
+        oldAttachedTo && removeFromMapList($attachments, oldAttachedTo, oldMapped)
       } else continue
     }
 
@@ -146,8 +151,6 @@ export function mapStructureUpdates(config: {
 
   const next: Structure.Node[] = Array(order.length)
   for (let i = 0; i < order.length; i++) {
-    console.log(i, order[i])
-
     const { id, tree } = order[i]
     const nodeList: Structure.Node[] = []
     $nodeMap.set(id, nodeList)
@@ -174,7 +177,7 @@ const structure = createRoot(() => {
         mapStructureUpdates({ prev, removed, updated, attachments, mappedRoots, nodeMap }),
       )
     })
-    console.log("updateStructure", performance.now() - time)
+    console.log("updateStructure: ", performance.now() - time, "nodes", $nodesLength)
   }
 
   function clearRoots() {
