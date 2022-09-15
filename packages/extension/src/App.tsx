@@ -3,7 +3,7 @@ import { Splitter, ToggleButton, Icon } from "@/ui"
 import { inspector, structure, locator } from "@/state"
 import * as styles from "./styles.css"
 import Details from "./components/Details"
-import StructureView from "./components/Structure"
+import StructureView from "./components/structure/Structure"
 
 const SelectComponent: Component<{}> = props => {
   return (

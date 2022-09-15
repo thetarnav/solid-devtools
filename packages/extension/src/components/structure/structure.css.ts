@@ -1,8 +1,5 @@
-import { levelVar } from "@/ui/components/owner/OwnerNode.css"
 import { color, hexToRgb, insetX, spacing, theme, transition } from "@/ui/theme"
 import { style } from "@vanilla-extract/css"
-
-export { levelVar }
 
 export const wrapper = style({
   height: "100%",
