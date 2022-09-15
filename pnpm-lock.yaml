@@ -45,7 +45,6 @@ importers:
       '@solid-devtools/transform': workspace:^0.7.2
       '@solid-primitives/event-bus': ^0.1.2
       '@solid-primitives/immutable': ^0.1.2
-      '@solid-primitives/memo': ^1.0.2
       '@solid-primitives/refs': ^0.3.2
       '@solid-primitives/scheduled': ^1.0.1
       '@solid-primitives/utils': ^3.0.2
@@ -62,7 +61,6 @@ importers:
       '@solid-devtools/shared': link:../shared
       '@solid-primitives/event-bus': 0.1.2_solid-js@1.5.4
       '@solid-primitives/immutable': 0.1.2_solid-js@1.5.4
-      '@solid-primitives/memo': 1.0.2_solid-js@1.5.4
       '@solid-primitives/refs': 0.3.2_solid-js@1.5.4
       '@solid-primitives/scheduled': 1.0.1_solid-js@1.5.4
       '@solid-primitives/utils': 3.0.2_solid-js@1.5.4
@@ -2690,16 +2688,6 @@ packages:
     peerDependencies:
       solid-js: ^1.4.0
     dependencies:
-      solid-js: 1.5.4
-    dev: false
-
-  /@solid-primitives/memo/1.0.2_solid-js@1.5.4:
-    resolution: {integrity: sha512-I4BKJAItiRxjR1ngc+gWsdpiz3V79LQdgxxRlFPp3K+8Oi2dolXweDlLKKX5qec8cSuhV99gTfsxEoVBMkzNgQ==}
-    peerDependencies:
-      solid-js: ^1.4.2
-    dependencies:
-      '@solid-primitives/scheduled': 1.0.1_solid-js@1.5.4
-      '@solid-primitives/utils': 3.0.2_solid-js@1.5.4
       solid-js: 1.5.4
     dev: false
 

@@ -170,14 +170,14 @@ const structure = createRoot(() => {
   const nodeMap: typeof $nodeMap = new Map()
 
   function updateStructure({ removed, updated }: RootsUpdates) {
-    const time = performance.now()
     batch(() => {
       clearUpdatedComputations()
+      const time = performance.now()
       setRoots(prev =>
         mapStructureUpdates({ prev, removed, updated, attachments, mappedRoots, nodeMap }),
       )
+      console.log("updateStructure: ", performance.now() - time, "nodes", $nodesLength)
     })
-    console.log("updateStructure: ", performance.now() - time, "nodes", $nodesLength)
   }
 
   function clearRoots() {
