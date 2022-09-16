@@ -78,7 +78,7 @@ importers:
 
   packages/ext-adapter:
     specifiers:
-      '@solid-devtools/debugger': workspace:^0.8.0
+      '@solid-devtools/debugger': workspace:^0.8.1
       '@solid-devtools/locator': workspace:^0.16.0
       '@solid-devtools/shared': workspace:^0.7.4
       '@solid-primitives/utils': ^3.0.2

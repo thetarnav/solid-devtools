@@ -1,5 +1,11 @@
 # @solid-devtools/debugger
 
+## 0.8.1
+
+### Patch Changes
+
+- a78d2e0: Bump solid-js peer dependency to 1.5.5
+
 ## 0.8.0
 
 ### Minor Changes
