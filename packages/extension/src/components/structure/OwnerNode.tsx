@@ -31,24 +31,24 @@ export const OwnerNode: Component<{
   onCleanup(() => toggleHoveredOwner(owner, false))
 
   return (
-    <div class={styles.container} style={assignInlineVars({ [styles.levelVar]: props.level + "" })}>
-      <div
-        data-hovered={isHovered()}
-        data-selected={isSelected()}
-        class={styles.header.contailer}
-        onClick={e => handleFocus(isSelected() ? null : owner)}
-        onMouseEnter={() => toggleHoveredOwner(owner, true)}
-        // onMouseLeave is fired in the next tick for the onMouseEnter of other node fired earlier
-        onMouseLeave={() => setTimeout(() => toggleHoveredOwner(owner, false))}
-      >
-        <div class={styles.header.selection}></div>
-        <div class={styles.header.nameContainer}>
-          {/* TODO: observers and sources highlighting */}
-          <Highlight strong={isUpdated()} light={false} class={styles.header.highlight}>
-            <div class={styles.header.name}>{type === NodeType.Component ? `<${name}>` : name}</div>
-          </Highlight>
-          <div class={styles.header.type}>{typeName}</div>
-        </div>
+    <div
+      data-hovered={isHovered()}
+      data-selected={isSelected()}
+      class={styles.contailer}
+      onClick={e => handleFocus(isSelected() ? null : owner)}
+      onMouseEnter={() => toggleHoveredOwner(owner, true)}
+      // onMouseLeave is fired in the next tick for the onMouseEnter of other node fired earlier
+      onMouseLeave={() => setTimeout(() => toggleHoveredOwner(owner, false))}
+      style={assignInlineVars({ [styles.levelVar]: props.level + "" })}
+    >
+      <div class={styles.selection}></div>
+      <div class={styles.levelPadding} />
+      <div class={styles.nameContainer}>
+        {/* TODO: observers and sources highlighting */}
+        <Highlight strong={isUpdated()} light={false} class={styles.highlight}>
+          <div class={styles.name}>{type === NodeType.Component ? `<${name}>` : name}</div>
+        </Highlight>
+        <div class={styles.type}>{typeName}</div>
       </div>
     </div>
   )
