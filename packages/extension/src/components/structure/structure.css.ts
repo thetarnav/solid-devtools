@@ -1,5 +1,7 @@
-import { color, hexToRgb, insetX, spacing, theme, transition } from "@/ui/theme"
+import { color, insetX, spacing } from "@/ui/theme"
 import { createVar, style } from "@vanilla-extract/css"
+
+export const ROW_HEIGHT_IN_REM = 1.25
 
 export const panelWrapper = style({
   height: "100%",
@@ -12,9 +14,15 @@ export const panelWrapper = style({
 export const treeLength = createVar()
 export const startIndex = createVar()
 
-export const scrolledContainer = style({
-  height: `calc(${treeLength} * 1rem)`,
-  paddingTop: `calc(${startIndex} * 1rem)`,
+export const scrolledOuter = style({
+  position: "relative",
+  height: `calc(${treeLength} * ${ROW_HEIGHT_IN_REM}rem)`,
+})
+export const scrolledInner = style({
+  position: "absolute",
+  top: 0,
+  ...insetX(0),
+  transform: `translateY(calc(${startIndex} * ${ROW_HEIGHT_IN_REM}rem))`,
 })
 
 export const path = style({

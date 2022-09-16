@@ -70,7 +70,6 @@ type DisplayNode = {
 const remToPx = (rem: number): number =>
   rem * parseFloat(getComputedStyle(document.documentElement).fontSize)
 
-const ROW_HEIGHT_IN_REM = 1.25
 let $startIndex = 20
 let $endIndex = 0
 let $index = 0
@@ -142,7 +141,7 @@ const DisplayStructureTree: Component = props => {
   }>((prev = { length: 0, start: 0, end: 0, list: [], rootList: [] }) => {
     const rootsList = structure.roots()
     const { top, height } = containerScroll()
-    const rowHeight = remToPx(ROW_HEIGHT_IN_REM)
+    const rowHeight = remToPx(styles.ROW_HEIGHT_IN_REM)
 
     $startIndex = Math.floor(top / rowHeight)
     $endIndex = $startIndex + Math.ceil(height / rowHeight)
@@ -158,9 +157,6 @@ const DisplayStructureTree: Component = props => {
     $prevMap = {}
     for (const node of prev.list) $prevMap[node.id] = node
 
-    console.log("startIndex", $startIndex)
-    console.log("endIndex", $endIndex)
-
     mapNodes(rootsList, 0)
 
     // REMOVED
@@ -175,13 +171,15 @@ const DisplayStructureTree: Component = props => {
       onScroll={e => updateScrollData(e.currentTarget)}
     >
       <div
-        class={styles.scrolledContainer}
+        class={styles.scrolledOuter}
         style={assignInlineVars({
           [styles.treeLength]: tree().length.toString(),
           [styles.startIndex]: tree().start.toString(),
         })}
       >
-        <For each={tree().list}>{node => node.render}</For>
+        <div class={styles.scrolledInner}>
+          <For each={tree().list}>{node => node.render}</For>
+        </div>
       </div>
     </Scrollable>
   )
