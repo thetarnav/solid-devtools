@@ -2,12 +2,14 @@ import { getOwner, Mapped, NodeID, NodeType, Solid } from "@solid-devtools/share
 import { ValueType } from "@solid-devtools/shared/serialize"
 import { UNNAMED } from "@solid-devtools/shared/variables"
 import {
+  $PROXY,
   createComputed,
   createEffect,
   createMemo,
   createRenderEffect,
   createRoot,
   createSignal,
+  JSX,
 } from "solid-js"
 import type * as API from "../src/walker"
 
@@ -49,11 +51,10 @@ describe("walkSolidTree", () => {
       return [dispose, getOwner()!]
     })
 
-    const { tree, components, selected } = walkSolidTree(owner, {
+    const { tree, components, inspectedOwner } = walkSolidTree(owner, {
       onComputationUpdate: () => {},
-      onSignalUpdate: () => {},
       rootId: "ff",
-      selectedId: null,
+      inspectedId: null,
       gatherComponents: false,
     })
 
@@ -91,12 +92,7 @@ describe("walkSolidTree", () => {
     })
     expect(tree).toEqual(JSON.parse(JSON.stringify(tree)))
     expect(components).toEqual([])
-    expect(selected).toEqual({
-      details: null,
-      owner: null,
-      signalMap: {},
-      elementMap: {},
-    })
+    expect(inspectedOwner).toBe(null)
   })
 
   it("listen to computation updates", () =>
@@ -110,9 +106,8 @@ describe("walkSolidTree", () => {
 
       walkSolidTree(getOwner()!, {
         onComputationUpdate: (rootId, id) => capturedComputationUpdates.push([rootId, id]),
-        onSignalUpdate: () => {},
         rootId: "ff",
-        selectedId: null,
+        inspectedId: null,
         gatherComponents: false,
       })
 
@@ -150,9 +145,8 @@ describe("walkSolidTree", () => {
 
       const { components } = walkSolidTree(getOwner()!, {
         onComputationUpdate: () => {},
-        onSignalUpdate: () => {},
         rootId: "ff",
-        selectedId: null,
+        inspectedId: null,
         gatherComponents: true,
       })
 
@@ -173,14 +167,13 @@ describe("walkSolidTree", () => {
       dispose()
     }))
 
-  it("collects focused owner details", () =>
+  it("returns inspected owner", () =>
     createRoot(dispose => {
       const walkSolidTree = getModule()
       const [s, setS] = createSignal(0, { name: "source" })
 
       let owner!: Solid.Owner
       const div = document.createElement("div")
-      const elementMap: Record<NodeID, HTMLElement> = {}
 
       createComputed(
         () => {
@@ -203,16 +196,14 @@ describe("walkSolidTree", () => {
         { name: "WRAPPER" },
       )
 
-      const { tree, selected } = walkSolidTree(getOwner()!, {
+      const { tree, inspectedOwner } = walkSolidTree(getOwner()!, {
         rootId: "0",
-        selectedId: "ff",
+        inspectedId: "ff",
         onComputationUpdate: () => {},
-        onSignalUpdate: () => {},
         gatherComponents: false,
-        elementMap,
       })
 
-      expect(owner).toBe(selected.owner)
+      expect(owner).toBe(inspectedOwner)
 
       expect(tree).toEqual({
         id: "0",
@@ -233,14 +224,14 @@ describe("walkSolidTree", () => {
                 type: NodeType.Memo,
                 children: [
                   {
-                    id: "3",
+                    id: "2",
                     name: "memo",
                     sources: 0,
                     type: NodeType.Memo,
                     children: [],
                   },
                   {
-                    id: "4",
+                    id: "3",
                     name: "render",
                     sources: 1,
                     type: NodeType.Render,
@@ -252,42 +243,6 @@ describe("walkSolidTree", () => {
           },
         ],
       })
-
-      expect(selected.details).toEqual({
-        id: "ff",
-        name: "focused",
-        type: NodeType.Memo,
-        path: ["0", "1"],
-        signals: [
-          {
-            type: NodeType.Signal,
-            id: "2",
-            name: "element",
-            observers: [],
-            value: { type: ValueType.Element, value: { name: "DIV", id: "0" } },
-          },
-          {
-            type: NodeType.Memo,
-            id: "3",
-            name: "memo",
-            observers: ["4"],
-            value: { type: ValueType.Number, value: 0 },
-          },
-        ],
-        value: { type: ValueType.String, value: "value" },
-        sources: ["5"],
-        observers: ["1"],
-      })
-
-      expect(selected.signalMap).toHaveProperty("2")
-      expect(selected.signalMap).toHaveProperty("3")
-      expect(selected.signalMap["2"].sdtId).toBe("2")
-      expect(selected.signalMap["3"].sdtId).toBe("3")
-
-      expect(selected.elementMap).toBe(elementMap)
-      expect(Object.keys(elementMap).length).toBe(1)
-      expect(elementMap).toHaveProperty("0")
-      expect(elementMap["0"]).toBe(div)
 
       dispose()
     }))

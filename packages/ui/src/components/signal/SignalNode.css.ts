@@ -11,9 +11,6 @@ export const Signals = {
     display: "flex",
     flexDirection: "column",
     gap: RowGap,
-    fontFamily: theme.font.mono,
-    color: color.gray[800],
-    fontWeight: 600,
   }),
 }
 
@@ -32,6 +29,9 @@ export const ValueRow = {
         [valueRowHighlight.bgColorVar]: color.gray[300],
         [valueRowHighlight.bgOpacityVar]: "0",
       },
+      fontFamily: theme.font.mono,
+      color: color.gray[800],
+      fontWeight: 600,
     },
   ]),
   containerFocused: style({

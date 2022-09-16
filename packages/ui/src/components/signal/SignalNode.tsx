@@ -9,13 +9,13 @@ import {
   Match,
   onCleanup,
   ParentComponent,
-  Setter,
   Show,
   splitProps,
   Switch,
+  untrack,
   useContext,
 } from "solid-js"
-import { Key } from "@solid-primitives/keyed"
+import { Entries } from "@solid-primitives/keyed"
 import { Graph, NodeID, NodeType } from "@solid-devtools/shared/graph"
 import {
   EncodedValue,
@@ -25,11 +25,11 @@ import {
   NEGATIVE_INFINITY,
   ValueType,
 } from "@solid-devtools/shared/serialize"
+import clsx from "clsx"
 import * as Icon from "~/icons"
 import { color } from "~/theme"
 import { Highlight } from "../highlight/Highlight"
 import * as styles from "./SignalNode.css"
-import clsx from "clsx"
 
 type ValueComponent<K extends ValueType> = Component<Omit<EncodedValueOf<K, boolean>, "type">>
 
@@ -65,6 +65,9 @@ const BooleanValuePreview: ValueComponent<ValueType.Boolean> = props => (
 const FunctionValuePreview: ValueComponent<ValueType.Function> = props => (
   <span class={styles.ValueFunction}>{props.value ? `f ${props.value}()` : "function()"}</span>
 )
+const GetterValuePreview: ValueComponent<ValueType.Getter> = props => (
+  <span class={styles.ValueFunction}>get {props.value}()</span>
+)
 
 const NullableValuePreview: Component<{ value: null | undefined }> = props => (
   <span class={styles.Nullable}>{props.value === null ? "null" : "undefined"}</span>
@@ -78,21 +81,29 @@ const InstanceValuePreview: ValueComponent<ValueType.Instance> = props => (
   <span class={styles.baseValue}>{props.value}</span>
 )
 
+export type ToggleElementHover = (elementId: NodeID, hovered?: boolean) => void
+
+const ElementHoverContext = createContext<ToggleElementHover>()
+
 const ElementValuePreview: ValueComponent<ValueType.Element> = props => {
-  const { setHoveredElement } = useSignalContext()
+  const onHover = useContext(ElementHoverContext)
 
-  const toggleHovered = (state: boolean) => {
-    if (props.value.id === undefined) return
-    setHoveredElement(state ? props.value.id : p => (p === props.value.id ? null : p))
-  }
+  const handleHover =
+    onHover &&
+    ((hovered: boolean) => {
+      if (props.value.id === undefined) return
+      onHover(props.value.id, hovered)
+    })
 
-  onCleanup(() => toggleHovered(false))
+  handleHover && onCleanup(() => handleHover(false))
 
   return (
     <span
       class={styles.ValueElement.container}
-      onMouseEnter={() => toggleHovered(true)}
-      onMouseLeave={() => toggleHovered(false)}
+      {...(handleHover && {
+        onMouseEnter: () => handleHover(true),
+        onMouseLeave: () => handleHover(false),
+      })}
     >
       <div class={styles.ValueElement.highlight} />
       {props.value.name}
@@ -118,8 +129,8 @@ const ObjectValuePreview: Component<
         </span>
       </Show>
     </Match>
-    <Match when={props.children} keyed>
-      {value => <CollapsableObjectPreview value={value} />}
+    <Match when={props.children}>
+      <CollapsableObjectPreview value={props.children!} />
     </Match>
   </Switch>
 )
@@ -128,15 +139,11 @@ const CollapsableObjectPreview: Component<{
   value:
     | EncodedValueOf<ValueType.Object, true>["children"]
     | EncodedValueOf<ValueType.Array, true>["children"]
-}> = props => (
-  <ul class={styles.collapsable.list}>
-    <Key each={Object.entries(props.value)} by={0}>
-      {keyvalue => {
-        // TODO: is <Key> necessary here? the values should be reconciled by the key anyway
-        // key will be static, because <Key> is using it as a key
-        const key = keyvalue()[0]
-        const value = () => keyvalue()[1]
-        return (
+}> = props => {
+  return (
+    <ul class={styles.collapsable.list}>
+      <Entries of={props.value}>
+        {(key, value) => (
           <Show
             when={value().type === ValueType.Object || value().type === ValueType.Array}
             fallback={
@@ -146,7 +153,7 @@ const CollapsableObjectPreview: Component<{
               </ValueRow>
             }
           >
-            {() => {
+            {untrack(() => {
               const [extended, setExtended] = createSignal(false)
               return (
                 <ValueRow
@@ -165,13 +172,13 @@ const CollapsableObjectPreview: Component<{
                   />
                 </ValueRow>
               )
-            }}
+            })}
           </Show>
-        )
-      }}
-    </Key>
-  </ul>
-)
+        )}
+      </Entries>
+    </ul>
+  )
+}
 
 const ValuePreview: Component<{ value: EncodedValue<boolean> }> = props =>
   createMemo(() => {
@@ -187,6 +194,8 @@ const ValuePreview: Component<{ value: EncodedValue<boolean> }> = props =>
         return <ObjectValuePreview {...props.value} />
       case ValueType.Function:
         return <FunctionValuePreview value={props.value.value} />
+      case ValueType.Getter:
+        return <GetterValuePreview value={props.value.value} />
       case ValueType.Null:
         return <NullableValuePreview value={null} />
       case ValueType.Undefined:
@@ -275,10 +284,33 @@ export const Signals: Component<{ each: Graph.Signal[] }> = props => {
   )
 }
 
+export const ValueNode: Component<{
+  value: EncodedValue<boolean>
+  name: string
+  type?: NodeType.Memo | NodeType.Signal | null
+  selected: boolean
+  updated?: boolean
+  onClick?: VoidFunction
+  onElementHover?: ToggleElementHover
+}> = props => {
+  return (
+    <ValueRow selected={props.selected} onClick={props.onClick}>
+      <ValueName type={props.type}>
+        <Highlight strong={props.updated} light={false} signal class={styles.ValueName.highlight}>
+          {props.name}
+        </Highlight>
+      </ValueName>
+      <ElementHoverContext.Provider value={props.onElementHover}>
+        <ValuePreview value={props.value} />
+      </ElementHoverContext.Provider>
+    </ValueRow>
+  )
+}
+
 export type SignalContextState = {
   useUpdatedSelector: (id: NodeID) => Accessor<boolean>
   toggleSignalFocus: (signal: NodeID, focused?: boolean) => void
-  setHoveredElement: Setter<string | null>
+  toggleHoveredElement: ToggleElementHover
 }
 
 const SignalContext = createContext<SignalContextState>()
@@ -292,19 +324,20 @@ const useSignalContext = (): SignalContextState => {
 }
 
 export const SignalNode: Component<{ signal: Graph.Signal }> = ({ signal }) => {
-  const { type, id } = signal
-  const { useUpdatedSelector, toggleSignalFocus } = useSignalContext()
+  const { type, id, name } = signal
+  const { useUpdatedSelector, toggleSignalFocus, toggleHoveredElement } = useSignalContext()
 
   const isUpdated = useUpdatedSelector(id)
 
   return (
-    <ValueRow selected={signal.selected} onClick={() => toggleSignalFocus(id)}>
-      <ValueName type={type}>
-        <Highlight strong={isUpdated()} light={false} signal class={styles.ValueName.highlight}>
-          {signal.name}
-        </Highlight>
-      </ValueName>
-      <ValuePreview value={signal.value} />
-    </ValueRow>
+    <ValueNode
+      name={name}
+      type={type}
+      value={signal.value}
+      selected={signal.selected}
+      updated={isUpdated()}
+      onClick={() => toggleSignalFocus(id)}
+      onElementHover={toggleHoveredElement}
+    />
   )
 }

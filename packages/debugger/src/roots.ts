@@ -9,23 +9,15 @@ import {
   Core,
 } from "@solid-devtools/shared/graph"
 import { INTERNAL } from "@solid-devtools/shared/variables"
-import {
-  clearOwnerObservers,
-  ComputationUpdateHandler,
-  SignalUpdateHandler,
-  walkSolidTree,
-} from "./walker"
+import { ComputationUpdateHandler, WalkerResult, walkSolidTree } from "./walker"
 import {
   enabled,
   onForceUpdate,
   onUpdate,
   updateRoot,
   removeRoot,
-  pushSignalUpdate,
-  setSelectedDetails,
   gatherComponents,
   pushComputationUpdate,
-  focusedState,
 } from "./plugin"
 import {
   createInternalRoot,
@@ -39,9 +31,11 @@ import {
 } from "./utils"
 import { untrackedCallback } from "@solid-devtools/shared/primitives"
 
-const RootMap: Record<NodeID, { update: VoidFunction; forceUpdate: VoidFunction }> = {}
-export const forceRootUpdate = (rootId: NodeID) => RootMap[rootId].forceUpdate()
-export const triggerRootUpdate = (rootId: NodeID) => RootMap[rootId].update()
+const RootMap: Record<NodeID, (inspectedId?: NodeID) => WalkerResult | null> = {}
+export const walkSolidRoot = (rootId: NodeID, inspectedId?: NodeID): WalkerResult | null => {
+  const walk = RootMap[rootId]
+  return walk ? walk(inspectedId) : null
+}
 
 export function createGraphRoot(owner: Solid.Root): void {
   // setup the debugger in a separate root, so that it doesn't walk and track itself
@@ -56,44 +50,27 @@ export function createGraphRoot(owner: Solid.Root): void {
       pushComputationUpdate(rootId, nodeId)
     }
 
-    const onSignalUpdate: SignalUpdateHandler = (nodeId, value) => {
-      if (owner.isDisposed) return
-      pushSignalUpdate(nodeId, value)
-    }
-
-    let lastSelectedOwner: Solid.Owner | null = null
-
-    const forceRootUpdate: VoidFunction = untrackedCallback(() => {
-      if (owner.isDisposed) return
-      // make sure we don't keep the listeners around
-      lastSelectedOwner && clearOwnerObservers(lastSelectedOwner)
-      const { tree, components, selected } = walkSolidTree(owner, {
+    const forceRootUpdate = untrackedCallback((inspectedId?: NodeID | void) => {
+      if (owner.isDisposed) return null
+      const { tree, components, inspectedOwner } = walkSolidTree(owner, {
         onComputationUpdate,
-        onSignalUpdate,
         rootId,
-        selectedId: focusedState.id,
+        inspectedId: inspectedId ?? null,
         gatherComponents: gatherComponents(),
-        elementMap: focusedState.elementMap,
       })
-      lastSelectedOwner = selected.owner
-      if (focusedState.rootId === rootId) setSelectedDetails(selected)
       updateRoot({ id: rootId, tree, components })
+      return { tree, components, inspectedOwner }
     })
     const triggerRootUpdate = throttle(forceRootUpdate, 350)
 
-    RootMap[rootId] = {
-      update: triggerRootUpdate,
-      forceUpdate: forceRootUpdate,
-    }
+    RootMap[rootId] = forceRootUpdate
 
     onUpdate(triggerRootUpdate)
     onForceUpdate(forceRootUpdate)
 
     createEffect(() => {
       // force trigger update when enabled changes to true
-      if (enabled()) forceRootUpdate()
-      // stop listeneing to signals when the debugger is disabled
-      else lastSelectedOwner && clearOwnerObservers(lastSelectedOwner)
+      enabled() && forceRootUpdate()
     })
 
     setDebuggerContext(owner, { rootId, triggerRootUpdate, forceRootUpdate })
@@ -102,7 +79,6 @@ export function createGraphRoot(owner: Solid.Root): void {
       removeDebuggerContext(owner)
       removeRoot(rootId)
       owner.isDisposed = true
-      lastSelectedOwner && clearOwnerObservers(lastSelectedOwner)
       delete RootMap[rootId]
     })
   })

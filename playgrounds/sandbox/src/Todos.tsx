@@ -1,8 +1,6 @@
-import { createEffect, createSignal, batch, For, Component } from "solid-js"
-import { $RAW, reconcile, unwrap } from "solid-js/store"
+import { createEffect, createSignal, batch, For, Component, getOwner } from "solid-js"
 import { createStore, Store, SetStoreFunction } from "solid-js/store"
-import { debugProps } from "@solid-devtools/logger"
-// import { makeStoreObserver } from "@solid-devtools/debugger"
+// import { isSolidMemo } from "@solid-devtools/debugger"
 
 export function createLocalStore<T extends object>(
   name: string,
@@ -27,6 +25,8 @@ const Todo: Component<{
   onUpdate: (value: string) => void
   onRemove: VoidFunction
 }> = props => {
+  // console.log(isSolidMemo(getOwner()!.owner))
+
   // debugProps(props)
 
   return (

@@ -66,16 +66,80 @@ function createSignalNode(raw: Readonly<Mapped.Signal>): Graph.Signal {
   return { ...raw, selected: false }
 }
 
-export type OwnerDetailsState = (
+function mapRawPath(rootId: NodeID, rawPath: readonly NodeID[]): Graph.Path {
+  const path = rawPath.map(id => findOwnerById(rootId, id) ?? NOTFOUND)
+  path.push(untrack(focused)!)
+  return path
+}
+
+function reconcileProps(proxy: Graph.Props, raw: Mapped.Props): void {
+  const record = proxy.record
+  const newRecord = raw.record
+  proxy.proxy = raw.proxy
+  // the props cannot be deleted/added, so we can just update them
+  for (const [key, prop] of Object.entries(record)) {
+    const newProp = newRecord[key]
+    if (!newProp) delete record[key]
+    else reconcileValue(prop.value, newProp)
+  }
+  for (const [key, newProp] of Object.entries(newRecord)) {
+    if (!record[key]) record[key] = { value: newProp, selected: false }
+  }
+}
+
+function createDetails(rootId: NodeID, raw: Readonly<Mapped.OwnerDetails>): Graph.OwnerDetails {
+  const signals = raw.signals.reduce((signals, signal) => {
+    signals[signal.id] = createSignalNode(signal)
+    return signals
+  }, {} as Graph.OwnerDetails["signals"])
+  const path = mapRawPath(rootId, raw.path)
+  const details: Mutable<Graph.OwnerDetails> = {
+    id: raw.id,
+    name: raw.name,
+    type: raw.type,
+    path,
+    rawPath: raw.path,
+    signals,
+  }
+  if (raw.props) {
+    details.props = {
+      proxy: raw.props.proxy,
+      record: Object.entries(raw.props.record).reduce((props, [propName, value]) => {
+        props[propName] = { value, selected: false }
+        return props
+      }, {} as Graph.Props["record"]),
+    }
+  }
+  return details
+}
+
+function reconcileDetails(
+  rootId: NodeID,
+  proxy: Mutable<Graph.OwnerDetails>,
+  raw: Readonly<Mapped.OwnerDetails>,
+): void {
+  // update path
+  if (!arrayEquals(proxy.rawPath, raw.path)) {
+    const path = mapRawPath(rootId, raw.path)
+    proxy.rawPath.length = 0
+    proxy.rawPath.push.apply(proxy.rawPath, raw.path)
+    proxy.path.length = 0
+    proxy.path.push.apply(proxy.path, path)
+  }
+  // update signals
+  reconcileSignals(raw.signals, proxy.signals)
+  // update props
+  if (raw.props) reconcileProps(proxy.props!, raw.props)
+}
+
+export type OwnerDetailsState =
   | { focused: null; rootId: null; details: null }
   | { focused: Graph.Owner; rootId: NodeID; details: Graph.OwnerDetails | null }
-) & { selectedSignals: NodeID[] }
 
 const nullState: OwnerDetailsState = {
   focused: null,
   rootId: null,
   details: null,
-  selectedSignals: [],
 }
 
 const exports = createRoot(() => {
@@ -104,38 +168,17 @@ const exports = createRoot(() => {
       }
     })
 
-  function mapRawPath(rootId: NodeID, rawPath: readonly NodeID[]): Graph.Path {
-    const path = rawPath.map(id => findOwnerById(rootId, id) ?? NOTFOUND)
-    path.push(untrack(focused)!)
-    return path
-  }
-
   function updateDetails(raw: Mapped.OwnerDetails): void {
     const rootId = untrack(focusedRootId)
     if (!rootId) return warn("OwnerDetailsUpdate: rootId is null")
 
-    setState("details", prev => {
-      // add new details
-      if (prev === null) {
-        const signals: Graph.OwnerDetails["signals"] = {}
-        raw.signals.forEach(signal => (signals[signal.id] = createSignalNode(signal)))
-        const path = mapRawPath(rootId, raw.path)
-        return { id: raw.id, name: raw.name, type: raw.type, path, rawPath: raw.path, signals }
-      }
-      // reconcile details
-      return produce<Mutable<Graph.OwnerDetails>>(proxy => {
-        // update path
-        if (!arrayEquals(proxy.rawPath, raw.path)) {
-          const path = mapRawPath(rootId, raw.path)
-          proxy.rawPath.length = 0
-          proxy.rawPath.push.apply(proxy.rawPath, raw.path)
-          proxy.path.length = 0
-          proxy.path.push.apply(proxy.path, path)
-        }
-        // update signals
-        reconcileSignals(raw.signals, proxy.signals)
-      })(prev)
-    })
+    setState("details", prev =>
+      prev === null
+        ? createDetails(rootId, raw)
+        : produce((proxy: Mutable<Graph.OwnerDetails>) => reconcileDetails(rootId, proxy, raw))(
+            prev,
+          ),
+    )
   }
 
   const [useUpdatedSelector, addUpdated, clearUpdated] = createUpdatedSelector()
@@ -162,19 +205,36 @@ const exports = createRoot(() => {
     })
   }
 
-  /** variable for a callback in bridge.ts */
-  let onSignalSelect: ((id: NodeID, selected: boolean) => void) | undefined
-  const setOnSignalSelect = (fn: typeof onSignalSelect) => (onSignalSelect = fn)
+  const handlePropsUpdate = untrackedCallback((props: Mapped.Props) => {
+    if (!details() || !details()!.props) return
+    setState(
+      "details",
+      "props",
+      produce(proxy => reconcileProps(proxy!, props)),
+    )
+  })
 
+  /** variable for a callback in bridge.ts */
+  let onInspectValue: ((payload: Messages["ToggleInspectedValue"]) => void) | undefined
+  const setOnInspectValue = (fn: typeof onInspectValue) => (onInspectValue = fn)
+
+  function togglePropFocus(id: string, selected?: boolean): void {
+    setState("details", "props", "record", id, "selected", p => (selected = selected ?? !p))
+    onInspectValue!({ type: "prop", id, selected: selected! })
+  }
   function toggleSignalFocus(id: NodeID, selected?: boolean) {
     setState("details", "signals", id, "selected", p => (selected = selected ?? !p))
-    onSignalSelect!(id, selected!)
+    onInspectValue!({ type: "signal", id, selected: selected! })
   }
 
   //
   // HOVERED ELEMENT
   //
   const [hoveredElement, setHoveredElement] = createSignal<string | null>(null)
+
+  function toggleHoveredElement(id: NodeID, selected?: boolean) {
+    setHoveredElement(p => (p === id ? (selected ? id : null) : selected ? id : p))
+  }
 
   return {
     focused,
@@ -186,10 +246,12 @@ const exports = createRoot(() => {
     updateDetails,
     handleSignalUpdates,
     handleGraphUpdate,
+    handlePropsUpdate,
     toggleSignalFocus,
-    setOnSignalSelect,
+    togglePropFocus,
+    setOnInspectValue,
     hoveredElement,
-    setHoveredElement,
+    toggleHoveredElement,
   }
 })
 export const {
@@ -202,8 +264,10 @@ export const {
   updateDetails,
   handleSignalUpdates,
   handleGraphUpdate,
+  handlePropsUpdate,
   toggleSignalFocus,
-  setOnSignalSelect,
+  togglePropFocus,
+  setOnInspectValue,
   hoveredElement,
-  setHoveredElement,
+  toggleHoveredElement,
 } = exports

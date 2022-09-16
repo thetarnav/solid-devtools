@@ -12,6 +12,7 @@ export enum ValueType {
   Array,
   Object,
   Function,
+  Getter,
   Element,
   Instance,
 }
@@ -24,6 +25,7 @@ export type EncodedPreviewPayloadMap = {
   [ValueType.String]: string
   [ValueType.Symbol]: string
   [ValueType.Function]: string
+  [ValueType.Getter]: string
   [ValueType.Element]: { name: string; id?: string }
   [ValueType.Instance]: string
 }
@@ -45,12 +47,10 @@ export type EncodedValue<Deep extends boolean = false> = {
   [K in ValueType]: EncodedValueOf<K, Deep>
 }[ValueType]
 
-let lastId = 0
-
 export function encodeValue<Deep extends boolean>(
   value: unknown,
   deep: Deep,
-  elementMap?: Record<string, HTMLElement>,
+  elementMap?: ElementMap,
 ): EncodedValue<Deep> {
   if (typeof value === "number") {
     if (value === Infinity) return { type: ValueType.Number, value: INFINITY }
@@ -64,14 +64,14 @@ export function encodeValue<Deep extends boolean>(
   if (value === undefined) return { type: ValueType.Undefined }
   if (typeof value === "symbol") return { type: ValueType.Symbol, value: value.description ?? "" }
   if (typeof value === "function") return { type: ValueType.Function, value: value.name }
-  if (value instanceof HTMLElement) {
-    if (elementMap) {
-      const id = (lastId++).toString()
-      elementMap[id] = value
-      return { type: ValueType.Element, value: { name: value.tagName, id } }
+
+  if (value instanceof HTMLElement)
+    return {
+      type: ValueType.Element,
+      value: elementMap
+        ? { name: value.tagName, id: elementMap.set(value) }
+        : { name: value.tagName },
     }
-    return { type: ValueType.Element, value: { name: value.tagName } }
-  }
 
   if (Array.isArray(value)) {
     const payload = { type: ValueType.Array, value: value.length } as EncodedValueOf<
@@ -99,4 +99,24 @@ export function encodeValue<Deep extends boolean>(
   }
 
   return { type: ValueType.Instance, value: name }
+}
+
+let lastId = 0
+
+export class ElementMap {
+  private obj: Record<string, HTMLElement> = {}
+  private map: WeakMap<HTMLElement, string> = new WeakMap()
+
+  get(id: string): HTMLElement | undefined {
+    return this.obj[id]
+  }
+
+  set(element: HTMLElement): string {
+    let id = this.map.get(element)
+    if (id !== undefined) return id
+    id = (lastId++).toString()
+    this.obj[id] = element
+    this.map.set(element, id)
+    return id
+  }
 }

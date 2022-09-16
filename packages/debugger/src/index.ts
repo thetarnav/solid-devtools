@@ -3,8 +3,8 @@ import { attachDebugger } from "./roots"
 
 export { useDebugger } from "./plugin"
 export type {
-  FocusedState,
-  SetSelectedOwner,
+  InspectedState,
+  SetInspectedOwner,
   SignaledRoot,
   BatchComputationUpdatesHandler,
   PluginData,

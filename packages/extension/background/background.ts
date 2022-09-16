@@ -26,7 +26,8 @@ chrome.runtime.onConnect.addListener(port => {
   if (port.name === DEVTOOLS_CONNECTION_NAME) {
     const disconnectListener = () => {
       panelVisibility = false
-      postPortMessage("PanelVisibility", false)
+      postPortMessage("PanelClosed", true)
+      log("Devtools Port disconnected")
       port.onDisconnect.removeListener(disconnectListener)
     }
     port.onDisconnect.addListener(disconnectListener)
@@ -37,50 +38,43 @@ chrome.runtime.onConnect.addListener(port => {
   if (port.name !== DEVTOOLS_CONTENT_PORT) return log("Ignored connection:", port.name)
 
   if (currentPort) {
-    log(`Switching BG Ports: ${currentPort.sender?.documentId} -> ${port.sender?.documentId}`)
+    log(`Switching Content Ports: ${currentPort.sender?.documentId} -> ${port.sender?.documentId}`)
   }
 
   currentPort = port
   lastDocumentId = port.sender?.documentId
 
-  const { push: addCleanup, execute: clearListeners } = createCallbackStack()
+  const { push: addCleanup, execute: clearRuntimeListeners } = createCallbackStack()
 
   port.onDisconnect.addListener(() => {
-    clearListeners()
-    log("Port disconnected.")
+    clearRuntimeListeners()
+    log("Content Port disconnected.")
   })
 
   const messanger = createPortMessanger(port)
   postPortMessage = messanger.postPortMessage
   onPortMessage = messanger.onPortMessage
 
-  addCleanup(
-    onPortMessage("SolidOnPage", () => {
-      solidOnPage = true
-      postRuntimeMessage("SolidOnPage")
-      // respond with page visibility to the debugger, to let him know
-      // if the panel is already created and visible (after page refresh)
-      postPortMessage("PanelVisibility", panelVisibility)
-    }),
-  )
+  onPortMessage("SolidOnPage", () => {
+    solidOnPage = true
+    postRuntimeMessage("SolidOnPage")
+    // respond with page visibility to the debugger, to let him know
+    // if the panel is already created and visible (after page refresh)
+    postPortMessage("PanelVisibility", panelVisibility)
+  }),
+    onPortMessage("ResetPanel", () => postRuntimeMessage("ResetPanel"))
 
-  addCleanup(onPortMessage("ResetPanel", () => postRuntimeMessage("ResetPanel")))
+  onPortMessage("GraphUpdate", e => postRuntimeMessage("GraphUpdate", e))
 
-  addCleanup(onPortMessage("GraphUpdate", graph => postRuntimeMessage("GraphUpdate", graph)))
+  onPortMessage("ComputationUpdates", e => postRuntimeMessage("ComputationUpdates", e))
+  onPortMessage("SignalUpdates", e => postRuntimeMessage("SignalUpdates", e))
+  onPortMessage("SignalValue", e => postRuntimeMessage("SignalValue", e))
+  onPortMessage("OwnerDetailsUpdate", e => postRuntimeMessage("OwnerDetailsUpdate", e))
+  onPortMessage("PropsUpdate", e => postRuntimeMessage("PropsUpdate", e))
+  onPortMessage("SetHoveredOwner", e => postRuntimeMessage("SetHoveredOwner", e))
+  onPortMessage("SendSelectedOwner", e => postRuntimeMessage("SendSelectedOwner", e))
 
-  addCleanup(onPortMessage("ComputationUpdates", e => postRuntimeMessage("ComputationUpdates", e)))
-
-  addCleanup(onPortMessage("SignalUpdates", e => postRuntimeMessage("SignalUpdates", e)))
-
-  addCleanup(onPortMessage("OwnerDetailsUpdate", e => postRuntimeMessage("OwnerDetailsUpdate", e)))
-
-  addCleanup(onPortMessage("SignalValue", e => postRuntimeMessage("SignalValue", e)))
-
-  addCleanup(onPortMessage("SetHoveredOwner", e => postRuntimeMessage("SetHoveredOwner", e)))
-
-  addCleanup(onPortMessage("SendSelectedOwner", e => postRuntimeMessage("SendSelectedOwner", e)))
-
-  addCleanup(onPortMessage("AdpLocatorMode", e => postRuntimeMessage("AdpLocatorMode", e)))
+  onPortMessage("AdpLocatorMode", e => postRuntimeMessage("AdpLocatorMode", e))
   addCleanup(onRuntimeMessage("ExtLocatorMode", e => postPortMessage("ExtLocatorMode", e)))
 
   addCleanup(
@@ -93,12 +87,16 @@ chrome.runtime.onConnect.addListener(port => {
   // make sure the devtools script will be triggered to create devtools panel
   addCleanup(
     onRuntimeMessage("DevtoolsScriptConnected", tabId => {
+      postPortMessage("DevtoolsScriptConnected", tabId)
       if (solidOnPage) postRuntimeMessage("SolidOnPage")
     }),
   )
 
   addCleanup(onRuntimeMessage("SetSelectedOwner", e => postPortMessage("SetSelectedOwner", e)))
-  addCleanup(onRuntimeMessage("SetSelectedSignal", e => postPortMessage("SetSelectedSignal", e)))
+
+  addCleanup(
+    onRuntimeMessage("ToggleInspectedValue", e => postPortMessage("ToggleInspectedValue", e)),
+  )
 
   addCleanup(onRuntimeMessage("HighlightElement", e => postPortMessage("HighlightElement", e)))
 

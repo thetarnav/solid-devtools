@@ -17,6 +17,6 @@
   },
   "dependencies": {
     "solid-devtools": "^0.15.0",
-    "solid-js": "^1.5.4"
+    "solid-js": "^1.5.5"
   }
 }

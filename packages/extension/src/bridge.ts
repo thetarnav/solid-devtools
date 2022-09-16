@@ -29,13 +29,12 @@ onRuntimeMessage("ComputationUpdates", updates => {
   Graph.handleComputationsUpdate(updates.map(u => u.id))
 })
 
-onRuntimeMessage("SignalUpdates", updates => {
-  Details.handleSignalUpdates(updates)
-})
+onRuntimeMessage("SignalUpdates", Details.handleSignalUpdates)
 onRuntimeMessage("SignalValue", update => {
   // updates the signal value but without causing it to highlight
   Details.handleSignalUpdates([update], false)
 })
+onRuntimeMessage("PropsUpdate", Details.handlePropsUpdate)
 
 onRuntimeMessage("OwnerDetailsUpdate", details => {
   Details.updateDetails(details)
@@ -107,7 +106,5 @@ createRoot(() => {
   })
 
   // toggle selected signals
-  Details.setOnSignalSelect((id, selected) => {
-    postRuntimeMessage("SetSelectedSignal", { id, selected })
-  })
+  Details.setOnInspectValue(payload => postRuntimeMessage("ToggleInspectedValue", payload))
 })

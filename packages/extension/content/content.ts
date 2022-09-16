@@ -52,22 +52,24 @@ onWindowMessage("GraphUpdate", graph => postPortMessage("GraphUpdate", graph))
 onWindowMessage("ComputationUpdates", e => postPortMessage("ComputationUpdates", e))
 
 onWindowMessage("SignalUpdates", e => postPortMessage("SignalUpdates", e))
+onWindowMessage("SignalValue", e => postPortMessage("SignalValue", e))
 
 onWindowMessage("OwnerDetailsUpdate", e => postPortMessage("OwnerDetailsUpdate", e))
 
-onWindowMessage("SignalValue", e => postPortMessage("SignalValue", e))
+onWindowMessage("PropsUpdate", e => postPortMessage("PropsUpdate", e))
 
 onWindowMessage("SetHoveredOwner", e => postPortMessage("SetHoveredOwner", e))
 
 onWindowMessage("SendSelectedOwner", e => postPortMessage("SendSelectedOwner", e))
 
-onPortMessage("PanelVisibility", visible => postWindowMessage("PanelVisibility", visible))
+onPortMessage("PanelVisibility", e => postWindowMessage("PanelVisibility", e))
+onPortMessage("PanelClosed", e => postWindowMessage("PanelClosed", e))
 
-once(onPortMessage, "ForceUpdate", () => postWindowMessage("ForceUpdate"))
+onPortMessage("ForceUpdate", () => postWindowMessage("ForceUpdate"))
 
 onPortMessage("SetSelectedOwner", e => postWindowMessage("SetSelectedOwner", e))
 
-onPortMessage("SetSelectedSignal", e => postWindowMessage("SetSelectedSignal", e))
+onPortMessage("ToggleInspectedValue", e => postWindowMessage("ToggleInspectedValue", e))
 
 onPortMessage("HighlightElement", e => postWindowMessage("HighlightElement", e))
 

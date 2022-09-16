@@ -60,28 +60,3 @@ export const pathInner = style({
   borderTop: `1px solid ${color.gray[200]}`,
   backgroundColor: color.gray[50],
 })
-
-export const details = {
-  root: style({
-    padding: spacing[4],
-  }),
-  header: style({
-    marginBottom: spacing[4],
-  }),
-  h1: style({
-    // TODO: typography
-    fontSize: spacing[4],
-    fontWeight: "bold",
-  }),
-  id: style({
-    fontSize: spacing[3],
-    color: color.gray[500],
-    fontWeight: 400,
-    textTransform: "uppercase",
-  }),
-  type: style({
-    fontSize: spacing[3],
-    color: color.gray[500],
-    fontWeight: 400,
-  }),
-}

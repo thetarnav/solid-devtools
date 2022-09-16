@@ -32,7 +32,7 @@
     "esbuild-plugin-solid": "^0.4.2",
     "object-observer": "^5.0.4",
     "prettier": "2.7.0",
-    "solid-js": "^1.5.4",
+    "solid-js": "^1.5.5",
     "taze": "^0.8.0",
     "ts-jest": "^28.0.8",
     "tsup": "^6.2.3",

@@ -96,6 +96,10 @@ export namespace Solid {
     observers: Computation[] | null
   }
 
+  export interface Component extends Memo {
+    props: Record<string, unknown>
+  }
+
   export type Owner = Computation | Root
 }
 
@@ -168,11 +172,17 @@ export namespace Mapped {
     element: Many<HTMLElement>
   }
 
+  export type Props = {
+    proxy: boolean
+    record: Record<string, EncodedValue<boolean>>
+  }
+
   export interface OwnerDetails {
     id: NodeID
     name: string
     type: NodeType
     path: NodeID[]
+    props?: Props
     signals: Signal[]
     /** for computations */
     value?: EncodedValue
@@ -213,6 +223,11 @@ export namespace Graph {
 
   export type Path = (Owner | typeof NOTFOUND)[]
 
+  export type Props = {
+    proxy: boolean
+    record: Record<string, { selected: boolean; value: EncodedValue<boolean> }>
+  }
+
   export interface OwnerDetails {
     readonly id: NodeID
     readonly name: string
@@ -220,6 +235,7 @@ export namespace Graph {
     readonly path: Path
     readonly rawPath: NodeID[]
     readonly signals: Record<NodeID, Signal>
+    readonly props?: Props
     // TODO: more to come
   }
 }

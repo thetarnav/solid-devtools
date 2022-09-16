@@ -22,19 +22,27 @@ createInternalRoot(() => {
   const [enabled, setEnabled] = createSignal(false)
   Locator.addHighlightingSource(enabled)
 
-  // update the graph only if the devtools panel is in view
-  onWindowMessage("PanelVisibility", setEnabled)
-
   const {
     forceTriggerUpdate,
     rootsUpdates,
     roots,
     handleComputationUpdates,
     handleSignalUpdates,
-    setFocusedOwner,
-    focusedState,
-    setSelectedSignal,
-  } = useDebugger({ enabled, observeComputations: enabled })
+    handlePropsUpdate,
+    setInspectedOwner,
+    inspected,
+    setInspectedSignal,
+    setInspectedProp,
+  } = useDebugger({ enabled })
+
+  // update the graph only if the devtools panel is in view
+  onWindowMessage("PanelVisibility", setEnabled)
+
+  // disable debugger and reset any state
+  onWindowMessage("PanelClosed", () => {
+    setEnabled(false)
+    setInspectedOwner(null)
+  })
 
   createEffect(() => {
     if (!enabled()) return
@@ -42,35 +50,41 @@ createInternalRoot(() => {
     if (loadedBefore) forceTriggerUpdate()
     else loadedBefore = true
 
-    onCleanup(() => setFocusedOwner(null))
-
     onCleanup(onWindowMessage("ForceUpdate", forceTriggerUpdate))
-    onCleanup(onWindowMessage("SetSelectedOwner", setFocusedOwner))
+
+    onCleanup(onWindowMessage("SetSelectedOwner", setInspectedOwner))
+
     onCleanup(
-      onWindowMessage("SetSelectedSignal", ({ id, selected }) => {
-        const value = setSelectedSignal({ id, selected })
-        if (value) postWindowMessage("SignalValue", { id, value })
+      onWindowMessage("ToggleInspectedValue", payload => {
+        // toggled signal
+        if (payload.type === "signal") {
+          const { id, selected } = payload
+          const value = setInspectedSignal(id, selected)
+          if (value) postWindowMessage("SignalValue", { id, value })
+        }
+        // toggled prop
+        else {
+          const { id, selected } = payload
+          setInspectedProp(id, selected)
+        }
       }),
     )
 
     // diff the roots, and send only the changed roots (edited, deleted, added)
-    createEffect(() => {
-      postWindowMessage("GraphUpdate", rootsUpdates())
-    })
+    createEffect(() => postWindowMessage("GraphUpdate", rootsUpdates()))
 
     // send the computation updates
-    handleComputationUpdates(updates => {
-      postWindowMessage("ComputationUpdates", updates)
-    })
+    handleComputationUpdates(updates => postWindowMessage("ComputationUpdates", updates))
 
     // send the signal updates
-    handleSignalUpdates(updates => {
-      postWindowMessage("SignalUpdates", updates)
-    })
+    handleSignalUpdates(updates => postWindowMessage("SignalUpdates", updates))
+
+    // send the props updates
+    handlePropsUpdate(updates => postWindowMessage("PropsUpdate", updates))
 
     // send the focused owner details
     createEffect(() => {
-      const details = focusedState.details
+      const details = inspected.details
       if (details) postWindowMessage("OwnerDetailsUpdate", details)
     })
 
@@ -129,7 +143,7 @@ createInternalRoot(() => {
         }
         // highlight element
         else {
-          const element = focusedState.elementMap[payload]
+          const element = inspected.elementMap.get(payload)
           if (!element) return warn("No element found", payload)
           target = element
         }

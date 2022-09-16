@@ -5,6 +5,7 @@ import {
   NAN,
   encodeValue,
   EncodedValue,
+  ElementMap,
 } from "../src/serialize"
 
 const _testFunction = () => {}
@@ -167,7 +168,7 @@ describe("save elements to a map", () => {
     ],
   ]
 
-  const map: Record<number, HTMLElement> = {}
+  const map = new ElementMap()
   for (const [testName, value, expectation] of elMapExpectations) {
     test(testName, () => {
       const s = encodeValue(value, true, map)
@@ -176,9 +177,8 @@ describe("save elements to a map", () => {
     })
   }
   test("map containing correct values", () => {
-    expect(Object.keys(map).length).toBe(3)
-    expect(map[0]).toBe(div1)
-    expect(map[1]).toBe(a1)
-    expect(map[2]).toBe(div2)
+    expect(map.get("0")).toBe(div1)
+    expect(map.get("1")).toBe(a1)
+    expect(map.get("2")).toBe(div2)
   })
 })

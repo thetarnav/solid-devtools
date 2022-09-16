@@ -1,13 +1,9 @@
 import { Component, For, Show } from "solid-js"
-import { destructure } from "@solid-primitives/destructure"
-import { NodeType, Graph } from "@solid-devtools/shared/graph"
 import {
   StructureProvider,
-  SignalContextProvider,
   OwnerNode,
   Splitter,
   Scrollable,
-  Signals,
   OwnerPath,
   ToggleButton,
 } from "@solid-devtools/ui"
@@ -18,43 +14,10 @@ import {
   useComputationUpdatedSelector,
   useHoveredSelector,
 } from "./state/graph"
-import {
-  focused,
-  details,
-  useUpdatedSignalsSelector,
-  toggleSignalFocus,
-  setSelectedNode,
-  useOwnerSelectedSelector,
-  setHoveredElement,
-} from "./state/details"
+import { focused, details, setSelectedNode, useOwnerSelectedSelector } from "./state/details"
 import { setExtLocator, locatorEnabled } from "./state/selected"
 import * as styles from "./styles.css"
-
-const DetailsContent: Component<{ details: Graph.OwnerDetails }> = props => {
-  const { name, id, type, signals } = destructure(() => props.details)
-
-  return (
-    <div class={styles.details.root}>
-      <header class={styles.details.header}>
-        <h1 class={styles.details.h1}>
-          {name()} <span class={styles.details.id}>#{id()}</span>
-        </h1>
-        <div class={styles.details.type}>{NodeType[type()]}</div>
-      </header>
-      <div>
-        <SignalContextProvider
-          value={{
-            useUpdatedSelector: useUpdatedSignalsSelector,
-            toggleSignalFocus: toggleSignalFocus,
-            setHoveredElement,
-          }}
-        >
-          <Signals each={Object.values(signals())} />
-        </SignalContextProvider>
-      </div>
-    </div>
-  )
-}
+import Details from "./components/Details"
 
 const SelectComponent: Component<{}> = props => {
   return (
@@ -88,11 +51,7 @@ const App: Component = () => {
             onToggle={() => setSelectedNode(null)}
             side={
               <Show when={focused()}>
-                <div>
-                  <Show when={details()} keyed>
-                    {details => <DetailsContent details={details} />}
-                  </Show>
-                </div>
+                <Details />
               </Show>
             }
           >
