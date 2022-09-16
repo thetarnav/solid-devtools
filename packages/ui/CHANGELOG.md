@@ -1,5 +1,13 @@
 # @solid-devtools/ui
 
+## 0.10.3
+
+### Patch Changes
+
+- db7edcf: Track component props and display their values in the details of a inspected component.
+- Updated dependencies [db7edcf]
+  - @solid-devtools/shared@0.7.4
+
 ## 0.10.2
 
 ### Patch Changes
