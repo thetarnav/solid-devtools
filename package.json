@@ -31,13 +31,11 @@
     "esbuild-plugin-solid": "^0.4.2",
     "object-observer": "^5.1.0",
     "prettier": "2.7.1",
+    "solid-js": "^1.5.5"
     "ts-jest": "^28.0.8",
     "tsup": "^6.2.3",
     "turbo": "^1.4.5",
     "typescript": "^4.8.2"
   },
-  "packageManager": "pnpm@7.11.0",
-  "dependencies": {
-    "solid-js": "^1.5.4"
-  }
+  "packageManager": "pnpm@7.11.0"
 }

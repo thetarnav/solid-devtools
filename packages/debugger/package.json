@@ -1,6 +1,6 @@
 {
   "name": "@solid-devtools/debugger",
-  "version": "0.7.2",
+  "version": "0.8.0",
   "description": "Debugger of the Solid's reactivity graph — a cornerstone of all solid-devtools.",
   "license": "MIT",
   "author": "Damian Tarnawski <gthetarnav@gmail.com>",
@@ -53,13 +53,13 @@
     "@testing-library/jest-dom": "^5.16.5",
     "jest": "^29.0.2",
     "jest-environment-jsdom": "^29.0.2",
-    "solid-js": "^1.5.4",
+    "solid-js": "^1.5.5",
     "ts-node": "^10.9.1",
     "tsup": "^6.2.3",
     "typescript": "^4.8.2"
   },
   "dependencies": {
-    "@solid-devtools/shared": "workspace:^0.7.2",
+    "@solid-devtools/shared": "workspace:^0.7.4",
     "@solid-primitives/event-bus": "^0.1.2",
     "@solid-primitives/immutable": "^0.1.2",
     "@solid-primitives/refs": "^0.3.2",

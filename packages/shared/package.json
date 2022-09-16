@@ -1,6 +1,6 @@
 {
   "name": "@solid-devtools/shared",
-  "version": "0.7.3",
+  "version": "0.7.4",
   "license": "MIT",
   "author": "Damian Tarnawski <gthetarnav@gmail.com>",
   "contributors": [],
@@ -102,7 +102,7 @@
     "@solid-primitives/event-bus": "^0.1.2",
     "@solid-primitives/immutable": "^0.1.2",
     "@solid-primitives/utils": "^3.0.2",
-    "solid-js": "^1.5.4",
+    "solid-js": "^1.5.5",
     "ts-node": "^10.9.1",
     "type-fest": "^2.19.0"
   }

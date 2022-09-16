@@ -1,5 +1,17 @@
 # solid-devtools-extension
 
+## 0.9.0
+
+### Minor Changes
+
+- db7edcf: Track component props and display their values in the details of a inspected component.
+
+### Patch Changes
+
+- Updated dependencies [db7edcf]
+  - @solid-devtools/shared@0.7.4
+  - @solid-devtools/ui@0.10.3
+
 ## 0.8.3
 
 ### Patch Changes

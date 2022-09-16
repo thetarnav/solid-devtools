@@ -1,6 +1,6 @@
 {
   "name": "solid-devtools-extension",
-  "version": "0.8.3",
+  "version": "0.9.0",
   "private": true,
   "license": "MIT",
   "author": "Damian Tarnawski <gthetarnav@gmail.com>",
@@ -14,7 +14,7 @@
   },
   "devDependencies": {
     "@crxjs/vite-plugin": "^1.0.14",
-    "@solid-devtools/ext-adapter": "workspace:^0.15.1",
+    "@solid-devtools/ext-adapter": "^0.16.0",
     "@types/chrome": "^0.0.196",
     "@vanilla-extract/vite-plugin": "^3.3.1",
     "esbuild-plugin-solid": "^0.4.2",
@@ -27,8 +27,7 @@
     "zip-a-folder": "^1.1.5"
   },
   "dependencies": {
-    "@otonashixav/solid-flip": "^0.10.5",
-    "@solid-devtools/shared": "workspace:^0.7.3",
+    "@solid-devtools/shared": "workspace:^0.7.4",
     "@solid-primitives/context": "^0.1.1",
     "@solid-primitives/cursor": "^0.0.100",
     "@solid-primitives/destructure": "^0.1.2",
@@ -47,8 +46,9 @@
     "@vanilla-extract/private": "^1.0.3",
     "clsx": "^1.2.1",
     "csstype": "^3.1.0",
-    "solid-js": "^1.5.4",
+    "solid-js": "^1.5.5",
     "solid-transition-group": "^0.0.11",
+    "@otonashixav/solid-flip": "^0.10.5",
     "type-fest": "^2.19.0"
   },
   "packageManager": "pnpm@7.11.0"

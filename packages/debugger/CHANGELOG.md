@@ -1,5 +1,17 @@
 # @solid-devtools/debugger
 
+## 0.8.0
+
+### Minor Changes
+
+- db7edcf: Track component props and display their values in the details of a inspected component.
+
+### Patch Changes
+
+- bf579bb: Restructure debugger plugin api.
+- Updated dependencies [db7edcf]
+  - @solid-devtools/shared@0.7.4
+
 ## 0.7.2
 
 ### Patch Changes
