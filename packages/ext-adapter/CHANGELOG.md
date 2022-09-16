@@ -1,5 +1,13 @@
 # @solid-devtools/ext-adapter
 
+## 0.16.1
+
+### Patch Changes
+
+- a78d2e0: Bump solid-js peer dependency to 1.5.5
+- Updated dependencies [a78d2e0]
+  - @solid-devtools/debugger@0.8.1
+
 ## 0.16.0
 
 ### Minor Changes
