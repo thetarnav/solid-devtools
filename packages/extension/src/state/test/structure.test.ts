@@ -33,11 +33,11 @@ describe("mapStructureUpdates", () => {
     },
   ]
   let removed: NodeID[] = []
-  let structure: Structure.Node[] = []
+  let structure: StructureNode[] = []
 
   const attachments = new Map<NodeID, Mapped.Root[]>()
   const mappedRoots = new Map<NodeID, Mapped.Root>()
-  const nodeMap = new Map<NodeID, Structure.Node[]>()
+  const nodeMap = new Map<NodeID, StructureNode[]>()
 
   test("initial", () => {
     structure = mapStructureUpdates({

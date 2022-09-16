@@ -1,4 +1,4 @@
-import { structure, inspector, Structure } from "@/state"
+import { structure, inspector, StructureNode } from "@/state"
 import { OwnerPath, Scrollable } from "@/ui"
 import { NodeID } from "@solid-devtools/shared/graph"
 import { assignInlineVars } from "@vanilla-extract/dynamic"
@@ -18,10 +18,10 @@ import { OwnerNode } from "./OwnerNode"
 import * as styles from "./structure.css"
 
 export type StructureContextState = {
-  handleFocus: (owner: Structure.Node | null) => void
+  handleFocus: (owner: StructureNode | null) => void
   useUpdatedSelector: (id: NodeID) => Accessor<boolean>
-  useSelectedSelector: (owner: Structure.Node) => Accessor<boolean>
-  toggleHoveredOwner: (owner: Structure.Node, hovered: boolean) => void
+  useSelectedSelector: (owner: StructureNode) => Accessor<boolean>
+  toggleHoveredOwner: (owner: StructureNode, hovered: boolean) => void
   useHoveredSelector: (id: NodeID) => Accessor<boolean>
 }
 
@@ -76,7 +76,7 @@ let $index = 0
 let $nextList: DisplayNode[] = []
 let $prevMap: Record<NodeID, DisplayNode> = {}
 
-function mapNode(node: Structure.Node, level: number): void {
+function mapNode(node: StructureNode, level: number): void {
   const { id } = node
   const prev = $prevMap[id]
   // already rendered
@@ -98,7 +98,7 @@ function mapNode(node: Structure.Node, level: number): void {
   }
 }
 
-function mapNodes(nodes: readonly Structure.Node[], level: number): void {
+function mapNodes(nodes: readonly StructureNode[], level: number): void {
   for (const node of nodes) {
     const { children, length } = node
     const i = $index++
@@ -137,7 +137,7 @@ const DisplayStructureTree: Component = props => {
     start: number
     end: number
     list: readonly DisplayNode[]
-    rootList: readonly Structure.Node[]
+    rootList: readonly StructureNode[]
   }>((prev = { length: 0, start: 0, end: 0, list: [], rootList: [] }) => {
     const rootsList = structure.roots()
     const { top, height } = containerScroll()

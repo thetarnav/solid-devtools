@@ -1,20 +1,18 @@
-import { Component, JSX, onCleanup } from "solid-js"
+import { Component, onCleanup } from "solid-js"
 import { assignInlineVars } from "@vanilla-extract/dynamic"
 import { NodeType } from "@solid-devtools/shared/graph"
-import { Structure } from "@/state"
+import { StructureNode } from "@/state"
 import { Highlight } from "@/ui"
 import { useStructure } from "./Structure"
 import * as styles from "./OwnerNode.css"
 
 export const OwnerNode: Component<{
-  owner: Structure.Node
+  owner: StructureNode
   level: number
 }> = props => {
   const { owner } = props
   const { name, type, id } = owner
   const typeName = NodeType[type]
-
-  console.log("render", name)
 
   const {
     useUpdatedSelector,
@@ -55,19 +53,3 @@ export const OwnerNode: Component<{
     </div>
   )
 }
-
-// export function TreeNode(props: { owner: Structure.Owner; level: number }): JSX.Element {
-//   const { owner, level } = props
-//   return (
-//     <div class={styles.container} style={assignInlineVars({ [styles.levelVar]: level + "" })}>
-//       <OwnerNode owner={props.owner} />
-//       <div
-//         class={styles.childrenContainer}
-//       >
-//         <TransitionGroup enter={animateEnter()} exit={animateExit()}>
-//           <For each={children()}>{o => <OwnerNode owner={o} level={level + 1} />}</For>
-//         </TransitionGroup>
-//       </div>
-//     </div>
-//   )
-// }

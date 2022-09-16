@@ -3,14 +3,12 @@ import { Mapped, NodeID, NodeType, RootsUpdates } from "@solid-devtools/shared/g
 import { Writable } from "type-fest"
 import { createUpdatedSelector } from "./utils"
 
-export namespace Structure {
-  export interface Node {
-    readonly id: NodeID
-    readonly name: string
-    readonly type: NodeType
-    readonly children: Node[]
-    readonly length: number
-  }
+export interface StructureNode {
+  readonly id: NodeID
+  readonly name: string
+  readonly type: NodeType
+  readonly children: StructureNode[]
+  readonly length: number
 }
 
 function pushToMapList<K, T>(map: Map<K, T[]>, key: K, value: T): void {
@@ -31,13 +29,13 @@ function getNodeById(
   nodeMap: typeof $nodeMap,
   id: NodeID,
   rootId: NodeID,
-): Structure.Node | undefined
-function getNodeById(nodeMap: typeof $nodeMap, id: NodeID): Structure.Node | undefined
+): StructureNode | undefined
+function getNodeById(nodeMap: typeof $nodeMap, id: NodeID): StructureNode | undefined
 function getNodeById(
   nodeMap: typeof $nodeMap,
   id: NodeID,
   rootId?: NodeID,
-): Structure.Node | undefined {
+): StructureNode | undefined {
   if (rootId) {
     const nodes = nodeMap.get(rootId)
     if (nodes) {
@@ -56,18 +54,18 @@ function getNodeById(
 
 let $attachments: Map<NodeID, Mapped.Root[]>
 let $mappedRoots: Map<NodeID, Mapped.Root>
-let $nodeMap: Map<NodeID, Structure.Node[]>
+let $nodeMap: Map<NodeID, StructureNode[]>
 
 function mapOwner(
   raw: Readonly<Mapped.Owner>,
-  parent: Writable<Structure.Node> | null,
-  nodeList: Structure.Node[],
-): Structure.Node {
+  parent: Writable<StructureNode> | null,
+  nodeList: StructureNode[],
+): StructureNode {
   const { id, name, type, children: rawChildren } = raw
   const subroots = $attachments.get(id)
   let ci = 0
-  const children: Structure.Node[] = Array(rawChildren.length + (subroots ? subroots.length : 0))
-  const node: Writable<Structure.Node> = { id, name, type, children, length: 0 }
+  const children: StructureNode[] = Array(rawChildren.length + (subroots ? subroots.length : 0))
+  const node: Writable<StructureNode> = { id, name, type, children, length: 0 }
   // map children
   for (; ci < rawChildren.length; ci++) {
     const child = mapOwner(rawChildren[ci], node, nodeList)
@@ -77,7 +75,7 @@ function mapOwner(
   if (subroots) {
     for (let i = 0; i < subroots.length; i++) {
       const { tree, id: rootId } = subroots[i]
-      const subNodeList: Structure.Node[] = []
+      const subNodeList: StructureNode[] = []
       $nodeMap.set(rootId, subNodeList)
       const child = mapOwner(tree, node, subNodeList)
       children[ci + i] = child
@@ -89,13 +87,13 @@ function mapOwner(
 }
 
 export function mapStructureUpdates(config: {
-  prev: readonly Structure.Node[]
+  prev: readonly StructureNode[]
   removed: readonly NodeID[]
   updated: readonly Mapped.Root[]
   attachments: typeof $attachments
   mappedRoots: typeof $mappedRoots
   nodeMap: typeof $nodeMap
-}): Structure.Node[] {
+}): StructureNode[] {
   const { prev, removed, updated, attachments, mappedRoots, nodeMap } = config
   $attachments = attachments
   $mappedRoots = mappedRoots
@@ -145,10 +143,10 @@ export function mapStructureUpdates(config: {
     else order.push(mapped)
   }
 
-  const next: Structure.Node[] = Array(order.length)
+  const next: StructureNode[] = Array(order.length)
   for (let i = 0; i < order.length; i++) {
     const { id, tree } = order[i]
-    const nodeList: Structure.Node[] = []
+    const nodeList: StructureNode[] = []
     $nodeMap.set(id, nodeList)
     next[i] = mapOwner(tree, null, nodeList)
   }
@@ -156,7 +154,7 @@ export function mapStructureUpdates(config: {
 }
 
 const structure = createRoot(() => {
-  const [roots, setRoots] = createSignal<Structure.Node[]>([])
+  const [roots, setRoots] = createSignal<StructureNode[]>([])
 
   /** parent nodeId : rootId to be attached */
   const attachments: typeof $attachments = new Map()
@@ -192,7 +190,7 @@ const structure = createRoot(() => {
 
   return {
     roots,
-    hovered: () => ({ rootId: null, node: null as null | Structure.Node, sync: false }),
+    hovered: () => ({ rootId: null, node: null as null | StructureNode, sync: false }),
     clearRoots,
     updateStructure,
     handleComputationsUpdate,
