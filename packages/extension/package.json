@@ -9,7 +9,8 @@
     "dev": "vite --port 3333",
     "build": "npm run clean && vite build && node scripts/zip",
     "clean": "rimraf ./dist",
-    "test": "vitest",
+    "test": "vitest run",
+    "test:watch": "vitest watch",
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
