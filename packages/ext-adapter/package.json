@@ -47,7 +47,7 @@
     "type-fest": "^2.19.0"
   },
   "peerDependencies": {
-    "solid-js": "^1.5.0"
+    "solid-js": "^1.5.5"
   },
   "packageManager": "pnpm@7.9.0"
 }

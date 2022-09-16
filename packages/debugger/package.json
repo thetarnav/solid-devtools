@@ -70,7 +70,7 @@
     "type-fest": "^2.19.0"
   },
   "peerDependencies": {
-    "solid-js": "^1.5.0"
+    "solid-js": "^1.5.5"
   },
   "optionalDependencies": {
     "@solid-devtools/transform": "^0.7.2"
