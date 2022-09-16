@@ -64,18 +64,18 @@ export const header = {
   }),
 }
 
-export const children = style({
-  position: "relative",
-  ...transition("opacity", theme.duration[500]),
-  ":before": {
-    content: "",
-    position: "absolute",
-    zIndex: -1,
-    top: 0,
-    bottom: 0,
-    left: `calc(${levelVar} * ${spacing[4]} + ${spacing[2]})`,
-    width: "1px",
-    backgroundColor: color.cyan[500],
-    opacity: 0.3,
-  },
-})
+// export const children = style({
+//   position: "relative",
+//   ...transition("opacity", theme.duration[500]),
+//   ":before": {
+//     content: "",
+//     position: "absolute",
+//     zIndex: -1,
+//     top: 0,
+//     bottom: 0,
+//     left: `calc(${levelVar} * ${spacing[4]} + ${spacing[2]})`,
+//     width: "1px",
+//     backgroundColor: color.cyan[500],
+//     opacity: 0.3,
+//   },
+// })

@@ -57,15 +57,12 @@ function getNodeById(
 let $attachments: Map<NodeID, Mapped.Root[]>
 let $mappedRoots: Map<NodeID, Mapped.Root>
 let $nodeMap: Map<NodeID, Structure.Node[]>
-let $nodesLength: number
 
 function mapOwner(
   raw: Readonly<Mapped.Owner>,
   parent: Writable<Structure.Node> | null,
   nodeList: Structure.Node[],
 ): Structure.Node {
-  // TODO length should be removed in prod
-  $nodesLength++
   const { id, name, type, children: rawChildren } = raw
   const subroots = $attachments.get(id)
   let ci = 0
@@ -103,7 +100,6 @@ export function mapStructureUpdates(config: {
   $attachments = attachments
   $mappedRoots = mappedRoots
   $nodeMap = nodeMap
-  $nodesLength = 0
 
   const order: Mapped.Root[] = []
   $nodeMap.clear()
@@ -176,7 +172,7 @@ const structure = createRoot(() => {
       setRoots(prev =>
         mapStructureUpdates({ prev, removed, updated, attachments, mappedRoots, nodeMap }),
       )
-      console.log("updateStructure: ", performance.now() - time, "nodes", $nodesLength)
+      console.log("updateStructure: ", performance.now() - time)
     })
   }
 

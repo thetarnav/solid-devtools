@@ -1,10 +1,11 @@
-import { createComputed, createSignal, ParentComponent } from "solid-js"
+import { createComputed, createSignal, JSX, ParentComponent } from "solid-js"
 import { createKeyHold } from "@solid-primitives/keyboard"
 import { makeEventListener } from "@solid-primitives/event-listener"
 import { createBodyCursor } from "@solid-primitives/cursor"
 import * as styles from "./Scrollable.css"
+import { combineProps } from "@solid-primitives/props"
 
-export const Scrollable: ParentComponent<{}> = props => {
+export const Scrollable: ParentComponent<JSX.IntrinsicElements["div"]> = props => {
   const [dragging, setDragging] = createSignal(false)
   const holdingSpace = createKeyHold(" ")
 
@@ -49,9 +50,13 @@ export const Scrollable: ParentComponent<{}> = props => {
   let container!: HTMLDivElement
   return (
     <div
-      ref={container}
-      class={styles.container[holdingSpace() ? (dragging() ? "dragging" : "space") : "normal"]}
-      onPointerDown={onPointerDown}
+      {...combineProps(props, {
+        ref: el => (container = el),
+        get class() {
+          return styles.container[holdingSpace() ? (dragging() ? "dragging" : "space") : "normal"]
+        },
+        onPointerDown,
+      })}
     >
       <div class={styles.overlay[holdingSpace() ? "space" : "normal"]}></div>
       <div class={styles.content}>{props.children}</div>

@@ -7,7 +7,7 @@ const splitWidth = spacing[0.5]
 
 const containerBase = style({
   display: "grid",
-  gridAutoFlow: "row",
+  gridAutoFlow: "column",
   height: "100%",
   width: "100%",
 })

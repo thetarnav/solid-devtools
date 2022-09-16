@@ -1,12 +1,20 @@
 import { color, hexToRgb, insetX, spacing, theme, transition } from "@/ui/theme"
-import { style } from "@vanilla-extract/css"
+import { createVar, style } from "@vanilla-extract/css"
 
-export const wrapper = style({
+export const panelWrapper = style({
   height: "100%",
   width: "100%",
   overflow: "hidden",
   display: "flex",
   flexDirection: "column",
+})
+
+export const treeLength = createVar()
+export const startIndex = createVar()
+
+export const scrolledContainer = style({
+  height: `calc(${treeLength} * 1rem)`,
+  paddingTop: `calc(${startIndex} * 1rem)`,
 })
 
 export const path = style({

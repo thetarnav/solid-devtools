@@ -8,7 +8,6 @@ import * as styles from "./OwnerNode.css"
 
 export const OwnerNode: Component<{
   owner: Structure.Node
-  children: JSX.Element
   level: number
 }> = props => {
   const { owner } = props
@@ -53,7 +52,6 @@ export const OwnerNode: Component<{
           <div class={styles.header.type}>{typeName}</div>
         </div>
       </div>
-      <div class={styles.children}>{props.children}</div>
     </div>
   )
 }

@@ -1,19 +1,17 @@
 import { structure, inspector, Structure } from "@/state"
 import { OwnerPath, Scrollable } from "@/ui"
 import { NodeID } from "@solid-devtools/shared/graph"
-import { Key } from "@solid-primitives/keyed"
+import { assignInlineVars } from "@vanilla-extract/dynamic"
 import {
   Accessor,
-  batch,
   Component,
   createContext,
   createMemo,
   createRoot,
   createSignal,
+  For,
   JSX,
-  Setter,
   Show,
-  untrack,
   useContext,
 } from "solid-js"
 import { OwnerNode } from "./OwnerNode"
@@ -35,89 +33,9 @@ export const useStructure = () => {
   return ctx
 }
 
-type TreeNode = {
-  id: NodeID
-  rendered: JSX.Element
-  dispose: VoidFunction
-  setChildren: Setter<TreeNode[]>
-  children: Accessor<TreeNode[]>
-}
-
-function disposeTreeNode(node: TreeNode) {
-  for (const child of node.children()) disposeTreeNode(child)
-  node.dispose()
-}
-
-const ForTreeNodes: Component<{ nodes: TreeNode[] }> = props => {
-  return (
-    <Key each={props.nodes} by="id">
-      {node => node().rendered}
-    </Key>
-  )
-}
-
-function createNode(node: Structure.Node, level: number): TreeNode {
-  return createRoot(dispose => {
-    const [children, setChildren] = createSignal<TreeNode[]>(
-      node.children.map(o => createNode(o, level + 1)),
-    )
-    const treeNode: TreeNode = {
-      id: node.id,
-      rendered: (
-        <OwnerNode owner={node} level={level}>
-          <ForTreeNodes nodes={children()} />
-        </OwnerNode>
-      ),
-      dispose,
-      setChildren,
-      children,
-    }
-
-    return treeNode
-  })
-}
-
-function reconcileNodes(nodes: TreeNode[], newNodes: Structure.Node[], level: number): TreeNode[] {
-  const prevMap: Record<NodeID, TreeNode> = {}
-  for (const node of nodes) prevMap[node.id] = node
-
-  const next: TreeNode[] = Array(newNodes.length)
-  for (let i = 0; i < newNodes.length; i++) {
-    const node = newNodes[i]
-    const id = node.id
-    const prevNode = prevMap[id]
-    if (prevNode) {
-      // UPDATED
-      next[i] = prevNode
-      prevNode.setChildren(prev => reconcileNodes(prev, node.children, level + 1))
-      delete prevMap[id]
-    }
-    // ADDED
-    else next[i] = createNode(node, level)
-  }
-
-  // REMOVED
-  for (const node of Object.values(prevMap)) disposeTreeNode(node)
-
-  return next
-}
-
-const OwnerTree: Component = () => {
-  const vh = window.innerHeight
-  const rowH = 1.25 * 16 // 1.25rem
-
-  const tree = createMemo<TreeNode[]>((prevTree = []) => {
-    const rootsList = structure.roots()
-
-    return untrack(() => batch(() => reconcileNodes(prevTree, rootsList, 0)))
-  })
-
-  return <ForTreeNodes nodes={tree()} />
-}
-
 export default function StructureView() {
   return (
-    <div class={styles.wrapper}>
+    <div class={styles.panelWrapper}>
       <StructureContext.Provider
         value={{
           handleFocus: inspector.setSelectedNode,
@@ -130,9 +48,7 @@ export default function StructureView() {
           useHoveredSelector: () => () => false,
         }}
       >
-        <Scrollable>
-          <OwnerTree />
-        </Scrollable>
+        <DisplayStructureTree />
       </StructureContext.Provider>
       <div class={styles.path}>
         <div class={styles.pathInner}>
@@ -142,5 +58,131 @@ export default function StructureView() {
         </div>
       </div>
     </div>
+  )
+}
+
+type DisplayNode = {
+  id: NodeID
+  render: JSX.Element
+  dispose: VoidFunction
+}
+
+const remToPx = (rem: number): number =>
+  rem * parseFloat(getComputedStyle(document.documentElement).fontSize)
+
+const ROW_HEIGHT_IN_REM = 1.25
+let $startIndex = 20
+let $endIndex = 0
+let $index = 0
+let $nextList: DisplayNode[] = []
+let $prevMap: Record<NodeID, DisplayNode> = {}
+
+function mapNode(node: Structure.Node, level: number): void {
+  const { id } = node
+  const prev = $prevMap[id]
+  // already rendered
+  if (prev) {
+    $nextList.push(prev)
+    delete $prevMap[id]
+  }
+  // not rendered — create a new one
+  else {
+    createRoot(dispose => {
+      $nextList.push({
+        id,
+        get render() {
+          return <OwnerNode owner={node} level={level} />
+        },
+        dispose,
+      })
+    })
+  }
+}
+
+function mapNodes(nodes: readonly Structure.Node[], level: number): void {
+  for (const node of nodes) {
+    const { children, length } = node
+    const i = $index++
+
+    // above the visible
+    if (i < $startIndex) {
+      // some nested children are visible
+      if (i + length >= $startIndex) mapNodes(children, level + 1)
+      // all nested children are invisible — skip
+      else $index += length
+    }
+    // visible
+    else if (i <= $endIndex) {
+      mapNode(node, level)
+      mapNodes(children, level + 1)
+    }
+    // below the visible
+    else break
+  }
+}
+
+const DisplayStructureTree: Component = props => {
+  const [containerScroll, setContainerScroll] = createSignal({
+    top: 0,
+    height: 0,
+  })
+
+  const updateScrollData = (el: HTMLElement) =>
+    setContainerScroll({
+      top: el.scrollTop,
+      height: el.clientHeight,
+    })
+
+  const tree = createMemo<{
+    length: number
+    start: number
+    end: number
+    list: readonly DisplayNode[]
+    rootList: readonly Structure.Node[]
+  }>((prev = { length: 0, start: 0, end: 0, list: [], rootList: [] }) => {
+    const rootsList = structure.roots()
+    const { top, height } = containerScroll()
+    const rowHeight = remToPx(ROW_HEIGHT_IN_REM)
+
+    $startIndex = Math.floor(top / rowHeight)
+    $endIndex = $startIndex + Math.ceil(height / rowHeight)
+
+    if (prev.rootList === rootsList && prev.start === $startIndex && prev.end === $endIndex)
+      return prev
+
+    let length = 0
+    for (const root of rootsList) length += root.length + 1
+
+    $index = 0
+    $nextList = []
+    $prevMap = {}
+    for (const node of prev.list) $prevMap[node.id] = node
+
+    console.log("startIndex", $startIndex)
+    console.log("endIndex", $endIndex)
+
+    mapNodes(rootsList, 0)
+
+    // REMOVED
+    for (const node of Object.values($prevMap)) node.dispose()
+
+    return { length, list: $nextList, start: $startIndex, end: $endIndex, rootList: rootsList }
+  })
+
+  return (
+    <Scrollable
+      ref={el => setTimeout(() => updateScrollData(el))}
+      onScroll={e => updateScrollData(e.currentTarget)}
+    >
+      <div
+        class={styles.scrolledContainer}
+        style={assignInlineVars({
+          [styles.treeLength]: tree().length.toString(),
+          [styles.startIndex]: tree().start.toString(),
+        })}
+      >
+        <For each={tree().list}>{node => node.render}</For>
+      </div>
+    </Scrollable>
   )
 }
