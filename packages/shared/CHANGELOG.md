@@ -1,5 +1,11 @@
 # solid-devtools-shared
 
+## 0.7.4
+
+### Patch Changes
+
+- db7edcf: Track component props and display their values in the details of a inspected component.
+
 ## 0.7.3
 
 ### Patch Changes

@@ -1,5 +1,16 @@
 # solid-devtools
 
+## 0.16.0
+
+### Patch Changes
+
+- bf579bb: Restructure debugger plugin api.
+- Updated dependencies [db7edcf]
+- Updated dependencies [bf579bb]
+  - @solid-devtools/debugger@0.8.0
+  - @solid-devtools/ext-adapter@0.16.0
+  - @solid-devtools/locator@0.16.0
+
 ## 0.15.0
 
 ### Patch Changes
