@@ -4,14 +4,14 @@ import { INTERNAL } from "./variables"
 import { EncodedValue } from "./serialize"
 
 export enum NodeType {
-  Component = "Ct",
-  Effect = "E",
-  Render = "Rr",
-  Memo = "M",
-  Computation = "Cn",
-  Refresh = "HMR",
-  Signal = "S",
-  Root = "Rt",
+  Component,
+  Effect,
+  Render,
+  Memo,
+  Computation,
+  Refresh,
+  Signal,
+  Root,
 }
 
 export type NodeID = string & {}
