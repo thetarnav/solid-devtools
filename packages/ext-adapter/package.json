@@ -37,7 +37,7 @@
   "devDependencies": {
     "solid-js": "^1.5.5",
     "tsup": "^6.2.3",
-    "typescript": "^4.8.2"
+    "typescript": "^4.8.3"
   },
   "dependencies": {
     "@solid-devtools/debugger": "workspace:^0.8.0",
