@@ -1,34 +1,29 @@
 import { Component, onCleanup } from "solid-js"
 import { assignInlineVars } from "@vanilla-extract/dynamic"
 import { NodeType } from "@solid-devtools/shared/graph"
-import { StructureNode } from "@/state"
+import { structure, Structure } from "@/state"
 import { Highlight } from "@/ui"
 import { useStructure } from "./Structure"
 import * as styles from "./OwnerNode.css"
 
 export const OwnerNode: Component<{
-  owner: StructureNode
+  owner: Structure.Node
   level: number
 }> = props => {
   const { owner } = props
   const { name, type, id } = owner
   const typeName = NodeType[type]
 
-  const {
-    useUpdatedSelector,
-    useSelectedSelector,
-    handleFocus,
-    toggleHoveredOwner,
-    useHoveredSelector,
-  } = useStructure()
+  const { useUpdatedSelector, useSelectedSelector, handleFocus } = useStructure()
+  const { toggleHoveredOwner } = structure
 
   const isUpdated = type !== NodeType.Root ? useUpdatedSelector(id) : () => false
 
   const isSelected = useSelectedSelector(owner)
+  const isHovered = structure.isHovered.bind(null, id)
   onCleanup(() => isSelected() && handleFocus(null))
 
-  const isHovered = useHoveredSelector(id)
-  onCleanup(() => toggleHoveredOwner(owner, false))
+  onCleanup(() => toggleHoveredOwner(id, false))
 
   return (
     <div
@@ -36,9 +31,9 @@ export const OwnerNode: Component<{
       data-selected={isSelected()}
       class={styles.contailer}
       onClick={e => handleFocus(isSelected() ? null : owner)}
-      onMouseEnter={() => toggleHoveredOwner(owner, true)}
+      onMouseEnter={() => toggleHoveredOwner(id, true)}
       // onMouseLeave is fired in the next tick for the onMouseEnter of other node fired earlier
-      onMouseLeave={() => setTimeout(() => toggleHoveredOwner(owner, false))}
+      onMouseLeave={() => setTimeout(() => toggleHoveredOwner(id, false))}
       style={assignInlineVars({ [styles.levelVar]: props.level + "" })}
     >
       <div class={styles.selection}></div>

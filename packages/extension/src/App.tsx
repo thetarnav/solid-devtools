@@ -24,7 +24,7 @@ const App: Component = () => {
         <SelectComponent />
         <div>
           <h3>Welcome to Solid Devtools</h3>
-          <p>Number of Roots: {structure.roots().length}</p>
+          <p>Number of Roots: {structure.structure().length}</p>
         </div>
       </header>
       <div class={styles.content}>

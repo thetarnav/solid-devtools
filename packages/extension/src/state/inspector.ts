@@ -4,7 +4,7 @@ import { Mapped, NodeID, NodeType, SignalUpdate } from "@solid-devtools/shared/g
 import { warn } from "@solid-devtools/shared/utils"
 import { NOTFOUND } from "@solid-devtools/shared/variables"
 import structure from "./structure"
-import type { StructureNode } from "./structure"
+import type { Structure } from "./structure"
 import { arrayEquals, Mutable } from "@solid-primitives/utils"
 import { createUpdatedSelector } from "./utils"
 import { EncodedValue } from "@solid-devtools/shared/serialize"
@@ -21,7 +21,7 @@ export namespace Inspector {
     readonly selected: boolean
   }
 
-  export type Path = (StructureNode | typeof NOTFOUND)[]
+  export type Path = (Structure.Node | typeof NOTFOUND)[]
 
   export type Props = {
     readonly proxy: boolean
@@ -169,7 +169,7 @@ function reconcileDetails(
 
 export type OwnerDetailsState =
   | { focused: null; rootId: null; details: null }
-  | { focused: StructureNode; rootId: NodeID; details: Inspector.Details | null }
+  | { focused: Structure.Node; rootId: NodeID; details: Inspector.Details | null }
 
 const nullState: OwnerDetailsState = {
   focused: null,
@@ -183,11 +183,11 @@ const inspector = createRoot(() => {
     focusedRootId = () => state.rootId,
     details = () => state.details
 
-  const ownerSelectedSelector = createSelector<StructureNode | null, StructureNode>(focused)
-  const useOwnerSelectedSelector = (owner: StructureNode): Accessor<boolean> =>
+  const ownerSelectedSelector = createSelector<Structure.Node | null, Structure.Node>(focused)
+  const useOwnerSelectedSelector = (owner: Structure.Node): Accessor<boolean> =>
     ownerSelectedSelector.bind(void 0, owner)
 
-  const setSelectedNode: (data: StructureNode | null | Messages["SendSelectedOwner"]) => void =
+  const setSelectedNode: (data: Structure.Node | null | Messages["SendSelectedOwner"]) => void =
     untrackedCallback(data => {
       // TODO
       // if (!data) setState({ ...nullState })

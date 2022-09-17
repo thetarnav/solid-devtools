@@ -1,5 +1,5 @@
 import { mapStructureUpdates, Structure } from "../structure"
-import { describe, expect, it, test } from "vitest"
+import { describe, expect, test } from "vitest"
 import { Mapped, NodeID, NodeType } from "@solid-devtools/shared/graph"
 
 describe("mapStructureUpdates", () => {
@@ -33,23 +33,22 @@ describe("mapStructureUpdates", () => {
     },
   ]
   let removed: NodeID[] = []
-  let structure: StructureNode[] = []
+  let prevStructure: Structure.Node[] = []
 
   const attachments = new Map<NodeID, Mapped.Root[]>()
   const mappedRoots = new Map<NodeID, Mapped.Root>()
-  const nodeMap = new Map<NodeID, StructureNode[]>()
 
   test("initial", () => {
-    structure = mapStructureUpdates({
+    const { structure } = mapStructureUpdates({
       prev: [],
       updated,
       removed,
       attachments,
       mappedRoots,
-      nodeMap,
     })
+    prevStructure = structure
 
-    expect(structure, "initial structure").toEqual([
+    expect(prevStructure, "initial structure").toEqual([
       {
         id: "1",
         name: "root",
@@ -109,16 +108,16 @@ describe("mapStructureUpdates", () => {
       },
     ]
 
-    structure = mapStructureUpdates({
-      prev: structure,
+    const { structure } = mapStructureUpdates({
+      prev: prevStructure,
       updated,
       removed,
       attachments,
       mappedRoots,
-      nodeMap,
     })
+    prevStructure = structure
 
-    expect(structure).toEqual([
+    expect(prevStructure).toEqual([
       {
         id: "1",
         name: "root",
@@ -170,16 +169,16 @@ describe("mapStructureUpdates", () => {
 
     removed = ["10"]
 
-    structure = mapStructureUpdates({
-      prev: structure,
+    const { structure } = mapStructureUpdates({
+      prev: prevStructure,
       updated,
       removed,
       attachments,
       mappedRoots,
-      nodeMap,
     })
+    prevStructure = structure
 
-    expect(structure, "updated structure 2").toEqual([
+    expect(prevStructure, "updated structure 2").toEqual([
       {
         id: "1",
         name: "root",
@@ -247,16 +246,16 @@ describe("mapStructureUpdates", () => {
       },
     ]
 
-    structure = mapStructureUpdates({
-      prev: structure,
+    const { structure } = mapStructureUpdates({
+      prev: prevStructure,
       updated,
       removed,
       attachments,
       mappedRoots,
-      nodeMap,
     })
+    prevStructure = structure
 
-    expect(structure).toEqual([
+    expect(prevStructure).toEqual([
       {
         id: "8",
         name: "root3",
@@ -297,16 +296,16 @@ describe("mapStructureUpdates", () => {
     removed = ["12"]
     updated = []
 
-    structure = mapStructureUpdates({
-      prev: structure,
+    const { structure } = mapStructureUpdates({
+      prev: prevStructure,
       updated,
       removed,
       attachments,
       mappedRoots,
-      nodeMap,
     })
+    prevStructure = structure
 
-    expect(structure).toEqual([
+    expect(prevStructure).toEqual([
       {
         id: "8",
         name: "root3",
