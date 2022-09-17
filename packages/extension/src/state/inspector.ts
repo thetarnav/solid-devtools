@@ -99,12 +99,24 @@ function createSignalNode(raw: Readonly<Mapped.Signal>): Inspector.Signal {
   return { ...raw, selected: false }
 }
 
-function mapRawPath(rootId: NodeID, rawPath: readonly NodeID[]): Inspector.Path {
-  // TODO
-  // const path = rawPath.map(id => findOwnerById(rootId, id) ?? NOTFOUND)
-  // path.push(untrack(focused)!)
-  // return path
-  return []
+function getNodePath(
+  rootId: NodeID,
+  focused: Structure.Node,
+  rawPath: readonly NodeID[],
+): Inspector.Path {
+  const path: Inspector.Path = Array(rawPath.length + 1)
+  for (let i = 0; i < rawPath.length; i++) {
+    const id = rawPath[i]
+    let node = structure.getNode(rootId, id)
+    if (!node) {
+      // * rootId of the inspected node don't have to be the same for the rest of the path
+      const find = structure.findNode(id)
+      if (find) node = find.node
+    }
+    path[i] = node || NOTFOUND
+  }
+  path[rawPath.length] = focused
+  return path
 }
 
 function reconcileProps(proxy: Mutable<Inspector.Props>, raw: Mapped.Props): void {
@@ -122,12 +134,16 @@ function reconcileProps(proxy: Mutable<Inspector.Props>, raw: Mapped.Props): voi
   }
 }
 
-function createDetails(rootId: NodeID, raw: Readonly<Mapped.OwnerDetails>): Inspector.Details {
+function createDetails(
+  rootId: NodeID,
+  node: Structure.Node,
+  raw: Readonly<Mapped.OwnerDetails>,
+): Inspector.Details {
   const signals = raw.signals.reduce((signals, signal) => {
     signals[signal.id] = createSignalNode(signal)
     return signals
   }, {} as Inspector.Details["signals"])
-  const path = mapRawPath(rootId, raw.path)
+  const path = getNodePath(rootId, node, raw.path)
   const details: Mutable<Inspector.Details> = {
     id: raw.id,
     name: raw.name,
@@ -150,12 +166,13 @@ function createDetails(rootId: NodeID, raw: Readonly<Mapped.OwnerDetails>): Insp
 
 function reconcileDetails(
   rootId: NodeID,
+  node: Structure.Node,
   proxy: Mutable<Inspector.Details>,
   raw: Readonly<Mapped.OwnerDetails>,
 ): void {
   // update path
   if (!arrayEquals(proxy.rawPath, raw.path)) {
-    const path = mapRawPath(rootId, raw.path)
+    const path = getNodePath(rootId, node, raw.path)
     proxy.rawPath.length = 0
     proxy.rawPath.push.apply(proxy.rawPath, raw.path)
     proxy.path.length = 0
@@ -168,63 +185,66 @@ function reconcileDetails(
 }
 
 export type OwnerDetailsState =
-  | { focused: null; rootId: null; details: null }
-  | { focused: Structure.Node; rootId: NodeID; details: Inspector.Details | null }
+  | { node: null; rootId: null; details: null }
+  | { node: Structure.Node; rootId: NodeID; details: Inspector.Details | null }
 
 const nullState: OwnerDetailsState = {
-  focused: null,
+  node: null,
   rootId: null,
   details: null,
 }
 
 const inspector = createRoot(() => {
   const [state, setState] = createStore<OwnerDetailsState>({ ...nullState })
-  const focused = () => state.focused,
-    focusedRootId = () => state.rootId,
-    details = () => state.details
 
-  const ownerSelectedSelector = createSelector<Structure.Node | null, Structure.Node>(focused)
+  const ownerSelectedSelector = createSelector<Structure.Node | null, Structure.Node>(
+    () => state.node,
+  )
   const useOwnerSelectedSelector = (owner: Structure.Node): Accessor<boolean> =>
     ownerSelectedSelector.bind(void 0, owner)
 
   const setSelectedNode: (data: Structure.Node | null | Messages["SendSelectedOwner"]) => void =
     untrackedCallback(data => {
-      // TODO
-      // if (!data) setState({ ...nullState })
-      // else if ("name" in data) {
-      //   // compare ids because state.focused is a proxy
-      //   if (!state.focused || data.id !== state.focused.id)
-      //     setState({ focused: data, rootId: findOwnerRootId(data), details: null })
-      // } else {
-      //   const { nodeId, rootId } = data
-      //   const owner = findOwnerById(rootId, nodeId)
-      //   // compare ids because state.focused is a proxy
-      //   if (owner && (!state.focused || owner.id !== state.focused.id))
-      //     setState({ focused: owner, rootId, details: null })
-      // }
+      if (!data) setState({ ...nullState })
+      else if ("name" in data) {
+        const { id } = data
+        // compare ids because state.node is a proxy
+        if (!state.node || id !== state.node.id) {
+          const find = structure.findNode(id)
+          console.log("find", data, find)
+
+          find && setState({ node: data, rootId: find.rootId, details: null })
+        }
+      } else {
+        const { nodeId, rootId } = data
+        const node = structure.getNode(rootId, nodeId)
+        // compare ids because state.node is a proxy
+        if (node && (!state.node || node.id !== state.node.id))
+          setState({ node: node, rootId, details: null })
+      }
     })
 
-  function updateDetails(raw: Mapped.OwnerDetails): void {
-    const rootId = untrack(focusedRootId)
-    if (!rootId) return warn("OwnerDetailsUpdate: rootId is null")
+  const updateDetails = untrackedCallback((raw: Mapped.OwnerDetails) => {
+    const { rootId, node } = state
+    if (!rootId || !node) return warn("OwnerDetailsUpdate: rootId is null")
 
-    setState("details", prev =>
-      prev === null
-        ? createDetails(rootId, raw)
-        : produce((proxy: Mutable<Inspector.Details>) => reconcileDetails(rootId, proxy, raw))(
+    setState("details", prev => {
+      return prev === null
+        ? createDetails(rootId, node, raw)
+        : produce<Mutable<Inspector.Details>>(proxy => reconcileDetails(rootId, node, proxy, raw))(
             prev,
-          ),
-    )
-  }
+          )
+    })
+  })
 
-  const [useUpdatedSelector, addUpdated, clearUpdated] = createUpdatedSelector()
+  const [isUpdated, addUpdated, clearUpdated] = createUpdatedSelector()
 
   function handleGraphUpdate() {
     clearUpdated()
   }
 
-  function handleSignalUpdates(updates: SignalUpdate[], isUpdate = true): void {
-    if (!untrack(details)) return
+  const handleSignalUpdates = untrackedCallback((updates: SignalUpdate[], isUpdate = true) => {
+    if (!state.details) return
     batch(() => {
       isUpdate && addUpdated(updates.map(u => u.id))
       setState(
@@ -239,10 +259,10 @@ const inspector = createRoot(() => {
         }),
       )
     })
-  }
+  })
 
   const handlePropsUpdate = untrackedCallback((props: Mapped.Props) => {
-    if (!details() || !details()!.props) return
+    if (!state.details || !state.details.props) return
     setState(
       "details",
       "props",
@@ -273,12 +293,10 @@ const inspector = createRoot(() => {
   }
 
   return {
-    focused,
-    focusedRootId,
-    details,
+    state,
     setSelectedNode,
     useOwnerSelectedSelector,
-    useUpdatedSignalsSelector: useUpdatedSelector,
+    isUpdated,
     updateDetails,
     handleSignalUpdates,
     handleGraphUpdate,

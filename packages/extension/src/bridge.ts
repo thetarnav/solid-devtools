@@ -24,7 +24,7 @@ onRuntimeMessage("ResetPanel", () => {
 })
 
 onRuntimeMessage("ComputationUpdates", updates => {
-  structure.handleComputationsUpdate(updates.map(u => u.id))
+  structure.addUpdatedComputations(updates.map(u => u.id))
 })
 
 onRuntimeMessage("SignalUpdates", inspector.handleSignalUpdates)
@@ -60,7 +60,7 @@ createRoot(() => {
   // toggle selected owner
   createEffect(
     on(
-      [inspector.focused, inspector.focusedRootId],
+      [() => inspector.state.node, () => inspector.state.rootId],
       ([owner, rootId]) => {
         const payload = owner && rootId ? { nodeId: owner.id, rootId } : null
         postRuntimeMessage("SetSelectedOwner", payload)

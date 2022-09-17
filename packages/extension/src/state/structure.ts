@@ -1,6 +1,6 @@
 import { batch, createRoot, createSelector, createSignal } from "solid-js"
-import { Mapped, NodeID, NodeType, RootsUpdates } from "@solid-devtools/shared/graph"
 import { Writable } from "type-fest"
+import { Mapped, NodeID, NodeType, RootsUpdates } from "@solid-devtools/shared/graph"
 import { createUpdatedSelector } from "./utils"
 
 export namespace Structure {
@@ -29,7 +29,7 @@ function removeFromMapList<K, T>(map: Map<K, T[]>, key: K, value: T): void {
   if (roots.length === 0) map.delete(key)
 }
 
-function getNodeById(
+function findNode(
   nodeMap: typeof $nodeMap,
   id: NodeID,
 ): { node: Structure.Node; rootId: NodeID } | undefined {
@@ -151,7 +151,6 @@ const structure = createRoot(() => {
   function updateStructure({ removed, updated }: RootsUpdates) {
     batch(() => {
       clearUpdatedComputations()
-      const time = performance.now()
       setStructure(prev => {
         const { structure, nodeMap: nextNodeMap } = mapStructureUpdates({
           prev,
@@ -163,23 +162,17 @@ const structure = createRoot(() => {
         nodeMap = nextNodeMap
         return structure
       })
-      console.log("updateStructure: ", performance.now() - time)
     })
   }
 
-  const [useComputationUpdatedSelector, addUpdatedComputations, clearUpdatedComputations] =
-    createUpdatedSelector()
-
-  function handleComputationsUpdate(nodeIds: NodeID[]) {
-    addUpdatedComputations(nodeIds)
-  }
+  const [isUpdated, addUpdatedComputations, clearUpdatedComputations] = createUpdatedSelector()
 
   const [hovered, setHovered] = createSignal<Structure.Hovered>(null)
   const isHovered = createSelector(hovered, (id: NodeID, o) => !!o && o.node.id === id)
 
   function toggleHoveredOwner(id: NodeID, hovered: boolean): Structure.Hovered {
     return setHovered(p => {
-      if (hovered) return getNodeById(nodeMap, id) ?? p
+      if (hovered) return findNode(nodeMap, id) ?? p
       return p && p.node.id === id ? null : p
     })
   }
@@ -196,13 +189,16 @@ const structure = createRoot(() => {
 
   return {
     structure,
-    hovered,
-    isHovered,
     resetStructure,
     updateStructure,
-    handleComputationsUpdate,
+    hovered,
+    isHovered,
+    addUpdatedComputations,
+    isUpdated,
     toggleHoveredOwner,
-    getNodeById: (nodeId: NodeID): ReturnType<typeof getNodeById> => getNodeById(nodeMap, nodeId),
+    findNode: (nodeId: NodeID): ReturnType<typeof findNode> => findNode(nodeMap, nodeId),
+    getNode: (rootId: NodeID, nodeId: NodeID): Structure.Node | undefined =>
+      nodeMap[rootId]?.[nodeId],
   }
 })
 export default structure

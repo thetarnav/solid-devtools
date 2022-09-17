@@ -17,7 +17,6 @@ import * as styles from "./structure.css"
 
 export type StructureContextState = {
   handleFocus: (owner: Structure.Node | null) => void
-  useUpdatedSelector: (id: NodeID) => Accessor<boolean>
   useSelectedSelector: (owner: Structure.Node) => Accessor<boolean>
 }
 
@@ -35,8 +34,6 @@ export default function StructureView() {
       <StructureContext.Provider
         value={{
           handleFocus: inspector.setSelectedNode,
-          // TODO
-          useUpdatedSelector: () => () => false,
           useSelectedSelector: inspector.useOwnerSelectedSelector,
         }}
       >
@@ -44,8 +41,8 @@ export default function StructureView() {
       </StructureContext.Provider>
       <div class={styles.path}>
         <div class={styles.pathInner}>
-          <Show when={inspector.details()?.path}>
-            <OwnerPath path={inspector.details()!.path} />
+          <Show when={inspector.state.details?.path}>
+            <OwnerPath path={inspector.state.details!.path} />
           </Show>
         </div>
       </div>

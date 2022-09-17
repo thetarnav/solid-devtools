@@ -14,16 +14,17 @@ export const OwnerNode: Component<{
   const { name, type, id } = owner
   const typeName = NodeType[type]
 
-  const { useUpdatedSelector, useSelectedSelector, handleFocus } = useStructure()
+  const { useSelectedSelector, handleFocus } = useStructure()
   const { toggleHoveredOwner } = structure
-
-  const isUpdated = type !== NodeType.Root ? useUpdatedSelector(id) : () => false
 
   const isSelected = useSelectedSelector(owner)
   const isHovered = structure.isHovered.bind(null, id)
-  onCleanup(() => isSelected() && handleFocus(null))
+  const isUpdated = structure.isUpdated.bind(null, id)
 
-  onCleanup(() => toggleHoveredOwner(id, false))
+  onCleanup(() => {
+    isSelected() && handleFocus(null)
+    toggleHoveredOwner(id, false)
+  })
 
   return (
     <div
@@ -43,7 +44,9 @@ export const OwnerNode: Component<{
         <Highlight strong={isUpdated()} light={false} class={styles.highlight}>
           <div class={styles.name}>{type === NodeType.Component ? `<${name}>` : name}</div>
         </Highlight>
-        <div class={styles.type}>{typeName}</div>
+        <div class={styles.type}>
+          {typeName}_{id}
+        </div>
       </div>
     </div>
   )

@@ -1,5 +1,4 @@
 import {
-  Accessor,
   Component,
   createContext,
   createMemo,
@@ -309,7 +308,7 @@ export const ValueNode: Component<{
 }
 
 export type SignalContextState = {
-  useUpdatedSelector: (id: NodeID) => Accessor<boolean>
+  isUpdated: (id: NodeID) => boolean
   toggleSignalFocus: (signal: NodeID, focused?: boolean) => void
   toggleHoveredElement: ToggleElementHover
 }
@@ -326,9 +325,11 @@ const useSignalContext = (): SignalContextState => {
 
 export const SignalNode: Component<{ signal: Inspector.Signal }> = ({ signal }) => {
   const { type, id, name } = signal
-  const { useUpdatedSelector, toggleSignalFocus, toggleHoveredElement } = useSignalContext()
 
-  const isUpdated = useUpdatedSelector(id)
+  const ctx = useSignalContext()
+  const { toggleSignalFocus, toggleHoveredElement } = ctx
+
+  const isUpdated = ctx.isUpdated.bind(null, id)
 
   return (
     <ValueNode

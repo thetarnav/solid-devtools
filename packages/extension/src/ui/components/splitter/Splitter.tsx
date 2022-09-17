@@ -21,7 +21,7 @@ export function Splitter(props: {
     containerWidth = container.getBoundingClientRect().width
   })
 
-  const [progress, setProgress] = createSignal(0.5)
+  const [progress, setProgress] = createSignal(0.6)
   const [dragging, setDragging] = createSignal(false)
 
   const onPointerDown = (e: PointerEvent) => {

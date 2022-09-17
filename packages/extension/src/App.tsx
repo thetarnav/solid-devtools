@@ -2,7 +2,7 @@ import { Component, Show } from "solid-js"
 import { Splitter, ToggleButton, Icon } from "@/ui"
 import { inspector, structure, locator } from "@/state"
 import * as styles from "./styles.css"
-import Details from "./components/Details"
+import Details from "./components/Inspector"
 import StructureView from "./components/structure/Structure"
 
 const SelectComponent: Component<{}> = props => {
@@ -31,7 +31,7 @@ const App: Component = () => {
         <Splitter
           onToggle={() => inspector.setSelectedNode(null)}
           side={
-            <Show when={inspector.focused()}>
+            <Show when={inspector.state.node}>
               <Details />
             </Show>
           }
