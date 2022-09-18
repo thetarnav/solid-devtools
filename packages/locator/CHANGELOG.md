@@ -1,5 +1,14 @@
 # @solid-devtools/locator
 
+## 0.16.2
+
+### Patch Changes
+
+- Updated dependencies [089331d]
+- Updated dependencies [5e913ac]
+  - @solid-devtools/debugger@0.9.0
+  - @solid-devtools/shared@0.8.0
+
 ## 0.16.0
 
 ### Patch Changes
