@@ -1,5 +1,17 @@
 # solid-devtools-extension
 
+## 0.10.0
+
+### Minor Changes
+
+- 5e913ac: Add virtualization of the structure tree.
+
+### Patch Changes
+
+- Updated dependencies [089331d]
+- Updated dependencies [5e913ac]
+  - @solid-devtools/shared@0.8.0
+
 ## 0.9.0
 
 ### Minor Changes

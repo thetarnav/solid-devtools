@@ -1,5 +1,21 @@
 # @solid-devtools/debugger
 
+## 0.9.0
+
+### Minor Changes
+
+- 089331d: Changes to the way roots and sub roots are handled.
+  Now every sub root will track their own graph independently, instead of being attached to parent tree.
+
+  Additionally the roots() and serializedRoots() signals were replaced with event emitter. (#108)
+
+### Patch Changes
+
+- 5e913ac: Add virtualization of the structure tree.
+- Updated dependencies [089331d]
+- Updated dependencies [5e913ac]
+  - @solid-devtools/shared@0.8.0
+
 ## 0.8.1
 
 ### Patch Changes

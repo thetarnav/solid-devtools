@@ -1,5 +1,18 @@
 # solid-devtools-shared
 
+## 0.8.0
+
+### Minor Changes
+
+- 5e913ac: Add virtualization of the structure tree.
+
+### Patch Changes
+
+- 089331d: Changes to the way roots and sub roots are handled.
+  Now every sub root will track their own graph independently, instead of being attached to parent tree.
+
+  Additionally the roots() and serializedRoots() signals were replaced with event emitter. (#108)
+
 ## 0.7.4
 
 ### Patch Changes
