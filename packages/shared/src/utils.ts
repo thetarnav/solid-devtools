@@ -77,3 +77,15 @@ export function trimString(str: string, maxLength: number): string {
   if (str.length <= maxLength) return str
   return str.slice(0, maxLength) + "…"
 }
+
+export function findIndexById<T extends { id: string }>(array: T[], id: string): number {
+  for (let i = 0; i < array.length; i++) if (array[i].id === id) return i
+  return -1
+}
+
+export function findItemById<T extends { id: string }>(array: T[], id: string): T | undefined {
+  for (let i = 0; i < array.length; i++) {
+    const item = array[i]
+    if (item.id === id) return item
+  }
+}

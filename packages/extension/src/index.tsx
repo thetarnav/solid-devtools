@@ -1,10 +1,6 @@
 import { render } from "solid-js/web"
-import "./state/selected"
-import "./state/graph"
-import "./state/details"
+import "./state"
 import "./bridge"
-
-import "@solid-devtools/ui/css"
 
 import App from "./App"
 

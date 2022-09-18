@@ -9,6 +9,8 @@ import {
   Core,
 } from "@solid-devtools/shared/graph"
 import { INTERNAL } from "@solid-devtools/shared/variables"
+import { untrackedCallback } from "@solid-devtools/shared/primitives"
+import { warn } from "@solid-devtools/shared/utils"
 import { ComputationUpdateHandler, WalkerResult, walkSolidTree } from "./walker"
 import {
   enabled,
@@ -22,14 +24,13 @@ import {
 import {
   createInternalRoot,
   getDebuggerContext,
-  getNewSdtId,
+  markNodeID,
   isSolidRoot,
   markOwnerType,
   onOwnerCleanup,
   removeDebuggerContext,
   setDebuggerContext,
 } from "./utils"
-import { untrackedCallback } from "@solid-devtools/shared/primitives"
 
 const RootMap: Record<NodeID, (inspectedId?: NodeID) => WalkerResult | null> = {}
 export const walkSolidRoot = (rootId: NodeID, inspectedId?: NodeID): WalkerResult | null => {
@@ -42,7 +43,7 @@ export function createGraphRoot(owner: Solid.Root): void {
   createInternalRoot(dispose => {
     onOwnerCleanup(owner, dispose)
 
-    const rootId = getNewSdtId()
+    const rootId = markNodeID(owner)
 
     const onComputationUpdate: ComputationUpdateHandler = (rootId, nodeId) => {
       if (owner.isDisposed) return
@@ -52,16 +53,16 @@ export function createGraphRoot(owner: Solid.Root): void {
 
     const forceRootUpdate = untrackedCallback((inspectedId?: NodeID | void) => {
       if (owner.isDisposed) return null
-      const { tree, components, inspectedOwner } = walkSolidTree(owner, {
+      const result = walkSolidTree(owner, {
         onComputationUpdate,
         rootId,
         inspectedId: inspectedId ?? null,
         gatherComponents: gatherComponents(),
       })
-      updateRoot({ id: rootId, tree, components })
-      return { tree, components, inspectedOwner }
+      updateRoot(result.root, result.components)
+      return result
     })
-    const triggerRootUpdate = throttle(forceRootUpdate, 350)
+    const triggerRootUpdate = throttle(forceRootUpdate, 300)
 
     RootMap[rootId] = forceRootUpdate
 
@@ -98,58 +99,45 @@ export function createGraphRoot(owner: Solid.Root): void {
  */
 export function attachDebugger(_owner: Core.Owner = getOwner()!): void {
   let owner = _owner as Solid.Owner
-  if (!owner)
-    return console.warn(
-      "reatachOwner helper should be used synchronously inside createRoot callback body.",
-    )
+  if (!owner) return warn("reatachOwner helper should be called synchronously in a reactive owner.")
 
   forEachLookupRoot(owner, (root, ctx) => {
-    root.sdtAttached = true
-    markOwnerType(root, NodeType.Root)
-
     if (ctx === INTERNAL) return
+
+    root.sdtAttachedTo = null
+    markOwnerType(root, NodeType.Root)
+    createGraphRoot(root)
 
     // under an existing debugger root
     if (ctx) {
       ctx.triggerRootUpdate()
       let parent = findClosestAliveParent(root)!
-      if (!parent.owner) return console.warn("PARENT_SHOULD_BE_ALIVE")
-      let removeFromOwned = addRootToOwnedRoots(parent.owner, root)
+      if (!parent.owner) return warn("PARENT_SHOULD_BE_ALIVE")
+      root.sdtAttachedTo = parent.owner
+
       const onParentCleanup = () => {
         const newParent = findClosestAliveParent(root)
+        // still a sub-root
         if (newParent.owner) {
           parent = newParent
-          removeFromOwned()
-          removeFromOwned = addRootToOwnedRoots(parent.owner, root)
+          root.sdtAttachedTo = parent.owner
           onOwnerCleanup(parent.root, onParentCleanup)
-        } else {
-          removeFromOwned()
+        }
+        // becomes a root
+        else {
+          root.sdtAttachedTo = null
           removeOwnCleanup()
-          // TODO the focused owner should be reattached to the new root
-          createGraphRoot(root)
         }
       }
       const removeParentCleanup = onOwnerCleanup(parent.root, onParentCleanup)
       const removeOwnCleanup = onOwnerCleanup(root, () => {
         root.isDisposed = true
-        removeFromOwned()
+        root.sdtAttachedTo = null
         removeParentCleanup()
         ctx.triggerRootUpdate()
       })
     }
-    // seperated from existing debugger roots
-    else createGraphRoot(root)
   })
-}
-
-/**
- * Adds SubRoot object to `ownedRoots` property of owner
- * @returns a function to remove from the `ownedRoots` property
- */
-function addRootToOwnedRoots(parent: Solid.Owner, root: Solid.Root): VoidFunction {
-  const ownedRoots = parent.ownedRoots ?? (parent.ownedRoots = new Set())
-  ownedRoots.add(root)
-  return (): void => void ownedRoots.delete(root)
 }
 
 /**
@@ -189,7 +177,7 @@ function forEachLookupRoot(
     // check if it's a root/subroot
     if (isSolidRoot(owner)) {
       // skip already handled and INTERNAL roots
-      if (owner.sdtAttached) {
+      if ("sdtAttachedTo" in owner) {
         if (!ctx) ctx = getDebuggerContext(owner)
         break
       }

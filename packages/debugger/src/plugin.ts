@@ -1,7 +1,6 @@
-import { Accessor, batch, createEffect, createSignal, untrack } from "solid-js"
+import { Accessor, createEffect, createSignal } from "solid-js"
 import { createSimpleEmitter, Listen } from "@solid-primitives/event-bus"
 import { omit } from "@solid-primitives/immutable"
-import { createLazyMemo } from "@solid-primitives/memo"
 import { createStaticStore } from "@solid-primitives/utils"
 import { throttle } from "@solid-primitives/scheduled"
 import {
@@ -62,18 +61,6 @@ const getNullInspected = (): InspectedState => ({
   elementMap: new ElementMap(),
 })
 
-export type SignaledRoot = {
-  readonly id: NodeID
-  readonly tree: Accessor<Mapped.Owner>
-  readonly components: Accessor<Mapped.Component[]>
-}
-
-/** @internal */
-export type _SignaledRoot = SignaledRoot & {
-  readonly setTree: (tree: Mapped.Owner) => void
-  readonly setComponents: (components: Mapped.Component[]) => void
-}
-
 export type BatchComputationUpdatesHandler = (payload: ComputationUpdate[]) => void
 export type BatchSignalUpdatesHandler = (payload: SignalUpdate[]) => void
 
@@ -83,15 +70,39 @@ export type PluginData = {
   readonly handleComputationUpdates: (listener: BatchComputationUpdatesHandler) => VoidFunction
   readonly handleSignalUpdates: (listener: BatchSignalUpdatesHandler) => VoidFunction
   readonly handlePropsUpdate: Listen<Mapped.Props>
-  readonly roots: Accessor<Record<NodeID, SignaledRoot>>
-  readonly serialisedRoots: Accessor<Record<NodeID, Mapped.Owner>>
-  readonly rootsUpdates: Accessor<RootsUpdates>
+  readonly handleStructureUpdates: Listen<RootsUpdates>
   readonly components: Accessor<Record<NodeID, Mapped.Component[]>>
   readonly setInspectedOwner: SetInspectedOwner
   readonly inspected: InspectedState
   readonly setInspectedSignal: (id: NodeID, selected: boolean) => EncodedValue<boolean> | null
   readonly setInspectedProp: (key: NodeID, selected: boolean) => void
 }
+
+type RootUpdate = { removed: NodeID } | { updated: Mapped.Root }
+
+const [handleStructureUpdates, pushStructureUpdate] = (() => {
+  const [handleStructureUpdate, emitStructureUpdate] = createSimpleEmitter<RootsUpdates>()
+  const updates: Mapped.Root[] = []
+  const removedIds = new Set<NodeID>()
+  const trigger = throttle(() => {
+    const updated: Record<NodeID, Mapped.Root> = {}
+    for (let i = updates.length - 1; i >= 0; i--) {
+      const update = updates[i]
+      const { id } = update
+      if (!removedIds.has(id) && !updated[id]) updated[id] = update
+    }
+    emitStructureUpdate({ updated, removed: [...removedIds] })
+    updates.length = 0
+    removedIds.clear()
+  }, 50)
+  const pushStructureUpdate = (update: RootUpdate) => {
+    if ("removed" in update) removedIds.add(update.removed)
+    else if (removedIds.has(update.updated.id)) return
+    else updates.push(update.updated)
+    trigger()
+  }
+  return [handleStructureUpdate, pushStructureUpdate]
+})()
 
 const exported = createInternalRoot(() => {
   /** throttled global update */
@@ -106,56 +117,17 @@ const exported = createInternalRoot(() => {
   const [gatherComponents, addGatherComponentsConsumer] = createConsumers()
 
   //
-  // Roots:
+  // Components:
   //
-  const [roots, setRoots] = createSignal<Record<NodeID, _SignaledRoot>>({})
-
-  const serialisedRoots = createLazyMemo<Record<NodeID, Mapped.Owner>>(() => {
-    const serialisedRoots: Record<NodeID, Mapped.Owner> = {}
-    for (const [id, root] of Object.entries(roots())) {
-      serialisedRoots[id] = root.tree()
-    }
-    return serialisedRoots
-  })
-
-  const updatedIds = new Set<NodeID>()
-  const removedIds = new Set<NodeID>()
-  const rootsUpdates = createLazyMemo<RootsUpdates>(() => {
-    const _updatedIds = [...updatedIds].filter(id => !removedIds.has(id))
-
-    const sRoots = serialisedRoots()
-    const updated: RootsUpdates["updated"] = _updatedIds.map(id => ({ id, tree: sRoots[id] }))
-    const removed: RootsUpdates["removed"] = [...removedIds]
-
-    updatedIds.clear()
-    removedIds.clear()
-
-    return { updated, removed }
-  })
+  const [components, setComponents] = createSignal<Record<NodeID, Mapped.Component[]>>({})
 
   function removeRoot(rootId: NodeID) {
-    removedIds.add(rootId)
-    setRoots(map => omit(map, rootId))
+    setComponents(omit(rootId))
+    pushStructureUpdate({ removed: rootId })
   }
-
-  function updateRoot(newRoot: Mapped.Root): void {
-    const rootMap = untrack(roots)
-    const rootId = newRoot.id
-    const root = rootMap[rootId]
-    updatedIds.add(rootId)
-    if (root) {
-      batch(() => {
-        root.setTree(newRoot.tree)
-        root.setComponents(newRoot.components)
-      })
-    } else {
-      const [tree, setTree] = createSignal(newRoot.tree)
-      const [components, setComponents] = createSignal(newRoot.components)
-      setRoots(map => ({
-        ...map,
-        [rootId]: { id: rootId, tree, setTree, components, setComponents },
-      }))
-    }
+  function updateRoot(newRoot: Mapped.Root, newComponents: Mapped.Component[]): void {
+    setComponents(prev => Object.assign(prev, { [newRoot.id]: newComponents }))
+    pushStructureUpdate({ updated: newRoot })
   }
 
   //
@@ -254,23 +226,11 @@ const exported = createInternalRoot(() => {
     _pushComputationUpdate({ rootId, id })
   }
 
-  //
-  // Components:
-  //
-  const components = createLazyMemo(() =>
-    Object.entries(roots()).reduce<Record<NodeID, Mapped.Component[]>>((obj, [rootId, root]) => {
-      obj[rootId] = root.components()
-      return obj
-    }, {}),
-  )
-
   const pluginData: PluginData = {
     handleComputationUpdates,
     handleSignalUpdates,
     handlePropsUpdate,
-    roots,
-    serialisedRoots,
-    rootsUpdates,
+    handleStructureUpdates,
     components,
     triggerUpdate,
     forceTriggerUpdate,

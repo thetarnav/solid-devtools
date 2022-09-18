@@ -1,5 +1,5 @@
 import { noop } from "@solid-primitives/utils"
-import { Solid } from "@solid-devtools/shared/graph"
+import { NodeType, Solid } from "@solid-devtools/shared/graph"
 import { UNNAMED } from "@solid-devtools/shared/variables"
 import * as API from "./index"
 import { createRoot } from "solid-js"
@@ -16,9 +16,7 @@ export const useDebugger: typeof API.useDebugger = () => ({
   forceTriggerUpdate: noop,
   handleComputationUpdates: () => noop,
   handleSignalUpdates: () => noop,
-  roots: () => ({}),
-  serialisedRoots: () => ({}),
-  rootsUpdates: () => ({ removed: [], updated: [] }),
+  handleStructureUpdates: () => noop,
   components: () => ({}),
   setInspectedOwner: noop,
   inspected: {
@@ -45,8 +43,8 @@ export const makeValueUpdateListener: typeof API.makeValueUpdateListener = noop
 export const removeValueUpdateObserver: typeof API.removeValueUpdateObserver = noop
 
 // utils
-export const getOwnerType: typeof API.getOwnerType = () => 0
-export const getNodeType: typeof API.getNodeType = () => 0
+export const getOwnerType: typeof API.getOwnerType = () => NodeType.Computation
+export const getNodeType: typeof API.getNodeType = () => NodeType.Computation
 export const getNodeName: typeof API.getNodeName = () => UNNAMED
 export const isSolidComputation: typeof API.isSolidComputation = (o): o is Solid.Computation =>
   false

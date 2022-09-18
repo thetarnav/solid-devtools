@@ -18,26 +18,8 @@ function observeComputation(owner: Solid.Owner, id: NodeID) {
     observeComputationUpdate(owner, OnComputationUpdate.bind(void 0, RootId, id))
 }
 
-function mapChildren({ owned, ownedRoots }: Readonly<Solid.Owner>): Mapped.Owner[] {
-  const children: Mapped.Owner[] = []
-
-  if (owned)
-    children.push.apply(
-      children,
-      owned.map(child => mapOwner(child)),
-    )
-
-  if (ownedRoots)
-    children.push.apply(
-      children,
-      [...ownedRoots].map(child => mapOwner(child, NodeType.Root)),
-    )
-
-  return children
-}
-
-function mapOwner(owner: Solid.Owner, type?: NodeType): Mapped.Owner {
-  type = markOwnerType(owner, type)
+function mapOwner(owner: Solid.Owner): Mapped.Owner {
+  const type = markOwnerType(owner)
   const id = markNodeID(owner)
   const name = markOwnerName(owner)
 
@@ -50,23 +32,19 @@ function mapOwner(owner: Solid.Owner, type?: NodeType): Mapped.Owner {
     if (element) Components.push({ id, name, element })
   }
 
-  return {
-    id,
-    name,
-    type,
-    children: mapChildren(owner),
-    sources: owner.sources ? owner.sources.length : 0,
-  }
+  const children = owner.owned ? owner.owned.map(child => mapOwner(child)) : []
+  return { id, name, type, children }
+  // sources: owner.sources ? owner.sources.length : 0,
 }
 
 export type WalkerResult = {
-  tree: Mapped.Owner
-  components: Mapped.Component[]
+  root: Mapped.Root
   inspectedOwner: Solid.Owner | null
+  components: Mapped.Component[]
 }
 
 export function walkSolidTree(
-  owner: Solid.Owner,
+  owner: Solid.Root,
   config: {
     rootId: NodeID
     onComputationUpdate: ComputationUpdateHandler
@@ -80,8 +58,13 @@ export function walkSolidTree(
   OnComputationUpdate = config.onComputationUpdate
   GatherComponents = config.gatherComponents
   InspectedOwner = null
+  // components is an array instead of an object to preserve the order (nesting) of the components,
+  // this helps the locator find the most nested component first
   Components = []
 
-  const tree = mapOwner(owner)
-  return { tree, components: Components, inspectedOwner: InspectedOwner }
+  const root: Mapped.Root = { id: RootId, tree: mapOwner(owner) }
+
+  if (owner.sdtAttachedTo) root.attachedTo = markNodeID(owner.sdtAttachedTo)
+
+  return { root, inspectedOwner: InspectedOwner, components: Components }
 }

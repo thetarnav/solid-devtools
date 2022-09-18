@@ -7,7 +7,7 @@
   "contributors": [],
   "scripts": {
     "dev:ext": "pnpm -dir packages/extension run dev",
-    "dev:ext-deps": "turbo run dev --filter=@solid-devtools/shared --filter=@solid-devtools/ui --filter=@solid-devtools/ext-adapter  --filter=@solid-devtools/locator  --filter=@solid-devtools/debugger",
+    "dev:ext-deps": "turbo run dev --filter=@solid-devtools/shared --filter=@solid-devtools/ext-adapter  --filter=@solid-devtools/locator  --filter=@solid-devtools/debugger",
     "dev:sandbox": "pnpm -dir playgrounds/sandbox run dev",
     "build": "turbo run build --filter=!./playgrounds/*",
     "test": "turbo run test --filter=!./playgrounds/*",
@@ -17,27 +17,25 @@
     "changeset": "changeset",
     "release": "pnpm run build-test && changeset publish",
     "version-packages": "changeset version && pnpm i",
-    "ci:version": "changeset version && pnpm i --no-frozen-lockfile && git add .",
-    "update-deps": "taze -w -r && pnpm i"
+    "ci:version": "changeset version && pnpm i --no-frozen-lockfile && git add ."
   },
   "devDependencies": {
-    "@babel/core": "^7.18.13",
-    "@babel/preset-env": "^7.18.10",
+    "@babel/core": "^7.19.1",
+    "@babel/preset-env": "^7.19.1",
     "@changesets/cli": "^2.24.4",
-    "@jest/types": "^28.1.3",
-    "@types/jest": "^28.1.8",
-    "@types/node": "^17.0.45",
-    "babel-preset-solid": "^1.5.4",
-    "esbuild": "^0.14.54",
+    "@jest/types": "^29.0.3",
+    "@types/jest": "^29.0.3",
+    "@types/node": "^18.7.18",
+    "babel-preset-solid": "^1.5.5",
+    "esbuild": "^0.15.7",
     "esbuild-plugin-solid": "^0.4.2",
-    "object-observer": "^5.0.4",
-    "prettier": "2.7.0",
+    "object-observer": "^5.1.5",
+    "prettier": "2.7.1",
     "solid-js": "^1.5.5",
-    "taze": "^0.8.0",
     "ts-jest": "^28.0.8",
     "tsup": "^6.2.3",
-    "turbo": "^1.4.4",
-    "typescript": "^4.8.2"
+    "turbo": "^1.4.6",
+    "typescript": "^4.8.3"
   },
-  "packageManager": "pnpm@7.9.0"
+  "packageManager": "pnpm@7.11.0"
 }

@@ -1,15 +1,12 @@
-import { getOwner, Mapped, NodeID, NodeType, Solid } from "@solid-devtools/shared/graph"
-import { ValueType } from "@solid-devtools/shared/serialize"
+import { getOwner, Mapped, NodeType, Solid } from "@solid-devtools/shared/graph"
 import { UNNAMED } from "@solid-devtools/shared/variables"
 import {
-  $PROXY,
   createComputed,
   createEffect,
   createMemo,
   createRenderEffect,
   createRoot,
   createSignal,
-  JSX,
 } from "solid-js"
 import type * as API from "../src/walker"
 
@@ -22,15 +19,8 @@ const mockTree = () => {
   createEffect(
     () => {
       createSignal({ bar: "baz" }, { name: "s2" })
-
       createComputed(s, undefined, { name: "c0" })
-      createComputed(
-        () => {
-          createSignal(0, { name: "s3" })
-        },
-        undefined,
-        { name: "c1" },
-      )
+      createComputed(() => createSignal(0, { name: "s3" }), undefined, { name: "c1" })
     },
     undefined,
     { name: "e0" },
@@ -48,10 +38,10 @@ describe("walkSolidTree", () => {
 
     const [dispose, owner] = createRoot(dispose => {
       mockTree()
-      return [dispose, getOwner()!]
+      return [dispose, getOwner()! as Solid.Root]
     })
 
-    const { tree, components, inspectedOwner } = walkSolidTree(owner, {
+    const { root, components, inspectedOwner } = walkSolidTree(owner, {
       onComputationUpdate: () => {},
       rootId: "ff",
       inspectedId: null,
@@ -60,37 +50,23 @@ describe("walkSolidTree", () => {
 
     dispose()
 
-    expect(tree).toEqual({
+    expect(root.tree).toEqual({
       id: "0",
       name: UNNAMED,
-      sources: 0,
       type: NodeType.Root,
       children: [
         {
           id: "1",
           name: "e0",
-          sources: 0,
           type: NodeType.Effect,
           children: [
-            {
-              id: "2",
-              name: "c0",
-              sources: 1,
-              type: NodeType.Computation,
-              children: [],
-            },
-            {
-              id: "3",
-              name: "c1",
-              sources: 0,
-              type: NodeType.Computation,
-              children: [],
-            },
+            { id: "2", name: "c0", type: NodeType.Computation, children: [] },
+            { id: "3", name: "c1", type: NodeType.Computation, children: [] },
           ],
         },
       ],
     })
-    expect(tree).toEqual(JSON.parse(JSON.stringify(tree)))
+    expect(root.tree).toEqual(JSON.parse(JSON.stringify(root.tree)))
     expect(components).toEqual([])
     expect(inspectedOwner).toBe(null)
   })
@@ -104,7 +80,7 @@ describe("walkSolidTree", () => {
       const [a, setA] = createSignal(0)
       createComputed(a)
 
-      walkSolidTree(getOwner()!, {
+      walkSolidTree(getOwner()! as Solid.Root, {
         onComputationUpdate: (rootId, id) => capturedComputationUpdates.push([rootId, id]),
         rootId: "ff",
         inspectedId: null,
@@ -143,7 +119,7 @@ describe("walkSolidTree", () => {
         )
       })
 
-      const { components } = walkSolidTree(getOwner()!, {
+      const { components } = walkSolidTree(getOwner()! as Solid.Root, {
         onComputationUpdate: () => {},
         rootId: "ff",
         inspectedId: null,
@@ -196,7 +172,7 @@ describe("walkSolidTree", () => {
         { name: "WRAPPER" },
       )
 
-      const { tree, inspectedOwner } = walkSolidTree(getOwner()!, {
+      const { root, inspectedOwner } = walkSolidTree(getOwner()! as Solid.Root, {
         rootId: "0",
         inspectedId: "ff",
         onComputationUpdate: () => {},
@@ -205,38 +181,23 @@ describe("walkSolidTree", () => {
 
       expect(owner).toBe(inspectedOwner)
 
-      expect(tree).toEqual({
+      expect(root.tree).toEqual({
         id: "0",
         name: UNNAMED,
-        sources: 0,
         type: NodeType.Root,
         children: [
           {
             id: "1",
             name: "WRAPPER",
-            sources: 1,
             type: NodeType.Computation,
             children: [
               {
                 id: "ff",
                 name: "focused",
-                sources: 1,
                 type: NodeType.Memo,
                 children: [
-                  {
-                    id: "2",
-                    name: "memo",
-                    sources: 0,
-                    type: NodeType.Memo,
-                    children: [],
-                  },
-                  {
-                    id: "3",
-                    name: "render",
-                    sources: 1,
-                    type: NodeType.Render,
-                    children: [],
-                  },
+                  { id: "2", name: "memo", type: NodeType.Memo, children: [] },
+                  { id: "3", name: "render", type: NodeType.Render, children: [] },
                 ],
               },
             ],
