@@ -115,7 +115,7 @@ export type ComputationUpdate = { rootId: NodeID; id: NodeID }
 
 export type RootsUpdates = {
   removed: NodeID[]
-  updated: Mapped.Root[]
+  updated: Record<NodeID, Mapped.Root>
 }
 
 export type SignalUpdate = {

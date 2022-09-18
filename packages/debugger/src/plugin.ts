@@ -85,15 +85,11 @@ const [handleStructureUpdates, pushStructureUpdate] = (() => {
   const updates: Mapped.Root[] = []
   const removedIds = new Set<NodeID>()
   const trigger = throttle(() => {
-    const updated: Mapped.Root[] = []
-    const updatedIds = new Set<NodeID>()
+    const updated: Record<NodeID, Mapped.Root> = {}
     for (let i = updates.length - 1; i >= 0; i--) {
       const update = updates[i]
       const { id } = update
-      if (!removedIds.has(id) && !updatedIds.has(id)) {
-        updated.push(update)
-        updatedIds.add(id)
-      }
+      if (!removedIds.has(id) && !updated[id]) updated[id] = update
     }
     emitStructureUpdate({ updated, removed: [...removedIds] })
     updates.length = 0

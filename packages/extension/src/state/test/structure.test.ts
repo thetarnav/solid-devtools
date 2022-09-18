@@ -3,8 +3,8 @@ import { describe, expect, test } from "vitest"
 import { Mapped, NodeID, NodeType } from "@solid-devtools/shared/graph"
 
 describe("mapStructureUpdates", () => {
-  let updated: Mapped.Root[] = [
-    {
+  let updated: Record<NodeID, Mapped.Root> = {
+    "1": {
       id: "1",
       tree: {
         id: "1",
@@ -21,7 +21,7 @@ describe("mapStructureUpdates", () => {
         ],
       },
     },
-    {
+    "5": {
       id: "5",
       tree: {
         id: "5",
@@ -31,7 +31,8 @@ describe("mapStructureUpdates", () => {
       },
       attachedTo: "3",
     },
-  ]
+  }
+
   let removed: NodeID[] = []
   let prevStructure: Structure.Node[] = []
 
@@ -80,8 +81,8 @@ describe("mapStructureUpdates", () => {
   })
 
   test("update", () => {
-    updated = [
-      {
+    updated = {
+      "1": {
         id: "1",
         tree: {
           id: "1",
@@ -97,16 +98,16 @@ describe("mapStructureUpdates", () => {
           ],
         },
       },
-      {
+      "10": {
         id: "10",
         tree: { id: "10", name: "root4", type: NodeType.Root, children: [] },
       },
-      {
+      "5": {
         id: "5",
         tree: { id: "5", name: "root2", type: NodeType.Root, children: [] },
         attachedTo: "3",
       },
-    ]
+    }
 
     const { structure } = mapStructureUpdates({
       prev: prevStructure,
@@ -142,8 +143,8 @@ describe("mapStructureUpdates", () => {
 
   test("attach to a different node", () => {
     // UPDATE 2
-    updated = [
-      {
+    updated = {
+      "5": {
         id: "5",
         attachedTo: "8",
         tree: {
@@ -156,7 +157,7 @@ describe("mapStructureUpdates", () => {
           ],
         },
       },
-      {
+      "8": {
         id: "8",
         tree: {
           id: "8",
@@ -165,7 +166,7 @@ describe("mapStructureUpdates", () => {
           children: [{ id: "9", name: "child6", type: NodeType.Component, children: [] }],
         },
       },
-    ]
+    }
 
     removed = ["10"]
 
@@ -221,8 +222,8 @@ describe("mapStructureUpdates", () => {
   test("remove attachment", () => {
     removed = ["1"]
 
-    updated = [
-      {
+    updated = {
+      "5": {
         id: "5",
         tree: {
           id: "5",
@@ -239,12 +240,12 @@ describe("mapStructureUpdates", () => {
           ],
         },
       },
-      {
+      "12": {
         id: "12",
         tree: { id: "12", name: "root5", type: NodeType.Root, children: [] },
         attachedTo: "9",
       },
-    ]
+    }
 
     const { structure } = mapStructureUpdates({
       prev: prevStructure,
@@ -294,7 +295,7 @@ describe("mapStructureUpdates", () => {
 
   test("remove attached node", () => {
     removed = ["12"]
-    updated = []
+    updated = {}
 
     const { structure } = mapStructureUpdates({
       prev: prevStructure,
@@ -332,5 +333,90 @@ describe("mapStructureUpdates", () => {
         ],
       },
     ])
+  })
+})
+
+describe("mapArray example", () => {
+  test("items keeping their position after update", () => {
+    let removed: NodeID[] = []
+    let updated: Record<NodeID, Mapped.Root> = {
+      "1": {
+        id: "1",
+        tree: {
+          id: "1",
+          name: "root",
+          type: NodeType.Root,
+          children: [{ id: "2", name: "For", type: NodeType.Component, children: [] }],
+        },
+      },
+      "3": {
+        id: "3",
+        tree: { id: "3", name: "item1", type: NodeType.Root, children: [] },
+        attachedTo: "2",
+      },
+      "4": {
+        id: "4",
+        tree: { id: "4", name: "item2", type: NodeType.Root, children: [] },
+        attachedTo: "2",
+      },
+      "5": {
+        id: "5",
+        tree: { id: "5", name: "item3", type: NodeType.Root, children: [] },
+        attachedTo: "2",
+      },
+    }
+
+    const attachments = new Map<NodeID, Mapped.Root[]>()
+    const mappedRoots = new Map<NodeID, Mapped.Root>()
+
+    const { structure } = mapStructureUpdates({
+      prev: [],
+      updated,
+      removed,
+      attachments,
+      mappedRoots,
+    })
+
+    const goalStructure = [
+      {
+        id: "1",
+        name: "root",
+        type: NodeType.Root,
+        length: 4,
+        children: [
+          {
+            id: "2",
+            name: "For",
+            length: 3,
+            type: NodeType.Component,
+            children: [
+              { id: "3", name: "item1", length: 0, type: NodeType.Root, children: [] },
+              { id: "4", name: "item2", length: 0, type: NodeType.Root, children: [] },
+              { id: "5", name: "item3", length: 0, type: NodeType.Root, children: [] },
+            ],
+          },
+        ],
+      },
+    ]
+
+    expect(structure, "init").toEqual(goalStructure)
+
+    updated = {
+      "3": {
+        id: "3",
+        tree: { id: "3", name: "item1", type: NodeType.Root, children: [] },
+        attachedTo: "2",
+      },
+    }
+
+    const { structure: structure1 } = mapStructureUpdates({
+      prev: structure,
+      updated,
+      removed,
+      attachments,
+      mappedRoots,
+    })
+
+    expect(structure1, "after update").toEqual(goalStructure)
   })
 })

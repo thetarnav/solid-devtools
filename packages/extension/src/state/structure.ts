@@ -15,18 +15,21 @@ export namespace Structure {
   export type Hovered = { readonly rootId: NodeID; readonly node: Node } | null
 }
 
-function pushToMapList<K, T>(map: Map<K, T[]>, key: K, value: T): void {
+function pushToMapList<K, T>(map: Map<K, T[]>, key: K, value: T, index?: number): void {
   const list = map.get(key)
-  if (list) list.push(value)
-  else map.set(key, [value])
+  if (list) {
+    if (index === undefined) list.push(value)
+    else list.splice(index, 0, value)
+  } else map.set(key, [value])
 }
-function removeFromMapList<K, T>(map: Map<K, T[]>, key: K, value: T): void {
+function removeFromMapList<K, T>(map: Map<K, T[]>, key: K, value: T): number {
   const roots = map.get(key)
-  if (!roots) return
+  if (!roots) return -1
   const index = roots.indexOf(value)
-  if (index === -1) return
+  if (index === -1) return -1
   roots.splice(index, 1)
   if (roots.length === 0) map.delete(key)
+  return index
 }
 
 function findNode(
@@ -76,7 +79,7 @@ function mapOwner(
 export function mapStructureUpdates(config: {
   prev: readonly Structure.Node[]
   removed: readonly NodeID[]
-  updated: readonly Mapped.Root[]
+  updated: Record<NodeID, Mapped.Root>
   attachments: typeof $attachments
   mappedRoots: typeof $mappedRoots
 }): { structure: Structure.Node[]; nodeMap: typeof $nodeMap } {
@@ -101,30 +104,33 @@ export function mapStructureUpdates(config: {
     if (!mapped) continue
 
     // UPDATED top level roots
-    for (const updatedRoot of updated)
-      if (updatedRoot.id === id) {
-        $mappedRoots.set(id, (mapped = updatedRoot))
-        break
-      }
+    const updatedRoot = updated[id]
+    if (updatedRoot) {
+      $mappedRoots.set(id, (mapped = updatedRoot))
+      delete updated[id]
+    }
 
     order.push(mapped)
   }
 
-  for (const mapped of updated) {
+  for (const mapped of Object.values(updated)) {
     const { id, attachedTo } = mapped
+    const oldMapped = $mappedRoots.get(id)
+    let index: number | undefined
 
-    if ($mappedRoots.has(id)) {
-      if (!order.includes(mapped)) {
-        // ATTACHED root
-        const oldMapped = $mappedRoots.get(id)!
-        const oldAttachedTo = oldMapped.attachedTo
-        oldAttachedTo && removeFromMapList($attachments, oldAttachedTo, oldMapped)
-      } else continue
+    if (oldMapped) {
+      // ATTACHED root
+      const oldAttachedTo = oldMapped.attachedTo
+      if (oldAttachedTo) {
+        const _index = removeFromMapList($attachments, oldAttachedTo, oldMapped)
+        // attach to the same parent to the same index
+        if (oldAttachedTo === attachedTo) index = _index
+      }
     }
 
     // ADDED roots
     $mappedRoots.set(id, mapped)
-    if (attachedTo) pushToMapList($attachments, attachedTo, mapped)
+    if (attachedTo) pushToMapList($attachments, attachedTo, mapped, index)
     else order.push(mapped)
   }
 

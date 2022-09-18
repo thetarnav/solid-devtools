@@ -1,4 +1,4 @@
-import { Accessor, batch, createRoot, createSelector, createSignal, untrack } from "solid-js"
+import { Accessor, batch, createRoot, createSelector, createSignal } from "solid-js"
 import { createStore, produce } from "solid-js/store"
 import { Mapped, NodeID, NodeType, SignalUpdate } from "@solid-devtools/shared/graph"
 import { warn } from "@solid-devtools/shared/utils"
@@ -211,8 +211,6 @@ const inspector = createRoot(() => {
         // compare ids because state.node is a proxy
         if (!state.node || id !== state.node.id) {
           const find = structure.findNode(id)
-          console.log("find", data, find)
-
           find && setState({ node: data, rootId: find.rootId, details: null })
         }
       } else {
