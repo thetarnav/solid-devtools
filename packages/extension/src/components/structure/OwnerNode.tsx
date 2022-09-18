@@ -44,9 +44,7 @@ export const OwnerNode: Component<{
         <Highlight strong={isUpdated()} light={false} class={styles.highlight}>
           <div class={styles.name}>{type === NodeType.Component ? `<${name}>` : name}</div>
         </Highlight>
-        <div class={styles.type}>
-          {typeName}_{id}
-        </div>
+        <div class={styles.type}>{typeName}</div>
       </div>
     </div>
   )
