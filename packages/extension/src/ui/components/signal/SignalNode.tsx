@@ -1,10 +1,10 @@
 import {
   Component,
+  ComponentProps,
   createContext,
   createMemo,
   createSignal,
   For,
-  JSX,
   Match,
   onCleanup,
   ParentComponent,
@@ -231,7 +231,7 @@ const ValueName: ParentComponent<{ type?: NodeType.Signal | NodeType.Memo | null
   )
 }
 
-const ValueRow: ParentComponent<{ selected?: boolean } & JSX.IntrinsicElements["li"]> = props => {
+const ValueRow: ParentComponent<{ selected?: boolean } & ComponentProps<"li">> = props => {
   const [, attrs] = splitProps(props, ["selected", "children", "class"])
 
   // early return if this value in not selectable (if undefined, this shouldn't be assigned again)

@@ -1,11 +1,11 @@
-import { createComputed, createSignal, JSX, ParentComponent } from "solid-js"
+import { ComponentProps, createComputed, createSignal, ParentComponent } from "solid-js"
 import { createKeyHold } from "@solid-primitives/keyboard"
 import { makeEventListener } from "@solid-primitives/event-listener"
 import { createBodyCursor } from "@solid-primitives/cursor"
 import * as styles from "./Scrollable.css"
 import { combineProps } from "@solid-primitives/props"
 
-export const Scrollable: ParentComponent<JSX.IntrinsicElements["div"]> = props => {
+export const Scrollable: ParentComponent<ComponentProps<"div">> = props => {
   const [dragging, setDragging] = createSignal(false)
   const holdingSpace = createKeyHold(" ")
 
