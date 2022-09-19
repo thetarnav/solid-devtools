@@ -17,10 +17,10 @@ export default defineConfig({
   ],
   resolve: {
     alias: {
-      // used inside packages/debugger
-      "solid-devtools": resolvePackage("main", "src"),
+      // "solid-devtools": resolvePackage("main", "src"),
+      // "@solid-devtools/ext-adapter": resolvePackage("ext-adapter", "src"),
       // "@solid-devtools/debugger": resolvePackage("debugger", "src"),
-      "@solid-devtools/logger": resolvePackage("logger", "src"),
+      // "@solid-devtools/logger": resolvePackage("logger", "src"),
       // "@solid-devtools/locator": resolvePackage("locator", "src"),
     },
   },

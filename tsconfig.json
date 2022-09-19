@@ -7,10 +7,11 @@
     "types": ["node"],
     "paths": {
       "solid-devtools": ["./packages/main/src/index.ts"],
-      // "@solid-devtools/shared/*": ["./packages/shared/src/*"],
-      // "@solid-devtools/debugger": ["./packages/debugger/src/index.ts"],
-      "@solid-devtools/logger": ["./packages/logger/src/index.ts"]
-      // "@solid-devtools/locator": ["./packages/locator/src/index.ts"]
+      "@solid-devtools/shared/*": ["./packages/shared/src/*"],
+      "@solid-devtools/ext-adapter": ["./packages/ext-adapter/src/index.ts"],
+      "@solid-devtools/debugger": ["./packages/debugger/src/index.ts"],
+      "@solid-devtools/logger": ["./packages/logger/src/index.ts"],
+      "@solid-devtools/locator": ["./packages/locator/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "**/dist/**/*"]

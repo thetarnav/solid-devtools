@@ -2,8 +2,9 @@ import { defineConfig } from "vitest/config"
 import solidPlugin from "vite-plugin-solid"
 import { crx } from "@crxjs/vite-plugin"
 import { vanillaExtractPlugin } from "@vanilla-extract/vite-plugin"
-import vitestConfig from "../../configs/vitest.config"
+import { resolve } from "path"
 
+import vitestConfig from "../../configs/vitest.config"
 import manifest from "./manifest"
 import pkg from "./package.json"
 
@@ -12,8 +13,7 @@ export default defineConfig({
   resolve: {
     alias: {
       "@/": `${__dirname}/src/`,
-      // "@solid-devtools/shared": resolve(__dirname, "..", "shared", "src"),
-      // "@solid-devtools/ui": path.resolve(__dirname, "..", "ui", "src"),
+      "@solid-devtools/shared": resolve(__dirname, "..", "shared", "src"),
     },
   },
   define: {
