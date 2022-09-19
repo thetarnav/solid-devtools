@@ -58,6 +58,8 @@ export function createGraphRoot(owner: Solid.Root): void {
         rootId,
         inspectedId: inspectedId ?? null,
         gatherComponents: gatherComponents(),
+        // TODO: add a way to disable this
+        omitRefresh: true,
       })
       updateRoot(result.root, result.components)
       return result
