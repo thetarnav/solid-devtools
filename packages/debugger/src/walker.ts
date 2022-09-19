@@ -13,11 +13,6 @@ let GatherComponents: boolean
 let Components: Mapped.Component[] = []
 let InspectedOwner: Solid.Owner | null
 
-function observeComputation(owner: Solid.Owner, id: NodeID) {
-  if (isSolidComputation(owner))
-    observeComputationUpdate(owner, OnComputationUpdate.bind(void 0, RootId, id))
-}
-
 function mapOwner(owner: Solid.Owner): Mapped.Owner {
   const type = markOwnerType(owner)
   const id = markNodeID(owner)
@@ -25,16 +20,24 @@ function mapOwner(owner: Solid.Owner): Mapped.Owner {
 
   if (id === InspectedId) InspectedOwner = owner
 
-  observeComputation(owner, id)
+  if (isSolidComputation(owner))
+    observeComputationUpdate(owner, OnComputationUpdate.bind(void 0, RootId, id))
 
   if (GatherComponents && type === NodeType.Component) {
     const element = resolveElements(owner.value)
     if (element) Components.push({ id, name, element })
   }
 
-  const children = owner.owned ? owner.owned.map(child => mapOwner(child)) : []
-  return { id, name, type, children }
-  // sources: owner.sources ? owner.sources.length : 0,
+  const mapped: Mapped.Owner = { id, name, type }
+
+  const { owned } = owner
+  if (owned) {
+    const children: Mapped.Owner[] = Array(owned.length)
+    for (let i = 0; i < children.length; i++) children[i] = mapOwner(owned[i])
+    mapped.children = children
+  }
+
+  return mapped
 }
 
 export type WalkerResult = {

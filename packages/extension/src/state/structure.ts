@@ -54,12 +54,16 @@ function mapOwner(
   const { id, name, type, children: rawChildren } = raw
   const subroots = $attachments.get(id)
   let ci = 0
-  const children: Structure.Node[] = Array(rawChildren.length + (subroots ? subroots.length : 0))
+  const children: Structure.Node[] = Array(
+    (rawChildren ? rawChildren.length : 0) + (subroots ? subroots.length : 0),
+  )
   const node: Writable<Structure.Node> = { id, name, type, children, length: 0 }
   // map children
-  for (; ci < rawChildren.length; ci++) {
-    const child = mapOwner(rawChildren[ci], node, nodes)
-    children[ci] = child
+  if (rawChildren) {
+    for (; ci < rawChildren.length; ci++) {
+      const child = mapOwner(rawChildren[ci], node, nodes)
+      children[ci] = child
+    }
   }
   // map attached subroots
   if (subroots) {

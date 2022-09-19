@@ -142,7 +142,7 @@ export namespace Mapped {
     id: NodeID
     name: string
     type: NodeType
-    children: Owner[]
+    children?: Owner[]
   }
 
   export interface Signal {

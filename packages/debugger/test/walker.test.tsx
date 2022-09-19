@@ -61,8 +61,8 @@ describe("walkSolidTree", () => {
           name: "e0",
           type: NodeType.Effect,
           children: [
-            { id: "2", name: "c0", type: NodeType.Computation, children: [] },
-            { id: "3", name: "c1", type: NodeType.Computation, children: [] },
+            { id: "2", name: "c0", type: NodeType.Computation },
+            { id: "3", name: "c1", type: NodeType.Computation },
           ],
         },
       ],
@@ -197,8 +197,8 @@ describe("walkSolidTree", () => {
                 name: "focused",
                 type: NodeType.Memo,
                 children: [
-                  { id: "2", name: "memo", type: NodeType.Memo, children: [] },
-                  { id: "3", name: "render", type: NodeType.Render, children: [] },
+                  { id: "2", name: "memo", type: NodeType.Memo },
+                  { id: "3", name: "render", type: NodeType.Render },
                 ],
               },
             ],
