@@ -1,3 +1,4 @@
+import { describe, test } from "vitest"
 import plugin from "../src/name"
 import wrapPlugin from "../src/wrapStores"
 import { assertTransform } from "./utils"
@@ -9,7 +10,7 @@ for (let [create, module, extraArg] of [
   ["createStore", "solid-js/store"],
   ["createMutable", "solid-js/store"],
 ]) {
-  extraArg = extraArg ? "undefined, " : "";
+  extraArg = extraArg ? "undefined, " : ""
   describe(create, () => {
     for (let [type, importStatement, creator] of [
       ["named import", `import { ${create} } from "${module}";`, create],
@@ -46,7 +47,7 @@ const signal = ${creator}(5, ${extraArg}{
 const rest = {};
 const signal = ${creator}(5, ${extraArg}{});`
 
-      const expectedOutput = `${importStatement}
+          const expectedOutput = `${importStatement}
 const rest = {};
 const signal = ${creator}(5, ${extraArg}{
   name: "signal"
@@ -161,4 +162,4 @@ const signal = createStore(undefined, {
 
     assertTransform(src, expectedOutput, plugin, wrapPlugin)
   })
-});
+})

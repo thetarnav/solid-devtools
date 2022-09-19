@@ -1,3 +1,4 @@
+import { describe, test } from "vitest"
 import { storeOverwriteName, storeOverwriteNamespace } from "../src/utils"
 import plugin from "../src/wrapStores"
 import { assertTransform } from "./utils"

@@ -1,8 +1,4 @@
-jest.mock("@otonashixav/solid-flip", () => ({
-  TransitionGroup: (p: any) => p.children,
-  animateExit: () => {},
-  animateEnter: () => {},
-}))
+import { jest } from "@jest/globals"
 
 jest.mock("object-observer", () => ({
   Observable: {

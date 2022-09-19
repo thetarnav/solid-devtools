@@ -9,8 +9,7 @@
     "dev": "vite --port 3333",
     "build": "npm run clean && vite build && node scripts/zip",
     "clean": "rimraf ./dist",
-    "test": "vitest run",
-    "test:watch": "vitest watch",
+    "test": "vitest",
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
@@ -23,7 +22,7 @@
     "rimraf": "^3.0.2",
     "typescript": "^4.8.3",
     "vite": "^3.1.1",
-    "vite-plugin-solid": "^2.3.1",
+    "vite-plugin-solid": "^2.3.3",
     "vitest": "^0.23.2",
     "zip-a-folder": "^1.1.5"
   },
@@ -52,5 +51,5 @@
     "solid-transition-group": "^0.0.11",
     "type-fest": "^2.19.0"
   },
-  "packageManager": "pnpm@7.11.0"
+  "packageManager": "pnpm@7.12.0"
 }
