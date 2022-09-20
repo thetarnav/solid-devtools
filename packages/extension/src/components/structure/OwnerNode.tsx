@@ -1,10 +1,9 @@
 import { Component, onCleanup } from "solid-js"
 import { assignInlineVars } from "@vanilla-extract/dynamic"
 import { NodeType } from "@solid-devtools/shared/graph"
-import { structure, Structure } from "@/state"
+import { structure, Structure, inspector } from "@/state"
 import { Highlight } from "@/ui"
-import { useStructure } from "./Structure"
-import * as styles from "./OwnerNode.css"
+import * as styles from "./ownerNode.css"
 
 export const OwnerNode: Component<{
   owner: Structure.Node
@@ -14,15 +13,13 @@ export const OwnerNode: Component<{
   const { name, type, id } = owner
   const typeName = NodeType[type]
 
-  const { useSelectedSelector, handleFocus } = useStructure()
   const { toggleHoveredOwner } = structure
 
-  const isSelected = useSelectedSelector(owner)
+  const isSelected = inspector.isNodeInspected.bind(null, id)
   const isHovered = structure.isHovered.bind(null, id)
   const isUpdated = structure.isUpdated.bind(null, id)
 
   onCleanup(() => {
-    isSelected() && handleFocus(null)
     toggleHoveredOwner(id, false)
   })
 
@@ -31,7 +28,7 @@ export const OwnerNode: Component<{
       data-hovered={isHovered()}
       data-selected={isSelected()}
       class={styles.contailer}
-      onClick={e => handleFocus(isSelected() ? null : owner)}
+      onClick={e => inspector.setInspectedNode(isSelected() ? null : owner)}
       onMouseEnter={() => toggleHoveredOwner(id, true)}
       // onMouseLeave is fired in the next tick for the onMouseEnter of other node fired earlier
       onMouseLeave={() => setTimeout(() => toggleHoveredOwner(id, false))}

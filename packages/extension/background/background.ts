@@ -57,7 +57,7 @@ chrome.runtime.onConnect.addListener(port => {
 
   onPortMessage("SolidOnPage", () => {
     solidOnPage = true
-    postRuntimeMessage("SolidOnPage")
+    postRuntimeMessage("SolidOnPage", "")
     // respond with page visibility to the debugger, to let him know
     // if the panel is already created and visible (after page refresh)
     postPortMessage("PanelVisibility", panelVisibility)
@@ -88,7 +88,7 @@ chrome.runtime.onConnect.addListener(port => {
   addCleanup(
     onRuntimeMessage("DevtoolsScriptConnected", tabId => {
       postPortMessage("DevtoolsScriptConnected", tabId)
-      if (solidOnPage) postRuntimeMessage("SolidOnPage")
+      if (solidOnPage) postRuntimeMessage("SolidOnPage", "")
     }),
   )
 
@@ -101,6 +101,8 @@ chrome.runtime.onConnect.addListener(port => {
   addCleanup(onRuntimeMessage("HighlightElement", e => postPortMessage("HighlightElement", e)))
 
   addCleanup(onRuntimeMessage("ForceUpdate", () => postPortMessage("ForceUpdate")))
+
+  addCleanup(onRuntimeMessage("SetOmitRefresh", e => postPortMessage("SetOmitRefresh", e)))
 })
 
 export {}

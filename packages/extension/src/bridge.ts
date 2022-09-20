@@ -48,6 +48,9 @@ onRuntimeMessage("OwnerDetailsUpdate", details => {
 // })
 
 createRoot(() => {
+  // sync the "omitRefresh" setting
+  createEffect(() => postRuntimeMessage("SetOmitRefresh", structure.omitsRefresh()))
+
   onRuntimeMessage("AdpLocatorMode", locator.setOtherLocator)
   createEffect(
     on(locator.extLocatorEnabled, state => postRuntimeMessage("ExtLocatorMode", state), {
@@ -55,7 +58,7 @@ createRoot(() => {
     }),
   )
 
-  onRuntimeMessage("SendSelectedOwner", inspector.setSelectedNode)
+  onRuntimeMessage("SendSelectedOwner", inspector.setInspectedNode)
 
   // toggle selected owner
   createEffect(

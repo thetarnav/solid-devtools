@@ -15,6 +15,7 @@ export const header = style({
   display: "flex",
   alignItems: "center",
   columnGap: spacing[4],
+  borderBottom: `1px solid ${color.gray[200]}`,
 })
 
 //

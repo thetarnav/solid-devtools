@@ -42,7 +42,7 @@ Matching adapter version: ${wantedAdapterVersion}`,
     }
   }
 
-  postPortMessage("SolidOnPage")
+  postPortMessage("SolidOnPage", "")
 })
 
 onWindowMessage("ResetPanel", () => postPortMessage("ResetPanel"))
@@ -75,5 +75,7 @@ onPortMessage("HighlightElement", e => postWindowMessage("HighlightElement", e))
 
 onWindowMessage("AdpLocatorMode", e => postPortMessage("AdpLocatorMode", e))
 onPortMessage("ExtLocatorMode", e => postWindowMessage("ExtLocatorMode", e))
+
+onPortMessage("SetOmitRefresh", e => postWindowMessage("SetOmitRefresh", e))
 
 export {}

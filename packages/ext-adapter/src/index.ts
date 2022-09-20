@@ -1,4 +1,4 @@
-import { createEffect, createSignal, on, onCleanup } from "solid-js"
+import { batch, createEffect, createSignal, on, onCleanup } from "solid-js"
 import { createInternalRoot, useDebugger } from "@solid-devtools/debugger"
 import * as Locator from "@solid-devtools/locator"
 import {
@@ -33,6 +33,7 @@ createInternalRoot(() => {
     inspected,
     setInspectedSignal,
     setInspectedProp,
+    setOmitRefresh,
   } = useDebugger({ enabled })
 
   // update the graph only if the devtools panel is in view
@@ -40,8 +41,11 @@ createInternalRoot(() => {
 
   // disable debugger and reset any state
   onWindowMessage("PanelClosed", () => {
-    setEnabled(false)
-    setInspectedOwner(null)
+    batch(() => {
+      setEnabled(false)
+      setInspectedOwner(null)
+      setOmitRefresh(true)
+    })
   })
 
   createEffect(() => {
@@ -69,6 +73,8 @@ createInternalRoot(() => {
         }
       }),
     )
+
+    onCleanup(onWindowMessage("SetOmitRefresh", setOmitRefresh))
 
     // send the structure graph updates
     handleStructureUpdates(updates => postWindowMessage("GraphUpdate", updates))

@@ -197,13 +197,11 @@ const nullState: OwnerDetailsState = {
 const inspector = createRoot(() => {
   const [state, setState] = createStore<OwnerDetailsState>({ ...nullState })
 
-  const ownerSelectedSelector = createSelector<Structure.Node | null, Structure.Node>(
-    () => state.node,
+  const isNodeInspected = createSelector<NodeID | null, NodeID>(() =>
+    state.node ? state.node.id : null,
   )
-  const useOwnerSelectedSelector = (owner: Structure.Node): Accessor<boolean> =>
-    ownerSelectedSelector.bind(void 0, owner)
 
-  const setSelectedNode: (data: Structure.Node | null | Messages["SendSelectedOwner"]) => void =
+  const setInspectedNode: (data: Structure.Node | null | Messages["SendSelectedOwner"]) => void =
     untrackedCallback(data => {
       if (!data) setState({ ...nullState })
       else if ("name" in data) {
@@ -292,8 +290,8 @@ const inspector = createRoot(() => {
 
   return {
     state,
-    setSelectedNode,
-    useOwnerSelectedSelector,
+    setInspectedNode,
+    isNodeInspected,
     isUpdated,
     updateDetails,
     handleSignalUpdates,

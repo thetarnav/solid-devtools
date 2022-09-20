@@ -2,43 +2,14 @@ import { structure, inspector, Structure } from "@/state"
 import { OwnerPath, Scrollable } from "@/ui"
 import { NodeID } from "@solid-devtools/shared/graph"
 import { assignInlineVars } from "@vanilla-extract/dynamic"
-import {
-  Accessor,
-  Component,
-  createContext,
-  createMemo,
-  createSignal,
-  For,
-  Show,
-  useContext,
-} from "solid-js"
+import { Component, createMemo, createSignal, For, Show } from "solid-js"
 import { OwnerNode } from "./OwnerNode"
 import * as styles from "./structure.css"
-
-export type StructureContextState = {
-  handleFocus: (owner: Structure.Node | null) => void
-  useSelectedSelector: (owner: Structure.Node) => Accessor<boolean>
-}
-
-const StructureContext = createContext<StructureContextState>()
-
-export const useStructure = () => {
-  const ctx = useContext(StructureContext)
-  if (!ctx) throw "GraphContext wasn't provided."
-  return ctx
-}
 
 export default function StructureView() {
   return (
     <div class={styles.panelWrapper}>
-      <StructureContext.Provider
-        value={{
-          handleFocus: inspector.setSelectedNode,
-          useSelectedSelector: inspector.useOwnerSelectedSelector,
-        }}
-      >
-        <DisplayStructureTree />
-      </StructureContext.Provider>
+      <DisplayStructureTree />
       <div class={styles.path}>
         <div class={styles.pathInner}>
           <Show when={inspector.state.details?.path}>

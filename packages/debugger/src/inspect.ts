@@ -71,14 +71,13 @@ export function collectOwnerDetails(
     inspectedProps: Set<string>
     elementMap: ElementMap
     signalUpdateHandler: SignalUpdateHandler
-    omitRefresh?: boolean
+    omitRefresh: boolean
   },
 ): {
   details: Mapped.OwnerDetails
   signalMap: Record<NodeID, Solid.Signal>
 } {
-  // TODO: toggle omit
-  const { elementMap, signalUpdateHandler, inspectedProps, omitRefresh = true } = config
+  const { elementMap, signalUpdateHandler, inspectedProps, omitRefresh } = config
   const signalMap: Record<NodeID, Solid.Signal> = {}
 
   // Set globals

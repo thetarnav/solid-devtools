@@ -29,7 +29,7 @@ const App: Component = () => {
       </header>
       <div class={styles.content}>
         <Splitter
-          onToggle={() => inspector.setSelectedNode(null)}
+          onToggle={() => inspector.setInspectedNode(null)}
           side={
             <Show when={inspector.state.node}>
               <Details />

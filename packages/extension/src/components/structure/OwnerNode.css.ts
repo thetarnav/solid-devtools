@@ -45,6 +45,8 @@ const paddingMask: Property.MaskImage = `linear-gradient(to right, rgba(0,0,0, 0
 const remMinusPx = `calc(1rem - 1px)`
 
 export const levelPadding = style({
+  position: "relative",
+  zIndex: -2,
   width: `calc(${levelVar} * ${spacing[4]})`,
   height: rowHeight,
   // background: `linear-gradient(90deg, ${color.white}, ${color.gray[100]}) ${color.gray[100]}`,
