@@ -1,10 +1,9 @@
-import { Accessor, batch, createRoot, createSelector, createSignal } from "solid-js"
+import { batch, createComputed, createRoot, createSelector, createSignal, untrack } from "solid-js"
 import { createStore, produce } from "solid-js/store"
 import { Mapped, NodeID, NodeType, SignalUpdate } from "@solid-devtools/shared/graph"
 import { warn } from "@solid-devtools/shared/utils"
 import { NOTFOUND } from "@solid-devtools/shared/variables"
-import structure from "./structure"
-import type { Structure } from "./structure"
+import structure, { Structure } from "./structure"
 import { arrayEquals, Mutable } from "@solid-primitives/utils"
 import { createUpdatedSelector } from "./utils"
 import { EncodedValue } from "@solid-devtools/shared/serialize"
@@ -188,11 +187,7 @@ export type OwnerDetailsState =
   | { node: null; rootId: null; details: null }
   | { node: Structure.Node; rootId: NodeID; details: Inspector.Details | null }
 
-const nullState: OwnerDetailsState = {
-  node: null,
-  rootId: null,
-  details: null,
-}
+const nullState: OwnerDetailsState = { node: null, rootId: null, details: null }
 
 const inspector = createRoot(() => {
   const [state, setState] = createStore<OwnerDetailsState>({ ...nullState })
@@ -219,6 +214,16 @@ const inspector = createRoot(() => {
           setState({ node: node, rootId, details: null })
       }
     })
+
+  // clear the inspector when the inspected node is removed
+  createComputed(() => {
+    structure.structure()
+    untrack(() => {
+      if (state.node) {
+        structure.getNode(state.rootId, state.node.id) || setInspectedNode(null)
+      }
+    })
+  })
 
   const updateDetails = untrackedCallback((raw: Mapped.OwnerDetails) => {
     const { rootId, node } = state
