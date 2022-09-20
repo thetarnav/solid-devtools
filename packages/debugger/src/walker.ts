@@ -40,17 +40,15 @@ function mapOwner(owner: Solid.Owner): Mapped.Owner {
       const element = resolveElements(owner.value)
       if (element) $components.push({ id, name, element })
     }
-    // omitting refresh memo — skip it but add its children to the component
-    let refresh: Solid.Owner
+    // omitting refresh memo — map it's children instead
+    let refresh: Solid.Owner | undefined
     if (
       $omitRefresh &&
       owned &&
       owned.length === 1 &&
       markOwnerType((refresh = owned[0])) === NodeType.Refresh
     ) {
-      const children = mapChildren(refresh)
-      if (children) mapped.children = children
-      return mapped
+      owner = refresh
     }
   }
 
