@@ -46,7 +46,6 @@ export const Memo: IconComponent = props => (
 export const CarretRight: IconComponent = props => (
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" class={props.class}>
     <g>
-      <path fill="none" d="M0 0h256v256H0z"></path>
       <path
         fill="none"
         stroke={props.color ?? "currentColor"}
@@ -62,7 +61,6 @@ export const CarretRight: IconComponent = props => (
 export const Select: IconComponent = props => (
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" class={props.class}>
     <g>
-      <path fill="none" d="M0 0h256v256H0z"></path>
       <circle
         cx="128"
         cy="128"
@@ -122,6 +120,79 @@ export const Select: IconComponent = props => (
         stroke-linejoin="round"
         stroke-width="16"
       ></circle>
+    </g>
+  </svg>
+)
+
+export const Options: IconComponent = props => (
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" class={props.class}>
+    <g>
+      <circle
+        cx="128"
+        cy="128"
+        opacity={props.bgColor ? undefined : "0.2"}
+        fill={props.bgColor ?? "currentColor"}
+      ></circle>
+      <circle
+        cx="128"
+        cy="48"
+        opacity={props.bgColor ? undefined : "0.2"}
+        fill={props.bgColor ?? "currentColor"}
+      ></circle>
+      <circle
+        cx="128"
+        cy="208"
+        opacity={props.bgColor ? undefined : "0.2"}
+        fill={props.bgColor ?? "currentColor"}
+      ></circle>
+      <circle
+        cx="128"
+        cy="128"
+        r="24"
+        fill="none"
+        stroke={props.color ?? "currentColor"}
+        stroke-miterlimit="10"
+        stroke-width="16"
+      ></circle>
+      <circle
+        cx="128"
+        cy="48"
+        r="24"
+        fill="none"
+        stroke={props.color ?? "currentColor"}
+        stroke-miterlimit="10"
+        stroke-width="16"
+      ></circle>
+      <circle
+        cx="128"
+        cy="208"
+        r="24"
+        fill="none"
+        stroke={props.color ?? "currentColor"}
+        stroke-miterlimit="10"
+        stroke-width="16"
+      ></circle>
+    </g>
+  </svg>
+)
+
+export const X: IconComponent = props => (
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" class={props.class}>
+    <g>
+      <path
+        stroke={props.color ?? "currentColor"}
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="16"
+        d="M200 56L56 200"
+      ></path>
+      <path
+        stroke={props.color ?? "currentColor"}
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="16"
+        d="M200 200L56 56"
+      ></path>
     </g>
   </svg>
 )

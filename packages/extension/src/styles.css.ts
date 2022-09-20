@@ -1,5 +1,5 @@
 import { style } from "@vanilla-extract/css"
-import { spacing, color } from "@/ui/theme"
+import { spacing, color, rounded } from "@/ui/theme"
 
 export const app = style({
   height: "100vh",
@@ -18,9 +18,6 @@ export const header = style({
   borderBottom: `1px solid ${color.gray[200]}`,
 })
 
-//
-// SELECT ELEMENT
-//
 export const select = style({
   width: spacing[8],
   height: spacing[8],
@@ -28,6 +25,28 @@ export const select = style({
 export const selectIcon = style({
   width: spacing[5],
   height: spacing[5],
+})
+
+export const options = style({
+  marginLeft: "auto",
+  width: spacing[8],
+  height: spacing[8],
+})
+export const optionsIcon = style({
+  width: spacing[5],
+  height: spacing[5],
+})
+
+export const optionsMenu = style({
+  position: "fixed",
+  zIndex: 9999,
+  padding: spacing[4],
+  display: "flex",
+  flexDirection: "column",
+  gap: spacing[4],
+  ...rounded("md"),
+  backgroundColor: color.gray[100],
+  border: `1px solid ${color.gray[200]}`,
 })
 
 export const content = style({
