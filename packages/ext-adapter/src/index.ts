@@ -24,7 +24,7 @@ createInternalRoot(() => {
 
   const {
     forceTriggerUpdate,
-    components,
+    findComponent,
     handleComputationUpdates,
     handleSignalUpdates,
     handlePropsUpdate,
@@ -135,7 +135,7 @@ createInternalRoot(() => {
         // highlight component
         if (typeof payload === "object") {
           const { rootId, nodeId } = payload
-          const component = components()[rootId]?.find(c => c.id === nodeId)
+          const component = findComponent(rootId, nodeId)
           if (!component) return warn("No component found", nodeId)
           target = { ...component, rootId }
         }

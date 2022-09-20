@@ -1,6 +1,5 @@
 import { Accessor, createEffect, createSignal } from "solid-js"
 import { createSimpleEmitter, Listen } from "@solid-primitives/event-bus"
-import { omit } from "@solid-primitives/immutable"
 import { createStaticStore } from "@solid-primitives/utils"
 import { throttle } from "@solid-primitives/scheduled"
 import {
@@ -72,6 +71,7 @@ export type PluginData = {
   readonly handlePropsUpdate: Listen<Mapped.Props>
   readonly handleStructureUpdates: Listen<RootsUpdates>
   readonly components: Accessor<Record<NodeID, Mapped.Component[]>>
+  readonly findComponent: (rootId: NodeID, nodeId: NodeID) => Mapped.Component | undefined
   readonly setInspectedOwner: SetInspectedOwner
   readonly inspected: InspectedState
   readonly setInspectedSignal: (id: NodeID, selected: boolean) => EncodedValue<boolean> | null
@@ -121,8 +121,20 @@ const exported = createInternalRoot(() => {
   //
   const [components, setComponents] = createSignal<Record<NodeID, Mapped.Component[]>>({})
 
+  function findComponent(rootId: NodeID, nodeId: NodeID): Mapped.Component | undefined {
+    const componentsList = components()[rootId] as Mapped.Component[] | undefined
+    if (!componentsList) return
+    for (const c of componentsList) {
+      if (c.id === nodeId) return c
+    }
+  }
+
   function removeRoot(rootId: NodeID) {
-    setComponents(omit(rootId))
+    setComponents(prev => {
+      const copy = Object.assign({}, prev)
+      delete copy[rootId]
+      return copy
+    })
     pushStructureUpdate({ removed: rootId })
   }
   function updateRoot(newRoot: Mapped.Root, newComponents: Mapped.Component[]): void {
@@ -232,6 +244,7 @@ const exported = createInternalRoot(() => {
     handlePropsUpdate,
     handleStructureUpdates,
     components,
+    findComponent,
     triggerUpdate,
     forceTriggerUpdate,
     setInspectedOwner,
