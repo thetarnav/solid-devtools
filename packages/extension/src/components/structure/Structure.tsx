@@ -2,7 +2,7 @@ import { structure, inspector, Structure } from "@/state"
 import { OwnerPath, Scrollable } from "@/ui"
 import { NodeID } from "@solid-devtools/shared/graph"
 import { assignInlineVars } from "@vanilla-extract/dynamic"
-import { Component, createMemo, createSignal, For, Show } from "solid-js"
+import { Accessor, Component, createMemo, createSignal, For, Setter, Show } from "solid-js"
 import { OwnerNode } from "./OwnerNode"
 import * as styles from "./structure.css"
 
@@ -23,7 +23,8 @@ export default function StructureView() {
 
 type DisplayNode = {
   node: Structure.Node
-  level: number
+  level: Accessor<number>
+  setLevel: Setter<number>
 }
 
 const remToPx = (rem: number): number =>
@@ -35,9 +36,15 @@ let $index = 0
 let $nextList: DisplayNode[] = []
 let $prevMap: Record<NodeID, DisplayNode> = {}
 
-function mapNode(node: Structure.Node, level: number): void {
+function mapNode(node: Structure.Node, newLevel: number): void {
   const prev = $prevMap[node.id]
-  $nextList.push(prev ?? { node, level })
+  if (prev) {
+    $nextList.push(prev)
+    prev.setLevel(newLevel)
+  } else {
+    const [level, setLevel] = createSignal(newLevel)
+    $nextList.push({ node, level, setLevel })
+  }
 }
 
 function mapNodes(nodes: readonly Structure.Node[], level: number): void {
@@ -112,7 +119,7 @@ const DisplayStructureTree: Component = props => {
       >
         <div class={styles.scrolledInner}>
           <For each={tree().list}>
-            {({ node, level }) => <OwnerNode owner={node} level={level} />}
+            {({ node, level }) => <OwnerNode owner={node} level={level()} />}
           </For>
         </div>
       </div>
