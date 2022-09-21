@@ -1,5 +1,6 @@
 import { style } from "@vanilla-extract/css"
 import { spacing, color, rounded } from "@/ui/theme"
+import { toggleButton } from "@/ui/components/button/button.css"
 
 export const app = style({
   height: "100vh",
@@ -29,24 +30,33 @@ export const selectIcon = style({
 
 export const options = style({
   marginLeft: "auto",
-  width: spacing[8],
-  height: spacing[8],
 })
+export const optionsButton = style([
+  toggleButton,
+  {
+    marginLeft: "auto",
+    width: spacing[8],
+    height: spacing[8],
+  },
+])
 export const optionsIcon = style({
   width: spacing[5],
   height: spacing[5],
 })
 
-export const optionsMenu = style({
+export const optionsPanel = style({
   position: "fixed",
   zIndex: 9999,
-  padding: spacing[4],
-  display: "flex",
-  flexDirection: "column",
-  gap: spacing[4],
+  padding: spacing[2],
   ...rounded("md"),
   backgroundColor: color.gray[100],
   border: `1px solid ${color.gray[200]}`,
+})
+export const optionsMenu = style({
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "stretch",
+  gap: spacing[2],
 })
 
 export const content = style({

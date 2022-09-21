@@ -45,6 +45,7 @@
     "clsx": "^1.2.1",
     "csstype": "^3.1.1",
     "solid-floating-ui": "^0.1.0",
+    "solid-headless": "^0.12.6",
     "solid-js": "^1.5.5",
     "solid-transition-group": "^0.0.11",
     "type-fest": "^2.19.0"
