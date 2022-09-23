@@ -1,5 +1,15 @@
 # @solid-devtools/debugger
 
+## 0.9.1
+
+### Patch Changes
+
+- 04fce35: Hide refresh memo nodes (MHR) from the Structure view and combine their details in the inspector panel.
+- 92c8fda: Don't include children property in the mapped owner object, if the children are missing.
+- Updated dependencies [04fce35]
+- Updated dependencies [92c8fda]
+  - @solid-devtools/shared@0.8.1
+
 ## 0.9.0
 
 ### Minor Changes

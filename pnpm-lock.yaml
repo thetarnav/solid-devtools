@@ -34,7 +34,7 @@ importers:
       '@babel/preset-env': ^7.19.1
       '@jest/globals': ^29.0.3
       '@jest/types': ^29.0.3
-      '@solid-devtools/shared': workspace:^0.8.0
+      '@solid-devtools/shared': workspace:^0.8.1
       '@solid-devtools/transform': workspace:^0.7.3
       '@solid-primitives/event-bus': ^0.1.2
       '@solid-primitives/refs': ^0.3.2
@@ -76,9 +76,9 @@ importers:
 
   packages/ext-adapter:
     specifiers:
-      '@solid-devtools/debugger': workspace:^0.9.0
-      '@solid-devtools/locator': workspace:^0.16.2
-      '@solid-devtools/shared': workspace:^0.8.0
+      '@solid-devtools/debugger': workspace:^0.9.1
+      '@solid-devtools/locator': workspace:^0.16.3
+      '@solid-devtools/shared': workspace:^0.8.1
       '@solid-primitives/utils': ^3.0.2
       solid-js: ^1.5.5
       tsup: ^6.2.3
@@ -100,8 +100,8 @@ importers:
       '@crxjs/vite-plugin': ^1.0.14
       '@floating-ui/dom': ^1.0.2
       '@otonashixav/solid-flip': ^0.10.5
-      '@solid-devtools/ext-adapter': workspace:^0.16.2
-      '@solid-devtools/shared': workspace:^0.8.0
+      '@solid-devtools/ext-adapter': workspace:^0.16.3
+      '@solid-devtools/shared': workspace:^0.8.1
       '@solid-primitives/cursor': ^0.0.100
       '@solid-primitives/destructure': ^0.1.2
       '@solid-primitives/event-listener': ^2.2.2
@@ -170,8 +170,8 @@ importers:
 
   packages/locator:
     specifiers:
-      '@solid-devtools/debugger': workspace:^0.9.0
-      '@solid-devtools/shared': workspace:^0.8.0
+      '@solid-devtools/debugger': workspace:^0.9.1
+      '@solid-devtools/shared': workspace:^0.8.1
       '@solid-devtools/transform': workspace:^0.7.3
       '@solid-primitives/bounds': ^0.0.102
       '@solid-primitives/cursor': ^0.0.100
@@ -387,12 +387,12 @@ importers:
       '@solidjs/meta': 0.28.0_solid-js@1.5.5
       '@solidjs/router': 0.4.3_solid-js@1.5.5
       solid-js: 1.5.5
-      solid-start: 0.1.0-alpha.101_2cq7e4sj7ivoqhxadrsoh2gyee
+      solid-start: 0.1.0_2cq7e4sj7ivoqhxadrsoh2gyee
       undici: 5.10.0
     devDependencies:
       '@solid-devtools/transform': link:../../packages/transform
       solid-devtools: link:../../packages/main
-      solid-start-node: 0.1.0-alpha.101_nrzah5w7f5ifjsevooa5pivbva
+      solid-start-node: 0.1.0-alpha.101_yhvgwiv7fr3jhxvwa2gnlv34va
       typescript: 4.8.3
       vite: 3.1.1
 
@@ -6724,7 +6724,7 @@ packages:
       '@babel/types': 7.19.0
       solid-js: 1.5.5
 
-  /solid-start-node/0.1.0-alpha.101_nrzah5w7f5ifjsevooa5pivbva:
+  /solid-start-node/0.1.0-alpha.101_yhvgwiv7fr3jhxvwa2gnlv34va:
     resolution: {integrity: sha512-bU8aHV0F6U72Bt4ES933QIuymbN/GgdIAI5/3qmrnS4e9eMeghhBbGM14uEhb4aMh7K9Uhd+5KTQDx6rXqMJ6g==}
     peerDependencies:
       solid-start: '*'
@@ -6738,7 +6738,7 @@ packages:
       polka: 1.0.0-next.22
       rollup: 2.79.0
       sirv: 2.0.2
-      solid-start: 0.1.0-alpha.101_2cq7e4sj7ivoqhxadrsoh2gyee
+      solid-start: 0.1.0_2cq7e4sj7ivoqhxadrsoh2gyee
       terser: 5.15.0
       undici: 5.10.0
       vite: 3.1.1
@@ -6746,8 +6746,8 @@ packages:
       - supports-color
     dev: true
 
-  /solid-start/0.1.0-alpha.101_2cq7e4sj7ivoqhxadrsoh2gyee:
-    resolution: {integrity: sha512-hfj/EAZuRHqTmnO4uZQQmpGGOZf5aQyGjz0VWiInOUvM4qYwTz978fXKeXBgSKnRCHxqkwLnhMjiKeqgHaD4PA==}
+  /solid-start/0.1.0_2cq7e4sj7ivoqhxadrsoh2gyee:
+    resolution: {integrity: sha512-Dco6FvRFNpH+koa9f5EKH4WwYg40eSGMovQS8Nvh8lmcYBGeUEuyX4sBSQ3uxAVSuZw9vBefld7GfFg6u0p0vQ==}
     hasBin: true
     peerDependencies:
       '@solidjs/meta': ^0.28.0

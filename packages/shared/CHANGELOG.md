@@ -1,5 +1,12 @@
 # solid-devtools-shared
 
+## 0.8.1
+
+### Patch Changes
+
+- 04fce35: Hide refresh memo nodes (MHR) from the Structure view and combine their details in the inspector panel.
+- 92c8fda: Don't include children property in the mapped owner object, if the children are missing.
+
 ## 0.8.0
 
 ### Minor Changes
