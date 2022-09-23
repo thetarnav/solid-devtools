@@ -57,7 +57,6 @@ describe("collectOwnerDetails", () => {
         elementMap,
         inspectedProps: new Set(),
         signalUpdateHandler: () => {},
-        omitRefresh: false,
       })
 
       expect(details).toEqual({
@@ -121,7 +120,6 @@ describe("collectOwnerDetails", () => {
         elementMap,
         inspectedProps: new Set(),
         signalUpdateHandler: () => {},
-        omitRefresh: false,
       })
 
       dispose()
@@ -167,7 +165,6 @@ describe("collectOwnerDetails", () => {
         elementMap,
         inspectedProps: new Set(),
         signalUpdateHandler: () => {},
-        omitRefresh: false,
       })
 
       expect(details).toEqual({
@@ -218,7 +215,6 @@ describe("collectOwnerDetails", () => {
         elementMap,
         inspectedProps: new Set(["nested"]),
         signalUpdateHandler: () => {},
-        omitRefresh: false,
       })
 
       dispose()
