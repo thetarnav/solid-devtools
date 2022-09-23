@@ -46,26 +46,23 @@ function reconcileSignals(
   newSignals: readonly Mapped.Signal[],
   signals: Record<NodeID, Inspector.Signal>,
 ): void {
-  if (!newSignals.length && !signals.length) return
-  const intersection: Mapped.Signal[] = []
-  for (const id in signals) {
-    const newSignal = newSignals.find(s => s.id === id)
-    if (newSignal) {
-      const signal = signals[id]
-      // reconcile signal observers
+  const prev = new Set(Object.keys(signals))
+  for (const raw of newSignals) {
+    const { id } = raw
+    const signal = signals[id]
+    if (signal) {
+      // update signal observers
       signal.observers.length = 0
-      signal.observers.push.apply(signal.observers, newSignal.observers)
-
-      intersection.push(newSignal)
-    } else {
-      // remove signal
-      delete signals[id]
+      signal.observers.push.apply(signal.observers, raw.observers)
+      // update signal value
+      reconcileValue(signal.value, raw.value)
+      prev.delete(id)
     }
+    // add new signal
+    else signals[id] = createSignalNode(raw)
   }
-  // map new signals
-  for (const newSignal of newSignals) {
-    if (!intersection.includes(newSignal)) signals[newSignal.id] = createSignalNode(newSignal)
-  }
+  // remove signals
+  for (const id of prev) delete signals[id]
 }
 
 function reconcileValue(proxy: EncodedValue<boolean>, next: EncodedValue<boolean>) {
@@ -240,10 +237,6 @@ const inspector = createRoot(() => {
 
   const [isUpdated, addUpdated, clearUpdated] = createUpdatedSelector()
 
-  function handleGraphUpdate() {
-    clearUpdated()
-  }
-
   const handleSignalUpdates = untrackedCallback((updates: SignalUpdate[], isUpdate = true) => {
     if (!state.details) return
     batch(() => {
@@ -298,9 +291,9 @@ const inspector = createRoot(() => {
     setInspectedNode,
     isNodeInspected,
     isUpdated,
+    clearUpdated,
     updateDetails,
     handleSignalUpdates,
-    handleGraphUpdate,
     handlePropsUpdate,
     toggleSignalFocus,
     togglePropFocus,
