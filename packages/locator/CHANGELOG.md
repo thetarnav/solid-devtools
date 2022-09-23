@@ -1,5 +1,15 @@
 # @solid-devtools/locator
 
+## 0.16.3
+
+### Patch Changes
+
+- 04fce35: Hide refresh memo nodes (MHR) from the Structure view and combine their details in the inspector panel.
+- Updated dependencies [04fce35]
+- Updated dependencies [92c8fda]
+  - @solid-devtools/debugger@0.9.1
+  - @solid-devtools/shared@0.8.1
+
 ## 0.16.2
 
 ### Patch Changes
