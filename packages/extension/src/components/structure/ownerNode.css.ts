@@ -59,6 +59,7 @@ export const nameContainer = style({
   marginLeft: spacing[3],
   display: "flex",
   alignItems: "center",
+  columnGap: spacing[2],
   minWidth: spacing[36],
 })
 
@@ -72,7 +73,6 @@ export const highlight = style({
 })
 
 export const type = style({
-  marginLeft: spacing[2],
   fontSize: 10,
   opacity: 0.4,
   userSelect: "none",

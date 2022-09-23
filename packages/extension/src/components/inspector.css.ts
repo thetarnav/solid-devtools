@@ -42,14 +42,3 @@ export const h2 = style({
   color: color.gray[500],
   marginBottom: spacing[1],
 })
-
-export const proxy = style({
-  paddingRight: spacing[1],
-  paddingLeft: spacing[1],
-  backgroundColor: color.cyan[100],
-  color: color.cyan[600],
-  textTransform: "uppercase",
-  fontWeight: 700,
-  fontSize: spacing[2.5],
-  ...rounded(),
-})

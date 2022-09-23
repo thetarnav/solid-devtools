@@ -43,6 +43,7 @@ function mapOwner(owner: Solid.Owner): Mapped.Owner {
     let refresh: Solid.Owner | undefined
     if (owned && owned.length === 1 && markOwnerType((refresh = owned[0])) === NodeType.Refresh) {
       owner = refresh
+      mapped.hmr = true
     }
   }
 

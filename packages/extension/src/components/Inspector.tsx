@@ -1,7 +1,7 @@
 import { Component, Show } from "solid-js"
 import { Entries } from "@solid-primitives/keyed"
 import { NodeType } from "@solid-devtools/shared/graph"
-import { SignalContextProvider, Scrollable, Signals, ValueNode } from "@/ui"
+import { SignalContextProvider, Scrollable, Signals, ValueNode, Badge } from "@/ui"
 import inspector, { Inspector } from "../state/inspector"
 import * as styles from "./inspector.css"
 
@@ -18,9 +18,7 @@ const DetailsContent: Component<{ details: Inspector.Details }> = ({ details }) 
       <div class={styles.content}>
         {componentProps && (
           <div>
-            <h2 class={styles.h2}>
-              Props {componentProps.proxy && <span class={styles.proxy}>proxy</span>}
-            </h2>
+            <h2 class={styles.h2}>Props {componentProps.proxy && <Badge>PROXY</Badge>}</h2>
             <Entries of={componentProps.record}>
               {(name, value) => (
                 <ValueNode

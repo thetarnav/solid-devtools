@@ -2,7 +2,7 @@ import { Component, onCleanup } from "solid-js"
 import { assignInlineVars } from "@vanilla-extract/dynamic"
 import { NodeType } from "@solid-devtools/shared/graph"
 import { structure, Structure, inspector } from "@/state"
-import { Highlight } from "@/ui"
+import { Badge, Highlight } from "@/ui"
 import * as styles from "./ownerNode.css"
 
 export const OwnerNode: Component<{
@@ -10,7 +10,7 @@ export const OwnerNode: Component<{
   level: number
 }> = props => {
   const { owner } = props
-  const { name, type, id } = owner
+  const { name, type, id, hmr } = owner
   const typeName = NodeType[type]
 
   const { toggleHoveredOwner } = structure
@@ -41,7 +41,8 @@ export const OwnerNode: Component<{
         <Highlight strong={isUpdated()} light={false} class={styles.highlight}>
           <div class={styles.name}>{type === NodeType.Component ? `<${name}>` : name}</div>
         </Highlight>
-        <div class={styles.type}>{typeName}</div>
+        {type !== NodeType.Component && <div class={styles.type}>{typeName}</div>}
+        {hmr && <Badge>HMR</Badge>}
       </div>
     </div>
   )

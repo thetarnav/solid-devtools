@@ -13,7 +13,7 @@ const cyan = {
   700: "#0e7490",
   800: "#155e75",
   900: "#164e63",
-}
+} as const
 
 const amber = {
   50: "#fffbeb",
@@ -26,7 +26,7 @@ const amber = {
   700: "#b45309",
   800: "#92400e",
   900: "#78350f",
-}
+} as const
 
 const gray = {
   50: "#fafafa",
@@ -39,7 +39,7 @@ const gray = {
   700: "#3f3f46",
   800: "#27272a",
   900: "#18181b",
-}
+} as const
 
 export const theme = {
   color: {
