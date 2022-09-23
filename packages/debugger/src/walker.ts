@@ -10,7 +10,6 @@ let $inspectedId: NodeID | null
 let $rootId: NodeID
 let $onComputationUpdate: ComputationUpdateHandler
 let $gatherComponents: boolean
-let $omitRefresh: boolean
 let $components: Mapped.Component[] = []
 let $inspectedOwner: Solid.Owner | null
 
@@ -42,12 +41,7 @@ function mapOwner(owner: Solid.Owner): Mapped.Owner {
     }
     // omitting refresh memo — map it's children instead
     let refresh: Solid.Owner | undefined
-    if (
-      $omitRefresh &&
-      owned &&
-      owned.length === 1 &&
-      markOwnerType((refresh = owned[0])) === NodeType.Refresh
-    ) {
+    if (owned && owned.length === 1 && markOwnerType((refresh = owned[0])) === NodeType.Refresh) {
       owner = refresh
     }
   }
@@ -70,7 +64,6 @@ export function walkSolidTree(
     onComputationUpdate: ComputationUpdateHandler
     gatherComponents?: boolean
     inspectedId: NodeID | null
-    omitRefresh?: boolean
   },
 ): WalkerResult {
   // set the globals to be available for this walk cycle
@@ -78,7 +71,6 @@ export function walkSolidTree(
   $rootId = config.rootId
   $onComputationUpdate = config.onComputationUpdate
   $gatherComponents = !!config.gatherComponents
-  $omitRefresh = !!config.omitRefresh
   $inspectedOwner = null
   // components is an array instead of an object to preserve the order (nesting) of the components,
   // this helps the locator find the most nested component first

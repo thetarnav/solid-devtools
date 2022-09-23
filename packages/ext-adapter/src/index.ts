@@ -33,7 +33,6 @@ createInternalRoot(() => {
     inspected,
     setInspectedSignal,
     setInspectedProp,
-    setOmitRefresh,
   } = useDebugger({ enabled })
 
   // update the graph only if the devtools panel is in view
@@ -44,7 +43,6 @@ createInternalRoot(() => {
     batch(() => {
       setEnabled(false)
       setInspectedOwner(null)
-      setOmitRefresh(true)
     })
   })
 
@@ -73,8 +71,6 @@ createInternalRoot(() => {
         }
       }),
     )
-
-    onCleanup(onWindowMessage("SetOmitRefresh", setOmitRefresh))
 
     // send the structure graph updates
     handleStructureUpdates(updates => postWindowMessage("GraphUpdate", updates))

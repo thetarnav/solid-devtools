@@ -74,7 +74,6 @@ export type PluginData = {
   readonly inspected: InspectedState
   readonly setInspectedSignal: (id: NodeID, selected: boolean) => EncodedValue<boolean> | null
   readonly setInspectedProp: (key: NodeID, selected: boolean) => void
-  readonly setOmitRefresh: (state: boolean) => void
 }
 
 type RootUpdate = { removed: NodeID } | { updated: Mapped.Root }
@@ -105,7 +104,6 @@ const [handleStructureUpdates, pushStructureUpdate] = (() => {
 
 export const debuggerConfig = {
   gatherComponents: false,
-  omitRefresh: true,
 }
 
 const exported = createInternalRoot(() => {
@@ -171,7 +169,6 @@ const exported = createInternalRoot(() => {
       elementMap,
       signalUpdateHandler,
       inspectedProps,
-      omitRefresh: debuggerConfig.omitRefresh,
     })
     setInspected({ details, signalMap })
   })
@@ -216,7 +213,6 @@ const exported = createInternalRoot(() => {
       elementMap,
       signalUpdateHandler,
       inspectedProps,
-      omitRefresh: debuggerConfig.omitRefresh,
     })
 
     setInspected({ id: nodeId, rootId, owner, details, signalMap, elementMap })
@@ -235,12 +231,6 @@ const exported = createInternalRoot(() => {
     else inspectedProps.delete(key)
     updateInspectedProps()
   })
-
-  const setOmitRefresh: PluginData["setOmitRefresh"] = state => {
-    debuggerConfig.omitRefresh = state
-    forceTriggerUpdate()
-    updateInspectedDetails()
-  }
 
   //
   // Computation updates:
@@ -264,7 +254,6 @@ const exported = createInternalRoot(() => {
     inspected,
     setInspectedSignal,
     setInspectedProp,
-    setOmitRefresh,
   }
   function useDebugger(options: {
     enabled?: Accessor<boolean>

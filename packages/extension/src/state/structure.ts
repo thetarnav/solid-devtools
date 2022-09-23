@@ -149,8 +149,6 @@ export function mapStructureUpdates(config: {
 }
 
 const structure = createRoot(() => {
-  const [omitsRefresh, setOmitsRefresh] = createSignal(true)
-
   const [structure, setStructure] = createSignal<Structure.Node[]>([])
 
   /** parent nodeId : rootId to be attached */
@@ -208,8 +206,6 @@ const structure = createRoot(() => {
     addUpdatedComputations,
     isUpdated,
     toggleHoveredOwner,
-    omitsRefresh,
-    setOmitsRefresh,
     findNode: (nodeId: NodeID): ReturnType<typeof findNode> => findNode(nodeMap, nodeId),
     getNode: (rootId: NodeID, nodeId: NodeID): Structure.Node | undefined =>
       nodeMap[rootId]?.[nodeId],

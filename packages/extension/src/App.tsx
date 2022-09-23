@@ -58,9 +58,6 @@ const Options: Component<{}> = props => {
                     }}
                   >
                     <Menu class={styles.optionsMenu}>
-                      <MenuItem as="button" on:click={() => structure.setOmitsRefresh(p => !p)}>
-                        {structure.omitsRefresh() ? "Show Refresh Nodes" : "Hide Refresh Nodes"}
-                      </MenuItem>
                       <MenuItem
                         as="a"
                         href="https://github.com/thetarnav/solid-devtools/issues"

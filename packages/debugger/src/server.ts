@@ -31,7 +31,6 @@ export const useDebugger: typeof API.useDebugger = () => ({
   handlePropsUpdate: () => noop,
   setInspectedSignal: () => null,
   setInspectedProp: noop,
-  setOmitRefresh: noop,
 })
 
 // update

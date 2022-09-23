@@ -39,8 +39,6 @@ export interface Messages {
   ExtLocatorMode: boolean
   /** adapter -> devtools */
   AdpLocatorMode: boolean
-  /** devtools -> adapter */
-  SetOmitRefresh: boolean
 }
 
 export type PostMessageFn = <K extends keyof Messages>(

@@ -71,13 +71,12 @@ export function collectOwnerDetails(
     inspectedProps: Set<string>
     elementMap: ElementMap
     signalUpdateHandler: SignalUpdateHandler
-    omitRefresh: boolean
   },
 ): {
   details: Mapped.OwnerDetails
   signalMap: Record<NodeID, Solid.Signal>
 } {
-  const { elementMap, signalUpdateHandler, inspectedProps, omitRefresh } = config
+  const { elementMap, signalUpdateHandler, inspectedProps } = config
   const signalMap: Record<NodeID, Solid.Signal> = {}
 
   // Set globals
@@ -94,12 +93,7 @@ export function collectOwnerDetails(
 
   let { sourceMap, owned } = owner
   let refresh: Solid.Owner | undefined
-  if (
-    omitRefresh &&
-    owned &&
-    owned.length === 1 &&
-    markOwnerType((refresh = owned[0])) === NodeType.Refresh
-  ) {
+  if (owned && owned.length === 1 && markOwnerType((refresh = owned[0])) === NodeType.Refresh) {
     // if omitting refresh node — map it's sourceMap and owned instead
     sourceMap = refresh.sourceMap
     owned = refresh.owned

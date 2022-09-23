@@ -101,8 +101,6 @@ chrome.runtime.onConnect.addListener(port => {
   addCleanup(onRuntimeMessage("HighlightElement", e => postPortMessage("HighlightElement", e)))
 
   addCleanup(onRuntimeMessage("ForceUpdate", () => postPortMessage("ForceUpdate")))
-
-  addCleanup(onRuntimeMessage("SetOmitRefresh", e => postPortMessage("SetOmitRefresh", e)))
 })
 
 export {}
