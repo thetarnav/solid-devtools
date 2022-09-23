@@ -1,9 +1,10 @@
 import { structure, inspector, Structure } from "@/state"
-import { OwnerPath, Scrollable } from "@/ui"
+import { Scrollable } from "@/ui"
 import { NodeID } from "@solid-devtools/shared/graph"
 import { assignInlineVars } from "@vanilla-extract/dynamic"
 import { Accessor, Component, createMemo, createSignal, For, Setter, Show } from "solid-js"
 import { OwnerNode } from "./OwnerNode"
+import { OwnerPath } from "./Path"
 import * as styles from "./structure.css"
 
 export default function StructureView() {

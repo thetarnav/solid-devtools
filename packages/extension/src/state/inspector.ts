@@ -2,7 +2,6 @@ import { batch, createComputed, createRoot, createSelector, createSignal, untrac
 import { createStore, produce } from "solid-js/store"
 import { Mapped, NodeID, NodeType, SignalUpdate } from "@solid-devtools/shared/graph"
 import { warn } from "@solid-devtools/shared/utils"
-import { NOTFOUND } from "@solid-devtools/shared/variables"
 import structure, { Structure } from "./structure"
 import { arrayEquals, Mutable } from "@solid-primitives/utils"
 import { createUpdatedSelector } from "./utils"
@@ -20,8 +19,6 @@ export namespace Inspector {
     readonly selected: boolean
   }
 
-  export type Path = (Structure.Node | typeof NOTFOUND)[]
-
   export type Props = {
     readonly proxy: boolean
     readonly record: Record<
@@ -34,7 +31,7 @@ export namespace Inspector {
     readonly id: NodeID
     readonly name: string
     readonly type: NodeType
-    readonly path: Path
+    readonly path: Structure.Node[]
     readonly rawPath: NodeID[]
     readonly signals: Record<NodeID, Signal>
     readonly props?: Props
@@ -99,19 +96,14 @@ function getNodePath(
   rootId: NodeID,
   focused: Structure.Node,
   rawPath: readonly NodeID[],
-): Inspector.Path {
-  const path: Inspector.Path = Array(rawPath.length + 1)
-  for (let i = 0; i < rawPath.length; i++) {
-    const id = rawPath[i]
-    let node = structure.getNode(rootId, id)
-    if (!node) {
-      // * rootId of the inspected node don't have to be the same for the rest of the path
-      const find = structure.findNode(id)
-      if (find) node = find.node
-    }
-    path[i] = node || NOTFOUND
+): Structure.Node[] {
+  const path: Structure.Node[] = []
+  for (const id of rawPath) {
+    // rootId of the inspected node don't have to be the same for the rest of the path
+    let node = structure.getNode(rootId, id) ?? structure.findNode(id)?.node
+    if (node) path.push(node)
   }
-  path[rawPath.length] = focused
+  path.push(focused)
   return path
 }
 
