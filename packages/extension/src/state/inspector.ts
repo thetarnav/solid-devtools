@@ -1,10 +1,8 @@
-import { Accessor, batch, createRoot, createSelector, createSignal } from "solid-js"
+import { batch, createComputed, createRoot, createSelector, createSignal, untrack } from "solid-js"
 import { createStore, produce } from "solid-js/store"
 import { Mapped, NodeID, NodeType, SignalUpdate } from "@solid-devtools/shared/graph"
 import { warn } from "@solid-devtools/shared/utils"
-import { NOTFOUND } from "@solid-devtools/shared/variables"
-import structure from "./structure"
-import type { Structure } from "./structure"
+import structure, { Structure } from "./structure"
 import { arrayEquals, Mutable } from "@solid-primitives/utils"
 import { createUpdatedSelector } from "./utils"
 import { EncodedValue } from "@solid-devtools/shared/serialize"
@@ -21,8 +19,6 @@ export namespace Inspector {
     readonly selected: boolean
   }
 
-  export type Path = (Structure.Node | typeof NOTFOUND)[]
-
   export type Props = {
     readonly proxy: boolean
     readonly record: Record<
@@ -35,7 +31,7 @@ export namespace Inspector {
     readonly id: NodeID
     readonly name: string
     readonly type: NodeType
-    readonly path: Path
+    readonly path: Structure.Node[]
     readonly rawPath: NodeID[]
     readonly signals: Record<NodeID, Signal>
     readonly props?: Props
@@ -47,26 +43,23 @@ function reconcileSignals(
   newSignals: readonly Mapped.Signal[],
   signals: Record<NodeID, Inspector.Signal>,
 ): void {
-  if (!newSignals.length && !signals.length) return
-  const intersection: Mapped.Signal[] = []
-  for (const id in signals) {
-    const newSignal = newSignals.find(s => s.id === id)
-    if (newSignal) {
-      const signal = signals[id]
-      // reconcile signal observers
+  const prev = new Set(Object.keys(signals))
+  for (const raw of newSignals) {
+    const { id } = raw
+    const signal = signals[id]
+    if (signal) {
+      // update signal observers
       signal.observers.length = 0
-      signal.observers.push.apply(signal.observers, newSignal.observers)
-
-      intersection.push(newSignal)
-    } else {
-      // remove signal
-      delete signals[id]
+      signal.observers.push.apply(signal.observers, raw.observers)
+      // update signal value
+      reconcileValue(signal.value, raw.value)
+      prev.delete(id)
     }
+    // add new signal
+    else signals[id] = createSignalNode(raw)
   }
-  // map new signals
-  for (const newSignal of newSignals) {
-    if (!intersection.includes(newSignal)) signals[newSignal.id] = createSignalNode(newSignal)
-  }
+  // remove signals
+  for (const id of prev) delete signals[id]
 }
 
 function reconcileValue(proxy: EncodedValue<boolean>, next: EncodedValue<boolean>) {
@@ -103,19 +96,14 @@ function getNodePath(
   rootId: NodeID,
   focused: Structure.Node,
   rawPath: readonly NodeID[],
-): Inspector.Path {
-  const path: Inspector.Path = Array(rawPath.length + 1)
-  for (let i = 0; i < rawPath.length; i++) {
-    const id = rawPath[i]
-    let node = structure.getNode(rootId, id)
-    if (!node) {
-      // * rootId of the inspected node don't have to be the same for the rest of the path
-      const find = structure.findNode(id)
-      if (find) node = find.node
-    }
-    path[i] = node || NOTFOUND
+): Structure.Node[] {
+  const path: Structure.Node[] = []
+  for (const id of rawPath) {
+    // rootId of the inspected node don't have to be the same for the rest of the path
+    let node = structure.getNode(rootId, id) ?? structure.findNode(id)?.node
+    if (node) path.push(node)
   }
-  path[rawPath.length] = focused
+  path.push(focused)
   return path
 }
 
@@ -188,22 +176,16 @@ export type OwnerDetailsState =
   | { node: null; rootId: null; details: null }
   | { node: Structure.Node; rootId: NodeID; details: Inspector.Details | null }
 
-const nullState: OwnerDetailsState = {
-  node: null,
-  rootId: null,
-  details: null,
-}
+const nullState: OwnerDetailsState = { node: null, rootId: null, details: null }
 
 const inspector = createRoot(() => {
   const [state, setState] = createStore<OwnerDetailsState>({ ...nullState })
 
-  const ownerSelectedSelector = createSelector<Structure.Node | null, Structure.Node>(
-    () => state.node,
+  const isNodeInspected = createSelector<NodeID | null, NodeID>(() =>
+    state.node ? state.node.id : null,
   )
-  const useOwnerSelectedSelector = (owner: Structure.Node): Accessor<boolean> =>
-    ownerSelectedSelector.bind(void 0, owner)
 
-  const setSelectedNode: (data: Structure.Node | null | Messages["SendSelectedOwner"]) => void =
+  const setInspectedNode: (data: Structure.Node | null | Messages["SendSelectedOwner"]) => void =
     untrackedCallback(data => {
       if (!data) setState({ ...nullState })
       else if ("name" in data) {
@@ -222,6 +204,16 @@ const inspector = createRoot(() => {
       }
     })
 
+  // clear the inspector when the inspected node is removed
+  createComputed(() => {
+    structure.structure()
+    untrack(() => {
+      if (state.node) {
+        structure.getNode(state.rootId, state.node.id) || setInspectedNode(null)
+      }
+    })
+  })
+
   const updateDetails = untrackedCallback((raw: Mapped.OwnerDetails) => {
     const { rootId, node } = state
     if (!rootId || !node) return warn("OwnerDetailsUpdate: rootId is null")
@@ -236,10 +228,6 @@ const inspector = createRoot(() => {
   })
 
   const [isUpdated, addUpdated, clearUpdated] = createUpdatedSelector()
-
-  function handleGraphUpdate() {
-    clearUpdated()
-  }
 
   const handleSignalUpdates = untrackedCallback((updates: SignalUpdate[], isUpdate = true) => {
     if (!state.details) return
@@ -292,12 +280,12 @@ const inspector = createRoot(() => {
 
   return {
     state,
-    setSelectedNode,
-    useOwnerSelectedSelector,
+    setInspectedNode,
+    isNodeInspected,
     isUpdated,
+    clearUpdated,
     updateDetails,
     handleSignalUpdates,
-    handleGraphUpdate,
     handlePropsUpdate,
     toggleSignalFocus,
     togglePropFocus,

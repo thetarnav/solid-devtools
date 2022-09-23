@@ -1,6 +1,5 @@
 import { Accessor, createEffect, createSignal } from "solid-js"
 import { createSimpleEmitter, Listen } from "@solid-primitives/event-bus"
-import { omit } from "@solid-primitives/immutable"
 import { createStaticStore } from "@solid-primitives/utils"
 import { throttle } from "@solid-primitives/scheduled"
 import {
@@ -40,8 +39,6 @@ DETAILS:
 - component props
 */
 
-export type SetInspectedOwner = (payload: { rootId: NodeID; nodeId: NodeID } | null) => void
-
 export type InspectedState = Readonly<
   {
     signalMap: Record<NodeID, Solid.Signal>
@@ -72,7 +69,8 @@ export type PluginData = {
   readonly handlePropsUpdate: Listen<Mapped.Props>
   readonly handleStructureUpdates: Listen<RootsUpdates>
   readonly components: Accessor<Record<NodeID, Mapped.Component[]>>
-  readonly setInspectedOwner: SetInspectedOwner
+  readonly findComponent: (rootId: NodeID, nodeId: NodeID) => Mapped.Component | undefined
+  readonly setInspectedOwner: (payload: { rootId: NodeID; nodeId: NodeID } | null) => void
   readonly inspected: InspectedState
   readonly setInspectedSignal: (id: NodeID, selected: boolean) => EncodedValue<boolean> | null
   readonly setInspectedProp: (key: NodeID, selected: boolean) => void
@@ -104,6 +102,10 @@ const [handleStructureUpdates, pushStructureUpdate] = (() => {
   return [handleStructureUpdate, pushStructureUpdate]
 })()
 
+export const debuggerConfig = {
+  gatherComponents: false,
+}
+
 const exported = createInternalRoot(() => {
   /** throttled global update */
   const [onUpdate, triggerUpdate] = createSimpleEmitter()
@@ -114,15 +116,26 @@ const exported = createInternalRoot(() => {
   // Consumers:
   //
   const [enabled, addDebuggerConsumer] = createConsumers()
-  const [gatherComponents, addGatherComponentsConsumer] = createConsumers()
 
   //
   // Components:
   //
   const [components, setComponents] = createSignal<Record<NodeID, Mapped.Component[]>>({})
 
+  const findComponent: PluginData["findComponent"] = (rootId, nodeId) => {
+    const componentsList = components()[rootId] as Mapped.Component[] | undefined
+    if (!componentsList) return
+    for (const c of componentsList) {
+      if (c.id === nodeId) return c
+    }
+  }
+
   function removeRoot(rootId: NodeID) {
-    setComponents(omit(rootId))
+    setComponents(prev => {
+      const copy = Object.assign({}, prev)
+      delete copy[rootId]
+      return copy
+    })
     pushStructureUpdate({ removed: rootId })
   }
   function updateRoot(newRoot: Mapped.Root, newComponents: Mapped.Component[]): void {
@@ -133,6 +146,7 @@ const exported = createInternalRoot(() => {
   //
   // Inspected Owner details:
   //
+  // TODO: this has no real business being a store
   const [inspected, setInspected] = createStaticStore(getNullInspected())
   let lastInspectedOwner: Solid.Owner | null = null
 
@@ -170,6 +184,7 @@ const exported = createInternalRoot(() => {
     if (!enabled()) lastInspectedOwner && clearOwnerObservers(lastInspectedOwner)
     // re-observe the owner when the plugin is enabled
     else updateInspectedDetails()
+
     createEffect(() => {
       // make sure we clear the owner observers when the owner changes
       const owner = inspected.owner
@@ -182,7 +197,7 @@ const exported = createInternalRoot(() => {
     })
   })
 
-  const setInspectedOwner: SetInspectedOwner = untrackedCallback(payload => {
+  const setInspectedOwner: PluginData["setInspectedOwner"] = untrackedCallback(payload => {
     if (!payload) return setInspected(getNullInspected())
     const { rootId, nodeId } = payload
     if (inspected.id === nodeId) return
@@ -232,6 +247,7 @@ const exported = createInternalRoot(() => {
     handlePropsUpdate,
     handleStructureUpdates,
     components,
+    findComponent,
     triggerUpdate,
     forceTriggerUpdate,
     setInspectedOwner,
@@ -241,11 +257,11 @@ const exported = createInternalRoot(() => {
   }
   function useDebugger(options: {
     enabled?: Accessor<boolean>
-    gatherComponents?: Accessor<boolean>
+    gatherComponents?: boolean
   }): PluginData {
     const { enabled, gatherComponents } = options
     enabled && addDebuggerConsumer(enabled)
-    gatherComponents && addGatherComponentsConsumer(gatherComponents)
+    if (gatherComponents) debuggerConfig.gatherComponents = true
     return pluginData
   }
 
@@ -256,7 +272,6 @@ const exported = createInternalRoot(() => {
     useDebugger,
     updateRoot,
     removeRoot,
-    gatherComponents,
     pushComputationUpdate,
   }
 })
@@ -264,7 +279,6 @@ export const {
   onUpdate,
   onForceUpdate,
   enabled,
-  gatherComponents,
   useDebugger,
   updateRoot,
   removeRoot,

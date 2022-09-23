@@ -18,8 +18,8 @@ import {
   onUpdate,
   updateRoot,
   removeRoot,
-  gatherComponents,
   pushComputationUpdate,
+  debuggerConfig,
 } from "./plugin"
 import {
   createInternalRoot,
@@ -54,10 +54,10 @@ export function createGraphRoot(owner: Solid.Root): void {
     const forceRootUpdate = untrackedCallback((inspectedId?: NodeID | void) => {
       if (owner.isDisposed) return null
       const result = walkSolidTree(owner, {
+        ...debuggerConfig,
         onComputationUpdate,
         rootId,
         inspectedId: inspectedId ?? null,
-        gatherComponents: gatherComponents(),
       })
       updateRoot(result.root, result.components)
       return result

@@ -143,6 +143,7 @@ export namespace Mapped {
     name: string
     type: NodeType
     children?: Owner[]
+    hmr?: true
   }
 
   export interface Signal {

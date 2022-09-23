@@ -13,7 +13,7 @@ export interface Messages {
   PanelVisibility: boolean
   /** devtools -> adapter: the chrome devtools got entirely closed */
   PanelClosed: true
-  ResetPanel: void
+  ResetPanel: {}
   GraphUpdate: RootsUpdates
   ComputationUpdates: ComputationUpdate[]
   SignalUpdates: SignalUpdate[]
@@ -22,7 +22,7 @@ export interface Messages {
   /** adapter -> devtools: encoded props object */
   PropsUpdate: Mapped.Props
   /** devtools -> adapter: force the debugger to walk the whole tree and send it */
-  ForceUpdate: void
+  ForceUpdate: {}
   /** devtools -> adapter: request for details of owner details opened in the side-panel */
   SetSelectedOwner: null | { rootId: NodeID; nodeId: NodeID }
   /** adapter -> devtools: send component clicked with the locator to the extension */
@@ -42,7 +42,8 @@ export interface Messages {
 }
 
 export type PostMessageFn = <K extends keyof Messages>(
-  ..._: [K] extends [void] ? [id: K] : [id: K, payload: Messages[K]]
+  type: K,
+  ..._: {} extends Messages[K] ? [] : [payload: Messages[K]]
 ) => void
 
 export type OnMessageFn = <K extends keyof Messages>(

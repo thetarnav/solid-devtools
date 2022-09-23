@@ -10,6 +10,7 @@ export namespace Structure {
     readonly type: NodeType
     readonly children: Node[]
     readonly length: number
+    readonly hmr?: true
   }
 
   export type Hovered = { readonly rootId: NodeID; readonly node: Node } | null
@@ -58,6 +59,7 @@ function mapOwner(
     (rawChildren ? rawChildren.length : 0) + (subroots ? subroots.length : 0),
   )
   const node: Writable<Structure.Node> = { id, name, type, children, length: 0 }
+  if (type === NodeType.Component && raw.hmr) node.hmr = true
   // map children
   if (rawChildren) {
     for (; ci < rawChildren.length; ci++) {

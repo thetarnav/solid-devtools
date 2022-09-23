@@ -18,6 +18,7 @@ export const useDebugger: typeof API.useDebugger = () => ({
   handleSignalUpdates: () => noop,
   handleStructureUpdates: () => noop,
   components: () => ({}),
+  findComponent: () => undefined,
   setInspectedOwner: noop,
   inspected: {
     details: null,

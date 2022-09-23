@@ -47,7 +47,7 @@ const exported = createInternalRoot(() => {
 
   const { components } = useDebugger({
     enabled: highlightingEnabled,
-    gatherComponents: highlightingEnabled,
+    gatherComponents: true,
   })
 
   // TODO: selected is an array, but it still only selects only one component at a time — only elements with location should be stored as array

@@ -1,10 +1,9 @@
 import { Component } from "solid-js"
-import { NOTFOUND } from "@solid-devtools/shared/variables"
 import { Icon } from "@/ui"
-import { Inspector } from "@/state"
-import * as styles from "./Path.css"
+import { Structure } from "@/state"
+import * as styles from "./path.css"
 
-export const OwnerPath: Component<{ path: Inspector.Path }> = props => {
+export const OwnerPath: Component<{ path: Structure.Node[] }> = props => {
   return (
     <div class={styles.container}>
       {props.path.map((node, index) => (
@@ -16,7 +15,7 @@ export const OwnerPath: Component<{ path: Inspector.Path }> = props => {
           )}
           <div class={styles.item}>
             <div class={styles.highlight} />
-            {node === NOTFOUND ? <span class={styles.notFound}></span> : node.name}
+            {node.name}
           </div>
         </>
       ))}

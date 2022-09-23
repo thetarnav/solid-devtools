@@ -42,7 +42,7 @@ Matching adapter version: ${wantedAdapterVersion}`,
     }
   }
 
-  postPortMessage("SolidOnPage")
+  postPortMessage("SolidOnPage", "")
 })
 
 onWindowMessage("ResetPanel", () => postPortMessage("ResetPanel"))

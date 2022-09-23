@@ -1,28 +1,25 @@
 import { Component, onCleanup } from "solid-js"
 import { assignInlineVars } from "@vanilla-extract/dynamic"
 import { NodeType } from "@solid-devtools/shared/graph"
-import { structure, Structure } from "@/state"
-import { Highlight } from "@/ui"
-import { useStructure } from "./Structure"
-import * as styles from "./OwnerNode.css"
+import { structure, Structure, inspector } from "@/state"
+import { Badge, Highlight } from "@/ui"
+import * as styles from "./ownerNode.css"
 
 export const OwnerNode: Component<{
   owner: Structure.Node
   level: number
 }> = props => {
   const { owner } = props
-  const { name, type, id } = owner
+  const { name, type, id, hmr } = owner
   const typeName = NodeType[type]
 
-  const { useSelectedSelector, handleFocus } = useStructure()
   const { toggleHoveredOwner } = structure
 
-  const isSelected = useSelectedSelector(owner)
+  const isSelected = inspector.isNodeInspected.bind(null, id)
   const isHovered = structure.isHovered.bind(null, id)
   const isUpdated = structure.isUpdated.bind(null, id)
 
   onCleanup(() => {
-    isSelected() && handleFocus(null)
     toggleHoveredOwner(id, false)
   })
 
@@ -31,7 +28,7 @@ export const OwnerNode: Component<{
       data-hovered={isHovered()}
       data-selected={isSelected()}
       class={styles.contailer}
-      onClick={e => handleFocus(isSelected() ? null : owner)}
+      onClick={e => inspector.setInspectedNode(isSelected() ? null : owner)}
       onMouseEnter={() => toggleHoveredOwner(id, true)}
       // onMouseLeave is fired in the next tick for the onMouseEnter of other node fired earlier
       onMouseLeave={() => setTimeout(() => toggleHoveredOwner(id, false))}
@@ -44,7 +41,8 @@ export const OwnerNode: Component<{
         <Highlight strong={isUpdated()} light={false} class={styles.highlight}>
           <div class={styles.name}>{type === NodeType.Component ? `<${name}>` : name}</div>
         </Highlight>
-        <div class={styles.type}>{typeName}</div>
+        {type !== NodeType.Component && <div class={styles.type}>{typeName}</div>}
+        {hmr && <Badge>HMR</Badge>}
       </div>
     </div>
   )

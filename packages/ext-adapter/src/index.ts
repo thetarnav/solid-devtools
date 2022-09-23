@@ -1,4 +1,4 @@
-import { createEffect, createSignal, on, onCleanup } from "solid-js"
+import { batch, createEffect, createSignal, on, onCleanup } from "solid-js"
 import { createInternalRoot, useDebugger } from "@solid-devtools/debugger"
 import * as Locator from "@solid-devtools/locator"
 import {
@@ -24,7 +24,7 @@ createInternalRoot(() => {
 
   const {
     forceTriggerUpdate,
-    components,
+    findComponent,
     handleComputationUpdates,
     handleSignalUpdates,
     handlePropsUpdate,
@@ -40,8 +40,10 @@ createInternalRoot(() => {
 
   // disable debugger and reset any state
   onWindowMessage("PanelClosed", () => {
-    setEnabled(false)
-    setInspectedOwner(null)
+    batch(() => {
+      setEnabled(false)
+      setInspectedOwner(null)
+    })
   })
 
   createEffect(() => {
@@ -135,7 +137,7 @@ createInternalRoot(() => {
         // highlight component
         if (typeof payload === "object") {
           const { rootId, nodeId } = payload
-          const component = components()[rootId]?.find(c => c.id === nodeId)
+          const component = findComponent(rootId, nodeId)
           if (!component) return warn("No component found", nodeId)
           target = { ...component, rootId }
         }

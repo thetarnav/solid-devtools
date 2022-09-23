@@ -8,3 +8,12 @@ declare global {
   }
   const __ADAPTER_VERSION__: string
 }
+
+declare module "solid-js" {
+  namespace JSX {
+    interface CustomEvents {
+      keydown: KeyboardEvent
+      click: MouseEvent
+    }
+  }
+}

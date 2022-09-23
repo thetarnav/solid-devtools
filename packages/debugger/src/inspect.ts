@@ -36,9 +36,12 @@ function mapSignalNode(node: Solid.Signal, handler: SignalUpdateHandler): Mapped
 }
 
 export function clearOwnerObservers(owner: Solid.Owner): void {
-  if (owner.sourceMap)
-    Object.values(owner.sourceMap).forEach(node => removeValueUpdateObserver(node, INSPECTOR))
-  if (owner.owned) owner.owned.forEach(node => removeValueUpdateObserver(node, INSPECTOR))
+  if (owner.sourceMap) {
+    for (const node of Object.values(owner.sourceMap)) removeValueUpdateObserver(node, INSPECTOR)
+  }
+  if (owner.owned) {
+    for (const node of owner.owned) removeValueUpdateObserver(node, INSPECTOR)
+  }
 }
 
 export function encodeComponentProps(
@@ -84,20 +87,34 @@ export function collectOwnerDetails(
   const path: NodeID[] = []
   let current: Solid.Owner | null = owner.owner
   while (current) {
-    // * after we flatten the tree, we'll know the length of the path — no need to use unshift then
     path.unshift(markNodeID(current))
     current = current.owner
   }
 
+  let { sourceMap, owned } = owner
+  let refresh: Solid.Owner | undefined
+  if (owned && owned.length === 1 && markOwnerType((refresh = owned[0])) === NodeType.Refresh) {
+    // if omitting refresh node — map it's sourceMap and owned instead
+    sourceMap = refresh.sourceMap
+    owned = refresh.owned
+  }
+
   // map signals
-  const signals = owner.sourceMap
-    ? Object.values(owner.sourceMap).map(s => mapSignalNode(s, signalUpdateHandler))
-    : []
+  let signals: Mapped.Signal[]
+  if (sourceMap) {
+    const signalNodes = Object.values(sourceMap)
+    signals = Array(signalNodes.length)
+    for (let i = 0; i < signalNodes.length; i++) {
+      signals[i] = mapSignalNode(signalNodes[i], signalUpdateHandler)
+    }
+  } else signals = []
+
   // map memos
-  owner.owned?.forEach(child => {
-    if (!isSolidMemo(child)) return
-    signals.push(mapSignalNode(child, signalUpdateHandler))
-  })
+  if (owned) {
+    for (const node of owned) {
+      if (isSolidMemo(node)) signals.push(mapSignalNode(node, signalUpdateHandler))
+    }
+  }
 
   const details: Mapped.OwnerDetails = {
     id: markNodeID(owner),
@@ -118,8 +135,5 @@ export function collectOwnerDetails(
     if (props) details.props = props
   }
 
-  return {
-    details,
-    signalMap,
-  }
+  return { details, signalMap }
 }

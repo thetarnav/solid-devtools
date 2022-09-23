@@ -45,6 +45,8 @@ const paddingMask: Property.MaskImage = `linear-gradient(to right, rgba(0,0,0, 0
 const remMinusPx = `calc(1rem - 1px)`
 
 export const levelPadding = style({
+  position: "relative",
+  zIndex: -2,
   width: `calc(${levelVar} * ${spacing[4]})`,
   height: rowHeight,
   // background: `linear-gradient(90deg, ${color.white}, ${color.gray[100]}) ${color.gray[100]}`,
@@ -57,6 +59,7 @@ export const nameContainer = style({
   marginLeft: spacing[3],
   display: "flex",
   alignItems: "center",
+  columnGap: spacing[2],
   minWidth: spacing[36],
 })
 
@@ -70,7 +73,6 @@ export const highlight = style({
 })
 
 export const type = style({
-  marginLeft: spacing[2],
   fontSize: 10,
   opacity: 0.4,
   userSelect: "none",
