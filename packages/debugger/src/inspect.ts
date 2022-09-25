@@ -83,14 +83,6 @@ export function collectOwnerDetails(
   $elementMap = elementMap
   $signalMap = signalMap
 
-  // get owner path
-  const path: NodeID[] = []
-  let current: Solid.Owner | null = owner.owner
-  while (current) {
-    path.unshift(markNodeID(current))
-    current = current.owner
-  }
-
   let { sourceMap, owned } = owner
   let refresh: Solid.Owner | undefined
   if (owned && owned.length === 1 && markOwnerType((refresh = owned[0])) === NodeType.Refresh) {
@@ -120,7 +112,6 @@ export function collectOwnerDetails(
     id: markNodeID(owner),
     name: markOwnerName(owner),
     type: markOwnerType(owner),
-    path,
     signals,
   }
 

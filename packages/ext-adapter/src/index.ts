@@ -105,8 +105,7 @@ createInternalRoot(() => {
     Locator.addClickInterceptor((e, component) => {
       e.preventDefault()
       e.stopPropagation()
-      const { id, rootId } = component
-      postWindowMessage("SendSelectedOwner", { nodeId: id, rootId })
+      postWindowMessage("SendSelectedOwner", component.id)
       return false
     })
 

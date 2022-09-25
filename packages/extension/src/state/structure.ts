@@ -24,6 +24,25 @@ export namespace Structure {
   export type State = { roots: Node[]; nodeList: Node[] }
 }
 
+function getParentRoot(node: Structure.Node): Structure.Node {
+  let parent = node.parent
+  while (parent) {
+    if (parent.type === NodeType.Root) return parent
+    parent = parent.parent
+  }
+  throw new Error("Parent root not found")
+}
+
+function getNodePath(node: Structure.Node): Structure.Node[] {
+  const path = [node]
+  let parent = node.parent
+  while (parent) {
+    path.unshift(parent)
+    parent = parent.parent
+  }
+  return path
+}
+
 const structure = createRoot(() => {
   const [structure, setStructure] = createSignal<Structure.State>({ nodeList: [], roots: [] })
 
@@ -38,15 +57,6 @@ const structure = createRoot(() => {
     for (const node of untrack(structure).nodeList) {
       if (node.id === id) return node
     }
-  }
-
-  function findParentRoot(node: Structure.Node): Structure.Node {
-    let parent = node.parent
-    while (parent) {
-      if (parent.type === NodeType.Root) return parent
-      parent = parent.parent
-    }
-    throw new Error("Parent root not found")
   }
 
   const [isUpdated, addUpdatedComputations, clearUpdatedComputations] = createUpdatedSelector()
@@ -75,7 +85,8 @@ const structure = createRoot(() => {
     isUpdated,
     toggleHoveredOwner,
     findNode,
-    findParentRoot,
+    getParentRoot,
+    getNodePath,
   }
 })
 export default structure

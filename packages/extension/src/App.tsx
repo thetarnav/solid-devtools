@@ -84,19 +84,15 @@ const App: Component = () => {
         <SelectComponent />
         <div>
           <h3>Welcome to Solid Devtools</h3>
-          <p>Number of Roots: {structure.structure().length}</p>
+          <p>
+            Roots length: {structure.structure().roots.length}; All nodes length:{" "}
+            {structure.structure().nodeList.length}
+          </p>
         </div>
         <Options />
       </header>
       <div class={styles.content}>
-        <Splitter
-          onToggle={() => inspector.setInspectedNode(null)}
-          side={
-            <Show when={inspector.state.node}>
-              <Details />
-            </Show>
-          }
-        >
+        <Splitter onToggle={() => inspector.setInspectedNode(null)} side={<Details />}>
           <StructureView />
         </Splitter>
       </div>

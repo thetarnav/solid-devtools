@@ -56,11 +56,12 @@ createRoot(() => {
   // toggle selected owner
   createEffect(
     on(
-      [() => inspector.state.node, () => inspector.state.rootId],
-      ([owner, rootId]) => {
-        const payload = owner && rootId ? { nodeId: owner.id, rootId } : null
-        postRuntimeMessage("SetSelectedOwner", payload)
-      },
+      inspector.inspectedNode,
+      node =>
+        postRuntimeMessage(
+          "SetSelectedOwner",
+          node ? { nodeId: node.id, rootId: structure.getParentRoot(node).id } : null,
+        ),
       { defer: true },
     ),
   )
@@ -91,7 +92,7 @@ createRoot(() => {
       )
         return prev
 
-      const rootId = structure.findParentRoot(hovered).id
+      const rootId = structure.getParentRoot(hovered).id
       const payload = { rootId, nodeId: hovered.id }
       postRuntimeMessage("HighlightElement", payload)
       return payload

@@ -13,8 +13,8 @@ export default function StructureView() {
       <DisplayStructureTree />
       <div class={styles.path}>
         <div class={styles.pathInner}>
-          <Show when={inspector.state.details?.path}>
-            <OwnerPath path={inspector.state.details!.path} />
+          <Show when={inspector.details()?.path}>
+            <OwnerPath path={inspector.details()!.path} />
           </Show>
         </div>
       </div>

@@ -172,7 +172,6 @@ export namespace Mapped {
     id: NodeID
     name: string
     type: NodeType
-    path: NodeID[]
     props?: Props
     signals: Signal[]
     /** for computations */

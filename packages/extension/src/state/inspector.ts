@@ -1,13 +1,13 @@
 import { batch, createComputed, createRoot, createSelector, createSignal, untrack } from "solid-js"
 import { createStore, produce } from "solid-js/store"
+import { Writable } from "type-fest"
 import { Mapped, NodeID, NodeType, SignalUpdate } from "@solid-devtools/shared/graph"
 import { warn } from "@solid-devtools/shared/utils"
-import structure, { Structure } from "./structure"
-import { arrayEquals, Mutable } from "@solid-primitives/utils"
-import { createUpdatedSelector } from "./utils"
 import { EncodedValue } from "@solid-devtools/shared/serialize"
 import { Messages } from "@solid-devtools/shared/bridge"
 import { untrackedCallback } from "@solid-devtools/shared/primitives"
+import structure, { Structure } from "./structure"
+import { createUpdatedSelector } from "./utils"
 
 export namespace Inspector {
   export type Signal = {
@@ -32,7 +32,6 @@ export namespace Inspector {
     readonly name: string
     readonly type: NodeType
     readonly path: Structure.Node[]
-    readonly rawPath: NodeID[]
     readonly signals: Record<NodeID, Signal>
     readonly props?: Props
     // TODO: more to come
@@ -92,22 +91,7 @@ function createSignalNode(raw: Readonly<Mapped.Signal>): Inspector.Signal {
   return { ...raw, selected: false }
 }
 
-function getNodePath(
-  rootId: NodeID,
-  focused: Structure.Node,
-  rawPath: readonly NodeID[],
-): Structure.Node[] {
-  const path: Structure.Node[] = []
-  for (const id of rawPath) {
-    // rootId of the inspected node don't have to be the same for the rest of the path
-    let node = structure.getNode(rootId, id) ?? structure.findNode(id)?.node
-    if (node) path.push(node)
-  }
-  path.push(focused)
-  return path
-}
-
-function reconcileProps(proxy: Mutable<Inspector.Props>, raw: Mapped.Props): void {
+function reconcileProps(proxy: Writable<Inspector.Props>, raw: Mapped.Props): void {
   const record = proxy.record
   const newRecord = raw.record
   proxy.proxy = raw.proxy
@@ -123,7 +107,6 @@ function reconcileProps(proxy: Mutable<Inspector.Props>, raw: Mapped.Props): voi
 }
 
 function createDetails(
-  rootId: NodeID,
   node: Structure.Node,
   raw: Readonly<Mapped.OwnerDetails>,
 ): Inspector.Details {
@@ -131,13 +114,12 @@ function createDetails(
     signals[signal.id] = createSignalNode(signal)
     return signals
   }, {} as Inspector.Details["signals"])
-  const path = getNodePath(rootId, node, raw.path)
-  const details: Mutable<Inspector.Details> = {
+  const path = structure.getNodePath(node)
+  const details: Writable<Inspector.Details> = {
     id: raw.id,
     name: raw.name,
     type: raw.type,
     path,
-    rawPath: raw.path,
     signals,
   }
   if (raw.props) {
@@ -153,88 +135,80 @@ function createDetails(
 }
 
 function reconcileDetails(
-  rootId: NodeID,
   node: Structure.Node,
-  proxy: Mutable<Inspector.Details>,
+  proxy: Writable<Inspector.Details>,
   raw: Readonly<Mapped.OwnerDetails>,
 ): void {
   // update path
-  if (!arrayEquals(proxy.rawPath, raw.path)) {
-    const path = getNodePath(rootId, node, raw.path)
-    proxy.rawPath.length = 0
-    proxy.rawPath.push.apply(proxy.rawPath, raw.path)
-    proxy.path.length = 0
-    proxy.path.push.apply(proxy.path, path)
-  }
+  const path = structure.getNodePath(node)
+  proxy.path.length = 0
+  proxy.path.push.apply(proxy.path, path)
   // update signals
   reconcileSignals(raw.signals, proxy.signals)
   // update props
   if (raw.props) reconcileProps(proxy.props!, raw.props)
 }
 
-export type OwnerDetailsState =
-  | { node: null; rootId: null; details: null }
-  | { node: Structure.Node; rootId: NodeID; details: Inspector.Details | null }
-
-const nullState: OwnerDetailsState = { node: null, rootId: null, details: null }
-
 const inspector = createRoot(() => {
-  const [state, setState] = createStore<OwnerDetailsState>({ ...nullState })
+  const [inspectedNode, setInspectedNode] = createSignal<Structure.Node | null>(null)
+  const [state, setDetails] = createStore<{ value: Inspector.Details | null }>({ value: null })
+  const details = () => state.value
 
-  const isNodeInspected = createSelector<NodeID | null, NodeID>(() =>
-    state.node ? state.node.id : null,
-  )
+  const isNodeInspected = createSelector<NodeID | null, NodeID>(() => inspectedNode()?.id ?? null)
 
-  const setInspectedNode: (data: Structure.Node | null | Messages["SendSelectedOwner"]) => void =
+  const setInspected: (data: Structure.Node | null | Messages["SendSelectedOwner"]) => void =
     untrackedCallback(data => {
-      if (!data) setState({ ...nullState })
-      else if ("name" in data) {
-        const { id } = data
-        // compare ids because state.node is a proxy
-        if (!state.node || id !== state.node.id) {
-          const find = structure.findNode(id)
-          find && setState({ node: data, rootId: find.rootId, details: null })
+      batch(() => {
+        if (!data) {
+          setInspectedNode(null)
+          setDetails({ value: null })
+          return
         }
-      } else {
-        const { nodeId, rootId } = data
-        const node = structure.getNode(rootId, nodeId)
-        // compare ids because state.node is a proxy
-        if (node && (!state.node || node.id !== state.node.id))
-          setState({ node: node, rootId, details: null })
-      }
+
+        const currentNode = inspectedNode()
+        if ("name" in data) {
+          if (currentNode && data.id === currentNode.id) return
+          setInspectedNode(data)
+          setDetails({ value: null })
+        } else {
+          if (currentNode && data === currentNode.id) return
+          const node = structure.findNode(data)
+          if (!node) return
+          setInspectedNode(node)
+          setDetails({ value: null })
+        }
+      })
     })
 
   // clear the inspector when the inspected node is removed
   createComputed(() => {
     structure.structure()
     untrack(() => {
-      if (state.node) {
-        structure.getNode(state.rootId, state.node.id) || setInspectedNode(null)
-      }
+      const node = inspectedNode()
+      if (!node) return
+      structure.findNode(node.id) || setInspectedNode(null)
     })
   })
 
   const updateDetails = untrackedCallback((raw: Mapped.OwnerDetails) => {
-    const { rootId, node } = state
-    if (!rootId || !node) return warn("OwnerDetailsUpdate: rootId is null")
+    const node = inspectedNode()
+    if (!node) return warn("updateDetails: no node is being inspected")
 
-    setState("details", prev => {
-      return prev === null
-        ? createDetails(rootId, node, raw)
-        : produce<Mutable<Inspector.Details>>(proxy => reconcileDetails(rootId, node, proxy, raw))(
-            prev,
-          )
-    })
+    setDetails("value", prev =>
+      prev === null
+        ? createDetails(node, raw)
+        : produce<Writable<Inspector.Details>>(proxy => reconcileDetails(node, proxy, raw))(prev),
+    )
   })
 
   const [isUpdated, addUpdated, clearUpdated] = createUpdatedSelector()
 
   const handleSignalUpdates = untrackedCallback((updates: SignalUpdate[], isUpdate = true) => {
-    if (!state.details) return
+    if (!details()) return
     batch(() => {
       isUpdate && addUpdated(updates.map(u => u.id))
-      setState(
-        "details",
+      setDetails(
+        "value",
         "signals",
         produce(proxy => {
           for (const update of updates) {
@@ -248,9 +222,9 @@ const inspector = createRoot(() => {
   })
 
   const handlePropsUpdate = untrackedCallback((props: Mapped.Props) => {
-    if (!state.details || !state.details.props) return
-    setState(
-      "details",
+    if (!details()?.props) return
+    setDetails(
+      "value",
       "props",
       produce(proxy => reconcileProps(proxy!, props)),
     )
@@ -261,11 +235,11 @@ const inspector = createRoot(() => {
   const setOnInspectValue = (fn: typeof onInspectValue) => (onInspectValue = fn)
 
   function togglePropFocus(id: string, selected?: boolean): void {
-    setState("details", "props", "record", id, "selected", p => (selected = selected ?? !p))
+    setDetails("value", "props", "record", id, "selected", p => (selected = selected ?? !p))
     onInspectValue!({ type: "prop", id, selected: selected! })
   }
   function toggleSignalFocus(id: NodeID, selected?: boolean) {
-    setState("details", "signals", id, "selected", p => (selected = selected ?? !p))
+    setDetails("value", "signals", id, "selected", p => (selected = selected ?? !p))
     onInspectValue!({ type: "signal", id, selected: selected! })
   }
 
@@ -279,8 +253,9 @@ const inspector = createRoot(() => {
   }
 
   return {
-    state,
-    setInspectedNode,
+    inspectedNode,
+    details,
+    setInspectedNode: setInspected,
     isNodeInspected,
     isUpdated,
     clearUpdated,
