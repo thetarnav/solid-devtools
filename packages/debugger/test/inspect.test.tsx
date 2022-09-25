@@ -63,32 +63,31 @@ describe("collectOwnerDetails", () => {
         id: "ff",
         name: "focused",
         type: NodeType.Memo,
-        path: ["1", "0"],
         value: { type: ValueType.String, value: "value" },
-        sources: ["5"],
-        observers: ["0"],
+        sources: ["3"],
+        observers: ["4"],
         signals: [
           {
             type: NodeType.Signal,
-            id: "2",
+            id: "0",
             name: "element",
             observers: [],
             value: { type: ValueType.Element, value: { name: "DIV", id: "0" } },
           },
           {
             type: NodeType.Memo,
-            id: "3",
+            id: "1",
             name: "memo",
-            observers: ["4"],
+            observers: ["2"],
             value: { type: ValueType.Number, value: 0 },
           },
         ],
       })
 
-      expect(signalMap).toHaveProperty("2")
-      expect(signalMap).toHaveProperty("3")
-      expect(signalMap["2"].sdtId).toBe("2")
-      expect(signalMap["3"].sdtId).toBe("3")
+      expect(signalMap).toHaveProperty("0")
+      expect(signalMap).toHaveProperty("1")
+      expect(signalMap["0"].sdtId).toBe("0")
+      expect(signalMap["1"].sdtId).toBe("1")
 
       expect(elementMap.get("0")).toBe(div)
 
@@ -125,12 +124,11 @@ describe("collectOwnerDetails", () => {
       dispose()
 
       expect(details).toEqual({
-        id: "2",
+        id: "0",
         name: "TestComponent",
         type: NodeType.Component,
         signals: [],
         sources: [],
-        path: ["1", "0"],
         value: { type: ValueType.Element, value: { id: "0", name: "DIV" } },
         props: {
           proxy: false,
@@ -168,12 +166,11 @@ describe("collectOwnerDetails", () => {
       })
 
       expect(details).toEqual({
-        id: "2",
+        id: "0",
         name: "Button",
         type: NodeType.Component,
         signals: [],
         sources: [],
-        path: ["1", "0"],
         value: { type: ValueType.Element, value: { id: "0", name: "BUTTON" } },
         props: {
           // ! this should be true, don't know what's the reason. it's working in the browser
@@ -220,12 +217,11 @@ describe("collectOwnerDetails", () => {
       dispose()
 
       expect(details).toEqual({
-        id: "2",
+        id: "0",
         name: "TestComponent",
         type: NodeType.Component,
         signals: [],
         sources: [],
-        path: ["1", "0"],
         value: { type: ValueType.Element, value: { id: "0", name: "DIV" } },
         props: {
           proxy: false,
