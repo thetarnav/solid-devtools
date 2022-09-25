@@ -42,12 +42,12 @@ describe("reconcileStructure", () => {
     prevRoots = roots
 
     expect(nodeList).toMatchObject([
-      { id: "1", parent: null, children: [{ id: "2" }, { id: "3" }] },
-      { id: "2", parent: { id: "1" }, children: [] },
-      { id: "3", parent: { id: "1" }, children: [{ id: "4" }], subroots: [{ id: "5" }] },
-      { id: "4", parent: { id: "3" }, children: [] },
-      { id: "5", parent: { id: "3" }, children: [{ id: "6" }] },
-      { id: "6", parent: { id: "5" }, children: [] },
+      { id: "1", parent: null, level: 0, children: [{ id: "2" }, { id: "3" }] },
+      { id: "2", parent: { id: "1" }, level: 1, children: [] },
+      { id: "3", parent: { id: "1" }, level: 1, children: [{ id: "4" }], subroots: [{ id: "5" }] },
+      { id: "4", parent: { id: "3" }, level: 2, children: [] },
+      { id: "5", parent: { id: "3" }, level: 2, children: [{ id: "6" }] },
+      { id: "6", parent: { id: "5" }, level: 3, children: [] },
     ])
 
     expect(roots).toMatchObject([{ id: "1" }])
@@ -90,11 +90,11 @@ describe("reconcileStructure", () => {
 
     expect(nodeList).toHaveLength(5)
     expect(nodeList).toMatchObject([
-      { id: "1", parent: null, children: [{ id: "3" }] },
-      { id: "3", parent: { id: "1" }, children: [{ id: "4" }], subroots: [{ id: "5" }] },
-      { id: "4", parent: { id: "3" }, children: [] },
-      { id: "5", parent: { id: "3" }, children: [] },
-      { id: "10", parent: null, children: [] },
+      { id: "1", parent: null, level: 0, children: [{ id: "3" }] },
+      { id: "3", parent: { id: "1" }, level: 1, children: [{ id: "4" }], subroots: [{ id: "5" }] },
+      { id: "4", parent: { id: "3" }, level: 2, children: [] },
+      { id: "5", parent: { id: "3" }, level: 2, children: [] },
+      { id: "10", parent: null, level: 0, children: [] },
     ])
 
     expect(roots).toMatchObject([{ id: "1" }, { id: "10" }])
@@ -137,14 +137,14 @@ describe("reconcileStructure", () => {
 
     expect(nodeList).toHaveLength(8)
     expect(nodeList).toMatchObject([
-      { id: "1", parent: null, children: [{ id: "3" }] },
-      { id: "3", parent: { id: "1" }, children: [{ id: "4" }] },
-      { id: "4", parent: { id: "3" }, children: [] },
-      { id: "8", parent: null, children: [{ id: "9" }], subroots: [{ id: "5" }] },
-      { id: "9", parent: { id: "8" }, children: [] },
-      { id: "5", parent: { id: "8" }, children: [{ id: "6" }, { id: "7" }] },
-      { id: "6", parent: { id: "5" }, children: [] },
-      { id: "7", parent: { id: "5" }, children: [] },
+      { id: "1", parent: null, level: 0, children: [{ id: "3" }] },
+      { id: "3", parent: { id: "1" }, level: 1, children: [{ id: "4" }] },
+      { id: "4", parent: { id: "3" }, level: 2, children: [] },
+      { id: "8", parent: null, level: 0, children: [{ id: "9" }], subroots: [{ id: "5" }] },
+      { id: "9", parent: { id: "8" }, level: 1, children: [] },
+      { id: "5", parent: { id: "8" }, level: 1, children: [{ id: "6" }, { id: "7" }] },
+      { id: "6", parent: { id: "5" }, level: 2, children: [] },
+      { id: "7", parent: { id: "5" }, level: 2, children: [] },
     ])
 
     expect(roots).toHaveLength(2)
@@ -188,13 +188,13 @@ describe("reconcileStructure", () => {
 
     expect(nodeList).toHaveLength(7)
     expect(nodeList).toMatchObject([
-      { id: "8", parent: null, children: [{ id: "9" }] },
-      { id: "9", parent: { id: "8" }, children: [], subroots: [{ id: "12" }] },
-      { id: "12", parent: { id: "9" }, children: [] },
-      { id: "5", parent: null, children: [{ id: "6" }, { id: "7" }] },
-      { id: "6", parent: { id: "5" }, children: [] },
-      { id: "7", parent: { id: "5" }, children: [{ id: "11" }] },
-      { id: "11", parent: { id: "7" }, children: [] },
+      { id: "8", parent: null, level: 0, children: [{ id: "9" }] },
+      { id: "9", parent: { id: "8" }, level: 1, children: [], subroots: [{ id: "12" }] },
+      { id: "12", parent: { id: "9" }, level: 2, children: [] },
+      { id: "5", parent: null, level: 0, children: [{ id: "6" }, { id: "7" }] },
+      { id: "6", parent: { id: "5" }, level: 1, children: [] },
+      { id: "7", parent: { id: "5" }, level: 1, children: [{ id: "11" }] },
+      { id: "11", parent: { id: "7" }, level: 2, children: [] },
     ])
 
     expect(roots).toHaveLength(2)
@@ -211,12 +211,12 @@ describe("reconcileStructure", () => {
 
     expect(nodeList).toHaveLength(6)
     expect(nodeList).toMatchObject([
-      { id: "8", parent: null, children: [{ id: "9" }] },
-      { id: "9", parent: { id: "8" }, children: [] },
-      { id: "5", parent: null, children: [{ id: "6" }, { id: "7" }] },
-      { id: "6", parent: { id: "5" }, children: [] },
-      { id: "7", parent: { id: "5" }, children: [{ id: "11" }] },
-      { id: "11", parent: { id: "7" }, children: [] },
+      { id: "8", parent: null, level: 0, children: [{ id: "9" }] },
+      { id: "9", parent: { id: "8" }, level: 1, children: [] },
+      { id: "5", parent: null, level: 0, children: [{ id: "6" }, { id: "7" }] },
+      { id: "6", parent: { id: "5" }, level: 1, children: [] },
+      { id: "7", parent: { id: "5" }, level: 1, children: [{ id: "11" }] },
+      { id: "11", parent: { id: "7" }, level: 2, children: [] },
     ])
 
     expect(roots).toHaveLength(2)
@@ -231,6 +231,7 @@ describe("mapArray example", () => {
       id: "1",
       name: "root",
       type: NodeType.Root,
+      level: 0,
       parent: null,
       children: [],
     }
@@ -238,6 +239,7 @@ describe("mapArray example", () => {
       id: "2",
       name: "For",
       type: NodeType.Component,
+      level: 1,
       parent: n1,
       children: [],
     }
@@ -245,6 +247,7 @@ describe("mapArray example", () => {
       id: "3",
       name: "item1",
       type: NodeType.Root,
+      level: 2,
       parent: n2,
       children: [],
     }
@@ -252,6 +255,7 @@ describe("mapArray example", () => {
       id: "4",
       name: "item2",
       type: NodeType.Root,
+      level: 2,
       parent: n2,
       children: [],
     }
@@ -259,6 +263,7 @@ describe("mapArray example", () => {
       id: "5",
       name: "item3",
       type: NodeType.Root,
+      level: 2,
       parent: n2,
       children: [],
     }

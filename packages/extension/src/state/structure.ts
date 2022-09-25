@@ -7,6 +7,7 @@ export interface WritableNode {
   id: NodeID
   name: string
   type: NodeType
+  level: number
   parent: WritableNode | null
   children: WritableNode[]
   subroots?: WritableNode[]

@@ -6,9 +6,14 @@ let $updatedAttached: Record<NodeID, Mapped.Root[]>
 let $removedSet: Set<NodeID>
 let $updated: Record<NodeID, Mapped.Root>
 
-function updateNode(node: WritableNode, newNode: Mapped.Owner | undefined): WritableNode {
+function updateNode(
+  node: WritableNode,
+  newNode: Mapped.Owner | undefined,
+  level: number,
+): WritableNode {
   const { id, subroots, children } = node
   $nextNodeList.push(node)
+  node.level = level
 
   if (newNode) {
     const { children: rawChildren } = newNode
@@ -20,13 +25,13 @@ function updateNode(node: WritableNode, newNode: Mapped.Owner | undefined): Writ
 
       for (const child of rawChildren) {
         const prevChild = prevChildrenRecord[child.id] as WritableNode | undefined
-        newChildren.push(prevChild ? updateNode(prevChild, child) : createNode(child, node))
+        newChildren.push(
+          prevChild ? updateNode(prevChild, child, level + 1) : createNode(child, node, level + 1),
+        )
       }
     }
   } else {
-    for (const child of children) {
-      updateNode(child, undefined)
-    }
+    for (const child of children) updateNode(child, undefined, level + 1)
   }
 
   const newSubroots: WritableNode[] = []
@@ -41,17 +46,15 @@ function updateNode(node: WritableNode, newNode: Mapped.Owner | undefined): Writ
       if ((updatedSubroot = $updated[subrootId])) {
         if (updatedSubroot.attachedTo !== id) continue
         if (subRootIds) subRootIds.add(subrootId)
-        newSubroots.push(updateNode(subroot, updatedSubroot.tree))
-      } else {
-        newSubroots.push(updateNode(subroot, undefined))
       }
+      newSubroots.push(updateNode(subroot, updatedSubroot?.tree, level + 1))
     }
   }
 
   if (newAttached) {
     for (const { tree, id: subrootId } of newAttached) {
       if (subRootIds && subRootIds.has(subrootId)) continue
-      newSubroots.push(createNode(tree, node))
+      newSubroots.push(createNode(tree, node, level + 1))
     }
   }
 
@@ -61,24 +64,24 @@ function updateNode(node: WritableNode, newNode: Mapped.Owner | undefined): Writ
   return node
 }
 
-function createNode(raw: Mapped.Owner, parent: WritableNode | null): WritableNode {
+function createNode(raw: Mapped.Owner, parent: WritableNode | null, level: number): WritableNode {
   const { id, name, type, children: rawChildren } = raw
 
   const children: WritableNode[] = []
-  const node: WritableNode = { id, name, type, children, parent }
+  const node: WritableNode = { id, name, type, children, parent, level }
   if (type === NodeType.Component && raw.hmr) node.hmr = true
   $nextNodeList.push(node)
 
   // map children
   if (rawChildren) {
-    for (const child of rawChildren) children.push(createNode(child, node))
+    for (const child of rawChildren) children.push(createNode(child, node, level + 1))
   }
   // map attached subroots
   const newAttached = $updatedAttached[id] as Mapped.Root[] | undefined
   if (newAttached) {
     const subroots: WritableNode[] = (node.subroots = [])
     for (const subroot of newAttached) {
-      subroots.push(createNode(subroot.tree, node))
+      subroots.push(createNode(subroot.tree, node, level + 1))
     }
   }
 
@@ -110,11 +113,11 @@ export function reconcileStructure(
     const { id } = root
     if ($removedSet.has(id)) continue
     delete added[id]
-    nextRoots.push(updateNode(root, updated[id]?.tree))
+    nextRoots.push(updateNode(root, updated[id]?.tree, 0))
   }
 
   for (const root of Object.values(added)) {
-    nextRoots.push(createNode(root, null))
+    nextRoots.push(createNode(root, null, 0))
   }
 
   return { roots: nextRoots, nodeList: $nextNodeList }
