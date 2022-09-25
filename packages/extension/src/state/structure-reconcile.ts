@@ -1,5 +1,5 @@
 import { Mapped, NodeID, NodeType, RootsUpdates } from "@solid-devtools/shared/graph"
-import type { WritableNode } from "./structure.new"
+import type { WritableNode } from "./structure"
 
 let $nextNodeList: WritableNode[]
 let $updatedAttached: Record<NodeID, Mapped.Root[]>
@@ -92,32 +92,28 @@ export function reconcileStructure(
 ): { roots: WritableNode[]; nodeList: WritableNode[] } {
   $updated = updated
   $removedSet = new Set(removed)
-  const added: Mapped.Owner[] = []
+  const added: Record<NodeID, Mapped.Owner> = {}
   $updatedAttached = {}
 
   for (const root of Object.values(updated)) {
-    const { attachedTo, tree } = root
+    const { attachedTo, tree, id } = root
     if (attachedTo) {
       if ($updatedAttached[attachedTo]) $updatedAttached[attachedTo].push(root)
       else $updatedAttached[attachedTo] = [root]
-    } else {
-      added.push(tree)
-    }
+    } else added[id] = tree
   }
 
   const nextRoots: WritableNode[] = []
   $nextNodeList = []
-  const topLevelSet = new Set<NodeID>()
 
   for (const root of roots) {
     const { id } = root
     if ($removedSet.has(id)) continue
-    topLevelSet.add(id)
+    delete added[id]
     nextRoots.push(updateNode(root, updated[id]?.tree))
   }
 
-  for (const root of added) {
-    if (topLevelSet.has(root.id)) continue
+  for (const root of Object.values(added)) {
     nextRoots.push(createNode(root, null))
   }
 
