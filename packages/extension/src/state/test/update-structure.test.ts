@@ -49,7 +49,7 @@ describe("mapStructureUpdates", () => {
     })
     prevStructure = structure
 
-    expect(prevStructure, "initial structure").toEqual([
+    expect(prevStructure, "initial structure").toMatchObject([
       {
         id: "1",
         name: "root",
@@ -118,7 +118,7 @@ describe("mapStructureUpdates", () => {
     })
     prevStructure = structure
 
-    expect(prevStructure).toEqual([
+    expect(prevStructure).toMatchObject([
       {
         id: "1",
         name: "root",
@@ -179,7 +179,7 @@ describe("mapStructureUpdates", () => {
     })
     prevStructure = structure
 
-    expect(prevStructure, "updated structure 2").toEqual([
+    expect(prevStructure, "updated structure 2").toMatchObject([
       {
         id: "1",
         name: "root",
@@ -256,7 +256,7 @@ describe("mapStructureUpdates", () => {
     })
     prevStructure = structure
 
-    expect(prevStructure).toEqual([
+    expect(prevStructure).toMatchObject([
       {
         id: "8",
         name: "root3",
@@ -306,7 +306,7 @@ describe("mapStructureUpdates", () => {
     })
     prevStructure = structure
 
-    expect(prevStructure).toEqual([
+    expect(prevStructure).toMatchObject([
       {
         id: "8",
         name: "root3",
@@ -399,7 +399,7 @@ describe("mapArray example", () => {
       },
     ]
 
-    expect(structure, "init").toEqual(goalStructure)
+    expect(structure, "init").toMatchObject(goalStructure)
 
     updated = {
       "3": {
@@ -417,6 +417,6 @@ describe("mapArray example", () => {
       mappedRoots,
     })
 
-    expect(structure1, "after update").toEqual(goalStructure)
+    expect(structure1, "after update").toMatchObject(goalStructure)
   })
 })
