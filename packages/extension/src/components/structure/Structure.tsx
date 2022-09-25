@@ -3,6 +3,7 @@ import { Scrollable } from "@/ui"
 import { NodeID } from "@solid-devtools/shared/graph"
 import { assignInlineVars } from "@vanilla-extract/dynamic"
 import { Accessor, Component, createMemo, createSignal, For, Setter, Show } from "solid-js"
+import { StructureProvider } from "./ctx"
 import { OwnerNode } from "./OwnerNode"
 import { OwnerPath } from "./Path"
 import * as styles from "./structure.css"
@@ -36,6 +37,7 @@ const DisplayStructureTree: Component = props => {
     setContainerScroll({ top: el.scrollTop, height: el.clientHeight })
 
   const [collapsed, setCollapsed] = createSignal(new WeakSet<Structure.Node>(), { equals: false })
+  const isCollapsed = (node: Structure.Node) => collapsed().has(node)
 
   const toggleCollapsed = (node: Structure.Node) =>
     setCollapsed(set => {
@@ -63,7 +65,7 @@ const DisplayStructureTree: Component = props => {
     return collapsedList
   })
 
-  const ROW_HEIGHT_IN_REM = styles.ROW_HEIGHT_IN_REM
+  const getRowHeight = () => remToPx(styles.ROW_HEIGHT_IN_REM)
 
   const virtual = createMemo<{
     start: number
@@ -74,12 +76,7 @@ const DisplayStructureTree: Component = props => {
   }>((prev = { start: 0, end: 0, fullLength: 0, list: [], nodeList: [] }) => {
     const nodeList = collapsedList()
     const { top, height } = containerScroll()
-    const { start, end, length } = getVirtualVars(
-      nodeList.length,
-      top,
-      height,
-      remToPx(ROW_HEIGHT_IN_REM),
-    )
+    const { start, end, length } = getVirtualVars(nodeList.length, top, height, getRowHeight())
 
     if (prev.nodeList === nodeList && prev.start === start && prev.end === end) return prev
 
@@ -107,19 +104,21 @@ const DisplayStructureTree: Component = props => {
       ref={el => setTimeout(() => updateScrollData(el))}
       onScroll={e => updateScrollData(e.currentTarget)}
     >
-      <div
-        class={styles.scrolledOuter}
-        style={assignInlineVars({
-          [styles.treeLength]: virtual().fullLength.toString(),
-          [styles.startIndex]: virtual().start.toString(),
-        })}
-      >
-        <div class={styles.scrolledInner}>
-          <For each={virtual().list}>
-            {({ node, level }) => <OwnerNode owner={node} level={level()} />}
-          </For>
+      <StructureProvider value={{ toggleCollapsed, isCollapsed }}>
+        <div
+          class={styles.scrolledOuter}
+          style={assignInlineVars({
+            [styles.treeLength]: virtual().fullLength.toString(),
+            [styles.startIndex]: virtual().start.toString(),
+          })}
+        >
+          <div class={styles.scrolledInner}>
+            <For each={virtual().list}>
+              {({ node, level }) => <OwnerNode owner={node} level={level()} />}
+            </For>
+          </div>
         </div>
-      </div>
+      </StructureProvider>
     </Scrollable>
   )
 }
