@@ -85,8 +85,8 @@ const App: Component = () => {
         <div>
           <h3>Welcome to Solid Devtools</h3>
           <p>
-            Roots length: {structure.structure().roots.length}; All nodes length:{" "}
-            {structure.structure().nodeList.length}
+            Roots length: {structure.structure().roots.length}. All nodes length:{" "}
+            {structure.structure().nodeList.length}.
           </p>
         </div>
         <Options />
