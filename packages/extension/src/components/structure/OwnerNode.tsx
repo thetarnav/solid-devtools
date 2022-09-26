@@ -2,7 +2,7 @@ import { Component, onCleanup } from "solid-js"
 import { assignInlineVars } from "@vanilla-extract/dynamic"
 import { NodeType } from "@solid-devtools/shared/graph"
 import { structure, Structure, inspector } from "@/state"
-import { Badge, Highlight } from "@/ui"
+import { Badge, Highlight, Icon } from "@/ui"
 import { useStructure } from "./ctx"
 import * as styles from "./ownerNode.css"
 
@@ -16,6 +16,7 @@ export const OwnerNode: Component<{
 
   const ctx = useStructure()
   const { toggleCollapsed } = ctx
+  // TODO: can use selector?
   const isCollapsed = ctx.isCollapsed.bind(null, owner)
 
   const { toggleHoveredOwner } = structure
@@ -33,10 +34,7 @@ export const OwnerNode: Component<{
       data-hovered={isHovered()}
       data-selected={isSelected()}
       class={styles.contailer}
-      onClick={e => {
-        inspector.setInspectedNode(isSelected() ? null : owner)
-        toggleCollapsed(owner)
-      }}
+      onClick={e => inspector.setInspectedNode(isSelected() ? null : owner)}
       onMouseEnter={() => toggleHoveredOwner(id, true)}
       // onMouseLeave is fired in the next tick for the onMouseEnter of other node fired earlier
       onMouseLeave={() => setTimeout(() => toggleHoveredOwner(id, false))}
@@ -45,13 +43,22 @@ export const OwnerNode: Component<{
       <div class={styles.selection}></div>
       <div class={styles.levelPadding} />
       <div class={styles.nameContainer}>
+        <button
+          class={styles.collapse}
+          aria-selected={isCollapsed()}
+          onClick={e => {
+            e.stopPropagation()
+            toggleCollapsed(owner)
+          }}
+        >
+          <Icon.Triangle class={styles.collapseIcon} />
+        </button>
         {/* TODO: observers and sources highlighting */}
         <Highlight strong={isUpdated()} light={false} class={styles.highlight}>
           <div class={styles.name}>{type === NodeType.Component ? `<${name}>` : name}</div>
         </Highlight>
         {type !== NodeType.Component && <div class={styles.type}>{typeName}</div>}
         {hmr && <Badge>HMR</Badge>}
-        {isCollapsed() && <Badge>Collapsed</Badge>}
       </div>
     </div>
   )

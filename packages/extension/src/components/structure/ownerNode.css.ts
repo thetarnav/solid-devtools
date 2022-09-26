@@ -1,10 +1,19 @@
 import { createVar, style } from "@vanilla-extract/css"
 import { CSSVarFunction } from "@vanilla-extract/private"
-import { color, hexToRgb, insetX, insetY, rounded, spacing, theme, transition } from "@/ui/theme"
+import {
+  centerChild,
+  color,
+  inset,
+  insetX,
+  insetY,
+  rounded,
+  spacing,
+  theme,
+  transition,
+} from "@/ui/theme"
 import { ROW_HEIGHT_IN_REM } from "./structure.css"
 import { Property } from "csstype"
 
-const shadowOpacity: CSSVarFunction = createVar()
 export const levelVar: CSSVarFunction = createVar()
 
 const rowHeight = `${ROW_HEIGHT_IN_REM}rem`
@@ -17,17 +26,6 @@ export const contailer = style({
   paddingRight: spacing[2],
   cursor: "pointer",
   color: color.black,
-  vars: { [shadowOpacity]: "0" },
-  ...transition("color"),
-  selectors: {
-    '&[data-hovered="true"]': {
-      vars: { [shadowOpacity]: "0.2" },
-    },
-    '&[data-selected="true"]': {
-      color: color.white,
-      vars: { [shadowOpacity]: "1" },
-    },
-  },
 })
 
 export const selection = style({
@@ -36,9 +34,17 @@ export const selection = style({
   ...insetY(0),
   ...insetX(1),
   ...rounded(),
-  backgroundColor: hexToRgb(color.gray[900], 0.8),
-  opacity: shadowOpacity,
-  ...transition("opacity", theme.duration[100]),
+  backgroundColor: color.gray[400],
+  opacity: 0,
+  ...transition(["opacity"], theme.duration[100]),
+  selectors: {
+    [`${contailer}[data-hovered="true"] &`]: {
+      opacity: 0.2,
+    },
+    [`${contailer}[data-selected="true"] &`]: {
+      opacity: 0.6,
+    },
+  },
 })
 
 const paddingMask: Property.MaskImage = `linear-gradient(to right, rgba(0,0,0, 0.4), black ${spacing[48]})`
@@ -47,7 +53,8 @@ const remMinusPx = `calc(1rem - 1px)`
 export const levelPadding = style({
   position: "relative",
   zIndex: -2,
-  width: `calc(${levelVar} * ${spacing[4]})`,
+  marginLeft: spacing[3],
+  width: `calc(${levelVar} * ${spacing[4]} + ${spacing[2.5]})`,
   height: rowHeight,
   // background: `linear-gradient(90deg, ${color.white}, ${color.gray[100]}) ${color.gray[100]}`,
   background: `repeating-linear-gradient(to right, transparent, transparent ${remMinusPx}, ${color.gray[200]} ${remMinusPx}, ${color.gray[200]} 1rem)`,
@@ -56,11 +63,55 @@ export const levelPadding = style({
 })
 
 export const nameContainer = style({
-  marginLeft: spacing[3],
+  position: "relative",
   display: "flex",
   alignItems: "center",
   columnGap: spacing[2],
   minWidth: spacing[36],
+})
+
+export const collapse = style({
+  position: "absolute",
+  height: rowHeight,
+  width: rowHeight,
+  left: `-${rowHeight}`,
+  ...centerChild,
+  opacity: 0,
+  ...transition("background-color"),
+  ":before": {
+    content: "",
+    position: "absolute",
+    zIndex: -2,
+    ...inset(0.5),
+    ...rounded("full"),
+    backgroundColor: color.white,
+    ...transition("background-color"),
+  },
+  selectors: {
+    [`${contailer}[data-hovered="true"] &`]: {
+      opacity: 1,
+    },
+    "&:hover:before": {
+      backgroundColor: color.gray[200],
+    },
+    '&[aria-selected="true"]': {
+      opacity: 1,
+    },
+  },
+})
+export const collapseIcon = style({
+  width: spacing[2],
+  height: spacing[2],
+  color: color.gray[600],
+  transform: "rotate(180deg)",
+  opacity: 0.5,
+  ...transition(["transform", "opacity"]),
+  selectors: {
+    [`${collapse}[aria-selected="true"] &`]: {
+      transform: "rotate(90deg)",
+      opacity: 1,
+    },
+  },
 })
 
 export const name = style({
