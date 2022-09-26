@@ -1,5 +1,13 @@
 # solid-devtools
 
+## 0.17.0
+
+### Patch Changes
+
+- Updated dependencies [0415e39]
+  - @solid-devtools/ext-adapter@0.17.0
+  - @solid-devtools/debugger@0.9.2
+
 ## 0.16.2
 
 ### Patch Changes

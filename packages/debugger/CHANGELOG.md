@@ -1,5 +1,16 @@
 # @solid-devtools/debugger
 
+## 0.9.2
+
+### Patch Changes
+
+- 0415e39: Rewrite the structure reconciler and virtualizer to reduce complexity.
+
+  Add the ability to collapse structure nodes.
+
+- Updated dependencies [0415e39]
+  - @solid-devtools/shared@0.8.2
+
 ## 0.9.1
 
 ### Patch Changes
