@@ -16,7 +16,6 @@ export const OwnerNode: Component<{
 
   const ctx = useStructure()
   const { toggleCollapsed } = ctx
-  // TODO: can use selector?
   const isCollapsed = ctx.isCollapsed.bind(null, owner)
 
   const { toggleHoveredOwner } = structure

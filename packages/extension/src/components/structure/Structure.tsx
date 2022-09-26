@@ -37,6 +37,7 @@ const DisplayStructureTree: Component = props => {
     setContainerScroll({ top: el.scrollTop, height: el.clientHeight })
 
   const [collapsed, setCollapsed] = createSignal(new WeakSet<Structure.Node>(), { equals: false })
+  // this cannot be a selector, because it uses a weakset
   const isCollapsed = (node: Structure.Node) => collapsed().has(node)
 
   const toggleCollapsed = (node: Structure.Node) =>
