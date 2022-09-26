@@ -25,10 +25,10 @@ export namespace Structure {
 }
 
 function getParentRoot(node: Structure.Node): Structure.Node {
-  let parent = node.parent
-  while (parent) {
-    if (parent.type === NodeType.Root) return parent
-    parent = parent.parent
+  let current: Structure.Node | null = node
+  while (current) {
+    if (current.type === NodeType.Root) return current
+    current = current.parent
   }
   throw new Error("Parent root not found")
 }

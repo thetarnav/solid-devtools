@@ -52,10 +52,11 @@ const DisplayStructureTree: Component = props => {
 
     let skip = 0
     for (const node of nodeList) {
-      if (skip) skip--
+      const skipped = skip > 0
+      if (skipped) skip--
       else collapsedList.push(node)
 
-      if (skip || set.has(node)) {
+      if (skipped || set.has(node)) {
         const { children, subroots } = node
         skip += children.length
         if (subroots) skip += subroots.length
