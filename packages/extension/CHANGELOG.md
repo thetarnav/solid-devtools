@@ -1,5 +1,18 @@
 # solid-devtools-extension
 
+## 0.12.0
+
+### Minor Changes
+
+- 0415e39: Rewrite the structure reconciler and virtualizer to reduce complexity.
+
+  Add the ability to collapse structure nodes.
+
+### Patch Changes
+
+- Updated dependencies [0415e39]
+  - @solid-devtools/shared@0.8.2
+
 ## 0.11.0
 
 ### Minor Changes

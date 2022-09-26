@@ -1,5 +1,19 @@
 # @solid-devtools/ext-adapter
 
+## 0.17.0
+
+### Minor Changes
+
+- 0415e39: Rewrite the structure reconciler and virtualizer to reduce complexity.
+
+  Add the ability to collapse structure nodes.
+
+### Patch Changes
+
+- Updated dependencies [0415e39]
+  - @solid-devtools/debugger@0.9.2
+  - @solid-devtools/shared@0.8.2
+
 ## 0.16.3
 
 ### Patch Changes
