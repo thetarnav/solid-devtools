@@ -373,26 +373,24 @@ importers:
 
   playgrounds/start:
     specifiers:
-      '@solid-devtools/transform': workspace:^0.7.3
       '@solidjs/meta': ^0.28.0
       '@solidjs/router': ^0.4.3
       solid-devtools: workspace:^0.16.2
-      solid-js: 1.5.5
-      solid-start: 0.1.0-alpha.101
-      solid-start-node: 0.1.0-alpha.101
+      solid-js: ^1.5.4
+      solid-start: ^0.1.0
+      solid-start-node: ^0.1.0
       typescript: ^4.8.3
       undici: ^5.10.0
-      vite: ^3.1.1
+      vite: ^3.1.0
     dependencies:
       '@solidjs/meta': 0.28.0_solid-js@1.5.5
       '@solidjs/router': 0.4.3_solid-js@1.5.5
+      solid-devtools: link:../../packages/main
       solid-js: 1.5.5
       solid-start: 0.1.0_2cq7e4sj7ivoqhxadrsoh2gyee
       undici: 5.10.0
     devDependencies:
-      '@solid-devtools/transform': link:../../packages/transform
-      solid-devtools: link:../../packages/main
-      solid-start-node: 0.1.0-alpha.101_yhvgwiv7fr3jhxvwa2gnlv34va
+      solid-start-node: 0.1.0_yhvgwiv7fr3jhxvwa2gnlv34va
       typescript: 4.8.3
       vite: 3.1.1
 
@@ -6724,8 +6722,8 @@ packages:
       '@babel/types': 7.19.0
       solid-js: 1.5.5
 
-  /solid-start-node/0.1.0-alpha.101_yhvgwiv7fr3jhxvwa2gnlv34va:
-    resolution: {integrity: sha512-bU8aHV0F6U72Bt4ES933QIuymbN/GgdIAI5/3qmrnS4e9eMeghhBbGM14uEhb4aMh7K9Uhd+5KTQDx6rXqMJ6g==}
+  /solid-start-node/0.1.0_yhvgwiv7fr3jhxvwa2gnlv34va:
+    resolution: {integrity: sha512-yaL5SmDhxl/lTjAKwg+It9PIuATyRUeu1fGJXymHN6jgkIffBfpXnwG47EldS22ZBE10+r7kribOnZUBxouKpQ==}
     peerDependencies:
       solid-start: '*'
       undici: ^5.8.0
