@@ -9,17 +9,16 @@
   "type": "module",
   "main": "./dist/index.js",
   "devDependencies": {
-    "@solid-devtools/transform": "workspace:^0.7.3",
-    "solid-devtools": "workspace:^0.16.2",
-    "solid-start-node": "0.1.0-alpha.101",
+    "solid-start-node": "^0.1.0",
     "typescript": "^4.8.3",
-    "vite": "^3.1.1"
+    "vite": "^3.1.0"
   },
   "dependencies": {
     "@solidjs/meta": "^0.28.0",
     "@solidjs/router": "^0.4.3",
-    "solid-js": "1.5.5",
-    "solid-start": "0.1.0-alpha.101",
+    "solid-devtools": "workspace:^0.16.2",
+    "solid-js": "^1.5.4",
+    "solid-start": "^0.1.0",
     "undici": "^5.10.0"
   },
   "engines": {

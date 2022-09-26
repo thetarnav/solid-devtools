@@ -51,12 +51,14 @@ const DetailsContent: Component<{ details: Inspector.Details }> = ({ details }) 
 
 export default function Details() {
   return (
-    <div class={styles.scrollWrapper}>
-      <Scrollable>
-        <Show when={inspector.state.details} keyed>
-          {details => <DetailsContent details={details} />}
-        </Show>
-      </Scrollable>
-    </div>
+    <Show when={inspector.inspectedNode()}>
+      <div class={styles.scrollWrapper}>
+        <Scrollable>
+          <Show when={inspector.details()} keyed>
+            {details => <DetailsContent details={details} />}
+          </Show>
+        </Scrollable>
+      </div>
+    </Show>
   )
 }

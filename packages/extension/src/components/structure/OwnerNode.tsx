@@ -2,7 +2,8 @@ import { Component, onCleanup } from "solid-js"
 import { assignInlineVars } from "@vanilla-extract/dynamic"
 import { NodeType } from "@solid-devtools/shared/graph"
 import { structure, Structure, inspector } from "@/state"
-import { Badge, Highlight } from "@/ui"
+import { Badge, Highlight, Icon } from "@/ui"
+import { useStructure } from "./ctx"
 import * as styles from "./ownerNode.css"
 
 export const OwnerNode: Component<{
@@ -12,6 +13,10 @@ export const OwnerNode: Component<{
   const { owner } = props
   const { name, type, id, hmr } = owner
   const typeName = NodeType[type]
+
+  const ctx = useStructure()
+  const { toggleCollapsed } = ctx
+  const isCollapsed = ctx.isCollapsed.bind(null, owner)
 
   const { toggleHoveredOwner } = structure
 
@@ -37,6 +42,16 @@ export const OwnerNode: Component<{
       <div class={styles.selection}></div>
       <div class={styles.levelPadding} />
       <div class={styles.nameContainer}>
+        <button
+          class={styles.collapse}
+          aria-selected={isCollapsed()}
+          onClick={e => {
+            e.stopPropagation()
+            toggleCollapsed(owner)
+          }}
+        >
+          <Icon.Triangle class={styles.collapseIcon} />
+        </button>
         {/* TODO: observers and sources highlighting */}
         <Highlight strong={isUpdated()} light={false} class={styles.highlight}>
           <div class={styles.name}>{type === NodeType.Component ? `<${name}>` : name}</div>

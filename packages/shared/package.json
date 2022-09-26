@@ -31,11 +31,6 @@
       "require": "./dist/bridge.cjs",
       "types": "./dist/bridge.d.ts"
     },
-    "./diff": {
-      "import": "./dist/diff.js",
-      "require": "./dist/diff.cjs",
-      "types": "./dist/diff.d.ts"
-    },
     "./graph": {
       "import": "./dist/graph.js",
       "require": "./dist/graph.cjs",
@@ -66,9 +61,6 @@
     "*": {
       "bridge": [
         "./dist/bridge.d.ts"
-      ],
-      "diff": [
-        "./dist/diff.d.ts"
       ],
       "graph": [
         "./dist/graph.d.ts"

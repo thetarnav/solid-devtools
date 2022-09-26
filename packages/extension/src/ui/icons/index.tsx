@@ -196,3 +196,12 @@ export const X: IconComponent = props => (
     </g>
   </svg>
 )
+
+export const Triangle: IconComponent = props => (
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" class={props.class}>
+    <path
+      fill={props.color ?? "currentColor"}
+      d="M236.7 188L148.8 36a24 24 0 0 0-41.6 0L19.3 188A23.9 23.9 0 0 0 40 224h176a23.9 23.9 0 0 0 20.7-36z"
+    ></path>
+  </svg>
+)

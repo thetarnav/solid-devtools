@@ -56,16 +56,17 @@ createRoot(() => {
   // toggle selected owner
   createEffect(
     on(
-      [() => inspector.state.node, () => inspector.state.rootId],
-      ([owner, rootId]) => {
-        const payload = owner && rootId ? { nodeId: owner.id, rootId } : null
-        postRuntimeMessage("SetSelectedOwner", payload)
-      },
+      inspector.inspectedNode,
+      node =>
+        postRuntimeMessage(
+          "SetSelectedOwner",
+          node ? { nodeId: node.id, rootId: structure.getParentRoot(node).id } : null,
+        ),
       { defer: true },
     ),
   )
 
-  let lastLocatorHovered: Structure.Hovered
+  let lastLocatorHovered: Structure.Node | null
   onRuntimeMessage("SetHoveredOwner", ({ state, nodeId }) => {
     // do not sync this state back to the adapter
     lastLocatorHovered = structure.toggleHoveredOwner(nodeId, state)
@@ -82,17 +83,17 @@ createRoot(() => {
     if (initHighlight) return (initHighlight = false) || undefined
 
     // handle component
-    if (hovered && hovered.node.type === NodeType.Component) {
-      const { node, rootId } = hovered
+    if (hovered && hovered.type === NodeType.Component) {
       if (
         // if the hovered component is the same as the last one
-        (prev && typeof prev === "object" && prev.nodeId === node.id) ||
+        (prev && typeof prev === "object" && prev.nodeId === hovered.id) ||
         // ignore state that came from the adapter
         hovered === lastLocatorHovered
       )
         return prev
 
-      const payload = { rootId, nodeId: node.id }
+      const rootId = structure.getParentRoot(hovered).id
+      const payload = { rootId, nodeId: hovered.id }
       postRuntimeMessage("HighlightElement", payload)
       return payload
     }

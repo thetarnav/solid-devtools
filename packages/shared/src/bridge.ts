@@ -26,7 +26,7 @@ export interface Messages {
   /** devtools -> adapter: request for details of owner details opened in the side-panel */
   SetSelectedOwner: null | { rootId: NodeID; nodeId: NodeID }
   /** adapter -> devtools: send component clicked with the locator to the extension */
-  SendSelectedOwner: { rootId: NodeID; nodeId: NodeID }
+  SendSelectedOwner: NodeID
   /** adapter -> devtools: send updates to the owner details */
   OwnerDetailsUpdate: Mapped.OwnerDetails
   /** devtools -> adapter: request for signal/prop details — subscribe or unsubscribe */
