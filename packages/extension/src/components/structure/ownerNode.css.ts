@@ -23,7 +23,7 @@ export const contailer = style({
   position: "relative",
   display: "flex",
   alignItems: "center",
-  paddingRight: spacing[2],
+  paddingRight: spacing[4],
   cursor: "pointer",
   color: color.black,
 })
