@@ -48,9 +48,19 @@ export const centerChild = {
   justifyContent: "center",
 } as const
 
-export const rounded = (key: keyof typeof theme.radius = "DEFAULT") => ({
-  borderRadius: theme.radius[key],
-})
+export const rounded = (
+  key: keyof typeof theme.radius = "DEFAULT",
+  corners?: ("tl" | "tr" | "bl" | "br")[],
+): CSSPropertiesWithVars => {
+  if (!corners) return { borderRadius: theme.radius[key] }
+
+  const radius = theme.radius[key]
+  const tl = corners.includes("tl") ? radius : "0"
+  const tr = corners.includes("tr") ? radius : "0"
+  const bl = corners.includes("bl") ? radius : "0"
+  const br = corners.includes("br") ? radius : "0"
+  return { borderRadius: `${tl} ${tr} ${br} ${bl}` }
+}
 
 export const transition = (
   property: Many<Property.TransitionProperty>,

@@ -1,9 +1,10 @@
-import { children, createEffect, createSignal, JSX } from "solid-js"
+import { children, createEffect, createSignal, JSX, Show } from "solid-js"
 import { makeEventListener } from "@solid-primitives/event-listener"
 import { clamp } from "@solid-primitives/utils"
 import { useWindowSize } from "@solid-primitives/resize-observer"
 import { assignInlineVars } from "@vanilla-extract/dynamic"
 import { createBodyCursor } from "@solid-primitives/cursor"
+import { Icon } from "@/ui"
 import * as styles from "./Splitter.css"
 
 export function Splitter(props: {
@@ -39,19 +40,22 @@ export function Splitter(props: {
   let container!: HTMLDivElement
   return (
     <div
-      class={styles.container[sideResolved() ? "open" : "closed"]}
+      class={styles.container}
+      data-open={!!sideResolved()}
       style={assignInlineVars({
         [styles.progress]: progress() * 100 + "%",
       })}
       ref={container}
     >
-      {props.children}
-      <div class={styles.split}>
-        <button class={styles.toggle} onClick={() => props.onToggle(!sideResolved())}>
-          {sideResolved() ? "X" : "O"}
-        </button>
-        <div class={styles.splitHandle} onPointerDown={onPointerDown}></div>
-      </div>
+      <div class={styles.mainContent}>{props.children}</div>
+      <Show when={sideResolved()}>
+        <div class={styles.split}>
+          <button class={styles.toggle} onClick={() => props.onToggle(!sideResolved())}>
+            <Icon.X class={styles.x} />
+          </button>
+          <div class={styles.splitHandle} onPointerDown={onPointerDown}></div>
+        </div>
+      </Show>
       {sideResolved()}
     </div>
   )
