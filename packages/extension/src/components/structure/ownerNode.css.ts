@@ -114,13 +114,19 @@ export const collapseIcon = style({
   },
 })
 
+export const highlight = style({
+  fontWeight: 500,
+  display: "flex",
+  alignItems: "center",
+})
 export const name = style({
   paddingBottom: "0.0625rem",
 })
-
-export const highlight = style({
-  // fontStyle: "italic",
-  fontWeight: 500,
+export const typeIcon = style({
+  width: spacing[3],
+  height: spacing[3],
+  color: color.gray[600],
+  marginRight: spacing[1],
 })
 
 export const type = style({

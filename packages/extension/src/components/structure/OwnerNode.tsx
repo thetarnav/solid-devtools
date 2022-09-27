@@ -12,7 +12,6 @@ export const OwnerNode: Component<{
 }> = props => {
   const { owner } = props
   const { name, type, id, hmr } = owner
-  const typeName = NodeType[type]
 
   const ctx = useStructure()
   const { toggleCollapsed } = ctx
@@ -27,6 +26,23 @@ export const OwnerNode: Component<{
   onCleanup(() => {
     toggleHoveredOwner(id, false)
   })
+
+  const IconComponent: Icon.IconComponent | null = (() => {
+    switch (type) {
+      case NodeType.Memo:
+        return Icon.Memo
+      case NodeType.Effect:
+        return Icon.Effect
+      case NodeType.Root:
+        return Icon.Root
+      case NodeType.Render:
+        return Icon.RenderEffect
+      case NodeType.Computation:
+        return Icon.Computation
+      default:
+        return null
+    }
+  })()
 
   return (
     <div
@@ -54,9 +70,15 @@ export const OwnerNode: Component<{
         </button>
         {/* TODO: observers and sources highlighting */}
         <Highlight strong={isUpdated()} light={false} class={styles.highlight}>
-          <div class={styles.name}>{type === NodeType.Component ? `<${name}>` : name}</div>
+          <>
+            {IconComponent && <IconComponent class={styles.typeIcon} />}
+            {type === NodeType.Render || type === NodeType.Root ? (
+              <div class={styles.type}>{type === NodeType.Render ? "Render Effect" : "Root"}</div>
+            ) : (
+              <div class={styles.name}>{type === NodeType.Component ? `<${name}>` : name}</div>
+            )}
+          </>
         </Highlight>
-        {type !== NodeType.Component && <div class={styles.type}>{typeName}</div>}
         {hmr && <Badge>HMR</Badge>}
       </div>
     </div>
