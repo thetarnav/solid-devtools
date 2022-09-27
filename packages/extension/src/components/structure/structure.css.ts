@@ -15,15 +15,10 @@ export const treeLength = createVar()
 export const startIndex = createVar()
 
 export const scrolledOuter = style({
-  // position: "relative",
   height: `calc(${treeLength} * ${ROW_HEIGHT_IN_REM}rem)`,
 })
 export const scrolledInner = style({
-  // position: "absolute",
-  // top: 0,
-  // ...insetX(0),
-  paddingTop: `calc(${startIndex} * ${ROW_HEIGHT_IN_REM}rem)`,
-  // transform: `translateY(calc(${startIndex} * ${ROW_HEIGHT_IN_REM}rem))`,
+  transform: `translateY(calc(${startIndex} * ${ROW_HEIGHT_IN_REM}rem))`,
 })
 
 export const path = style({

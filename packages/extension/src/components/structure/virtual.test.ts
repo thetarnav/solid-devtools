@@ -8,8 +8,8 @@ describe("getVirtualVars", () => {
     const scroll = 0
     const { end, length, start } = getVirtualVars(fullLength, scroll, vh, 1)
     expect(start).toBe(0)
-    expect(end).toBe(20)
-    expect(length).toBe(20)
+    expect(end).toBe(21)
+    expect(length).toBe(21)
   })
 
   test("some scroll", () => {
@@ -18,8 +18,8 @@ describe("getVirtualVars", () => {
     const scroll = 10
     const { end, length, start } = getVirtualVars(fullLength, scroll, vh, 1)
     expect(start).toBe(10)
-    expect(end).toBe(30)
-    expect(length).toBe(20)
+    expect(end).toBe(31)
+    expect(length).toBe(21)
   })
 
   test("low rows", () => {
@@ -37,9 +37,9 @@ describe("getVirtualVars", () => {
     const vh = 20
     const scroll = 90
     const { end, length, start } = getVirtualVars(fullLength, scroll, vh, 1)
-    expect(start).toBe(80)
+    expect(start).toBe(79)
     expect(end).toBe(100)
-    expect(length).toBe(20)
+    expect(length).toBe(21)
   })
 
   test("scroll beyond the rows with low rows", () => {
