@@ -68,8 +68,8 @@ export type PluginData = {
   readonly handleSignalUpdates: (listener: BatchSignalUpdatesHandler) => VoidFunction
   readonly handlePropsUpdate: Listen<Mapped.Props>
   readonly handleStructureUpdates: Listen<RootsUpdates>
-  readonly components: Accessor<Record<NodeID, Mapped.Component[]>>
-  readonly findComponent: (rootId: NodeID, nodeId: NodeID) => Mapped.Component | undefined
+  readonly components: Accessor<Record<NodeID, Mapped.ResolvedComponent[]>>
+  readonly findComponent: (rootId: NodeID, nodeId: NodeID) => Mapped.ResolvedComponent | undefined
   readonly setInspectedOwner: (payload: { rootId: NodeID; nodeId: NodeID } | null) => void
   readonly inspected: InspectedState
   readonly setInspectedSignal: (id: NodeID, selected: boolean) => EncodedValue<boolean> | null
@@ -120,10 +120,10 @@ const exported = createInternalRoot(() => {
   //
   // Components:
   //
-  const [components, setComponents] = createSignal<Record<NodeID, Mapped.Component[]>>({})
+  const [components, setComponents] = createSignal<Record<NodeID, Mapped.ResolvedComponent[]>>({})
 
   const findComponent: PluginData["findComponent"] = (rootId, nodeId) => {
-    const componentsList = components()[rootId] as Mapped.Component[] | undefined
+    const componentsList = components()[rootId] as Mapped.ResolvedComponent[] | undefined
     if (!componentsList) return
     for (const c of componentsList) {
       if (c.id === nodeId) return c
@@ -138,7 +138,7 @@ const exported = createInternalRoot(() => {
     })
     pushStructureUpdate({ removed: rootId })
   }
-  function updateRoot(newRoot: Mapped.Root, newComponents: Mapped.Component[]): void {
+  function updateRoot(newRoot: Mapped.Root, newComponents: Mapped.ResolvedComponent[]): void {
     setComponents(prev => Object.assign(prev, { [newRoot.id]: newComponents }))
     pushStructureUpdate({ updated: newRoot })
   }

@@ -108,6 +108,7 @@ importers:
       '@solid-primitives/keyboard': ^1.0.2
       '@solid-primitives/keyed': ^1.1.2
       '@solid-primitives/props': ^2.2.2
+      '@solid-primitives/range': ^0.1.2
       '@solid-primitives/resize-observer': ^2.0.4
       '@solid-primitives/timer': ^1.3.2
       '@solid-primitives/utils': ^3.0.2
@@ -141,6 +142,7 @@ importers:
       '@solid-primitives/keyboard': 1.0.2_solid-js@1.5.5
       '@solid-primitives/keyed': 1.1.2_solid-js@1.5.5
       '@solid-primitives/props': 2.2.2_solid-js@1.5.5
+      '@solid-primitives/range': 0.1.2_solid-js@1.5.5
       '@solid-primitives/resize-observer': 2.0.4_solid-js@1.5.5
       '@solid-primitives/timer': 1.3.2_solid-js@1.5.5
       '@solid-primitives/utils': 3.0.2_solid-js@1.5.5
@@ -2420,6 +2422,15 @@ packages:
 
   /@solid-primitives/props/2.2.2_solid-js@1.5.5:
     resolution: {integrity: sha512-vjRRoi/z3S2ylIJKCs+mN07oxDmt2S9gPCbTqkEx8jYHnvzocpt34UQdglLoSklTE6jI37JhW3g/Cs8Qr/peHg==}
+    peerDependencies:
+      solid-js: ^1.3.0
+    dependencies:
+      '@solid-primitives/utils': 3.0.2_solid-js@1.5.5
+      solid-js: 1.5.5
+    dev: false
+
+  /@solid-primitives/range/0.1.2_solid-js@1.5.5:
+    resolution: {integrity: sha512-Kl30WJD7e0fk5VpWSrWDXNfNCwOk2nIHzBE49NFSwblAbiTIFX6roW1QRQGE7vzxIaAQzd0k2zkyFnwEnb12aQ==}
     peerDependencies:
       solid-js: ^1.3.0
     dependencies:

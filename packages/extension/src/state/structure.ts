@@ -3,22 +3,35 @@ import { NodeID, NodeType, RootsUpdates } from "@solid-devtools/shared/graph"
 import { createUpdatedSelector } from "./utils"
 import { reconcileStructure } from "./structure-reconcile"
 
-export interface WritableNode {
-  id: NodeID
-  name: string
-  type: NodeType
-  level: number
-  parent: WritableNode | null
-  children: WritableNode[]
-  subroots?: WritableNode[]
-  hmr?: true
-}
-
 export namespace Structure {
-  export interface Node extends Readonly<WritableNode> {
-    readonly parent: Node | null
-    readonly children: Node[]
-    readonly subroots?: Node[]
+  export interface Node {
+    id: NodeID
+    name?: string
+    type: NodeType
+    level: number
+    parent: Node | null
+    children: Node[]
+    subroots?: Node[]
+    hmr?: boolean
+    frozen?: true
+  }
+
+  export interface Root extends Node {
+    name?: undefined
+    frozen?: undefined
+    type: NodeType.Root
+  }
+
+  export interface Component extends Node {
+    name: string
+    frozen?: undefined
+    type: NodeType.Component
+    hmr: boolean
+  }
+
+  export interface Computation extends Node {
+    type: NodeType.Computation | NodeType.Memo | NodeType.Effect | NodeType.Render
+    hmr?: undefined
   }
 
   export type State = { roots: Node[]; nodeList: Node[] }

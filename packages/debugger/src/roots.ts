@@ -104,7 +104,7 @@ export function attachDebugger(_owner: Core.Owner = getOwner()!): void {
   forEachLookupRoot(owner, (root, ctx) => {
     if (ctx === INTERNAL) return
 
-    root.sdtAttachedTo = null
+    root.sdtAttached = null
     markOwnerType(root, NodeType.Root)
     createGraphRoot(root)
 
@@ -113,26 +113,26 @@ export function attachDebugger(_owner: Core.Owner = getOwner()!): void {
       ctx.triggerRootUpdate()
       let parent = findClosestAliveParent(root)!
       if (!parent.owner) return warn("PARENT_SHOULD_BE_ALIVE")
-      root.sdtAttachedTo = parent.owner
+      root.sdtAttached = parent.owner
 
       const onParentCleanup = () => {
         const newParent = findClosestAliveParent(root)
         // still a sub-root
         if (newParent.owner) {
           parent = newParent
-          root.sdtAttachedTo = parent.owner
+          root.sdtAttached = parent.owner
           onOwnerCleanup(parent.root, onParentCleanup)
         }
         // becomes a root
         else {
-          root.sdtAttachedTo = null
+          root.sdtAttached = null
           removeOwnCleanup()
         }
       }
       const removeParentCleanup = onOwnerCleanup(parent.root, onParentCleanup)
       const removeOwnCleanup = onOwnerCleanup(root, () => {
         root.isDisposed = true
-        root.sdtAttachedTo = null
+        root.sdtAttached = null
         removeParentCleanup()
         ctx.triggerRootUpdate()
       })
@@ -177,7 +177,7 @@ function forEachLookupRoot(
     // check if it's a root/subroot
     if (isSolidRoot(owner)) {
       // skip already handled and INTERNAL roots
-      if ("sdtAttachedTo" in owner) {
+      if ("sdtAttached" in owner) {
         if (!ctx) ctx = getDebuggerContext(owner)
         break
       }

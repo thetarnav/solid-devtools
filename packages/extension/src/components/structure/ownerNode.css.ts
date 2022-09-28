@@ -3,6 +3,7 @@ import { CSSVarFunction } from "@vanilla-extract/private"
 import {
   centerChild,
   color,
+  hexToRgbValue,
   inset,
   insetX,
   insetY,
@@ -13,12 +14,13 @@ import {
 } from "@/ui/theme"
 import { ROW_HEIGHT_IN_REM } from "./structure.css"
 import { Property } from "csstype"
+import { CSSPropertiesWithVars } from "@vanilla-extract/css/dist/declarations/src/types"
 
 export const levelVar: CSSVarFunction = createVar()
 
 const rowHeight = `${ROW_HEIGHT_IN_REM}rem`
 
-export const contailer = style({
+export const container = style({
   height: rowHeight,
   position: "relative",
   display: "flex",
@@ -35,14 +37,15 @@ export const selection = style({
   ...insetX(1),
   ...rounded(),
   backgroundColor: color.gray[400],
+  border: `1px solid ${color.gray[500]}`,
   opacity: 0,
   ...transition(["opacity"], theme.duration[100]),
   selectors: {
-    [`${contailer}[data-hovered="true"] &`]: {
+    [`${container}[data-hovered="true"] &`]: {
       opacity: 0.2,
     },
-    [`${contailer}[data-selected="true"] &`]: {
-      opacity: 0.6,
+    [`${container}[data-selected="true"] &`]: {
+      opacity: 0.4,
     },
   },
 })
@@ -88,7 +91,7 @@ export const collapse = style({
     ...transition("background-color"),
   },
   selectors: {
-    [`${contailer}[data-hovered="true"] &`]: {
+    [`${container}[data-hovered="true"] &`]: {
       opacity: 1,
     },
     "&:hover:before": {
@@ -114,6 +117,17 @@ export const collapseIcon = style({
   },
 })
 
+const strikeThroughLine: CSSPropertiesWithVars = {
+  content: "",
+  position: "absolute",
+  zIndex: -1,
+  top: "50%",
+  left: 0,
+  right: 0,
+  height: "1px",
+  backgroundColor: "currentcolor",
+}
+
 export const highlight = style({
   fontWeight: 500,
   display: "flex",
@@ -121,6 +135,12 @@ export const highlight = style({
 })
 export const name = style({
   paddingBottom: "0.0625rem",
+  selectors: {
+    [`${container}[data-frozen="true"] &`]: {
+      color: color.gray[600],
+    },
+    [`${container}[data-frozen="true"] &:after`]: strikeThroughLine,
+  },
 })
 export const typeIcon = style({
   width: spacing[3],
@@ -134,4 +154,7 @@ export const type = style({
   opacity: 0.4,
   userSelect: "none",
   paddingBottom: "0.0625rem",
+  selectors: {
+    [`${container}[data-frozen="true"] &:after`]: strikeThroughLine,
+  },
 })

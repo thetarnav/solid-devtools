@@ -26,15 +26,18 @@ export default function StructureView() {
 
 type DisplayNode = {
   node: Structure.Node
-  level: Accessor<number>
-  setLevel: Setter<number>
+  getNode: Accessor<Structure.Node>
+  update: VoidFunction
 }
 
 const DisplayStructureTree: Component = props => {
   const [containerScroll, setContainerScroll] = createSignal({ top: 0, height: 0 })
 
   const updateScrollData = (el: HTMLElement) =>
-    setContainerScroll({ top: el.scrollTop, height: el.clientHeight })
+    setContainerScroll({
+      top: Math.max(el.scrollTop - remToPx(styles.V_MARGIN_IN_REM), 0),
+      height: el.clientHeight,
+    })
 
   const [collapsed, setCollapsed] = createSignal(new WeakSet<Structure.Node>(), { equals: false })
   // this cannot be a selector, because it uses a weakset
@@ -91,10 +94,10 @@ const DisplayStructureTree: Component = props => {
       const prev = prevMap[node.id]
       if (prev) {
         next[i] = prev
-        prev.setLevel(node.level)
+        prev.update()
       } else {
-        const [level, setLevel] = createSignal(node.level)
-        next[i] = { node, level, setLevel }
+        const [getNode, setNode] = createSignal(node, { equals: false })
+        next[i] = { node, getNode, update: () => setNode(node) }
       }
     }
 
@@ -115,9 +118,7 @@ const DisplayStructureTree: Component = props => {
           })}
         >
           <div class={styles.scrolledInner}>
-            <For each={virtual().list}>
-              {({ node, level }) => <OwnerNode owner={node} level={level()} />}
-            </For>
+            <For each={virtual().list}>{({ getNode }) => <OwnerNode getOwner={getNode} />}</For>
           </div>
         </div>
       </StructureProvider>

@@ -64,7 +64,7 @@ export namespace Solid {
     sourceMap?: Record<string, Signal>
     // Used by the debugger
     isDisposed?: boolean
-    sdtAttachedTo?: Owner | null
+    sdtAttached?: Owner | null
     sdtContext?: DebuggerContext
     // Computation compatibility
     value?: undefined
@@ -133,18 +133,30 @@ export type ValueUpdateListener = (newValue: unknown, oldValue: unknown) => void
 export namespace Mapped {
   export interface Root {
     id: NodeID
+    name?: undefined
+    type: NodeType.Root
+    children?: Owner[]
     // sub-roots will have an owner
-    attachedTo?: NodeID
-    tree: Owner
+    attached?: NodeID
   }
 
-  export interface Owner {
+  export interface Component {
     id: NodeID
-    name: string
-    type: NodeType
+    type: NodeType.Component
     children?: Owner[]
-    hmr?: true
+    name: string
+    hmr: boolean
   }
+
+  export interface Computation {
+    id: NodeID
+    type: Exclude<NodeType, NodeType.Refresh | NodeType.Root | NodeType.Component>
+    children?: Owner[]
+    name: string
+    frozen?: true
+  }
+
+  export type Owner = Component | Computation
 
   export interface Signal {
     type: NodeType.Signal | NodeType.Memo
@@ -154,7 +166,7 @@ export namespace Mapped {
     value: EncodedValue<false>
   }
 
-  export type Component = {
+  export type ResolvedComponent = {
     id: NodeID
     name: string
     /**

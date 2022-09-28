@@ -8,6 +8,7 @@ import {
   Setter,
   ParentComponent,
   createRoot,
+  createRenderEffect,
 } from "solid-js"
 import Todos from "./Todos"
 import { disposeApp } from "."
@@ -88,6 +89,10 @@ const App: Component = () => {
     <h1 onClick={() => setHeader(<h1>Call that an easter egg</h1>)}>Welcome to the Sandbox</h1>,
   )
 
+  // setInterval(() => {
+  //   setCount(count() + 1)
+  // }, 2000)
+
   const objmemo = createMemo(() => {
     return {
       foo: "bar",
@@ -105,6 +110,9 @@ const App: Component = () => {
     undefined,
     { name: "c-12-3-1-2-3-2-1-1-1-1-1-1-1-0-1-2-1-1-0" },
   )
+
+  createComputed(() => {}, undefined, { name: "frozen" })
+  createRenderEffect(() => {})
 
   return (
     <>

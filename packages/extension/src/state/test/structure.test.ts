@@ -7,30 +7,24 @@ describe("reconcileStructure", () => {
   let updated: Record<NodeID, Mapped.Root> = {
     "1": {
       id: "1",
-      tree: {
-        id: "1",
-        name: "root",
-        type: NodeType.Root,
-        children: [
-          { id: "2", name: "child", type: NodeType.Component, children: [] },
-          {
-            id: "3",
-            name: "child2",
-            type: NodeType.Effect,
-            children: [{ id: "4", name: "child3", type: NodeType.Component, children: [] }],
-          },
-        ],
-      },
+      type: NodeType.Root,
+      children: [
+        { id: "2", name: "child", type: NodeType.Component, children: [], hmr: false },
+        {
+          id: "3",
+          name: "child2",
+          type: NodeType.Effect,
+          children: [
+            { id: "4", name: "child3", type: NodeType.Component, children: [], hmr: false },
+          ],
+        },
+      ],
     },
     "5": {
       id: "5",
-      tree: {
-        id: "5",
-        name: "root2",
-        type: NodeType.Root,
-        children: [{ id: "6", name: "child4", type: NodeType.Component, children: [] }],
-      },
-      attachedTo: "3",
+      type: NodeType.Root,
+      children: [{ id: "6", name: "child4", type: NodeType.Component, children: [], hmr: false }],
+      attached: "3",
     },
   }
   let removed: NodeID[] = []
@@ -44,7 +38,13 @@ describe("reconcileStructure", () => {
     expect(nodeList).toMatchObject([
       { id: "1", parent: null, level: 0, children: [{ id: "2" }, { id: "3" }] },
       { id: "2", parent: { id: "1" }, level: 1, children: [] },
-      { id: "3", parent: { id: "1" }, level: 1, children: [{ id: "4" }], subroots: [{ id: "5" }] },
+      {
+        id: "3",
+        parent: { id: "1" },
+        level: 1,
+        children: [{ id: "4" }],
+        subroots: [{ id: "5" }],
+      },
       { id: "4", parent: { id: "3" }, level: 2, children: [] },
       { id: "5", parent: { id: "3" }, level: 2, children: [{ id: "6" }] },
       { id: "6", parent: { id: "5" }, level: 3, children: [] },
@@ -57,31 +57,32 @@ describe("reconcileStructure", () => {
     updated = {
       "1": {
         id: "1",
-        tree: {
-          id: "1",
-          name: "root",
-          type: NodeType.Root,
-          children: [
-            // removed child (2)
-            {
-              id: "3",
-              name: "child2",
-              type: NodeType.Effect,
-              children: [{ id: "4", name: "child3", type: NodeType.Component, children: [] }],
-            },
-          ],
-        },
+        type: NodeType.Root,
+        children: [
+          // removed child (2)
+          {
+            id: "3",
+            name: "child2",
+            type: NodeType.Effect,
+            frozen: true,
+            children: [
+              { id: "4", name: "child3", type: NodeType.Component, children: [], hmr: false },
+            ],
+          },
+        ],
       },
       // added new top-level root (10)
       "10": {
         id: "10",
-        tree: { id: "10", name: "root4", type: NodeType.Root, children: [] },
+        type: NodeType.Root,
+        children: [],
       },
       "5": {
-        id: "5",
         // removed child (6)
-        tree: { id: "5", name: "root2", type: NodeType.Root, children: [] },
-        attachedTo: "3",
+        id: "5",
+        type: NodeType.Root,
+        children: [],
+        attached: "3",
       },
     }
 
@@ -91,7 +92,14 @@ describe("reconcileStructure", () => {
     expect(nodeList).toHaveLength(5)
     expect(nodeList).toMatchObject([
       { id: "1", parent: null, level: 0, children: [{ id: "3" }] },
-      { id: "3", parent: { id: "1" }, level: 1, children: [{ id: "4" }], subroots: [{ id: "5" }] },
+      {
+        id: "3",
+        parent: { id: "1" },
+        level: 1,
+        children: [{ id: "4" }],
+        subroots: [{ id: "5" }],
+        frozen: true,
+      },
       { id: "4", parent: { id: "3" }, level: 2, children: [] },
       { id: "5", parent: { id: "3" }, level: 2, children: [] },
       { id: "10", parent: null, level: 0, children: [] },
@@ -104,29 +112,21 @@ describe("reconcileStructure", () => {
     // UPDATE 2
     updated = {
       "5": {
-        id: "5",
         // changed attachment from 3 to 8
-        attachedTo: "8",
-        tree: {
-          id: "5",
-          name: "root2",
-          type: NodeType.Root,
-          children: [
-            // add two children (6, 7)
-            { id: "6", name: "child4", type: NodeType.Component, children: [] },
-            { id: "7", name: "child5", type: NodeType.Refresh, children: [] },
-          ],
-        },
+        attached: "8",
+        id: "5",
+        type: NodeType.Root,
+        children: [
+          // add two children (6, 7)
+          { id: "6", name: "child4", type: NodeType.Component, children: [], hmr: false },
+          { id: "7", name: "child5", type: NodeType.Effect, children: [] },
+        ],
       },
       // add new root (8)
       "8": {
         id: "8",
-        tree: {
-          id: "8",
-          name: "root3",
-          type: NodeType.Root,
-          children: [{ id: "9", name: "child6", type: NodeType.Component, children: [] }],
-        },
+        type: NodeType.Root,
+        children: [{ id: "9", name: "child6", type: NodeType.Component, children: [], hmr: false }],
       },
     }
 
@@ -159,27 +159,24 @@ describe("reconcileStructure", () => {
       // remove attachment from 8
       "5": {
         id: "5",
-        tree: {
-          id: "5",
-          name: "root2",
-          type: NodeType.Root,
-          children: [
-            { id: "6", name: "child4", type: NodeType.Component, children: [] },
-            {
-              id: "7",
-              name: "child5",
-              type: NodeType.Refresh,
-              // add a child (11)
-              children: [{ id: "11", name: "child7", type: NodeType.Computation, children: [] }],
-            },
-          ],
-        },
+        type: NodeType.Root,
+        children: [
+          { id: "6", name: "child4", type: NodeType.Component, children: [], hmr: false },
+          {
+            id: "7",
+            name: "child5",
+            type: NodeType.Effect,
+            // add a child (11)
+            children: [{ id: "11", name: "child7", type: NodeType.Computation, children: [] }],
+          },
+        ],
       },
       // add new subroot (12) attached to 9
       "12": {
         id: "12",
-        tree: { id: "12", name: "root5", type: NodeType.Root, children: [] },
-        attachedTo: "9",
+        type: NodeType.Root,
+        children: [],
+        attached: "9",
       },
     }
 
@@ -271,11 +268,7 @@ describe("mapArray example", () => {
     ;(n2 as any).subroots = [n3, n4, n5]
 
     const updated: Record<NodeID, Mapped.Root> = {
-      "3": {
-        id: "3",
-        tree: { id: "3", name: "item1", type: NodeType.Root, children: [] },
-        attachedTo: "2",
-      },
+      "3": { id: "3", type: NodeType.Root, children: [], attached: "2" },
     }
 
     const prevRoots: Structure.Node[] = [n1]

@@ -1,6 +1,5 @@
 import { describe, beforeEach, jest, it, expect } from "@jest/globals"
 import { getOwner, Mapped, NodeType, Solid } from "@solid-devtools/shared/graph"
-import { UNNAMED } from "@solid-devtools/shared/variables"
 import {
   createComputed,
   createEffect,
@@ -44,30 +43,30 @@ describe("walkSolidTree", () => {
 
     const { root, components, inspectedOwner } = walkSolidTree(owner, {
       onComputationUpdate: () => {},
-      rootId: "ff",
+      rootId: (owner.sdtId = "ff"),
       inspectedId: null,
       gatherComponents: false,
     })
 
     dispose()
 
-    expect(root.tree).toEqual({
-      id: "0",
-      name: UNNAMED,
+    expect(root).toEqual({
+      id: "ff",
       type: NodeType.Root,
       children: [
         {
-          id: "1",
+          id: "0",
           name: "e0",
           type: NodeType.Effect,
+          frozen: true,
           children: [
-            { id: "2", name: "c0", type: NodeType.Computation },
-            { id: "3", name: "c1", type: NodeType.Computation },
+            { id: "1", name: "c0", type: NodeType.Computation },
+            { id: "2", name: "c1", type: NodeType.Computation, frozen: true },
           ],
         },
       ],
     })
-    expect(root.tree).toEqual(JSON.parse(JSON.stringify(root.tree)))
+    expect(root).toEqual(JSON.parse(JSON.stringify(root)))
     expect(components).toEqual([])
     expect(inspectedOwner).toBe(null)
   })
@@ -81,9 +80,10 @@ describe("walkSolidTree", () => {
       const [a, setA] = createSignal(0)
       createComputed(a)
 
-      walkSolidTree(getOwner()! as Solid.Root, {
+      const owner = getOwner()! as Solid.Root
+      walkSolidTree(owner, {
         onComputationUpdate: (rootId, id) => capturedComputationUpdates.push([rootId, id]),
-        rootId: "ff",
+        rootId: (owner.sdtId = "ff"),
         inspectedId: null,
         gatherComponents: false,
       })
@@ -93,7 +93,7 @@ describe("walkSolidTree", () => {
       setA(1)
 
       expect(capturedComputationUpdates.length).toBe(1)
-      expect(capturedComputationUpdates[0]).toEqual(["ff", "1"])
+      expect(capturedComputationUpdates[0]).toEqual(["ff", "0"])
 
       dispose()
     }))
@@ -120,9 +120,10 @@ describe("walkSolidTree", () => {
         )
       })
 
-      const { components } = walkSolidTree(getOwner()! as Solid.Root, {
+      const owner = getOwner()! as Solid.Root
+      const { components } = walkSolidTree(owner, {
         onComputationUpdate: () => {},
-        rootId: "ff",
+        rootId: (owner.sdtId = "ff"),
         inspectedId: null,
         gatherComponents: true,
       })
@@ -130,7 +131,7 @@ describe("walkSolidTree", () => {
       expect(components.length).toBe(7)
 
       let testCompsLength = 0
-      let btn!: Mapped.Component
+      let btn!: Mapped.ResolvedComponent
       components.forEach(c => {
         if (c.name === "TestComponent" && c.element instanceof HTMLDivElement) testCompsLength++
         else btn = c
@@ -173,8 +174,9 @@ describe("walkSolidTree", () => {
         { name: "WRAPPER" },
       )
 
-      const { root, inspectedOwner } = walkSolidTree(getOwner()! as Solid.Root, {
-        rootId: "0",
+      const rootOwner = getOwner()! as Solid.Root
+      const { root, inspectedOwner } = walkSolidTree(rootOwner, {
+        rootId: (rootOwner.sdtId = "0"),
         inspectedId: "ff",
         onComputationUpdate: () => {},
         gatherComponents: false,
@@ -182,13 +184,12 @@ describe("walkSolidTree", () => {
 
       expect(owner).toBe(inspectedOwner)
 
-      expect(root.tree).toEqual({
+      expect(root).toEqual({
         id: "0",
-        name: UNNAMED,
         type: NodeType.Root,
         children: [
           {
-            id: "1",
+            id: "0",
             name: "WRAPPER",
             type: NodeType.Computation,
             children: [
@@ -197,8 +198,8 @@ describe("walkSolidTree", () => {
                 name: "focused",
                 type: NodeType.Memo,
                 children: [
-                  { id: "2", name: "memo", type: NodeType.Memo },
-                  { id: "3", name: "render", type: NodeType.Render },
+                  { id: "1", name: "memo", type: NodeType.Memo, frozen: true },
+                  { id: "2", name: "render", type: NodeType.Render },
                 ],
               },
             ],

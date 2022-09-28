@@ -184,7 +184,7 @@ export function getFunctionSources(fn: () => unknown): Solid.Signal[] {
 }
 
 let LAST_ID = 0
-export const getNewSdtId = (): NodeID => (LAST_ID++).toString(16)
+export const getNewSdtId = (): NodeID => (LAST_ID++).toString(36)
 
 export function markOwnerName(o: Solid.Owner): string {
   if (o.sdtName !== undefined) return o.sdtName

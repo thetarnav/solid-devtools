@@ -1,4 +1,4 @@
-import { Component, onCleanup } from "solid-js"
+import { Accessor, Component, onCleanup } from "solid-js"
 import { assignInlineVars } from "@vanilla-extract/dynamic"
 import { NodeType } from "@solid-devtools/shared/graph"
 import { structure, Structure, inspector } from "@/state"
@@ -7,10 +7,9 @@ import { useStructure } from "./ctx"
 import * as styles from "./ownerNode.css"
 
 export const OwnerNode: Component<{
-  owner: Structure.Node
-  level: number
-}> = props => {
-  const { owner } = props
+  getOwner: Accessor<Structure.Node>
+}> = ({ getOwner }) => {
+  const owner = getOwner()
   const { name, type, id, hmr } = owner
 
   const ctx = useStructure()
@@ -48,12 +47,13 @@ export const OwnerNode: Component<{
     <div
       data-hovered={isHovered()}
       data-selected={isSelected()}
-      class={styles.contailer}
+      data-frozen={getOwner().frozen}
+      class={styles.container}
       onClick={e => inspector.setInspectedNode(isSelected() ? null : owner)}
       onMouseEnter={() => toggleHoveredOwner(id, true)}
       // onMouseLeave is fired in the next tick for the onMouseEnter of other node fired earlier
       onMouseLeave={() => setTimeout(() => toggleHoveredOwner(id, false))}
-      style={assignInlineVars({ [styles.levelVar]: props.level + "" })}
+      style={assignInlineVars({ [styles.levelVar]: getOwner().level + "" })}
     >
       <div class={styles.selection}></div>
       <div class={styles.levelPadding} />

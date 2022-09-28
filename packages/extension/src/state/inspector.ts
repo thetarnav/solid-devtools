@@ -166,7 +166,7 @@ const inspector = createRoot(() => {
         }
 
         const currentNode = inspectedNode()
-        if ("name" in data) {
+        if (typeof data === "object") {
           if (currentNode && data.id === currentNode.id) return
           setInspectedNode(data)
           setDetails({ value: null })

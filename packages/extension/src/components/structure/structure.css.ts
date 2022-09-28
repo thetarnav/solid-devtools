@@ -2,6 +2,7 @@ import { color, insetX, spacing } from "@/ui/theme"
 import { createVar, style } from "@vanilla-extract/css"
 
 export const ROW_HEIGHT_IN_REM = 1.25
+export const V_MARGIN_IN_REM = 0.75
 
 export const panelWrapper = style({
   height: "100%",
@@ -15,7 +16,9 @@ export const treeLength = createVar()
 export const startIndex = createVar()
 
 export const scrolledOuter = style({
+  padding: `${V_MARGIN_IN_REM}rem 0`,
   height: `calc(${treeLength} * ${ROW_HEIGHT_IN_REM}rem)`,
+  boxSizing: "content-box",
 })
 export const scrolledInner = style({
   transform: `translateY(calc(${startIndex} * ${ROW_HEIGHT_IN_REM}rem))`,
