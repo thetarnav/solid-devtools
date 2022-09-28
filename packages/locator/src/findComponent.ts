@@ -31,7 +31,7 @@ export function getLocationFromElement(element: Element): ElementLocation | null
 const findComponentCache = new Map<HTMLElement, HoveredComponent | null>()
 
 // for comparison — clear cache when component map changes
-let prevCompMap: Record<NodeID, Mapped.Component[]> = {}
+let prevCompMap: Record<NodeID, Mapped.ResolvedComponent[]> = {}
 
 /**
  * Given an array of components and a HTML Element, find the closest component that contains the element.
@@ -43,7 +43,7 @@ let prevCompMap: Record<NodeID, Mapped.Component[]> = {}
  * @returns A SelectedComponent or null if no component was found. Selected component contains also a source code location property.
  */
 export function findComponent(
-  compMap: Record<NodeID, Mapped.Component[]>,
+  compMap: Record<NodeID, Mapped.ResolvedComponent[]>,
   target: HTMLElement,
 ): HoveredComponent | null {
   if (prevCompMap !== compMap) {

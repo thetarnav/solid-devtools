@@ -34,7 +34,7 @@ export type ClickMiddleware = (
   data: SourceCodeData | null,
 ) => false | void
 
-export type TargetComponent = Mapped.Component & { rootId: NodeID }
+export type TargetComponent = Mapped.ResolvedComponent & { rootId: NodeID }
 
 const exported = createInternalRoot(() => {
   // enables debugger and highlighting components
