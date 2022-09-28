@@ -1,5 +1,13 @@
 # solid-devtools-extension
 
+## 0.12.1
+
+### Patch Changes
+
+- 4ef8606: Add one row margin to virtual list. (fixes it being clipped at hte bottom)
+- cd36816: Improve Splitter styles
+- bf9d78b: Improve display styles of tree nodes. Adds icons for different types of nodes.
+
 ## 0.12.0
 
 ### Minor Changes
