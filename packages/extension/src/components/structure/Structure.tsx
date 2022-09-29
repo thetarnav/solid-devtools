@@ -1,13 +1,15 @@
 import { structure, inspector, Structure } from "@/state"
 import { Scrollable } from "@/ui"
 import { NodeID } from "@solid-devtools/shared/graph"
+import { useRemSize } from "@solid-devtools/shared/primitives"
 import { assignInlineVars } from "@vanilla-extract/dynamic"
-import { Accessor, Component, createMemo, createSignal, For, Setter, Show } from "solid-js"
+import { Accessor, Component, createEffect, createMemo, createSignal, For, Show } from "solid-js"
+import { untrack } from "solid-js/web"
 import { StructureProvider } from "./ctx"
 import { OwnerNode } from "./OwnerNode"
 import { OwnerPath } from "./Path"
 import * as styles from "./structure.css"
-import { getVirtualVars, remToPx } from "./virtual"
+import { getVirtualVars } from "./virtual"
 
 export default function StructureView() {
   return (
@@ -33,9 +35,14 @@ type DisplayNode = {
 const DisplayStructureTree: Component = props => {
   const [containerScroll, setContainerScroll] = createSignal({ top: 0, height: 0 })
 
+  const remSize = useRemSize()
+
+  const getContainerTopMargin = () => remSize() * styles.V_MARGIN_IN_REM
+  const getRowHeight = () => remSize() * styles.ROW_HEIGHT_IN_REM
+
   const updateScrollData = (el: HTMLElement) =>
     setContainerScroll({
-      top: Math.max(el.scrollTop - remToPx(styles.V_MARGIN_IN_REM), 0),
+      top: Math.max(el.scrollTop - getContainerTopMargin(), 0),
       height: el.clientHeight,
     })
 
@@ -70,8 +77,6 @@ const DisplayStructureTree: Component = props => {
     return collapsedList
   })
 
-  const getRowHeight = () => remToPx(styles.ROW_HEIGHT_IN_REM)
-
   const virtual = createMemo<{
     start: number
     end: number
@@ -104,9 +109,32 @@ const DisplayStructureTree: Component = props => {
     return { list: next, start, end, nodeList, fullLength: nodeList.length }
   })
 
+  createEffect(() => {
+    const node = inspector.inspectedNode()
+    if (!node) return
+    untrack(() => {
+      const index = collapsedList().indexOf(node)
+      if (index === -1) return
+
+      const { start, end } = virtual()
+      const rowHeight = getRowHeight()
+      const containerTopMargin = getContainerTopMargin()
+      let top: number
+      if (index < start) top = (index - 1) * rowHeight
+      else if (index > end) top = (index + 2) * rowHeight - containerScroll().height
+      else return
+
+      container.scrollTop = top + containerTopMargin
+    })
+  })
+
+  let container: HTMLElement
   return (
     <Scrollable
-      ref={el => setTimeout(() => updateScrollData(el))}
+      ref={el => {
+        container = el
+        setTimeout(() => updateScrollData(el))
+      }}
       onScroll={e => updateScrollData(e.currentTarget)}
     >
       <StructureProvider value={{ toggleCollapsed, isCollapsed }}>

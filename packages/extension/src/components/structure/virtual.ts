@@ -1,6 +1,3 @@
-export const remToPx = (rem: number): number =>
-  rem * parseFloat(getComputedStyle(document.documentElement).fontSize)
-
 export function getVirtualVars(
   listLength: number,
   scroll: number,

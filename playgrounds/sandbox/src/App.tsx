@@ -9,6 +9,7 @@ import {
   ParentComponent,
   createRoot,
   createRenderEffect,
+  onCleanup,
 } from "solid-js"
 import Todos from "./Todos"
 import { disposeApp } from "."
@@ -139,8 +140,18 @@ const App: Component = () => {
       <button onClick={() => disposeOuterRoot()}>Dispose OUTSIDE_ROOT</button>
       <Article />
       <Todos />
+      <div style={{ margin: "24px" }}>
+        <CountingComponent />
+      </div>
     </>
   )
+}
+
+const CountingComponent = () => {
+  const [count, setCount] = createSignal(0)
+  const interval = setInterval(() => setCount(c => c + 1), 1000)
+  onCleanup(() => clearInterval(interval))
+  return <div>Count value is {count()}</div>
 }
 
 export default App
