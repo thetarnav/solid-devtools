@@ -6,7 +6,6 @@ import {
   createSignal,
   For,
   Match,
-  onCleanup,
   ParentComponent,
   Show,
   splitProps,
@@ -30,6 +29,7 @@ import { color } from "@/ui/theme"
 import { Inspector } from "@/state/inspector"
 import { Highlight } from "../highlight/Highlight"
 import * as styles from "./SignalNode.css"
+import { createHover } from "@solid-devtools/shared/primitives"
 
 type ValueComponent<K extends ValueType> = Component<Omit<EncodedValueOf<K, boolean>, "type">>
 
@@ -95,16 +95,8 @@ const ElementValuePreview: ValueComponent<ValueType.Element> = props => {
       onHover(props.value.id, hovered)
     })
 
-  handleHover && onCleanup(() => handleHover(false))
-
   return (
-    <span
-      class={styles.ValueElement.container}
-      {...(handleHover && {
-        onMouseEnter: () => handleHover(true),
-        onMouseLeave: () => handleHover(false),
-      })}
-    >
+    <span class={styles.ValueElement.container} {...(handleHover && createHover(handleHover))}>
       <div class={styles.ValueElement.highlight} />
       {props.value.name}
     </span>

@@ -1,10 +1,11 @@
-import { Accessor, Component, onCleanup } from "solid-js"
+import { Accessor, Component } from "solid-js"
 import { assignInlineVars } from "@vanilla-extract/dynamic"
 import { NodeType } from "@solid-devtools/shared/graph"
 import { structure, Structure, inspector } from "@/state"
 import { Badge, Highlight, Icon } from "@/ui"
 import { useStructure } from "./ctx"
 import * as styles from "./ownerNode.css"
+import { createHover } from "@solid-devtools/shared/primitives"
 
 export const NodeTypeIcon: Component<{ type: NodeType; class?: string }> = props => {
   const IconComponent: Icon.IconComponent | null = (() => {
@@ -43,10 +44,6 @@ export const OwnerNode: Component<{
   const isHovered = structure.isHovered.bind(null, id)
   const isUpdated = structure.isUpdated.bind(null, id)
 
-  onCleanup(() => {
-    toggleHoveredOwner(id, false)
-  })
-
   return (
     <div
       data-hovered={isHovered()}
@@ -54,9 +51,7 @@ export const OwnerNode: Component<{
       data-frozen={getOwner().frozen}
       class={styles.container}
       onClick={e => inspector.setInspectedNode(isSelected() ? null : owner)}
-      onMouseEnter={() => toggleHoveredOwner(id, true)}
-      // onMouseLeave is fired in the next tick for the onMouseEnter of other node fired earlier
-      onMouseLeave={() => setTimeout(() => toggleHoveredOwner(id, false))}
+      {...createHover(hovering => toggleHoveredOwner(id, hovering))}
       style={assignInlineVars({ [styles.levelVar]: getOwner().level + "" })}
     >
       <div class={styles.selection}></div>

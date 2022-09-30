@@ -1,9 +1,10 @@
 import { Component } from "solid-js"
 import { NodeType } from "@solid-devtools/shared/graph"
 import { Icon } from "@/ui"
-import { Structure } from "@/state"
+import { inspector, structure, Structure } from "@/state"
 import * as styles from "./path.css"
 import { NodeTypeIcon } from "./OwnerNode"
+import { createHover } from "@solid-devtools/shared/primitives"
 
 export const OwnerPath: Component<{ path: Structure.Node[] }> = props => {
   return (
@@ -15,7 +16,12 @@ export const OwnerPath: Component<{ path: Structure.Node[] }> = props => {
               <Icon.CarretRight class={styles.carret} />
             </div>
           )}
-          <div class={styles.item}>
+          <div
+            class={styles.item}
+            data-hovered={structure.isHovered(node.id)}
+            {...createHover(hovering => structure.toggleHoveredOwner(node.id, hovering))}
+            onClick={() => inspector.setInspectedNode(node)}
+          >
             <div class={styles.highlight} />
             {() => {
               switch (node.type) {

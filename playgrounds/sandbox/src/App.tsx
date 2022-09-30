@@ -10,6 +10,7 @@ import {
   createRoot,
   createRenderEffect,
   onCleanup,
+  Show,
 } from "solid-js"
 import Todos from "./Todos"
 import { disposeApp } from "."
@@ -115,6 +116,8 @@ const App: Component = () => {
   createComputed(() => {}, undefined, { name: "frozen" })
   createRenderEffect(() => {})
 
+  const Bold: ParentComponent = props => <b>{props.children}</b>
+
   return (
     <>
       {header()}
@@ -123,8 +126,11 @@ const App: Component = () => {
           <Button onClick={() => setCount(p => ++p)} text={`Count: ${count()}`} />
           <Button onClick={() => setCount(p => ++p)} text={`Count: ${count()}`} />
         </header>
-        <br />
-        <div>{/* <Show when={showEven()}>{count()} is even!</Show> */}</div>
+        <div style={{ height: "1rem", "margin-top": "1rem" }}>
+          <Show when={showEven()}>
+            <Bold>{count()} is even!</Bold>
+          </Show>
+        </div>
         <p>Dispose application</p>
         <button onClick={() => disposeApp()}>Dispose</button>
         {/* <div>

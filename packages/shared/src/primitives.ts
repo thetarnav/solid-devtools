@@ -20,6 +20,22 @@ function createRemSize(debounceTimout = 100): Accessor<number> {
 
 export const useRemSize = /*#__PURE__*/ createSharedRoot(() => createRemSize())
 
+export function createHover(handle: (hovering: boolean) => void): {
+  onMouseEnter: VoidFunction
+  onMouseLeave: VoidFunction
+} {
+  let state = false
+  let mounted = true
+  onCleanup(() => {
+    mounted = false
+    if (state) handle((state = false))
+  })
+  return {
+    onMouseEnter: () => state || handle((state = true)),
+    onMouseLeave: () => setTimeout(() => mounted && state && handle((state = false))),
+  }
+}
+
 /**
  * Reactive array reducer — if at least one consumer (boolean signal) is enabled — the returned result will the `true`.
  *

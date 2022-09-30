@@ -42,8 +42,10 @@ export const item = style([
       [highlights.bgColorVar]: color.gray[300],
       [highlights.bgOpacityVar]: "0",
     },
-    ":hover": {
-      vars: { [highlights.bgOpacityVar]: "0.3" },
+    selectors: {
+      '&[data-hovered="true"]': {
+        vars: { [highlights.bgOpacityVar]: "0.3" },
+      },
     },
   },
 ])
