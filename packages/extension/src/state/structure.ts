@@ -1,7 +1,8 @@
-import { batch, createRoot, createSelector, createSignal, untrack } from "solid-js"
+import { batch, createMemo, createRoot, createSelector, createSignal, untrack } from "solid-js"
 import { NodeID, NodeType, RootsUpdates } from "@solid-devtools/shared/graph"
 import { createUpdatedSelector } from "./utils"
 import { reconcileStructure } from "./structure-reconcile"
+import locator from "./locator"
 
 export namespace Structure {
   export interface Node {
@@ -74,7 +75,13 @@ const structure = createRoot(() => {
 
   const [isUpdated, addUpdatedComputations, clearUpdatedComputations] = createUpdatedSelector()
 
-  const [hovered, setHovered] = createSignal<Structure.Node | null>(null)
+  const [extHovered, setHovered] = createSignal<Structure.Node | null>(null)
+  const clientHoveredComponent = createMemo(() => {
+    const id = locator.clientHoveredId()
+    return id ? findNode(id) : null
+  })
+  const hovered = () => extHovered() || clientHoveredComponent()
+
   const isHovered = createSelector(hovered, (id: NodeID, o) => !!o && o.id === id)
 
   function toggleHoveredOwner(id: NodeID, hovered: boolean): Structure.Node | null {

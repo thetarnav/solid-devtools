@@ -1,8 +1,8 @@
-import { createEffect, createRoot, on } from "solid-js"
+import { batch, createEffect, createRoot, on, untrack } from "solid-js"
 import { Messages } from "@solid-devtools/shared/bridge"
 import { NodeType } from "@solid-devtools/shared/graph"
 import { createRuntimeMessanger } from "../shared/messanger"
-import { structure, inspector, locator, Structure, updateStructure } from "@/state"
+import { structure, inspector, locator, updateStructure } from "@/state"
 
 export const { onRuntimeMessage, postRuntimeMessage } = createRuntimeMessanger()
 
@@ -14,9 +14,11 @@ if (import.meta.env.DEV) {
 onRuntimeMessage("GraphUpdate", updateStructure)
 
 onRuntimeMessage("ResetPanel", () => {
-  updateStructure(null)
-  locator.setOtherLocator(false)
-  locator.setExtLocator(false)
+  batch(() => {
+    updateStructure(null)
+    locator.setClientLocatorState(false)
+    locator.setExtLocator(false)
+  })
 })
 
 onRuntimeMessage("ComputationUpdates", updates => {
@@ -43,13 +45,18 @@ onRuntimeMessage("OwnerDetailsUpdate", details => {
 //   log("PanelVisibility", visibility)
 // })
 
+// toggle selected signals
+inspector.setOnInspectValue(payload => postRuntimeMessage("ToggleInspectedValue", payload))
+
 createRoot(() => {
-  onRuntimeMessage("AdpLocatorMode", locator.setOtherLocator)
+  onRuntimeMessage("AdpLocatorMode", locator.setClientLocatorState)
   createEffect(
     on(locator.extLocatorEnabled, state => postRuntimeMessage("ExtLocatorMode", state), {
       defer: true,
     }),
   )
+
+  onRuntimeMessage("SetHoveredOwner", ({ state, nodeId }) => locator.toggleHovered(nodeId, state))
 
   onRuntimeMessage("SendSelectedOwner", inspector.setInspectedNode)
 
@@ -66,12 +73,6 @@ createRoot(() => {
     ),
   )
 
-  let lastLocatorHovered: Structure.Node | null
-  onRuntimeMessage("SetHoveredOwner", ({ state, nodeId }) => {
-    // do not sync this state back to the adapter
-    lastLocatorHovered = structure.toggleHoveredOwner(nodeId, state)
-  })
-
   let initHighlight = true
   // toggle hovered html element
   createEffect<Messages["HighlightElement"] | undefined>(prev => {
@@ -79,35 +80,34 @@ createRoot(() => {
     const hovered = structure.hovered()
     const elId = inspector.hoveredElement()
 
-    // skip initial value
-    if (initHighlight) return (initHighlight = false) || undefined
+    return untrack(() => {
+      // skip initial value
+      if (initHighlight) return (initHighlight = false) || undefined
 
-    // handle component
-    if (hovered && hovered.type === NodeType.Component) {
-      if (
-        // if the hovered component is the same as the last one
-        (prev && typeof prev === "object" && prev.nodeId === hovered.id) ||
-        // ignore state that came from the adapter
-        hovered === lastLocatorHovered
-      )
-        return prev
+      // handle component
+      if (hovered && hovered.type === NodeType.Component) {
+        if (
+          // if the hovered component is the same as the last one
+          (prev && typeof prev === "object" && prev.nodeId === hovered.id) ||
+          // ignore state that came from the client
+          hovered.id === locator.clientHoveredId()
+        )
+          return prev
 
-      const rootId = structure.getParentRoot(hovered).id
-      const payload = { rootId, nodeId: hovered.id }
-      postRuntimeMessage("HighlightElement", payload)
-      return payload
-    }
-    // handle element
-    if (elId) {
-      // do not send the same message twice
-      if (typeof prev === "string" && prev === elId) return prev
-      postRuntimeMessage("HighlightElement", elId)
-      return elId
-    }
-    // no element or component
-    if (prev) postRuntimeMessage("HighlightElement", null)
+        const rootId = structure.getParentRoot(hovered).id
+        const payload = { rootId, nodeId: hovered.id }
+        postRuntimeMessage("HighlightElement", payload)
+        return payload
+      }
+      // handle element
+      if (elId) {
+        // do not send the same message twice
+        if (typeof prev === "string" && prev === elId) return prev
+        postRuntimeMessage("HighlightElement", elId)
+        return elId
+      }
+      // no element or component
+      if (prev) postRuntimeMessage("HighlightElement", null)
+    })
   })
-
-  // toggle selected signals
-  inspector.setOnInspectValue(payload => postRuntimeMessage("ToggleInspectedValue", payload))
 })
