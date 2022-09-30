@@ -1,5 +1,18 @@
 # @solid-devtools/debugger
 
+## 0.10.0
+
+### Minor Changes
+
+- d7b35e4: Indicate "frozen" computations — stroke out the computation nodes that do not have any sources.
+
+### Patch Changes
+
+- Updated dependencies [7794a85]
+- Updated dependencies [d7b35e4]
+- Updated dependencies [a5b60ba]
+  - @solid-devtools/shared@0.8.3
+
 ## 0.9.2
 
 ### Patch Changes

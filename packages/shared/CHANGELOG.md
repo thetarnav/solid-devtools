@@ -1,5 +1,13 @@
 # solid-devtools-shared
 
+## 0.8.3
+
+### Patch Changes
+
+- 7794a85: Selecting nodes with the structure path.
+- d7b35e4: Indicate "frozen" computations — stroke out the computation nodes that do not have any sources.
+- a5b60ba: Scrolls the structure view to the selected node if it's outside of the view. (#117)
+
 ## 0.8.2
 
 ### Patch Changes
