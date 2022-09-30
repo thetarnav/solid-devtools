@@ -2,17 +2,19 @@ import { style } from "@vanilla-extract/css"
 import { createHighlightStyles } from "@/ui/mixins"
 import { centerChild, color, rounded, spacing, theme } from "@/ui/theme"
 
+const rowHeight = spacing[3]
+
 export const container = style({
   display: "flex",
   flexWrap: "wrap",
-  fontSize: spacing[2.5],
-  lineHeight: spacing[3],
+  fontSize: theme.fontSize["2xs"],
+  lineHeight: rowHeight,
   fontFamily: theme.font.mono,
 })
 
 export const divider = style({
-  width: spacing[3],
-  height: spacing[3],
+  width: rowHeight,
+  height: rowHeight,
   marginRight: spacing[1],
   ...centerChild,
 })
@@ -27,6 +29,10 @@ const highlights = createHighlightStyles()
 export const item = style([
   highlights.container,
   {
+    height: rowHeight,
+    display: "flex",
+    alignItems: "center",
+    columnGap: spacing[1],
     marginRight: spacing[1],
     ":last-child": {
       marginRight: 0,
@@ -50,4 +56,12 @@ export const highlight = style([
   },
 ])
 
-export const notFound = style({})
+export const typeIcon = style({
+  width: spacing[2.5],
+  height: spacing[2.5],
+  color: color.gray[500],
+})
+
+export const name = style({
+  transform: "translateY(0.2px)",
+})

@@ -39,7 +39,7 @@ export const pathInner = style({
   width: "100%",
   display: "flex",
   alignItems: "center",
-  padding: `${spacing[0.5]} ${spacing[2]}`,
+  padding: `${spacing[0.5]} ${spacing[2]} calc(${spacing[0.5]} + 1px) ${spacing[2]}`,
   borderTop: `1px solid ${color.gray[200]}`,
   backgroundColor: color.gray[50],
 })

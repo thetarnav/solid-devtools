@@ -6,6 +6,27 @@ import { Badge, Highlight, Icon } from "@/ui"
 import { useStructure } from "./ctx"
 import * as styles from "./ownerNode.css"
 
+export const NodeTypeIcon: Component<{ type: NodeType; class?: string }> = props => {
+  const IconComponent: Icon.IconComponent | null = (() => {
+    switch (props.type) {
+      case NodeType.Memo:
+        return Icon.Memo
+      case NodeType.Effect:
+        return Icon.Effect
+      case NodeType.Root:
+        return Icon.Root
+      case NodeType.Render:
+        return Icon.RenderEffect
+      case NodeType.Computation:
+        return Icon.Computation
+      default:
+        return null
+    }
+  })()
+
+  return IconComponent && <IconComponent class={props.class} />
+}
+
 export const OwnerNode: Component<{
   getOwner: Accessor<Structure.Node>
 }> = ({ getOwner }) => {
@@ -25,23 +46,6 @@ export const OwnerNode: Component<{
   onCleanup(() => {
     toggleHoveredOwner(id, false)
   })
-
-  const IconComponent: Icon.IconComponent | null = (() => {
-    switch (type) {
-      case NodeType.Memo:
-        return Icon.Memo
-      case NodeType.Effect:
-        return Icon.Effect
-      case NodeType.Root:
-        return Icon.Root
-      case NodeType.Render:
-        return Icon.RenderEffect
-      case NodeType.Computation:
-        return Icon.Computation
-      default:
-        return null
-    }
-  })()
 
   return (
     <div
@@ -71,7 +75,7 @@ export const OwnerNode: Component<{
         {/* TODO: observers and sources highlighting */}
         <Highlight strong={isUpdated()} light={false} class={styles.highlight}>
           <>
-            {IconComponent && <IconComponent class={styles.typeIcon} />}
+            <NodeTypeIcon type={type} class={styles.typeIcon} />
             {type === NodeType.Render || type === NodeType.Root ? (
               <div class={styles.type}>{type === NodeType.Render ? "Render Effect" : "Root"}</div>
             ) : (
