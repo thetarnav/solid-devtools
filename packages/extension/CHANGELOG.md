@@ -1,5 +1,22 @@
 # solid-devtools-extension
 
+## 0.13.0
+
+### Minor Changes
+
+- d7b35e4: Indicate "frozen" computations — stroke out the computation nodes that do not have any sources.
+
+### Patch Changes
+
+- 7794a85: Selecting nodes with the structure path.
+- 0e06d89: Improve structure path styles. (fixes #126)
+- 3272462: Fix locator not exiting the highlighting if the extension was open. (fixes #127)
+- a5b60ba: Scrolls the structure view to the selected node if it's outside of the view. (#117)
+- Updated dependencies [7794a85]
+- Updated dependencies [d7b35e4]
+- Updated dependencies [a5b60ba]
+  - @solid-devtools/shared@0.8.3
+
 ## 0.12.1
 
 ### Patch Changes
