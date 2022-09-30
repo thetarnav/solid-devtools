@@ -1,5 +1,4 @@
 import {
-  once,
   onWindowMessage,
   postWindowMessage,
   startListeningWindowMessages,
@@ -11,14 +10,14 @@ const toVersionTuple = (version: string) =>
   version.split(".").map(Number) as [number, number, number]
 
 const extVersion = chrome.runtime.getManifest().version
-const wantedAdapterVersion = __ADAPTER_VERSION__
+const matchingClientVersion = __CLIENT_VERSION__
 
 const port = chrome.runtime.connect({ name: DEVTOOLS_CONTENT_PORT })
 
 startListeningWindowMessages()
 const { postPortMessage, onPortMessage } = createPortMessanger(port)
 
-onWindowMessage("SolidOnPage", adapterVersion => {
+onWindowMessage("SolidOnPage", clientVersion => {
   console.log(
     "🚧 %csolid-devtools%c is in early development! 🚧\nPlease report any bugs to https://github.com/thetarnav/solid-devtools/issues",
     "color: #fff; background: rgba(181, 111, 22, 0.7); padding: 1px 4px;",
@@ -26,8 +25,8 @@ onWindowMessage("SolidOnPage", adapterVersion => {
   )
 
   // warn if the matching adapter version is not the same minor version range as the actual adapter
-  const adapterTuple = toVersionTuple(adapterVersion)
-  const wantedTuple = toVersionTuple(wantedAdapterVersion)
+  const adapterTuple = toVersionTuple(clientVersion)
+  const wantedTuple = toVersionTuple(matchingClientVersion)
 
   // match only major and minor version
   for (let i = 0; i < 2; i++) {
@@ -35,8 +34,8 @@ onWindowMessage("SolidOnPage", adapterVersion => {
       warn(
         `${i === 0 ? "MAJOR" : "MINOR"} VERSION MISMATCH!
 Extension version: ${extVersion}
-Adapter version: ${adapterVersion}
-Matching adapter version: ${wantedAdapterVersion}`,
+Client version: ${clientVersion}
+Matching client version: ${matchingClientVersion}`,
       )
       break
     }
@@ -73,7 +72,7 @@ onPortMessage("ToggleInspectedValue", e => postWindowMessage("ToggleInspectedVal
 
 onPortMessage("HighlightElement", e => postWindowMessage("HighlightElement", e))
 
-onWindowMessage("AdpLocatorMode", e => postPortMessage("AdpLocatorMode", e))
+onWindowMessage("ClientLocatorMode", e => postPortMessage("ClientLocatorMode", e))
 onPortMessage("ExtLocatorMode", e => postWindowMessage("ExtLocatorMode", e))
 
 export {}

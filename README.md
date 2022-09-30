@@ -19,27 +19,22 @@ and interacting with Solid's reactivity graph.
 
 ## [The Chrome Extension](./packages/extension#readme)
 
-🚧 In very very early development. 🚧
+🚧 In early development. 🚧
 
 Chrome Developer Tools extension for debugging SolidJS applications. It allows for visualizing and interacting with Solid's reactivity graph, as well as inspecting component state and hierarchy.
 
-[**See the guide on setting started**](https://github.com/thetarnav/solid-devtools/tree/main/packages/extension#how-do-i-try-it-out)
+[**See the guide on setting started**](https://github.com/thetarnav/solid-devtools/tree/main/packages/extension#getting-started)
 
-## Main Devtools package
-
-###### `solid-devtools`
-
-The main library is re-exporting and connecting
-the rest of packages together to provide a
-common experience for users.
-It is a recommended and easy way to get started.
-
-[**See README for more information.**](./packages/main#readme)
-
-## Available Devtools
+## All devtools packages
 
 Most of the present packages are not much more then just ideas and experiments. Some in progress, and some very much in progress.
 But few of them can help you in your work already, and a man can dream, so this is what's out there waiting:
+
+### [`solid-devtools`](./packages/ext-client#readme)
+
+The main client library. It reexports the most important tools and connects the client application to the chrome extension.
+
+[**See README for more information.**](./packages/ext-client#readme)
 
 ### [Locator](./packages/locator#readme)
 
@@ -69,18 +64,6 @@ It's a cornerstone of the rest of the packages.
 A babel transform plugin for vite for transforming Solid code. For development — debugging purposes only.
 
 It can do very useful things for you: Wrap stores to let the debugger observe them. Automatically name signals, memos and stroes. It's also required by the [Locator](./packages/locator#readme) package to allow for going to the source code of the components.
-
-### [Extension Adapter](./packages/ext-adapter#readme)
-
-###### `@solid-devtools/ext-adapter`
-
-A runtime library connecting the [Debugger](./packages/debugger#readme) with [Chrome Extension](./packages/extension#readme).
-
-### [UI](./packages/ui#readme)
-
-###### `@solid-devtools/ui`
-
-A collection of UI components for visualizing and interacting with Solid's reactivity graph. Used by the [Chrome Extension](./packages/extension#readme).
 
 ## Resources
 

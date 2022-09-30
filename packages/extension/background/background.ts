@@ -74,7 +74,7 @@ chrome.runtime.onConnect.addListener(port => {
   onPortMessage("SetHoveredOwner", e => postRuntimeMessage("SetHoveredOwner", e))
   onPortMessage("SendSelectedOwner", e => postRuntimeMessage("SendSelectedOwner", e))
 
-  onPortMessage("AdpLocatorMode", e => postRuntimeMessage("AdpLocatorMode", e))
+  onPortMessage("ClientLocatorMode", e => postRuntimeMessage("ClientLocatorMode", e))
   addCleanup(onRuntimeMessage("ExtLocatorMode", e => postPortMessage("ExtLocatorMode", e)))
 
   addCleanup(

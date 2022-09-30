@@ -6,7 +6,7 @@ declare global {
       documentId: string
     }
   }
-  const __ADAPTER_VERSION__: string
+  const __CLIENT_VERSION__: string
 }
 
 declare module "solid-js" {

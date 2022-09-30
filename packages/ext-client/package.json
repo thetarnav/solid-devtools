@@ -1,7 +1,7 @@
 {
   "name": "solid-devtools",
   "version": "0.17.0",
-  "description": "Runtime helpers for hooking up SolidJS application with Solid Devtools",
+  "description": "Runtime library for hooking up SolidJS application with Solid Devtools Extension",
   "license": "MIT",
   "author": "Damian Tarnawski <gthetarnav@gmail.com>",
   "contributors": [],
@@ -16,7 +16,9 @@
   "keywords": [
     "solid",
     "devtools",
-    "reactivity"
+    "reactivity",
+    "extension",
+    "chrome"
   ],
   "private": false,
   "sideEffects": true,
@@ -71,9 +73,11 @@
   },
   "dependencies": {
     "@solid-devtools/debugger": "workspace:^0.9.2",
-    "@solid-devtools/ext-adapter": "workspace:^0.17.0",
-    "@solid-devtools/locator": "workspace:^0.16.2",
-    "@solid-devtools/transform": "workspace:^0.7.3"
+    "@solid-devtools/locator": "workspace:^0.16.3",
+    "@solid-devtools/shared": "workspace:^0.8.2",
+    "@solid-devtools/transform": "workspace:^0.7.3",
+    "@solid-primitives/utils": "^3.0.2",
+    "type-fest": "^2.19.0"
   },
   "peerDependencies": {
     "solid-js": "^1.5.5"

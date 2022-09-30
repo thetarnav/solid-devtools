@@ -1,5 +1,5 @@
 import { attachDebugger, makeCreateRootListener } from "@solid-devtools/debugger"
-import "@solid-devtools/ext-adapter"
+import "./client"
 
 makeCreateRootListener(root => attachDebugger(root))
 

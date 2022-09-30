@@ -4,41 +4,41 @@ import { log } from "./utils"
 export const LOG_MESSAGES = false
 
 export interface Messages {
-  // adapter -> content -> devtools.html
-  // the `string` payload is the ext-adapter version
+  // client -> content -> devtools.html
+  // the `string` payload is the ext-client version
   SolidOnPage: string
   // devtools -> background: number is a tab id
   DevtoolsScriptConnected: number
-  /** devtools -> adapter: user switching between Solid devtools and other panel */
+  /** devtools -> client: user switching between Solid devtools and other panel */
   PanelVisibility: boolean
-  /** devtools -> adapter: the chrome devtools got entirely closed */
+  /** devtools -> client: the chrome devtools got entirely closed */
   PanelClosed: true
   ResetPanel: {}
   GraphUpdate: RootsUpdates
   ComputationUpdates: ComputationUpdate[]
   SignalUpdates: SignalUpdate[]
-  /** adapter -> devtools: signal deep value */
+  /** client -> devtools: signal deep value */
   SignalValue: SignalUpdate
-  /** adapter -> devtools: encoded props object */
+  /** client -> devtools: encoded props object */
   PropsUpdate: Mapped.Props
-  /** devtools -> adapter: force the debugger to walk the whole tree and send it */
+  /** devtools -> client: force the debugger to walk the whole tree and send it */
   ForceUpdate: {}
-  /** devtools -> adapter: request for details of owner details opened in the side-panel */
+  /** devtools -> client: request for details of owner details opened in the side-panel */
   SetSelectedOwner: null | { rootId: NodeID; nodeId: NodeID }
-  /** adapter -> devtools: send component clicked with the locator to the extension */
+  /** client -> devtools: send component clicked with the locator to the extension */
   SendSelectedOwner: NodeID
-  /** adapter -> devtools: send updates to the owner details */
+  /** client -> devtools: send updates to the owner details */
   OwnerDetailsUpdate: Mapped.OwnerDetails
-  /** devtools -> adapter: request for signal/prop details — subscribe or unsubscribe */
+  /** devtools -> client: request for signal/prop details — subscribe or unsubscribe */
   ToggleInspectedValue: { type: "signal" | "prop"; id: NodeID; selected: boolean }
-  /** devtools -> adapter: user hovered over component/element signal in devtools panel */
+  /** devtools -> client: user hovered over component/element signal in devtools panel */
   HighlightElement: { rootId: NodeID; nodeId: NodeID } | string | null
-  /** adapter -> devtools: send hovered (by the locator) owner to the extension */
+  /** client -> devtools: send hovered (by the locator) owner to the extension */
   SetHoveredOwner: { nodeId: NodeID; state: boolean }
-  /** devtools -> adapter: user is selecting component from the page */
+  /** devtools -> client: user is selecting component from the page */
   ExtLocatorMode: boolean
-  /** adapter -> devtools */
-  AdpLocatorMode: boolean
+  /** client -> devtools */
+  ClientLocatorMode: boolean
 }
 
 export type PostMessageFn = <K extends keyof Messages>(
@@ -53,7 +53,7 @@ export type OnMessageFn = <K extends keyof Messages>(
 
 export const postWindowMessage: PostMessageFn = (id, payload?: any) => {
   LOG_MESSAGES && log("message posted:", id, payload)
-  window.postMessage({ id, payload }, "*")
+  postMessage({ id, payload }, "*")
 }
 
 const listeners: {
@@ -65,7 +65,7 @@ const listeners: {
  */
 export function startListeningWindowMessages() {
   if (typeof window === "undefined") return
-  window.addEventListener("message", event => {
+  addEventListener("message", event => {
     const id = event.data?.id as keyof Messages
     if (typeof id !== "string") return
     listeners[id]?.forEach(f => f(event.data.payload as never))

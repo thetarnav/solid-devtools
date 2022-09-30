@@ -49,7 +49,7 @@ onRuntimeMessage("OwnerDetailsUpdate", details => {
 inspector.setOnInspectValue(payload => postRuntimeMessage("ToggleInspectedValue", payload))
 
 createRoot(() => {
-  onRuntimeMessage("AdpLocatorMode", locator.setClientLocatorState)
+  onRuntimeMessage("ClientLocatorMode", locator.setClientLocatorState)
   createEffect(
     on(locator.extLocatorEnabled, state => postRuntimeMessage("ExtLocatorMode", state), {
       defer: true,

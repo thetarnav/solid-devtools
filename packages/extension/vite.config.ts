@@ -18,8 +18,8 @@ export default defineConfig({
   },
   define: {
     // need to insert the "" quotes manually, because vite just inserts the value as-is.
-    __ADAPTER_VERSION__: `"${
-      pkg.devDependencies["@solid-devtools/ext-adapter"].match(/\d+.\d+.\d+/)![0]
+    __CLIENT_VERSION__: `"${
+      pkg.devDependencies["@solid-devtools/ext-client"].match(/\d+.\d+.\d+/)![0]
     }"`,
   },
   build: {

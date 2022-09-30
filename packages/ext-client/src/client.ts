@@ -96,7 +96,7 @@ createInternalRoot(() => {
     Locator.addLocatorModeSource(extLocatorEnabled)
     onCleanup(onWindowMessage("ExtLocatorMode", setExtLocatorEnabled))
     createEffect(
-      on(Locator.locatorModeEnabled, state => postWindowMessage("AdpLocatorMode", state), {
+      on(Locator.locatorModeEnabled, state => postWindowMessage("ClientLocatorMode", state), {
         defer: true,
       }),
     )

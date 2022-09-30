@@ -9,7 +9,7 @@
 [![version](https://img.shields.io/chrome-web-store/v/kmcfjchnmmaeeagadbhoofajiopoceel?label=version&style=for-the-badge)](https://chrome.google.com/webstore/detail/solid-devtools/kmcfjchnmmaeeagadbhoofajiopoceel)
 [![users](https://img.shields.io/chrome-web-store/users/kmcfjchnmmaeeagadbhoofajiopoceel?label=users&style=for-the-badge)](https://chrome.google.com/webstore/detail/solid-devtools/kmcfjchnmmaeeagadbhoofajiopoceel)
 
-🚧 In very early development. 🚧
+🚧 In early development. 🚧
 
 Chrome devtools extension for debugging Solid applications.
 It allows for visualizing and interacting with Solid's reactivity graph, as well as inspecting component state and hierarchy.
@@ -18,7 +18,7 @@ Should work in any application using SolidJS, including SolidStart and Astro.
 
 ![screenshot](https://user-images.githubusercontent.com/24491503/186668195-e8de08a6-b381-453a-9fde-683a9b571b89.png)
 
-## How do I try it out?
+## Getting started
 
 ### 1. Install the extension
 
@@ -28,7 +28,7 @@ The extension is now available on the Chrome Web Store. You can install it when 
 
 ### 2. Install the npm library
 
-If you think about the Chrome Extension as a **Frontend**, then the [**"solid-devtools"**](<(https://github.com/thetarnav/solid-devtools/blob/main/packages/main#readme)>) package is its **Backend**. It debugs the Solid's reactivity and communicates the updates to the Chrome Extension.
+If you think about the Chrome Extension as a **Frontend**, then the [**"solid-devtools"**](<(https://github.com/thetarnav/solid-devtools/blob/main/packages/ext-client#readme)>) package is its **Backend**. It debugs the Solid's reactivity and communicates the updates to the Chrome Extension.
 
 Install the following package:
 
@@ -71,17 +71,16 @@ The vite plugin is not necessary for the devtools to work, but enabling some of 
 // vite.config.ts
 
 import { defineConfig } from "vite"
-import solidPlugin from "vite-plugin-solid"
-// "@solid-devtools/transform" will already be available if you installed "solid-devtools"
-import devtoolsPlugin from "@solid-devtools/transform"
+import solid from "vite-plugin-solid"
+import devtools from "solid-devtools/vite"
 
 export default defineConfig({
   plugins: [
-    devtoolsPlugin({
+    devtools({
       // Will automatically add names when creating signals, memos, stores, or mutables
       name: true,
     }),
-    solidPlugin(),
+    solid(),
   ],
 })
 ```
