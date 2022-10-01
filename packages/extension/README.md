@@ -16,7 +16,7 @@ It allows for visualizing and interacting with Solid's reactivity graph, as well
 
 Should work in any application using SolidJS, including SolidStart and Astro.
 
-![screenshot](https://user-images.githubusercontent.com/24491503/186668195-e8de08a6-b381-453a-9fde-683a9b571b89.png)
+![screenshot](https://user-images.githubusercontent.com/24491503/193428963-f19d4da7-940d-4c8b-8aa8-88af3e705cc1.png)
 
 ## Getting started
 
