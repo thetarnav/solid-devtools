@@ -63,7 +63,7 @@ const Options: Component<{}> = props => {
                         href="https://github.com/thetarnav/solid-devtools/issues"
                         target="_blank"
                       >
-                        Report bug
+                        Report a bug
                       </MenuItem>
                     </Menu>
                   </PopoverPanel>

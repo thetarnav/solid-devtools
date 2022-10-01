@@ -28,11 +28,14 @@ createInternalRoot(() => {
     handleComputationUpdates,
     handleSignalUpdates,
     handlePropsUpdate,
+    handleValueUpdate,
     handleStructureUpdates,
     setInspectedOwner,
-    inspected,
+    inspectedDetails,
+    getElementById,
     setInspectedSignal,
     setInspectedProp,
+    setInspectedValue,
   } = useDebugger({ enabled })
 
   // update the graph only if the devtools panel is in view
@@ -58,16 +61,16 @@ createInternalRoot(() => {
 
     onCleanup(
       onWindowMessage("ToggleInspectedValue", payload => {
-        // toggled signal
         if (payload.type === "signal") {
           const { id, selected } = payload
           const value = setInspectedSignal(id, selected)
-          if (value) postWindowMessage("SignalValue", { id, value })
-        }
-        // toggled prop
-        else {
+          if (value) postWindowMessage("SignalUpdates", { signals: [{ id, value }], update: false })
+        } else if (payload.type === "prop") {
           const { id, selected } = payload
           setInspectedProp(id, selected)
+        } else {
+          const value = setInspectedValue(payload.selected)
+          if (value) postWindowMessage("ValueUpdate", { value, update: false })
         }
       }),
     )
@@ -79,14 +82,19 @@ createInternalRoot(() => {
     handleComputationUpdates(updates => postWindowMessage("ComputationUpdates", updates))
 
     // send the signal updates
-    handleSignalUpdates(updates => postWindowMessage("SignalUpdates", updates))
+    handleSignalUpdates(updates => {
+      postWindowMessage("SignalUpdates", { signals: updates, update: true })
+    })
 
     // send the props updates
     handlePropsUpdate(updates => postWindowMessage("PropsUpdate", updates))
 
+    // send the node value updates
+    handleValueUpdate(value => postWindowMessage("ValueUpdate", { value, update: true }))
+
     // send the focused owner details
     createEffect(() => {
-      const details = inspected.details
+      const details = inspectedDetails()
       if (details) postWindowMessage("OwnerDetailsUpdate", details)
     })
 
@@ -142,7 +150,7 @@ createInternalRoot(() => {
         }
         // highlight element
         else {
-          const element = inspected.elementMap.get(payload)
+          const element = getElementById(payload)
           if (!element) return warn("No element found", payload)
           target = element
         }

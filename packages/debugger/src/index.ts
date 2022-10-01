@@ -2,7 +2,7 @@ import { ParentComponent } from "solid-js"
 import { attachDebugger } from "./roots"
 
 export { useDebugger } from "./plugin"
-export type { InspectedState, BatchComputationUpdatesHandler, PluginData } from "./plugin"
+export type { BatchComputationUpdatesHandler, PluginData } from "./plugin"
 
 export { attachDebugger } from "./roots"
 

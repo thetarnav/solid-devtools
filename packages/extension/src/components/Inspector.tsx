@@ -6,7 +6,7 @@ import inspector, { Inspector } from "../state/inspector"
 import * as styles from "./inspector.css"
 
 const DetailsContent: Component<{ details: Inspector.Details }> = ({ details }) => {
-  const { name, id, type, signals, props: componentProps } = details
+  const { name, id, type, signals, props: componentProps, value: nodeValue } = details
   return (
     <div class={styles.root}>
       <header class={styles.header}>
@@ -25,7 +25,7 @@ const DetailsContent: Component<{ details: Inspector.Details }> = ({ details }) 
                   name={name}
                   value={value().value}
                   selected={value().selected}
-                  onClick={() => inspector.togglePropFocus(name)}
+                  onClick={() => inspector.togglePropSelection(name)}
                   onElementHover={inspector.toggleHoveredElement}
                 />
               )}
@@ -37,13 +37,25 @@ const DetailsContent: Component<{ details: Inspector.Details }> = ({ details }) 
           <SignalContextProvider
             value={{
               isUpdated: inspector.isUpdated,
-              toggleSignalFocus: inspector.toggleSignalFocus,
+              toggleSignalFocus: inspector.toggleSignalSelection,
               toggleHoveredElement: inspector.toggleHoveredElement,
             }}
           >
             <Signals each={Object.values(signals)} />
           </SignalContextProvider>
         </div>
+        {nodeValue && (
+          <div>
+            <ValueNode
+              name="Value"
+              nameIsTitle
+              value={nodeValue}
+              selected={details.valueSelected}
+              onClick={() => inspector.toggleValueSelection()}
+              onElementHover={inspector.toggleHoveredElement}
+            />
+          </div>
+        )}
       </div>
     </div>
   )

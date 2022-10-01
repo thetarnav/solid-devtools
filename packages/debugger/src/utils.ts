@@ -72,6 +72,15 @@ export const getOwnerType = (o: Readonly<Solid.Owner>): NodeType => {
   return NodeType.Computation
 }
 
+export function getComponentRefreshNode(owner: Readonly<Solid.Component>): Solid.Memo | null {
+  const { owned } = owner
+  let refresh: Solid.Owner
+  if (owned && owned.length === 1 && markOwnerType((refresh = owned[0])) === NodeType.Refresh) {
+    return refresh as Solid.Memo
+  }
+  return null
+}
+
 /**
  * helper to getting to an owner that you want — walking downwards
  */

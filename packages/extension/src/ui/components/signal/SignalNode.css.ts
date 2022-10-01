@@ -1,6 +1,6 @@
-import { style } from "@vanilla-extract/css"
+import { style, styleVariants } from "@vanilla-extract/css"
 import { CSSPropertiesWithVars } from "@vanilla-extract/css/dist/declarations/src/types"
-import { centerChild, color, spacing, theme } from "@/ui/theme"
+import { color, spacing, theme } from "@/ui/theme"
 import { createHighlightStyles } from "@/ui/mixins"
 
 const RowHeight = spacing[4.5]
@@ -31,7 +31,6 @@ export const ValueRow = {
       },
       fontFamily: theme.font.mono,
       color: color.gray[800],
-      fontWeight: 600,
     },
   ]),
   containerFocused: style({
@@ -50,17 +49,24 @@ export const ValueRow = {
   ]),
 }
 
+const ValueName_container_base = style({
+  display: "flex",
+  alignItems: "center",
+  height: RowHeight,
+})
+const ValueName_name_base = style({
+  height: RowHeight,
+  minWidth: "5ch",
+  marginRight: "2ch",
+  ":after": {
+    content: ":",
+    color: color.disabled,
+  },
+})
 export const ValueName = {
-  container: style({
-    display: "flex",
-    alignItems: "center",
-    height: RowHeight,
-  }),
-  iconWrapper: style({
-    height: RowHeight,
-    width: RowHeight,
-    marginRight: spacing[1],
-    ...centerChild,
+  container: styleVariants({
+    base: [ValueName_container_base, { paddingLeft: spacing[2] }],
+    title: [ValueName_container_base],
   }),
   signalDot: style({
     width: spacing[1],
@@ -69,20 +75,27 @@ export const ValueName = {
     backgroundColor: color.amber[400],
   }),
   icon: style({
-    height: spacing[4],
-    width: spacing[4],
+    height: spacing[3],
+    width: spacing[3],
+    color: color.gray[600],
+    marginRight: spacing[1],
   }),
-  name: style({
-    height: RowHeight,
-    minWidth: "5ch",
-    marginRight: "2ch",
-    color: color.gray[800],
-    fontWeight: 600,
-    fontFamily: theme.font.mono,
-    ":after": {
-      content: ":",
-      color: color.disabled,
-    },
+  name: styleVariants({
+    base: [
+      ValueName_name_base,
+      {
+        color: color.gray[800],
+        fontWeight: 600,
+        fontFamily: theme.font.mono,
+      },
+    ],
+    title: [
+      ValueName_name_base,
+      {
+        color: color.gray[500],
+        fontSize: theme.fontSize.xs,
+      },
+    ],
   }),
   highlight: style({
     display: "inline-block",
@@ -90,6 +103,7 @@ export const ValueName = {
 }
 
 export const baseValue = style({
+  fontWeight: 600,
   height: RowHeight,
 })
 
@@ -101,7 +115,7 @@ export const ValueObject = style({
   color: color.disabled,
   ":before": {
     ...bracketsStyles,
-    content: `{`,
+    content: "{",
   },
   ":after": {
     ...bracketsStyles,
@@ -119,14 +133,20 @@ export const collapsable = {
   }),
 }
 
-export const ValueString = style({
-  minHeight: RowHeight,
-  color: color.green,
-})
-export const ValueNumber = style({
-  minHeight: RowHeight,
-  color: color.cyan[600],
-})
+export const ValueString = style([
+  baseValue,
+  {
+    minHeight: RowHeight,
+    color: color.green,
+  },
+])
+export const ValueNumber = style([
+  baseValue,
+  {
+    minHeight: RowHeight,
+    color: color.cyan[600],
+  },
+])
 export const ValueBoolean = style([
   baseValue,
   {

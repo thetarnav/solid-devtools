@@ -1,4 +1,5 @@
-import { ComputationUpdate, Mapped, NodeID, RootsUpdates, SignalUpdate } from "./graph"
+import { ComputationUpdate, Mapped, NodeID, RootsUpdates } from "./graph"
+import { EncodedValue } from "./serialize"
 import { log } from "./utils"
 
 export const LOG_MESSAGES = false
@@ -16,11 +17,12 @@ export interface Messages {
   ResetPanel: {}
   GraphUpdate: RootsUpdates
   ComputationUpdates: ComputationUpdate[]
-  SignalUpdates: SignalUpdate[]
   /** client -> devtools: signal deep value */
-  SignalValue: SignalUpdate
+  SignalUpdates: { signals: { id: NodeID; value: EncodedValue<boolean> }[]; update: boolean }
   /** client -> devtools: encoded props object */
   PropsUpdate: Mapped.Props
+  /** client -> devtools: inspected node value update */
+  ValueUpdate: { value: EncodedValue<boolean>; update: boolean }
   /** devtools -> client: force the debugger to walk the whole tree and send it */
   ForceUpdate: {}
   /** devtools -> client: request for details of owner details opened in the side-panel */
@@ -30,7 +32,9 @@ export interface Messages {
   /** client -> devtools: send updates to the owner details */
   OwnerDetailsUpdate: Mapped.OwnerDetails
   /** devtools -> client: request for signal/prop details — subscribe or unsubscribe */
-  ToggleInspectedValue: { type: "signal" | "prop"; id: NodeID; selected: boolean }
+  ToggleInspectedValue:
+    | { type: "signal" | "prop"; id: NodeID; selected: boolean }
+    | { type: "value"; selected: boolean }
   /** devtools -> client: user hovered over component/element signal in devtools panel */
   HighlightElement: { rootId: NodeID; nodeId: NodeID } | string | null
   /** client -> devtools: send hovered (by the locator) owner to the extension */

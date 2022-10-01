@@ -1,4 +1,4 @@
-import { describe, beforeEach, jest, it, test, expect } from "@jest/globals"
+import { describe, beforeEach, jest, it, expect } from "@jest/globals"
 import { getOwner, NodeType, Solid } from "@solid-devtools/shared/graph"
 import { ValueType } from "@solid-devtools/shared/serialize"
 import {
@@ -14,9 +14,6 @@ import type * as API from "../src/inspect"
 const getModule = (): typeof API.collectOwnerDetails =>
   require("../src/inspect").collectOwnerDetails
 
-const getElementsMap = (): import("@solid-devtools/shared/serialize").ElementMap =>
-  new (require("@solid-devtools/shared/serialize").ElementMap)()
-
 describe("collectOwnerDetails", () => {
   beforeEach(() => {
     delete (window as any).Solid$$
@@ -30,7 +27,6 @@ describe("collectOwnerDetails", () => {
 
       let owner!: Solid.Owner
       const div = document.createElement("div")
-      const elementMap = getElementsMap()
 
       createComputed(
         () => {
@@ -53,10 +49,9 @@ describe("collectOwnerDetails", () => {
         { name: "WRAPPER" },
       )
 
-      const { details, signalMap } = collectOwnerDetails(owner, {
-        elementMap,
-        inspectedProps: new Set(),
-        signalUpdateHandler: () => {},
+      const { details, signalMap, elementMap } = collectOwnerDetails(owner, {
+        onSignalUpdate: () => {},
+        onValueUpdate: () => {},
       })
 
       expect(details).toEqual({
@@ -98,8 +93,6 @@ describe("collectOwnerDetails", () => {
     const collectOwnerDetails = getModule()
 
     createRoot(dispose => {
-      let elementMap = getElementsMap()
-
       let owner!: Solid.Owner
       const TestComponent = (props: {
         count: number
@@ -115,10 +108,9 @@ describe("collectOwnerDetails", () => {
         </TestComponent>
       ))
 
-      const { details } = collectOwnerDetails(owner, {
-        elementMap,
-        inspectedProps: new Set(),
-        signalUpdateHandler: () => {},
+      const { details, elementMap } = collectOwnerDetails(owner, {
+        onSignalUpdate: () => {},
+        onValueUpdate: () => {},
       })
 
       dispose()
@@ -147,7 +139,6 @@ describe("collectOwnerDetails", () => {
   it("dynamic component props", () =>
     createRoot(dispose => {
       const collectOwnerDetails = getModule()
-      let elementMap = getElementsMap()
 
       let owner!: Solid.Owner
       const Button = (props: JSX.ButtonHTMLAttributes<HTMLButtonElement>) => {
@@ -159,10 +150,9 @@ describe("collectOwnerDetails", () => {
         return <Button {...props()} />
       })
 
-      const { details } = collectOwnerDetails(owner, {
-        elementMap,
-        inspectedProps: new Set(),
-        signalUpdateHandler: () => {},
+      const { details, elementMap } = collectOwnerDetails(owner, {
+        onSignalUpdate: () => {},
+        onValueUpdate: () => {},
       })
 
       expect(details).toEqual({
@@ -187,60 +177,60 @@ describe("collectOwnerDetails", () => {
       dispose()
     }))
 
-  test("inspected component props", () => {
-    const collectOwnerDetails = getModule()
+  // * collectOwnerDetails doesn't allow for inspected props now
+  // test("inspected component props", () => {
+  //   const collectOwnerDetails = getModule()
 
-    createRoot(dispose => {
-      let elementMap = getElementsMap()
+  //   createRoot(dispose => {
 
-      let owner!: Solid.Owner
-      const TestComponent = (props: {
-        count: number
-        children: JSX.Element
-        nested: { foo: number; bar: string }
-      }) => {
-        owner = getOwner()!
-        return <div>{props.children}</div>
-      }
-      createRenderEffect(() => (
-        <TestComponent count={123} nested={{ foo: 1, bar: "2" }}>
-          <button>Click me</button>
-        </TestComponent>
-      ))
+  //     let owner!: Solid.Owner
+  //     const TestComponent = (props: {
+  //       count: number
+  //       children: JSX.Element
+  //       nested: { foo: number; bar: string }
+  //     }) => {
+  //       owner = getOwner()!
+  //       return <div>{props.children}</div>
+  //     }
+  //     createRenderEffect(() => (
+  //       <TestComponent count={123} nested={{ foo: 1, bar: "2" }}>
+  //         <button>Click me</button>
+  //       </TestComponent>
+  //     ))
 
-      const { details } = collectOwnerDetails(owner, {
-        elementMap,
-        inspectedProps: new Set(["nested"]),
-        signalUpdateHandler: () => {},
-      })
+  //     const { details, elementMap } = collectOwnerDetails(owner, {
+  //       elementMap,
+  //       inspectedProps: new Set(["nested"]),
+  //       onSignalUpdate: () => {},
+  //     })
 
-      dispose()
+  //     dispose()
 
-      expect(details).toEqual({
-        id: "0",
-        name: "TestComponent",
-        type: NodeType.Component,
-        signals: [],
-        sources: [],
-        value: { type: ValueType.Element, value: { id: "0", name: "DIV" } },
-        props: {
-          proxy: false,
-          record: {
-            count: { type: ValueType.Number, value: 123 },
-            children: { type: ValueType.Getter, value: "children" },
-            nested: {
-              type: ValueType.Object,
-              value: 2,
-              children: {
-                foo: { type: ValueType.Number, value: 1 },
-                bar: { type: ValueType.String, value: "2" },
-              },
-            },
-          },
-        },
-      })
+  //     expect(details).toEqual({
+  //       id: "0",
+  //       name: "TestComponent",
+  //       type: NodeType.Component,
+  //       signals: [],
+  //       sources: [],
+  //       value: { type: ValueType.Element, value: { id: "0", name: "DIV" } },
+  //       props: {
+  //         proxy: false,
+  //         record: {
+  //           count: { type: ValueType.Number, value: 123 },
+  //           children: { type: ValueType.Getter, value: "children" },
+  //           nested: {
+  //             type: ValueType.Object,
+  //             value: 2,
+  //             children: {
+  //               foo: { type: ValueType.Number, value: 1 },
+  //               bar: { type: ValueType.String, value: "2" },
+  //             },
+  //           },
+  //         },
+  //       },
+  //     })
 
-      expect(elementMap.get("0")).toBeInstanceOf(HTMLDivElement)
-    })
-  })
+  //     expect(elementMap.get("0")).toBeInstanceOf(HTMLDivElement)
+  //   })
+  // })
 })

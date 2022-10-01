@@ -13,7 +13,7 @@ export default defineConfig({
       // jsxLocation: true,
       name: true,
     }),
-    solidPlugin(),
+    solidPlugin({}),
   ],
   resolve: {
     alias: {

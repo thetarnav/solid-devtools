@@ -1,8 +1,9 @@
 import { Mapped, NodeID, Solid, NodeType } from "@solid-devtools/shared/graph"
-import { ElementMap, encodeValue, ValueType } from "@solid-devtools/shared/serialize"
+import { ElementMap, EncodedValue, encodeValue, ValueType } from "@solid-devtools/shared/serialize"
 import { $PROXY } from "solid-js"
 import { observeValueUpdate, removeValueUpdateObserver } from "./update"
 import {
+  getComponentRefreshNode,
   getNodeName,
   getNodeType,
   isSolidComponent,
@@ -15,6 +16,7 @@ import {
 } from "./utils"
 
 export type SignalUpdateHandler = (nodeId: NodeID, value: unknown) => void
+export type ValueUpdateHandler = (value: unknown) => void
 
 // Globals set before collecting the owner details
 let $elementMap!: ElementMap
@@ -36,6 +38,9 @@ function mapSignalNode(node: Solid.Signal, handler: SignalUpdateHandler): Mapped
 }
 
 export function clearOwnerObservers(owner: Solid.Owner): void {
+  if (isSolidComputation(owner)) {
+    removeValueUpdateObserver(owner, INSPECTOR)
+  }
   if (owner.sourceMap) {
     for (const node of Object.values(owner.sourceMap)) removeValueUpdateObserver(node, INSPECTOR)
   }
@@ -46,7 +51,7 @@ export function clearOwnerObservers(owner: Solid.Owner): void {
 
 export function encodeComponentProps(
   owner: Solid.Owner,
-  config: { inspectedProps: Set<string>; elementMap: ElementMap },
+  config: { inspectedProps?: Set<string>; elementMap: ElementMap },
 ): Mapped.Props | null {
   if (!isSolidComponent(owner)) return null
   const { elementMap, inspectedProps } = config
@@ -57,7 +62,11 @@ export function encodeComponentProps(
       record[key] =
         "get" in descriptor
           ? { type: ValueType.Getter, value: key }
-          : encodeValue(descriptor.value, inspectedProps.has(key), elementMap)
+          : encodeValue(
+              descriptor.value,
+              inspectedProps ? inspectedProps.has(key) : false,
+              elementMap,
+            )
       return record
     },
     {} as Mapped.Props["record"],
@@ -65,30 +74,42 @@ export function encodeComponentProps(
   return { proxy, record }
 }
 
+export function encodeOwnerValue(
+  owner: Solid.Owner,
+  deep: boolean,
+  elementMap: ElementMap,
+): EncodedValue<boolean> {
+  let refresh: Solid.Memo | null
+  if (isSolidComponent(owner) && (refresh = getComponentRefreshNode(owner))) {
+    owner = refresh
+  }
+  return encodeValue(owner.value, deep, elementMap)
+}
+
 export function collectOwnerDetails(
   owner: Solid.Owner,
   config: {
-    inspectedProps: Set<string>
-    elementMap: ElementMap
-    signalUpdateHandler: SignalUpdateHandler
+    onSignalUpdate: SignalUpdateHandler
+    onValueUpdate: ValueUpdateHandler
   },
 ): {
   details: Mapped.OwnerDetails
   signalMap: Record<NodeID, Solid.Signal>
+  elementMap: ElementMap
 } {
-  const { elementMap, signalUpdateHandler, inspectedProps } = config
-  const signalMap: Record<NodeID, Solid.Signal> = {}
+  const { onSignalUpdate, onValueUpdate } = config
 
   // Set globals
-  $elementMap = elementMap
-  $signalMap = signalMap
+  $elementMap = new ElementMap()
+  $signalMap = {}
 
-  let { sourceMap, owned } = owner
-  let refresh: Solid.Owner | undefined
-  if (owned && owned.length === 1 && markOwnerType((refresh = owned[0])) === NodeType.Refresh) {
-    // if omitting refresh node — map it's sourceMap and owned instead
+  let { sourceMap, owned, value } = owner
+  // marge component with refresh memo
+  let refresh: Solid.Memo | null
+  if (isSolidComponent(owner) && (refresh = getComponentRefreshNode(owner))) {
     sourceMap = refresh.sourceMap
     owned = refresh.owned
+    value = refresh.value
   }
 
   // map signals
@@ -97,14 +118,14 @@ export function collectOwnerDetails(
     const signalNodes = Object.values(sourceMap)
     signals = Array(signalNodes.length)
     for (let i = 0; i < signalNodes.length; i++) {
-      signals[i] = mapSignalNode(signalNodes[i], signalUpdateHandler)
+      signals[i] = mapSignalNode(signalNodes[i], onSignalUpdate)
     }
   } else signals = []
 
   // map memos
   if (owned) {
     for (const node of owned) {
-      if (isSolidMemo(node)) signals.push(mapSignalNode(node, signalUpdateHandler))
+      if (isSolidMemo(node)) signals.push(mapSignalNode(node, onSignalUpdate))
     }
   }
 
@@ -116,15 +137,16 @@ export function collectOwnerDetails(
   }
 
   if (isSolidComputation(owner)) {
-    details.value = encodeValue(owner.value, false, elementMap)
+    details.value = encodeValue(value, false, $elementMap)
+    observeValueUpdate(owner, onValueUpdate, INSPECTOR)
     details.sources = markNodesID(owner.sources)
     if (isSolidMemo(owner)) {
       details.observers = markNodesID(owner.observers)
     }
     // map component props
-    const props = encodeComponentProps(owner, { inspectedProps, elementMap })
+    const props = encodeComponentProps(owner, { elementMap: $elementMap })
     if (props) details.props = props
   }
 
-  return { details, signalMap }
+  return { details, signalMap: $signalMap, elementMap: $elementMap }
 }

@@ -51,11 +51,12 @@ onWindowMessage("GraphUpdate", graph => postPortMessage("GraphUpdate", graph))
 onWindowMessage("ComputationUpdates", e => postPortMessage("ComputationUpdates", e))
 
 onWindowMessage("SignalUpdates", e => postPortMessage("SignalUpdates", e))
-onWindowMessage("SignalValue", e => postPortMessage("SignalValue", e))
 
 onWindowMessage("OwnerDetailsUpdate", e => postPortMessage("OwnerDetailsUpdate", e))
 
 onWindowMessage("PropsUpdate", e => postPortMessage("PropsUpdate", e))
+
+onWindowMessage("ValueUpdate", e => postPortMessage("ValueUpdate", e))
 
 onWindowMessage("SetHoveredOwner", e => postPortMessage("SetHoveredOwner", e))
 

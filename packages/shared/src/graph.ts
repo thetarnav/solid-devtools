@@ -118,11 +118,6 @@ export type RootsUpdates = {
   updated: Record<NodeID, Mapped.Root>
 }
 
-export type SignalUpdate = {
-  id: NodeID
-  value: EncodedValue<boolean>
-}
-
 export type ValueUpdateListener = (newValue: unknown, oldValue: unknown) => void
 
 //

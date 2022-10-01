@@ -25,15 +25,19 @@ onRuntimeMessage("ComputationUpdates", updates => {
   structure.addUpdatedComputations(updates.map(u => u.id))
 })
 
-onRuntimeMessage("SignalUpdates", inspector.handleSignalUpdates)
-onRuntimeMessage("SignalValue", update => {
-  // updates the signal value but without causing it to highlight
-  inspector.handleSignalUpdates([update], false)
-})
-onRuntimeMessage("PropsUpdate", inspector.handlePropsUpdate)
-
 onRuntimeMessage("OwnerDetailsUpdate", details => {
   inspector.updateDetails(details)
+})
+
+// toggle selected signals
+inspector.setOnInspectValue(payload => postRuntimeMessage("ToggleInspectedValue", payload))
+
+onRuntimeMessage("SignalUpdates", ({ signals, update }) => {
+  inspector.handleSignalUpdates(signals, update)
+})
+onRuntimeMessage("PropsUpdate", inspector.handlePropsUpdate)
+onRuntimeMessage("ValueUpdate", ({ value, update }) => {
+  inspector.handleValueUpdate(value, update)
 })
 
 // let visibility = false
@@ -44,9 +48,6 @@ onRuntimeMessage("OwnerDetailsUpdate", details => {
 //   }
 //   log("PanelVisibility", visibility)
 // })
-
-// toggle selected signals
-inspector.setOnInspectValue(payload => postRuntimeMessage("ToggleInspectedValue", payload))
 
 createRoot(() => {
   onRuntimeMessage("ClientLocatorMode", locator.setClientLocatorState)

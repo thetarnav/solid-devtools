@@ -3,7 +3,6 @@ import { CSSVarFunction } from "@vanilla-extract/private"
 import {
   centerChild,
   color,
-  hexToRgbValue,
   inset,
   insetX,
   insetY,

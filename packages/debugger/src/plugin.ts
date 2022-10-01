@@ -1,6 +1,5 @@
-import { Accessor, createEffect, createSignal } from "solid-js"
+import { Accessor, createEffect, createSignal, untrack } from "solid-js"
 import { createSimpleEmitter, Listen } from "@solid-primitives/event-bus"
-import { createStaticStore } from "@solid-primitives/utils"
 import { throttle } from "@solid-primitives/scheduled"
 import {
   Mapped,
@@ -8,7 +7,6 @@ import {
   RootsUpdates,
   NodeID,
   ComputationUpdate,
-  SignalUpdate,
 } from "@solid-devtools/shared/graph"
 import { EncodedValue, encodeValue, ElementMap } from "@solid-devtools/shared/serialize"
 import { createConsumers, untrackedCallback } from "@solid-devtools/shared/primitives"
@@ -19,7 +17,9 @@ import {
   clearOwnerObservers,
   collectOwnerDetails,
   encodeComponentProps,
+  encodeOwnerValue,
   SignalUpdateHandler,
+  ValueUpdateHandler,
 } from "./inspect"
 import { makeSolidUpdateListener } from "./update"
 
@@ -39,41 +39,26 @@ DETAILS:
 - component props
 */
 
-export type InspectedState = Readonly<
-  {
-    signalMap: Record<NodeID, Solid.Signal>
-    elementMap: ElementMap
-  } & (
-    | { id: null; rootId: null; owner: null; details: null }
-    | { id: NodeID; rootId: NodeID; owner: Solid.Owner; details: Mapped.OwnerDetails }
-  )
->
-
-const getNullInspected = (): InspectedState => ({
-  id: null,
-  rootId: null,
-  owner: null,
-  details: null,
-  signalMap: {},
-  elementMap: new ElementMap(),
-})
-
 export type BatchComputationUpdatesHandler = (payload: ComputationUpdate[]) => void
-export type BatchSignalUpdatesHandler = (payload: SignalUpdate[]) => void
 
 export type PluginData = {
   readonly triggerUpdate: VoidFunction
   readonly forceTriggerUpdate: VoidFunction
   readonly handleComputationUpdates: (listener: BatchComputationUpdatesHandler) => VoidFunction
-  readonly handleSignalUpdates: (listener: BatchSignalUpdatesHandler) => VoidFunction
+  readonly handleSignalUpdates: (
+    listener: (payload: { id: NodeID; value: EncodedValue<boolean> }[]) => void,
+  ) => VoidFunction
   readonly handlePropsUpdate: Listen<Mapped.Props>
+  readonly handleValueUpdate: Listen<EncodedValue<boolean>>
   readonly handleStructureUpdates: Listen<RootsUpdates>
   readonly components: Accessor<Record<NodeID, Mapped.ResolvedComponent[]>>
   readonly findComponent: (rootId: NodeID, nodeId: NodeID) => Mapped.ResolvedComponent | undefined
+  readonly inspectedDetails: Accessor<Mapped.OwnerDetails | null>
   readonly setInspectedOwner: (payload: { rootId: NodeID; nodeId: NodeID } | null) => void
-  readonly inspected: InspectedState
+  readonly getElementById: (id: NodeID) => HTMLElement | undefined
   readonly setInspectedSignal: (id: NodeID, selected: boolean) => EncodedValue<boolean> | null
   readonly setInspectedProp: (key: NodeID, selected: boolean) => void
+  readonly setInspectedValue: (selected: boolean) => EncodedValue<boolean> | null
 }
 
 type RootUpdate = { removed: NodeID } | { updated: Mapped.Root }
@@ -146,91 +131,102 @@ const exported = createInternalRoot(() => {
   //
   // Inspected Owner details:
   //
-  // TODO: this has no real business being a store
-  const [inspected, setInspected] = createStaticStore(getNullInspected())
-  let lastInspectedOwner: Solid.Owner | null = null
+  const inspected = {
+    elementMap: new ElementMap(),
+    signalMap: {} as Record<NodeID, Solid.Signal>,
+    owner: null as Solid.Owner | null,
+    signals: new Set<NodeID>(),
+    props: new Set<string>(),
+    value: false,
+  }
 
-  const inspectedSignals: Set<NodeID> = new Set()
-  const inspectedProps: Set<string> = new Set()
+  const [details, setDetails] = createSignal<Mapped.OwnerDetails | null>(null)
 
-  const [handleSignalUpdates, pushSignalUpdate] = createBatchedUpdateEmitter<SignalUpdate>()
-  const signalUpdateHandler: SignalUpdateHandler = untrackedCallback((id, value) => {
-    if (!enabled() || !inspected.id) return
-    const isSelected = inspectedSignals.has(id)
+  const getElementById = (id: NodeID): HTMLElement | undefined => inspected.elementMap.get(id)
+
+  const [handleSignalUpdates, pushSignalUpdate] = createBatchedUpdateEmitter<{
+    id: NodeID
+    value: EncodedValue<boolean>
+  }>()
+  const onSignalUpdate: SignalUpdateHandler = untrackedCallback((id, value) => {
+    if (!enabled() || !inspected.owner) return
+    const isSelected = inspected.signals.has(id)
     pushSignalUpdate({ id, value: encodeValue(value, isSelected, inspected.elementMap) })
   })
 
+  const [handleValueUpdate, emitValueUpdate] = createSimpleEmitter<EncodedValue<boolean>>()
+  const onValueUpdate: ValueUpdateHandler = throttle(value => {
+    if (!enabled() || !inspected.owner) return
+    emitValueUpdate(encodeValue(value, inspected.value, inspected.elementMap))
+  })
+
+  const setInspectedDetails = untrackedCallback((owner: Solid.Owner) => {
+    inspected.owner && clearOwnerObservers(inspected.owner)
+    inspected.props.clear()
+    inspected.signals.clear()
+    inspected.owner = owner
+    inspected.value = false
+    const result = collectOwnerDetails(owner, { onSignalUpdate, onValueUpdate })
+    setDetails(result.details)
+    inspected.signalMap = result.signalMap
+    inspected.elementMap = result.elementMap
+  })
+  const clearInspectedDetails = () => {
+    inspected.owner && clearOwnerObservers(inspected.owner)
+    inspected.owner = null
+    setDetails(null)
+    inspected.signals.clear()
+    inspected.props.clear()
+    inspected.value = false
+  }
+
   const [handlePropsUpdate, emitPropsUpdate] = createSimpleEmitter<Mapped.Props>()
 
-  const updateInspectedDetails = untrackedCallback(() => {
-    const { owner, elementMap } = inspected
-    if (!owner) return
-    const { details, signalMap } = collectOwnerDetails(owner, {
-      elementMap,
-      signalUpdateHandler,
-      inspectedProps,
+  function updateInspectedProps() {
+    if (!inspected.owner) return
+    const props = encodeComponentProps(inspected.owner, {
+      inspectedProps: inspected.props,
+      elementMap: inspected.elementMap,
     })
-    setInspected({ details, signalMap })
-  })
-  const updateInspectedProps = untrackedCallback(() => {
-    const { owner, elementMap } = inspected
-    if (!owner) return
-    const props = encodeComponentProps(owner, { inspectedProps, elementMap })
     props && emitPropsUpdate(props)
-  })
+  }
 
   createEffect(() => {
     // make sure we clear the owner observers when the plugin is disabled
-    if (!enabled()) lastInspectedOwner && clearOwnerObservers(lastInspectedOwner)
+    if (!enabled()) inspected.owner && clearOwnerObservers(inspected.owner)
     // re-observe the owner when the plugin is enabled
-    else updateInspectedDetails()
+    else inspected.owner && setInspectedDetails(inspected.owner)
 
-    createEffect(() => {
-      // make sure we clear the owner observers when the owner changes
-      const owner = inspected.owner
-      if (lastInspectedOwner && lastInspectedOwner !== owner)
-        clearOwnerObservers(lastInspectedOwner)
-      lastInspectedOwner = owner
-
-      // update the owner details whenever there is a change in solid's internals
-      makeSolidUpdateListener(throttle(updateInspectedProps, 150))
-    })
+    // update the owner details whenever there is a change in solid's internals
+    makeSolidUpdateListener(throttle(updateInspectedProps, 150))
   })
 
-  const setInspectedOwner: PluginData["setInspectedOwner"] = untrackedCallback(payload => {
-    if (!payload) return setInspected(getNullInspected())
+  const setInspectedOwner: PluginData["setInspectedOwner"] = payload => {
+    if (!payload) return clearInspectedDetails()
     const { rootId, nodeId } = payload
-    if (inspected.id === nodeId) return
 
-    const result = walkSolidRoot(rootId, nodeId)
-    if (!result || !result.inspectedOwner) return setInspected(getNullInspected())
+    const walkResult = walkSolidRoot(rootId, nodeId)
+    if (!walkResult || !walkResult.inspectedOwner) return clearInspectedDetails()
 
-    const owner = result.inspectedOwner
-    const elementMap = new ElementMap()
-    inspectedProps.clear()
-    inspectedSignals.clear()
-    const { details, signalMap } = collectOwnerDetails(owner, {
-      elementMap,
-      signalUpdateHandler,
-      inspectedProps,
-    })
+    setInspectedDetails(walkResult.inspectedOwner)
+  }
 
-    setInspected({ id: nodeId, rootId, owner, details, signalMap, elementMap })
-  })
-
-  const setInspectedSignal: PluginData["setInspectedSignal"] = untrackedCallback((id, selected) => {
-    const { signalMap, elementMap } = inspected
-    const signal = signalMap[id] as Solid.Signal | undefined
+  const setInspectedSignal: PluginData["setInspectedSignal"] = (id, selected) => {
+    const signal = inspected.signalMap[id] as Solid.Signal | undefined
     if (!signal) return null
-    if (selected) inspectedSignals.add(id)
-    else inspectedSignals.delete(id)
-    return encodeValue(signal.value, selected, elementMap)
-  })
-  const setInspectedProp: PluginData["setInspectedProp"] = untrackedCallback((key, selected) => {
-    if (selected) inspectedProps.add(key)
-    else inspectedProps.delete(key)
+    if (selected) inspected.signals.add(id)
+    else inspected.signals.delete(id)
+    return untrack(() => encodeValue(signal.value, selected, inspected.elementMap))
+  }
+  const setInspectedProp: PluginData["setInspectedProp"] = (key, selected) => {
+    if (selected) inspected.props.add(key)
+    else inspected.props.delete(key)
     updateInspectedProps()
-  })
+  }
+  const setInspectedValue: PluginData["setInspectedValue"] = selected => {
+    if (!inspected.owner) return null
+    return encodeOwnerValue(inspected.owner, (inspected.value = selected), inspected.elementMap)
+  }
 
   //
   // Computation updates:
@@ -245,15 +241,18 @@ const exported = createInternalRoot(() => {
     handleComputationUpdates,
     handleSignalUpdates,
     handlePropsUpdate,
+    handleValueUpdate,
     handleStructureUpdates,
     components,
     findComponent,
     triggerUpdate,
     forceTriggerUpdate,
+    inspectedDetails: details,
     setInspectedOwner,
-    inspected,
     setInspectedSignal,
     setInspectedProp,
+    setInspectedValue,
+    getElementById,
   }
   function useDebugger(options: {
     enabled?: Accessor<boolean>

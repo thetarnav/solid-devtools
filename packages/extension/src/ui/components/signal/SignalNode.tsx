@@ -5,6 +5,7 @@ import {
   createMemo,
   createSignal,
   For,
+  JSX,
   Match,
   ParentComponent,
   Show,
@@ -25,7 +26,6 @@ import {
 } from "@solid-devtools/shared/serialize"
 import clsx from "clsx"
 import { Icon } from "@/ui"
-import { color } from "@/ui/theme"
 import { Inspector } from "@/state/inspector"
 import { Highlight } from "../highlight/Highlight"
 import * as styles from "./SignalNode.css"
@@ -203,22 +203,13 @@ const ValuePreview: Component<{ value: EncodedValue<boolean> }> = props =>
     }
   })
 
-const ValueName: ParentComponent<{ type?: NodeType.Signal | NodeType.Memo | null }> = props => {
-  const IconComponent = createMemo(() => {
-    switch (props.type) {
-      case NodeType.Signal:
-        return <div class={styles.ValueName.signalDot} />
-      case NodeType.Memo:
-        return <Icon.Memo bgColor={color.amber[400]} class={styles.ValueName.icon} />
-      default:
-        return null
-    }
-  })
-
+const ValueName: ParentComponent<{ isTitle?: boolean; isMemo?: boolean }> = props => {
   return (
-    <div class={styles.ValueName.container}>
-      <div class={styles.ValueName.iconWrapper}>{<IconComponent />}</div>
-      <div class={styles.ValueName.name}>{props.children}</div>
+    <div class={styles.ValueName.container[props.isTitle !== true ? "base" : "title"]}>
+      {props.isTitle !== true && props.isMemo && <Icon.Memo class={styles.ValueName.icon} />}
+      <div class={styles.ValueName.name[props.isTitle !== true ? "base" : "title"]}>
+        {props.children}
+      </div>
     </div>
   )
 }
@@ -260,6 +251,30 @@ const ValueRow: ParentComponent<{ selected?: boolean } & ComponentProps<"li">> =
   )
 }
 
+export const ValueNode: Component<{
+  value: EncodedValue<boolean>
+  name: JSX.Element
+  nameIsTitle?: boolean
+  isMemo?: boolean
+  selected: boolean
+  updated?: boolean
+  onClick?: VoidFunction
+  onElementHover?: ToggleElementHover
+}> = props => {
+  return (
+    <ValueRow selected={props.selected} onClick={props.onClick}>
+      <ValueName isMemo={props.isMemo} isTitle={props.nameIsTitle}>
+        <Highlight strong={props.updated} light={false} signal class={styles.ValueName.highlight}>
+          {props.name}
+        </Highlight>
+      </ValueName>
+      <ElementHoverContext.Provider value={props.onElementHover}>
+        <ValuePreview value={props.value} />
+      </ElementHoverContext.Provider>
+    </ValueRow>
+  )
+}
+
 export const Signals: Component<{ each: Inspector.Signal[] }> = props => {
   const sorted = createMemo(() =>
     props.each.slice().sort((a, b) => {
@@ -273,29 +288,6 @@ export const Signals: Component<{ each: Inspector.Signal[] }> = props => {
         <For each={sorted()}>{signal => <SignalNode signal={signal} />}</For>
       </ul>
     </Show>
-  )
-}
-
-export const ValueNode: Component<{
-  value: EncodedValue<boolean>
-  name: string
-  type?: NodeType.Memo | NodeType.Signal | null
-  selected: boolean
-  updated?: boolean
-  onClick?: VoidFunction
-  onElementHover?: ToggleElementHover
-}> = props => {
-  return (
-    <ValueRow selected={props.selected} onClick={props.onClick}>
-      <ValueName type={props.type}>
-        <Highlight strong={props.updated} light={false} signal class={styles.ValueName.highlight}>
-          {props.name}
-        </Highlight>
-      </ValueName>
-      <ElementHoverContext.Provider value={props.onElementHover}>
-        <ValuePreview value={props.value} />
-      </ElementHoverContext.Provider>
-    </ValueRow>
   )
 }
 
@@ -326,7 +318,7 @@ export const SignalNode: Component<{ signal: Inspector.Signal }> = ({ signal }) 
   return (
     <ValueNode
       name={name}
-      type={type}
+      isMemo={type === NodeType.Memo}
       value={signal.value}
       selected={signal.selected}
       updated={isUpdated()}

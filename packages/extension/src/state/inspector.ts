@@ -1,7 +1,7 @@
 import { batch, createComputed, createRoot, createSelector, createSignal, untrack } from "solid-js"
 import { createStore, produce } from "solid-js/store"
 import { Writable } from "type-fest"
-import { Mapped, NodeID, NodeType, SignalUpdate } from "@solid-devtools/shared/graph"
+import { Mapped, NodeID, NodeType } from "@solid-devtools/shared/graph"
 import { warn } from "@solid-devtools/shared/utils"
 import { EncodedValue } from "@solid-devtools/shared/serialize"
 import { Messages } from "@solid-devtools/shared/bridge"
@@ -34,6 +34,8 @@ export namespace Inspector {
     readonly path: Structure.Node[]
     readonly signals: Record<NodeID, Signal>
     readonly props?: Props
+    readonly value?: EncodedValue<boolean>
+    readonly valueSelected: boolean
     // TODO: more to come
   }
 }
@@ -64,7 +66,7 @@ function reconcileSignals(
 function reconcileValue(proxy: EncodedValue<boolean>, next: EncodedValue<boolean>) {
   proxy.type = next.type
   // value is a literal, so we can just assign it
-  if (next.value) proxy.value = next.value
+  if ("value" in next) proxy.value = next.value
   else delete proxy.value
   if (next.children) {
     // add new children
@@ -121,6 +123,8 @@ function createDetails(
     type: raw.type,
     path,
     signals,
+    value: raw.value,
+    valueSelected: false,
   }
   if (raw.props) {
     details.props = {
@@ -147,6 +151,8 @@ function reconcileDetails(
   reconcileSignals(raw.signals, proxy.signals)
   // update props
   if (raw.props) reconcileProps(proxy.props!, raw.props)
+  // update value
+  if (raw.value) reconcileValue(proxy.value!, raw.value)
 }
 
 const inspector = createRoot(() => {
@@ -203,24 +209,25 @@ const inspector = createRoot(() => {
 
   const [isUpdated, addUpdated, clearUpdated] = createUpdatedSelector()
 
-  const handleSignalUpdates = untrackedCallback((updates: SignalUpdate[], isUpdate = true) => {
-    if (!details()) return
-    batch(() => {
-      isUpdate && addUpdated(updates.map(u => u.id))
-      setDetails(
-        "value",
-        "signals",
-        produce(proxy => {
-          for (const update of updates) {
-            const signal = proxy[update.id]
-            if (!signal) return
-            reconcileValue(signal.value, update.value)
-          }
-        }),
-      )
-    })
-  })
-
+  const handleSignalUpdates = untrackedCallback(
+    (updates: { id: NodeID; value: EncodedValue<boolean> }[], isUpdate = true) => {
+      if (!details()) return
+      batch(() => {
+        isUpdate && addUpdated(updates.map(u => u.id))
+        setDetails(
+          "value",
+          "signals",
+          produce(proxy => {
+            for (const update of updates) {
+              const signal = proxy[update.id]
+              if (!signal) return
+              reconcileValue(signal.value, update.value)
+            }
+          }),
+        )
+      })
+    },
+  )
   const handlePropsUpdate = untrackedCallback((props: Mapped.Props) => {
     if (!details()?.props) return
     setDetails(
@@ -229,18 +236,30 @@ const inspector = createRoot(() => {
       produce(proxy => reconcileProps(proxy!, props)),
     )
   })
+  const handleValueUpdate = untrackedCallback((value: EncodedValue<boolean>, isUpdate: boolean) => {
+    if (!details()?.value) return
+    setDetails(
+      "value",
+      "value",
+      produce(proxy => reconcileValue(proxy!, value)),
+    )
+  })
 
   /** variable for a callback in bridge.ts */
   let onInspectValue: ((payload: Messages["ToggleInspectedValue"]) => void) | undefined
   const setOnInspectValue = (fn: typeof onInspectValue) => (onInspectValue = fn)
 
-  function togglePropFocus(id: string, selected?: boolean): void {
+  function togglePropSelection(id: string, selected?: boolean): void {
     setDetails("value", "props", "record", id, "selected", p => (selected = selected ?? !p))
     onInspectValue!({ type: "prop", id, selected: selected! })
   }
-  function toggleSignalFocus(id: NodeID, selected?: boolean) {
+  function toggleSignalSelection(id: NodeID, selected?: boolean) {
     setDetails("value", "signals", id, "selected", p => (selected = selected ?? !p))
     onInspectValue!({ type: "signal", id, selected: selected! })
+  }
+  function toggleValueSelection(selected?: boolean) {
+    setDetails("value", "valueSelected", p => (selected = selected ?? !p))
+    onInspectValue!({ type: "value", selected: selected! })
   }
 
   //
@@ -262,8 +281,10 @@ const inspector = createRoot(() => {
     updateDetails,
     handleSignalUpdates,
     handlePropsUpdate,
-    toggleSignalFocus,
-    togglePropFocus,
+    handleValueUpdate,
+    toggleSignalSelection,
+    toggleValueSelection,
+    togglePropSelection,
     setOnInspectValue,
     hoveredElement,
     toggleHoveredElement,
