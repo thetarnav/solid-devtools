@@ -1,6 +1,11 @@
-import { resolveElements } from "@solid-primitives/refs"
 import { NodeType, NodeID, Solid, Mapped } from "@solid-devtools/shared/graph"
-import { getComponentRefreshNode, markNodeID, markOwnerName, markOwnerType } from "./utils"
+import {
+  getComponentRefreshNode,
+  markNodeID,
+  markOwnerName,
+  markOwnerType,
+  resolveElements,
+} from "./utils"
 import { observeComputationUpdate } from "./update"
 
 export type ComputationUpdateHandler = (rootId: NodeID, nodeId: NodeID) => void
@@ -33,9 +38,6 @@ function mapOwner(owner: Solid.Owner): Mapped.Owner {
   // Component
   if (type === NodeType.Component) {
     if ($gatherComponents) {
-      // ! resolveElements will execute all () => {} functions nested in the value
-      // ! in the dev mode those will mostly be signals of refresh memos
-      // ! but it should only execute the ones of name "bound readSignal"
       const element = resolveElements(owner.value)
       if (element) $components.push({ id, name, element })
     }

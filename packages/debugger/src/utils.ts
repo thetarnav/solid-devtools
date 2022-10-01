@@ -81,6 +81,26 @@ export function getComponentRefreshNode(owner: Readonly<Solid.Component>): Solid
   return null
 }
 
+export function resolveElements(value: unknown): HTMLElement | HTMLElement[] | null {
+  let resolved = getResolvedElements(value)
+  if (Array.isArray(resolved) && !resolved.length) resolved = null
+  return resolved
+}
+function getResolvedElements(value: unknown): HTMLElement | HTMLElement[] | null {
+  // do not call a function, unless it's a signal (to prevent creating new nodes)
+  if (typeof value === "function" && !value.length && value.name === "bound readSignal")
+    return getResolvedElements(value())
+  if (Array.isArray(value)) {
+    const results: HTMLElement[] = []
+    for (const item of value) {
+      const result = getResolvedElements(item)
+      if (result) Array.isArray(result) ? results.push.apply(results, result) : results.push(result)
+    }
+    return results
+  }
+  return value instanceof HTMLElement ? value : null
+}
+
 /**
  * helper to getting to an owner that you want — walking downwards
  */
