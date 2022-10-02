@@ -318,3 +318,86 @@ export const Computation: IconComponent = props => (
     ></path>
   </svg>
 )
+
+export const Context: IconComponent = props => (
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" class={props.class}>
+    <g fill={props.bgColor ?? "currentColor"}>
+      <rect
+        x="24"
+        y="100"
+        width="56"
+        height="56"
+        rx="8"
+        opacity={props.bgColor ? undefined : "0.2"}
+      ></rect>
+      <rect
+        x="160"
+        y="40"
+        width="64"
+        height="64"
+        rx="8"
+        opacity={props.bgColor ? undefined : "0.2"}
+      ></rect>
+      <rect
+        x="160"
+        y="152"
+        width="64"
+        height="64"
+        rx="8"
+        opacity={props.bgColor ? undefined : "0.2"}
+      ></rect>
+      <rect
+        x="24"
+        y="100"
+        width="56"
+        height="56"
+        rx="8"
+        fill="none"
+        stroke={props.color ?? "currentColor"}
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="16"
+      ></rect>
+      <rect
+        x="160"
+        y="40"
+        width="64"
+        height="64"
+        rx="8"
+        fill="none"
+        stroke={props.color ?? "currentColor"}
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="16"
+      ></rect>
+      <rect
+        x="160"
+        y="152"
+        width="64"
+        height="64"
+        rx="8"
+        fill="none"
+        stroke={props.color ?? "currentColor"}
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="16"
+      ></rect>
+      <path
+        fill="none"
+        stroke={props.color ?? "currentColor"}
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="16"
+        d="M80 128h40"
+      ></path>
+      <path
+        d="M160 184h-16a23.9 23.9 0 0 1-24-24V96a23.9 23.9 0 0 1 24-24h16"
+        fill="none"
+        stroke={props.color ?? "currentColor"}
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="16"
+      ></path>
+    </g>
+  </svg>
+)

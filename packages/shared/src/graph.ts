@@ -4,14 +4,15 @@ import { INTERNAL } from "./variables"
 import { EncodedValue } from "./serialize"
 
 export enum NodeType {
+  Root,
   Component,
   Effect,
   Render,
   Memo,
   Computation,
   Refresh,
+  Context,
   Signal,
-  Root,
 }
 
 export type NodeID = string & {}
@@ -147,7 +148,7 @@ export namespace Mapped {
     id: NodeID
     type: Exclude<NodeType, NodeType.Refresh | NodeType.Root | NodeType.Component>
     children?: Owner[]
-    name: string
+    name?: string
     frozen?: true
   }
 
