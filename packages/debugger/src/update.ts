@@ -1,9 +1,8 @@
 import { untrack } from "solid-js"
-import { noop, onRootCleanup } from "@solid-primitives/utils"
 import { Observable, Observer as ObjectObserver } from "object-observer"
 import { Solid, Core, ValueUpdateListener } from "@solid-devtools/shared/graph"
 import { WINDOW_WRAP_STORE_PROPERTY } from "@solid-devtools/shared/variables"
-import { skipInternalRoot } from "./utils"
+import { skipInternalRoot, tryOnCleanup } from "./utils"
 
 //
 // AFTER UPDATE
@@ -28,7 +27,7 @@ const GraphUpdateListeners = new Set<VoidFunction>()
  */
 export function makeSolidUpdateListener(onUpdate: VoidFunction): VoidFunction {
   GraphUpdateListeners.add(onUpdate)
-  return onRootCleanup(() => {
+  return tryOnCleanup(() => {
     GraphUpdateListeners.delete(onUpdate)
   })
 }
@@ -59,7 +58,7 @@ const CreateRootListeners = new Set<AfterCrateRoot>()
  */
 export function makeCreateRootListener(onUpdate: AfterCrateRoot): VoidFunction {
   CreateRootListeners.add(onUpdate)
-  return onRootCleanup(() => CreateRootListeners.delete(onUpdate))
+  return tryOnCleanup(() => CreateRootListeners.delete(onUpdate))
 }
 
 //
@@ -82,10 +81,12 @@ window[WINDOW_WRAP_STORE_PROPERTY] = init => {
 export function makeStoreObserver(state: object, onUpdate: ObjectObserver): VoidFunction {
   if (!Observable.isObservable(state)) {
     console.warn(`Object ${state} is not wrapped`)
-    return noop
+    return () => {
+      /* noop */
+    }
   }
   Observable.observe(state, onUpdate)
-  return onRootCleanup(() => Observable.unobserve(state, onUpdate))
+  return tryOnCleanup(() => Observable.unobserve(state, onUpdate))
 }
 
 //
@@ -176,5 +177,5 @@ export function makeValueUpdateListener(
   symbol: symbol,
 ): void {
   observeValueUpdate(node, onUpdate, symbol)
-  onRootCleanup(() => removeValueUpdateObserver(node, symbol))
+  tryOnCleanup(() => removeValueUpdateObserver(node, symbol))
 }

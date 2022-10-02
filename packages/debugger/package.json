@@ -67,7 +67,6 @@
     "@solid-devtools/shared": "workspace:^0.8.3",
     "@solid-primitives/event-bus": "^0.1.2",
     "@solid-primitives/scheduled": "^1.0.1",
-    "@solid-primitives/utils": "^3.0.2",
     "object-observer": "^5.1.5",
     "type-fest": "^2.19.0"
   },

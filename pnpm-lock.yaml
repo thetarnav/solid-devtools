@@ -38,7 +38,6 @@ importers:
       '@solid-devtools/transform': workspace:^0.7.3
       '@solid-primitives/event-bus': ^0.1.2
       '@solid-primitives/scheduled': ^1.0.1
-      '@solid-primitives/utils': ^3.0.2
       '@testing-library/jest-dom': ^5.16.5
       jest: ^29.0.3
       jest-environment-jsdom: ^29.0.3
@@ -53,7 +52,6 @@ importers:
       '@solid-devtools/shared': link:../shared
       '@solid-primitives/event-bus': 0.1.2_solid-js@1.5.5
       '@solid-primitives/scheduled': 1.0.1_solid-js@1.5.5
-      '@solid-primitives/utils': 3.0.2_solid-js@1.5.5
       object-observer: 5.1.5
       type-fest: 2.19.0
     optionalDependencies:

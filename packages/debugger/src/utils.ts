@@ -1,5 +1,4 @@
-import { createComputed, createRoot, runWithOwner } from "solid-js"
-import { AnyFunction, AnyObject, noop, warn } from "@solid-primitives/utils"
+import { createComputed, createRoot, onCleanup, runWithOwner } from "solid-js"
 import {
   DebuggerContext,
   NodeType,
@@ -16,7 +15,7 @@ import { throttle } from "@solid-primitives/scheduled"
 export const isSolidComputation = (o: Readonly<Solid.Owner>): o is Solid.Computation => "fn" in o
 
 export const isSolidMemo = (o: Readonly<Solid.Owner>): o is Solid.Memo =>
-  "sdtType" in o ? o.sdtType === NodeType.Memo : _isMemo(o) && !fnMatchesRefresh(o.fn!)
+  "sdtType" in o ? o.sdtType === NodeType.Memo : isSolidComputation(o) && _isMemo(o)
 
 export const isSolidOwner = (o: Readonly<Solid.Owner> | Solid.Signal): o is Solid.Owner =>
   "owned" in o
@@ -27,12 +26,8 @@ export const isSolidRoot = (o: Readonly<Solid.Owner>): o is Solid.Root =>
 export const isSolidComponent = (o: Readonly<Solid.Owner>): o is Solid.Component =>
   "componentName" in o
 
-const _isMemo = (o: Readonly<AnyObject>): boolean =>
+const _isMemo = (o: Readonly<Solid.Computation>): boolean =>
   "value" in o && "comparator" in o && o.pure === true
-
-const fnMatchesRefresh = (fn: AnyFunction): boolean =>
-  (fn + "").replace(/[\n\t]/g, "").replace(/ +/g, " ") ===
-  "() => { const c = source(); if (c) { return untrack(() => c(props)); } return undefined; }"
 
 export function getOwnerName(owner: Readonly<Solid.Owner>): string {
   const { name, componentName: component } = owner
@@ -57,11 +52,16 @@ export function getNodeType(o: Readonly<Solid.Signal | Solid.Owner>): NodeType {
 export const getOwnerType = (o: Readonly<Solid.Owner>): NodeType => {
   if (typeof o.sdtType !== "undefined") return o.sdtType
   if (!isSolidComputation(o)) return NodeType.Root
-  // Precompiled components do not start with "_Hot$$"
-  // we need a way to identify imported (3rd party) vs user components
   if (isSolidComponent(o)) return NodeType.Component
   if (_isMemo(o)) {
-    if (fnMatchesRefresh(o.fn)) return NodeType.Refresh
+    let parent: Solid.Owner | null, parentName: string | undefined
+    if (
+      (parent = o.owner) &&
+      isSolidComponent(parent) &&
+      (parentName = parent.componentName) &&
+      parentName.startsWith("_Hot$$")
+    )
+      return NodeType.Refresh
     return NodeType.Memo
   }
   // Effect
@@ -139,6 +139,11 @@ export function removeDebuggerContext(owner: Solid.Owner): void {
 }
 
 /**
+ * Solid's `onCleanup` that is registered only if there is a root.
+ */
+export const tryOnCleanup: typeof onCleanup = fn => (getOwner() ? onCleanup(fn) : fn)
+
+/**
  * Attach onCleanup callback to a reactive owner
  * @param prepend add the callback to the front of the stack, instead of pushing, fot it to be called before other cleanup callbacks.
  * @returns a function to remove the cleanup callback
@@ -165,7 +170,9 @@ export function onParentCleanup(
   prepend = false,
 ): VoidFunction {
   if (owner.owner) return onOwnerCleanup(owner.owner, fn, prepend)
-  return noop
+  return () => {
+    /* noop */
+  }
 }
 
 const DISPOSE_ID = Symbol("Dispose ID")
@@ -175,7 +182,7 @@ export function onDispose<T>(
 ): () => T {
   const owner = getOwner()
   if (!owner) {
-    warn("onDispose called outside of a reactive owner")
+    console.warn("onDispose called outside of a reactive owner")
     return fn
   }
   // owner is a root
