@@ -1,4 +1,4 @@
-import { Mapped, NodeID, Solid, NodeType } from "@solid-devtools/shared/graph"
+import { Mapped, NodeID, Solid, NodeType, ValueUpdateListener } from "@solid-devtools/shared/graph"
 import { ElementMap, encodeValue, ValueType } from "@solid-devtools/shared/serialize"
 import { $PROXY } from "solid-js"
 import { observeValueUpdate, removeValueUpdateObserver } from "./update"
@@ -77,7 +77,7 @@ export function collectOwnerDetails(
   owner: Solid.Owner,
   config: {
     onSignalUpdate: SignalUpdateHandler
-    onValueUpdate: VoidFunction
+    onValueUpdate: ValueUpdateListener
   },
 ): {
   details: Mapped.OwnerDetails

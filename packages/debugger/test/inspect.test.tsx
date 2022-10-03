@@ -233,4 +233,70 @@ describe("collectOwnerDetails", () => {
   //     expect(elementMap.get("0")).toBeInstanceOf(HTMLDivElement)
   //   })
   // })
+
+  it("listens to value updates", () => {
+    const collectOwnerDetails = getModule()
+
+    createRoot(dispose => {
+      let owner!: Solid.Owner
+
+      const [count, setCount] = createSignal(0)
+      createMemo(() => {
+        owner = getOwner()!
+        return count()
+      })
+
+      const onValueUpdate = jest.fn()
+      collectOwnerDetails(owner, {
+        onSignalUpdate: () => {},
+        onValueUpdate: onValueUpdate,
+      })
+
+      expect(onValueUpdate).not.toBeCalled()
+
+      setCount(1)
+      expect(onValueUpdate).toBeCalledTimes(1)
+      expect(onValueUpdate).toBeCalledWith(1, 0)
+
+      setCount(2)
+      expect(onValueUpdate).toBeCalledTimes(2)
+      expect(onValueUpdate).toBeCalledWith(2, 1)
+
+      setCount(2)
+      expect(onValueUpdate).toBeCalledTimes(2)
+
+      dispose()
+    })
+  })
+
+  it("listens to signal updates", () => {
+    const collectOwnerDetails = getModule()
+
+    createRoot(dispose => {
+      let owner = getOwner()!
+      const [, setCount] = createSignal(0) // id: "0"
+      const [, setCount2] = createSignal(0) // id: "1"
+
+      const onSignalUpdate = jest.fn()
+      collectOwnerDetails(owner, {
+        onSignalUpdate: onSignalUpdate,
+        onValueUpdate: () => {},
+      })
+
+      expect(onSignalUpdate).not.toBeCalled()
+
+      setCount(1)
+      expect(onSignalUpdate).toBeCalledTimes(1)
+      expect(onSignalUpdate).toBeCalledWith("0", 1)
+
+      setCount(1)
+      expect(onSignalUpdate).toBeCalledTimes(1)
+
+      setCount2(1)
+      expect(onSignalUpdate).toBeCalledTimes(2)
+      expect(onSignalUpdate).toBeCalledWith("1", 1)
+
+      dispose()
+    })
+  })
 })

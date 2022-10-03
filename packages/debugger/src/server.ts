@@ -12,9 +12,7 @@ export const attachDebugger: typeof API.attachDebugger = () => {}
 export const useDebugger: typeof API.useDebugger = () => ({
   triggerUpdate: () => {},
   forceTriggerUpdate: () => {},
-  handleComputationUpdates: () => () => {},
-  handleSignalUpdates: () => () => {},
-  handleStructureUpdates: () => () => {},
+  listenTo: () => () => {},
   components: () => ({}),
   findComponent: () => undefined,
   setInspectedOwner: () => {},
@@ -22,7 +20,6 @@ export const useDebugger: typeof API.useDebugger = () => ({
   handlePropsUpdate: () => () => {},
   setInspectedSignal: () => null,
   setInspectedProp: () => {},
-  handleValueUpdate: () => () => {},
   inspectedDetails: () => null,
   setInspectedValue: () => null,
 })

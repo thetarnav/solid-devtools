@@ -2,7 +2,7 @@ import { batch, createEffect, createRoot, on, untrack } from "solid-js"
 import { Messages } from "@solid-devtools/shared/bridge"
 import { NodeType } from "@solid-devtools/shared/graph"
 import { createRuntimeMessanger } from "../shared/messanger"
-import { structure, inspector, locator, updateStructure } from "@/state"
+import { structure, inspector, locator } from "@/state"
 
 export const { onRuntimeMessage, postRuntimeMessage } = createRuntimeMessanger()
 
@@ -11,11 +11,11 @@ if (import.meta.env.DEV) {
   postRuntimeMessage("ForceUpdate")
 }
 
-onRuntimeMessage("GraphUpdate", updateStructure)
+onRuntimeMessage("GraphUpdate", structure.updateStructure)
 
 onRuntimeMessage("ResetPanel", () => {
   batch(() => {
-    updateStructure(null)
+    structure.updateStructure(null)
     locator.setClientLocatorState(false)
     locator.setExtLocator(false)
   })

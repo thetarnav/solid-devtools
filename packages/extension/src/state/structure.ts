@@ -48,10 +48,14 @@ function getNodePath(node: Structure.Node): Structure.Node[] {
 const structure = createRoot(() => {
   const [structure, setStructure] = createSignal<Structure.State>({ nodeList: [], roots: [] })
 
-  function updateStructure({ removed, updated }: RootsUpdates): void {
+  function updateStructure(update: RootsUpdates | null): void {
     batch(() => {
       clearUpdatedComputations()
-      setStructure(prev => reconcileStructure(prev.roots, updated, removed))
+      setStructure(prev =>
+        update
+          ? reconcileStructure(prev.roots, update.updated, update.removed)
+          : { nodeList: [], roots: [] },
+      )
     })
   }
 
@@ -80,13 +84,8 @@ const structure = createRoot(() => {
     })
   }
 
-  function resetStructure() {
-    setStructure({ nodeList: [], roots: [] })
-  }
-
   return {
     structure,
-    resetStructure,
     updateStructure,
     hovered,
     isHovered,
