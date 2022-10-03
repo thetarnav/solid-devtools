@@ -32,6 +32,7 @@ import * as styles from "./SignalNode.css"
 import { createHover } from "@solid-devtools/shared/primitives"
 import { createTimer, makeTimer } from "@solid-primitives/timer"
 import { Listen } from "@solid-primitives/event-bus"
+import { createPingedSignal } from "@/utils"
 
 type ValueComponent<K extends ValueType> = Component<Omit<EncodedValueOf<K, boolean>, "type">>
 
@@ -263,21 +264,7 @@ export const ValueNode: Component<{
   onClick?: VoidFunction
   onElementHover?: ToggleElementHover
 }> = props => {
-  const isUpdated =
-    props.listenToUpdate &&
-    (() => {
-      const [isUpdated, setIsUpdated] = createSignal(false)
-
-      let timeoutId: NodeJS.Timeout | undefined
-      onCleanup(() => clearTimeout(timeoutId))
-      props.listenToUpdate(() => {
-        setIsUpdated(true)
-        clearTimeout(timeoutId)
-        timeoutId = setTimeout(() => setIsUpdated(false), 400)
-      })
-
-      return isUpdated
-    })()
+  const isUpdated = props.listenToUpdate && createPingedSignal(props.listenToUpdate)
 
   return (
     <ValueRow selected={props.selected} onClick={props.onClick}>

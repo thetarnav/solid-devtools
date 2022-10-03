@@ -1,8 +1,8 @@
-import { batch, createMemo, createRoot, createSelector, createSignal, untrack } from "solid-js"
+import { createMemo, createRoot, createSelector, createSignal, untrack } from "solid-js"
 import { NodeID, NodeType, RootsUpdates } from "@solid-devtools/shared/graph"
-import { createUpdatedSelector } from "./utils"
 import { reconcileStructure } from "./structure-reconcile"
 import locator from "./locator"
+import { createSimpleEmitter } from "@solid-primitives/event-bus"
 
 export namespace Structure {
   export interface Node {
@@ -49,14 +49,11 @@ const structure = createRoot(() => {
   const [structure, setStructure] = createSignal<Structure.State>({ nodeList: [], roots: [] })
 
   function updateStructure(update: RootsUpdates | null): void {
-    batch(() => {
-      clearUpdatedComputations()
-      setStructure(prev =>
-        update
-          ? reconcileStructure(prev.roots, update.updated, update.removed)
-          : { nodeList: [], roots: [] },
-      )
-    })
+    setStructure(prev =>
+      update
+        ? reconcileStructure(prev.roots, update.updated, update.removed)
+        : { nodeList: [], roots: [] },
+    )
   }
 
   function findNode(id: NodeID): Structure.Node | undefined {
@@ -65,8 +62,7 @@ const structure = createRoot(() => {
     }
   }
 
-  // TODO: switch to using an event bus
-  const [isUpdated, addUpdatedComputations, clearUpdatedComputations] = createUpdatedSelector()
+  const [listenToComputationUpdate, emitComputationUpdate] = createSimpleEmitter<NodeID>()
 
   const [extHovered, setHovered] = createSignal<Structure.Node | null>(null)
   const clientHoveredComponent = createMemo(() => {
@@ -89,8 +85,8 @@ const structure = createRoot(() => {
     updateStructure,
     hovered,
     isHovered,
-    addUpdatedComputations,
-    isUpdated,
+    listenToComputationUpdate,
+    emitComputationUpdate,
     toggleHoveredOwner,
     findNode,
     getParentRoot,

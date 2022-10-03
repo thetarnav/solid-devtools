@@ -22,7 +22,7 @@ onRuntimeMessage("ResetPanel", () => {
 })
 
 onRuntimeMessage("ComputationUpdates", updates => {
-  structure.addUpdatedComputations(updates.map(u => u.id))
+  updates.forEach(update => structure.emitComputationUpdate(update.id))
 })
 
 onRuntimeMessage("OwnerDetailsUpdate", details => {

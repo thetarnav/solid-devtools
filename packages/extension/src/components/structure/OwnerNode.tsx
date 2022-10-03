@@ -6,6 +6,7 @@ import { Badge, Highlight, Icon } from "@/ui"
 import { useStructure } from "./ctx"
 import * as styles from "./ownerNode.css"
 import { createHover } from "@solid-devtools/shared/primitives"
+import { createPingedSignal } from "@/utils"
 
 export const NodeTypeIcon: Component<{ type: NodeType; class?: string }> = props => {
   const IconComponent: Icon.IconComponent | null = (() => {
@@ -45,7 +46,9 @@ export const OwnerNode: Component<{
 
   const isSelected = inspector.isNodeInspected.bind(null, id)
   const isHovered = structure.isHovered.bind(null, id)
-  const isUpdated = structure.isUpdated.bind(null, id)
+  const isUpdated = createPingedSignal(listener =>
+    structure.listenToComputationUpdate(updatedId => updatedId === id && listener()),
+  )
 
   return (
     <div
