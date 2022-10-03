@@ -1,5 +1,22 @@
 # solid-devtools
 
+## 0.18.0
+
+### Minor Changes
+
+- 74effef: Display computation values in the side panel just as signals and props.
+
+### Patch Changes
+
+- fb8b3c4: Improve displaying the context node on the structure graph and it's value on the inspector.
+- Updated dependencies [74effef]
+- Updated dependencies [fb8b3c4]
+- Updated dependencies [7419067]
+- Updated dependencies [aa7fde4]
+  - @solid-devtools/debugger@0.11.0
+  - @solid-devtools/shared@0.8.4
+  - @solid-devtools/locator@0.16.5
+
 ## 0.17.1
 
 ### Patch Changes
