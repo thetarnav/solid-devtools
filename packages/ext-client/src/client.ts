@@ -25,11 +25,7 @@ createInternalRoot(() => {
   const {
     forceTriggerUpdate,
     findComponent,
-    handleComputationUpdates,
-    handleSignalUpdates,
-    handlePropsUpdate,
-    handleValueUpdate,
-    handleStructureUpdates,
+    listenTo,
     setInspectedOwner,
     inspectedDetails,
     getElementById,
@@ -69,28 +65,24 @@ createInternalRoot(() => {
           const { id, selected } = payload
           setInspectedProp(id, selected)
         } else {
-          const value = setInspectedValue(payload.selected)
-          if (value) postWindowMessage("ValueUpdate", { value, update: false })
+          setInspectedValue(payload.selected)
         }
       }),
     )
 
-    // send the structure graph updates
-    handleStructureUpdates(updates => postWindowMessage("GraphUpdate", updates))
+    listenTo("StructureUpdates", updates => postWindowMessage("GraphUpdate", updates))
 
-    // send the computation updates
-    handleComputationUpdates(updates => postWindowMessage("ComputationUpdates", updates))
+    listenTo("ComputationUpdates", updates => postWindowMessage("ComputationUpdates", updates))
 
-    // send the signal updates
-    handleSignalUpdates(updates => {
+    listenTo("SignalUpdates", updates => {
       postWindowMessage("SignalUpdates", { signals: updates, update: true })
     })
 
-    // send the props updates
-    handlePropsUpdate(updates => postWindowMessage("PropsUpdate", updates))
+    listenTo("PropsUpdate", updates => postWindowMessage("PropsUpdate", updates))
 
-    // send the node value updates
-    handleValueUpdate(value => postWindowMessage("ValueUpdate", { value, update: true }))
+    listenTo("ValueUpdate", ({ value, update }) => {
+      postWindowMessage("ValueUpdate", { value, update })
+    })
 
     // send the focused owner details
     createEffect(() => {

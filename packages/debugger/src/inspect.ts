@@ -1,5 +1,5 @@
 import { Mapped, NodeID, Solid, NodeType } from "@solid-devtools/shared/graph"
-import { ElementMap, EncodedValue, encodeValue, ValueType } from "@solid-devtools/shared/serialize"
+import { ElementMap, encodeValue, ValueType } from "@solid-devtools/shared/serialize"
 import { $PROXY } from "solid-js"
 import { observeValueUpdate, removeValueUpdateObserver } from "./update"
 import {
@@ -16,7 +16,6 @@ import {
 } from "./utils"
 
 export type SignalUpdateHandler = (nodeId: NodeID, value: unknown) => void
-export type ValueUpdateHandler = (value: unknown) => void
 
 // Globals set before collecting the owner details
 let $elementMap!: ElementMap
@@ -74,28 +73,17 @@ export function encodeComponentProps(
   return { proxy, record }
 }
 
-export function encodeOwnerValue(
-  owner: Solid.Owner,
-  deep: boolean,
-  elementMap: ElementMap,
-): EncodedValue<boolean> {
-  let refresh: Solid.Memo | null
-  if (isSolidComponent(owner) && (refresh = getComponentRefreshNode(owner))) {
-    owner = refresh
-  }
-  return encodeValue(owner.value, deep, elementMap)
-}
-
 export function collectOwnerDetails(
   owner: Solid.Owner,
   config: {
     onSignalUpdate: SignalUpdateHandler
-    onValueUpdate: ValueUpdateHandler
+    onValueUpdate: VoidFunction
   },
 ): {
   details: Mapped.OwnerDetails
   signalMap: Record<NodeID, Solid.Signal>
   elementMap: ElementMap
+  getOwnerValue: () => unknown
 } {
   const { onSignalUpdate, onValueUpdate } = config
 
@@ -103,13 +91,30 @@ export function collectOwnerDetails(
   $elementMap = new ElementMap()
   $signalMap = {}
 
-  let { sourceMap, owned, value } = owner
+  const type = markOwnerType(owner)
+  let { sourceMap, owned } = owner
+  let getValue = () => owner.value
+
+  // handle context node specially
+  if (type === NodeType.Context) {
+    sourceMap = undefined
+    owned = null
+    const symbols = Object.getOwnPropertySymbols(owner.context)
+    if (symbols.length !== 1) {
+      console.warn("Context field has more than one symbol. This is not expected.")
+      getValue = () => undefined
+    } else {
+      const contextValue = owner.context[symbols[0]]
+      getValue = () => contextValue
+    }
+  }
+
   // marge component with refresh memo
   let refresh: Solid.Memo | null
   if (isSolidComponent(owner) && (refresh = getComponentRefreshNode(owner))) {
     sourceMap = refresh.sourceMap
     owned = refresh.owned
-    value = refresh.value
+    getValue = () => refresh!.value
   }
 
   // map signals
@@ -137,7 +142,7 @@ export function collectOwnerDetails(
   }
 
   if (isSolidComputation(owner)) {
-    details.value = encodeValue(value, false, $elementMap)
+    details.value = encodeValue(getValue(), false, $elementMap)
     observeValueUpdate(owner, onValueUpdate, INSPECTOR)
     details.sources = markNodesID(owner.sources)
     if (isSolidMemo(owner)) {
@@ -148,5 +153,5 @@ export function collectOwnerDetails(
     if (props) details.props = props
   }
 
-  return { details, signalMap: $signalMap, elementMap: $elementMap }
+  return { details, signalMap: $signalMap, elementMap: $elementMap, getOwnerValue: getValue }
 }

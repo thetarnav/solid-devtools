@@ -67,7 +67,7 @@ function mapOwner(owner: Solid.Owner): Mapped.Owner {
       hmr = true
       owner = refresh
     }
-    ;(mapped as Mapped.Component).hmr = hmr
+    mapped.hmr = hmr
   }
   // Computation
   else if (type !== NodeType.Context) {
@@ -76,7 +76,7 @@ function mapOwner(owner: Solid.Owner): Mapped.Owner {
       $onComputationUpdate.bind(void 0, $rootId, id),
     )
     if (!owner.sources || owner.sources.length === 0) {
-      ;(mapped as Mapped.Computation).frozen = true
+      mapped.frozen = true
     }
   }
 

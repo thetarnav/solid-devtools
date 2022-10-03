@@ -23,18 +23,6 @@ export namespace Structure {
     type: NodeType.Root
   }
 
-  export interface Component extends Node {
-    name: string
-    frozen?: undefined
-    type: NodeType.Component
-    hmr: boolean
-  }
-
-  export interface Computation extends Node {
-    type: NodeType.Computation | NodeType.Memo | NodeType.Effect | NodeType.Render
-    hmr?: undefined
-  }
-
   export type State = { roots: Node[]; nodeList: Node[] }
 }
 

@@ -1,5 +1,5 @@
 import { createComputed, createRoot, onCleanup, runWithOwner } from "solid-js"
-import { createSimpleEmitter, GenericListen } from "@solid-primitives/event-bus"
+import { Emit } from "@solid-primitives/event-bus"
 import { throttle } from "@solid-primitives/scheduled"
 import {
   DebuggerContext,
@@ -265,11 +265,9 @@ export const skipInternalRoot = () => {
  *
  * The updates are deduped by `id` property
  */
-export function createBatchedUpdateEmitter<T extends { id: NodeID }>(): [
-  handleUpdates: GenericListen<[T[]]>,
-  pushUpdate: (update: T) => void,
-] {
-  const [handleUpdates, emitUpdates] = createSimpleEmitter<T[]>()
+export function createBatchedUpdateEmitter<T extends { id: NodeID }>(
+  emit: Emit<T[]>,
+): (update: T) => void {
   const updates: T[] = []
 
   const triggerUpdateEmit = throttle(() => {
@@ -283,13 +281,11 @@ export function createBatchedUpdateEmitter<T extends { id: NodeID }>(): [
       deduped.push(update)
     }
     updates.length = 0
-    emitUpdates(deduped)
+    emit(deduped)
   })
 
-  const pushUpdate: (update: T) => void = update => {
+  return update => {
     updates.push(update)
     triggerUpdateEmit()
   }
-
-  return [handleUpdates, pushUpdate]
 }
