@@ -1,5 +1,19 @@
 # solid-devtools-extension
 
+## 0.14.0
+
+### Minor Changes
+
+- 74effef: Display computation values in the side panel just as signals and props.
+
+### Patch Changes
+
+- fb8b3c4: Improve displaying the context node on the structure graph and it's value on the inspector.
+- e11e3ad: Improve triggering highlights of updated computation nodes — now the highlight will alvays last 400ms.
+- Updated dependencies [74effef]
+- Updated dependencies [fb8b3c4]
+  - @solid-devtools/shared@0.8.4
+
 ## 0.13.0
 
 ### Minor Changes

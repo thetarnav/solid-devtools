@@ -1,5 +1,20 @@
 # @solid-devtools/debugger
 
+## 0.11.0
+
+### Minor Changes
+
+- 74effef: Display computation values in the side panel just as signals and props.
+- fb8b3c4: Improve displaying the context node on the structure graph and it's value on the inspector.
+
+### Patch Changes
+
+- 7419067: Prevent executing non-signal functions during resolving component elements.
+- aa7fde4: Identify solid-refresh memos without checking the function string. (#128)
+- Updated dependencies [74effef]
+- Updated dependencies [fb8b3c4]
+  - @solid-devtools/shared@0.8.4
+
 ## 0.10.0
 
 ### Minor Changes

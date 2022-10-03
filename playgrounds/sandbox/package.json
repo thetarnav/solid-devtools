@@ -17,9 +17,9 @@
     "vite-plugin-solid": "^2.3.3"
   },
   "dependencies": {
-    "@solid-devtools/logger": "workspace:^0.4.8",
+    "@solid-devtools/logger": "workspace:^0.4.9",
     "@solid-primitives/timer": "^1.3.2",
-    "solid-devtools": "workspace:^0.17.1",
+    "solid-devtools": "workspace:^0.18.0",
     "solid-js": "^1.5.5"
   }
 }
