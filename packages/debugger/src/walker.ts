@@ -29,9 +29,16 @@ function mapChildren(owner: Solid.Owner): Mapped.Owner[] | undefined {
 function mapOwner(owner: Solid.Owner): Mapped.Owner {
   const type = markOwnerType(owner) as Exclude<NodeType, NodeType.Refresh | NodeType.Root>
   const id = markNodeID(owner)
-  const name = markOwnerName(owner)
+  const name =
+    type === NodeType.Component ||
+    type === NodeType.Memo ||
+    type === NodeType.Effect ||
+    type === NodeType.Computation
+      ? markOwnerName(owner)
+      : undefined
 
-  const mapped = { id, name, type } as Mapped.Owner
+  const mapped = { id, type } as Mapped.Owner
+  if (name) mapped.name = name
 
   if (id === $inspectedId) $inspectedOwner = owner
 
@@ -39,25 +46,37 @@ function mapOwner(owner: Solid.Owner): Mapped.Owner {
   if (type === NodeType.Component) {
     if ($gatherComponents) {
       const element = resolveElements(owner.value)
-      if (element) $components.push({ id, name, element })
+      if (element) $components.push({ id, name: name!, element })
     }
+
+    // combine context provide component with it' render-effect
+    let contextNode: Solid.Computation | undefined
+    if (
+      name === "provider" &&
+      owner.owned &&
+      owner.owned.length === 1 &&
+      markOwnerType((contextNode = owner.owned[0])) === NodeType.Context
+    ) {
+      return mapOwner(contextNode)
+    }
+
     // omitting refresh memo — map it's children instead
-    let refresh = getComponentRefreshNode(owner as Solid.Component)
     let hmr = false
+    let refresh = getComponentRefreshNode(owner as Solid.Component)
     if (refresh) {
       hmr = true
       owner = refresh
     }
-    ;(mapped as Mapped.Component).hmr = hmr
+    mapped.hmr = hmr
   }
   // Computation
-  else {
+  else if (type !== NodeType.Context) {
     observeComputationUpdate(
       owner as Solid.Computation,
       $onComputationUpdate.bind(void 0, $rootId, id),
     )
     if (!owner.sources || owner.sources.length === 0) {
-      ;(mapped as Mapped.Computation).frozen = true
+      mapped.frozen = true
     }
   }
 

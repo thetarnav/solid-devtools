@@ -1,4 +1,6 @@
 import { createComputed, createRoot, onCleanup, runWithOwner } from "solid-js"
+import { Emit } from "@solid-primitives/event-bus"
+import { throttle } from "@solid-primitives/scheduled"
 import {
   DebuggerContext,
   NodeType,
@@ -9,8 +11,6 @@ import {
 } from "@solid-devtools/shared/graph"
 import { INTERNAL, UNNAMED } from "@solid-devtools/shared/variables"
 import { trimString } from "@solid-devtools/shared/utils"
-import { createSimpleEmitter, GenericListen } from "@solid-primitives/event-bus"
-import { throttle } from "@solid-primitives/scheduled"
 
 export const isSolidComputation = (o: Readonly<Solid.Owner>): o is Solid.Computation => "fn" in o
 
@@ -23,8 +23,7 @@ export const isSolidOwner = (o: Readonly<Solid.Owner> | Solid.Signal): o is Soli
 export const isSolidRoot = (o: Readonly<Solid.Owner>): o is Solid.Root =>
   o.sdtType === NodeType.Root || !isSolidComputation(o)
 
-export const isSolidComponent = (o: Readonly<Solid.Owner>): o is Solid.Component =>
-  "componentName" in o
+export const isSolidComponent = (o: Readonly<Solid.Owner>): o is Solid.Component => "props" in o
 
 const _isMemo = (o: Readonly<Solid.Computation>): boolean =>
   "value" in o && "comparator" in o && o.pure === true
@@ -67,6 +66,7 @@ export const getOwnerType = (o: Readonly<Solid.Owner>): NodeType => {
   // Effect
   if (o.pure === false) {
     if (o.user === true) return NodeType.Effect
+    if (o.context !== null) return NodeType.Context
     return NodeType.Render
   }
   return NodeType.Computation
@@ -265,11 +265,9 @@ export const skipInternalRoot = () => {
  *
  * The updates are deduped by `id` property
  */
-export function createBatchedUpdateEmitter<T extends { id: NodeID }>(): [
-  handleUpdates: GenericListen<[T[]]>,
-  pushUpdate: (update: T) => void,
-] {
-  const [handleUpdates, emitUpdates] = createSimpleEmitter<T[]>()
+export function createBatchedUpdateEmitter<T extends { id: NodeID }>(
+  emit: Emit<T[]>,
+): (update: T) => void {
   const updates: T[] = []
 
   const triggerUpdateEmit = throttle(() => {
@@ -283,13 +281,11 @@ export function createBatchedUpdateEmitter<T extends { id: NodeID }>(): [
       deduped.push(update)
     }
     updates.length = 0
-    emitUpdates(deduped)
+    emit(deduped)
   })
 
-  const pushUpdate: (update: T) => void = update => {
+  return update => {
     updates.push(update)
     triggerUpdateEmit()
   }
-
-  return [handleUpdates, pushUpdate]
 }

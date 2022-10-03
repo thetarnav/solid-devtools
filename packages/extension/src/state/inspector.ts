@@ -1,13 +1,12 @@
 import { batch, createComputed, createRoot, createSelector, createSignal, untrack } from "solid-js"
 import { createStore, produce } from "solid-js/store"
 import { Writable } from "type-fest"
+import { createSimpleEmitter } from "@solid-primitives/event-bus"
 import { Mapped, NodeID, NodeType } from "@solid-devtools/shared/graph"
-import { warn } from "@solid-devtools/shared/utils"
 import { EncodedValue } from "@solid-devtools/shared/serialize"
 import { Messages } from "@solid-devtools/shared/bridge"
 import { untrackedCallback } from "@solid-devtools/shared/primitives"
 import structure, { Structure } from "./structure"
-import { createUpdatedSelector } from "./utils"
 
 export namespace Inspector {
   export type Signal = {
@@ -40,28 +39,29 @@ export namespace Inspector {
   }
 }
 
-function reconcileSignals(
-  newSignals: readonly Mapped.Signal[],
-  signals: Record<NodeID, Inspector.Signal>,
-): void {
-  const prev = new Set(Object.keys(signals))
-  for (const raw of newSignals) {
-    const { id } = raw
-    const signal = signals[id]
-    if (signal) {
-      // update signal observers
-      signal.observers.length = 0
-      signal.observers.push.apply(signal.observers, raw.observers)
-      // update signal value
-      reconcileValue(signal.value, raw.value)
-      prev.delete(id)
-    }
-    // add new signal
-    else signals[id] = createSignalNode(raw)
-  }
-  // remove signals
-  for (const id of prev) delete signals[id]
-}
+// TODO: this probably needs to be done when the inspected computation is rerun
+// function reconcileSignals(
+//   newSignals: readonly Mapped.Signal[],
+//   signals: Record<NodeID, Inspector.Signal>,
+// ): void {
+//   const prev = new Set(Object.keys(signals))
+//   for (const raw of newSignals) {
+//     const { id } = raw
+//     const signal = signals[id]
+//     if (signal) {
+//       // update signal observers
+//       signal.observers.length = 0
+//       signal.observers.push.apply(signal.observers, raw.observers)
+//       // update signal value
+//       reconcileValue(signal.value, raw.value)
+//       prev.delete(id)
+//     }
+//     // add new signal
+//     else signals[id] = createSignalNode(raw)
+//   }
+//   // remove signals
+//   for (const id of prev) delete signals[id]
+// }
 
 function reconcileValue(proxy: EncodedValue<boolean>, next: EncodedValue<boolean>) {
   proxy.type = next.type
@@ -138,27 +138,14 @@ function createDetails(
   return details
 }
 
-function reconcileDetails(
-  node: Structure.Node,
-  proxy: Writable<Inspector.Details>,
-  raw: Readonly<Mapped.OwnerDetails>,
-): void {
-  // update path
-  const path = structure.getNodePath(node)
-  proxy.path.length = 0
-  proxy.path.push.apply(proxy.path, path)
-  // update signals
-  reconcileSignals(raw.signals, proxy.signals)
-  // update props
-  if (raw.props) reconcileProps(proxy.props!, raw.props)
-  // update value
-  if (raw.value) reconcileValue(proxy.value!, raw.value)
-}
+export const $VALUE = Symbol("value")
 
 const inspector = createRoot(() => {
   const [inspectedNode, setInspectedNode] = createSignal<Structure.Node | null>(null)
   const [state, setDetails] = createStore<{ value: Inspector.Details | null }>({ value: null })
   const details = () => state.value
+
+  const [listenToValueUpdates, emitValueUpdate] = createSimpleEmitter<NodeID | typeof $VALUE>()
 
   const isNodeInspected = createSelector<NodeID | null, NodeID>(() => inspectedNode()?.id ?? null)
 
@@ -198,34 +185,25 @@ const inspector = createRoot(() => {
 
   const updateDetails = untrackedCallback((raw: Mapped.OwnerDetails) => {
     const node = inspectedNode()
-    if (!node) return warn("updateDetails: no node is being inspected")
-
-    setDetails("value", prev =>
-      prev === null
-        ? createDetails(node, raw)
-        : produce<Writable<Inspector.Details>>(proxy => reconcileDetails(node, proxy, raw))(prev),
-    )
+    if (!node) return console.warn("updateDetails: no node is being inspected")
+    setDetails("value", createDetails(node, raw))
   })
-
-  const [isUpdated, addUpdated, clearUpdated] = createUpdatedSelector()
 
   const handleSignalUpdates = untrackedCallback(
     (updates: { id: NodeID; value: EncodedValue<boolean> }[], isUpdate = true) => {
       if (!details()) return
-      batch(() => {
-        isUpdate && addUpdated(updates.map(u => u.id))
-        setDetails(
-          "value",
-          "signals",
-          produce(proxy => {
-            for (const update of updates) {
-              const signal = proxy[update.id]
-              if (!signal) return
-              reconcileValue(signal.value, update.value)
-            }
-          }),
-        )
-      })
+      setDetails(
+        "value",
+        "signals",
+        produce(proxy => {
+          for (const update of updates) {
+            const signal = proxy[update.id]
+            if (!signal) return
+            reconcileValue(signal.value, update.value)
+          }
+        }),
+      )
+      isUpdate && updates.forEach(update => emitValueUpdate(update.id))
     },
   )
   const handlePropsUpdate = untrackedCallback((props: Mapped.Props) => {
@@ -243,6 +221,7 @@ const inspector = createRoot(() => {
       "value",
       produce(proxy => reconcileValue(proxy!, value)),
     )
+    isUpdate && emitValueUpdate($VALUE)
   })
 
   /** variable for a callback in bridge.ts */
@@ -274,10 +253,9 @@ const inspector = createRoot(() => {
   return {
     inspectedNode,
     details,
+    listenToValueUpdates,
     setInspectedNode: setInspected,
     isNodeInspected,
-    isUpdated,
-    clearUpdated,
     updateDetails,
     handleSignalUpdates,
     handlePropsUpdate,

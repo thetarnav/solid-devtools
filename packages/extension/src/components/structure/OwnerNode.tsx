@@ -9,6 +9,7 @@ import { createHover } from "@solid-devtools/shared/primitives"
 
 export const NodeTypeIcon: Component<{ type: NodeType; class?: string }> = props => {
   const IconComponent: Icon.IconComponent | null = (() => {
+    console.log(props.type, NodeType.Context)
     switch (props.type) {
       case NodeType.Memo:
         return Icon.Memo
@@ -20,6 +21,8 @@ export const NodeTypeIcon: Component<{ type: NodeType; class?: string }> = props
         return Icon.RenderEffect
       case NodeType.Computation:
         return Icon.Computation
+      case NodeType.Context:
+        return Icon.Context
       default:
         return null
     }
@@ -71,11 +74,19 @@ export const OwnerNode: Component<{
         <Highlight strong={isUpdated()} light={false} class={styles.highlight}>
           <>
             <NodeTypeIcon type={type} class={styles.typeIcon} />
-            {type === NodeType.Render || type === NodeType.Root ? (
-              <div class={styles.type}>{type === NodeType.Render ? "Render Effect" : "Root"}</div>
-            ) : (
-              <div class={styles.name}>{type === NodeType.Component ? `<${name}>` : name}</div>
-            )}
+            {() => {
+              switch (type) {
+                case NodeType.Root:
+                case NodeType.Context:
+                  return <div class={styles.type}>{NodeType[type]}</div>
+                case NodeType.Render:
+                  return <div class={styles.type}>Render Effect</div>
+                case NodeType.Component:
+                  return <div class={styles.name}>{`<${name}>`}</div>
+                default:
+                  return <div class={styles.name}>{name}</div>
+              }
+            }}
           </>
         </Highlight>
         {hmr && <Badge>HMR</Badge>}

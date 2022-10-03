@@ -103,6 +103,7 @@ importers:
       '@solid-devtools/shared': workspace:^0.8.3
       '@solid-primitives/cursor': ^0.0.100
       '@solid-primitives/destructure': ^0.1.2
+      '@solid-primitives/event-bus': ^0.1.2
       '@solid-primitives/event-listener': ^2.2.2
       '@solid-primitives/keyboard': ^1.0.2
       '@solid-primitives/keyed': ^1.1.2
@@ -138,6 +139,7 @@ importers:
       '@solid-devtools/shared': link:../shared
       '@solid-primitives/cursor': 0.0.100_solid-js@1.5.5
       '@solid-primitives/destructure': 0.1.2_solid-js@1.5.5
+      '@solid-primitives/event-bus': 0.1.2_solid-js@1.5.5
       '@solid-primitives/event-listener': 2.2.2_solid-js@1.5.5
       '@solid-primitives/keyboard': 1.0.2_solid-js@1.5.5
       '@solid-primitives/keyed': 1.1.2_solid-js@1.5.5

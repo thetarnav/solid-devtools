@@ -199,7 +199,7 @@ describe("walkSolidTree", () => {
                 type: NodeType.Memo,
                 children: [
                   { id: "1", name: "memo", type: NodeType.Memo, frozen: true },
-                  { id: "2", name: "render", type: NodeType.Render },
+                  { id: "2", type: NodeType.Render },
                 ],
               },
             ],

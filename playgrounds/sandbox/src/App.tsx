@@ -14,6 +14,7 @@ import {
 } from "solid-js"
 import Todos from "./Todos"
 import { disposeApp } from "."
+import { ThemeExample } from "./Theme"
 
 const doMediumCalc = () => {
   Array.from({ length: 1000000 }, (_, i) => i).sort(() => Math.random() - 5)
@@ -148,6 +149,9 @@ const App: Component = () => {
       <Todos />
       <div style={{ margin: "24px" }}>
         <CountingComponent />
+      </div>
+      <div style={{ margin: "24px" }}>
+        <ThemeExample />
       </div>
     </>
   )
