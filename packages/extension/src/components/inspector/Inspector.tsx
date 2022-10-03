@@ -1,9 +1,11 @@
 import { Component, Show } from "solid-js"
 import { Entries } from "@solid-primitives/keyed"
 import { NodeType } from "@solid-devtools/shared/graph"
-import { SignalContextProvider, Scrollable, Signals, ValueNode, Badge } from "@/ui"
-import inspector, { Inspector } from "../state/inspector"
+import { Scrollable, Badge } from "@/ui"
+import { Inspector, inspector } from "@/state"
+import { Signals, ValueNode } from "./SignalNode"
 import * as styles from "./inspector.css"
+import { $VALUE } from "@/state/inspector"
 
 const DetailsContent: Component<{ details: Inspector.Details }> = ({ details }) => {
   const { name, id, type, signals, props: componentProps, value: nodeValue } = details
@@ -34,15 +36,7 @@ const DetailsContent: Component<{ details: Inspector.Details }> = ({ details }) 
         )}
         <div>
           <h2 class={styles.h2}>Signals</h2>
-          <SignalContextProvider
-            value={{
-              isUpdated: inspector.isUpdated,
-              toggleSignalFocus: inspector.toggleSignalSelection,
-              toggleHoveredElement: inspector.toggleHoveredElement,
-            }}
-          >
-            <Signals each={Object.values(signals)} />
-          </SignalContextProvider>
+          <Signals each={Object.values(signals)} />
         </div>
         {nodeValue && (
           <div>
@@ -51,6 +45,9 @@ const DetailsContent: Component<{ details: Inspector.Details }> = ({ details }) 
               nameIsTitle
               value={nodeValue}
               selected={details.valueSelected}
+              listenToUpdate={listener =>
+                inspector.listenToValueUpdates(id => id === $VALUE && listener())
+              }
               onClick={() => inspector.toggleValueSelection()}
               onElementHover={inspector.toggleHoveredElement}
             />

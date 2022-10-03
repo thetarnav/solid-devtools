@@ -7,6 +7,7 @@ import {
   For,
   JSX,
   Match,
+  onCleanup,
   ParentComponent,
   Show,
   splitProps,
@@ -25,11 +26,12 @@ import {
   ValueType,
 } from "@solid-devtools/shared/serialize"
 import clsx from "clsx"
-import { Icon } from "@/ui"
-import { Inspector } from "@/state/inspector"
-import { Highlight } from "../highlight/Highlight"
+import { Highlight, Icon } from "@/ui"
+import inspector, { Inspector } from "@/state/inspector"
 import * as styles from "./SignalNode.css"
 import { createHover } from "@solid-devtools/shared/primitives"
+import { createTimer, makeTimer } from "@solid-primitives/timer"
+import { Listen } from "@solid-primitives/event-bus"
 
 type ValueComponent<K extends ValueType> = Component<Omit<EncodedValueOf<K, boolean>, "type">>
 
@@ -257,14 +259,35 @@ export const ValueNode: Component<{
   nameIsTitle?: boolean
   isMemo?: boolean
   selected: boolean
-  updated?: boolean
+  listenToUpdate?: Listen
   onClick?: VoidFunction
   onElementHover?: ToggleElementHover
 }> = props => {
+  const isUpdated =
+    props.listenToUpdate &&
+    (() => {
+      const [isUpdated, setIsUpdated] = createSignal(false)
+
+      let timeoutId: NodeJS.Timeout | undefined
+      onCleanup(() => clearTimeout(timeoutId))
+      props.listenToUpdate(() => {
+        setIsUpdated(true)
+        clearTimeout(timeoutId)
+        timeoutId = setTimeout(() => setIsUpdated(false), 400)
+      })
+
+      return isUpdated
+    })()
+
   return (
     <ValueRow selected={props.selected} onClick={props.onClick}>
       <ValueName isMemo={props.isMemo} isTitle={props.nameIsTitle}>
-        <Highlight strong={props.updated} light={false} signal class={styles.ValueName.highlight}>
+        <Highlight
+          strong={isUpdated && isUpdated()}
+          light={false}
+          signal
+          class={styles.ValueName.highlight}
+        >
           {props.name}
         </Highlight>
       </ValueName>
@@ -291,29 +314,10 @@ export const Signals: Component<{ each: Inspector.Signal[] }> = props => {
   )
 }
 
-export type SignalContextState = {
-  isUpdated: (id: NodeID) => boolean
-  toggleSignalFocus: (signal: NodeID, focused?: boolean) => void
-  toggleHoveredElement: ToggleElementHover
-}
-
-const SignalContext = createContext<SignalContextState>()
-
-export const SignalContextProvider = SignalContext.Provider
-
-const useSignalContext = (): SignalContextState => {
-  const ctx = useContext(SignalContext)
-  if (!ctx) throw "SignalContext wasn't provided."
-  return ctx
-}
-
 export const SignalNode: Component<{ signal: Inspector.Signal }> = ({ signal }) => {
   const { type, id, name } = signal
 
-  const ctx = useSignalContext()
-  const { toggleSignalFocus, toggleHoveredElement } = ctx
-
-  const isUpdated = ctx.isUpdated.bind(null, id)
+  const { toggleSignalSelection, toggleHoveredElement } = inspector
 
   return (
     <ValueNode
@@ -321,8 +325,10 @@ export const SignalNode: Component<{ signal: Inspector.Signal }> = ({ signal }) 
       isMemo={type === NodeType.Memo}
       value={signal.value}
       selected={signal.selected}
-      updated={isUpdated()}
-      onClick={() => toggleSignalFocus(id)}
+      listenToUpdate={listener =>
+        inspector.listenToValueUpdates(id => id === signal.id && listener())
+      }
+      onClick={() => toggleSignalSelection(id)}
       onElementHover={toggleHoveredElement}
     />
   )

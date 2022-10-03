@@ -5,7 +5,7 @@ import { Menu, MenuItem, Popover, PopoverButton, PopoverPanel } from "solid-head
 import { Splitter, ToggleButton, Icon } from "@/ui"
 import { inspector, structure, locator } from "@/state"
 import * as styles from "./styles.css"
-import Details from "./components/Inspector"
+import Details from "./components/inspector/Inspector"
 import StructureView from "./components/structure/Structure"
 
 const SelectComponent: Component<{}> = props => {

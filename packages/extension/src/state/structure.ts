@@ -61,6 +61,7 @@ const structure = createRoot(() => {
     }
   }
 
+  // TODO: switch to using an event bus
   const [isUpdated, addUpdatedComputations, clearUpdatedComputations] = createUpdatedSelector()
 
   const [extHovered, setHovered] = createSignal<Structure.Node | null>(null)
