@@ -18,28 +18,23 @@ export function hexToRgb(hex: string, alpha?: number) {
   return alpha === undefined ? `rgb(${value})` : `rgb(${value} / ${alpha})`
 }
 
-export const insetX = (n: string | keyof typeof spacing) => {
-  const nn = typeof n === "string" ? n : spacing[n]
-  return {
-    left: nn,
-    right: nn,
-  }
+export type SpacingValue = string | keyof typeof spacing
+
+const resolveSpacing = (n: SpacingValue) => {
+  return n in spacing ? spacing[n as keyof typeof spacing] : (n as string)
 }
-export const insetY = (n: string | keyof typeof spacing) => {
-  const nn = typeof n === "string" ? n : spacing[n]
-  return {
-    top: nn,
-    bottom: nn,
-  }
+
+export const insetX = (n: SpacingValue) => {
+  const nn = resolveSpacing(n)
+  return { left: nn, right: nn }
 }
-export const inset = (n: string | keyof typeof spacing) => {
-  const nn = typeof n === "string" ? n : spacing[n]
-  return {
-    top: nn,
-    bottom: nn,
-    left: nn,
-    right: nn,
-  }
+export const insetY = (n: SpacingValue) => {
+  const nn = resolveSpacing(n)
+  return { top: nn, bottom: nn }
+}
+export const inset = (n: SpacingValue) => {
+  const nn = resolveSpacing(n)
+  return { top: nn, bottom: nn, left: nn, right: nn }
 }
 
 export const centerChild = {

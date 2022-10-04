@@ -42,18 +42,13 @@ const gray = {
 } as const
 
 const fontSize = {
-  "3xs": "0.5rem",
-  "2xs": "0.625rem",
-  xs: "0.75rem",
-  sm: "0.875rem",
-  base: "1rem",
-  lg: "1.125rem",
-  xl: "1.25rem",
-  "2xl": "1.5rem",
-  "3xl": "1.875rem",
-  "4xl": "2.25rem",
-  "5xl": "3rem",
-  "6xl": "3.75rem",
+  xs: "0.5rem",
+  sm: "0.625rem",
+  base: "0.75rem",
+  lg: "0.875rem",
+  xl: "1rem",
+  "2xl": "1.125rem",
+  "3xl": "1.25rem",
 } as const
 
 const lineHeight = {
@@ -76,12 +71,13 @@ export const theme = {
     inherit: "inherit",
     current: "currentColor",
     transparent: "transparent",
-    black: "#000",
-    white: "#fff",
+    black: "#000000",
+    white: "#ffffff",
     cyan,
     amber,
     gray,
     green: "#16a34a",
+    red: "#ef4444",
     disabled: gray[500],
   },
   spacing: {

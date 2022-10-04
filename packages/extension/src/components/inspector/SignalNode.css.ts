@@ -93,7 +93,6 @@ export const ValueName = {
       ValueName_name_base,
       {
         color: color.gray[500],
-        fontSize: theme.fontSize.xs,
       },
     ],
   }),

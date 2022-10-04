@@ -20,7 +20,6 @@ once(onRuntimeMessage, "SolidOnPage", async () => {
   try {
     panel = await createPanel()
     log("Panel created.")
-    // console.log("panel", panel)
     panel.onShown.addListener(onPanelShown)
     panel.onHidden.addListener(onPanelHidden)
   } catch (error) {

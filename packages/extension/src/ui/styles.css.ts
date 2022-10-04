@@ -6,7 +6,19 @@ import { globalStyle } from "@vanilla-extract/css"
 import { theme } from "./theme"
 
 globalStyle("body", {
-  fontSize: theme.fontSize.xs,
+  fontSize: theme.fontSize.base,
+})
+
+globalStyle(".sr-only", {
+  position: "absolute",
+  width: "1px",
+  height: "1px",
+  padding: "0",
+  margin: "-1px",
+  overflow: "hidden",
+  clip: "rect(0, 0, 0, 0)",
+  whiteSpace: "nowrap",
+  borderWidth: "0",
 })
 
 //

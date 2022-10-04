@@ -1,7 +1,16 @@
 import { render } from "solid-js/web"
+import { ErrorOverlay } from "@/ui"
+
 import "./state"
 import "./bridge"
 
 import App from "./App"
 
-render(() => <App />, document.getElementById("root")!)
+render(
+  () => (
+    <ErrorOverlay>
+      <App />
+    </ErrorOverlay>
+  ),
+  document.getElementById("root")!,
+)

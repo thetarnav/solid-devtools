@@ -10,7 +10,6 @@ import { createPingedSignal } from "@/utils"
 
 export const NodeTypeIcon: Component<{ type: NodeType; class?: string }> = props => {
   const IconComponent: Icon.IconComponent | null = (() => {
-    console.log(props.type, NodeType.Context)
     switch (props.type) {
       case NodeType.Memo:
         return Icon.Memo

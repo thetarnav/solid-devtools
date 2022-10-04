@@ -150,7 +150,7 @@ export const typeIcon = style({
 
 export const type = style({
   fontSize: 10,
-  opacity: 0.4,
+  color: color.gray[500],
   userSelect: "none",
   paddingBottom: "0.0625rem",
   selectors: {
