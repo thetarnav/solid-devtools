@@ -10,6 +10,8 @@ export interface Messages {
   SolidOnPage: string
   // devtools -> background: number is a tab id
   DevtoolsScriptConnected: number
+  DevtoolsPanelConnected: {}
+  Versions: { client: string; expectedClient: string; extension: string }
   /** devtools -> client: user switching between Solid devtools and other panel */
   PanelVisibility: boolean
   /** devtools -> client: the chrome devtools got entirely closed */

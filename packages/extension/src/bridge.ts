@@ -1,8 +1,9 @@
 import { batch, createEffect, createRoot, on, untrack } from "solid-js"
-import { Messages } from "@solid-devtools/shared/bridge"
+import { Messages, once } from "@solid-devtools/shared/bridge"
 import { NodeType } from "@solid-devtools/shared/graph"
 import { createRuntimeMessanger } from "../shared/messanger"
 import { structure, inspector, locator } from "@/state"
+import { setVersions } from "./versions"
 
 export const { onRuntimeMessage, postRuntimeMessage } = createRuntimeMessanger()
 
@@ -10,6 +11,10 @@ export const { onRuntimeMessage, postRuntimeMessage } = createRuntimeMessanger()
 if (import.meta.env.DEV) {
   postRuntimeMessage("ForceUpdate")
 }
+
+once(onRuntimeMessage, "Versions", v => setVersions(v))
+
+postRuntimeMessage("DevtoolsPanelConnected")
 
 onRuntimeMessage("GraphUpdate", structure.updateStructure)
 

@@ -40,7 +40,16 @@ const CustomErrorOverlayComponents: Partial<ErrorOverlayComponents> = {
       <Icon.Refresh class={styles.icon} />
     </button>
   ),
-  ErrorOverlayContent: props => <div class={styles.content.container}>{props.children}</div>,
+  ErrorOverlayContent: props => (
+    <div class={styles.content.container}>
+      {props.children}
+      <ul class={styles.content.versions}>
+        <li class={styles.content.version}>Extension: {window.versions.extension}</li>
+        <li class={styles.content.version}>Client: {window.versions.client}</li>
+        <li class={styles.content.version}>Expected client: {window.versions.expectedClient}</li>
+      </ul>
+    </div>
+  ),
   ErrorOverlayErrorInfo: props => (
     <span class={styles.content.error}>
       <span class={styles.content.errorName}>

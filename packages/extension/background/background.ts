@@ -18,6 +18,14 @@ let lastDocumentId: string | undefined
 // state reused between panels
 let panelVisibility = false
 let solidOnPage = false
+let versions:
+  | {
+      client: string
+      expectedClient: string
+      extension: string
+    }
+  | undefined
+
 let postPortMessage: PostMessageFn
 let onPortMessage: OnMessageFn
 
@@ -61,28 +69,9 @@ chrome.runtime.onConnect.addListener(port => {
     // respond with page visibility to the debugger, to let him know
     // if the panel is already created and visible (after page refresh)
     postPortMessage("PanelVisibility", panelVisibility)
-  }),
-    onPortMessage("ResetPanel", () => postRuntimeMessage("ResetPanel"))
+  })
 
-  onPortMessage("GraphUpdate", e => postRuntimeMessage("GraphUpdate", e))
-
-  onPortMessage("ComputationUpdates", e => postRuntimeMessage("ComputationUpdates", e))
-  onPortMessage("SignalUpdates", e => postRuntimeMessage("SignalUpdates", e))
-  onPortMessage("OwnerDetailsUpdate", e => postRuntimeMessage("OwnerDetailsUpdate", e))
-  onPortMessage("PropsUpdate", e => postRuntimeMessage("PropsUpdate", e))
-  onPortMessage("ValueUpdate", e => postRuntimeMessage("ValueUpdate", e))
-  onPortMessage("SetHoveredOwner", e => postRuntimeMessage("SetHoveredOwner", e))
-  onPortMessage("SendSelectedOwner", e => postRuntimeMessage("SendSelectedOwner", e))
-
-  onPortMessage("ClientLocatorMode", e => postRuntimeMessage("ClientLocatorMode", e))
-  addCleanup(onRuntimeMessage("ExtLocatorMode", e => postPortMessage("ExtLocatorMode", e)))
-
-  addCleanup(
-    onRuntimeMessage("PanelVisibility", visibility => {
-      panelVisibility = visibility
-      postPortMessage("PanelVisibility", visibility)
-    }),
-  )
+  onPortMessage("Versions", v => (versions = v))
 
   // make sure the devtools script will be triggered to create devtools panel
   addCleanup(
@@ -92,15 +81,43 @@ chrome.runtime.onConnect.addListener(port => {
     }),
   )
 
-  addCleanup(onRuntimeMessage("SetSelectedOwner", e => postPortMessage("SetSelectedOwner", e)))
+  onRuntimeMessage("DevtoolsPanelConnected", () => {
+    log("DevtoolsPanelConnected")
 
-  addCleanup(
-    onRuntimeMessage("ToggleInspectedValue", e => postPortMessage("ToggleInspectedValue", e)),
-  )
+    postRuntimeMessage("Versions", versions!)
 
-  addCleanup(onRuntimeMessage("HighlightElement", e => postPortMessage("HighlightElement", e)))
+    onPortMessage("ResetPanel", () => postRuntimeMessage("ResetPanel"))
 
-  addCleanup(onRuntimeMessage("ForceUpdate", () => postPortMessage("ForceUpdate")))
+    onPortMessage("GraphUpdate", e => postRuntimeMessage("GraphUpdate", e))
+
+    onPortMessage("ComputationUpdates", e => postRuntimeMessage("ComputationUpdates", e))
+    onPortMessage("SignalUpdates", e => postRuntimeMessage("SignalUpdates", e))
+    onPortMessage("OwnerDetailsUpdate", e => postRuntimeMessage("OwnerDetailsUpdate", e))
+    onPortMessage("PropsUpdate", e => postRuntimeMessage("PropsUpdate", e))
+    onPortMessage("ValueUpdate", e => postRuntimeMessage("ValueUpdate", e))
+    onPortMessage("SetHoveredOwner", e => postRuntimeMessage("SetHoveredOwner", e))
+    onPortMessage("SendSelectedOwner", e => postRuntimeMessage("SendSelectedOwner", e))
+
+    onPortMessage("ClientLocatorMode", e => postRuntimeMessage("ClientLocatorMode", e))
+    addCleanup(onRuntimeMessage("ExtLocatorMode", e => postPortMessage("ExtLocatorMode", e)))
+
+    addCleanup(
+      onRuntimeMessage("PanelVisibility", visibility => {
+        panelVisibility = visibility
+        postPortMessage("PanelVisibility", visibility)
+      }),
+    )
+
+    addCleanup(onRuntimeMessage("SetSelectedOwner", e => postPortMessage("SetSelectedOwner", e)))
+
+    addCleanup(
+      onRuntimeMessage("ToggleInspectedValue", e => postPortMessage("ToggleInspectedValue", e)),
+    )
+
+    addCleanup(onRuntimeMessage("HighlightElement", e => postPortMessage("HighlightElement", e)))
+
+    addCleanup(onRuntimeMessage("ForceUpdate", () => postPortMessage("ForceUpdate")))
+  })
 })
 
 export {}

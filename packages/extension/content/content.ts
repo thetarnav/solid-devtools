@@ -43,6 +43,11 @@ Please install the "solid-devtools@${matchingClientVersion}" package in your pro
   }
 
   postPortMessage("SolidOnPage", "")
+  postPortMessage("Versions", {
+    client: clientVersion,
+    extension: extVersion,
+    expectedClient: matchingClientVersion,
+  })
 })
 
 onWindowMessage("ResetPanel", () => postPortMessage("ResetPanel"))

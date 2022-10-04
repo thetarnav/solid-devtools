@@ -29,6 +29,8 @@ export const container = {
     marginBottom: spacing[8],
     backgroundColor: color.gray[50],
     ...rounded("xl"),
+    fontFamily: theme.font.mono,
+    color: color.gray[800],
   }),
 }
 
@@ -44,7 +46,6 @@ export const pagination = style({
 })
 export const pageCounter = style({
   padding: spacing[1],
-  fontFamily: theme.font.mono,
   fontWeight: 500,
 })
 
@@ -58,22 +59,22 @@ export const content = {
     paddingTop: spacing[2],
     display: "flex",
     flexDirection: "column",
-    rowGap: spacing[1],
+    rowGap: spacing[2],
   }),
   error: style({
     color: color.red,
-    fontFamily: theme.font.mono,
     fontWeight: 500,
   }),
   errorName: style({
     fontWeight: 700,
   }),
+  versions: style({}),
+  version: style({}),
 }
 
 export const button = style({
   ...rounded("md"),
   backgroundColor: color.gray[50],
-  color: color.gray[800],
   ":hover": {
     backgroundColor: color.gray[200],
     color: color.gray[600],

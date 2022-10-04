@@ -3,10 +3,11 @@ import { useFloating } from "solid-floating-ui"
 import { offset } from "@floating-ui/dom"
 import { Menu, MenuItem, Popover, PopoverButton, PopoverPanel } from "solid-headless"
 import { Splitter, ToggleButton, Icon } from "@/ui"
-import { inspector, structure, locator } from "@/state"
+import { inspector, locator } from "@/state"
 import * as styles from "./styles.css"
 import Details from "./components/inspector/Inspector"
 import StructureView from "./components/structure/Structure"
+import { versions } from "./versions"
 
 const SelectComponent: Component<{}> = props => {
   return (
@@ -84,10 +85,7 @@ const App: Component = () => {
         <SelectComponent />
         <div>
           <h3>Welcome to Solid Devtools</h3>
-          <p>
-            Roots length: {structure.structure().roots.length}. All nodes length:{" "}
-            {structure.structure().nodeList.length}.
-          </p>
+          <p>Version: {versions().extension}</p>
         </div>
         <Options />
       </header>
