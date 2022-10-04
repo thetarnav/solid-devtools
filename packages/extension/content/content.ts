@@ -33,9 +33,10 @@ onWindowMessage("SolidOnPage", clientVersion => {
     if (adapterTuple[i] !== wantedTuple[i]) {
       warn(
         `${i === 0 ? "MAJOR" : "MINOR"} VERSION MISMATCH!
-Extension version: ${extVersion}
-Client version: ${clientVersion}
-Matching client version: ${matchingClientVersion}`,
+Extension version: ${extVersion}.
+Client version: ${clientVersion}.
+Expected client version: ${matchingClientVersion}.
+Please install the "solid-devtools@${matchingClientVersion}" package in your project.`,
       )
       break
     }
