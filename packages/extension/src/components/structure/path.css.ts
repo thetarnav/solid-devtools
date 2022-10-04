@@ -7,7 +7,7 @@ const rowHeight = spacing[3]
 export const container = style({
   display: "flex",
   flexWrap: "wrap",
-  fontSize: theme.fontSize["2xs"],
+  fontSize: theme.fontSize.sm,
   lineHeight: rowHeight,
   fontFamily: theme.font.mono,
 })
