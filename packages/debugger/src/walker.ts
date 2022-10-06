@@ -44,11 +44,7 @@ function mapOwner(owner: Solid.Owner): Mapped.Owner {
 
   // Component
   if (type === NodeType.Component) {
-    if ($gatherComponents) {
-      const element = resolveElements(owner.value)
-      if (element) $components.push({ id, name: name!, element })
-    }
-
+    // Context
     // combine context provide component with it' render-effect
     let contextNode: Solid.Computation | undefined
     if (
@@ -57,9 +53,21 @@ function mapOwner(owner: Solid.Owner): Mapped.Owner {
       owner.owned.length === 1 &&
       markOwnerType((contextNode = owner.owned[0])) === NodeType.Context
     ) {
-      return mapOwner(contextNode)
+      // custom mapping for context nodes
+      const id = markNodeID(contextNode)
+      if (id === $inspectedId) $inspectedOwner = contextNode
+      const mapped = { id, type: NodeType.Context } as Mapped.Owner
+      const children = mapChildren(contextNode.owned![0])
+      if (children) mapped.children = children
+      return mapped
     }
 
+    if ($gatherComponents) {
+      const element = resolveElements(owner.value)
+      if (element) $components.push({ id, name: name!, element })
+    }
+
+    // Refresh
     // omitting refresh memo — map it's children instead
     let hmr = false
     let refresh = getComponentRefreshNode(owner as Solid.Component)
