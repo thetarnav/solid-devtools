@@ -9,7 +9,7 @@ import manifest from "./manifest"
 import pkg from "./package.json"
 
 export default defineConfig({
-  plugins: [solidPlugin(), vanillaExtractPlugin(), crx({ manifest })],
+  plugins: [solidPlugin({ dev: false }), vanillaExtractPlugin(), crx({ manifest })],
   resolve: {
     alias: {
       "@/": `${__dirname}/src/`,
