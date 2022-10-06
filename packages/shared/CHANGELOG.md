@@ -1,5 +1,11 @@
 # solid-devtools-shared
 
+## 0.8.5
+
+### Patch Changes
+
+- d3122f3: Improve the ErrorOverlay by displaying client/extension versions.
+
 ## 0.8.4
 
 ### Patch Changes

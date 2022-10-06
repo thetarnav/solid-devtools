@@ -1,5 +1,15 @@
 # solid-devtools-extension
 
+## 0.14.1
+
+### Patch Changes
+
+- d3122f3: Improve the ErrorOverlay by displaying client/extension versions.
+- 0f850f6: Improve version mismatch message.
+- 9e7ab6c: Add ErrorBoundary to display cought errors to the users. (#121)
+- Updated dependencies [d3122f3]
+  - @solid-devtools/shared@0.8.5
+
 ## 0.14.0
 
 ### Minor Changes
