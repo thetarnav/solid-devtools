@@ -1,5 +1,15 @@
 # solid-devtools
 
+## 0.18.1
+
+### Patch Changes
+
+- 71fec9a: Correct reexporting vite plugin for cjs resolvers.
+- Updated dependencies [d3122f3]
+- Updated dependencies [71fec9a]
+  - @solid-devtools/shared@0.8.5
+  - @solid-devtools/transform@0.7.4
+
 ## 0.18.0
 
 ### Minor Changes
