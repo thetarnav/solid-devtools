@@ -1,5 +1,11 @@
 # solid-devtools
 
+## 0.18.2
+
+### Patch Changes
+
+- ca39745: Mark type export
+
 ## 0.18.1
 
 ### Patch Changes
