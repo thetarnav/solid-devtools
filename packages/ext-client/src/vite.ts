@@ -1,3 +1,5 @@
-import devtoolsPlugin from "@solid-devtools/transform"
-export default devtoolsPlugin
-export * from "@solid-devtools/transform"
+export {
+  DevtoolsPluginOptions,
+  devtoolsPlugin as default,
+  devtoolsPlugin,
+} from "@solid-devtools/transform"

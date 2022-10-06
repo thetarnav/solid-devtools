@@ -15,7 +15,7 @@ export interface DevtoolsPluginOptions {
 }
 
 // This export is used for configuration.
-const devtoolsPlugin = (options: DevtoolsPluginOptions = {}): PluginOption => {
+export const devtoolsPlugin = (options: DevtoolsPluginOptions = {}): PluginOption => {
   const { wrapStores = false, jsxLocation = false, name = false } = options
 
   let enablePlugin = false
