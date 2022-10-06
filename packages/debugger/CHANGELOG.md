@@ -1,5 +1,11 @@
 # @solid-devtools/debugger
 
+## 0.11.1
+
+### Patch Changes
+
+- b0e3453: Omit internal memos of Context node while mapping the structure.
+
 ## 0.11.0
 
 ### Minor Changes
