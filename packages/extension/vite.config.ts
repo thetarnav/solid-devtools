@@ -8,12 +8,14 @@ import vitestConfig from "../../configs/vitest.config"
 import manifest from "./manifest"
 import pkg from "./package.json"
 
+const isDev = process.env.NODE_ENV === "development"
+
 export default defineConfig({
   plugins: [solidPlugin({ dev: false }), vanillaExtractPlugin(), crx({ manifest })],
   resolve: {
     alias: {
       "@/": `${__dirname}/src/`,
-      "@solid-devtools/shared": resolve(__dirname, "..", "shared", "src"),
+      // "@solid-devtools/shared": resolve(__dirname, "..", "shared", "src"),
     },
   },
   define: {
@@ -21,12 +23,17 @@ export default defineConfig({
     __CLIENT_VERSION__: `"${pkg.devDependencies["solid-devtools"].match(/\d+.\d+.\d+/)![0]}"`,
   },
   build: {
+    emptyOutDir: false,
+    sourcemap: isDev ? "inline" : false,
     rollupOptions: {
       input: {
         panel: "index.html",
       },
     },
     target: "esnext",
+  },
+  optimizeDeps: {
+    exclude: ["@solid-devtools/shared"],
   },
   ...vitestConfig,
 })

@@ -113,6 +113,7 @@ importers:
       '@solid-primitives/timer': ^1.3.3
       '@solid-primitives/utils': ^3.0.2
       '@types/chrome': ^0.0.196
+      '@types/webextension-polyfill': ^0.9.1
       '@vanilla-extract/css': ^1.9.1
       '@vanilla-extract/dynamic': ^2.0.2
       '@vanilla-extract/private': ^1.0.3
@@ -133,6 +134,7 @@ importers:
       vite: ^3.1.6
       vite-plugin-solid: ^2.3.9
       vitest: ^0.23.4
+      webextension-polyfill: ^0.10.0
       zip-a-folder: ^1.1.5
     dependencies:
       '@floating-ui/dom': 1.0.2
@@ -163,6 +165,7 @@ importers:
     devDependencies:
       '@crxjs/vite-plugin': 1.0.14_vite@3.1.6
       '@types/chrome': 0.0.196
+      '@types/webextension-polyfill': 0.9.1
       '@vanilla-extract/vite-plugin': 3.6.1_vite@3.1.6
       esbuild-plugin-solid: 0.4.2_2cadobjxrehtwrfj6brvelnqz4
       jsdom: 20.0.1
@@ -172,6 +175,7 @@ importers:
       vite: 3.1.6
       vite-plugin-solid: 2.3.9_solid-js@1.5.7+vite@3.1.6
       vitest: 0.23.4_jsdom@20.0.1
+      webextension-polyfill: 0.10.0
       zip-a-folder: 1.1.5
 
   packages/locator:
@@ -2685,6 +2689,10 @@ packages:
 
   /@types/tough-cookie/4.0.2:
     resolution: {integrity: sha512-Q5vtl1W5ue16D+nIaW8JWebSSraJVlK+EthKn7e7UcD4KWsaSJ8BqGPXNaPghgtcn/fhvrN17Tv8ksUsQpiplw==}
+    dev: true
+
+  /@types/webextension-polyfill/0.9.1:
+    resolution: {integrity: sha512-6aNzPIhqKlAV9t06nwSH3/veAceYE2dS2RVFZI8V1+UXHqsFNB6cRwxNmheiBvEGRc45E/gyZNzH0xAYIC27KA==}
     dev: true
 
   /@types/yargs-parser/21.0.0:
@@ -7795,6 +7803,10 @@ packages:
     resolution: {integrity: sha512-XHPEwS0q6TaxcvG85+8EYkbiCux2XtWG2mkc47Ng2A77BQu9+DqIOJldST4HgPkuea7dvKSj5VgX3P1d4rW8Tg==}
     dependencies:
       defaults: 1.0.3
+    dev: true
+
+  /webextension-polyfill/0.10.0:
+    resolution: {integrity: sha512-c5s35LgVa5tFaHhrZDnr3FpQpjj1BB+RXhLTYUxGqBVN460HkbM8TBtEqdXWbpTKfzwCcjAZVF7zXCYSKtcp9g==}
     dev: true
 
   /webidl-conversions/4.0.2:

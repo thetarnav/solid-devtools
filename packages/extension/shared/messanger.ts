@@ -1,4 +1,3 @@
-import { noop } from "@solid-primitives/utils"
 import { LOG_MESSAGES, OnMessageFn, PostMessageFn, Messages } from "@solid-devtools/shared/bridge"
 import { log } from "@solid-devtools/shared/utils"
 
@@ -37,7 +36,7 @@ export function createPortMessanger(port: chrome.runtime.Port): {
       port.postMessage({ id, payload })
     },
     onPortMessage: (id, handler) => {
-      if (!connected) return noop
+      if (!connected) return () => {}
       let arr = listeners[id]
       if (!arr) arr = listeners[id] = []
       arr.push(handler)
