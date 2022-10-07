@@ -1,5 +1,11 @@
 # solid-devtools-shared
 
+## 0.8.6
+
+### Patch Changes
+
+- 74d49e1: Getter object properties won't be read during value encoding. (#136)
+
 ## 0.8.5
 
 ### Patch Changes
