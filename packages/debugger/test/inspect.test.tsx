@@ -23,7 +23,7 @@ describe("collectOwnerDetails", () => {
   it("collects focused owner details", () =>
     createRoot(dispose => {
       const collectOwnerDetails = getModule()
-      const [s, setS] = createSignal(0, { name: "source" })
+      const [s] = createSignal(0, { name: "source" })
 
       let owner!: Solid.Owner
       const div = document.createElement("div")

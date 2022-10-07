@@ -13,7 +13,6 @@ log("background script working")
 const { onRuntimeMessage, postRuntimeMessage } = createRuntimeMessanger()
 
 let currentPort: chrome.runtime.Port | undefined
-let lastDocumentId: string | undefined
 
 // state reused between panels
 let panelVisibility = false
@@ -50,7 +49,7 @@ chrome.runtime.onConnect.addListener(port => {
   }
 
   currentPort = port
-  lastDocumentId = port.sender?.documentId
+  // lastDocumentId = port.sender?.documentId
 
   const { push: addCleanup, execute: clearRuntimeListeners } = createCallbackStack()
 

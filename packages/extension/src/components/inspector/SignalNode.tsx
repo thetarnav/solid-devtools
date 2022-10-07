@@ -7,7 +7,6 @@ import {
   For,
   JSX,
   Match,
-  onCleanup,
   ParentComponent,
   Show,
   splitProps,
@@ -30,7 +29,6 @@ import { Highlight, Icon } from "@/ui"
 import inspector, { Inspector } from "@/state/inspector"
 import * as styles from "./SignalNode.css"
 import { createHover } from "@solid-devtools/shared/primitives"
-import { createTimer, makeTimer } from "@solid-primitives/timer"
 import { Listen } from "@solid-primitives/event-bus"
 import { createPingedSignal } from "@/utils"
 
