@@ -1,5 +1,11 @@
 # @solid-devtools/locator
 
+## 0.16.6
+
+### Patch Changes
+
+- f537ca6: Fix locator overlay not being visible when using solid-start.
+
 ## 0.16.5
 
 ### Patch Changes
