@@ -20,16 +20,16 @@
     "ci:version": "changeset version && pnpm i --no-frozen-lockfile && git add ."
   },
   "devDependencies": {
-    "@changesets/cli": "^2.24.4",
-    "@types/node": "^18.7.18",
-    "babel-preset-solid": "^1.5.5",
-    "esbuild": "^0.15.7",
+    "@changesets/cli": "^2.25.0",
+    "@types/node": "^18.8.3",
+    "babel-preset-solid": "^1.5.7",
+    "esbuild": "^0.15.10",
     "esbuild-plugin-solid": "^0.4.2",
     "prettier": "2.7.1",
-    "solid-js": "^1.5.5",
+    "solid-js": "^1.5.7",
     "tsup": "^6.2.3",
-    "turbo": "^1.4.6",
-    "typescript": "^4.8.3",
+    "turbo": "^1.5.5",
+    "typescript": "^4.8.4",
     "vitest": "^0.23.4"
   },
   "packageManager": "pnpm@7.12.0"
