@@ -78,7 +78,7 @@ const exported = createInternalRoot(() => {
 
   // wait a second to let the framework mess with the document before attaching the overlay
   setTimeout(() => {
-    attachElementOverlay(highlightedComponent)
+    createInternalRoot(() => attachElementOverlay(highlightedComponent))
   }, 1000)
 
   const clickInterceptors: ClickMiddleware[] = []
