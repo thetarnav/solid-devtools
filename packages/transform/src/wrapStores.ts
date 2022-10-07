@@ -112,14 +112,13 @@ const wrapStoresPlugin: PluginObj<any> = {
           }
           // import { createStore } from "solid-js/store"
           // import { createStore as userName } from "solid-js/store"
-          let primitive: "createStore" | "createMutable"
           if (
             s.type === "ImportSpecifier" &&
             ([(s.imported as t.Identifier).name, (s.imported as t.StringLiteral).value].includes(
-              (primitive = "createStore"),
+              "createStore",
             ) ||
               [(s.imported as t.Identifier).name, (s.imported as t.StringLiteral).value].includes(
-                (primitive = "createMutable"),
+                "createMutable",
               ))
           ) {
             const userName = s.local.name
