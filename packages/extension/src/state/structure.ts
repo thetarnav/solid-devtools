@@ -46,7 +46,10 @@ function getNodePath(node: Structure.Node): Structure.Node[] {
 }
 
 const structure = createRoot(() => {
-  const [structure, setStructure] = createSignal<Structure.State>({ nodeList: [], roots: [] })
+  const [structure, setStructure] = createSignal<Structure.State>(
+    { nodeList: [], roots: [] },
+    { internal: true },
+  )
 
   function updateStructure(update: RootsUpdates | null): void {
     setStructure(prev =>

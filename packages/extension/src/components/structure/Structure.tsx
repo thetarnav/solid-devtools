@@ -101,7 +101,7 @@ const DisplayStructureTree: Component = props => {
         next[i] = prev
         prev.update()
       } else {
-        const [getNode, setNode] = createSignal(node, { equals: false })
+        const [getNode, setNode] = createSignal(node, { equals: false, internal: true })
         next[i] = { node, getNode, update: () => setNode(node) }
       }
     }
