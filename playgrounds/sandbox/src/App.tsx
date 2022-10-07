@@ -100,7 +100,9 @@ const App: Component = () => {
     return {
       foo: "bar",
       count: count(),
-      header: header(),
+      get subheader() {
+        return <h2>Subheader</h2>
+      },
     }
   })
 
@@ -122,6 +124,7 @@ const App: Component = () => {
   return (
     <>
       {header()}
+      {objmemo().subheader}
       <div>
         <header>
           <Button onClick={() => setCount(p => ++p)} text={`Count: ${count()}`} />

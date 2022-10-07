@@ -138,6 +138,23 @@ const encodeDeepExpectations: [string, unknown, EncodedValue<true>][] = [
       },
     },
   ],
+  [
+    "Object with getter properties",
+    {
+      a: 123,
+      get b() {
+        return 456
+      },
+    },
+    {
+      type: ValueType.Object,
+      value: 2,
+      children: {
+        a: { type: ValueType.Number, value: 123 },
+        b: { type: ValueType.Getter, value: "b" },
+      },
+    },
+  ],
 ]
 
 describe("encodeValue Deep", () => {
