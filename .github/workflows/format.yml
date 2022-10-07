@@ -30,5 +30,4 @@ jobs:
       - name: Add, Commit and Push
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
-          commit_message: "Format"
-          file_pattern: packages/**/*.{js,ts,json,css,tsx,jsx} playgrounds/**/*.{js,ts,json,css,tsx,jsx}
+          commit_message: 'Format'
