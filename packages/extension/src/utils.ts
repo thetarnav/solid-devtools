@@ -1,5 +1,5 @@
-import { createSignal, onCleanup } from "solid-js"
-import { Listen } from "@solid-primitives/event-bus"
+import { createSignal, onCleanup } from 'solid-js'
+import { Listen } from '@solid-primitives/event-bus'
 
 /**
  * Creates a signal that will be activated for a given amount of time on every "ping" — a call to the listener function.

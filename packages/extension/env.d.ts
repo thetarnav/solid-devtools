@@ -9,7 +9,7 @@ declare global {
   const __CLIENT_VERSION__: string
 }
 
-declare module "solid-js" {
+declare module 'solid-js' {
   namespace JSX {
     interface CustomEvents {
       keydown: KeyboardEvent

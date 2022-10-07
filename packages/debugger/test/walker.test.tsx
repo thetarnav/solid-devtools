@@ -1,5 +1,5 @@
-import { describe, beforeEach, jest, it, expect } from "@jest/globals"
-import { getOwner, Mapped, NodeType, Solid } from "@solid-devtools/shared/graph"
+import { describe, beforeEach, jest, it, expect } from '@jest/globals'
+import { getOwner, Mapped, NodeType, Solid } from '@solid-devtools/shared/graph'
 import {
   createComputed,
   createEffect,
@@ -7,33 +7,33 @@ import {
   createRenderEffect,
   createRoot,
   createSignal,
-} from "solid-js"
-import type * as API from "../src/walker"
+} from 'solid-js'
+import type * as API from '../src/walker'
 
-const getModule = (): typeof API.walkSolidTree => require("../src/walker").walkSolidTree
+const getModule = (): typeof API.walkSolidTree => require('../src/walker').walkSolidTree
 
 const mockTree = () => {
-  const [s] = createSignal("foo", { name: "s0" })
-  createSignal("hello", { name: "s1" })
+  const [s] = createSignal('foo', { name: 's0' })
+  createSignal('hello', { name: 's1' })
 
   createEffect(
     () => {
-      createSignal({ bar: "baz" }, { name: "s2" })
-      createComputed(s, undefined, { name: "c0" })
-      createComputed(() => createSignal(0, { name: "s3" }), undefined, { name: "c1" })
+      createSignal({ bar: 'baz' }, { name: 's2' })
+      createComputed(s, undefined, { name: 'c0' })
+      createComputed(() => createSignal(0, { name: 's3' }), undefined, { name: 'c1' })
     },
     undefined,
-    { name: "e0" },
+    { name: 'e0' },
   )
 }
 
-describe("walkSolidTree", () => {
+describe('walkSolidTree', () => {
   beforeEach(() => {
     delete (window as any).Solid$$
     jest.resetModules()
   })
 
-  it("default options", () => {
+  it('default options', () => {
     const walkSolidTree = getModule()
 
     const [dispose, owner] = createRoot(dispose => {
@@ -43,7 +43,7 @@ describe("walkSolidTree", () => {
 
     const { root, components, inspectedOwner } = walkSolidTree(owner, {
       onComputationUpdate: () => {},
-      rootId: (owner.sdtId = "ff"),
+      rootId: (owner.sdtId = 'ff'),
       inspectedId: null,
       gatherComponents: false,
     })
@@ -51,17 +51,17 @@ describe("walkSolidTree", () => {
     dispose()
 
     expect(root).toEqual({
-      id: "ff",
+      id: 'ff',
       type: NodeType.Root,
       children: [
         {
-          id: "0",
-          name: "e0",
+          id: '0',
+          name: 'e0',
           type: NodeType.Effect,
           frozen: true,
           children: [
-            { id: "1", name: "c0", type: NodeType.Computation },
-            { id: "2", name: "c1", type: NodeType.Computation, frozen: true },
+            { id: '1', name: 'c0', type: NodeType.Computation },
+            { id: '2', name: 'c1', type: NodeType.Computation, frozen: true },
           ],
         },
       ],
@@ -71,7 +71,7 @@ describe("walkSolidTree", () => {
     expect(inspectedOwner).toBe(null)
   })
 
-  it("listen to computation updates", () =>
+  it('listen to computation updates', () =>
     createRoot(dispose => {
       const walkSolidTree = getModule()
 
@@ -83,7 +83,7 @@ describe("walkSolidTree", () => {
       const owner = getOwner()! as Solid.Root
       walkSolidTree(owner, {
         onComputationUpdate: (rootId, id) => capturedComputationUpdates.push([rootId, id]),
-        rootId: (owner.sdtId = "ff"),
+        rootId: (owner.sdtId = 'ff'),
         inspectedId: null,
         gatherComponents: false,
       })
@@ -93,19 +93,19 @@ describe("walkSolidTree", () => {
       setA(1)
 
       expect(capturedComputationUpdates.length).toBe(1)
-      expect(capturedComputationUpdates[0]).toEqual(["ff", "0"])
+      expect(capturedComputationUpdates[0]).toEqual(['ff', '0'])
 
       dispose()
     }))
 
-  it("gathers components", () =>
+  it('gathers components', () =>
     createRoot(dispose => {
       const walkSolidTree = getModule()
 
       const TestComponent = (props: { n: number }) => {
         const [a] = createSignal(0)
         createComputed(a)
-        return <div>{props.n === 0 ? "end" : <TestComponent n={props.n - 1} />}</div>
+        return <div>{props.n === 0 ? 'end' : <TestComponent n={props.n - 1} />}</div>
       }
       const Button = () => {
         return <button>Click me</button>
@@ -123,7 +123,7 @@ describe("walkSolidTree", () => {
       const owner = getOwner()! as Solid.Root
       const { components } = walkSolidTree(owner, {
         onComputationUpdate: () => {},
-        rootId: (owner.sdtId = "ff"),
+        rootId: (owner.sdtId = 'ff'),
         inspectedId: null,
         gatherComponents: true,
       })
@@ -133,51 +133,51 @@ describe("walkSolidTree", () => {
       let testCompsLength = 0
       let btn!: Mapped.ResolvedComponent
       components.forEach(c => {
-        if (c.name === "TestComponent" && c.element instanceof HTMLDivElement) testCompsLength++
+        if (c.name === 'TestComponent' && c.element instanceof HTMLDivElement) testCompsLength++
         else btn = c
       })
       expect(testCompsLength).toBe(6)
 
       expect(btn).toBeTruthy()
-      expect(btn.name).toBe("Button")
+      expect(btn.name).toBe('Button')
       expect(btn.element).toBeInstanceOf(HTMLButtonElement)
 
       dispose()
     }))
 
-  it("returns inspected owner", () =>
+  it('returns inspected owner', () =>
     createRoot(dispose => {
       const walkSolidTree = getModule()
-      const [s] = createSignal(0, { name: "source" })
+      const [s] = createSignal(0, { name: 'source' })
 
       let owner!: Solid.Owner
-      const div = document.createElement("div")
+      const div = document.createElement('div')
 
       createComputed(
         () => {
           const focused = createMemo(
             () => {
               owner = getOwner()!
-              owner.sdtId = "ff"
+              owner.sdtId = 'ff'
               s()
-              createSignal(div, { name: "element" })
-              const memo = createMemo(() => 0, undefined, { name: "memo" })
-              createRenderEffect(memo, undefined, { name: "render" })
-              return "value"
+              createSignal(div, { name: 'element' })
+              const memo = createMemo(() => 0, undefined, { name: 'memo' })
+              createRenderEffect(memo, undefined, { name: 'render' })
+              return 'value'
             },
             undefined,
-            { name: "focused" },
+            { name: 'focused' },
           )
           focused()
         },
         undefined,
-        { name: "WRAPPER" },
+        { name: 'WRAPPER' },
       )
 
       const rootOwner = getOwner()! as Solid.Root
       const { root, inspectedOwner } = walkSolidTree(rootOwner, {
-        rootId: (rootOwner.sdtId = "0"),
-        inspectedId: "ff",
+        rootId: (rootOwner.sdtId = '0'),
+        inspectedId: 'ff',
         onComputationUpdate: () => {},
         gatherComponents: false,
       })
@@ -185,21 +185,21 @@ describe("walkSolidTree", () => {
       expect(owner).toBe(inspectedOwner)
 
       expect(root).toEqual({
-        id: "0",
+        id: '0',
         type: NodeType.Root,
         children: [
           {
-            id: "0",
-            name: "WRAPPER",
+            id: '0',
+            name: 'WRAPPER',
             type: NodeType.Computation,
             children: [
               {
-                id: "ff",
-                name: "focused",
+                id: 'ff',
+                name: 'focused',
                 type: NodeType.Memo,
                 children: [
-                  { id: "1", name: "memo", type: NodeType.Memo, frozen: true },
-                  { id: "2", type: NodeType.Render },
+                  { id: '1', name: 'memo', type: NodeType.Memo, frozen: true },
+                  { id: '2', type: NodeType.Render },
                 ],
               },
             ],

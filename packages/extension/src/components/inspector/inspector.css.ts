@@ -1,10 +1,10 @@
-import { spacing, color } from "@/ui/theme"
-import { style } from "@vanilla-extract/css"
+import { spacing, color } from '@/ui/theme'
+import { style } from '@vanilla-extract/css'
 
 export const scrollWrapper = style({
-  height: "100%",
-  width: "100%",
-  overflow: "hidden",
+  height: '100%',
+  width: '100%',
+  overflow: 'hidden',
 })
 
 export const root = style({
@@ -19,13 +19,13 @@ export const header = style({
 export const h1 = style({
   // TODO: typography
   fontSize: spacing[4],
-  fontWeight: "bold",
+  fontWeight: 'bold',
 })
 export const id = style({
   fontSize: spacing[3],
   color: color.gray[500],
   fontWeight: 400,
-  textTransform: "uppercase",
+  textTransform: 'uppercase',
 })
 export const type = style({
   color: color.gray[500],
@@ -33,8 +33,8 @@ export const type = style({
 })
 
 export const content = style({
-  display: "flex",
-  flexDirection: "column",
+  display: 'flex',
+  flexDirection: 'column',
   rowGap: spacing[4],
 })
 

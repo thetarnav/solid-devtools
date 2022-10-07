@@ -1,10 +1,10 @@
-import { Component } from "solid-js"
-import { NodeType } from "@solid-devtools/shared/graph"
-import { Icon } from "@/ui"
-import { inspector, structure, Structure } from "@/state"
-import * as styles from "./path.css"
-import { NodeTypeIcon } from "./OwnerNode"
-import { createHover } from "@solid-devtools/shared/primitives"
+import { Component } from 'solid-js'
+import { NodeType } from '@solid-devtools/shared/graph'
+import { Icon } from '@/ui'
+import { inspector, structure, Structure } from '@/state'
+import * as styles from './path.css'
+import { NodeTypeIcon } from './OwnerNode'
+import { createHover } from '@solid-devtools/shared/primitives'
 
 export const OwnerPath: Component<{ path: Structure.Node[] }> = props => {
   return (

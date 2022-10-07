@@ -1,7 +1,7 @@
-import { render } from "solid-js/web"
-import { Clock } from "./Clock"
-import "./styles.css"
-import { Debugger } from "../../../packages/debugger/src"
+import { render } from 'solid-js/web'
+import { Clock } from './Clock'
+import './styles.css'
+import { Debugger } from '../../../packages/debugger/src'
 
 render(
   () => (
@@ -9,5 +9,5 @@ render(
       <Clock />
     </Debugger>
   ),
-  document.getElementById("root")!,
+  document.getElementById('root')!,
 )

@@ -1,31 +1,31 @@
-import { Component, createResource, For, Show } from "solid-js";
-import { RouteDataArgs, useRouteData } from "solid-start";
-import Story from "~/components/story";
-import fetchAPI from "~/lib/api";
-import { IStory } from "~/types";
+import { Component, createResource, For, Show } from 'solid-js'
+import { RouteDataArgs, useRouteData } from 'solid-start'
+import Story from '~/components/story'
+import fetchAPI from '~/lib/api'
+import { IStory } from '~/types'
 
 const mapStories = {
-  top: "news",
-  new: "newest",
-  show: "show",
-  ask: "ask",
-  job: "jobs",
-} as const;
+  top: 'news',
+  new: 'newest',
+  show: 'show',
+  ask: 'ask',
+  job: 'jobs',
+} as const
 
 export const routeData = ({ location, params }: RouteDataArgs) => {
-  const page = () => +location.query.page || 1;
-  const type = () => params.stories || "top";
+  const page = () => +location.query.page || 1
+  const type = () => params.stories || 'top'
 
   const [stories] = createResource<IStory[], string>(
     () => `${mapStories[type()]}?page=${page()}`,
-    fetchAPI
-  );
+    fetchAPI,
+  )
 
-  return { type, stories, page };
-};
+  return { type, stories, page }
+}
 
 const Stories: Component = () => {
-  const { page, type, stories } = useRouteData<typeof routeData>();
+  const { page, type, stories } = useRouteData<typeof routeData>()
   return (
     <div class="news-view">
       <div class="news-list-nav">
@@ -33,16 +33,12 @@ const Stories: Component = () => {
           when={page() > 1}
           fallback={
             <span class="page-link disabled" aria-disabled="true">
-              {"<"} prev
+              {'<'} prev
             </span>
           }
         >
-          <a
-            class="page-link"
-            href={`/${type()}?page=${page() - 1}`}
-            aria-label="Previous Page"
-          >
-            {"<"} prev
+          <a class="page-link" href={`/${type()}?page=${page() - 1}`} aria-label="Previous Page">
+            {'<'} prev
           </a>
         </Show>
         <span>page {page()}</span>
@@ -50,28 +46,24 @@ const Stories: Component = () => {
           when={stories() && stories().length >= 29}
           fallback={
             <span class="page-link disabled" aria-disabled="true">
-              more {">"}
+              more {'>'}
             </span>
           }
         >
-          <a
-            class="page-link"
-            href={`/${type()}?page=${page() + 1}`}
-            aria-label="Next Page"
-          >
-            more {">"}
+          <a class="page-link" href={`/${type()}?page=${page() + 1}`} aria-label="Next Page">
+            more {'>'}
           </a>
         </Show>
       </div>
       <main class="news-list">
         <Show when={stories()}>
           <ul>
-            <For each={stories()}>{(story) => <Story story={story} />}</For>
+            <For each={stories()}>{story => <Story story={story} />}</For>
           </ul>
         </Show>
       </main>
     </div>
-  );
-};
+  )
+}
 
-export default Stories;
+export default Stories

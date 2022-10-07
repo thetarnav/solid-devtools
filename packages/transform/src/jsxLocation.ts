@@ -1,18 +1,18 @@
-import { relative } from "path"
-import { PluginObj } from "@babel/core"
-import * as t from "@babel/types"
+import { relative } from 'path'
+import { PluginObj } from '@babel/core'
+import * as t from '@babel/types'
 import {
   LOCATION_ATTRIBUTE_NAME,
   WINDOW_PROJECTPATH_PROPERTY,
-} from "@solid-devtools/shared/variables"
-import { getLocationAttribute, isLowercase, windowId } from "./utils"
+} from '@solid-devtools/shared/variables'
+import { getLocationAttribute, isLowercase, windowId } from './utils'
 
 const jsxLocationPlugin: PluginObj<any> = {
-  name: "@solid-devtools/jsx-location",
+  name: '@solid-devtools/jsx-location',
   visitor: {
     Program(path, state) {
       const { cwd, filename } = state as { cwd: unknown; filename: unknown }
-      if (typeof cwd !== "string" || typeof filename !== "string") return
+      if (typeof cwd !== 'string' || typeof filename !== 'string') return
 
       // target only project files
       if (!filename.includes(cwd)) return
@@ -24,7 +24,7 @@ const jsxLocationPlugin: PluginObj<any> = {
       const dataSourceLocMemberExpression = t.memberExpression(windowId, dataSourceLocId)
       const cwdStringLiteral = t.stringLiteral(cwd)
       const assignmentExpression = t.assignmentExpression(
-        "=",
+        '=',
         dataSourceLocMemberExpression,
         cwdStringLiteral,
       )
@@ -32,7 +32,7 @@ const jsxLocationPlugin: PluginObj<any> = {
     },
     JSXOpeningElement(path, state) {
       const container = path.container as t.JSXElement
-      if (container.openingElement.name.type !== "JSXIdentifier") return
+      if (container.openingElement.name.type !== 'JSXIdentifier') return
       const name = container.openingElement.name.name
 
       // Filter native elements
@@ -42,7 +42,7 @@ const jsxLocationPlugin: PluginObj<any> = {
       if (!location) return
 
       const { cwd, filename } = state as { cwd: unknown; filename: unknown }
-      if (typeof cwd !== "string" || typeof filename !== "string") return
+      if (typeof cwd !== 'string' || typeof filename !== 'string') return
 
       container.openingElement.attributes.push(
         t.jsxAttribute(

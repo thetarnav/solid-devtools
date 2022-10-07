@@ -1,17 +1,17 @@
-import * as t from "@babel/types"
+import * as t from '@babel/types'
 
-export const windowId = t.identifier("window")
-export const storeOverwriteName = "$sdt_createStore"
-export const storeOverwriteNamespace = "$sdt_StoreNamespace"
+export const windowId = t.identifier('window')
+export const storeOverwriteName = '$sdt_createStore'
+export const storeOverwriteNamespace = '$sdt_StoreNamespace'
 
 const LOWERCASE_REGEX = /^[a-z0-9]+$/
 
 export const isLowercase = (s: string) => LOWERCASE_REGEX.test(s)
 
 export const getLocationAttribute = (filePath: string, line: number, column: number): string =>
-  filePath + ":" + line + ":" + column
+  filePath + ':' + line + ':' + column
 
 export function getFileExtension(filename: string): string {
-  const index = filename.lastIndexOf(".")
-  return index < 0 ? "" : filename.substring(index + 1)
+  const index = filename.lastIndexOf('.')
+  return index < 0 ? '' : filename.substring(index + 1)
 }

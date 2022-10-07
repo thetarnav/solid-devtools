@@ -1,6 +1,6 @@
 const getLogLabel = () => [
   `%csolid-devtools`,
-  "color: #fff; background: #2c4f7c; padding: 1px 4px;",
+  'color: #fff; background: #2c4f7c; padding: 1px 4px;',
 ]
 
 export function info<T>(data: T): T {
@@ -17,11 +17,11 @@ export function warn(...args: any[]): void {
 
 export function formatTime(d: Date = new Date()): string {
   return (
-    ("0" + d.getHours()).slice(-2) +
-    ":" +
-    ("0" + d.getMinutes()).slice(-2) +
-    ":" +
-    ("0" + d.getSeconds()).slice(-2)
+    ('0' + d.getHours()).slice(-2) +
+    ':' +
+    ('0' + d.getMinutes()).slice(-2) +
+    ':' +
+    ('0' + d.getSeconds()).slice(-2)
   )
 }
 
@@ -75,7 +75,7 @@ export const arrayRefEquals = <T>(a: readonly T[], b: readonly T[]) =>
 /** function that trims too long string */
 export function trimString(str: string, maxLength: number): string {
   if (str.length <= maxLength) return str
-  return str.slice(0, maxLength) + "…"
+  return str.slice(0, maxLength) + '…'
 }
 
 export function findIndexById<T extends { id: string }>(array: T[], id: string): number {

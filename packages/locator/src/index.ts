@@ -1,25 +1,25 @@
-import { createEffect, createMemo, createSignal, getOwner, runWithOwner, onCleanup } from "solid-js"
-import { makeEventListener } from "@solid-primitives/event-listener"
-import { createKeyHold, KbdKey } from "@solid-primitives/keyboard"
-import { remove } from "@solid-primitives/immutable"
-import { onRootCleanup } from "@solid-primitives/utils"
-import { useDebugger, createInternalRoot } from "@solid-devtools/debugger"
-import { createConsumers } from "@solid-devtools/shared/primitives"
-import { Mapped, NodeID } from "@solid-devtools/shared/graph"
-import { warn } from "@solid-devtools/shared/utils"
-import { findComponent, getLocationFromElement, HoveredComponent } from "./findComponent"
-import { makeHoverElementListener } from "./hoverElement"
+import { createEffect, createMemo, createSignal, getOwner, runWithOwner, onCleanup } from 'solid-js'
+import { makeEventListener } from '@solid-primitives/event-listener'
+import { createKeyHold, KbdKey } from '@solid-primitives/keyboard'
+import { remove } from '@solid-primitives/immutable'
+import { onRootCleanup } from '@solid-primitives/utils'
+import { useDebugger, createInternalRoot } from '@solid-devtools/debugger'
+import { createConsumers } from '@solid-devtools/shared/primitives'
+import { Mapped, NodeID } from '@solid-devtools/shared/graph'
+import { warn } from '@solid-devtools/shared/utils'
+import { findComponent, getLocationFromElement, HoveredComponent } from './findComponent'
+import { makeHoverElementListener } from './hoverElement'
 import {
   getFullSourceCodeData,
   openSourceCode,
   SourceCodeData,
   TargetIDE,
   TargetURLFunction,
-} from "./goToSource"
-import { attachElementOverlay } from "./ElementOverlay"
+} from './goToSource'
+import { attachElementOverlay } from './ElementOverlay'
 
-export type { TargetIDE, TargetURLFunction } from "./goToSource"
-export type { HoveredComponent } from "./findComponent"
+export type { TargetIDE, TargetURLFunction } from './goToSource'
+export type { HoveredComponent } from './findComponent'
 
 export type LocatorOptions = {
   /** Choose in which IDE the component source code should be revealed. */
@@ -105,7 +105,7 @@ const exported = createInternalRoot(() => {
     // go to selected component source code on click
     makeEventListener(
       window,
-      "click",
+      'click',
       e => {
         const { target } = e
         if (!(target instanceof HTMLElement)) return
@@ -134,10 +134,10 @@ const exported = createInternalRoot(() => {
    * @param options {@link LocatorOptions} for the locator.
    */
   function useLocator(options: LocatorOptions): void {
-    if (locatorUsed) return warn("useLocator can be used called once.")
+    if (locatorUsed) return warn('useLocator can be used called once.')
     locatorUsed = true
     if (options.targetIDE) targetIDE = options.targetIDE
-    const isHoldingKey = createKeyHold(options.key ?? "Alt", { preventDefault: true })
+    const isHoldingKey = createKeyHold(options.key ?? 'Alt', { preventDefault: true })
     addLocatorModeSource(isHoldingKey)
   }
 

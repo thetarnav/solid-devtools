@@ -11,10 +11,10 @@ import {
   createRenderEffect,
   onCleanup,
   Show,
-} from "solid-js"
-import Todos from "./Todos"
-import { disposeApp } from "."
-import { ThemeExample } from "./Theme"
+} from 'solid-js'
+import Todos from './Todos'
+import { disposeApp } from '.'
+import { ThemeExample } from './Theme'
 
 const doMediumCalc = () => {
   Array.from({ length: 1000000 }, (_, i) => i).sort(() => Math.random() - 5)
@@ -26,7 +26,7 @@ let disposeOuterRoot: VoidFunction
 createRoot(dispose => {
   disposeOuterRoot = dispose
 
-  getOwner()!.name = "OUTSIDE_ROOT"
+  getOwner()!.name = 'OUTSIDE_ROOT'
 
   const [count, setCount] = createSignal(0)
   setRootCount = setCount
@@ -35,12 +35,12 @@ createRoot(dispose => {
     count()
     if (count() === 1) {
       createRoot(dispose => {
-        getOwner()!.name = "OUTSIDE_TEMP_ROOT"
+        getOwner()!.name = 'OUTSIDE_TEMP_ROOT'
 
         createEffect(() => count() === 4 && dispose())
 
         createRoot(_ => {
-          getOwner()!.name = "OUTSIDE_INSIDE_ROOT"
+          getOwner()!.name = 'OUTSIDE_INSIDE_ROOT'
           createEffect(() => count())
         })
       })
@@ -67,7 +67,7 @@ const Article: Component = () => {
       <h3>A cool headline for testing :)</h3>
       <p>
         Lorem ipsum dolor sit amet, consectetur adipisicing elit. Dolorem odio culpa vel vitae? Quis
-        deleniti soluta rem velit necessitatibus?{" "}
+        deleniti soluta rem velit necessitatibus?{' '}
         <PassChildren>
           <b>
             Saepe nulla omnis nobis minima perferendis odio doloremque deleniti dolore corrupti.
@@ -87,7 +87,7 @@ const App: Component = () => {
   const [showEven, setShowEven] = createSignal(false)
   const fnSig = createSignal(() => {})
   const nullSig = createSignal(null)
-  const symbolSig = createSignal(Symbol("hello-symbol"))
+  const symbolSig = createSignal(Symbol('hello-symbol'))
   const [header, setHeader] = createSignal(
     <h1 onClick={() => setHeader(<h1>Call that an easter egg</h1>)}>Welcome to the Sandbox</h1>,
   )
@@ -98,7 +98,7 @@ const App: Component = () => {
 
   const objmemo = createMemo(() => {
     return {
-      foo: "bar",
+      foo: 'bar',
       count: count(),
       get subheader() {
         return <h2>Subheader</h2>
@@ -108,15 +108,15 @@ const App: Component = () => {
 
   createComputed(
     _ => {
-      const hello = createSignal("hello")
+      const hello = createSignal('hello')
       setShowEven(count() % 2 === 0)
       return count()
     },
     undefined,
-    { name: "c-12-3-1-2-3-2-1-1-1-1-1-1-1-0-1-2-1-1-0" },
+    { name: 'c-12-3-1-2-3-2-1-1-1-1-1-1-1-0-1-2-1-1-0' },
   )
 
-  createComputed(() => {}, undefined, { name: "frozen" })
+  createComputed(() => {}, undefined, { name: 'frozen' })
   createRenderEffect(() => {})
 
   const Bold: ParentComponent = props => <b>{props.children}</b>
@@ -130,7 +130,7 @@ const App: Component = () => {
           <Button onClick={() => setCount(p => ++p)} text={`Count: ${count()}`} />
           <Button onClick={() => setCount(p => ++p)} text={`Count: ${count()}`} />
         </header>
-        <div style={{ height: "1rem", "margin-top": "1rem" }}>
+        <div style={{ height: '1rem', 'margin-top': '1rem' }}>
           <Show when={showEven()}>
             <Bold>{count()} is even!</Bold>
           </Show>
@@ -150,10 +150,10 @@ const App: Component = () => {
       <button onClick={() => disposeOuterRoot()}>Dispose OUTSIDE_ROOT</button>
       <Article />
       <Todos />
-      <div style={{ margin: "24px" }}>
+      <div style={{ margin: '24px' }}>
         <CountingComponent />
       </div>
-      <div style={{ margin: "24px" }}>
+      <div style={{ margin: '24px' }}>
         <ThemeExample />
       </div>
     </>

@@ -1,10 +1,10 @@
-import { describe, test } from "vitest"
-import { storeOverwriteName, storeOverwriteNamespace } from "../src/utils"
-import plugin from "../src/wrapStores"
-import { assertTransform } from "./utils"
+import { describe, test } from 'vitest'
+import { storeOverwriteName, storeOverwriteNamespace } from '../src/utils'
+import plugin from '../src/wrapStores'
+import { assertTransform } from './utils'
 
-describe("createStore", () => {
-  test("named import", () => {
+describe('createStore', () => {
+  test('named import', () => {
     const src = `import { createStore } from "solid-js/store";`
 
     const expectedOutput = `import { createStore as ${storeOverwriteName}0 } from "solid-js/store";
@@ -22,7 +22,7 @@ const createStore = (obj, options) => {
     assertTransform(src, expectedOutput, plugin)
   })
 
-  test("renamed import", () => {
+  test('renamed import', () => {
     const src = `import { createStore as createSolidStore } from "solid-js/store";`
 
     const expectedOutput = `import { createStore as ${storeOverwriteName}0 } from "solid-js/store";
@@ -41,8 +41,8 @@ const createSolidStore = (obj, options) => {
   })
 })
 
-describe("createMutable", () => {
-  test("named import", () => {
+describe('createMutable', () => {
+  test('named import', () => {
     const src = `import { createMutable } from "solid-js/store";`
 
     const expectedOutput = `import { createMutable as ${storeOverwriteName}0 } from "solid-js/store";
@@ -60,7 +60,7 @@ const createMutable = (obj, options) => {
     assertTransform(src, expectedOutput, plugin)
   })
 
-  test("renamed import", () => {
+  test('renamed import', () => {
     const src = `import { createMutable as createSolidStore } from "solid-js/store";`
 
     const expectedOutput = `import { createMutable as ${storeOverwriteName}0 } from "solid-js/store";
@@ -79,7 +79,7 @@ const createSolidStore = (obj, options) => {
   })
 })
 
-test("namespace import", () => {
+test('namespace import', () => {
   const src = `import * as Store from "solid-js/store";`
 
   const expectedOutput = `import * as ${storeOverwriteNamespace} from "solid-js/store";
@@ -111,7 +111,7 @@ Store.createMutable = (obj, options) => {
   assertTransform(src, expectedOutput, plugin)
 })
 
-test("both", () => {
+test('both', () => {
   const src = `import { createMutable, createStore } from "solid-js/store";`
 
   const expectedOutput = `import { createMutable as ${storeOverwriteName}0, createStore as ${storeOverwriteName}1 } from "solid-js/store";

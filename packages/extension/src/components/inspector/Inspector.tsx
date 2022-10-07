@@ -1,11 +1,11 @@
-import { Component, Show } from "solid-js"
-import { Entries } from "@solid-primitives/keyed"
-import { NodeType } from "@solid-devtools/shared/graph"
-import { Scrollable, Badge } from "@/ui"
-import { Inspector, inspector } from "@/state"
-import { Signals, ValueNode } from "./SignalNode"
-import * as styles from "./inspector.css"
-import { $VALUE } from "@/state/inspector"
+import { Component, Show } from 'solid-js'
+import { Entries } from '@solid-primitives/keyed'
+import { NodeType } from '@solid-devtools/shared/graph'
+import { Scrollable, Badge } from '@/ui'
+import { Inspector, inspector } from '@/state'
+import { Signals, ValueNode } from './SignalNode'
+import * as styles from './inspector.css'
+import { $VALUE } from '@/state/inspector'
 
 const DetailsContent: Component<{ details: Inspector.Details }> = ({ details }) => {
   const { name, id, type, signals, props: componentProps, value: nodeValue } = details

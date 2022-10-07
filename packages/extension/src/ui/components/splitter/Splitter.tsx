@@ -1,11 +1,11 @@
-import { children, createEffect, createSignal, JSX, Show } from "solid-js"
-import { makeEventListener } from "@solid-primitives/event-listener"
-import { clamp } from "@solid-primitives/utils"
-import { useWindowSize } from "@solid-primitives/resize-observer"
-import { assignInlineVars } from "@vanilla-extract/dynamic"
-import { createBodyCursor } from "@solid-primitives/cursor"
-import { Icon } from "@/ui"
-import * as styles from "./Splitter.css"
+import { children, createEffect, createSignal, JSX, Show } from 'solid-js'
+import { makeEventListener } from '@solid-primitives/event-listener'
+import { clamp } from '@solid-primitives/utils'
+import { useWindowSize } from '@solid-primitives/resize-observer'
+import { assignInlineVars } from '@vanilla-extract/dynamic'
+import { createBodyCursor } from '@solid-primitives/cursor'
+import { Icon } from '@/ui'
+import * as styles from './Splitter.css'
 
 export function Splitter(props: {
   children: JSX.Element
@@ -29,13 +29,13 @@ export function Splitter(props: {
     e.preventDefault()
     setDragging(true)
   }
-  makeEventListener(window, "pointermove", e => {
+  makeEventListener(window, 'pointermove', e => {
     if (!dragging()) return
     setProgress(clamp(e.x / containerWidth, 0, 1))
   })
-  makeEventListener(window, "pointerup", setDragging.bind(void 0, false))
+  makeEventListener(window, 'pointerup', setDragging.bind(void 0, false))
 
-  createBodyCursor(() => dragging() && "col-resize")
+  createBodyCursor(() => dragging() && 'col-resize')
 
   let container!: HTMLDivElement
   return (
@@ -43,7 +43,7 @@ export function Splitter(props: {
       class={styles.container}
       data-open={!!sideResolved()}
       style={assignInlineVars({
-        [styles.progress]: progress() * 100 + "%",
+        [styles.progress]: progress() * 100 + '%',
       })}
       ref={container}
     >

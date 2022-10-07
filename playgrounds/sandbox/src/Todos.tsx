@@ -1,5 +1,5 @@
-import { createEffect, createSignal, batch, For, Component, getOwner } from "solid-js"
-import { createStore, Store, SetStoreFunction } from "solid-js/store"
+import { createEffect, createSignal, batch, For, Component, getOwner } from 'solid-js'
+import { createStore, Store, SetStoreFunction } from 'solid-js/store'
 // import { isSolidMemo } from "@solid-devtools/debugger"
 
 export function createLocalStore<T extends object>(
@@ -47,8 +47,8 @@ const Todo: Component<{
 }
 
 const Todos: Component = () => {
-  const [newTitle, setTitle] = createSignal("")
-  const [todos, setTodos] = createLocalStore<TodoItem[]>("todos", [])
+  const [newTitle, setTitle] = createSignal('')
+  const [todos, setTodos] = createLocalStore<TodoItem[]>('todos', [])
 
   // makeStoreObserver(todos, console.log)
 
@@ -61,7 +61,7 @@ const Todos: Component = () => {
         title: newTitle(),
         done: false,
       })
-      setTitle("")
+      setTitle('')
     })
   }
 
@@ -92,8 +92,8 @@ const Todos: Component = () => {
         {(todo, i) => (
           <Todo
             {...todo}
-            onCheck={v => setTodos(i(), "done", v)}
-            onUpdate={v => setTodos(i(), "title", v)}
+            onCheck={v => setTodos(i(), 'done', v)}
+            onUpdate={v => setTodos(i(), 'title', v)}
             onRemove={() => setTodos(t => removeIndex(t, i()))}
           />
         )}

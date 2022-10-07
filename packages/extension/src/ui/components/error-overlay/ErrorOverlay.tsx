@@ -1,7 +1,7 @@
-import { ParentComponent } from "solid-js"
-import { ErrorOverlay as HeadlessErrorOverlay, ErrorOverlayComponents } from "solid-error-overlay"
-import * as styles from "./error-overlay.css"
-import { Icon } from "@/ui"
+import { ParentComponent } from 'solid-js'
+import { ErrorOverlay as HeadlessErrorOverlay, ErrorOverlayComponents } from 'solid-error-overlay'
+import * as styles from './error-overlay.css'
+import { Icon } from '@/ui'
 
 const CustomErrorOverlayComponents: Partial<ErrorOverlayComponents> = {
   ErrorOverlayContainer: props => (
@@ -29,7 +29,7 @@ const CustomErrorOverlayComponents: Partial<ErrorOverlayComponents> = {
   ErrorOverlayPageCounter: props => (
     <span class={styles.pageCounter}>
       <span>{props.currentCount}</span>
-      {" of "}
+      {' of '}
       <span>{props.maxCount}</span>
     </span>
   ),
@@ -53,9 +53,9 @@ const CustomErrorOverlayComponents: Partial<ErrorOverlayComponents> = {
   ErrorOverlayErrorInfo: props => (
     <span class={styles.content.error}>
       <span class={styles.content.errorName}>
-        {props.value instanceof Error ? props.value.name : "UnknownError"}
+        {props.value instanceof Error ? props.value.name : 'UnknownError'}
       </span>
-      {": "}
+      {': '}
       {props.value instanceof Error ? props.value.message : String(props.value)}
     </span>
   ),

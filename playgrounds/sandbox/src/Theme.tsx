@@ -1,5 +1,5 @@
-import { createContext, useContext, ParentComponent, Component, createSignal } from "solid-js"
-import { createStore } from "solid-js/store"
+import { createContext, useContext, ParentComponent, Component, createSignal } from 'solid-js'
+import { createStore } from 'solid-js/store'
 
 export type ThemeContextState = {
   readonly color: string
@@ -14,8 +14,8 @@ export type ThemeContextValue = [
 ]
 
 const defaultState = {
-  color: "#66e6ac",
-  title: "Fallback Title",
+  color: '#66e6ac',
+  title: 'Fallback Title',
 }
 
 const ThemeContext = createContext<ThemeContextValue>([

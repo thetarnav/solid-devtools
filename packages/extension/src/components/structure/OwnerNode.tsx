@@ -1,12 +1,12 @@
-import { Accessor, Component } from "solid-js"
-import { assignInlineVars } from "@vanilla-extract/dynamic"
-import { NodeType } from "@solid-devtools/shared/graph"
-import { structure, Structure, inspector } from "@/state"
-import { Badge, Highlight, Icon } from "@/ui"
-import { useStructure } from "./ctx"
-import * as styles from "./ownerNode.css"
-import { createHover } from "@solid-devtools/shared/primitives"
-import { createPingedSignal } from "@/utils"
+import { Accessor, Component } from 'solid-js'
+import { assignInlineVars } from '@vanilla-extract/dynamic'
+import { NodeType } from '@solid-devtools/shared/graph'
+import { structure, Structure, inspector } from '@/state'
+import { Badge, Highlight, Icon } from '@/ui'
+import { useStructure } from './ctx'
+import * as styles from './ownerNode.css'
+import { createHover } from '@solid-devtools/shared/primitives'
+import { createPingedSignal } from '@/utils'
 
 export const NodeTypeIcon: Component<{ type: NodeType; class?: string }> = props => {
   const IconComponent: Icon.IconComponent | null = (() => {
@@ -57,7 +57,7 @@ export const OwnerNode: Component<{
       class={styles.container}
       onClick={e => inspector.setInspectedNode(isSelected() ? null : owner)}
       {...createHover(hovering => toggleHoveredOwner(id, hovering))}
-      style={assignInlineVars({ [styles.levelVar]: getOwner().level + "" })}
+      style={assignInlineVars({ [styles.levelVar]: getOwner().level + '' })}
     >
       <div class={styles.selection}></div>
       <div class={styles.levelPadding} />

@@ -1,4 +1,4 @@
-import { createSignal } from "solid-js"
+import { createSignal } from 'solid-js'
 
 declare global {
   interface Window {
@@ -11,9 +11,9 @@ declare global {
 }
 
 export const [versions, setVersions] = createSignal({
-  client: "",
-  expectedClient: "",
-  extension: "",
+  client: '',
+  expectedClient: '',
+  extension: '',
 })
 
 window.versions = {

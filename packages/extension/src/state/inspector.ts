@@ -1,12 +1,12 @@
-import { batch, createComputed, createRoot, createSelector, createSignal, untrack } from "solid-js"
-import { createStore, produce } from "solid-js/store"
-import { Writable } from "type-fest"
-import { createSimpleEmitter } from "@solid-primitives/event-bus"
-import { Mapped, NodeID, NodeType } from "@solid-devtools/shared/graph"
-import { EncodedValue } from "@solid-devtools/shared/serialize"
-import { Messages } from "@solid-devtools/shared/bridge"
-import { untrackedCallback } from "@solid-devtools/shared/primitives"
-import structure, { Structure } from "./structure"
+import { batch, createComputed, createRoot, createSelector, createSignal, untrack } from 'solid-js'
+import { createStore, produce } from 'solid-js/store'
+import { Writable } from 'type-fest'
+import { createSimpleEmitter } from '@solid-primitives/event-bus'
+import { Mapped, NodeID, NodeType } from '@solid-devtools/shared/graph'
+import { EncodedValue } from '@solid-devtools/shared/serialize'
+import { Messages } from '@solid-devtools/shared/bridge'
+import { untrackedCallback } from '@solid-devtools/shared/primitives'
+import structure, { Structure } from './structure'
 
 export namespace Inspector {
   export type Signal = {
@@ -66,7 +66,7 @@ export namespace Inspector {
 function reconcileValue(proxy: EncodedValue<boolean>, next: EncodedValue<boolean>) {
   proxy.type = next.type
   // value is a literal, so we can just assign it
-  if ("value" in next) proxy.value = next.value
+  if ('value' in next) proxy.value = next.value
   else delete proxy.value
   if (next.children) {
     // add new children
@@ -115,7 +115,7 @@ function createDetails(
   const signals = raw.signals.reduce((signals, signal) => {
     signals[signal.id] = createSignalNode(signal)
     return signals
-  }, {} as Inspector.Details["signals"])
+  }, {} as Inspector.Details['signals'])
   const path = structure.getNodePath(node)
   const details: Writable<Inspector.Details> = {
     id: raw.id,
@@ -132,13 +132,13 @@ function createDetails(
       record: Object.entries(raw.props.record).reduce((props, [propName, value]) => {
         props[propName] = { value, selected: false }
         return props
-      }, {} as Inspector.Props["record"]),
+      }, {} as Inspector.Props['record']),
     }
   }
   return details
 }
 
-export const $VALUE = Symbol("value")
+export const $VALUE = Symbol('value')
 
 const inspector = createRoot(() => {
   const [inspectedNode, setInspectedNode] = createSignal<Structure.Node | null>(null)
@@ -149,7 +149,7 @@ const inspector = createRoot(() => {
 
   const isNodeInspected = createSelector<NodeID | null, NodeID>(() => inspectedNode()?.id ?? null)
 
-  const setInspected: (data: Structure.Node | null | Messages["SendSelectedOwner"]) => void =
+  const setInspected: (data: Structure.Node | null | Messages['SendSelectedOwner']) => void =
     untrackedCallback(data => {
       batch(() => {
         if (!data) {
@@ -159,7 +159,7 @@ const inspector = createRoot(() => {
         }
 
         const currentNode = inspectedNode()
-        if (typeof data === "object") {
+        if (typeof data === 'object') {
           if (currentNode && data.id === currentNode.id) return
           setInspectedNode(data)
           setDetails({ value: null })
@@ -185,16 +185,16 @@ const inspector = createRoot(() => {
 
   const updateDetails = untrackedCallback((raw: Mapped.OwnerDetails) => {
     const node = inspectedNode()
-    if (!node) return console.warn("updateDetails: no node is being inspected")
-    setDetails("value", createDetails(node, raw))
+    if (!node) return console.warn('updateDetails: no node is being inspected')
+    setDetails('value', createDetails(node, raw))
   })
 
   const handleSignalUpdates = untrackedCallback(
     (updates: { id: NodeID; value: EncodedValue<boolean> }[], isUpdate = true) => {
       if (!details()) return
       setDetails(
-        "value",
-        "signals",
+        'value',
+        'signals',
         produce(proxy => {
           for (const update of updates) {
             const signal = proxy[update.id]
@@ -209,36 +209,36 @@ const inspector = createRoot(() => {
   const handlePropsUpdate = untrackedCallback((props: Mapped.Props) => {
     if (!details()?.props) return
     setDetails(
-      "value",
-      "props",
+      'value',
+      'props',
       produce(proxy => reconcileProps(proxy!, props)),
     )
   })
   const handleValueUpdate = untrackedCallback((value: EncodedValue<boolean>, isUpdate: boolean) => {
     if (!details()?.value) return
     setDetails(
-      "value",
-      "value",
+      'value',
+      'value',
       produce(proxy => reconcileValue(proxy!, value)),
     )
     isUpdate && emitValueUpdate($VALUE)
   })
 
   /** variable for a callback in bridge.ts */
-  let onInspectValue: ((payload: Messages["ToggleInspectedValue"]) => void) | undefined
+  let onInspectValue: ((payload: Messages['ToggleInspectedValue']) => void) | undefined
   const setOnInspectValue = (fn: typeof onInspectValue) => (onInspectValue = fn)
 
   function togglePropSelection(id: string, selected?: boolean): void {
-    setDetails("value", "props", "record", id, "selected", p => (selected = selected ?? !p))
-    onInspectValue!({ type: "prop", id, selected: selected! })
+    setDetails('value', 'props', 'record', id, 'selected', p => (selected = selected ?? !p))
+    onInspectValue!({ type: 'prop', id, selected: selected! })
   }
   function toggleSignalSelection(id: NodeID, selected?: boolean) {
-    setDetails("value", "signals", id, "selected", p => (selected = selected ?? !p))
-    onInspectValue!({ type: "signal", id, selected: selected! })
+    setDetails('value', 'signals', id, 'selected', p => (selected = selected ?? !p))
+    onInspectValue!({ type: 'signal', id, selected: selected! })
   }
   function toggleValueSelection(selected?: boolean) {
-    setDetails("value", "valueSelected", p => (selected = selected ?? !p))
-    onInspectValue!({ type: "value", selected: selected! })
+    setDetails('value', 'valueSelected', p => (selected = selected ?? !p))
+    onInspectValue!({ type: 'value', selected: selected! })
   }
 
   //

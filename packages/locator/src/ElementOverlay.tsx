@@ -7,13 +7,13 @@ import {
   createEffect,
   Accessor,
   Index,
-} from "solid-js"
-import { Portal } from "solid-js/web"
-import { animate } from "motion"
-import { clsx } from "clsx"
-import { createElementCursor } from "@solid-primitives/cursor"
-import { createElementBounds } from "@solid-primitives/bounds"
-import { HoveredComponent } from "./findComponent"
+} from 'solid-js'
+import { Portal } from 'solid-js/web'
+import { animate } from 'motion'
+import { clsx } from 'clsx'
+import { createElementCursor } from '@solid-primitives/cursor'
+import { createElementBounds } from '@solid-primitives/bounds'
+import { HoveredComponent } from './findComponent'
 
 const styles = /*css*/ `
 .element-overlay {
@@ -94,7 +94,7 @@ export function attachElementOverlay(selected: Accessor<HoveredComponent[]>) {
       <Index each={selected()}>
         {component => {
           // set pointer cursor to selected component
-          createElementCursor(() => component().element, "pointer")
+          createElementCursor(() => component().element, 'pointer')
           const bounds = createElementBounds(() => component().element)
           return (
             <ElementOverlay
@@ -124,13 +124,13 @@ const ElementOverlay: Component<ElementOverlayProps> = props => {
         class="element-overlay"
         style={{
           transform: transform(),
-          width: width() + "px",
-          height: height() + "px",
+          width: width() + 'px',
+          height: height() + 'px',
         }}
       >
         <div class="border" />
         <Show when={!!props.name}>
-          <div class={clsx("name-container", placeOnTop() ? "top" : "bottom")}>
+          <div class={clsx('name-container', placeOnTop() ? 'top' : 'bottom')}>
             <div
               class="name-animated-container"
               ref={el => {

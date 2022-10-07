@@ -1,5 +1,5 @@
-import { createEffect, onCleanup, untrack } from "solid-js"
-import { throttle } from "@solid-primitives/scheduled"
+import { createEffect, onCleanup, untrack } from 'solid-js'
+import { throttle } from '@solid-primitives/scheduled'
 import {
   DebuggerContext,
   getOwner,
@@ -7,11 +7,11 @@ import {
   NodeType,
   Solid,
   Core,
-} from "@solid-devtools/shared/graph"
-import { INTERNAL } from "@solid-devtools/shared/variables"
-import { untrackedCallback } from "@solid-devtools/shared/primitives"
-import { warn } from "@solid-devtools/shared/utils"
-import { ComputationUpdateHandler, WalkerResult, walkSolidTree } from "./walker"
+} from '@solid-devtools/shared/graph'
+import { INTERNAL } from '@solid-devtools/shared/variables'
+import { untrackedCallback } from '@solid-devtools/shared/primitives'
+import { warn } from '@solid-devtools/shared/utils'
+import { ComputationUpdateHandler, WalkerResult, walkSolidTree } from './walker'
 import {
   enabled,
   onForceUpdate,
@@ -20,7 +20,7 @@ import {
   removeRoot,
   pushComputationUpdate,
   debuggerConfig,
-} from "./plugin"
+} from './plugin'
 import {
   createInternalRoot,
   getDebuggerContext,
@@ -30,7 +30,7 @@ import {
   onOwnerCleanup,
   removeDebuggerContext,
   setDebuggerContext,
-} from "./utils"
+} from './utils'
 
 const RootMap: Record<NodeID, (inspectedId?: NodeID) => WalkerResult | null> = {}
 export const walkSolidRoot = (rootId: NodeID, inspectedId?: NodeID): WalkerResult | null => {
@@ -99,7 +99,7 @@ export function createGraphRoot(owner: Solid.Root): void {
  */
 export function attachDebugger(_owner: Core.Owner = getOwner()!): void {
   let owner = _owner as Solid.Owner
-  if (!owner) return warn("reatachOwner helper should be called synchronously in a reactive owner.")
+  if (!owner) return warn('reatachOwner helper should be called synchronously in a reactive owner.')
 
   forEachLookupRoot(owner, (root, ctx) => {
     if (ctx === INTERNAL) return
@@ -112,7 +112,7 @@ export function attachDebugger(_owner: Core.Owner = getOwner()!): void {
     if (ctx) {
       ctx.triggerRootUpdate()
       let parent = findClosestAliveParent(root)!
-      if (!parent.owner) return warn("PARENT_SHOULD_BE_ALIVE")
+      if (!parent.owner) return warn('PARENT_SHOULD_BE_ALIVE')
       root.sdtAttached = parent.owner
 
       const onParentCleanup = () => {
@@ -177,7 +177,7 @@ function forEachLookupRoot(
     // check if it's a root/subroot
     if (isSolidRoot(owner)) {
       // skip already handled and INTERNAL roots
-      if ("sdtAttached" in owner) {
+      if ('sdtAttached' in owner) {
         if (!ctx) ctx = getDebuggerContext(owner)
         break
       }

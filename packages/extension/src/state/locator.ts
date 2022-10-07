@@ -1,5 +1,5 @@
-import { NodeID } from "@solid-devtools/shared/graph"
-import { batch, createRoot, createSignal } from "solid-js"
+import { NodeID } from '@solid-devtools/shared/graph'
+import { batch, createRoot, createSignal } from 'solid-js'
 
 const locator = createRoot(() => {
   const [extLocatorEnabled, setExtLocator] = createSignal(false)

@@ -1,3 +1,3 @@
-import defineConfig from "../../configs/tsup.config"
+import defineConfig from '../../configs/tsup.config'
 
 export default defineConfig()

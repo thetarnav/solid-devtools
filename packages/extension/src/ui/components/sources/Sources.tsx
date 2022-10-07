@@ -1,6 +1,6 @@
-import { Component, Show } from "solid-js"
-import { Repeat } from "@solid-primitives/range"
-import * as styles from "./sources.css"
+import { Component, Show } from 'solid-js'
+import { Repeat } from '@solid-primitives/range'
+import * as styles from './sources.css'
 
 export const Sources: Component<{ length: number }> = props => {
   const a = () => Math.ceil(props.length / 2)

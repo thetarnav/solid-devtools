@@ -1,9 +1,9 @@
-import { defineConfig } from "vite"
-import solidPlugin from "vite-plugin-solid"
-import devtoolsPlugin from "@solid-devtools/transform"
-import path from "path"
+import { defineConfig } from 'vite'
+import solidPlugin from 'vite-plugin-solid'
+import devtoolsPlugin from '@solid-devtools/transform'
+import path from 'path'
 
-const pathToPackages = path.resolve(__dirname, "..", "..", "packages")
+const pathToPackages = path.resolve(__dirname, '..', '..', 'packages')
 const resolvePackage = (...filepath: string[]) => path.resolve(pathToPackages, ...filepath)
 
 export default defineConfig({
@@ -25,6 +25,6 @@ export default defineConfig({
     },
   },
   build: {
-    target: "esnext",
+    target: 'esnext',
   },
 })

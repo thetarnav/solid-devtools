@@ -1,13 +1,13 @@
-import { ComponentProps, createComputed, createSignal, ParentComponent } from "solid-js"
-import { createKeyHold } from "@solid-primitives/keyboard"
-import { makeEventListener } from "@solid-primitives/event-listener"
-import { createBodyCursor } from "@solid-primitives/cursor"
-import * as styles from "./Scrollable.css"
-import { combineProps } from "@solid-primitives/props"
+import { ComponentProps, createComputed, createSignal, ParentComponent } from 'solid-js'
+import { createKeyHold } from '@solid-primitives/keyboard'
+import { makeEventListener } from '@solid-primitives/event-listener'
+import { createBodyCursor } from '@solid-primitives/cursor'
+import * as styles from './Scrollable.css'
+import { combineProps } from '@solid-primitives/props'
 
-export const Scrollable: ParentComponent<ComponentProps<"div">> = props => {
+export const Scrollable: ParentComponent<ComponentProps<'div'>> = props => {
   const [dragging, setDragging] = createSignal(false)
-  const holdingSpace = createKeyHold(" ")
+  const holdingSpace = createKeyHold(' ')
 
   createComputed(() => {
     // letting go of the spacebar should stop dragging
@@ -15,11 +15,11 @@ export const Scrollable: ParentComponent<ComponentProps<"div">> = props => {
   })
 
   // TODO: implement this logic in @solid-primitives/keyboard (prevent default repeated events)
-  makeEventListener(window, "keydown", e => {
-    if (e.key === " " && holdingSpace()) e.preventDefault()
+  makeEventListener(window, 'keydown', e => {
+    if (e.key === ' ' && holdingSpace()) e.preventDefault()
   })
 
-  createBodyCursor(() => dragging() && "grabbing")
+  createBodyCursor(() => dragging() && 'grabbing')
 
   let start = { x: 0, y: 0 }
   let startScroll = { x: 0, y: 0 }
@@ -31,7 +31,7 @@ export const Scrollable: ParentComponent<ComponentProps<"div">> = props => {
     setDragging(true)
   }
 
-  makeEventListener(window, "pointermove", e => {
+  makeEventListener(window, 'pointermove', e => {
     if (!dragging()) return
     e.preventDefault()
     const x = start.x - e.x
@@ -40,9 +40,9 @@ export const Scrollable: ParentComponent<ComponentProps<"div">> = props => {
     container.scrollTop = startScroll.y + y
   })
 
-  makeEventListener(window, "pointerup", setDragging.bind(void 0, false))
+  makeEventListener(window, 'pointerup', setDragging.bind(void 0, false))
 
-  makeEventListener(window, "mouseout", e => {
+  makeEventListener(window, 'mouseout', e => {
     // if the mouse leaves the window, stop dragging
     if (!e.relatedTarget) setDragging(false)
   })
@@ -53,12 +53,12 @@ export const Scrollable: ParentComponent<ComponentProps<"div">> = props => {
       {...combineProps(props, {
         ref: el => (container = el),
         get class() {
-          return styles.container[holdingSpace() ? (dragging() ? "dragging" : "space") : "normal"]
+          return styles.container[holdingSpace() ? (dragging() ? 'dragging' : 'space') : 'normal']
         },
         onPointerDown,
       })}
     >
-      <div class={styles.overlay[holdingSpace() ? "space" : "normal"]}></div>
+      <div class={styles.overlay[holdingSpace() ? 'space' : 'normal']}></div>
       <div class={styles.content}>{props.children}</div>
     </div>
   )

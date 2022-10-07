@@ -1,12 +1,12 @@
-import { NodeType, NodeID, Solid, Mapped } from "@solid-devtools/shared/graph"
+import { NodeType, NodeID, Solid, Mapped } from '@solid-devtools/shared/graph'
 import {
   getComponentRefreshNode,
   markNodeID,
   markOwnerName,
   markOwnerType,
   resolveElements,
-} from "./utils"
-import { observeComputationUpdate } from "./update"
+} from './utils'
+import { observeComputationUpdate } from './update'
 
 export type ComputationUpdateHandler = (rootId: NodeID, nodeId: NodeID) => void
 
@@ -48,7 +48,7 @@ function mapOwner(owner: Solid.Owner): Mapped.Owner {
     // combine context provide component with it' render-effect
     let contextNode: Solid.Computation | undefined
     if (
-      name === "provider" &&
+      name === 'provider' &&
       owner.owned &&
       owner.owned.length === 1 &&
       markOwnerType((contextNode = owner.owned[0])) === NodeType.Context

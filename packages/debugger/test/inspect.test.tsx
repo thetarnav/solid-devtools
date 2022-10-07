@@ -1,6 +1,6 @@
-import { describe, beforeEach, jest, it, expect } from "@jest/globals"
-import { getOwner, NodeType, Solid } from "@solid-devtools/shared/graph"
-import { ValueType } from "@solid-devtools/shared/serialize"
+import { describe, beforeEach, jest, it, expect } from '@jest/globals'
+import { getOwner, NodeType, Solid } from '@solid-devtools/shared/graph'
+import { ValueType } from '@solid-devtools/shared/serialize'
 import {
   createComputed,
   createMemo,
@@ -8,45 +8,45 @@ import {
   createRoot,
   createSignal,
   JSX,
-} from "solid-js"
-import type * as API from "../src/inspect"
+} from 'solid-js'
+import type * as API from '../src/inspect'
 
 const getModule = (): typeof API.collectOwnerDetails =>
-  require("../src/inspect").collectOwnerDetails
+  require('../src/inspect').collectOwnerDetails
 
-describe("collectOwnerDetails", () => {
+describe('collectOwnerDetails', () => {
   beforeEach(() => {
     delete (window as any).Solid$$
     jest.resetModules()
   })
 
-  it("collects focused owner details", () =>
+  it('collects focused owner details', () =>
     createRoot(dispose => {
       const collectOwnerDetails = getModule()
-      const [s] = createSignal(0, { name: "source" })
+      const [s] = createSignal(0, { name: 'source' })
 
       let owner!: Solid.Owner
-      const div = document.createElement("div")
+      const div = document.createElement('div')
 
       createComputed(
         () => {
           const focused = createMemo(
             () => {
               owner = getOwner()!
-              owner.sdtId = "ff"
+              owner.sdtId = 'ff'
               s()
-              createSignal(div, { name: "element" })
-              const memo = createMemo(() => 0, undefined, { name: "memo" })
-              createRenderEffect(memo, undefined, { name: "render" })
-              return "value"
+              createSignal(div, { name: 'element' })
+              const memo = createMemo(() => 0, undefined, { name: 'memo' })
+              createRenderEffect(memo, undefined, { name: 'render' })
+              return 'value'
             },
             undefined,
-            { name: "focused" },
+            { name: 'focused' },
           )
           focused()
         },
         undefined,
-        { name: "WRAPPER" },
+        { name: 'WRAPPER' },
       )
 
       const { details, signalMap, elementMap } = collectOwnerDetails(owner, {
@@ -55,41 +55,41 @@ describe("collectOwnerDetails", () => {
       })
 
       expect(details).toEqual({
-        id: "ff",
-        name: "focused",
+        id: 'ff',
+        name: 'focused',
         type: NodeType.Memo,
-        value: { type: ValueType.String, value: "value" },
-        sources: ["3"],
-        observers: ["4"],
+        value: { type: ValueType.String, value: 'value' },
+        sources: ['3'],
+        observers: ['4'],
         signals: [
           {
             type: NodeType.Signal,
-            id: "0",
-            name: "element",
+            id: '0',
+            name: 'element',
             observers: [],
-            value: { type: ValueType.Element, value: { name: "DIV", id: "0" } },
+            value: { type: ValueType.Element, value: { name: 'DIV', id: '0' } },
           },
           {
             type: NodeType.Memo,
-            id: "1",
-            name: "memo",
-            observers: ["2"],
+            id: '1',
+            name: 'memo',
+            observers: ['2'],
             value: { type: ValueType.Number, value: 0 },
           },
         ],
       })
 
-      expect(signalMap).toHaveProperty("0")
-      expect(signalMap).toHaveProperty("1")
-      expect(signalMap["0"].sdtId).toBe("0")
-      expect(signalMap["1"].sdtId).toBe("1")
+      expect(signalMap).toHaveProperty('0')
+      expect(signalMap).toHaveProperty('1')
+      expect(signalMap['0'].sdtId).toBe('0')
+      expect(signalMap['1'].sdtId).toBe('1')
 
-      expect(elementMap.get("0")).toBe(div)
+      expect(elementMap.get('0')).toBe(div)
 
       dispose()
     }))
 
-  it("component props", () => {
+  it('component props', () => {
     const collectOwnerDetails = getModule()
 
     createRoot(dispose => {
@@ -103,7 +103,7 @@ describe("collectOwnerDetails", () => {
         return <div>{props.children}</div>
       }
       createRenderEffect(() => (
-        <TestComponent count={123} nested={{ foo: 1, bar: "2" }}>
+        <TestComponent count={123} nested={{ foo: 1, bar: '2' }}>
           <button>Click me</button>
         </TestComponent>
       ))
@@ -116,27 +116,27 @@ describe("collectOwnerDetails", () => {
       dispose()
 
       expect(details).toEqual({
-        id: "0",
-        name: "TestComponent",
+        id: '0',
+        name: 'TestComponent',
         type: NodeType.Component,
         signals: [],
         sources: [],
-        value: { type: ValueType.Element, value: { id: "0", name: "DIV" } },
+        value: { type: ValueType.Element, value: { id: '0', name: 'DIV' } },
         props: {
           proxy: false,
           record: {
             count: { type: ValueType.Number, value: 123 },
-            children: { type: ValueType.Getter, value: "children" },
+            children: { type: ValueType.Getter, value: 'children' },
             nested: { type: ValueType.Object, value: 2 },
           },
         },
       })
 
-      expect(elementMap.get("0")).toBeInstanceOf(HTMLDivElement)
+      expect(elementMap.get('0')).toBeInstanceOf(HTMLDivElement)
     })
   })
 
-  it("dynamic component props", () =>
+  it('dynamic component props', () =>
     createRoot(dispose => {
       const collectOwnerDetails = getModule()
 
@@ -146,7 +146,7 @@ describe("collectOwnerDetails", () => {
         return <button {...props}>Click me</button>
       }
       createRenderEffect(() => {
-        const props = () => ({ onClick: () => {}, role: "button" } as const)
+        const props = () => ({ onClick: () => {}, role: 'button' } as const)
         return <Button {...props()} />
       })
 
@@ -156,23 +156,23 @@ describe("collectOwnerDetails", () => {
       })
 
       expect(details).toEqual({
-        id: "0",
-        name: "Button",
+        id: '0',
+        name: 'Button',
         type: NodeType.Component,
         signals: [],
         sources: [],
-        value: { type: ValueType.Element, value: { id: "0", name: "BUTTON" } },
+        value: { type: ValueType.Element, value: { id: '0', name: 'BUTTON' } },
         props: {
           // ! this should be true, don't know what's the reason. it's working in the browser
           proxy: false,
           record: {
-            onClick: { type: ValueType.Getter, value: "onClick" },
-            role: { type: ValueType.Getter, value: "role" },
+            onClick: { type: ValueType.Getter, value: 'onClick' },
+            role: { type: ValueType.Getter, value: 'role' },
           },
         },
       })
 
-      expect(elementMap.get("0")).toBeInstanceOf(HTMLButtonElement)
+      expect(elementMap.get('0')).toBeInstanceOf(HTMLButtonElement)
 
       dispose()
     }))
@@ -234,7 +234,7 @@ describe("collectOwnerDetails", () => {
   //   })
   // })
 
-  it("listens to value updates", () => {
+  it('listens to value updates', () => {
     const collectOwnerDetails = getModule()
 
     createRoot(dispose => {
@@ -269,7 +269,7 @@ describe("collectOwnerDetails", () => {
     })
   })
 
-  it("listens to signal updates", () => {
+  it('listens to signal updates', () => {
     const collectOwnerDetails = getModule()
 
     createRoot(dispose => {
@@ -287,14 +287,14 @@ describe("collectOwnerDetails", () => {
 
       setCount(1)
       expect(onSignalUpdate).toBeCalledTimes(1)
-      expect(onSignalUpdate).toBeCalledWith("0", 1)
+      expect(onSignalUpdate).toBeCalledWith('0', 1)
 
       setCount(1)
       expect(onSignalUpdate).toBeCalledTimes(1)
 
       setCount2(1)
       expect(onSignalUpdate).toBeCalledTimes(2)
-      expect(onSignalUpdate).toBeCalledWith("1", 1)
+      expect(onSignalUpdate).toBeCalledWith('1', 1)
 
       dispose()
     })

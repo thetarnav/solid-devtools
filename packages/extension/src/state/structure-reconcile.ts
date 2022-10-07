@@ -1,5 +1,5 @@
-import { Mapped, NodeID, NodeType, RootsUpdates } from "@solid-devtools/shared/graph"
-import type { Structure } from "./structure"
+import { Mapped, NodeID, NodeType, RootsUpdates } from '@solid-devtools/shared/graph'
+import type { Structure } from './structure'
 
 let $nextNodeList: Structure.Node[]
 let $updatedAttached: Record<NodeID, Mapped.Root[]>
@@ -102,8 +102,8 @@ function createNode(
 
 export function reconcileStructure(
   roots: Structure.Node[],
-  updated: RootsUpdates["updated"],
-  removed: RootsUpdates["removed"],
+  updated: RootsUpdates['updated'],
+  removed: RootsUpdates['removed'],
 ): { roots: Structure.Node[]; nodeList: Structure.Node[] } {
   $updated = updated
   $removedSet = new Set(removed)

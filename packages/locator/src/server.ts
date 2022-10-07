@@ -1,5 +1,5 @@
-import { noop } from "@solid-primitives/utils"
-import * as API from "."
+import { noop } from '@solid-primitives/utils'
+import * as API from '.'
 
 export const useLocator: typeof API.useLocator = noop
 export const setTarget: typeof API.setTarget = () => null as any

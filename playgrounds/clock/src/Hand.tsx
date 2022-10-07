@@ -1,4 +1,4 @@
-import type { Accessor, Component } from "solid-js"
+import type { Accessor, Component } from 'solid-js'
 
 type HandProps = {
   rotate: Accessor<string>

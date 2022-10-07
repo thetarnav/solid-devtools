@@ -17,17 +17,12 @@ function Nav() {
         <a href="/job">
           <strong>Jobs</strong>
         </a>
-        <a
-          class="github"
-          href="http://github.com/solidjs/solid"
-          target="_blank"
-          rel="noreferrer"
-        >
+        <a class="github" href="http://github.com/solidjs/solid" target="_blank" rel="noreferrer">
           Built with Solid
         </a>
       </nav>
     </header>
-  );
+  )
 }
 
-export default Nav;
+export default Nav

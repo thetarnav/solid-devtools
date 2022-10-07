@@ -1,15 +1,15 @@
-import { style, styleVariants } from "@vanilla-extract/css"
-import { CSSPropertiesWithVars } from "@vanilla-extract/css/dist/declarations/src/types"
-import { color, spacing, theme } from "@/ui/theme"
-import { createHighlightStyles } from "@/ui/mixins"
+import { style, styleVariants } from '@vanilla-extract/css'
+import { CSSPropertiesWithVars } from '@vanilla-extract/css/dist/declarations/src/types'
+import { color, spacing, theme } from '@/ui/theme'
+import { createHighlightStyles } from '@/ui/mixins'
 
 const RowHeight = spacing[4.5]
 const RowGap = spacing[0.5]
 
 export const Signals = {
   container: style({
-    display: "flex",
-    flexDirection: "column",
+    display: 'flex',
+    flexDirection: 'column',
     gap: RowGap,
   }),
 }
@@ -20,14 +20,14 @@ export const ValueRow = {
   container: style([
     valueRowHighlight.container,
     {
-      width: "100%",
-      display: "flex",
-      flexWrap: "wrap",
-      alignItems: "flex-start",
-      cursor: "pointer",
+      width: '100%',
+      display: 'flex',
+      flexWrap: 'wrap',
+      alignItems: 'flex-start',
+      cursor: 'pointer',
       vars: {
         [valueRowHighlight.bgColorVar]: color.gray[300],
-        [valueRowHighlight.bgOpacityVar]: "0",
+        [valueRowHighlight.bgOpacityVar]: '0',
       },
       fontFamily: theme.font.mono,
       color: color.gray[800],
@@ -35,11 +35,11 @@ export const ValueRow = {
   ]),
   containerFocused: style({
     vars: {
-      [valueRowHighlight.bgOpacityVar]: "0.2",
+      [valueRowHighlight.bgOpacityVar]: '0.2',
     },
   }),
   containerHovered: style({
-    vars: { [valueRowHighlight.bgOpacityVar]: "0.3" },
+    vars: { [valueRowHighlight.bgOpacityVar]: '0.3' },
   }),
   highlight: style([
     valueRowHighlight.highlight,
@@ -50,16 +50,16 @@ export const ValueRow = {
 }
 
 const ValueName_container_base = style({
-  display: "flex",
-  alignItems: "center",
+  display: 'flex',
+  alignItems: 'center',
   height: RowHeight,
 })
 const ValueName_name_base = style({
   height: RowHeight,
-  minWidth: "5ch",
-  marginRight: "2ch",
-  ":after": {
-    content: ":",
+  minWidth: '5ch',
+  marginRight: '2ch',
+  ':after': {
+    content: ':',
     color: color.disabled,
   },
 })
@@ -71,7 +71,7 @@ export const ValueName = {
   signalDot: style({
     width: spacing[1],
     height: spacing[1],
-    borderRadius: "50%",
+    borderRadius: '50%',
     backgroundColor: color.amber[400],
   }),
   icon: style({
@@ -97,7 +97,7 @@ export const ValueName = {
     ],
   }),
   highlight: style({
-    display: "inline-block",
+    display: 'inline-block',
   }),
 }
 
@@ -112,23 +112,23 @@ const bracketsStyles: CSSPropertiesWithVars = {
 }
 export const ValueObject = style({
   color: color.disabled,
-  ":before": {
+  ':before': {
     ...bracketsStyles,
-    content: "{",
+    content: '{',
   },
-  ":after": {
+  ':after': {
     ...bracketsStyles,
-    content: "}",
+    content: '}',
   },
 })
 
 export const collapsable = {
   list: style({
-    width: "100%",
-    display: "flex",
-    flexDirection: "column",
+    width: '100%',
+    display: 'flex',
+    flexDirection: 'column',
     gap: RowGap,
-    marginLeft: "2ch",
+    marginLeft: '2ch',
   }),
 }
 
@@ -151,13 +151,13 @@ export const ValueBoolean = style([
   {
     // the checkbox is not clickable now
     // TODO: is it's not clickable—it shouldn't be able to be focused
-    pointerEvents: "none",
+    pointerEvents: 'none',
   },
 ])
 export const ValueFunction = style([
   baseValue,
   {
-    fontStyle: "italic",
+    fontStyle: 'italic',
   },
 ])
 export const Nullable = style([
@@ -175,23 +175,23 @@ export const ValueElement = {
     elHighlight.container,
     {
       color: color.amber[600],
-      textTransform: "lowercase",
+      textTransform: 'lowercase',
       vars: {
         [elHighlight.bgColorVar]: color.gray[300],
-        [elHighlight.bgOpacityVar]: "0",
+        [elHighlight.bgOpacityVar]: '0',
       },
-      ":hover": {
+      ':hover': {
         vars: {
-          [elHighlight.bgOpacityVar]: "0.6",
+          [elHighlight.bgOpacityVar]: '0.6',
         },
       },
-      ":before": {
+      ':before': {
         color: color.disabled,
         content: `<`,
       },
-      ":after": {
+      ':after': {
         color: color.disabled,
-        content: "/>",
+        content: '/>',
       },
     },
   ]),

@@ -1,13 +1,13 @@
 /* @refresh reload */
-import { render } from "solid-js/web"
-import "solid-devtools"
-import { useLocator } from "solid-devtools"
+import { render } from 'solid-js/web'
+import 'solid-devtools'
+import { useLocator } from 'solid-devtools'
 
-import App from "./App"
-import { ThemeProvider } from "./Theme"
+import App from './App'
+import { ThemeProvider } from './Theme'
 
 useLocator({
-  targetIDE: "vscode",
+  targetIDE: 'vscode',
 })
 
 export const disposeApp = render(
@@ -16,5 +16,5 @@ export const disposeApp = render(
       <App />
     </ThemeProvider>
   ),
-  document.getElementById("root")!,
+  document.getElementById('root')!,
 )

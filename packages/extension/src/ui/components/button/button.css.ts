@@ -1,5 +1,5 @@
-import { ComplexStyleRule, style } from "@vanilla-extract/css"
-import { centerChild, color, rounded, theme, transition } from "@/ui/theme"
+import { ComplexStyleRule, style } from '@vanilla-extract/css'
+import { centerChild, color, rounded, theme, transition } from '@/ui/theme'
 
 export const selectedStyles: ComplexStyleRule = {
   color: color.cyan[700],
@@ -10,11 +10,11 @@ export const selectedStyles: ComplexStyleRule = {
 export const toggleButtonStyles: ComplexStyleRule = {
   ...centerChild,
   color: color.gray[500],
-  backgroundColor: "transparent",
+  backgroundColor: 'transparent',
   border: `1px solid ${color.gray[200]}`,
-  ...transition(["color", "backgroundColor", "borderColor"], theme.duration[200]),
-  ...rounded("md"),
-  ":hover": {
+  ...transition(['color', 'backgroundColor', 'borderColor'], theme.duration[200]),
+  ...rounded('md'),
+  ':hover': {
     color: color.gray[700],
     backgroundColor: color.gray[200],
     borderColor: color.gray[300],

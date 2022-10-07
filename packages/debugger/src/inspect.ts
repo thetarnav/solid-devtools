@@ -1,7 +1,7 @@
-import { Mapped, NodeID, Solid, NodeType, ValueUpdateListener } from "@solid-devtools/shared/graph"
-import { ElementMap, encodeValue, ValueType } from "@solid-devtools/shared/serialize"
-import { $PROXY } from "solid-js"
-import { observeValueUpdate, removeValueUpdateObserver } from "./update"
+import { Mapped, NodeID, Solid, NodeType, ValueUpdateListener } from '@solid-devtools/shared/graph'
+import { ElementMap, encodeValue, ValueType } from '@solid-devtools/shared/serialize'
+import { $PROXY } from 'solid-js'
+import { observeValueUpdate, removeValueUpdateObserver } from './update'
 import {
   getComponentRefreshNode,
   getNodeName,
@@ -13,7 +13,7 @@ import {
   markNodesID,
   markOwnerName,
   markOwnerType,
-} from "./utils"
+} from './utils'
 
 export type SignalUpdateHandler = (nodeId: NodeID, value: unknown) => void
 
@@ -21,7 +21,7 @@ export type SignalUpdateHandler = (nodeId: NodeID, value: unknown) => void
 let $elementMap!: ElementMap
 let $signalMap!: Record<NodeID, Solid.Signal>
 
-const INSPECTOR = Symbol("inspector")
+const INSPECTOR = Symbol('inspector')
 
 function mapSignalNode(node: Solid.Signal, handler: SignalUpdateHandler): Mapped.Signal {
   const id = markNodeID(node)
@@ -59,7 +59,7 @@ export function encodeComponentProps(
   const record = Object.entries(Object.getOwnPropertyDescriptors(props)).reduce(
     (record, [key, descriptor]) => {
       record[key] =
-        "get" in descriptor
+        'get' in descriptor
           ? { type: ValueType.Getter, value: key }
           : encodeValue(
               descriptor.value,
@@ -68,7 +68,7 @@ export function encodeComponentProps(
             )
       return record
     },
-    {} as Mapped.Props["record"],
+    {} as Mapped.Props['record'],
   )
   return { proxy, record }
 }
@@ -101,7 +101,7 @@ export function collectOwnerDetails(
     owned = null
     const symbols = Object.getOwnPropertySymbols(owner.context)
     if (symbols.length !== 1) {
-      console.warn("Context field has more than one symbol. This is not expected.")
+      console.warn('Context field has more than one symbol. This is not expected.')
       getValue = () => undefined
     } else {
       const contextValue = owner.context[symbols[0]]

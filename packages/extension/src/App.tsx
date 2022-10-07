@@ -1,13 +1,13 @@
-import { Component, Show } from "solid-js"
-import { useFloating } from "solid-floating-ui"
-import { offset } from "@floating-ui/dom"
-import { Menu, MenuItem, Popover, PopoverButton, PopoverPanel } from "solid-headless"
-import { Splitter, ToggleButton, Icon } from "@/ui"
-import { inspector, locator } from "@/state"
-import * as styles from "./styles.css"
-import Details from "./components/inspector/Inspector"
-import StructureView from "./components/structure/Structure"
-import { versions } from "./versions"
+import { Component, Show } from 'solid-js'
+import { useFloating } from 'solid-floating-ui'
+import { offset } from '@floating-ui/dom'
+import { Menu, MenuItem, Popover, PopoverButton, PopoverPanel } from 'solid-headless'
+import { Splitter, ToggleButton, Icon } from '@/ui'
+import { inspector, locator } from '@/state'
+import * as styles from './styles.css'
+import Details from './components/inspector/Inspector'
+import StructureView from './components/structure/Structure'
+import { versions } from './versions'
 
 const SelectComponent: Component<{}> = props => {
   return (
@@ -30,7 +30,7 @@ const Options: Component<{}> = props => {
           <>
             <PopoverButton
               ref={button}
-              onKeyDown={(e: KeyboardEvent) => e.key === " " && setState(true)}
+              onKeyDown={(e: KeyboardEvent) => e.key === ' ' && setState(true)}
               class={styles.optionsButton}
             >
               <Icon.Options class={styles.optionsIcon} />
@@ -43,8 +43,8 @@ const Options: Component<{}> = props => {
                   () => button,
                   () => menu,
                   {
-                    strategy: "fixed",
-                    placement: "left-start",
+                    strategy: 'fixed',
+                    placement: 'left-start',
                     middleware: [offset(8)],
                   },
                 )
@@ -52,7 +52,7 @@ const Options: Component<{}> = props => {
                   <PopoverPanel
                     class={styles.optionsPanel}
                     ref={menu}
-                    on:keydown={(e: KeyboardEvent) => e.key === "Escape" && e.stopPropagation()}
+                    on:keydown={(e: KeyboardEvent) => e.key === 'Escape' && e.stopPropagation()}
                     style={{
                       top: `${position.y ?? 0}px`,
                       left: `${position.x ?? 0}px`,

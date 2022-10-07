@@ -15,30 +15,30 @@ export function getDiffMap<T extends object>(
   from: readonly T[],
   to: readonly T[],
   constructor?: WeakMapConstructor,
-): [(item: T) => "added" | "removed" | null, T[]]
+): [(item: T) => 'added' | 'removed' | null, T[]]
 export function getDiffMap<T>(
   from: readonly T[],
   to: readonly T[],
   constructor: MapConstructor,
-): [(item: T) => "added" | "removed" | null, T[]]
+): [(item: T) => 'added' | 'removed' | null, T[]]
 export function getDiffMap<T extends object>(
   from: readonly T[],
   to: readonly T[],
   constructor: WeakMapConstructor | MapConstructor = WeakMap,
-): [(item: T) => "added" | "removed" | null, T[]] {
-  const marks: Map<T, "added" | "removed"> = new (constructor as any)()
+): [(item: T) => 'added' | 'removed' | null, T[]] {
+  const marks: Map<T, 'added' | 'removed'> = new (constructor as any)()
   const allItems: T[] = []
   const toCopy = [...to]
 
   from.forEach(owner => {
     const index = toCopy.indexOf(owner)
     if (index !== -1) toCopy.splice(index, 1)
-    else marks.set(owner, "removed")
+    else marks.set(owner, 'removed')
     allItems.push(owner)
   })
   toCopy.forEach(owner => {
     if (allItems.includes(owner)) return
-    marks.set(owner, "added")
+    marks.set(owner, 'added')
     allItems.push(owner)
   })
 
@@ -49,22 +49,22 @@ export function getStackDiffMap<T extends object>(
   from: readonly T[],
   to: readonly T[],
   constructor?: WeakMapConstructor,
-): [(item: T) => "added" | null, T[]]
+): [(item: T) => 'added' | null, T[]]
 export function getStackDiffMap<T>(
   from: readonly T[],
   to: readonly T[],
   constructor: MapConstructor,
-): [(item: T) => "added" | null, T[]]
+): [(item: T) => 'added' | null, T[]]
 export function getStackDiffMap<T>(
   from: readonly T[],
   to: readonly T[],
   constructor: WeakMapConstructor | MapConstructor = WeakMap,
-): [(item: T) => "added" | null, T[]] {
-  const marks: Map<T, "added"> = new (constructor as any)()
+): [(item: T) => 'added' | null, T[]] {
+  const marks: Map<T, 'added'> = new (constructor as any)()
   const allItems: T[] = [...from]
   for (let i = allItems.length; i < to.length; i++) {
     allItems.push(to[i])
-    marks.set(to[i], "added")
+    marks.set(to[i], 'added')
   }
   return [item => marks.get(item) || null, allItems]
 }

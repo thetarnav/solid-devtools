@@ -1,17 +1,17 @@
-import { style, createVar } from "@vanilla-extract/css"
-import { CSSVarFunction } from "@vanilla-extract/private"
-import { centerChild, color, spacing, transition } from "@/ui/theme"
+import { style, createVar } from '@vanilla-extract/css'
+import { CSSVarFunction } from '@vanilla-extract/private'
+import { centerChild, color, spacing, transition } from '@/ui/theme'
 
 const minWidth = spacing[36]
-const splitWidth = "1px"
+const splitWidth = '1px'
 
 export const progress: CSSVarFunction = createVar()
 
 export const container = style({
-  display: "grid",
-  gridAutoFlow: "column",
-  height: "100%",
-  width: "100%",
+  display: 'grid',
+  gridAutoFlow: 'column',
+  height: '100%',
+  width: '100%',
   gridTemplateColumns: `1fr`,
   selectors: {
     '&[data-open="true"]': {
@@ -21,31 +21,31 @@ export const container = style({
 })
 
 export const mainContent = style({
-  position: "relative",
+  position: 'relative',
   zIndex: 1,
-  overflow: "hidden",
-  height: "100%",
-  width: "100%",
+  overflow: 'hidden',
+  height: '100%',
+  width: '100%',
 })
 
 export const split = style({
-  position: "relative",
+  position: 'relative',
   backgroundColor: color.gray[400],
 })
 
 export const splitHandle = style({
-  position: "absolute",
+  position: 'absolute',
   zIndex: 10,
   top: 0,
   left: -1,
   right: -1,
   bottom: 0,
-  cursor: "col-resize",
-  userSelect: "none",
+  cursor: 'col-resize',
+  userSelect: 'none',
 })
 
 export const toggle = style({
-  position: "absolute",
+  position: 'absolute',
   zIndex: 11,
   top: 0,
   right: 0,
@@ -54,9 +54,9 @@ export const toggle = style({
   backgroundColor: color.gray[400],
   ...centerChild,
   color: color.gray[100],
-  userSelect: "none",
-  ...transition("background-color"),
-  ":hover": {
+  userSelect: 'none',
+  ...transition('background-color'),
+  ':hover': {
     backgroundColor: color.gray[500],
   },
 })

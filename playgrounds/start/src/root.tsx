@@ -1,5 +1,5 @@
 // @refresh reload
-import { Suspense } from "solid-js";
+import { Suspense } from 'solid-js'
 import {
   Body,
   ErrorBoundary,
@@ -11,9 +11,9 @@ import {
   Routes,
   Scripts,
   Title,
-} from "solid-start";
-import Nav from "./components/nav";
-import "./root.css";
+} from 'solid-start'
+import Nav from './components/nav'
+import './root.css'
 
 export default function Root() {
   return (
@@ -37,7 +37,7 @@ export default function Root() {
         <Scripts />
       </Body>
     </Html>
-  );
+  )
 }
 
 // if (import.meta.env.PROD && !isServer && "serviceWorker" in navigator) {

@@ -1,6 +1,6 @@
-import { ComputationUpdate, Mapped, NodeID, RootsUpdates } from "./graph"
-import { EncodedValue } from "./serialize"
-import { log } from "./utils"
+import { ComputationUpdate, Mapped, NodeID, RootsUpdates } from './graph'
+import { EncodedValue } from './serialize'
+import { log } from './utils'
 
 export const LOG_MESSAGES = false
 
@@ -35,8 +35,8 @@ export interface Messages {
   OwnerDetailsUpdate: Mapped.OwnerDetails
   /** devtools -> client: request for signal/prop details — subscribe or unsubscribe */
   ToggleInspectedValue:
-    | { type: "signal" | "prop"; id: NodeID; selected: boolean }
-    | { type: "value"; selected: boolean }
+    | { type: 'signal' | 'prop'; id: NodeID; selected: boolean }
+    | { type: 'value'; selected: boolean }
   /** devtools -> client: user hovered over component/element signal in devtools panel */
   HighlightElement: { rootId: NodeID; nodeId: NodeID } | string | null
   /** client -> devtools: send hovered (by the locator) owner to the extension */
@@ -58,8 +58,8 @@ export type OnMessageFn = <K extends keyof Messages>(
 ) => VoidFunction
 
 export const postWindowMessage: PostMessageFn = (id, payload?: any) => {
-  LOG_MESSAGES && log("message posted:", id, payload)
-  postMessage({ id, payload }, "*")
+  LOG_MESSAGES && log('message posted:', id, payload)
+  postMessage({ id, payload }, '*')
 }
 
 const listeners: {
@@ -70,10 +70,10 @@ const listeners: {
  * Important ot call this if you want to use {@link onWindowMessage}
  */
 export function startListeningWindowMessages() {
-  if (typeof window === "undefined") return
-  addEventListener("message", event => {
+  if (typeof window === 'undefined') return
+  addEventListener('message', event => {
     const id = event.data?.id as keyof Messages
-    if (typeof id !== "string") return
+    if (typeof id !== 'string') return
     listeners[id]?.forEach(f => f(event.data.payload as never))
   })
 }

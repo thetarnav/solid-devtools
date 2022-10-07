@@ -1,5 +1,5 @@
-import { render } from "solid-js/web"
-import type { Owner } from "solid-js/types/reactive/signal"
+import { render } from 'solid-js/web'
+import type { Owner } from 'solid-js/types/reactive/signal'
 
 import {
   createEffect,
@@ -12,17 +12,17 @@ import {
   Show,
   Suspense,
   Switch,
-} from "solid-js"
-import { MetaProvider, Link, Style } from "solid-meta"
-import { tw, sheet } from "@ui"
+} from 'solid-js'
+import { MetaProvider, Link, Style } from 'solid-meta'
+import { tw, sheet } from '@ui'
 
 export function createDevtools(owner: Owner) {
   createEffect(() => {
-    const div = document.createElement("div")
-    div.className = "devtools"
-    let shadow = div.attachShadow({ mode: "open" })
+    const div = document.createElement('div')
+    div.className = 'devtools'
+    let shadow = div.attachShadow({ mode: 'open' })
     document.body.appendChild(div)
-    let div2 = document.createElement("div")
+    let div2 = document.createElement('div')
     shadow.appendChild(div2)
     shadow.adoptedStyleSheets = [sheet.target]
 
@@ -43,9 +43,9 @@ function getPathToSource(el) {
 }
 
 export const State = /** @type {const} */ {
-  IDLE: "IDLE",
-  HOVER: "HOVER",
-  SELECT: "SELECT",
+  IDLE: 'IDLE',
+  HOVER: 'HOVER',
+  SELECT: 'SELECT',
 }
 
 /**
@@ -74,7 +74,7 @@ export function Devtools(props) {
       const url = `${props.editor}://file/${path}`
 
       event.preventDefault()
-      window.open(url, "_blank")
+      window.open(url, '_blank')
 
       setState(State.IDLE)
     }
@@ -146,7 +146,7 @@ export function Devtools(props) {
     switch (state()) {
       case State.IDLE:
       case State.HOVER:
-        if (event.target.className === "devtools") {
+        if (event.target.className === 'devtools') {
           break
         }
         setTarget(event.target)
@@ -164,7 +164,7 @@ export function Devtools(props) {
 
     onCleanup(() => {
       for (const element of Array.from(
-        document.querySelectorAll("[data-click-to-component-target]"),
+        document.querySelectorAll('[data-click-to-component-target]'),
       )) {
         if (element instanceof HTMLElement) {
           delete element.dataset.clickToComponentTarget
@@ -186,20 +186,20 @@ export function Devtools(props) {
   })
 
   createEffect(function addEventListenersToWindow() {
-    window.addEventListener("click", onClick, { capture: true })
-    window.addEventListener("contextmenu", onContextMenu, { capture: true })
-    window.addEventListener("keydown", onKeyDown)
-    window.addEventListener("keyup", onKeyUp)
-    window.addEventListener("mousemove", onMouseMove)
+    window.addEventListener('click', onClick, { capture: true })
+    window.addEventListener('contextmenu', onContextMenu, { capture: true })
+    window.addEventListener('keydown', onKeyDown)
+    window.addEventListener('keyup', onKeyUp)
+    window.addEventListener('mousemove', onMouseMove)
 
     onCleanup(() => {
-      window.removeEventListener("click", onClick, { capture: true })
-      window.removeEventListener("contextmenu", onContextMenu, {
+      window.removeEventListener('click', onClick, { capture: true })
+      window.removeEventListener('contextmenu', onContextMenu, {
         capture: true,
       })
-      window.removeEventListener("keydown", onKeyDown)
-      window.removeEventListener("keyup", onKeyUp)
-      window.removeEventListener("mousemove", onMouseMove)
+      window.removeEventListener('keydown', onKeyDown)
+      window.removeEventListener('keyup', onKeyUp)
+      window.removeEventListener('mousemove', onMouseMove)
     })
   })
 
@@ -255,16 +255,16 @@ export function ComponentTree(props) {
     >
       <div
         style={{
-          display: "flex",
-          flexDirection: "row",
-          height: "100%",
+          display: 'flex',
+          flexDirection: 'row',
+          height: '100%',
         }}
       >
         <div
           style={{
             flex: 3,
-            height: "100%",
-            overflow: "scroll",
+            height: '100%',
+            overflow: 'scroll',
           }}
         >
           <Show when={tree()}>
@@ -279,8 +279,8 @@ export function ComponentTree(props) {
         <div
           style={{
             flex: 1,
-            height: "100%",
-            overflow: "scroll",
+            height: '100%',
+            overflow: 'scroll',
           }}
         >
           <SelectedElement selected={selected()} />
@@ -292,7 +292,7 @@ export function ComponentTree(props) {
 
 function SelectedElement(props) {
   return (
-    <Suspense fallback={"loading"}>
+    <Suspense fallback={'loading'}>
       <Switch>
         <Match when={props.selected?.element}>
           <Source element={props.selected?.element} />
@@ -306,12 +306,12 @@ function Source(props) {
   const [resource] = createResource(
     () => props.element.dataset.sourceLoc,
     async loc => {
-      let [file, line, col] = loc.split(":")
-      let src = await fetch("__src" + file).then(res => res.text())
+      let [file, line, col] = loc.split(':')
+      let src = await fetch('__src' + file).then(res => res.text())
       console.log(line, col)
       return {
         src,
-        lines: src.split("\n"),
+        lines: src.split('\n'),
         line: Number(line),
         col: Number(col),
       }
@@ -320,9 +320,9 @@ function Source(props) {
   return (
     <div
       style={{
-        "font-size": "0.6rem",
-        display: "flex",
-        "flex-direction": "column",
+        'font-size': '0.6rem',
+        display: 'flex',
+        'flex-direction': 'column',
       }}
       // innerText={resource()?.src}
     >
@@ -348,18 +348,18 @@ function Node(props) {
   return (
     <div
       style={{
-        display: "flex",
-        "flex-direction": "column",
-        "font-size": "0.6rem",
-        "font-family": "Roboto Mono",
+        display: 'flex',
+        'flex-direction': 'column',
+        'font-size': '0.6rem',
+        'font-family': 'Roboto Mono',
       }}
       //"relative flex flex-col font-mono text-xs h-full"}
     >
       <div
         style={{
-          display: "flex",
-          "flex-direction": "row",
-          "align-items": "center",
+          display: 'flex',
+          'flex-direction': 'row',
+          'align-items': 'center',
         }}
         //"flex flex-row items-center space-x-1"
       >
@@ -376,11 +376,11 @@ function Node(props) {
           >
             <div
               style={{
-                "margin-left": "-8px",
+                'margin-left': '-8px',
               }}
               onClick={() => setToggle(t => !t)}
             >
-              <Show when={!toggle()} fallback={"▼"}>
+              <Show when={!toggle()} fallback={'▼'}>
                 ▶
               </Show>
             </div>
@@ -389,7 +389,7 @@ function Node(props) {
 
         <div
           style={{
-            color: "purple",
+            color: 'purple',
           }}
           onMouseEnter={() => {
             if (props.node.element) props.setHoverTarget(props.node.element)
@@ -417,19 +417,19 @@ function Node(props) {
           }}
           onClick={() => props.setSelected(props.node)}
         >
-          {"<"}
+          {'<'}
           {props.node.componentName}
-          <Show when={props.node.children?.length && toggle()} fallback={"/>"}>
-            {">"}
+          <Show when={props.node.children?.length && toggle()} fallback={'/>'}>
+            {'>'}
           </Show>
         </div>
       </div>
       <Show when={toggle()}>
         <div
           style={{
-            "margin-left": "16px",
-            display: "flex",
-            "flex-direction": "column",
+            'margin-left': '16px',
+            display: 'flex',
+            'flex-direction': 'column',
           }}
         >
           <For each={props.node.children}>
@@ -449,21 +449,21 @@ function Node(props) {
       <Show when={props.node.children.length && toggle()}>
         <div
           style={{
-            display: "flex",
-            "flex-direction": "row",
-            "align-items": "center",
+            display: 'flex',
+            'flex-direction': 'row',
+            'align-items': 'center',
           }}
           //"flex flex-row items-center space-x-1"
         >
           <div
             onClick={() => props.setSelected(props.node)}
             style={{
-              color: "purple",
+              color: 'purple',
             }}
           >
-            {"</"}
+            {'</'}
             {props.node.componentName}
-            {">"}
+            {'>'}
           </div>
         </div>
       </Show>
@@ -479,9 +479,9 @@ export function getTree(owner, map, parent) {
     parent,
     owner: owner,
     componentName:
-      (owner.componentName?.startsWith("_Hot$$")
+      (owner.componentName?.startsWith('_Hot$$')
         ? owner.componentName.slice(6)
-        : owner.componentName) || "(anonymous)",
+        : owner.componentName) || '(anonymous)',
     children: [],
   }
 
@@ -602,7 +602,7 @@ export function getTree(owner, map, parent) {
       map.set(owner.value, node)
     } else if (owner.value instanceof Text) {
       node.children.push({
-        componentName: "text",
+        componentName: 'text',
         text: owner.value.textContent,
 
         children: [],
@@ -617,7 +617,7 @@ export function getTree(owner, map, parent) {
           map.set(value, node)
         } else if (value instanceof Text) {
           node.children.push({
-            componentName: "text",
+            componentName: 'text',
             text: value.textContent,
             children: [],
           })

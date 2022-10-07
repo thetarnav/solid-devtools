@@ -1,7 +1,7 @@
-import { createMemo, For, JSX, onCleanup, Show } from "solid-js"
-import { render } from "solid-js/web"
-import { createLocalStore } from "./utils"
-import { Debugger } from "../../../packages/debugger/src"
+import { createMemo, For, JSX, onCleanup, Show } from 'solid-js'
+import { render } from 'solid-js/web'
+import { createLocalStore } from './utils'
+import { Debugger } from '../../../packages/debugger/src'
 
 const ESCAPE_KEY = 27
 const ENTER_KEY = 13
@@ -13,26 +13,26 @@ type TodoItem = {
 }
 
 const TodoApp = () => {
-  const [state, setState] = createLocalStore("solid-todomvc-store", {
+  const [state, setState] = createLocalStore('solid-todomvc-store', {
       counter: 1,
       todos: [] as TodoItem[],
-      showMode: "all",
+      showMode: 'all',
       editingTodoId: null as number | null,
     }),
     remainingCount = createMemo(
       () => state.todos.length - state.todos.filter(todo => todo.completed).length,
     ),
     filterList = (todos: TodoItem[]) => {
-      if (state.showMode === "active") return todos.filter(todo => !todo.completed)
-      else if (state.showMode === "completed") return todos.filter(todo => todo.completed)
+      if (state.showMode === 'active') return todos.filter(todo => !todo.completed)
+      else if (state.showMode === 'completed') return todos.filter(todo => todo.completed)
       else return todos
     },
-    removeTodo = (todoId: number) => setState("todos", t => t.filter(item => item.id !== todoId)),
-    editTodo = (todo: Partial<TodoItem>) => setState("todos", item => item.id === todo.id, todo),
-    clearCompleted = () => setState("todos", t => t.filter(todo => !todo.completed)),
+    removeTodo = (todoId: number) => setState('todos', t => t.filter(item => item.id !== todoId)),
+    editTodo = (todo: Partial<TodoItem>) => setState('todos', item => item.id === todo.id, todo),
+    clearCompleted = () => setState('todos', t => t.filter(todo => !todo.completed)),
     toggleAll = (completed: boolean) =>
-      setState("todos", todo => todo.completed !== completed, { completed }),
-    setEditing = (todoId: number | null) => setState("editingTodoId", todoId),
+      setState('todos', todo => todo.completed !== completed, { completed }),
+    setEditing = (todoId: number | null) => setState('editingTodoId', todoId),
     addTodo: JSX.EventHandler<HTMLInputElement, KeyboardEvent> = ({ currentTarget, keyCode }) => {
       const title = currentTarget.value.trim()
       if (keyCode === ENTER_KEY && title) {
@@ -40,7 +40,7 @@ const TodoApp = () => {
           todos: [{ title, id: state.counter, completed: false }, ...state.todos],
           counter: state.counter + 1,
         })
-        currentTarget.value = ""
+        currentTarget.value = ''
       }
     },
     save = (todoId: number, title: string) => {
@@ -56,9 +56,9 @@ const TodoApp = () => {
       else if (keyCode === ESCAPE_KEY) setEditing(null)
     }
 
-  const locationHandler = () => setState("showMode", location.hash.slice(2) || "all")
-  window.addEventListener("hashchange", locationHandler)
-  onCleanup(() => window.removeEventListener("hashchange", locationHandler))
+  const locationHandler = () => setState('showMode', location.hash.slice(2) || 'all')
+  window.addEventListener('hashchange', locationHandler)
+  onCleanup(() => window.removeEventListener('hashchange', locationHandler))
 
   return (
     <section class="todoapp">
@@ -114,21 +114,21 @@ const TodoApp = () => {
 
         <footer class="footer">
           <span class="todo-count">
-            <strong>{remainingCount()}</strong> {remainingCount() === 1 ? " item " : " items "} left
+            <strong>{remainingCount()}</strong> {remainingCount() === 1 ? ' item ' : ' items '} left
           </span>
           <ul class="filters">
             <li>
-              <a href="#/" classList={{ selected: state.showMode === "all" }}>
+              <a href="#/" classList={{ selected: state.showMode === 'all' }}>
                 All
               </a>
             </li>
             <li>
-              <a href="#/active" classList={{ selected: state.showMode === "active" }}>
+              <a href="#/active" classList={{ selected: state.showMode === 'active' }}>
                 Active
               </a>
             </li>
             <li>
-              <a href="#/completed" classList={{ selected: state.showMode === "completed" }}>
+              <a href="#/completed" classList={{ selected: state.showMode === 'completed' }}>
                 Completed
               </a>
             </li>
@@ -150,5 +150,5 @@ render(
       <TodoApp />
     </Debugger>
   ),
-  document.getElementById("main")!,
+  document.getElementById('main')!,
 )

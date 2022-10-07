@@ -1,4 +1,4 @@
-import { describe, test, expect } from "vitest"
+import { describe, test, expect } from 'vitest'
 import {
   ValueType,
   INFINITY,
@@ -7,43 +7,43 @@ import {
   encodeValue,
   EncodedValue,
   ElementMap,
-} from "../src/serialize"
+} from '../src/serialize'
 
 const _testFunction = () => {}
 
 const encodePreviewExpectations: [string, unknown, EncodedValue<false>][] = [
-  ["Infinity", Infinity, { type: ValueType.Number, value: INFINITY }],
-  ["Negative Infinity", -Infinity, { type: ValueType.Number, value: NEGATIVE_INFINITY }],
-  ["NaN", NaN, { type: ValueType.Number, value: NAN }],
-  ["Number", 1, { type: ValueType.Number, value: 1 }],
-  ["Boolean true", true, { type: ValueType.Boolean, value: true }],
-  ["Boolean false", false, { type: ValueType.Boolean, value: false }],
-  ["String", "", { type: ValueType.String, value: "" }],
-  ["String", "foo", { type: ValueType.String, value: "foo" }],
-  ["Null", null, { type: ValueType.Null }],
-  ["Undefined", undefined, { type: ValueType.Undefined }],
-  ["Named Symbol", Symbol("foo"), { type: ValueType.Symbol, value: "foo" }],
-  ["Symbol", Symbol(), { type: ValueType.Symbol, value: "" }],
-  ["Function", () => {}, { type: ValueType.Function, value: "" }],
-  ["Named Function", _testFunction, { type: ValueType.Function, value: "_testFunction" }],
+  ['Infinity', Infinity, { type: ValueType.Number, value: INFINITY }],
+  ['Negative Infinity', -Infinity, { type: ValueType.Number, value: NEGATIVE_INFINITY }],
+  ['NaN', NaN, { type: ValueType.Number, value: NAN }],
+  ['Number', 1, { type: ValueType.Number, value: 1 }],
+  ['Boolean true', true, { type: ValueType.Boolean, value: true }],
+  ['Boolean false', false, { type: ValueType.Boolean, value: false }],
+  ['String', '', { type: ValueType.String, value: '' }],
+  ['String', 'foo', { type: ValueType.String, value: 'foo' }],
+  ['Null', null, { type: ValueType.Null }],
+  ['Undefined', undefined, { type: ValueType.Undefined }],
+  ['Named Symbol', Symbol('foo'), { type: ValueType.Symbol, value: 'foo' }],
+  ['Symbol', Symbol(), { type: ValueType.Symbol, value: '' }],
+  ['Function', () => {}, { type: ValueType.Function, value: '' }],
+  ['Named Function', _testFunction, { type: ValueType.Function, value: '_testFunction' }],
   [
-    "Element div",
-    document.createElement("div"),
-    { type: ValueType.Element, value: { name: "DIV" } },
+    'Element div',
+    document.createElement('div'),
+    { type: ValueType.Element, value: { name: 'DIV' } },
   ],
-  ["Element a", document.createElement("a"), { type: ValueType.Element, value: { name: "A" } }],
-  ["Array empty", [], { type: ValueType.Array, value: 0 }],
-  ["Array", [1, 2, 3], { type: ValueType.Array, value: 3 }],
-  ["Object empty", {}, { type: ValueType.Object, value: 0 }],
-  ["Object", { a: 1, b: 2, c: 3 }, { type: ValueType.Object, value: 3 }],
-  ["Date", new Date(), { type: ValueType.Instance, value: "Date" }],
-  ["Error", new Error(), { type: ValueType.Instance, value: "Error" }],
-  ["Map", new Map(), { type: ValueType.Instance, value: "Map" }],
-  ["WeakMap", new WeakMap(), { type: ValueType.Instance, value: "WeakMap" }],
-  ["Set", new Set(), { type: ValueType.Instance, value: "Set" }],
+  ['Element a', document.createElement('a'), { type: ValueType.Element, value: { name: 'A' } }],
+  ['Array empty', [], { type: ValueType.Array, value: 0 }],
+  ['Array', [1, 2, 3], { type: ValueType.Array, value: 3 }],
+  ['Object empty', {}, { type: ValueType.Object, value: 0 }],
+  ['Object', { a: 1, b: 2, c: 3 }, { type: ValueType.Object, value: 3 }],
+  ['Date', new Date(), { type: ValueType.Instance, value: 'Date' }],
+  ['Error', new Error(), { type: ValueType.Instance, value: 'Error' }],
+  ['Map', new Map(), { type: ValueType.Instance, value: 'Map' }],
+  ['WeakMap', new WeakMap(), { type: ValueType.Instance, value: 'WeakMap' }],
+  ['Set', new Set(), { type: ValueType.Instance, value: 'Set' }],
 ]
 
-describe("encodeValue Preview", () => {
+describe('encodeValue Preview', () => {
   for (const [testName, value, expectation] of encodePreviewExpectations) {
     test(testName, () => {
       const s = encodeValue(value, false)
@@ -54,9 +54,9 @@ describe("encodeValue Preview", () => {
 })
 
 const encodeDeepExpectations: [string, unknown, EncodedValue<true>][] = [
-  ["Array empty", [], { type: ValueType.Array, value: 0, children: [] }],
+  ['Array empty', [], { type: ValueType.Array, value: 0, children: [] }],
   [
-    "Array shallow",
+    'Array shallow',
     [1, 2, 3],
     {
       type: ValueType.Array,
@@ -69,8 +69,8 @@ const encodeDeepExpectations: [string, unknown, EncodedValue<true>][] = [
     },
   ],
   [
-    "Array nested",
-    [[1, { foo: "bar" }], 2, { map: new Map() }],
+    'Array nested',
+    [[1, { foo: 'bar' }], 2, { map: new Map() }],
     {
       type: ValueType.Array,
       value: 3,
@@ -83,7 +83,7 @@ const encodeDeepExpectations: [string, unknown, EncodedValue<true>][] = [
             {
               type: ValueType.Object,
               value: 1,
-              children: { foo: { type: ValueType.String, value: "bar" } },
+              children: { foo: { type: ValueType.String, value: 'bar' } },
             },
           ],
         },
@@ -91,14 +91,14 @@ const encodeDeepExpectations: [string, unknown, EncodedValue<true>][] = [
         {
           type: ValueType.Object,
           value: 1,
-          children: { map: { type: ValueType.Instance, value: "Map" } },
+          children: { map: { type: ValueType.Instance, value: 'Map' } },
         },
       ],
     },
   ],
-  ["Object empty", {}, { type: ValueType.Object, value: 0, children: {} }],
+  ['Object empty', {}, { type: ValueType.Object, value: 0, children: {} }],
   [
-    "Object shallow",
+    'Object shallow',
     { a: 1, b: 2, c: 3 },
     {
       type: ValueType.Object,
@@ -111,8 +111,8 @@ const encodeDeepExpectations: [string, unknown, EncodedValue<true>][] = [
     },
   ],
   [
-    "Object nested",
-    { a: [1, { foo: "bar" }], b: 2, c: { map: new Map() } },
+    'Object nested',
+    { a: [1, { foo: 'bar' }], b: 2, c: { map: new Map() } },
     {
       type: ValueType.Object,
       value: 3,
@@ -125,7 +125,7 @@ const encodeDeepExpectations: [string, unknown, EncodedValue<true>][] = [
             {
               type: ValueType.Object,
               value: 1,
-              children: { foo: { type: ValueType.String, value: "bar" } },
+              children: { foo: { type: ValueType.String, value: 'bar' } },
             },
           ],
         },
@@ -133,13 +133,13 @@ const encodeDeepExpectations: [string, unknown, EncodedValue<true>][] = [
         c: {
           type: ValueType.Object,
           value: 1,
-          children: { map: { type: ValueType.Instance, value: "Map" } },
+          children: { map: { type: ValueType.Instance, value: 'Map' } },
         },
       },
     },
   ],
   [
-    "Object with getter properties",
+    'Object with getter properties',
     {
       a: 123,
       get b() {
@@ -151,13 +151,13 @@ const encodeDeepExpectations: [string, unknown, EncodedValue<true>][] = [
       value: 2,
       children: {
         a: { type: ValueType.Number, value: 123 },
-        b: { type: ValueType.Getter, value: "b" },
+        b: { type: ValueType.Getter, value: 'b' },
       },
     },
   ],
 ]
 
-describe("encodeValue Deep", () => {
+describe('encodeValue Deep', () => {
   for (const [testName, value, expectation] of encodeDeepExpectations) {
     test(testName, () => {
       const s = encodeValue(value, true)
@@ -167,21 +167,21 @@ describe("encodeValue Deep", () => {
   }
 })
 
-describe("save elements to a map", () => {
-  const div1 = document.createElement("div")
-  const a1 = document.createElement("a")
-  const div2 = document.createElement("div")
+describe('save elements to a map', () => {
+  const div1 = document.createElement('div')
+  const a1 = document.createElement('a')
+  const div2 = document.createElement('div')
 
   const elMapExpectations: [string, unknown, EncodedValue<true>][] = [
-    ["Element div", div1, { type: ValueType.Element, value: { name: "DIV", id: "0" } }],
-    ["Element a", a1, { type: ValueType.Element, value: { name: "A", id: "1" } }],
+    ['Element div', div1, { type: ValueType.Element, value: { name: 'DIV', id: '0' } }],
+    ['Element a', a1, { type: ValueType.Element, value: { name: 'A', id: '1' } }],
     [
-      "Element in object",
+      'Element in object',
       { el: div2 },
       {
         type: ValueType.Object,
         value: 1,
-        children: { el: { type: ValueType.Element, value: { name: "DIV", id: "2" } } },
+        children: { el: { type: ValueType.Element, value: { name: 'DIV', id: '2' } } },
       },
     ],
   ]
@@ -194,9 +194,9 @@ describe("save elements to a map", () => {
       expect(JSON.parse(JSON.stringify(s))).toEqual(s)
     })
   }
-  test("map containing correct values", () => {
-    expect(map.get("0")).toBe(div1)
-    expect(map.get("1")).toBe(a1)
-    expect(map.get("2")).toBe(div2)
+  test('map containing correct values', () => {
+    expect(map.get('0')).toBe(div1)
+    expect(map.get('1')).toBe(a1)
+    expect(map.get('2')).toBe(div2)
   })
 })

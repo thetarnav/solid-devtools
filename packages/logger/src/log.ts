@@ -1,10 +1,10 @@
 // see https://developer.chrome.com/docs/devtools/console/format-style/
 // to gen a overview of how to style console messages
 
-import { getNodeName, getNodeType, getOwnerType, isSolidMemo } from "@solid-devtools/debugger"
-import { NodeType, Solid } from "@solid-devtools/shared/graph"
-import { dedupeArray } from "@solid-devtools/shared/utils"
-import { getDiffMap, getStackDiffMap } from "./utils"
+import { getNodeName, getNodeType, getOwnerType, isSolidMemo } from '@solid-devtools/debugger'
+import { NodeType, Solid } from '@solid-devtools/shared/graph'
+import { dedupeArray } from '@solid-devtools/shared/utils'
+import { getDiffMap, getStackDiffMap } from './utils'
 
 export type NodeState = {
   type: NodeType
@@ -19,7 +19,7 @@ export type NodeStateWithValue = {
   value: unknown
 }
 
-export const UNUSED = Symbol("unused")
+export const UNUSED = Symbol('unused')
 
 export type ComputationState = {
   owned: Solid.Computation[]
@@ -31,12 +31,12 @@ export type ComputationState = {
 }
 
 export const STYLES = {
-  bold: "font-weight: bold; font-size: 1.1em;",
+  bold: 'font-weight: bold; font-size: 1.1em;',
   ownerName:
-    "font-weight: bold; font-size: 1.1em; background: rgba(153, 153, 153, 0.3); padding: 0.1em 0.3em; border-radius: 4px;",
-  grayBackground: "background: rgba(153, 153, 153, 0.3); padding: 0 0.2em; border-radius: 4px;",
-  signalUnderline: "text-decoration: orange wavy underline;",
-  new: "color: orange; font-style: italic",
+    'font-weight: bold; font-size: 1.1em; background: rgba(153, 153, 153, 0.3); padding: 0.1em 0.3em; border-radius: 4px;',
+  grayBackground: 'background: rgba(153, 153, 153, 0.3); padding: 0 0.2em; border-radius: 4px;',
+  signalUnderline: 'text-decoration: orange wavy underline;',
+  new: 'color: orange; font-style: italic',
 }
 
 export const inGray = (text: unknown) => `\x1B[90m${text}\x1B[m`
@@ -46,13 +46,13 @@ export const getNameStyle = (type: NodeType): string =>
   type === NodeType.Signal ? STYLES.signalUnderline : STYLES.grayBackground
 
 export function getValueSpecifier(v: unknown) {
-  if (typeof v === "object") return " %o"
-  if (typeof v === "function") return " %O"
-  return ""
+  if (typeof v === 'object') return ' %o'
+  if (typeof v === 'function') return ' %O'
+  return ''
 }
 
 export function getNodeState(owner: Solid.Owner | Solid.Signal | NodeState): NodeState {
-  if ("type" in owner && "typeName" in owner && "name" in owner) return owner
+  if ('type' in owner && 'typeName' in owner && 'name' in owner) return owner
   const type = getNodeType(owner)
   return {
     type,
@@ -63,7 +63,7 @@ export function getNodeState(owner: Solid.Owner | Solid.Signal | NodeState): Nod
 export function getNodeStateWithValue(
   owner: Solid.Computation | Solid.Signal | NodeStateWithValue,
 ): NodeStateWithValue {
-  if ("type" in owner && "typeName" in owner && "name" in owner) return owner
+  if ('type' in owner && 'typeName' in owner && 'name' in owner) return owner
   const type = getNodeType(owner)
   return {
     type,
@@ -101,23 +101,23 @@ export const getComputationCreatedLabel = (
   timeElapsed: number,
 ): string[] => [
   `%c${type} %c${name}%c created  ${styleTime(timeElapsed)}`,
-  "",
+  '',
   STYLES.ownerName,
-  "",
+  '',
 ]
 export const getComputationRerunLabel = (name: string, timeElapsed: number): string[] => [
   `%c${name}%c re-executed  ${styleTime(timeElapsed)}`,
   STYLES.ownerName,
-  "",
+  '',
 ]
 export const getOwnerDisposedLabel = (name: string): string[] => [
   `%c${name}%c disposed`,
   STYLES.ownerName,
-  "",
+  '',
 ]
 
 export function logPrevValue(prev: unknown): void {
-  console.log(`${inGray("Previous =")}${getValueSpecifier(prev)}`, prev)
+  console.log(`${inGray('Previous =')}${getValueSpecifier(prev)}`, prev)
 }
 
 export const logComputationDetails = ({
@@ -130,7 +130,7 @@ export const logComputationDetails = ({
 }: Readonly<ComputationState>) => {
   // Owner
   if (owner !== UNUSED) {
-    const label = inGray("Owner:")
+    const label = inGray('Owner:')
     if (!owner) console.log(label, null)
     else {
       const { name } = getNodeState(owner)
@@ -139,7 +139,7 @@ export const logComputationDetails = ({
   }
 
   // Value
-  if (value !== UNUSED) console.log(`${inGray("Value =")}${getValueSpecifier(value)}`, value)
+  if (value !== UNUSED) console.log(`${inGray('Value =')}${getValueSpecifier(value)}`, value)
   if (prev !== UNUSED) logPrevValue(prev)
 
   // Caused By
@@ -147,16 +147,16 @@ export const logComputationDetails = ({
     if (causedBy.length === 1) {
       const { name, type, value } = causedBy[0]
       console.log(
-        `%c${inGray("Caused By:")} %c${name}%c ${inGray("=")}`,
-        "",
+        `%c${inGray('Caused By:')} %c${name}%c ${inGray('=')}`,
+        '',
         getNameStyle(type),
-        "",
+        '',
         value,
       )
     } else {
-      console.groupCollapsed(inGray("Caused By:"), causedBy.length)
+      console.groupCollapsed(inGray('Caused By:'), causedBy.length)
       causedBy.forEach(({ name, type, value }) => {
-        console.log(`%c${name}%c ${inGray("=")}`, getNameStyle(type), "", value)
+        console.log(`%c${name}%c ${inGray('=')}`, getNameStyle(type), '', value)
       })
       console.groupEnd()
     }
@@ -164,23 +164,23 @@ export const logComputationDetails = ({
 
   // Sources
   if (sources.length) {
-    console.groupCollapsed(inGray("Sources:"), sources.length)
+    console.groupCollapsed(inGray('Sources:'), sources.length)
     sources.forEach(source => {
       const { type, name } = getNodeState(source)
-      console.log(`%c${name}%c ${inGray("=")}`, getNameStyle(type), "", source.value)
+      console.log(`%c${name}%c ${inGray('=')}`, getNameStyle(type), '', source.value)
     })
     console.groupEnd()
   } else {
-    console.log(inGray("Sources:"), 0)
+    console.log(inGray('Sources:'), 0)
   }
 
   // Owned
   if (owned.length) {
-    console.groupCollapsed(inGray("Owned:"), owned.length)
+    console.groupCollapsed(inGray('Owned:'), owned.length)
     logOwnerList(owned)
     console.groupEnd()
   } else {
-    console.log(inGray("Owned:"), 0)
+    console.log(inGray('Owned:'), 0)
   }
 }
 
@@ -198,11 +198,11 @@ export function logOwned(
   console.groupCollapsed(
     `Owned by the %c${ownerState.name}%c ${ownerState.typeName}:`,
     STYLES.ownerName,
-    "",
+    '',
     owned.length,
   )
 
-  logOwnersDiff(prevOwned, owned, "stack", owner => {
+  logOwnersDiff(prevOwned, owned, 'stack', owner => {
     const sources = owner.sources ? dedupeArray(owner.sources) : []
     const usesPrev = !!owner.fn.length
     const usesValue = usesPrev || isSolidMemo(owner)
@@ -220,7 +220,7 @@ export function logOwned(
 }
 
 export function logSignalsInitialValues(signals: Solid.Signal[]) {
-  console.groupCollapsed("Signals initial values:")
+  console.groupCollapsed('Signals initial values:')
   signals.forEach(logSignalValue)
   console.groupEnd()
 }
@@ -228,10 +228,10 @@ export function logSignalsInitialValues(signals: Solid.Signal[]) {
 export function logInitialValue(node: Solid.Signal | NodeStateWithValue): void {
   const { type, typeName, value, name } = getNodeStateWithValue(node)
   console.log(
-    `%c${typeName} %c${name}%c initial value ${inGray("=")}${getValueSpecifier(value)}`,
-    "",
+    `%c${typeName} %c${name}%c initial value ${inGray('=')}${getValueSpecifier(value)}`,
+    '',
     `${STYLES.bold} ${getNameStyle(type)}`,
-    "",
+    '',
     value,
   )
 }
@@ -239,9 +239,9 @@ export function logInitialValue(node: Solid.Signal | NodeStateWithValue): void {
 export function logSignalValue(signal: Solid.Signal | NodeStateWithValue): void {
   const { type, typeName, name, value } = getNodeStateWithValue(signal)
   console.log(
-    `${inGray(typeName)} %c${name}%c ${inGray("=")}${getValueSpecifier(value)}`,
+    `${inGray(typeName)} %c${name}%c ${inGray('=')}${getValueSpecifier(value)}`,
     `${getNameStyle(type)}`,
-    "",
+    '',
     value,
   )
 }
@@ -253,9 +253,9 @@ export function logSignalValueUpdate(
   observers?: Solid.Computation[],
 ): void {
   console.groupCollapsed(
-    `%c${name}%c updated ${inGray("=")}${getValueSpecifier(value)}`,
+    `%c${name}%c updated ${inGray('=')}${getValueSpecifier(value)}`,
     `${STYLES.bold} ${getNameStyle(type)}`,
-    "",
+    '',
     value,
   )
   logPrevValue(prev)
@@ -265,7 +265,7 @@ export function logSignalValueUpdate(
 
 function logCausedUpdates(observers: Solid.Computation[]): void {
   if (!observers.length) return
-  console.groupCollapsed(inGray("Caused Updates:"), observers.length)
+  console.groupCollapsed(inGray('Caused Updates:'), observers.length)
   logOwnerList(observers)
   console.groupEnd()
 }
@@ -278,22 +278,22 @@ export function logObservers(
   const label = [
     `%c${signalName}%c observers changed:`,
     `${STYLES.bold} ${STYLES.signalUnderline}`,
-    "",
+    '',
     observers.length,
   ]
   if (!observers.length && !prevObservers.length) return console.log(...label)
   console.groupCollapsed(...label)
-  logOwnersDiff(prevObservers, observers, "thorow")
+  logOwnersDiff(prevObservers, observers, 'thorow')
   console.groupEnd()
 }
 
 function logOwnersDiff<T extends Solid.Owner>(
   from: readonly T[],
   to: readonly T[],
-  diff: "thorow" | "stack",
+  diff: 'thorow' | 'stack',
   logGroup?: (owner: T) => void,
 ): void {
-  const [getMark, owners] = diff === "thorow" ? getDiffMap(from, to) : getStackDiffMap(from, to)
+  const [getMark, owners] = diff === 'thorow' ? getDiffMap(from, to) : getStackDiffMap(from, to)
 
   paddedForEach(
     owners,
@@ -302,12 +302,12 @@ function logOwnersDiff<T extends Solid.Owner>(
       const mark = getMark(owner)
       const name = getNodeName(owner)
       const label = (() => {
-        if (mark === "added")
+        if (mark === 'added')
           return [`${inGray(type)} %c${name}%c  new`, STYLES.grayBackground, STYLES.new]
-        if (mark === "removed")
+        if (mark === 'removed')
           return [
             `${inGray(type)} %c${name}`,
-            "background: rgba(153, 153, 153, 0.15); padding: 0 0.2em; border-radius: 4px; text-decoration: line-through; color: #888",
+            'background: rgba(153, 153, 153, 0.15); padding: 0 0.2em; border-radius: 4px; text-decoration: line-through; color: #888',
           ]
         return [`${inGray(type)} %c${name}`, STYLES.grayBackground]
       })()
@@ -345,37 +345,37 @@ export function logOwnerList<T extends Solid.Owner>(
 export function getPropsInitLabel(state: NodeState, proxy: boolean, empty: boolean): string[] {
   const { type, typeName, name } = state
   return [
-    `%c${typeName} %c${name}%c created with ${empty ? "empty" : ""}${proxy ? "dynamic " : ""}props`,
-    "",
+    `%c${typeName} %c${name}%c created with ${empty ? 'empty' : ''}${proxy ? 'dynamic ' : ''}props`,
+    '',
     getNameStyle(type),
-    "",
+    '',
   ]
 }
 
 export function getPropsKeyUpdateLabel({ name, type }: NodeState, empty: boolean): any[] {
   return [
-    `Dynamic props of %c${name}%c ${empty ? "are empty now" : "updated keys:"}`,
+    `Dynamic props of %c${name}%c ${empty ? 'are empty now' : 'updated keys:'}`,
     getNameStyle(type),
-    "",
+    '',
   ]
 }
 
 export function getPropLabel(
-  type: "Getter" | "Value",
+  type: 'Getter' | 'Value',
   name: string,
   value: unknown,
-  occurrence: "added" | "removed" | null,
+  occurrence: 'added' | 'removed' | null,
 ): any[] {
   // stayed
   if (occurrence === null)
-    return [`${inGray(type)} ${name} ${inGray("=")}${getValueSpecifier(value)}`, value]
+    return [`${inGray(type)} ${name} ${inGray('=')}${getValueSpecifier(value)}`, value]
   // added
-  if (occurrence === "added")
+  if (occurrence === 'added')
     return [
-      `${inGray(type)} ${name}%c new ${inGray("=")}${getValueSpecifier(value)}`,
+      `${inGray(type)} ${name}%c new ${inGray('=')}${getValueSpecifier(value)}`,
       STYLES.new,
       value,
     ]
   // removed
-  return [`${inGray(type)} %c${name}`, "text-decoration: line-through; color: #888"]
+  return [`${inGray(type)} %c${name}`, 'text-decoration: line-through; color: #888']
 }

@@ -1,8 +1,8 @@
-import { createSignal, onCleanup } from "solid-js"
-import { Hand } from "./Hand"
-import { Lines } from "./Lines"
-import { createAnimationLoop } from "./utils"
-import type { Accessor, Component } from "solid-js"
+import { createSignal, onCleanup } from 'solid-js'
+import { Hand } from './Hand'
+import { Lines } from './Lines'
+import { createAnimationLoop } from './utils'
+import type { Accessor, Component } from 'solid-js'
 
 const getSecondsSinceMidnight = (): number => (Date.now() - new Date().setHours(0, 0, 0, 0)) / 1000
 

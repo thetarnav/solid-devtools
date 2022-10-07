@@ -1,10 +1,10 @@
-import { ParentComponent } from "solid-js"
-import { attachDebugger } from "./roots"
+import { ParentComponent } from 'solid-js'
+import { attachDebugger } from './roots'
 
-export { useDebugger } from "./plugin"
-export type { BatchComputationUpdatesHandler, PluginData } from "./plugin"
+export { useDebugger } from './plugin'
+export type { BatchComputationUpdatesHandler, PluginData } from './plugin'
 
-export { attachDebugger } from "./roots"
+export { attachDebugger } from './roots'
 
 export {
   makeSolidUpdateListener,
@@ -15,8 +15,8 @@ export {
   interceptComputationRerun,
   makeValueUpdateListener,
   removeValueUpdateObserver,
-} from "./update"
-export type { AfterCrateRoot, ObjectObserver } from "./update"
+} from './update'
+export type { AfterCrateRoot, ObjectObserver } from './update'
 
 export {
   getOwnerType,
@@ -32,7 +32,7 @@ export {
   getFunctionSources,
   createUnownedRoot,
   createInternalRoot,
-} from "./utils"
+} from './utils'
 
 export const Debugger: ParentComponent = props => {
   attachDebugger()

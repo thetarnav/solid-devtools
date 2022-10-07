@@ -1,6 +1,6 @@
-import { createComputed, createRoot, onCleanup, runWithOwner } from "solid-js"
-import { Emit } from "@solid-primitives/event-bus"
-import { throttle } from "@solid-primitives/scheduled"
+import { createComputed, createRoot, onCleanup, runWithOwner } from 'solid-js'
+import { Emit } from '@solid-primitives/event-bus'
+import { throttle } from '@solid-primitives/scheduled'
 import {
   DebuggerContext,
   NodeType,
@@ -8,30 +8,30 @@ import {
   Core,
   getOwner,
   NodeID,
-} from "@solid-devtools/shared/graph"
-import { INTERNAL, UNNAMED } from "@solid-devtools/shared/variables"
-import { trimString } from "@solid-devtools/shared/utils"
+} from '@solid-devtools/shared/graph'
+import { INTERNAL, UNNAMED } from '@solid-devtools/shared/variables'
+import { trimString } from '@solid-devtools/shared/utils'
 
-export const isSolidComputation = (o: Readonly<Solid.Owner>): o is Solid.Computation => "fn" in o
+export const isSolidComputation = (o: Readonly<Solid.Owner>): o is Solid.Computation => 'fn' in o
 
 export const isSolidMemo = (o: Readonly<Solid.Owner>): o is Solid.Memo =>
-  "sdtType" in o ? o.sdtType === NodeType.Memo : isSolidComputation(o) && _isMemo(o)
+  'sdtType' in o ? o.sdtType === NodeType.Memo : isSolidComputation(o) && _isMemo(o)
 
 export const isSolidOwner = (o: Readonly<Solid.Owner> | Solid.Signal): o is Solid.Owner =>
-  "owned" in o
+  'owned' in o
 
 export const isSolidRoot = (o: Readonly<Solid.Owner>): o is Solid.Root =>
   o.sdtType === NodeType.Root || !isSolidComputation(o)
 
-export const isSolidComponent = (o: Readonly<Solid.Owner>): o is Solid.Component => "props" in o
+export const isSolidComponent = (o: Readonly<Solid.Owner>): o is Solid.Component => 'props' in o
 
 const _isMemo = (o: Readonly<Solid.Computation>): boolean =>
-  "value" in o && "comparator" in o && o.pure === true
+  'value' in o && 'comparator' in o && o.pure === true
 
 export function getOwnerName(owner: Readonly<Solid.Owner>): string {
   const { name, componentName: component } = owner
-  if (component && typeof component === "string")
-    return component.startsWith("_Hot$$") ? component.slice(6) : component
+  if (component && typeof component === 'string')
+    return component.startsWith('_Hot$$') ? component.slice(6) : component
   return name || UNNAMED
 }
 export function getSignalName(signal: Readonly<Solid.Signal>): string {
@@ -49,7 +49,7 @@ export function getNodeType(o: Readonly<Solid.Signal | Solid.Owner>): NodeType {
 }
 
 export const getOwnerType = (o: Readonly<Solid.Owner>): NodeType => {
-  if (typeof o.sdtType !== "undefined") return o.sdtType
+  if (typeof o.sdtType !== 'undefined') return o.sdtType
   if (!isSolidComputation(o)) return NodeType.Root
   if (isSolidComponent(o)) return NodeType.Component
   if (_isMemo(o)) {
@@ -58,7 +58,7 @@ export const getOwnerType = (o: Readonly<Solid.Owner>): NodeType => {
       (parent = o.owner) &&
       isSolidComponent(parent) &&
       (parentName = parent.componentName) &&
-      parentName.startsWith("_Hot$$")
+      parentName.startsWith('_Hot$$')
     )
       return NodeType.Refresh
     return NodeType.Memo
@@ -88,7 +88,7 @@ export function resolveElements(value: unknown): HTMLElement | HTMLElement[] | n
 }
 function getResolvedElements(value: unknown): HTMLElement | HTMLElement[] | null {
   // do not call a function, unless it's a signal (to prevent creating new nodes)
-  if (typeof value === "function" && !value.length && value.name === "bound readSignal")
+  if (typeof value === 'function' && !value.length && value.name === 'bound readSignal')
     return getResolvedElements(value())
   if (Array.isArray(value)) {
     const results: HTMLElement[] = []
@@ -175,14 +175,14 @@ export function onParentCleanup(
   }
 }
 
-const DISPOSE_ID = Symbol("Dispose ID")
+const DISPOSE_ID = Symbol('Dispose ID')
 export function onDispose<T>(
   fn: () => T,
   { prepend = false, id }: { prepend?: boolean; id?: string | symbol } = {},
 ): () => T {
   const owner = getOwner()
   if (!owner) {
-    console.warn("onDispose called outside of a reactive owner")
+    console.warn('onDispose called outside of a reactive owner')
     return fn
   }
   // owner is a root

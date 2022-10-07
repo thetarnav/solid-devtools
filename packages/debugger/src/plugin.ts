@@ -1,30 +1,30 @@
-import { Accessor, createEffect, createSignal, untrack } from "solid-js"
+import { Accessor, createEffect, createSignal, untrack } from 'solid-js'
 import {
   createEventHub,
   createSimpleEmitter,
   EventBus,
   EventHubOn,
-} from "@solid-primitives/event-bus"
-import { throttle } from "@solid-primitives/scheduled"
+} from '@solid-primitives/event-bus'
+import { throttle } from '@solid-primitives/scheduled'
 import {
   Mapped,
   Solid,
   RootsUpdates,
   NodeID,
   ComputationUpdate,
-} from "@solid-devtools/shared/graph"
-import { EncodedValue, encodeValue, ElementMap } from "@solid-devtools/shared/serialize"
-import { createConsumers, untrackedCallback } from "@solid-devtools/shared/primitives"
-import { createBatchedUpdateEmitter, createInternalRoot } from "./utils"
-import { ComputationUpdateHandler } from "./walker"
-import { walkSolidRoot } from "./roots"
+} from '@solid-devtools/shared/graph'
+import { EncodedValue, encodeValue, ElementMap } from '@solid-devtools/shared/serialize'
+import { createConsumers, untrackedCallback } from '@solid-devtools/shared/primitives'
+import { createBatchedUpdateEmitter, createInternalRoot } from './utils'
+import { ComputationUpdateHandler } from './walker'
+import { walkSolidRoot } from './roots'
 import {
   clearOwnerObservers,
   collectOwnerDetails,
   encodeComponentProps,
   SignalUpdateHandler,
-} from "./inspect"
-import { makeSolidUpdateListener } from "./update"
+} from './inspect'
+import { makeSolidUpdateListener } from './update'
 
 /*
 DETAILS:
@@ -96,7 +96,7 @@ const exported = createInternalRoot(() => {
   //
   const [components, setComponents] = createSignal<Record<NodeID, Mapped.ResolvedComponent[]>>({})
 
-  const findComponent: PluginData["findComponent"] = (rootId, nodeId) => {
+  const findComponent: PluginData['findComponent'] = (rootId, nodeId) => {
     const componentsList = components()[rootId] as Mapped.ResolvedComponent[] | undefined
     if (!componentsList) return
     for (const c of componentsList) {
@@ -130,12 +130,12 @@ const exported = createInternalRoot(() => {
         const { id } = update
         if (!removedIds.has(id) && !updated[id]) updated[id] = update
       }
-      eventHub.emit("StructureUpdates", { updated, removed: [...removedIds] })
+      eventHub.emit('StructureUpdates', { updated, removed: [...removedIds] })
       updates.length = 0
       removedIds.clear()
     }, 50)
     const pushStructureUpdate = (update: RootUpdate) => {
-      if ("removed" in update) removedIds.add(update.removed)
+      if ('removed' in update) removedIds.add(update.removed)
       else if (removedIds.has(update.updated.id)) return
       else updates.push(update.updated)
       trigger()
@@ -163,7 +163,7 @@ const exported = createInternalRoot(() => {
   const pushSignalUpdate = createBatchedUpdateEmitter<{
     id: NodeID
     value: EncodedValue<boolean>
-  }>(updates => eventHub.emit("SignalUpdates", updates))
+  }>(updates => eventHub.emit('SignalUpdates', updates))
   const onSignalUpdate: SignalUpdateHandler = untrackedCallback((id, value) => {
     if (!enabled() || !inspected.owner) return
     const isSelected = inspected.signals.has(id)
@@ -174,7 +174,7 @@ const exported = createInternalRoot(() => {
     let updateNext = false
     const forceValueUpdate = () => {
       if (!enabled() || !inspected.owner) return (updateNext = false)
-      eventHub.emit("ValueUpdate", {
+      eventHub.emit('ValueUpdate', {
         value: encodeValue(inspected.getValue(), inspected.value, inspected.elementMap),
         update: updateNext,
       })
@@ -219,7 +219,7 @@ const exported = createInternalRoot(() => {
       inspectedProps: inspected.props,
       elementMap: inspected.elementMap,
     })
-    props && eventHub.emit("PropsUpdate", props)
+    props && eventHub.emit('PropsUpdate', props)
   }
 
   createEffect(() => {
@@ -237,7 +237,7 @@ const exported = createInternalRoot(() => {
     )
   })
 
-  const setInspectedOwner: PluginData["setInspectedOwner"] = payload => {
+  const setInspectedOwner: PluginData['setInspectedOwner'] = payload => {
     if (!payload) return clearInspectedDetails()
     const { rootId, nodeId } = payload
 
@@ -247,19 +247,19 @@ const exported = createInternalRoot(() => {
     setInspectedDetails(walkResult.inspectedOwner)
   }
 
-  const setInspectedSignal: PluginData["setInspectedSignal"] = (id, selected) => {
+  const setInspectedSignal: PluginData['setInspectedSignal'] = (id, selected) => {
     const signal = inspected.signalMap[id] as Solid.Signal | undefined
     if (!signal) return null
     if (selected) inspected.signals.add(id)
     else inspected.signals.delete(id)
     return untrack(() => encodeValue(signal.value, selected, inspected.elementMap))
   }
-  const setInspectedProp: PluginData["setInspectedProp"] = (key, selected) => {
+  const setInspectedProp: PluginData['setInspectedProp'] = (key, selected) => {
     if (selected) inspected.props.add(key)
     else inspected.props.delete(key)
     updateInspectedProps()
   }
-  const setInspectedValue: PluginData["setInspectedValue"] = selected => {
+  const setInspectedValue: PluginData['setInspectedValue'] = selected => {
     if (!inspected.owner) return null
     inspected.value = selected
     triggerValueUpdate(false, true)
@@ -269,7 +269,7 @@ const exported = createInternalRoot(() => {
   // Computation updates:
   //
   const _pushComputationUpdate = createBatchedUpdateEmitter<ComputationUpdate>(updates =>
-    eventHub.emit("ComputationUpdates", updates),
+    eventHub.emit('ComputationUpdates', updates),
   )
   const pushComputationUpdate: ComputationUpdateHandler = (rootId, id) => {
     _pushComputationUpdate({ rootId, id })

@@ -1,6 +1,6 @@
-import { WINDOW_PROJECTPATH_PROPERTY } from "@solid-devtools/shared/variables"
+import { WINDOW_PROJECTPATH_PROPERTY } from '@solid-devtools/shared/variables'
 
-export type TargetIDE = "vscode" | "webstorm" | "atom" | "vscode-insiders"
+export type TargetIDE = 'vscode' | 'webstorm' | 'atom' | 'vscode-insiders'
 
 export type ElementLocation = {
   filePath: string
@@ -18,7 +18,7 @@ export type TargetURLFunction = (data: SourceCodeData) => string | void
 const targetIDEMap: Record<TargetIDE, (data: SourceCodeData) => string> = {
   vscode: ({ projectPath, filePath, line, column }) =>
     `vscode://file/${projectPath}/${filePath}:${line}:${column}`,
-  "vscode-insiders": ({ projectPath, filePath, line, column }) =>
+  'vscode-insiders': ({ projectPath, filePath, line, column }) =>
     `vscode-insiders://file/${projectPath}/${filePath}:${line}:${column}`,
   atom: ({ projectPath, filePath, line, column }) =>
     `atom://core/open/file?filename=${projectPath}/${filePath}&line=${line}&column=${column}`,
@@ -27,7 +27,7 @@ const targetIDEMap: Record<TargetIDE, (data: SourceCodeData) => string> = {
 }
 
 function getTargetURL(target: TargetIDE | TargetURLFunction, data: SourceCodeData): string | void {
-  if (typeof target === "function") return target(data)
+  if (typeof target === 'function') return target(data)
   return targetIDEMap[target](data)
 }
 
@@ -42,5 +42,5 @@ export function getFullSourceCodeData(
 
 export function openSourceCode(target: TargetIDE | TargetURLFunction, data: SourceCodeData): void {
   const url = getTargetURL(target, data)
-  if (typeof url === "string") window.open(url, "_blank")
+  if (typeof url === 'string') window.open(url, '_blank')
 }

@@ -1,8 +1,8 @@
-import { Many } from "@solid-primitives/utils"
-import type { CSSPropertiesWithVars } from "@vanilla-extract/css/dist/declarations/src/types"
-import { clsx } from "clsx"
-import { Property } from "csstype"
-import { spacing, theme } from "."
+import { Many } from '@solid-primitives/utils'
+import type { CSSPropertiesWithVars } from '@vanilla-extract/css/dist/declarations/src/types'
+import { clsx } from 'clsx'
+import { Property } from 'csstype'
+import { spacing, theme } from '.'
 
 export function hexToRgbValue(hex: string) {
   var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex)
@@ -38,22 +38,22 @@ export const inset = (n: SpacingValue) => {
 }
 
 export const centerChild = {
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
 } as const
 
 export const rounded = (
-  key: keyof typeof theme.radius = "DEFAULT",
-  corners?: ("tl" | "tr" | "bl" | "br")[],
+  key: keyof typeof theme.radius = 'DEFAULT',
+  corners?: ('tl' | 'tr' | 'bl' | 'br')[],
 ): CSSPropertiesWithVars => {
   if (!corners) return { borderRadius: theme.radius[key] }
 
   const radius = theme.radius[key]
-  const tl = corners.includes("tl") ? radius : "0"
-  const tr = corners.includes("tr") ? radius : "0"
-  const bl = corners.includes("bl") ? radius : "0"
-  const br = corners.includes("br") ? radius : "0"
+  const tl = corners.includes('tl') ? radius : '0'
+  const tr = corners.includes('tr') ? radius : '0'
+  const bl = corners.includes('bl') ? radius : '0'
+  const br = corners.includes('br') ? radius : '0'
   return { borderRadius: `${tl} ${tr} ${br} ${bl}` }
 }
 

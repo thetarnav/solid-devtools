@@ -1,20 +1,20 @@
-import { batch, createEffect, createSignal, on, onCleanup } from "solid-js"
-import { createInternalRoot, useDebugger } from "@solid-devtools/debugger"
-import * as Locator from "@solid-devtools/locator"
+import { batch, createEffect, createSignal, on, onCleanup } from 'solid-js'
+import { createInternalRoot, useDebugger } from '@solid-devtools/debugger'
+import * as Locator from '@solid-devtools/locator'
 import {
   Messages,
   onWindowMessage,
   postWindowMessage,
   startListeningWindowMessages,
-} from "@solid-devtools/shared/bridge"
-import { warn } from "@solid-devtools/shared/utils"
+} from '@solid-devtools/shared/bridge'
+import { warn } from '@solid-devtools/shared/utils'
 
 startListeningWindowMessages()
 
 // in case of navigation/page reload, reset the locator mode state in the extension
-postWindowMessage("ResetPanel")
+postWindowMessage('ResetPanel')
 
-postWindowMessage("SolidOnPage", process.env.VERSION!)
+postWindowMessage('SolidOnPage', process.env.VERSION!)
 
 let loadedBefore = false
 
@@ -35,10 +35,10 @@ createInternalRoot(() => {
   } = useDebugger({ enabled })
 
   // update the graph only if the devtools panel is in view
-  onWindowMessage("PanelVisibility", setEnabled)
+  onWindowMessage('PanelVisibility', setEnabled)
 
   // disable debugger and reset any state
-  onWindowMessage("PanelClosed", () => {
+  onWindowMessage('PanelClosed', () => {
     batch(() => {
       setEnabled(false)
       setInspectedOwner(null)
@@ -51,17 +51,17 @@ createInternalRoot(() => {
     if (loadedBefore) forceTriggerUpdate()
     else loadedBefore = true
 
-    onCleanup(onWindowMessage("ForceUpdate", forceTriggerUpdate))
+    onCleanup(onWindowMessage('ForceUpdate', forceTriggerUpdate))
 
-    onCleanup(onWindowMessage("SetSelectedOwner", setInspectedOwner))
+    onCleanup(onWindowMessage('SetSelectedOwner', setInspectedOwner))
 
     onCleanup(
-      onWindowMessage("ToggleInspectedValue", payload => {
-        if (payload.type === "signal") {
+      onWindowMessage('ToggleInspectedValue', payload => {
+        if (payload.type === 'signal') {
           const { id, selected } = payload
           const value = setInspectedSignal(id, selected)
-          if (value) postWindowMessage("SignalUpdates", { signals: [{ id, value }], update: false })
-        } else if (payload.type === "prop") {
+          if (value) postWindowMessage('SignalUpdates', { signals: [{ id, value }], update: false })
+        } else if (payload.type === 'prop') {
           const { id, selected } = payload
           setInspectedProp(id, selected)
         } else {
@@ -70,33 +70,33 @@ createInternalRoot(() => {
       }),
     )
 
-    listenTo("StructureUpdates", updates => postWindowMessage("GraphUpdate", updates))
+    listenTo('StructureUpdates', updates => postWindowMessage('GraphUpdate', updates))
 
-    listenTo("ComputationUpdates", updates => postWindowMessage("ComputationUpdates", updates))
+    listenTo('ComputationUpdates', updates => postWindowMessage('ComputationUpdates', updates))
 
-    listenTo("SignalUpdates", updates => {
-      postWindowMessage("SignalUpdates", { signals: updates, update: true })
+    listenTo('SignalUpdates', updates => {
+      postWindowMessage('SignalUpdates', { signals: updates, update: true })
     })
 
-    listenTo("PropsUpdate", updates => postWindowMessage("PropsUpdate", updates))
+    listenTo('PropsUpdate', updates => postWindowMessage('PropsUpdate', updates))
 
-    listenTo("ValueUpdate", ({ value, update }) => {
-      postWindowMessage("ValueUpdate", { value, update })
+    listenTo('ValueUpdate', ({ value, update }) => {
+      postWindowMessage('ValueUpdate', { value, update })
     })
 
     // send the focused owner details
     createEffect(() => {
       const details = inspectedDetails()
-      if (details) postWindowMessage("OwnerDetailsUpdate", details)
+      if (details) postWindowMessage('OwnerDetailsUpdate', details)
     })
 
     // TODO: abstract state sharing to a separate package
     // state of the extension's locator mode
     const [extLocatorEnabled, setExtLocatorEnabled] = createSignal(false)
     Locator.addLocatorModeSource(extLocatorEnabled)
-    onCleanup(onWindowMessage("ExtLocatorMode", setExtLocatorEnabled))
+    onCleanup(onWindowMessage('ExtLocatorMode', setExtLocatorEnabled))
     createEffect(
-      on(Locator.locatorModeEnabled, state => postWindowMessage("ClientLocatorMode", state), {
+      on(Locator.locatorModeEnabled, state => postWindowMessage('ClientLocatorMode', state), {
         defer: true,
       }),
     )
@@ -105,12 +105,12 @@ createInternalRoot(() => {
     Locator.addClickInterceptor((e, component) => {
       e.preventDefault()
       e.stopPropagation()
-      postWindowMessage("SendSelectedOwner", component.id)
+      postWindowMessage('SendSelectedOwner', component.id)
       return false
     })
 
     let skipNextHoveredComponent = true
-    let prevHoverMessage: Messages["SetHoveredOwner"] | null = null
+    let prevHoverMessage: Messages['SetHoveredOwner'] | null = null
     // listen for op-page components being hovered and send them to the devtools panel
     createEffect(() => {
       const hovered = Locator.highlightedComponent()[0] as Locator.HoveredComponent | undefined
@@ -118,32 +118,32 @@ createInternalRoot(() => {
       if (!hovered) {
         if (prevHoverMessage && prevHoverMessage.state)
           postWindowMessage(
-            "SetHoveredOwner",
+            'SetHoveredOwner',
             (prevHoverMessage = { nodeId: prevHoverMessage.nodeId, state: false }),
           )
       } else {
         postWindowMessage(
-          "SetHoveredOwner",
+          'SetHoveredOwner',
           (prevHoverMessage = { nodeId: hovered.id, state: true }),
         )
       }
     })
 
     onCleanup(
-      onWindowMessage("HighlightElement", payload => {
+      onWindowMessage('HighlightElement', payload => {
         if (!payload) return Locator.setTarget(null)
         let target: Locator.TargetComponent | HTMLElement
         // highlight component
-        if (typeof payload === "object") {
+        if (typeof payload === 'object') {
           const { rootId, nodeId } = payload
           const component = findComponent(rootId, nodeId)
-          if (!component) return warn("No component found", nodeId)
+          if (!component) return warn('No component found', nodeId)
           target = { ...component, rootId }
         }
         // highlight element
         else {
           const element = getElementById(payload)
-          if (!element) return warn("No element found", payload)
+          if (!element) return warn('No element found', payload)
           target = element
         }
         Locator.setTarget(p => {

@@ -1,4 +1,4 @@
-import { makeEventListener } from "@solid-primitives/event-listener"
+import { makeEventListener } from '@solid-primitives/event-listener'
 
 // TODO: contribute to solid-primitives
 
@@ -11,6 +11,6 @@ export function makeHoverElementListener(onHover: (el: HTMLElement | null) => vo
     if (target === last || (!(target instanceof HTMLElement) && target !== null)) return
     onHover((last = target))
   }
-  makeEventListener(window, "mouseover", handleHover)
-  makeEventListener(document, "mouseleave", handleHover.bind(void 0, { target: null }))
+  makeEventListener(window, 'mouseover', handleHover)
+  makeEventListener(document, 'mouseleave', handleHover.bind(void 0, { target: null }))
 }

@@ -1,6 +1,6 @@
-import { jest } from "@jest/globals"
+import { jest } from '@jest/globals'
 
-jest.mock("object-observer", () => ({
+jest.mock('object-observer', () => ({
   Observable: {
     from: (obj: any) => obj,
     observe: () => void 0,

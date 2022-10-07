@@ -1,9 +1,9 @@
-import { NodeType, Solid } from "@solid-devtools/shared/graph"
-import { UNNAMED } from "@solid-devtools/shared/variables"
-import * as API from "./index"
-import { createRoot } from "solid-js"
+import { NodeType, Solid } from '@solid-devtools/shared/graph'
+import { UNNAMED } from '@solid-devtools/shared/variables'
+import * as API from './index'
+import { createRoot } from 'solid-js'
 
-export { createUnownedRoot } from "./index"
+export { createUnownedRoot } from './index'
 
 export const Debugger: typeof API.Debugger = props => props.children
 

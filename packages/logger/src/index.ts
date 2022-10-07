@@ -1,5 +1,5 @@
-import { Accessor, onCleanup, $PROXY, untrack, createEffect, on } from "solid-js"
-import { arrayEquals, asArray, Many } from "@solid-primitives/utils"
+import { Accessor, onCleanup, $PROXY, untrack, createEffect, on } from 'solid-js'
+import { arrayEquals, asArray, Many } from '@solid-primitives/utils'
 import {
   getOwnerType,
   isSolidComputation,
@@ -12,9 +12,9 @@ import {
   lookupOwner,
   makeValueUpdateListener,
   removeValueUpdateObserver,
-} from "@solid-devtools/debugger"
-import { getOwner, NodeType, Solid, Core } from "@solid-devtools/shared/graph"
-import { dedupeArray, arrayRefEquals } from "@solid-devtools/shared/utils"
+} from '@solid-devtools/debugger'
+import { getOwner, NodeType, Solid, Core } from '@solid-devtools/shared/graph'
+import { dedupeArray, arrayRefEquals } from '@solid-devtools/shared/utils'
 import {
   getComputationCreatedLabel,
   getComputationRerunLabel,
@@ -33,10 +33,10 @@ import {
   logSignalValue,
   getPropsKeyUpdateLabel,
   getPropLabel,
-} from "./log"
-import { getDiffMap, makeTimeMeter } from "./utils"
+} from './log'
+import { getDiffMap, makeTimeMeter } from './utils'
 
-declare module "solid-js/types/reactive/signal" {
+declare module 'solid-js/types/reactive/signal' {
   interface Owner {
     $debug?: boolean
     $debugSignals?: boolean
@@ -54,18 +54,18 @@ const isSolidProxy = (o: any): boolean => !!o[$PROXY]
  */
 function markDebugNode(
   o: Core.Owner,
-  type: "computation" | "signals" | "owned",
+  type: 'computation' | 'signals' | 'owned',
 ): true | VoidFunction
 function markDebugNode(o: Core.SignalState): true | VoidFunction
 function markDebugNode(
   o: Core.Owner | Core.SignalState,
-  type?: "computation" | "signals" | "owned",
+  type?: 'computation' | 'signals' | 'owned',
 ): true | VoidFunction {
-  let property: "$debug" | "$debugSignals" | "$debugOwned" | "$debugSignal"
-  if (type === "computation") property = "$debug"
-  else if (type === "signals") property = "$debugSignals"
-  else if (type === "owned") property = "$debugOwned"
-  else property = "$debugSignal"
+  let property: '$debug' | '$debugSignals' | '$debugOwned' | '$debugSignal'
+  if (type === 'computation') property = '$debug'
+  else if (type === 'signals') property = '$debugSignals'
+  else if (type === 'owned') property = '$debugOwned'
+  else property = '$debugSignal'
 
   if ((o as any)[property]) return true
   ;(o as any)[property] = true
@@ -101,9 +101,9 @@ export function debugComputation(
   { initialRun = true }: DebugComputationOptions = {},
 ): void {
   const owner = _owner === undefined ? getOwner() : (_owner as Solid.Owner)
-  if (!owner || !isSolidComputation(owner)) return console.warn("owner is not a computation")
+  if (!owner || !isSolidComputation(owner)) return console.warn('owner is not a computation')
 
-  if (markDebugNode(owner, "computation") === true) return
+  if (markDebugNode(owner, 'computation') === true) return
 
   const { type, typeName, name } = getNodeState(owner)
   const SYMBOL = Symbol(name)
@@ -216,9 +216,9 @@ export function debugComputation(
 export function debugOwnerComputations(owner?: Core.Owner): void
 export function debugOwnerComputations(_owner?: Core.Owner): void {
   const owner = _owner === undefined ? getOwner() : (_owner as Solid.Owner)
-  if (!owner) return console.warn("no owner passed to debugOwnedComputations")
+  if (!owner) return console.warn('no owner passed to debugOwnedComputations')
 
-  const marked = markDebugNode(owner, "owned")
+  const marked = markDebugNode(owner, 'owned')
   if (marked === true) return
   onCleanup(marked)
 
@@ -279,11 +279,11 @@ export function debugSignal(
 ): void {
   let signal: Solid.Signal
 
-  if (typeof source === "function") {
+  if (typeof source === 'function') {
     const sources = getFunctionSources(source)
-    if (sources.length === 0) return console.warn("No signal was passed to debugSignal")
+    if (sources.length === 0) return console.warn('No signal was passed to debugSignal')
     else if (sources.length > 1)
-      return console.warn("More then one signal was passed to debugSignal")
+      return console.warn('More then one signal was passed to debugSignal')
     signal = sources[0]
   } else {
     signal = source as Solid.Signal
@@ -365,10 +365,10 @@ export function debugSignals(
 ): void {
   let signals: Solid.Signal[] = []
   asArray(source).forEach(s => {
-    if (typeof s === "function") signals.push.apply(signals, getFunctionSources(s))
+    if (typeof s === 'function') signals.push.apply(signals, getFunctionSources(s))
     else signals.push(s as Solid.Signal)
   })
-  if (signals.length === 0) return console.warn("No signals were passed to debugSignals")
+  if (signals.length === 0) return console.warn('No signals were passed to debugSignals')
 
   // filter out already debugged signals
   signals = signals.filter(s => !s.$debugSignal)
@@ -408,9 +408,9 @@ export function debugSignals(
  */
 export function debugOwnerSignals(owner?: Core.Owner, options: DebugSignalOptions = {}) {
   owner = getOwner()!
-  if (!owner) return console.warn("debugOwnerState found no Owner")
+  if (!owner) return console.warn('debugOwnerState found no Owner')
 
-  if (markDebugNode(owner, "signals") === true) return
+  if (markDebugNode(owner, 'signals') === true) return
 
   const solidOwner = owner as Solid.Owner
 
@@ -460,7 +460,7 @@ const getPropValue = (props: Record<string, unknown>, desc: PropertyDescriptor):
  */
 export function debugProps(props: Record<string, unknown>): void {
   const owner = getOwner()
-  if (!owner) return console.warn("debugProps should be used synchronously inside a component")
+  if (!owner) return console.warn('debugProps should be used synchronously inside a component')
 
   // for solid-refresh HMR memos, return the owned component
   const ownerState = getNodeState(lookupOwner(owner, o => getOwnerType(o) !== NodeType.Refresh)!)
@@ -473,10 +473,10 @@ export function debugProps(props: Record<string, unknown>): void {
     console.groupCollapsed(...getPropsInitLabel(ownerState, isProxy, false))
     paddedForEach(
       descriptorsList,
-      ([, desc]) => (desc.get ? "Getter" : "Value"),
+      ([, desc]) => (desc.get ? 'Getter' : 'Value'),
       (type, [key, desc]) => {
         const value = getPropValue(props, desc)
-        const signals = type === "Getter" ? getFunctionSources(() => props[key]) : []
+        const signals = type === 'Getter' ? getFunctionSources(() => props[key]) : []
         const label = getPropLabel(type, key, value, null)
 
         if (signals.length > 0) {
@@ -507,12 +507,12 @@ export function debugProps(props: Record<string, unknown>): void {
             allKeys.forEach(key => {
               const mark = getMark(key)
 
-              if (mark === "removed")
-                return console.log(...getPropLabel("Getter", key, null, "removed"))
+              if (mark === 'removed')
+                return console.log(...getPropLabel('Getter', key, null, 'removed'))
 
               const desc = descriptors[key]
               const value = getPropValue(props, desc)
-              const label = getPropLabel("Getter", key, value, mark)
+              const label = getPropLabel('Getter', key, value, mark)
               const signals = getFunctionSources(() => props[key])
 
               if (signals.length > 0) {
@@ -526,7 +526,7 @@ export function debugProps(props: Record<string, unknown>): void {
         },
       ),
       undefined,
-      { name: "debugProps EFFECT" },
+      { name: 'debugProps EFFECT' },
     )
   }
 }

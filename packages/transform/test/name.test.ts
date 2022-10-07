@@ -1,24 +1,24 @@
-import { describe, test } from "vitest"
-import plugin from "../src/name"
-import wrapPlugin from "../src/wrapStores"
-import { assertTransform } from "./utils"
+import { describe, test } from 'vitest'
+import plugin from '../src/name'
+import wrapPlugin from '../src/wrapStores'
+import { assertTransform } from './utils'
 
 // Positive tests
 for (let [create, module, extraArg] of [
-  ["createSignal", "solid-js"],
-  ["createMemo", "solid-js", "1"],
-  ["createStore", "solid-js/store"],
-  ["createMutable", "solid-js/store"],
+  ['createSignal', 'solid-js'],
+  ['createMemo', 'solid-js', '1'],
+  ['createStore', 'solid-js/store'],
+  ['createMutable', 'solid-js/store'],
 ]) {
-  extraArg = extraArg ? "undefined, " : ""
+  extraArg = extraArg ? 'undefined, ' : ''
   describe(create, () => {
     for (let [type, importStatement, creator] of [
-      ["named import", `import { ${create} } from "${module}";`, create],
-      ["renamed import", `import { ${create} as foo } from "${module}";`, "foo"],
-      ["namespace import", `import * as foo from "${module}";`, `foo.${create}`],
+      ['named import', `import { ${create} } from "${module}";`, create],
+      ['renamed import', `import { ${create} as foo } from "${module}";`, 'foo'],
+      ['namespace import', `import * as foo from "${module}";`, `foo.${create}`],
     ]) {
       describe(type, () => {
-        test("no default value", () => {
+        test('no default value', () => {
           const src = `${importStatement}
   const signal = ${creator}();`
 
@@ -30,7 +30,7 @@ const signal = ${creator}(undefined, ${extraArg}{
           assertTransform(src, expectedOutput, plugin)
         })
 
-        test("default value", () => {
+        test('default value', () => {
           const src = `${importStatement}
 const signal = ${creator}(5);`
 
@@ -42,7 +42,7 @@ const signal = ${creator}(5, ${extraArg}{
           assertTransform(src, expectedOutput, plugin)
         })
 
-        test("empty options", () => {
+        test('empty options', () => {
           const src = `${importStatement}
 const rest = {};
 const signal = ${creator}(5, ${extraArg}{});`
@@ -56,7 +56,7 @@ const signal = ${creator}(5, ${extraArg}{
           assertTransform(src, expectedOutput, plugin)
         })
 
-        test("options excluding name", () => {
+        test('options excluding name', () => {
           const src = `${importStatement}
 const rest = {};
 const signal = ${creator}(5, ${extraArg}{ equals: false, ...rest });`
@@ -72,7 +72,7 @@ const signal = ${creator}(5, ${extraArg}{
           assertTransform(src, expectedOutput, plugin)
         })
 
-        test("options including name", () => {
+        test('options including name', () => {
           const src = `${importStatement}
 const rest = {};
 const signal = ${creator}(5, ${extraArg}{ equals: false, name: "foo", ...rest });`
@@ -88,7 +88,7 @@ const signal = ${creator}(5, ${extraArg}{
           assertTransform(src, expectedOutput, plugin)
         })
 
-        test("array of length 1", () => {
+        test('array of length 1', () => {
           const src = `${importStatement}
 const [signal] = ${creator}(5);`
 
@@ -100,7 +100,7 @@ const [signal] = ${creator}(5, ${extraArg}{
           assertTransform(src, expectedOutput, plugin)
         })
 
-        test("array of length 2", () => {
+        test('array of length 2', () => {
           const src = `${importStatement}
 const [signal, setSignal] = ${creator}(5);`
 
@@ -118,10 +118,10 @@ const [signal, setSignal] = ${creator}(5, ${extraArg}{
 
 // Negative tests
 for (let [create, module] of [
-  ["createSignal", "solid-js/store"],
-  ["createMemo", "solid-js/store"],
-  ["createStore", "solid-js"],
-  ["createMutable", "solid-js"],
+  ['createSignal', 'solid-js/store'],
+  ['createMemo', 'solid-js/store'],
+  ['createStore', 'solid-js'],
+  ['createMutable', 'solid-js'],
 ]) {
   describe(create, () => {
     test(`no import`, () => {
@@ -139,8 +139,8 @@ const signal = ${create}();`
   })
 }
 
-describe("wrapStores interaction", () => {
-  test("named import", () => {
+describe('wrapStores interaction', () => {
+  test('named import', () => {
     const src = `import { createStore } from "solid-js/store";
 const signal = createStore();`
 

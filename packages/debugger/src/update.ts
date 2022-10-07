@@ -1,8 +1,8 @@
-import { untrack } from "solid-js"
-import { Observable, Observer as ObjectObserver } from "object-observer"
-import { Solid, Core, ValueUpdateListener } from "@solid-devtools/shared/graph"
-import { WINDOW_WRAP_STORE_PROPERTY } from "@solid-devtools/shared/variables"
-import { skipInternalRoot, tryOnCleanup } from "./utils"
+import { untrack } from 'solid-js'
+import { Observable, Observer as ObjectObserver } from 'object-observer'
+import { Solid, Core, ValueUpdateListener } from '@solid-devtools/shared/graph'
+import { WINDOW_WRAP_STORE_PROPERTY } from '@solid-devtools/shared/variables'
+import { skipInternalRoot, tryOnCleanup } from './utils'
 
 //
 // AFTER UPDATE
@@ -13,7 +13,7 @@ const GraphUpdateListeners = new Set<VoidFunction>()
 // Patch window._$afterUpdate
 {
   const runListeners = () => GraphUpdateListeners.forEach(f => f())
-  if (typeof window._$afterUpdate === "function") {
+  if (typeof window._$afterUpdate === 'function') {
     GraphUpdateListeners.add(window._$afterUpdate)
   }
   window._$afterUpdate = runListeners
@@ -46,7 +46,7 @@ const CreateRootListeners = new Set<AfterCrateRoot>()
     if (skipInternalRoot()) return
     CreateRootListeners.forEach(f => f(root))
   }
-  if (typeof window._$afterCreateRoot === "function") {
+  if (typeof window._$afterCreateRoot === 'function') {
     CreateRootListeners.add(window._$afterCreateRoot)
   }
   window._$afterCreateRoot = runListeners as (root: Core.Owner) => void
@@ -158,7 +158,7 @@ export function observeValueUpdate(
   // patch node
   const map = (node.onValueUpdate = { [symbol]: onUpdate })
   let value = node.value
-  Object.defineProperty(node, "value", {
+  Object.defineProperty(node, 'value', {
     get: () => value,
     set: newValue => {
       for (let sym of Object.getOwnPropertySymbols(map)) map[sym](newValue, value)

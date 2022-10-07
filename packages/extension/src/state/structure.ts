@@ -1,8 +1,8 @@
-import { createMemo, createRoot, createSelector, createSignal, untrack } from "solid-js"
-import { NodeID, NodeType, RootsUpdates } from "@solid-devtools/shared/graph"
-import { reconcileStructure } from "./structure-reconcile"
-import locator from "./locator"
-import { createSimpleEmitter } from "@solid-primitives/event-bus"
+import { createMemo, createRoot, createSelector, createSignal, untrack } from 'solid-js'
+import { NodeID, NodeType, RootsUpdates } from '@solid-devtools/shared/graph'
+import { reconcileStructure } from './structure-reconcile'
+import locator from './locator'
+import { createSimpleEmitter } from '@solid-primitives/event-bus'
 
 export namespace Structure {
   export interface Node {
@@ -32,7 +32,7 @@ function getParentRoot(node: Structure.Node): Structure.Node {
     if (current.type === NodeType.Root) return current
     current = current.parent
   }
-  throw new Error("Parent root not found")
+  throw new Error('Parent root not found')
 }
 
 function getNodePath(node: Structure.Node): Structure.Node[] {

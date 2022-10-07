@@ -1,10 +1,10 @@
-import defineConfig from "../../configs/tsup.config"
+import defineConfig from '../../configs/tsup.config'
 
-import { version } from "./package.json"
+import { version } from './package.json'
 
 export default defineConfig({
   server: true,
-  additionalEntries: ["vite"],
+  additionalEntries: ['vite'],
   overwrite: config => {
     config.env = {
       ...config.env,

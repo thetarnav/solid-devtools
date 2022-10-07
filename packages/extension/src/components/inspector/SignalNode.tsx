@@ -13,9 +13,9 @@ import {
   Switch,
   untrack,
   useContext,
-} from "solid-js"
-import { Entries } from "@solid-primitives/keyed"
-import { NodeID, NodeType } from "@solid-devtools/shared/graph"
+} from 'solid-js'
+import { Entries } from '@solid-primitives/keyed'
+import { NodeID, NodeType } from '@solid-devtools/shared/graph'
 import {
   EncodedValue,
   EncodedValueOf,
@@ -23,16 +23,16 @@ import {
   NAN,
   NEGATIVE_INFINITY,
   ValueType,
-} from "@solid-devtools/shared/serialize"
-import clsx from "clsx"
-import { Highlight, Icon } from "@/ui"
-import inspector, { Inspector } from "@/state/inspector"
-import * as styles from "./SignalNode.css"
-import { createHover } from "@solid-devtools/shared/primitives"
-import { Listen } from "@solid-primitives/event-bus"
-import { createPingedSignal } from "@/utils"
+} from '@solid-devtools/shared/serialize'
+import clsx from 'clsx'
+import { Highlight, Icon } from '@/ui'
+import inspector, { Inspector } from '@/state/inspector'
+import * as styles from './SignalNode.css'
+import { createHover } from '@solid-devtools/shared/primitives'
+import { Listen } from '@solid-primitives/event-bus'
+import { createPingedSignal } from '@/utils'
 
-type ValueComponent<K extends ValueType> = Component<Omit<EncodedValueOf<K, boolean>, "type">>
+type ValueComponent<K extends ValueType> = Component<Omit<EncodedValueOf<K, boolean>, 'type'>>
 
 const StringValuePreview: ValueComponent<ValueType.String> = props => (
   <span class={styles.ValueString}>"{props.value}"</span>
@@ -42,11 +42,11 @@ const NumberValuePreview: ValueComponent<ValueType.Number> = props => {
   const value = () => {
     switch (props.value) {
       case NAN:
-        return "NaN"
+        return 'NaN'
       case INFINITY:
-        return "Infinity"
+        return 'Infinity'
       case NEGATIVE_INFINITY:
-        return "-Infinity"
+        return '-Infinity'
       default:
         return props.value
     }
@@ -64,14 +64,14 @@ const BooleanValuePreview: ValueComponent<ValueType.Boolean> = props => (
 )
 
 const FunctionValuePreview: ValueComponent<ValueType.Function> = props => (
-  <span class={styles.ValueFunction}>{props.value ? `f ${props.value}()` : "function()"}</span>
+  <span class={styles.ValueFunction}>{props.value ? `f ${props.value}()` : 'function()'}</span>
 )
 const GetterValuePreview: ValueComponent<ValueType.Getter> = props => (
   <span class={styles.ValueFunction}>get {props.value}()</span>
 )
 
 const NullableValuePreview: Component<{ value: null | undefined }> = props => (
-  <span class={styles.Nullable}>{props.value === null ? "null" : "undefined"}</span>
+  <span class={styles.Nullable}>{props.value === null ? 'null' : 'undefined'}</span>
 )
 
 const SymbolValuePreview: ValueComponent<ValueType.Symbol> = props => (
@@ -113,12 +113,12 @@ const ObjectValuePreview: Component<
         when={props.value > 0}
         fallback={
           <span class={styles.Nullable}>
-            Empty {props.type === ValueType.Array ? "Array" : "Object"}
+            Empty {props.type === ValueType.Array ? 'Array' : 'Object'}
           </span>
         }
       >
         <span class={styles.baseValue}>
-          {props.type === ValueType.Array ? "Array" : "Object"} [{props.value}]
+          {props.type === ValueType.Array ? 'Array' : 'Object'} [{props.value}]
         </span>
       </Show>
     </Match>
@@ -130,8 +130,8 @@ const ObjectValuePreview: Component<
 
 const CollapsableObjectPreview: Component<{
   value:
-    | EncodedValueOf<ValueType.Object, true>["children"]
-    | EncodedValueOf<ValueType.Array, true>["children"]
+    | EncodedValueOf<ValueType.Object, true>['children']
+    | EncodedValueOf<ValueType.Array, true>['children']
 }> = props => {
   return (
     <ul class={styles.collapsable.list}>
@@ -206,17 +206,17 @@ const ValuePreview: Component<{ value: EncodedValue<boolean> }> = props =>
 
 const ValueName: ParentComponent<{ isTitle?: boolean; isMemo?: boolean }> = props => {
   return (
-    <div class={styles.ValueName.container[props.isTitle !== true ? "base" : "title"]}>
+    <div class={styles.ValueName.container[props.isTitle !== true ? 'base' : 'title']}>
       {props.isTitle !== true && props.isMemo && <Icon.Memo class={styles.ValueName.icon} />}
-      <div class={styles.ValueName.name[props.isTitle !== true ? "base" : "title"]}>
+      <div class={styles.ValueName.name[props.isTitle !== true ? 'base' : 'title']}>
         {props.children}
       </div>
     </div>
   )
 }
 
-const ValueRow: ParentComponent<{ selected?: boolean } & ComponentProps<"li">> = props => {
-  const [, attrs] = splitProps(props, ["selected", "children", "class"])
+const ValueRow: ParentComponent<{ selected?: boolean } & ComponentProps<'li'>> = props => {
+  const [, attrs] = splitProps(props, ['selected', 'children', 'class'])
 
   // early return if this value in not selectable (if undefined, this shouldn't be assigned again)
   if (props.selected === undefined) {

@@ -1,15 +1,15 @@
-import { structure, inspector, Structure } from "@/state"
-import { Scrollable } from "@/ui"
-import { NodeID } from "@solid-devtools/shared/graph"
-import { useRemSize } from "@solid-devtools/shared/primitives"
-import { assignInlineVars } from "@vanilla-extract/dynamic"
-import { Accessor, Component, createEffect, createMemo, createSignal, For, Show } from "solid-js"
-import { untrack } from "solid-js/web"
-import { StructureProvider } from "./ctx"
-import { OwnerNode } from "./OwnerNode"
-import { OwnerPath } from "./Path"
-import * as styles from "./structure.css"
-import { getVirtualVars } from "./virtual"
+import { structure, inspector, Structure } from '@/state'
+import { Scrollable } from '@/ui'
+import { NodeID } from '@solid-devtools/shared/graph'
+import { useRemSize } from '@solid-devtools/shared/primitives'
+import { assignInlineVars } from '@vanilla-extract/dynamic'
+import { Accessor, Component, createEffect, createMemo, createSignal, For, Show } from 'solid-js'
+import { untrack } from 'solid-js/web'
+import { StructureProvider } from './ctx'
+import { OwnerNode } from './OwnerNode'
+import { OwnerPath } from './Path'
+import * as styles from './structure.css'
+import { getVirtualVars } from './virtual'
 
 export default function StructureView() {
   return (

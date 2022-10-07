@@ -1,17 +1,17 @@
-import { describe, it, expect } from "@jest/globals"
-import { getOwner, Solid } from "@solid-devtools/shared/graph"
-import { createComputed, createRoot, createSignal } from "solid-js"
+import { describe, it, expect } from '@jest/globals'
+import { getOwner, Solid } from '@solid-devtools/shared/graph'
+import { createComputed, createRoot, createSignal } from 'solid-js'
 import {
   interceptComputationRerun,
   makeSolidUpdateListener,
   makeCreateRootListener,
   observeValueUpdate,
   removeValueUpdateObserver,
-} from "../src/update"
-import { createInternalRoot } from "../src/utils"
+} from '../src/update'
+import { createInternalRoot } from '../src/utils'
 
-describe("makeSolidUpdateListener", () => {
-  it("listens to solid updates", () =>
+describe('makeSolidUpdateListener', () => {
+  it('listens to solid updates', () =>
     createRoot(dispose => {
       const [count, setCount] = createSignal(0)
       createComputed(count)
@@ -35,8 +35,8 @@ describe("makeSolidUpdateListener", () => {
     }))
 })
 
-describe("makeCreateRootListener", () => {
-  it("listens to new roots", () =>
+describe('makeCreateRootListener', () => {
+  it('listens to new roots', () =>
     createRoot(dispose => {
       const captured: Solid.Root[] = []
       makeCreateRootListener(root => captured.push(root))
@@ -59,8 +59,8 @@ describe("makeCreateRootListener", () => {
     }))
 })
 
-describe("interceptComputationRerun", () => {
-  it("patches computation", () =>
+describe('interceptComputationRerun', () => {
+  it('patches computation', () =>
     createRoot(dispose => {
       let last_prev: unknown
       let last_patched_prev: unknown
@@ -72,7 +72,7 @@ describe("interceptComputationRerun", () => {
         last_prev = prev
         last_value = count()
         return last_value
-      }, "init")
+      }, 'init')
 
       const owner = getOwner()!.owned![0]
       interceptComputationRerun(owner, (fn, prev) => {
@@ -94,11 +94,11 @@ describe("interceptComputationRerun", () => {
     }))
 })
 
-describe("observeValueUpdate", () => {
-  it("patches signal", () =>
+describe('observeValueUpdate', () => {
+  it('patches signal', () =>
     createRoot(dispose => {
-      const [, setCount] = createSignal(0, { name: "s1" })
-      const signal = getOwner()!.sourceMap!["s1"]
+      const [, setCount] = createSignal(0, { name: 's1' })
+      const signal = getOwner()!.sourceMap!['s1']
       const symbol = Symbol()
       let last_prev: unknown
       let last_value: unknown
