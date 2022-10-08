@@ -39,3 +39,4 @@ Thumbs.db
 *.pem
 
 packages/extension/dist.zip
+packages/*/vite.config.ts.timestamp-*.*

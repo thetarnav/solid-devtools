@@ -15,7 +15,7 @@ export default defineConfig({
   resolve: {
     alias: {
       '@/': `${__dirname}/src/`,
-      // "@solid-devtools/shared": resolve(__dirname, "..", "shared", "src"),
+      '@solid-devtools/shared': resolve(__dirname, '..', 'shared', 'src'),
     },
   },
   define: {
