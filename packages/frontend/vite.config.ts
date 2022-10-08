@@ -1,8 +1,8 @@
 import { resolve } from 'path'
 import { defineConfig } from 'vite'
 import dts from 'vite-plugin-dts'
-import solidPlugin from 'vite-plugin-solid'
-import { vanillaExtractPlugin } from '@vanilla-extract/vite-plugin'
+import solid from 'vite-plugin-solid'
+import { vanillaExtractPlugin as vanillaExtract } from '@vanilla-extract/vite-plugin'
 import { dependencies, peerDependencies } from './package.json'
 
 const externals = [...Object.keys(dependencies), ...Object.keys(peerDependencies)]
@@ -13,13 +13,14 @@ export default defineConfig({
   resolve: {
     alias: {
       '@/': `${__dirname}/src/`,
+      '@solid-devtools/shared': r`../shared/src`,
     },
   },
   plugins: [
     // compiles solid jsx
-    solidPlugin(),
+    solid(),
     // compiles vanilla-extract stylesheets to dist/style.css
-    vanillaExtractPlugin(),
+    vanillaExtract(),
     // generates type definitions
     dts({
       outputDir: './dist/types',

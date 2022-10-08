@@ -10,12 +10,14 @@ import pkg from './package.json'
 
 const isDev = process.env.NODE_ENV === 'development'
 
+const r = (str: TemplateStringsArray) => resolve(__dirname, str.join(''))
+
 export default defineConfig({
   plugins: [solidPlugin({ dev: false }), vanillaExtractPlugin(), crx({ manifest })],
   resolve: {
     alias: {
       '@/': `${__dirname}/src/`,
-      '@solid-devtools/shared': resolve(__dirname, '..', 'shared', 'src'),
+      '@solid-devtools/shared': r`../shared/src`,
     },
   },
   define: {
