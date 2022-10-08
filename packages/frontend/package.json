@@ -5,11 +5,11 @@
   "license": "MIT",
   "author": "Damian Tarnawski <gthetarnav@gmail.com>",
   "contributors": [],
-  "type": "module",
   "files": [
     "dist"
   ],
-  "main": "dist/index.js",
+  "type": "module",
+  "main": "dist/index.cjs",
   "module": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {

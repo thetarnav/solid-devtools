@@ -9,6 +9,7 @@ export default ({
   additionalPlugins = [],
   overwrite,
   jsx,
+  external = [],
 }: {
   extension?: 'tsx' | 'ts'
   server?: boolean
@@ -16,6 +17,7 @@ export default ({
   additionalPlugins?: Plugin[]
   overwrite?: (overrideOptions: Options) => Options
   jsx?: boolean
+  external?: (string | RegExp)[]
 } = {}) => {
   const entry = `src/index.${extension}`
   const baseEntries = server ? [entry, `src/server.${extension}`] : [entry]
@@ -30,13 +32,16 @@ export default ({
         entry: [entry, ...mappedAdditionalEntries],
       },
       target: 'esnext',
-      format: ['cjs', 'esm'],
+      format: config.watch ? 'esm' : ['cjs', 'esm'],
       entryPoints: [...baseEntries, ...mappedAdditionalEntries],
-      // solidPlugin() returns an incompatible plugin type from 0.14.53 esbuild version
       esbuildPlugins:
-        extension === 'tsx' || jsx
-          ? [solidPlugin() as any, ...additionalPlugins]
-          : additionalPlugins,
+        extension === 'tsx' || jsx ? [solidPlugin(), ...additionalPlugins] : additionalPlugins,
+      external: [
+        'solid-js',
+        /^solid-js\/[\w-]+$/,
+        /^@solid-devtools\/shared\/[\w-]+$/,
+        ...external,
+      ],
     }
     return overwrite ? overwrite(options) : options
   })
