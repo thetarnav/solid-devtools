@@ -17,7 +17,7 @@ export interface Messages {
   /** devtools -> client: the chrome devtools got entirely closed */
   PanelClosed: true
   ResetPanel: {}
-  GraphUpdate: RootsUpdates
+  StructureUpdate: RootsUpdates
   ComputationUpdates: ComputationUpdate[]
   /** client -> devtools: signal deep value */
   SignalUpdates: { signals: { id: NodeID; value: EncodedValue<boolean> }[]; update: boolean }
@@ -28,11 +28,11 @@ export interface Messages {
   /** devtools -> client: force the debugger to walk the whole tree and send it */
   ForceUpdate: {}
   /** devtools -> client: request for details of owner details opened in the side-panel */
-  SetSelectedOwner: null | { rootId: NodeID; nodeId: NodeID }
+  InspectedNodeChange: null | { rootId: NodeID; nodeId: NodeID }
   /** client -> devtools: send component clicked with the locator to the extension */
-  SendSelectedOwner: NodeID
+  ClientInspectedNode: NodeID
   /** client -> devtools: send updates to the owner details */
-  OwnerDetailsUpdate: Mapped.OwnerDetails
+  SetInspectedDetails: Mapped.OwnerDetails
   /** devtools -> client: request for signal/prop details — subscribe or unsubscribe */
   ToggleInspectedValue:
     | { type: 'signal' | 'prop'; id: NodeID; selected: boolean }
@@ -40,7 +40,7 @@ export interface Messages {
   /** devtools -> client: user hovered over component/element signal in devtools panel */
   HighlightElement: { rootId: NodeID; nodeId: NodeID } | string | null
   /** client -> devtools: send hovered (by the locator) owner to the extension */
-  SetHoveredOwner: { nodeId: NodeID; state: boolean }
+  ClientHoveredNodeChange: { nodeId: NodeID; state: boolean }
   /** devtools -> client: user is selecting component from the page */
   ExtLocatorMode: boolean
   /** client -> devtools */

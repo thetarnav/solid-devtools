@@ -1,4 +1,4 @@
-import { batch, createComputed, createRoot, createSelector, createSignal, untrack } from 'solid-js'
+import { batch, createSelector, createSignal } from 'solid-js'
 import { createStore, produce } from 'solid-js/store'
 import { Writable } from 'type-fest'
 import { createSimpleEmitter } from '@solid-primitives/event-bus'
@@ -6,7 +6,7 @@ import { Mapped, NodeID, NodeType } from '@solid-devtools/shared/graph'
 import { EncodedValue } from '@solid-devtools/shared/serialize'
 import { Messages } from '@solid-devtools/shared/bridge'
 import { untrackedCallback } from '@solid-devtools/shared/primitives'
-import structure, { Structure } from './structure'
+import type { Structure } from '../structure'
 
 export namespace Inspector {
   export type Signal = {
@@ -109,14 +109,13 @@ function reconcileProps(proxy: Writable<Inspector.Props>, raw: Mapped.Props): vo
 }
 
 function createDetails(
-  node: Structure.Node,
   raw: Readonly<Mapped.OwnerDetails>,
+  path: Structure.Node[],
 ): Inspector.Details {
   const signals = raw.signals.reduce((signals, signal) => {
     signals[signal.id] = createSignalNode(signal)
     return signals
   }, {} as Inspector.Details['signals'])
-  const path = structure.getNodePath(node)
   const details: Writable<Inspector.Details> = {
     id: raw.id,
     name: raw.name,
@@ -140,7 +139,13 @@ function createDetails(
 
 export const $VALUE = Symbol('value')
 
-const inspector = createRoot(() => {
+export default function createInspector({
+  getNodePath,
+  findNode,
+}: {
+  getNodePath(node: Structure.Node): Structure.Node[]
+  findNode(id: NodeID): Structure.Node | undefined
+}) {
   const [inspectedNode, setInspectedNode] = createSignal<Structure.Node | null>(null)
   const [state, setDetails] = createStore<{ value: Inspector.Details | null }>({ value: null })
   const details = () => state.value
@@ -149,7 +154,7 @@ const inspector = createRoot(() => {
 
   const isNodeInspected = createSelector<NodeID | null, NodeID>(() => inspectedNode()?.id ?? null)
 
-  const setInspected: (data: Structure.Node | null | Messages['SendSelectedOwner']) => void =
+  const setInspected: (data: Structure.Node | null | Messages['ClientInspectedNode']) => void =
     untrackedCallback(data => {
       batch(() => {
         if (!data) {
@@ -165,7 +170,7 @@ const inspector = createRoot(() => {
           setDetails({ value: null })
         } else {
           if (currentNode && data === currentNode.id) return
-          const node = structure.findNode(data)
+          const node = findNode(data)
           if (!node) return
           setInspectedNode(node)
           setDetails({ value: null })
@@ -174,19 +179,16 @@ const inspector = createRoot(() => {
     })
 
   // clear the inspector when the inspected node is removed
-  createComputed(() => {
-    structure.structure()
-    untrack(() => {
-      const node = inspectedNode()
-      if (!node) return
-      structure.findNode(node.id) || setInspectedNode(null)
-    })
+  const handleStructureChange = untrackedCallback(() => {
+    const node = inspectedNode()
+    if (!node) return
+    findNode(node.id) || setInspectedNode(null)
   })
 
-  const updateDetails = untrackedCallback((raw: Mapped.OwnerDetails) => {
+  const setNewDetails = untrackedCallback((raw: Mapped.OwnerDetails) => {
     const node = inspectedNode()
-    if (!node) return console.warn('updateDetails: no node is being inspected')
-    setDetails('value', createDetails(node, raw))
+    if (!node) return console.warn('setDetails: no node is being inspected')
+    setDetails('value', createDetails(raw, getNodePath(node)))
   })
 
   const handleSignalUpdates = untrackedCallback(
@@ -256,7 +258,7 @@ const inspector = createRoot(() => {
     listenToValueUpdates,
     setInspectedNode: setInspected,
     isNodeInspected,
-    updateDetails,
+    setDetails: setNewDetails,
     handleSignalUpdates,
     handlePropsUpdate,
     handleValueUpdate,
@@ -266,6 +268,6 @@ const inspector = createRoot(() => {
     setOnInspectValue,
     hoveredElement,
     toggleHoveredElement,
+    handleStructureChange,
   }
-})
-export default inspector
+}

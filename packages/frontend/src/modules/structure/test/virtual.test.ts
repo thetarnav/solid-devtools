@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest'
-import { getVirtualVars } from './virtual'
+import { getVirtualVars } from '../virtual'
 
 describe('getVirtualVars', () => {
   test('no scroll', () => {

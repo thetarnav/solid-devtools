@@ -1,24 +1,35 @@
-import { structure, inspector, Structure } from '@/state'
-import { Scrollable } from '@/ui'
+import {
+  Accessor,
+  Component,
+  createEffect,
+  createMemo,
+  createSignal,
+  For,
+  Show,
+  untrack,
+} from 'solid-js'
+import { assignInlineVars } from '@vanilla-extract/dynamic'
 import { NodeID } from '@solid-devtools/shared/graph'
 import { useRemSize } from '@solid-devtools/shared/primitives'
-import { assignInlineVars } from '@vanilla-extract/dynamic'
-import { Accessor, Component, createEffect, createMemo, createSignal, For, Show } from 'solid-js'
-import { untrack } from 'solid-js/web'
+import type { Structure } from '.'
+import { Scrollable } from '@/ui'
 import { StructureProvider } from './ctx'
 import { OwnerNode } from './OwnerNode'
 import { OwnerPath } from './Path'
-import * as styles from './structure.css'
 import { getVirtualVars } from './virtual'
+import * as styles from './structure.css'
+import { useController } from '@/Controller'
 
 export default function StructureView() {
+  const { inspectedDetails } = useController()
+
   return (
     <div class={styles.panelWrapper}>
       <DisplayStructureTree />
       <div class={styles.path}>
         <div class={styles.pathInner}>
-          <Show when={inspector.details()?.path}>
-            <OwnerPath path={inspector.details()!.path} />
+          <Show when={inspectedDetails()?.path}>
+            <OwnerPath path={inspectedDetails()!.path} />
           </Show>
         </div>
       </div>
@@ -56,8 +67,18 @@ const DisplayStructureTree: Component = props => {
       return set
     })
 
+  const {
+    structureState,
+    inspectedNode,
+    isNodeHovered,
+    isNodeInspected,
+    listenToComputationUpdate,
+    toggleHoveredNode,
+    setInspectedNode,
+  } = useController()
+
   const collapsedList = createMemo(() => {
-    const nodeList = structure.structure().nodeList
+    const nodeList = structureState().nodeList
     const collapsedList: Structure.Node[] = []
     const set = collapsed()
 
@@ -110,7 +131,7 @@ const DisplayStructureTree: Component = props => {
   })
 
   createEffect(() => {
-    const node = inspector.inspectedNode()
+    const node = inspectedNode()
     if (!node) return
     untrack(() => {
       const index = collapsedList().indexOf(node)
@@ -137,19 +158,30 @@ const DisplayStructureTree: Component = props => {
       }}
       onScroll={e => updateScrollData(e.currentTarget)}
     >
-      <StructureProvider value={{ toggleCollapsed, isCollapsed }}>
-        <div
-          class={styles.scrolledOuter}
-          style={assignInlineVars({
-            [styles.treeLength]: virtual().fullLength.toString(),
-            [styles.startIndex]: virtual().start.toString(),
-          })}
-        >
-          <div class={styles.scrolledInner}>
-            <For each={virtual().list}>{({ getNode }) => <OwnerNode getOwner={getNode} />}</For>
-          </div>
+      <div
+        class={styles.scrolledOuter}
+        style={assignInlineVars({
+          [styles.treeLength]: virtual().fullLength.toString(),
+          [styles.startIndex]: virtual().start.toString(),
+        })}
+      >
+        <div class={styles.scrolledInner}>
+          <StructureProvider value={{ toggleCollapsed, isCollapsed }}>
+            <For each={virtual().list}>
+              {({ getNode, node }) => (
+                <OwnerNode
+                  owner={getNode()}
+                  isHovered={isNodeHovered(node.id)}
+                  isSelected={isNodeInspected(node.id)}
+                  listenToUpdate={listenToComputationUpdate}
+                  onHoverChange={hovered => toggleHoveredNode(node.id, hovered)}
+                  onInspectChange={inspected => setInspectedNode(inspected ? node : null)}
+                />
+              )}
+            </For>
+          </StructureProvider>
         </div>
-      </StructureProvider>
+      </div>
     </Scrollable>
   )
 }

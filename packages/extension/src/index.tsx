@@ -1,16 +1,8 @@
 import { render } from 'solid-js/web'
-import { ErrorOverlay } from '@/ui'
+import { Devtools } from '@solid-devtools/frontend'
 
-import './state'
-import './bridge'
+import '@solid-devtools/frontend/dist/index.css'
 
-import App from './App'
+import { controller } from './bridge'
 
-render(
-  () => (
-    <ErrorOverlay>
-      <App />
-    </ErrorOverlay>
-  ),
-  document.getElementById('root')!,
-)
+render(() => <Devtools controller={controller} />, document.getElementById('root')!)

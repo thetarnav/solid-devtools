@@ -87,15 +87,15 @@ chrome.runtime.onConnect.addListener(port => {
 
     onPortMessage('ResetPanel', () => postRuntimeMessage('ResetPanel'))
 
-    onPortMessage('GraphUpdate', e => postRuntimeMessage('GraphUpdate', e))
+    onPortMessage('StructureUpdate', e => postRuntimeMessage('StructureUpdate', e))
 
     onPortMessage('ComputationUpdates', e => postRuntimeMessage('ComputationUpdates', e))
     onPortMessage('SignalUpdates', e => postRuntimeMessage('SignalUpdates', e))
-    onPortMessage('OwnerDetailsUpdate', e => postRuntimeMessage('OwnerDetailsUpdate', e))
+    onPortMessage('SetInspectedDetails', e => postRuntimeMessage('SetInspectedDetails', e))
     onPortMessage('PropsUpdate', e => postRuntimeMessage('PropsUpdate', e))
     onPortMessage('ValueUpdate', e => postRuntimeMessage('ValueUpdate', e))
-    onPortMessage('SetHoveredOwner', e => postRuntimeMessage('SetHoveredOwner', e))
-    onPortMessage('SendSelectedOwner', e => postRuntimeMessage('SendSelectedOwner', e))
+    onPortMessage('ClientHoveredNodeChange', e => postRuntimeMessage('ClientHoveredNodeChange', e))
+    onPortMessage('ClientInspectedNode', e => postRuntimeMessage('ClientInspectedNode', e))
 
     onPortMessage('ClientLocatorMode', e => postRuntimeMessage('ClientLocatorMode', e))
     addCleanup(onRuntimeMessage('ExtLocatorMode', e => postPortMessage('ExtLocatorMode', e)))
@@ -107,7 +107,9 @@ chrome.runtime.onConnect.addListener(port => {
       }),
     )
 
-    addCleanup(onRuntimeMessage('SetSelectedOwner', e => postPortMessage('SetSelectedOwner', e)))
+    addCleanup(
+      onRuntimeMessage('InspectedNodeChange', e => postPortMessage('InspectedNodeChange', e)),
+    )
 
     addCleanup(
       onRuntimeMessage('ToggleInspectedValue', e => postPortMessage('ToggleInspectedValue', e)),

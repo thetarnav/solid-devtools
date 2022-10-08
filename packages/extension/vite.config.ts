@@ -16,7 +16,6 @@ export default defineConfig({
   plugins: [solidPlugin({ dev: false }), vanillaExtractPlugin(), crx({ manifest })],
   resolve: {
     alias: {
-      '@/': `${__dirname}/src/`,
       '@solid-devtools/shared': r`../shared/src`,
     },
   },
@@ -33,9 +32,6 @@ export default defineConfig({
       },
     },
     target: 'esnext',
-  },
-  optimizeDeps: {
-    exclude: ['@solid-devtools/shared'],
   },
   ...vitestConfig,
 })

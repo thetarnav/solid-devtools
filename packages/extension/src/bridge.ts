@@ -1,9 +1,5 @@
-import { batch, createEffect, createRoot, on, untrack } from 'solid-js'
-import { Messages, once } from '@solid-devtools/shared/bridge'
-import { NodeType } from '@solid-devtools/shared/graph'
 import { createRuntimeMessanger } from '../shared/messanger'
-import { structure, inspector, locator } from '@/state'
-import { setVersions } from './versions'
+import { Controller } from '@solid-devtools/frontend'
 
 export const { onRuntimeMessage, postRuntimeMessage } = createRuntimeMessanger()
 
@@ -12,108 +8,79 @@ if (import.meta.env.DEV) {
   postRuntimeMessage('ForceUpdate')
 }
 
-once(onRuntimeMessage, 'Versions', v => setVersions(v))
-
 postRuntimeMessage('DevtoolsPanelConnected')
 
-onRuntimeMessage('GraphUpdate', structure.updateStructure)
+// once(onRuntimeMessage, 'Versions', v => setVersions(v))
 
-onRuntimeMessage('ResetPanel', () => {
-  batch(() => {
-    structure.updateStructure(null)
-    locator.setClientLocatorState(false)
-    locator.setExtLocator(false)
-  })
+export const controller = new Controller({
+  onExtLocatorEnabledChange(enabled) {
+    postRuntimeMessage('ExtLocatorMode', enabled)
+  },
+  onHighlightElementChange(data) {
+    postRuntimeMessage('HighlightElement', data)
+  },
+  onInspectedNodeChange(data) {
+    postRuntimeMessage('InspectedNodeChange', data)
+  },
+  onInspectValue(data) {
+    postRuntimeMessage('ToggleInspectedValue', data)
+  },
 })
 
-onRuntimeMessage('ComputationUpdates', updates => {
-  updates.forEach(update => structure.emitComputationUpdate(update.id))
-})
+onRuntimeMessage('StructureUpdate', controller.updateStructure.bind(controller))
 
-onRuntimeMessage('OwnerDetailsUpdate', details => {
-  inspector.updateDetails(details)
-})
+onRuntimeMessage('ResetPanel', controller.resetPanel.bind(controller))
 
-// toggle selected signals
-inspector.setOnInspectValue(payload => postRuntimeMessage('ToggleInspectedValue', payload))
+onRuntimeMessage('ComputationUpdates', controller.updateComputation.bind(controller))
 
-onRuntimeMessage('SignalUpdates', ({ signals, update }) => {
-  inspector.handleSignalUpdates(signals, update)
-})
-onRuntimeMessage('PropsUpdate', inspector.handlePropsUpdate)
-onRuntimeMessage('ValueUpdate', ({ value, update }) => {
-  inspector.handleValueUpdate(value, update)
-})
+onRuntimeMessage('SetInspectedDetails', controller.setInspectedDetails.bind(controller))
 
-// let visibility = false
-// onRuntimeMessage("PanelVisibility", newVisibility => {
-//   visibility = newVisibility
-//   if (visibility) {
-//     // panel
-//   }
-//   log("PanelVisibility", visibility)
+onRuntimeMessage('SignalUpdates', controller.updateSignals.bind(controller))
+
+onRuntimeMessage('PropsUpdate', controller.updateProps.bind(controller))
+
+onRuntimeMessage('ValueUpdate', controller.updateValue.bind(controller))
+
+onRuntimeMessage('ClientLocatorMode', controller.setLocatorState.bind(controller))
+
+onRuntimeMessage('ClientHoveredNodeChange', controller.setHoveredNode.bind(controller))
+
+onRuntimeMessage('ClientInspectedNode', controller.setSelectedNode.bind(controller))
+
+// let initHighlight = true
+// // toggle hovered html element
+// createEffect<Messages['HighlightElement'] | undefined>(prev => {
+//   // tracks
+//   const hovered = structure.hovered()
+//   const elId = inspector.hoveredElement()
+
+//   return untrack(() => {
+//     // skip initial value
+//     if (initHighlight) return (initHighlight = false) || undefined
+
+//     // handle component
+//     if (hovered && hovered.type === NodeType.Component) {
+//       if (
+//         // if the hovered component is the same as the last one
+//         (prev && typeof prev === 'object' && prev.nodeId === hovered.id) ||
+//         // ignore state that came from the client
+//         hovered.id === locator.clientHoveredId()
+//       )
+//         return prev
+
+//       const rootId = structure.getParentRoot(hovered).id
+//       const payload = { rootId, nodeId: hovered.id }
+//       postRuntimeMessage('HighlightElement', payload)
+//       return payload
+//     }
+//     // handle element
+//     if (elId) {
+//       // do not send the same message twice
+//       if (typeof prev === 'string' && prev === elId) return prev
+//       postRuntimeMessage('HighlightElement', elId)
+//       return elId
+//     }
+//     // no element or component
+//     if (prev) postRuntimeMessage('HighlightElement', null)
+//   })
 // })
-
-createRoot(() => {
-  onRuntimeMessage('ClientLocatorMode', locator.setClientLocatorState)
-  createEffect(
-    on(locator.extLocatorEnabled, state => postRuntimeMessage('ExtLocatorMode', state), {
-      defer: true,
-    }),
-  )
-
-  onRuntimeMessage('SetHoveredOwner', ({ state, nodeId }) => locator.toggleHovered(nodeId, state))
-
-  onRuntimeMessage('SendSelectedOwner', inspector.setInspectedNode)
-
-  // toggle selected owner
-  createEffect(
-    on(
-      inspector.inspectedNode,
-      node =>
-        postRuntimeMessage(
-          'SetSelectedOwner',
-          node ? { nodeId: node.id, rootId: structure.getParentRoot(node).id } : null,
-        ),
-      { defer: true },
-    ),
-  )
-
-  let initHighlight = true
-  // toggle hovered html element
-  createEffect<Messages['HighlightElement'] | undefined>(prev => {
-    // tracks
-    const hovered = structure.hovered()
-    const elId = inspector.hoveredElement()
-
-    return untrack(() => {
-      // skip initial value
-      if (initHighlight) return (initHighlight = false) || undefined
-
-      // handle component
-      if (hovered && hovered.type === NodeType.Component) {
-        if (
-          // if the hovered component is the same as the last one
-          (prev && typeof prev === 'object' && prev.nodeId === hovered.id) ||
-          // ignore state that came from the client
-          hovered.id === locator.clientHoveredId()
-        )
-          return prev
-
-        const rootId = structure.getParentRoot(hovered).id
-        const payload = { rootId, nodeId: hovered.id }
-        postRuntimeMessage('HighlightElement', payload)
-        return payload
-      }
-      // handle element
-      if (elId) {
-        // do not send the same message twice
-        if (typeof prev === 'string' && prev === elId) return prev
-        postRuntimeMessage('HighlightElement', elId)
-        return elId
-      }
-      // no element or component
-      if (prev) postRuntimeMessage('HighlightElement', null)
-    })
-  })
-})

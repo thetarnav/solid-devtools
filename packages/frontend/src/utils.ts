@@ -8,11 +8,14 @@ export function createPingedSignal(listen: Listen, timeout = 400) {
   const [isUpdated, setIsUpdated] = createSignal(false)
 
   let timeoutId: NodeJS.Timeout | undefined
-  onCleanup(() => clearTimeout(timeoutId))
-  listen(() => {
+  const unsub = listen(() => {
     setIsUpdated(true)
     clearTimeout(timeoutId)
     timeoutId = setTimeout(() => setIsUpdated(false), 400)
+  })
+  onCleanup(() => {
+    clearTimeout(timeoutId)
+    unsub()
   })
 
   return isUpdated

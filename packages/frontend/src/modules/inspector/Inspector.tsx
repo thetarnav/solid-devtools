@@ -2,13 +2,16 @@ import { Component, Show } from 'solid-js'
 import { Entries } from '@solid-primitives/keyed'
 import { NodeType } from '@solid-devtools/shared/graph'
 import { Scrollable, Badge } from '@/ui'
-import { Inspector, inspector } from '@/state'
 import { Signals, ValueNode } from './SignalNode'
+import { useController } from '@/Controller'
+import { $VALUE, Inspector } from '.'
 import * as styles from './inspector.css'
-import { $VALUE } from '@/state/inspector'
 
 const DetailsContent: Component<{ details: Inspector.Details }> = ({ details }) => {
   const { name, id, type, signals, props: componentProps, value: nodeValue } = details
+
+  const { inspector } = useController()
+
   return (
     <div class={styles.root}>
       <header class={styles.header}>
@@ -36,7 +39,12 @@ const DetailsContent: Component<{ details: Inspector.Details }> = ({ details }) 
         )}
         <div>
           <h2 class={styles.h2}>Signals</h2>
-          <Signals each={Object.values(signals)} />
+          <Signals
+            each={Object.values(signals)}
+            listenToValueUpdates={inspector.listenToValueUpdates}
+            toggleHoveredElement={inspector.toggleHoveredElement}
+            toggleSignalSelection={inspector.toggleSignalSelection}
+          />
         </div>
         {nodeValue && (
           <div>
@@ -59,6 +67,8 @@ const DetailsContent: Component<{ details: Inspector.Details }> = ({ details }) 
 }
 
 export default function Details() {
+  const { inspector } = useController()
+
   return (
     <Show when={inspector.inspectedNode()}>
       <div class={styles.scrollWrapper}>

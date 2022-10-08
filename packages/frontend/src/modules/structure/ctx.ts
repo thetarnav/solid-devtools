@@ -1,5 +1,5 @@
-import { Structure } from '@/state'
 import { createContext, useContext } from 'solid-js'
+import type { Structure } from '.'
 
 const StructureContext = createContext<{
   toggleCollapsed: (node: Structure.Node) => void

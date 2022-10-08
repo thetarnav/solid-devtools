@@ -3,8 +3,7 @@
   "compilerOptions": {
     "types": ["vite/client", "@types/chrome"],
     "paths": {
-      "@solid-devtools/shared/*": ["../shared/src/*"],
-      "@/*": ["./src/*"]
+      "@solid-devtools/shared/*": ["../shared/src/*"]
     }
   },
   "include": [
