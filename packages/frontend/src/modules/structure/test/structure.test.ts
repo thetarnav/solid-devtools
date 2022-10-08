@@ -1,4 +1,4 @@
-import { Structure } from '../structure'
+import type { Structure } from '..'
 import { reconcileStructure } from '../structure-reconcile'
 import { describe, expect, test } from 'vitest'
 import { Mapped, NodeID, NodeType } from '@solid-devtools/shared/graph'
