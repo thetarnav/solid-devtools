@@ -1,7 +1,7 @@
 import { readFileSync } from 'fs'
 import { readFile } from 'fs/promises'
 import path from 'path'
-import { build } from 'esbuild'
+import esbuild from 'esbuild'
 import { solidPlugin } from 'esbuild-plugin-solid'
 import ts from 'typescript'
 import { peerDependencies, dependencies } from './package.json'
@@ -41,43 +41,48 @@ function getTscOptions(): ts.CompilerOptions {
     noEmit: false,
     declaration: true,
     rootDir: 'src',
+    // packages from paths are being inlined to the output
     paths: {},
   }
 }
 
-build({
+function minifyCss(): esbuild.Plugin {
+  return {
+    name: 'minify-css',
+    setup(build) {
+      if (isDev) return
+
+      const cleanCss = new CleanCSS()
+
+      build.onLoad({ filter: /\.css$/ }, async args => {
+        const text = await readFile(args.path, 'utf-8')
+        return { loader: 'default', contents: cleanCss.minify(text).styles }
+      })
+    },
+  }
+}
+
+function dts(): esbuild.Plugin {
+  return {
+    name: 'dts',
+    setup({ onEnd }) {
+      const options = getTscOptions()
+
+      onEnd(() => {
+        ts.createProgram([entryFile], options).emit()
+      })
+    },
+  }
+}
+
+esbuild.build({
   entryPoints: [entryFile],
   outfile: 'dist/index.js',
   target: 'esnext',
   format: 'esm',
   bundle: true,
   loader: { '.css': 'text' },
-  plugins: [
-    {
-      name: 'css',
-      setup(build) {
-        if (isDev) return
-
-        const cleanCss = new CleanCSS()
-
-        build.onLoad({ filter: /\.css$/ }, async args => {
-          const text = await readFile(args.path, 'utf-8')
-          return { loader: 'default', contents: cleanCss.minify(text).styles }
-        })
-      },
-    },
-    solidPlugin(),
-    {
-      name: 'dts',
-      setup({ onEnd }) {
-        const options = getTscOptions()
-
-        onEnd(() => {
-          ts.createProgram([entryFile], options).emit()
-        })
-      },
-    },
-  ],
+  plugins: [minifyCss(), solidPlugin(), dts()],
   watch: isDev,
   external: externals,
 })
