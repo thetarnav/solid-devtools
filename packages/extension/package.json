@@ -17,7 +17,6 @@
     "@crxjs/vite-plugin": "^1.0.14",
     "@types/chrome": "^0.0.196",
     "@types/webextension-polyfill": "^0.9.1",
-    "esbuild-plugin-solid": "^0.4.2",
     "jsdom": "^20.0.1",
     "rimraf": "^3.0.2",
     "solid-devtools": "workspace:^0.18.2",

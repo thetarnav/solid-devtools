@@ -1,7 +1,7 @@
-import { attachDebugger, makeCreateRootListener } from '@solid-devtools/debugger'
+import { enableRootsAutoattach } from '@solid-devtools/debugger'
 import './client'
 
-makeCreateRootListener(root => attachDebugger(root))
+enableRootsAutoattach()
 
 export {
   Debugger,
