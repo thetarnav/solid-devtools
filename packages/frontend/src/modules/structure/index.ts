@@ -1,7 +1,6 @@
-import { createMemo, createRoot, createSelector, createSignal, untrack } from 'solid-js'
+import { Accessor, createMemo, createSelector, createSignal, untrack } from 'solid-js'
 import { NodeID, NodeType, RootsUpdates } from '@solid-devtools/shared/graph'
 import { reconcileStructure } from './structure-reconcile'
-import locator from './locator'
 import { createSimpleEmitter } from '@solid-primitives/event-bus'
 
 export namespace Structure {
@@ -45,14 +44,18 @@ function getNodePath(node: Structure.Node): Structure.Node[] {
   return path
 }
 
-const structure = createRoot(() => {
-  const [structure, setStructure] = createSignal<Structure.State>(
+export default function createStructure({
+  clientHoveredNodeId,
+}: {
+  clientHoveredNodeId: Accessor<NodeID | null>
+}) {
+  const [state, setState] = createSignal<Structure.State>(
     { nodeList: [], roots: [] },
     { internal: true },
   )
 
   function updateStructure(update: RootsUpdates | null): void {
-    setStructure(prev =>
+    setState(prev =>
       update
         ? reconcileStructure(prev.roots, update.updated, update.removed)
         : { nodeList: [], roots: [] },
@@ -60,7 +63,7 @@ const structure = createRoot(() => {
   }
 
   function findNode(id: NodeID): Structure.Node | undefined {
-    for (const node of untrack(structure).nodeList) {
+    for (const node of untrack(state).nodeList) {
       if (node.id === id) return node
     }
   }
@@ -69,14 +72,14 @@ const structure = createRoot(() => {
 
   const [extHovered, setHovered] = createSignal<Structure.Node | null>(null)
   const clientHoveredComponent = createMemo(() => {
-    const id = locator.clientHoveredId()
+    const id = clientHoveredNodeId()
     return id ? findNode(id) : null
   })
   const hovered = () => extHovered() || clientHoveredComponent()
 
   const isHovered = createSelector(hovered, (id: NodeID, o) => !!o && o.id === id)
 
-  function toggleHoveredOwner(id: NodeID, hovered: boolean): Structure.Node | null {
+  function toggleHoveredNode(id: NodeID, hovered: boolean): Structure.Node | null {
     return setHovered(p => {
       if (hovered) return findNode(id) ?? p
       return p && p.id === id ? null : p
@@ -84,16 +87,16 @@ const structure = createRoot(() => {
   }
 
   return {
-    structure,
+    state,
     updateStructure,
     hovered,
+    extHovered,
     isHovered,
     listenToComputationUpdate,
     emitComputationUpdate,
-    toggleHoveredOwner,
+    toggleHoveredNode,
     findNode,
     getParentRoot,
     getNodePath,
   }
-})
-export default structure
+}

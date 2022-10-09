@@ -5,19 +5,18 @@
   "license": "MIT",
   "author": "Damian Tarnawski <gthetarnav@gmail.com>",
   "contributors": [],
+  "type": "module",
   "scripts": {
     "dev": "vite --port 3333",
-    "build": "npm run clear && vite build && node scripts/zip",
-    "clear": "rimraf dist dist.zip",
+    "build": "npm run clean && vite build && node scripts/zip.cjs",
+    "clean": "rimraf dist dist.zip",
     "test": "vitest",
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
     "@crxjs/vite-plugin": "^1.0.14",
-    "zip-a-folder": "^1.1.5",
     "@types/chrome": "^0.0.196",
     "@types/webextension-polyfill": "^0.9.1",
-    "@vanilla-extract/vite-plugin": "^3.6.1",
     "esbuild-plugin-solid": "^0.4.2",
     "jsdom": "^20.0.1",
     "rimraf": "^3.0.2",
@@ -26,34 +25,13 @@
     "vite": "^3.1.6",
     "vite-plugin-solid": "^2.3.9",
     "vitest": "^0.23.4",
-    "webextension-polyfill": "^0.10.0"
+    "webextension-polyfill": "^0.10.0",
+    "zip-a-folder": "^1.1.5"
   },
   "dependencies": {
-    "@floating-ui/dom": "^1.0.2",
-    "@otonashixav/solid-flip": "^0.10.5",
+    "@solid-devtools/frontend": "workspace:^0.0.1",
     "@solid-devtools/shared": "workspace:^0.8.6",
-    "@solid-primitives/cursor": "^0.0.100",
-    "@solid-primitives/destructure": "^0.1.2",
-    "@solid-primitives/event-bus": "^0.1.2",
-    "@solid-primitives/event-listener": "^2.2.2",
-    "@solid-primitives/keyboard": "^1.0.2",
-    "@solid-primitives/keyed": "^1.1.2",
-    "@solid-primitives/props": "^2.2.2",
-    "@solid-primitives/range": "^0.1.2",
-    "@solid-primitives/resize-observer": "^2.0.4",
-    "@solid-primitives/timer": "^1.3.3",
-    "@solid-primitives/utils": "^3.0.2",
-    "@vanilla-extract/css": "^1.9.1",
-    "@vanilla-extract/dynamic": "^2.0.2",
-    "@vanilla-extract/private": "^1.0.3",
-    "clsx": "^1.2.1",
-    "csstype": "^3.1.1",
-    "solid-error-overlay": "^0.2.1",
-    "solid-floating-ui": "^0.1.0",
-    "solid-headless": "^0.12.6",
-    "solid-js": "^1.5.7",
-    "solid-transition-group": "^0.0.11",
-    "type-fest": "^2.19.0"
+    "@solid-primitives/utils": "^3.0.2"
   },
   "packageManager": "pnpm@7.12.0"
 }

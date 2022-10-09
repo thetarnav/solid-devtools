@@ -1,26 +1,28 @@
-import { defineConfig, Options } from "tsup"
-import { Plugin } from "esbuild"
-import { solidPlugin } from "esbuild-plugin-solid"
+import { defineConfig, Options } from 'tsup'
+import { Plugin } from 'esbuild'
+import { solidPlugin } from 'esbuild-plugin-solid'
 
 export default ({
-  extension = "ts",
+  extension = 'ts',
   server = false,
   additionalEntries = [],
   additionalPlugins = [],
   overwrite,
   jsx,
+  external = [],
 }: {
-  extension?: "tsx" | "ts"
+  extension?: 'tsx' | 'ts'
   server?: boolean
   additionalEntries?: string[]
   additionalPlugins?: Plugin[]
   overwrite?: (overrideOptions: Options) => Options
   jsx?: boolean
+  external?: (string | RegExp)[]
 } = {}) => {
   const entry = `src/index.${extension}`
   const baseEntries = server ? [entry, `src/server.${extension}`] : [entry]
   const mappedAdditionalEntries = additionalEntries.map(entry => {
-    if (entry.includes(".")) return `src/${entry}`
+    if (entry.includes('.')) return `src/${entry}`
     return `src/${entry}.${extension}`
   })
   return defineConfig(config => {
@@ -29,13 +31,17 @@ export default ({
       dts: {
         entry: [entry, ...mappedAdditionalEntries],
       },
-      format: ["cjs", "esm"],
+      target: 'esnext',
+      format: config.watch ? 'esm' : ['cjs', 'esm'],
       entryPoints: [...baseEntries, ...mappedAdditionalEntries],
-      // solidPlugin() returns an incompatible plugin type from 0.14.53 esbuild version
       esbuildPlugins:
-        extension === "tsx" || jsx
-          ? [solidPlugin() as any, ...additionalPlugins]
-          : additionalPlugins,
+        extension === 'tsx' || jsx ? [solidPlugin(), ...additionalPlugins] : additionalPlugins,
+      external: [
+        'solid-js',
+        /^solid-js\/[\w-]+$/,
+        /^@solid-devtools\/shared\/[\w-]+$/,
+        ...external,
+      ],
     }
     return overwrite ? overwrite(options) : options
   })

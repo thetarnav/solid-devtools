@@ -1,7 +1,6 @@
 import { defineConfig } from 'vitest/config'
 import solidPlugin from 'vite-plugin-solid'
 import { crx } from '@crxjs/vite-plugin'
-import { vanillaExtractPlugin } from '@vanilla-extract/vite-plugin'
 import { resolve } from 'path'
 
 import vitestConfig from '../../configs/vitest.config'
@@ -10,12 +9,13 @@ import pkg from './package.json'
 
 const isDev = process.env.NODE_ENV === 'development'
 
+const r = (str: TemplateStringsArray) => resolve(__dirname, str.join(''))
+
 export default defineConfig({
-  plugins: [solidPlugin({ dev: false }), vanillaExtractPlugin(), crx({ manifest })],
+  plugins: [solidPlugin({ dev: false }), crx({ manifest })],
   resolve: {
     alias: {
-      '@/': `${__dirname}/src/`,
-      // "@solid-devtools/shared": resolve(__dirname, "..", "shared", "src"),
+      '@solid-devtools/shared': r`../shared/src`,
     },
   },
   define: {
@@ -31,9 +31,6 @@ export default defineConfig({
       },
     },
     target: 'esnext',
-  },
-  optimizeDeps: {
-    exclude: ['@solid-devtools/shared'],
   },
   ...vitestConfig,
 })

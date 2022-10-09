@@ -1,101 +1,27 @@
-import { Component, Show } from 'solid-js'
-import { useFloating } from 'solid-floating-ui'
-import { offset } from '@floating-ui/dom'
-import { Menu, MenuItem, Popover, PopoverButton, PopoverPanel } from 'solid-headless'
-import { Splitter, ToggleButton, Icon } from '@/ui'
-import { inspector, locator } from '@/state'
-import * as styles from './styles.css'
-import Details from './components/inspector/Inspector'
-import StructureView from './components/structure/Structure'
-import { versions } from './versions'
+import { createSignal } from 'solid-js'
+import { Devtools } from '@solid-devtools/frontend'
+import createBridge from './bridge'
 
-const SelectComponent: Component<{}> = props => {
+export default function App() {
+  const [versions, setVersions] = createSignal({
+    client: '',
+    expectedClient: '',
+    extension: '',
+  })
+
+  const controller = createBridge({ setVersions })
+
   return (
-    <ToggleButton
-      class={styles.select}
-      onToggle={locator.setExtLocator}
-      selected={locator.locatorEnabled()}
-    >
-      <Icon.Select class={styles.selectIcon} />
-    </ToggleButton>
+    <Devtools
+      controller={controller}
+      headerSubtitle={`version ${versions().extension}`}
+      errorOverlayFooter={
+        <ul>
+          <li>Extension: {versions().extension}</li>
+          <li>Client: {versions().client}</li>
+          <li>Expected client: {versions().expectedClient}</li>
+        </ul>
+      }
+    />
   )
 }
-
-const Options: Component<{}> = props => {
-  return (
-    <Popover defaultOpen={false} class={styles.options}>
-      {({ isOpen, setState }) => {
-        let button!: HTMLButtonElement
-        return (
-          <>
-            <PopoverButton
-              ref={button}
-              onKeyDown={(e: KeyboardEvent) => e.key === ' ' && setState(true)}
-              class={styles.optionsButton}
-            >
-              <Icon.Options class={styles.optionsIcon} />
-            </PopoverButton>
-
-            <Show when={isOpen()}>
-              {() => {
-                let menu: HTMLDivElement | undefined
-                const position = useFloating(
-                  () => button,
-                  () => menu,
-                  {
-                    strategy: 'fixed',
-                    placement: 'left-start',
-                    middleware: [offset(8)],
-                  },
-                )
-                return (
-                  <PopoverPanel
-                    class={styles.optionsPanel}
-                    ref={menu}
-                    on:keydown={(e: KeyboardEvent) => e.key === 'Escape' && e.stopPropagation()}
-                    style={{
-                      top: `${position.y ?? 0}px`,
-                      left: `${position.x ?? 0}px`,
-                    }}
-                  >
-                    <Menu class={styles.optionsMenu}>
-                      <MenuItem
-                        as="a"
-                        href="https://github.com/thetarnav/solid-devtools/issues"
-                        target="_blank"
-                      >
-                        Report a bug
-                      </MenuItem>
-                    </Menu>
-                  </PopoverPanel>
-                )
-              }}
-            </Show>
-          </>
-        )
-      }}
-    </Popover>
-  )
-}
-
-const App: Component = () => {
-  return (
-    <div class={styles.app}>
-      <header class={styles.header}>
-        <SelectComponent />
-        <div>
-          <h3>Welcome to Solid Devtools</h3>
-          <p>Version: {versions().extension}</p>
-        </div>
-        <Options />
-      </header>
-      <div class={styles.content}>
-        <Splitter onToggle={() => inspector.setInspectedNode(null)} side={<Details />}>
-          <StructureView />
-        </Splitter>
-      </div>
-    </div>
-  )
-}
-
-export default App

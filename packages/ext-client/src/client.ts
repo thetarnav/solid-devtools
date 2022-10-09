@@ -53,7 +53,7 @@ createInternalRoot(() => {
 
     onCleanup(onWindowMessage('ForceUpdate', forceTriggerUpdate))
 
-    onCleanup(onWindowMessage('SetSelectedOwner', setInspectedOwner))
+    onCleanup(onWindowMessage('InspectedNodeChange', setInspectedOwner))
 
     onCleanup(
       onWindowMessage('ToggleInspectedValue', payload => {
@@ -70,7 +70,7 @@ createInternalRoot(() => {
       }),
     )
 
-    listenTo('StructureUpdates', updates => postWindowMessage('GraphUpdate', updates))
+    listenTo('StructureUpdates', updates => postWindowMessage('StructureUpdate', updates))
 
     listenTo('ComputationUpdates', updates => postWindowMessage('ComputationUpdates', updates))
 
@@ -87,7 +87,7 @@ createInternalRoot(() => {
     // send the focused owner details
     createEffect(() => {
       const details = inspectedDetails()
-      if (details) postWindowMessage('OwnerDetailsUpdate', details)
+      if (details) postWindowMessage('SetInspectedDetails', details)
     })
 
     // TODO: abstract state sharing to a separate package
@@ -105,12 +105,12 @@ createInternalRoot(() => {
     Locator.addClickInterceptor((e, component) => {
       e.preventDefault()
       e.stopPropagation()
-      postWindowMessage('SendSelectedOwner', component.id)
+      postWindowMessage('ClientInspectedNode', component.id)
       return false
     })
 
     let skipNextHoveredComponent = true
-    let prevHoverMessage: Messages['SetHoveredOwner'] | null = null
+    let prevHoverMessage: Messages['ClientHoveredNodeChange'] | null = null
     // listen for op-page components being hovered and send them to the devtools panel
     createEffect(() => {
       const hovered = Locator.highlightedComponent()[0] as Locator.HoveredComponent | undefined
@@ -118,12 +118,12 @@ createInternalRoot(() => {
       if (!hovered) {
         if (prevHoverMessage && prevHoverMessage.state)
           postWindowMessage(
-            'SetHoveredOwner',
+            'ClientHoveredNodeChange',
             (prevHoverMessage = { nodeId: prevHoverMessage.nodeId, state: false }),
           )
       } else {
         postWindowMessage(
-          'SetHoveredOwner',
+          'ClientHoveredNodeChange',
           (prevHoverMessage = { nodeId: hovered.id, state: true }),
         )
       }

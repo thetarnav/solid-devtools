@@ -1,0 +1,10 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "paths": {
+      "@solid-devtools/shared/*": ["../shared/src/*"],
+      "@/*": ["./src/*"]
+    }
+  },
+  "include": ["src/**/*", "../../env.d.ts", "env.d.ts"]
+}

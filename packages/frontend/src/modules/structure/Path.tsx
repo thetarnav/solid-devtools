@@ -1,12 +1,15 @@
 import { Component } from 'solid-js'
 import { NodeType } from '@solid-devtools/shared/graph'
-import { Icon } from '@/ui'
-import { inspector, structure, Structure } from '@/state'
-import * as styles from './path.css'
-import { NodeTypeIcon } from './OwnerNode'
 import { createHover } from '@solid-devtools/shared/primitives'
+import { Icon } from '@/ui'
+import { NodeTypeIcon } from './OwnerNode'
+import type { Structure } from '.'
+import { useController } from '@/controller'
+import * as styles from './path.css'
 
 export const OwnerPath: Component<{ path: Structure.Node[] }> = props => {
+  const { isNodeHovered, toggleHoveredNode, setInspectedNode } = useController()
+
   return (
     <div class={styles.container}>
       {props.path.map((node, index) => (
@@ -18,9 +21,9 @@ export const OwnerPath: Component<{ path: Structure.Node[] }> = props => {
           )}
           <div
             class={styles.item}
-            data-hovered={structure.isHovered(node.id)}
-            {...createHover(hovering => structure.toggleHoveredOwner(node.id, hovering))}
-            onClick={() => inspector.setInspectedNode(node)}
+            data-hovered={isNodeHovered(node.id)}
+            {...createHover(hovering => toggleHoveredNode(node.id, hovering))}
+            onClick={() => setInspectedNode(node)}
           >
             <div class={styles.highlight} />
             {() => {

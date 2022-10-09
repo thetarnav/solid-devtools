@@ -26,7 +26,7 @@ import {
 } from '@solid-devtools/shared/serialize'
 import clsx from 'clsx'
 import { Highlight, Icon } from '@/ui'
-import inspector, { Inspector } from '@/state/inspector'
+import { $VALUE, Inspector } from '.'
 import * as styles from './SignalNode.css'
 import { createHover } from '@solid-devtools/shared/primitives'
 import { Listen } from '@solid-primitives/event-bus'
@@ -283,7 +283,13 @@ export const ValueNode: Component<{
   )
 }
 
-export const Signals: Component<{ each: Inspector.Signal[] }> = props => {
+type SignalControlls = {
+  toggleSignalSelection(id: NodeID): void
+  toggleHoveredElement: ToggleElementHover
+  listenToValueUpdates: Listen<NodeID | typeof $VALUE>
+}
+
+export const Signals: Component<{ each: Inspector.Signal[] } & SignalControlls> = props => {
   const sorted = createMemo(() =>
     props.each.slice().sort((a, b) => {
       if (a.type === b.type) return a.id > b.id ? 1 : -1
@@ -293,16 +299,19 @@ export const Signals: Component<{ each: Inspector.Signal[] }> = props => {
   return (
     <Show when={props.each.length}>
       <ul class={styles.Signals.container}>
-        <For each={sorted()}>{signal => <SignalNode signal={signal} />}</For>
+        <For each={sorted()}>{signal => <SignalNode signal={signal} {...props} />}</For>
       </ul>
     </Show>
   )
 }
 
-export const SignalNode: Component<{ signal: Inspector.Signal }> = ({ signal }) => {
+export const SignalNode: Component<{ signal: Inspector.Signal } & SignalControlls> = ({
+  signal,
+  toggleSignalSelection,
+  toggleHoveredElement,
+  listenToValueUpdates,
+}) => {
   const { type, id, name } = signal
-
-  const { toggleSignalSelection, toggleHoveredElement } = inspector
 
   return (
     <ValueNode
@@ -310,9 +319,7 @@ export const SignalNode: Component<{ signal: Inspector.Signal }> = ({ signal }) 
       isMemo={type === NodeType.Memo}
       value={signal.value}
       selected={signal.selected}
-      listenToUpdate={listener =>
-        inspector.listenToValueUpdates(id => id === signal.id && listener())
-      }
+      listenToUpdate={listener => listenToValueUpdates(id => id === signal.id && listener())}
       onClick={() => toggleSignalSelection(id)}
       onElementHover={toggleHoveredElement}
     />

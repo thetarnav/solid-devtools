@@ -52,28 +52,28 @@ Please install the "solid-devtools@${matchingClientVersion}" package in your pro
 
 onWindowMessage('ResetPanel', () => postPortMessage('ResetPanel'))
 
-onWindowMessage('GraphUpdate', graph => postPortMessage('GraphUpdate', graph))
+onWindowMessage('StructureUpdate', graph => postPortMessage('StructureUpdate', graph))
 
 onWindowMessage('ComputationUpdates', e => postPortMessage('ComputationUpdates', e))
 
 onWindowMessage('SignalUpdates', e => postPortMessage('SignalUpdates', e))
 
-onWindowMessage('OwnerDetailsUpdate', e => postPortMessage('OwnerDetailsUpdate', e))
+onWindowMessage('SetInspectedDetails', e => postPortMessage('SetInspectedDetails', e))
 
 onWindowMessage('PropsUpdate', e => postPortMessage('PropsUpdate', e))
 
 onWindowMessage('ValueUpdate', e => postPortMessage('ValueUpdate', e))
 
-onWindowMessage('SetHoveredOwner', e => postPortMessage('SetHoveredOwner', e))
+onWindowMessage('ClientHoveredNodeChange', e => postPortMessage('ClientHoveredNodeChange', e))
 
-onWindowMessage('SendSelectedOwner', e => postPortMessage('SendSelectedOwner', e))
+onWindowMessage('ClientInspectedNode', e => postPortMessage('ClientInspectedNode', e))
 
 onPortMessage('PanelVisibility', e => postWindowMessage('PanelVisibility', e))
 onPortMessage('PanelClosed', e => postWindowMessage('PanelClosed', e))
 
 onPortMessage('ForceUpdate', () => postWindowMessage('ForceUpdate'))
 
-onPortMessage('SetSelectedOwner', e => postWindowMessage('SetSelectedOwner', e))
+onPortMessage('InspectedNodeChange', e => postWindowMessage('InspectedNodeChange', e))
 
 onPortMessage('ToggleInspectedValue', e => postWindowMessage('ToggleInspectedValue', e))
 

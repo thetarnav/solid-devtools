@@ -1,5 +1,5 @@
 import { Mapped, NodeID, NodeType, RootsUpdates } from '@solid-devtools/shared/graph'
-import type { Structure } from './structure'
+import type { Structure } from '.'
 
 let $nextNodeList: Structure.Node[]
 let $updatedAttached: Record<NodeID, Mapped.Root[]>

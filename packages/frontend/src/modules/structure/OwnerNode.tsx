@@ -1,12 +1,12 @@
-import { Accessor, Component } from 'solid-js'
+import { Component } from 'solid-js'
 import { assignInlineVars } from '@vanilla-extract/dynamic'
 import { NodeType } from '@solid-devtools/shared/graph'
-import { structure, Structure, inspector } from '@/state'
 import { Badge, Highlight, Icon } from '@/ui'
 import { useStructure } from './ctx'
 import * as styles from './ownerNode.css'
 import { createHover } from '@solid-devtools/shared/primitives'
 import { createPingedSignal } from '@/utils'
+import type { Structure } from '.'
 
 export const NodeTypeIcon: Component<{ type: NodeType; class?: string }> = props => {
   const IconComponent: Icon.IconComponent | null = (() => {
@@ -32,32 +32,32 @@ export const NodeTypeIcon: Component<{ type: NodeType; class?: string }> = props
 }
 
 export const OwnerNode: Component<{
-  getOwner: Accessor<Structure.Node>
-}> = ({ getOwner }) => {
-  const owner = getOwner()
-  const { name, type, id, hmr } = owner
+  owner: Structure.Node
+  isHovered: boolean
+  isSelected: boolean
+  onHoverChange(hovered: boolean): void
+  onInspectChange(inspect: boolean): void
+  listenToUpdate(cb: VoidFunction): VoidFunction
+}> = props => {
+  const { onHoverChange, listenToUpdate, onInspectChange } = props
+  const owner = props.owner
+  const { name, type, hmr } = owner
 
   const ctx = useStructure()
   const { toggleCollapsed } = ctx
   const isCollapsed = ctx.isCollapsed.bind(null, owner)
 
-  const { toggleHoveredOwner } = structure
-
-  const isSelected = inspector.isNodeInspected.bind(null, id)
-  const isHovered = structure.isHovered.bind(null, id)
-  const isUpdated = createPingedSignal(listener =>
-    structure.listenToComputationUpdate(updatedId => updatedId === id && listener()),
-  )
+  const isUpdated = createPingedSignal(listener => listenToUpdate(listener))
 
   return (
     <div
-      data-hovered={isHovered()}
-      data-selected={isSelected()}
-      data-frozen={getOwner().frozen}
+      data-hovered={props.isHovered}
+      data-selected={props.isSelected}
+      data-frozen={props.owner.frozen}
       class={styles.container}
-      onClick={e => inspector.setInspectedNode(isSelected() ? null : owner)}
-      {...createHover(hovering => toggleHoveredOwner(id, hovering))}
-      style={assignInlineVars({ [styles.levelVar]: getOwner().level + '' })}
+      onClick={e => onInspectChange(!props.isSelected)}
+      {...createHover(hovering => onHoverChange(hovering))}
+      style={assignInlineVars({ [styles.levelVar]: props.owner.level + '' })}
     >
       <div class={styles.selection}></div>
       <div class={styles.levelPadding} />
