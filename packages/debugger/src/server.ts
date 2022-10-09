@@ -24,6 +24,8 @@ export const useDebugger: typeof API.useDebugger = () => ({
   setInspectedValue: () => null,
 })
 
+export const enableRootsAutoattach: typeof API.enableRootsAutoattach = () => {}
+
 // update
 export const makeSolidUpdateListener: typeof API.makeSolidUpdateListener = () => () => {}
 export const makeCreateRootListener: typeof API.makeCreateRootListener = () => () => {}
