@@ -68,8 +68,6 @@ export const content = {
   errorName: style({
     fontWeight: 700,
   }),
-  versions: style({}),
-  version: style({}),
 }
 
 export const button = style({

@@ -37,7 +37,6 @@
     "@vanilla-extract/private": "^1.0.3",
     "clsx": "^1.2.1",
     "csstype": "^3.1.1",
-    "solid-error-overlay": "^0.2.1",
     "solid-floating-ui": "^0.1.0",
     "solid-headless": "^0.12.6",
     "solid-transition-group": "^0.0.11",

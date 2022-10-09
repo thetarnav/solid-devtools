@@ -1,11 +1,10 @@
-import { Component, Show } from 'solid-js'
+import { Component, JSX, Show } from 'solid-js'
 import { useFloating } from 'solid-floating-ui'
 import { offset } from '@floating-ui/dom'
 import { Menu, MenuItem, Popover, PopoverButton, PopoverPanel } from 'solid-headless'
 import { Splitter, ToggleButton, Icon } from '@/ui'
 import Inspector from './modules/inspector/Inspector'
 import Structure from './modules/structure/Structure'
-import { versions } from './versions'
 import { useController } from './controller'
 import * as styles from './App.css'
 
@@ -79,7 +78,7 @@ const Options: Component<{}> = props => {
   )
 }
 
-const App: Component = () => {
+const App: Component<{ headerSubtitle?: JSX.Element }> = props => {
   const ctx = useController()
   return (
     <div class={styles.app}>
@@ -87,7 +86,7 @@ const App: Component = () => {
         <SelectComponent />
         <div>
           <h3>Welcome to Solid Devtools</h3>
-          <p>Version: {versions().extension}</p>
+          {props.headerSubtitle && <p>{props.headerSubtitle}</p>}
         </div>
         <Options />
       </header>
