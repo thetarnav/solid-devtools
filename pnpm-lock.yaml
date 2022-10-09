@@ -102,6 +102,7 @@ importers:
       '@crxjs/vite-plugin': ^1.0.14
       '@solid-devtools/frontend': workspace:^0.0.1
       '@solid-devtools/shared': workspace:^0.8.6
+      '@solid-primitives/utils': ^3.0.2
       '@types/chrome': ^0.0.196
       '@types/webextension-polyfill': ^0.9.1
       esbuild-plugin-solid: ^0.4.2
@@ -117,6 +118,7 @@ importers:
     dependencies:
       '@solid-devtools/frontend': link:../frontend
       '@solid-devtools/shared': link:../shared
+      '@solid-primitives/utils': 3.0.2_solid-js@1.5.7
     devDependencies:
       '@crxjs/vite-plugin': 1.0.14_vite@3.1.6
       '@types/chrome': 0.0.196
