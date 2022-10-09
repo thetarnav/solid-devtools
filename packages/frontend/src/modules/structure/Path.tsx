@@ -4,7 +4,7 @@ import { createHover } from '@solid-devtools/shared/primitives'
 import { Icon } from '@/ui'
 import { NodeTypeIcon } from './OwnerNode'
 import type { Structure } from '.'
-import { useController } from '@/Controller'
+import { useController } from '@/controller'
 import * as styles from './path.css'
 
 export const OwnerPath: Component<{ path: Structure.Node[] }> = props => {

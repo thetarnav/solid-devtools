@@ -18,7 +18,7 @@ import { OwnerNode } from './OwnerNode'
 import { OwnerPath } from './Path'
 import { getVirtualVars } from './virtual'
 import * as styles from './structure.css'
-import { useController } from '@/Controller'
+import { useController } from '@/controller'
 
 export default function StructureView() {
   const { inspectedDetails } = useController()
@@ -173,7 +173,9 @@ const DisplayStructureTree: Component = props => {
                   owner={getNode()}
                   isHovered={isNodeHovered(node.id)}
                   isSelected={isNodeInspected(node.id)}
-                  listenToUpdate={listenToComputationUpdate}
+                  listenToUpdate={listener =>
+                    listenToComputationUpdate(id => id === node.id && listener())
+                  }
                   onHoverChange={hovered => toggleHoveredNode(node.id, hovered)}
                   onInspectChange={inspected => setInspectedNode(inspected ? node : null)}
                 />

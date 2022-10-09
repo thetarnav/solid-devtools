@@ -3,7 +3,7 @@ import { Entries } from '@solid-primitives/keyed'
 import { NodeType } from '@solid-devtools/shared/graph'
 import { Scrollable, Badge } from '@/ui'
 import { Signals, ValueNode } from './SignalNode'
-import { useController } from '@/Controller'
+import { useController } from '@/controller'
 import { $VALUE, Inspector } from '.'
 import * as styles from './inspector.css'
 

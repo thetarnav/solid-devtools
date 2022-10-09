@@ -6,7 +6,7 @@ import { Splitter, ToggleButton, Icon } from '@/ui'
 import Inspector from './modules/inspector/Inspector'
 import Structure from './modules/structure/Structure'
 import { versions } from './versions'
-import { useController } from './Controller'
+import { useController } from './controller'
 import * as styles from './App.css'
 
 const SelectComponent: Component<{}> = props => {
