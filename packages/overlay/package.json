@@ -27,8 +27,8 @@
   "module": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "dev": "tsx ./build.ts --watch",
-    "build": "tsx ./build.ts"
+    "dev": "pnpm run build --watch",
+    "build": "tsx ./scripts/build.ts"
   },
   "devDependencies": {
     "@types/clean-css": "^4.2.6",

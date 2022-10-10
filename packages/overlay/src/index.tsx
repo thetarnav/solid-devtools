@@ -16,7 +16,7 @@ if (!isServer) {
   })
 }
 
-export const Overlay: Component<{ test: string }> = props => {
+export const Overlay: Component<{ test: number }> = props => {
   if (isServer) return ''
 
   setMounted(true)
