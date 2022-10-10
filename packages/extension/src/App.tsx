@@ -12,16 +12,25 @@ export default function App() {
   const controller = createBridge({ setVersions })
 
   return (
-    <Devtools
-      controller={controller}
-      headerSubtitle={`version ${versions().extension}`}
-      errorOverlayFooter={
-        <ul>
-          <li>Extension: {versions().extension}</li>
-          <li>Client: {versions().client}</li>
-          <li>Expected client: {versions().expectedClient}</li>
-        </ul>
-      }
-    />
+    <div
+      style={{
+        position: 'fixed',
+        height: '100vh',
+        width: '100vw',
+        inset: '0',
+      }}
+    >
+      <Devtools
+        controller={controller}
+        headerSubtitle={`version ${versions().extension}`}
+        errorOverlayFooter={
+          <ul>
+            <li>Extension: {versions().extension}</li>
+            <li>Client: {versions().client}</li>
+            <li>Expected client: {versions().expectedClient}</li>
+          </ul>
+        }
+      />
+    </div>
   )
 }
