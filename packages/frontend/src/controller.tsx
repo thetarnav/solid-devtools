@@ -85,7 +85,7 @@ export class Controller {
   setHoveredNode(node: Messages['ClientHoveredNodeChange']) {
     this.listeners.onClientHoveredNodeChange(node)
   }
-  setSelectedNode(node: Messages['ClientInspectedNode']) {
+  setInspectedNode(node: Messages['ClientInspectedNode']) {
     this.listeners.onClientInspectedNode(node)
   }
 }

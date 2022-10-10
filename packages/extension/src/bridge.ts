@@ -51,7 +51,7 @@ export default function createBridge({
 
   onRuntimeMessage('ClientHoveredNodeChange', controller.setHoveredNode.bind(controller))
 
-  onRuntimeMessage('ClientInspectedNode', controller.setSelectedNode.bind(controller))
+  onRuntimeMessage('ClientInspectedNode', controller.setInspectedNode.bind(controller))
 
   return controller
 }

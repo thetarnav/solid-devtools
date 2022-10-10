@@ -264,6 +264,8 @@ importers:
     specifiers:
       '@solid-devtools/debugger': workspace:^0.11.1
       '@solid-devtools/frontend': ^0.0.1
+      '@solid-devtools/locator': workspace:^0.16.6
+      '@solid-devtools/shared': workspace:^0.8.6
       '@types/clean-css': ^4.2.6
       clean-css: ^5.3.1
       esbuild: ^0.15.10
@@ -273,6 +275,8 @@ importers:
     dependencies:
       '@solid-devtools/debugger': link:../debugger
       '@solid-devtools/frontend': link:../frontend
+      '@solid-devtools/locator': link:../locator
+      '@solid-devtools/shared': link:../shared
       solid-js: 1.5.7
     devDependencies:
       '@types/clean-css': 4.2.6
