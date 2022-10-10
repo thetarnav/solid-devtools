@@ -13,7 +13,7 @@ const isDev = process.argv.includes('--watch')
 
 const externals = Object.keys(
   (() => {
-    const deps = { ...peerDependencies, ...dependencies }
+    const deps: Record<string, string> = { ...peerDependencies, ...dependencies }
     // @solid-devtools/frontend will be handled specially by the build plugin
     delete deps['@solid-devtools/frontend']
     return deps
@@ -49,7 +49,7 @@ esbuild.build({
             let time = Date.now()
             let text = await readFile(args.path, 'utf-8')
             text = new CleanCSS().minify(text).styles
-            console.log('CSS minify', Math.ceil(Date.now() - time))
+            console.log(`CSS minify. ${Math.ceil(Date.now() - time)}ms`)
             return { loader: 'text', contents: text }
           })
         }
@@ -72,7 +72,7 @@ esbuild.build({
           generalTime = Date.now()
         })
         build.onEnd(() => {
-          console.log(`Build complete in ${Math.round(Date.now() - generalTime)}ms`)
+          console.log(`Build complete. ${Math.round(Date.now() - generalTime)}ms`)
         })
       },
     },
