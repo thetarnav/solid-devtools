@@ -12,6 +12,7 @@ import { __dirname } from './utils'
 const isDev = process.argv.includes('--watch')
 
 const externals = (() => {
+  // TODO copy frontend dependencies to overlay dependencies
   const frontendPkg: { dependencies?: Record<string, string> } = JSON.parse(
     fs.readFileSync(
       path.resolve(process.cwd(), `./node_modules/@solid-devtools/frontend/package.json`),
@@ -24,7 +25,6 @@ const externals = (() => {
     ...dependencies,
     ...frontendPkg.dependencies,
   }
-  delete allDeps['@solid-devtools/frontend']
   return Object.keys(allDeps)
 })()
 
@@ -83,5 +83,6 @@ esbuild.build({
   loader: { '.css': 'text' },
   plugins: [minifyCss(), solidPlugin(), dts()],
   watch: isDev,
+  color: true,
   external: externals,
 })

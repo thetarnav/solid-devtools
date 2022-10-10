@@ -15,7 +15,7 @@ export const useDebugger: typeof API.useDebugger = () => ({
   listenTo: () => () => {},
   components: () => ({}),
   findComponent: () => undefined,
-  setInspectedOwner: () => {},
+  setInspectedNode: () => {},
   getElementById: () => undefined,
   handlePropsUpdate: () => () => {},
   setInspectedSignal: () => null,

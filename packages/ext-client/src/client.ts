@@ -26,7 +26,7 @@ createInternalRoot(() => {
     forceTriggerUpdate,
     findComponent,
     listenTo,
-    setInspectedOwner,
+    setInspectedNode,
     inspectedDetails,
     getElementById,
     setInspectedSignal,
@@ -41,7 +41,7 @@ createInternalRoot(() => {
   onWindowMessage('PanelClosed', () => {
     batch(() => {
       setEnabled(false)
-      setInspectedOwner(null)
+      setInspectedNode(null)
     })
   })
 
@@ -53,7 +53,7 @@ createInternalRoot(() => {
 
     onCleanup(onWindowMessage('ForceUpdate', forceTriggerUpdate))
 
-    onCleanup(onWindowMessage('InspectedNodeChange', setInspectedOwner))
+    onCleanup(onWindowMessage('InspectedNodeChange', setInspectedNode))
 
     onCleanup(
       onWindowMessage('ToggleInspectedValue', payload => {

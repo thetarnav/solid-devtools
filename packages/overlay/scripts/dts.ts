@@ -11,6 +11,7 @@ export function getTscOptions(): ts.CompilerOptions {
     declarationDir: 'dist',
     emitDeclarationOnly: true,
     noEmit: false,
+    // TODO: noEmitOnError durrent production build
     declaration: true,
     rootDir: 'src',
     // packages from paths are being inlined to the output

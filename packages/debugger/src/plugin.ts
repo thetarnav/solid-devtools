@@ -59,7 +59,7 @@ export type PluginData = {
   readonly components: Accessor<Record<NodeID, Mapped.ResolvedComponent[]>>
   readonly findComponent: (rootId: NodeID, nodeId: NodeID) => Mapped.ResolvedComponent | undefined
   readonly inspectedDetails: Accessor<Mapped.OwnerDetails | null>
-  readonly setInspectedOwner: (payload: { rootId: NodeID; nodeId: NodeID } | null) => void
+  readonly setInspectedNode: (payload: { rootId: NodeID; nodeId: NodeID } | null) => void
   readonly getElementById: (id: NodeID) => HTMLElement | undefined
   readonly setInspectedSignal: (id: NodeID, selected: boolean) => EncodedValue<boolean> | null
   readonly setInspectedProp: (key: NodeID, selected: boolean) => void
@@ -237,7 +237,7 @@ const exported = createInternalRoot(() => {
     )
   })
 
-  const setInspectedOwner: PluginData['setInspectedOwner'] = payload => {
+  const setInspectedNode: PluginData['setInspectedNode'] = payload => {
     if (!payload) return clearInspectedDetails()
     const { rootId, nodeId } = payload
 
@@ -282,7 +282,7 @@ const exported = createInternalRoot(() => {
     triggerUpdate,
     forceTriggerUpdate,
     inspectedDetails: details,
-    setInspectedOwner,
+    setInspectedNode,
     setInspectedSignal,
     setInspectedProp,
     setInspectedValue,
