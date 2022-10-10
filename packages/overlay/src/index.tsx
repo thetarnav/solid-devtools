@@ -21,9 +21,11 @@ export const Overlay: Component<{}> = props => {
   if (isServer) return ''
 
   setMounted(true)
-  onCleanup(() => setMounted(false))
-
-  let dispose!: VoidFunction
+  let dispose: VoidFunction | undefined
+  onCleanup(() => {
+    setMounted(false)
+    dispose?.()
+  })
 
   setTimeout(() =>
     createInternalRoot(_dispose => {

@@ -35,34 +35,11 @@
     "clean-css": "^5.3.1",
     "esbuild": "^0.15.10",
     "esbuild-plugin-solid": "^0.4.2",
-    "tsx": "^3.10.1",
-    "@solid-devtools/frontend": "^0.0.1"
+    "tsx": "^3.10.1"
   },
   "dependencies": {
     "@solid-devtools/debugger": "workspace:^0.11.1",
-    "@floating-ui/dom": "^1.0.2",
-    "@otonashixav/solid-flip": "^0.10.5",
-    "@solid-devtools/shared": "workspace:^0.8.6",
-    "@solid-primitives/cursor": "^0.0.100",
-    "@solid-primitives/destructure": "^0.1.2",
-    "@solid-primitives/event-bus": "^0.1.2",
-    "@solid-primitives/event-listener": "^2.2.2",
-    "@solid-primitives/keyboard": "^1.0.2",
-    "@solid-primitives/keyed": "^1.1.2",
-    "@solid-primitives/props": "^2.2.2",
-    "@solid-primitives/range": "^0.1.2",
-    "@solid-primitives/resize-observer": "^2.0.4",
-    "@solid-primitives/timer": "^1.3.3",
-    "@solid-primitives/utils": "^3.0.2",
-    "@vanilla-extract/css": "^1.9.1",
-    "@vanilla-extract/dynamic": "^2.0.2",
-    "@vanilla-extract/private": "^1.0.3",
-    "clsx": "^1.2.1",
-    "csstype": "^3.1.1",
-    "solid-floating-ui": "^0.1.0",
-    "solid-headless": "^0.12.6",
-    "solid-transition-group": "^0.0.11",
-    "type-fest": "^2.19.0"
+    "@solid-devtools/frontend": "^0.0.1"
   },
   "peerDependencies": {
     "solid-js": "^1.5.7"

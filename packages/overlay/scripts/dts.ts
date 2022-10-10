@@ -19,8 +19,10 @@ export function getTscOptions(): ts.CompilerOptions {
   }
 }
 
-export function emitDts(entryFile: string, options: ts.CompilerOptions): void {
+export function emitDts(entryFile: string, options: ts.CompilerOptions, oldProgram?: ts.Program) {
   const timestamp = Date.now()
-  ts.createProgram([entryFile], options).emit()
+  const program = ts.createProgram([entryFile], options, undefined, oldProgram)
+  program.emit()
   console.log('TSC complete', Math.ceil(Date.now() - timestamp))
+  return program
 }
