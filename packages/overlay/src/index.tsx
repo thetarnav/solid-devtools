@@ -104,15 +104,12 @@ export const Overlay: Component<{}> = props => {
       })
 
       return (
-        <Portal useShadow>
+        <Portal useShadow mount={document.documentElement}>
           <style>{styles}</style>
           <div
             style={{
               position: 'fixed',
-              top: '50%',
-              left: '0',
-              right: '0',
-              bottom: '0',
+              inset: '50% 0 0 0',
               'z-index': 999999,
             }}
           >

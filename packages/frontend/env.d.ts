@@ -5,6 +5,8 @@ declare module 'solid-js' {
     interface CustomEvents {
       keydown: KeyboardEvent
       click: MouseEvent
+      pointerover: PointerEvent
+      pointerout: PointerEvent
     }
   }
 }

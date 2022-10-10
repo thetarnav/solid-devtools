@@ -31,6 +31,7 @@ export const ValueRow = {
       },
       fontFamily: theme.font.mono,
       color: color.gray[800],
+      lineHeight: RowHeight,
     },
   ]),
   containerFocused: style({
