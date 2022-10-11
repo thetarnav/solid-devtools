@@ -6,6 +6,8 @@ import App from './App'
 export { Controller } from './controller'
 export type { ClientListeners } from './controller'
 
+export * as Icon from './ui/icons'
+
 export const Devtools: Component<{
   controller: Controller.Controller
   errorOverlayFooter?: JSX.Element

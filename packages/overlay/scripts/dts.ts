@@ -8,12 +8,11 @@ export function getTscOptions(): ts.CompilerOptions {
 
   return {
     ...options,
-    declarationDir: 'dist',
+    declarationDir: 'dist/types',
     emitDeclarationOnly: true,
     noEmit: false,
     noEmitOnError: false,
     declaration: true,
-    rootDir: 'src',
     // packages from paths are being inlined to the output
     paths: {},
   }

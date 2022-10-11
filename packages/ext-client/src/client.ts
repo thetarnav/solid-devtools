@@ -109,24 +109,26 @@ createInternalRoot(() => {
       return false
     })
 
+    // TODO: this logic should be a part of the debugger, this way the different clients don't have to duplicate it
     let skipNextHoveredComponent = true
-    let prevHoverMessage: Messages['ClientHoveredNodeChange'] | null = null
     // listen for op-page components being hovered and send them to the devtools panel
-    createEffect(() => {
+    createEffect((prev: Messages['ClientHoveredNodeChange'] | undefined | void) => {
       const hovered = locator.highlightedComponent()[0] as locator.HoveredComponent | undefined
-      if (skipNextHoveredComponent) return (skipNextHoveredComponent = false)
-      if (!hovered) {
-        if (prevHoverMessage && prevHoverMessage.state)
-          postWindowMessage(
-            'ClientHoveredNodeChange',
-            (prevHoverMessage = { nodeId: prevHoverMessage.nodeId, state: false }),
-          )
-      } else {
-        postWindowMessage(
-          'ClientHoveredNodeChange',
-          (prevHoverMessage = { nodeId: hovered.id, state: true }),
-        )
+      if (skipNextHoveredComponent) {
+        skipNextHoveredComponent = false
+        return
       }
+      let data: Messages['ClientHoveredNodeChange'] | undefined
+      if (!hovered) {
+        if (prev && prev.state) {
+          data = { nodeId: prev.nodeId, state: false }
+          postWindowMessage('ClientHoveredNodeChange', data)
+        }
+      } else {
+        data = { nodeId: hovered.id, state: true }
+        postWindowMessage('ClientHoveredNodeChange', data)
+      }
+      return data
     })
 
     onCleanup(

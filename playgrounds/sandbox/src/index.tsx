@@ -2,15 +2,11 @@
 import { render } from 'solid-js/web'
 // import 'solid-devtools'
 // import { useLocator } from 'solid-devtools'
-import { Overlay } from '@solid-devtools/overlay'
-import { useLocator } from '@solid-devtools/locator'
+import { DevtoolsOverlay } from '@solid-devtools/overlay'
 
 import App from './App'
 import { ThemeProvider } from './Theme'
-
-useLocator({
-  targetIDE: 'vscode',
-})
+import './locator'
 
 export const disposeApp = render(
   () => (
@@ -18,7 +14,7 @@ export const disposeApp = render(
       <ThemeProvider>
         <App />
       </ThemeProvider>
-      <Overlay />
+      <DevtoolsOverlay />
     </>
   ),
   document.getElementById('root')!,
