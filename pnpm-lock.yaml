@@ -266,6 +266,9 @@ importers:
       '@solid-devtools/frontend': ^0.0.1
       '@solid-devtools/locator': workspace:^0.16.6
       '@solid-devtools/shared': workspace:^0.8.6
+      '@solid-primitives/cursor': ^0.0.100
+      '@solid-primitives/event-listener': ^2.2.2
+      '@solid-primitives/utils': ^3.0.2
       '@types/clean-css': ^4.2.6
       clean-css: ^5.3.1
       esbuild: ^0.15.10
@@ -277,6 +280,9 @@ importers:
       '@solid-devtools/frontend': link:../frontend
       '@solid-devtools/locator': link:../locator
       '@solid-devtools/shared': link:../shared
+      '@solid-primitives/cursor': 0.0.100_solid-js@1.5.7
+      '@solid-primitives/event-listener': 2.2.2_solid-js@1.5.7
+      '@solid-primitives/utils': 3.0.2_solid-js@1.5.7
       solid-js: 1.5.7
     devDependencies:
       '@types/clean-css': 4.2.6

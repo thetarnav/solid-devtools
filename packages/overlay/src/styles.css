@@ -1,6 +1,6 @@
 .overlay__container {
   position: fixed;
-  inset: 50% 0 0 0;
+  inset: var(--progress) 0 0 0;
   transform: translateY(100%);
   z-index: 999999;
   padding: 0 0.5rem 0.5rem 0.5rem;
@@ -18,6 +18,27 @@
   /* border: 1px solid #89b6ff; */
 }
 
+.overlay__container__resizer {
+  position: absolute;
+  right: 30%;
+  left: 30%;
+  bottom: 100%;
+  margin: 0.2rem;
+  height: 0.3rem;
+  border-radius: 0.5rem;
+  background-color: #fafafa;
+  opacity: 0.2;
+  cursor: row-resize;
+  display: none;
+  user-select: none;
+}
+.overlay__container[data-open='true'] .overlay__container__resizer {
+  display: block;
+}
+.overlay__container__resizer:hover {
+  opacity: 0.3;
+}
+
 .overlay__toggle-button {
   position: absolute;
   bottom: 100%;
@@ -31,6 +52,7 @@
   color: #89b6ff;
   border-radius: 0.4rem;
   cursor: pointer;
+  user-select: none;
   display: flex;
   align-items: center;
   column-gap: 0.2rem;
