@@ -1,6 +1,6 @@
 import ts from 'typescript'
 
-export function getTscOptions(prod = true): ts.CompilerOptions {
+export function getTscOptions(): ts.CompilerOptions {
   const configFile = ts.findConfigFile(process.cwd(), ts.sys.fileExists, 'tsconfig.json')
   if (!configFile) throw Error('tsconfig.json not found')
   const { config } = ts.readConfigFile(configFile, ts.sys.readFile)
@@ -11,7 +11,7 @@ export function getTscOptions(prod = true): ts.CompilerOptions {
     declarationDir: 'dist',
     emitDeclarationOnly: true,
     noEmit: false,
-    noEmitOnError: !prod,
+    noEmitOnError: false,
     declaration: true,
     rootDir: 'src',
     // packages from paths are being inlined to the output
