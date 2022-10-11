@@ -28,7 +28,8 @@
   "types": "dist/types/index.d.ts",
   "scripts": {
     "dev": "pnpm run build --watch",
-    "build": "tsx ./scripts/build.ts"
+    "build": "tsx ./scripts/build.ts",
+    "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
     "@types/clean-css": "^4.2.6",
