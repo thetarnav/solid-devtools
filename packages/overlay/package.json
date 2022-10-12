@@ -29,9 +29,9 @@
   "exports": {
     "browser": {
       "development": "./dist/dev.js",
-      "import": "./dist/prod.js"
+      "default": "./dist/prod.js"
     },
-    "import": "./dist/prod.js"
+    "default": "./dist/prod.js"
   },
   "scripts": {
     "dev": "pnpm run build --watch",

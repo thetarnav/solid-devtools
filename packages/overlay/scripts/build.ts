@@ -80,21 +80,29 @@ if (!isDev) {
 
 // build entry modules
 
-;(['dev', 'prod'] as const).flatMap(output => {
-  esbuild.build({
-    entryPoints: [entryFile],
-    outfile: `dist/${output}.js`,
-    target: 'esnext',
-    format: 'esm',
-    bundle: true,
-    loader: { '.css': 'text' },
-    define: {
-      'process.env.NODE_ENV': output === 'dev' ? '"development"' : '"production"',
-    },
-    plugins: [customPlugin(output), solidPlugin()],
-    watch: isDev,
-    color: true,
-    external: externals,
-    treeShaking: true,
-  })
+const commonOptions: esbuild.BuildOptions = {
+  target: 'esnext',
+  format: 'esm',
+  bundle: true,
+  loader: { '.css': 'text' },
+  watch: isDev,
+  color: true,
+  external: externals,
+  treeShaking: true,
+}
+
+// dev.js
+esbuild.build({
+  ...commonOptions,
+  entryPoints: [entryFile],
+  outfile: `dist/dev.js`,
+  plugins: [customPlugin('dev'), solidPlugin()],
+})
+
+// prod.js
+esbuild.build({
+  ...commonOptions,
+  entryPoints: [path.relative(cwd, 'src/prod.ts')],
+  outfile: `dist/prod.js`,
+  plugins: [customPlugin('prod')],
 })

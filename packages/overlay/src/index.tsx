@@ -11,8 +11,6 @@ import frontendStyles from '@solid-devtools/frontend/dist/index.css'
 import overlayStyles from './styles.css'
 
 export const DevtoolsOverlay: Component = props => {
-  if (process.env.NODE_ENV === 'production') return ''
-
   let dispose: VoidFunction | undefined
   onCleanup(() => {
     setEnabled(false)
