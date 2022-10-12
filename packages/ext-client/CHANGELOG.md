@@ -1,5 +1,22 @@
 # solid-devtools
 
+## 0.19.0
+
+### Minor Changes
+
+- 8eb3fcb: Improve message names.
+
+### Patch Changes
+
+- 94178ba: Rename `setInspectedOwner` to `setInspectedNode`
+- Updated dependencies [8eb3fcb]
+- Updated dependencies [94178ba]
+- Updated dependencies [94178ba]
+  - @solid-devtools/shared@0.9.0
+  - @solid-devtools/debugger@0.12.0
+  - @solid-devtools/locator@0.16.7
+  - @solid-devtools/transform@0.7.5
+
 ## 0.18.2
 
 ### Patch Changes

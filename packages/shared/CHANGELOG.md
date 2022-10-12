@@ -1,5 +1,11 @@
 # solid-devtools-shared
 
+## 0.9.0
+
+### Minor Changes
+
+- 8eb3fcb: Improve message names.
+
 ## 0.8.6
 
 ### Patch Changes

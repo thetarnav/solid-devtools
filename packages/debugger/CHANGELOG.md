@@ -1,5 +1,17 @@
 # @solid-devtools/debugger
 
+## 0.12.0
+
+### Minor Changes
+
+- 94178ba: Export a function for automatically attaching new roots, that also prevents from setting it up more times than one.
+
+### Patch Changes
+
+- 94178ba: Rename `setInspectedOwner` to `setInspectedNode`
+- Updated dependencies [8eb3fcb]
+  - @solid-devtools/shared@0.9.0
+
 ## 0.11.1
 
 ### Patch Changes
