@@ -1,6 +1,6 @@
 {
   "name": "@solid-devtools/frontend",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "license": "MIT",
   "author": "Damian Tarnawski <gthetarnav@gmail.com>",
   "contributors": [],
@@ -36,7 +36,7 @@
   "dependencies": {
     "@floating-ui/dom": "^1.0.2",
     "@otonashixav/solid-flip": "^0.10.5",
-    "@solid-devtools/shared": "workspace:^0.8.6",
+    "@solid-devtools/shared": "workspace:^0.9.0",
     "@solid-primitives/context": "^0.1.1",
     "@solid-primitives/cursor": "^0.0.100",
     "@solid-primitives/destructure": "^0.1.2",
