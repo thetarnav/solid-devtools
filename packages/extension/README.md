@@ -51,13 +51,13 @@ Import `"solid-devtools"` package in your app entry file. (It's best if the scri
 ```ts
 // will automatically find and track all roots in your application
 // also setups the extension adapter
-import "solid-devtools"
+import 'solid-devtools'
 ```
 
 You can also use the Locator pacage here. It now is integrated with the extension. More on that [here](https://github.com/thetarnav/solid-devtools/tree/main/packages/locator#readme).
 
 ```ts
-import { useLocator } from "solid-devtools"
+import { useLocator } from 'solid-devtools'
 useLocator()
 ```
 
@@ -70,9 +70,9 @@ The vite plugin is not necessary for the devtools to work, but enabling some of 
 ```ts
 // vite.config.ts
 
-import { defineConfig } from "vite"
-import solid from "vite-plugin-solid"
-import devtools from "solid-devtools/vite"
+import { defineConfig } from 'vite'
+import solid from 'vite-plugin-solid'
+import devtools from 'solid-devtools/vite'
 
 export default defineConfig({
   plugins: [
@@ -109,3 +109,7 @@ The content and examples of extension docs are inspired by following articles:
 
 - [**Taking SolidJS Dev-Tools for a Spin**](https://dev.to/mbarzeev/taking-solidjs-dev-tools-for-a-spin-44m2)
 - [**Using SolidJS Dev-Tools Locator Feature**](https://dev.to/mbarzeev/using-solidjs-dev-tools-locator-feature-1445)
+
+## Changelog
+
+See [CHANGELOG.md](./CHANGELOG.md).

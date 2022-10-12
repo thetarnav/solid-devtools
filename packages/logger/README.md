@@ -6,6 +6,10 @@
 
 # @solid-devtools/logger
 
+[![pnpm](https://img.shields.io/badge/maintained%20with-pnpm-cc00ff.svg?style=for-the-badge&logo=pnpm)](https://pnpm.io/)
+[![version](https://img.shields.io/npm/v/@solid-devtools/logger?style=for-the-badge)](https://www.npmjs.com/package/@solid-devtools/logger)
+[![npm](https://img.shields.io/npm/dw/@solid-devtools/logger?style=for-the-badge)](https://www.npmjs.com/package/@solid-devtools/logger)
+
 For debugging only the pinpoint places parts of the Solid's reactivity graph you are concerned with, right in the console you use all the time.
 
 Provides a variaty of debugging utilities for logging the state and lifecycle of the nodes of reactivity graph to the browser console.
@@ -56,7 +60,7 @@ Following information will be tracked and displayed in the console:
 - The computation disposal.
 
 ```ts
-import { debugComputation } from "@solid-devtools/logger"
+import { debugComputation } from '@solid-devtools/logger'
 
 createEffect(() => {
   debugComputation()
@@ -104,7 +108,7 @@ Following information will be tracked and displayed in the console:
 - The signal's state after each value update. (value, previous value, observers, caused reruns, etc.)
 
 ```ts
-import { debugSignal } from "@solid-devtools/logger"
+import { debugSignal } from '@solid-devtools/logger'
 
 const [count, setCount] = createSignal(0)
 
@@ -118,7 +122,7 @@ Same as [`debugSignal`](#debugsignal) but for multiple signals.
 The `source` argument can be an array of signals or a function that calls multiple signals. _(Similar to Solid's `on` helper)_
 
 ```ts
-import { debugSignals } from "@solid-devtools/logger"
+import { debugSignals } from '@solid-devtools/logger'
 
 const [count, setCount] = createSignal(0)
 const double = createMemo(() => count() * 2)
@@ -146,7 +150,7 @@ Following information will be tracked and displayed in the console:
 - The signals state after each value update. (value, previous value, observers, caused reruns, etc.)
 
 ```tsx
-import { debugOwnerSignals } from "@solid-devtools/logger"
+import { debugOwnerSignals } from '@solid-devtools/logger'
 
 const Button = props => {
   const [count, setCount] = createSignal(0)
@@ -165,7 +169,7 @@ Accepts following arguments:
 - `props` - The component's props object to debug. _(optional)_
 
 ```tsx
-import { debugProps } from "@solid-devtools/logger"
+import { debugProps } from '@solid-devtools/logger'
 
 const Button = props => {
   debugProps(props)
