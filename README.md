@@ -32,13 +32,17 @@ Chrome Developer Tools extension for debugging SolidJS applications. It allows f
 Most of the present packages are not much more then just ideas and experiments. Some in progress, and some very much in progress.
 But few of them can help you in your work already, and a man can dream, so this is what's out there waiting:
 
-### [`solid-devtools`](./packages/ext-client#readme)
+### [Extension Client](./packages/ext-client#readme)
+
+###### `solid-devtools`
 
 The main client library. It reexports the most important tools and connects the client application to the chrome extension.
 
 [**See README for more information.**](./packages/ext-client#readme)
 
-### [`@solid-devtools/overlay`](./packages/overlay#readme)
+### [Devtools Overlay](./packages/overlay#readme)
+
+###### `@solid-devtools/overlay`
 
 An on-page devtools overlay for debugging SolidJS Applications without a chrome extension.
 
