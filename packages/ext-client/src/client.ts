@@ -1,6 +1,6 @@
 import { batch, createEffect, createSignal, on, onCleanup } from 'solid-js'
 import { createInternalRoot, useDebugger } from '@solid-devtools/debugger'
-import * as Locator from '@solid-devtools/locator'
+import * as locator from '@solid-devtools/locator'
 import {
   Messages,
   onWindowMessage,
@@ -20,13 +20,13 @@ let loadedBefore = false
 
 createInternalRoot(() => {
   const [enabled, setEnabled] = createSignal(false)
-  Locator.addHighlightingSource(enabled)
+  locator.addHighlightingSource(enabled)
 
   const {
     forceTriggerUpdate,
     findComponent,
     listenTo,
-    setInspectedOwner,
+    setInspectedNode,
     inspectedDetails,
     getElementById,
     setInspectedSignal,
@@ -41,7 +41,7 @@ createInternalRoot(() => {
   onWindowMessage('PanelClosed', () => {
     batch(() => {
       setEnabled(false)
-      setInspectedOwner(null)
+      setInspectedNode(null)
     })
   })
 
@@ -53,7 +53,7 @@ createInternalRoot(() => {
 
     onCleanup(onWindowMessage('ForceUpdate', forceTriggerUpdate))
 
-    onCleanup(onWindowMessage('InspectedNodeChange', setInspectedOwner))
+    onCleanup(onWindowMessage('InspectedNodeChange', setInspectedNode))
 
     onCleanup(
       onWindowMessage('ToggleInspectedValue', payload => {
@@ -93,46 +93,48 @@ createInternalRoot(() => {
     // TODO: abstract state sharing to a separate package
     // state of the extension's locator mode
     const [extLocatorEnabled, setExtLocatorEnabled] = createSignal(false)
-    Locator.addLocatorModeSource(extLocatorEnabled)
+    locator.addLocatorModeSource(extLocatorEnabled)
     onCleanup(onWindowMessage('ExtLocatorMode', setExtLocatorEnabled))
     createEffect(
-      on(Locator.locatorModeEnabled, state => postWindowMessage('ClientLocatorMode', state), {
+      on(locator.locatorModeEnabled, state => postWindowMessage('ClientLocatorMode', state), {
         defer: true,
       }),
     )
 
     // intercept on-page components clicks and send them to the devtools panel
-    Locator.addClickInterceptor((e, component) => {
+    locator.addClickInterceptor((e, component) => {
       e.preventDefault()
       e.stopPropagation()
       postWindowMessage('ClientInspectedNode', component.id)
       return false
     })
 
+    // TODO: this logic should be a part of the debugger, this way the different clients don't have to duplicate it
     let skipNextHoveredComponent = true
-    let prevHoverMessage: Messages['ClientHoveredNodeChange'] | null = null
     // listen for op-page components being hovered and send them to the devtools panel
-    createEffect(() => {
-      const hovered = Locator.highlightedComponent()[0] as Locator.HoveredComponent | undefined
-      if (skipNextHoveredComponent) return (skipNextHoveredComponent = false)
-      if (!hovered) {
-        if (prevHoverMessage && prevHoverMessage.state)
-          postWindowMessage(
-            'ClientHoveredNodeChange',
-            (prevHoverMessage = { nodeId: prevHoverMessage.nodeId, state: false }),
-          )
-      } else {
-        postWindowMessage(
-          'ClientHoveredNodeChange',
-          (prevHoverMessage = { nodeId: hovered.id, state: true }),
-        )
+    createEffect((prev: Messages['ClientHoveredNodeChange'] | undefined | void) => {
+      const hovered = locator.highlightedComponent()[0] as locator.HoveredComponent | undefined
+      if (skipNextHoveredComponent) {
+        skipNextHoveredComponent = false
+        return
       }
+      let data: Messages['ClientHoveredNodeChange'] | undefined
+      if (!hovered) {
+        if (prev && prev.state) {
+          data = { nodeId: prev.nodeId, state: false }
+          postWindowMessage('ClientHoveredNodeChange', data)
+        }
+      } else {
+        data = { nodeId: hovered.id, state: true }
+        postWindowMessage('ClientHoveredNodeChange', data)
+      }
+      return data
     })
 
     onCleanup(
       onWindowMessage('HighlightElement', payload => {
-        if (!payload) return Locator.setTarget(null)
-        let target: Locator.TargetComponent | HTMLElement
+        if (!payload) return locator.setTarget(null)
+        let target: locator.TargetComponent | HTMLElement
         // highlight component
         if (typeof payload === 'object') {
           const { rootId, nodeId } = payload
@@ -146,7 +148,7 @@ createInternalRoot(() => {
           if (!element) return warn('No element found', payload)
           target = element
         }
-        Locator.setTarget(p => {
+        locator.setTarget(p => {
           if (p === target) return p
           // prevent creating an infinite loop
           skipNextHoveredComponent = true

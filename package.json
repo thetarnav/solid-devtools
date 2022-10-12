@@ -12,13 +12,14 @@
     "dev:locator": "pnpm -dir packages/locator run dev",
     "dev:debugger": "pnpm -dir packages/debugger run dev",
     "dev:frontend": "pnpm -dir packages/frontend run dev",
-    "dev:sandbox": "pnpm -dir playgrounds/sandbox run dev",
-    "dev": "run-p dev:client dev:shared dev:locator dev:debugger dev:frontend",
-    "build": "turbo run build --filter=!./playgrounds/*",
-    "test": "turbo run test --filter=!./playgrounds/*",
-    "typecheck": "turbo run typecheck --filter=!./playgrounds/*",
-    "build-test": "turbo run build test typecheck --filter=!./playgrounds/*",
-    "format": "prettier -w \"packages/**/*.{js,ts,json,css,tsx,jsx}\" \"playgrounds/**/*.{js,ts,json,css,tsx,jsx}\"",
+    "dev:overlay": "pnpm -dir packages/overlay run dev",
+    "dev:sandbox": "pnpm -dir examples/sandbox run dev",
+    "dev": "run-p dev:client dev:shared dev:locator dev:debugger dev:frontend dev:overlay",
+    "build": "turbo run build --filter=!./examples/*",
+    "test": "turbo run test --filter=!./examples/*",
+    "typecheck": "turbo run typecheck --filter=!./examples/*",
+    "build-test": "turbo run build test typecheck --filter=!./examples/*",
+    "format": "prettier -w \"packages/**/*.{js,ts,json,css,tsx,jsx}\" \"examples/**/*.{js,ts,json,css,tsx,jsx}\"",
     "changeset": "changeset",
     "release": "pnpm run build-test && changeset publish",
     "version-packages": "changeset version && pnpm i",
@@ -38,5 +39,8 @@
     "typescript": "^4.8.4",
     "vitest": "^0.23.4"
   },
-  "packageManager": "pnpm@7.12.0"
+  "packageManager": "pnpm@7.13.0",
+  "engines": {
+    "node": ">=16"
+  }
 }

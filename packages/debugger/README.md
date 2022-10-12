@@ -6,6 +6,10 @@
 
 # @solid-devtools/debugger
 
+[![pnpm](https://img.shields.io/badge/maintained%20with-pnpm-cc00ff.svg?style=for-the-badge&logo=pnpm)](https://pnpm.io/)
+[![version](https://img.shields.io/npm/v/@solid-devtools/debugger?style=for-the-badge)](https://www.npmjs.com/package/@solid-devtools/debugger)
+[![npm](https://img.shields.io/npm/dw/@solid-devtools/debugger?style=for-the-badge)](https://www.npmjs.com/package/@solid-devtools/debugger)
+
 A runtime package, used to get information and track changes of the Solid's reactivity graph. It's a cornerstone of the rest of the packages.
 
 ## Usage Guide
@@ -29,7 +33,7 @@ That means that you can use the debugger in your Solid apps without having to ma
 [**If you use `solid-devtools` package, this is already handled for you!**](https://github.com/thetarnav/solid-devtools/tree/main/packages/main)
 
 ```ts
-import { attachDebugger, makeCreateRootListener } from "@solid-devtools/debugger"
+import { attachDebugger, makeCreateRootListener } from '@solid-devtools/debugger'
 
 makeCreateRootListener(root => attachDebugger(root))
 ```
@@ -45,13 +49,13 @@ To do so you need to import the debugger package and use one of the two primitiv
 This is a hook that will attach the debugger to the reactive owner of the scope it was used under. For example you might want to use it in you `<App>` component, or directly in the `render` function. It can be used in many places at once without any issues.
 
 ```tsx
-import { render } from "solid-js/web"
-import { attachDebugger } from "@solid-devtools/debugger"
+import { render } from 'solid-js/web'
+import { attachDebugger } from '@solid-devtools/debugger'
 
 render(() => {
   attachDebugger()
   return <App />
-}, document.getElementById("root"))
+}, document.getElementById('root'))
 
 // or inside the App component:
 function App() {
@@ -65,8 +69,8 @@ function App() {
 The debugger component works exactly like [`attachDebugger`](#attachDebugger), but it may be more convenient to use at times.
 
 ```tsx
-import { render } from "solid-js/web"
-import { Debugger } from "@solid-devtools/debugger"
+import { render } from 'solid-js/web'
+import { Debugger } from '@solid-devtools/debugger'
 
 render(
   () => (
@@ -74,7 +78,7 @@ render(
       <App />
     </Debugger>
   ),
-  document.getElementById("root"),
+  document.getElementById('root'),
 )
 ```
 

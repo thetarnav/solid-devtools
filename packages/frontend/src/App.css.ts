@@ -1,13 +1,16 @@
 import { style } from '@vanilla-extract/css'
-import { spacing, color, rounded } from '@/ui/theme'
+import { spacing, color, rounded, theme } from '@/ui/theme'
 import { toggleButton } from '@/ui/components/button/button.css'
 
 export const app = style({
-  height: '100vh',
-  width: '100vw',
+  height: '100%',
+  width: '100%',
   overflow: 'hidden',
   display: 'grid',
   gridTemplateRows: `${spacing[16]} 1fr`,
+  backgroundColor: color.white,
+  fontSize: theme.fontSize.base,
+  fontFamily: theme.font.sans,
 })
 
 export const header = style({

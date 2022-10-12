@@ -1,5 +1,18 @@
 import { ParentComponent } from 'solid-js'
 import { attachDebugger } from './roots'
+import { makeCreateRootListener } from './update'
+
+export const Debugger: ParentComponent = props => {
+  attachDebugger()
+  return props.children
+}
+
+let autoattachEnabled = false
+export function enableRootsAutoattach(): void {
+  if (autoattachEnabled) return
+  autoattachEnabled = true
+  makeCreateRootListener(root => attachDebugger(root))
+}
 
 export { useDebugger } from './plugin'
 export type { BatchComputationUpdatesHandler, PluginData } from './plugin'
@@ -33,8 +46,3 @@ export {
   createUnownedRoot,
   createInternalRoot,
 } from './utils'
-
-export const Debugger: ParentComponent = props => {
-  attachDebugger()
-  return props.children
-}

@@ -6,6 +6,10 @@
 
 # @solid-devtools/frontend
 
+[![pnpm](https://img.shields.io/badge/maintained%20with-pnpm-cc00ff.svg?style=for-the-badge&logo=pnpm)](https://pnpm.io/)
+[![version](https://img.shields.io/npm/v/@solid-devtools/frontend?style=for-the-badge)](https://www.npmjs.com/package/@solid-devtools/frontend)
+[![npm](https://img.shields.io/npm/dw/@solid-devtools/frontend?style=for-the-badge)](https://www.npmjs.com/package/@solid-devtools/frontend)
+
 The frontend of the devtools extension as a npm package, so it can be embedded in different projects.
 
 ## Getting started

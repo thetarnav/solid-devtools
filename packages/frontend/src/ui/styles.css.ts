@@ -3,11 +3,6 @@
 //
 
 import { globalStyle } from '@vanilla-extract/css'
-import { theme } from './theme'
-
-globalStyle('body', {
-  fontSize: theme.fontSize.base,
-})
 
 globalStyle('.sr-only', {
   position: 'absolute',

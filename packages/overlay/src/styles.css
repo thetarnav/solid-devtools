@@ -1,0 +1,70 @@
+.overlay__container {
+  position: fixed;
+  inset: var(--progress) 0 0 0;
+  transform: translateY(100%);
+  z-index: 999999;
+  padding: 0 0.5rem 0.5rem 0.5rem;
+}
+.overlay__container[data-open='true'] {
+  transition: transform 200ms;
+  transform: translateY(0);
+}
+
+.overlay__container__inner {
+  width: 100%;
+  height: 100%;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  /* border: 1px solid #89b6ff; */
+}
+
+.overlay__container__resizer {
+  position: absolute;
+  right: 30%;
+  left: 30%;
+  bottom: 100%;
+  margin: 0.2rem;
+  height: 0.3rem;
+  border-radius: 0.5rem;
+  background-color: #fafafa;
+  opacity: 0.2;
+  cursor: row-resize;
+  display: none;
+  user-select: none;
+}
+.overlay__container[data-open='true'] .overlay__container__resizer {
+  display: block;
+}
+.overlay__container__resizer:hover {
+  opacity: 0.3;
+}
+
+.overlay__toggle-button {
+  position: absolute;
+  bottom: 100%;
+  right: 0;
+  margin: 0.5rem;
+  height: 1.2rem;
+  padding: 0 0.3rem;
+  font-size: 0.7rem;
+  background: rgb(6 33 68 / 0.9);
+  border: 1px solid #89b6ff;
+  color: #89b6ff;
+  border-radius: 0.4rem;
+  cursor: pointer;
+  user-select: none;
+  display: flex;
+  align-items: center;
+  column-gap: 0.2rem;
+}
+.overlay__toggle-button:hover {
+  background: rgb(12 55 113 / 0.9);
+}
+.overlay__toggle-button:active {
+  background: rgb(10 47 96 / 0.9);
+}
+
+.overlay__toggle-button__icon {
+  width: 0.9rem;
+  height: 0.9rem;
+}

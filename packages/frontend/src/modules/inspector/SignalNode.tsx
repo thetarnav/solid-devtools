@@ -237,11 +237,11 @@ const ValueRow: ParentComponent<{ selected?: boolean } & ComponentProps<'li'>> =
         isHovered() && styles.ValueRow.containerHovered,
         props.class,
       )}
-      onPointerOver={e => {
+      on:pointerover={e => {
         e.stopPropagation()
         setIsHovered(true)
       }}
-      onPointerOut={e => {
+      on:pointerout={e => {
         e.stopPropagation()
         setIsHovered(false)
       }}

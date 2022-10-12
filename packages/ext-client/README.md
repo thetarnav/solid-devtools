@@ -6,6 +6,10 @@
 
 # solid-devtools
 
+[![pnpm](https://img.shields.io/badge/maintained%20with-pnpm-cc00ff.svg?style=for-the-badge&logo=pnpm)](https://pnpm.io/)
+[![version](https://img.shields.io/npm/v/solid-devtools?style=for-the-badge)](https://www.npmjs.com/package/solid-devtools)
+[![npm](https://img.shields.io/npm/dw/solid-devtools?style=for-the-badge)](https://www.npmjs.com/package/solid-devtools)
+
 The main client library. It reexports the most [important tools](<(https://github.com/thetarnav/solid-devtools#available-devtools)>) and connects the client application to the [chrome extension](https://github.com/thetarnav/solid-devtools/tree/main/packages/extension#readme).
 
 It contains the following subpackages:
@@ -31,7 +35,7 @@ pnpm add solid-devtools
 All you need to do is import the devtools script in your app entry file, and the debugger will automatically find roots in your app and track them.
 
 ```ts
-import "solid-devtools"
+import 'solid-devtools'
 // and that's it!
 ```
 
@@ -56,9 +60,9 @@ To enable it you need to add it to plugins array in your `.vite.config.js` file:
 ```ts
 // vite.config.ts
 
-import { defineConfig } from "vite"
-import solid from "vite-plugin-solid"
-import devtools from "solid-devtools/vite"
+import { defineConfig } from 'vite'
+import solid from 'vite-plugin-solid'
+import devtools from 'solid-devtools/vite'
 
 export default defineConfig({
   plugins: [devtools(), solid()],

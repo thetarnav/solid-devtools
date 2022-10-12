@@ -1,12 +1,10 @@
 {
-  "name": "solid-devtools-overlay",
-  "version": "0.0.3",
+  "name": "@solid-devtools/overlay",
+  "version": "0.0.1",
   "description": "On-page Devtools Overlay for SolidJS Applications.",
   "license": "MIT",
-  "author": "Nikhil Saraf <nsaraf98@gmail.com>",
-  "contributors": [
-    "Damian Tarnawski <gthetarnav@gmail.com>"
-  ],
+  "author": "Damian Tarnawski <gthetarnav@gmail.com>",
+  "contributors": [],
   "homepage": "https://github.com/thetarnav/solid-devtools/tree/main/packages/overlay#readme",
   "repository": {
     "type": "git",
@@ -19,37 +17,51 @@
     "solid",
     "devtools"
   ],
-  "private": true,
+  "private": false,
+  "publishConfig": {
+    "access": "public"
+  },
   "sideEffects": false,
-  "type": "module",
   "files": [
     "dist"
   ],
-  "main": "dist/esm/index.js",
-  "module": "dist/esm/index.js",
-  "types": "dist/types/index.d.ts",
+  "type": "module",
+  "main": "./dist/prod.js",
+  "module": "./dist/prod.js",
+  "types": "./dist/types/index.d.ts",
   "exports": {
-    ".": {
-      "import": "./dist/esm/index.js",
-      "browser": "./dist/esm/index.js",
-      "require": "./dist/esm/index.js",
-      "node": "./dist/esm/index.js"
-    }
+    "browser": {
+      "development": "./dist/dev.js",
+      "default": "./dist/prod.js"
+    },
+    "default": "./dist/prod.js"
   },
-  "scripts": {},
+  "scripts": {
+    "dev": "pnpm run build --watch",
+    "build": "tsx ./scripts/build.ts",
+    "typecheck": "tsc --noEmit",
+    "build:vite": "vite build",
+    "build:tsup": "tsup"
+  },
   "devDependencies": {
-    "@rollup/plugin-alias": "^3.1.9",
-    "rimraf": "^3.0.2",
-    "rollup": "^2.79.1",
-    "rollup-preset-solid": "^1.4.0",
-    "typescript": "^4.8.4",
-    "watchlist": "^0.3.1"
+    "@types/clean-css": "^4.2.6",
+    "chokidar": "^3.5.3",
+    "clean-css": "^5.3.1",
+    "esbuild": "^0.15.10",
+    "esbuild-plugin-solid": "^0.4.2",
+    "tsx": "^3.10.1"
   },
   "dependencies": {
-    "@solid-primitives/utils": "^3.0.2",
-    "solid-js": "^1.5.7",
-    "solid-meta": "^0.28.1",
-    "twind": "^0.16.17"
+    "@solid-devtools/debugger": "workspace:^0.11.1",
+    "@solid-devtools/frontend": "^0.0.1",
+    "@solid-devtools/locator": "workspace:^0.16.6",
+    "@solid-devtools/shared": "workspace:^0.8.6",
+    "@solid-primitives/cursor": "^0.0.100",
+    "@solid-primitives/event-listener": "^2.2.2",
+    "@solid-primitives/utils": "^3.0.2"
   },
-  "packageManager": "pnpm@7.12.0"
+  "peerDependencies": {
+    "solid-js": "^1.5.7"
+  },
+  "packageManager": "pnpm@7.13.0"
 }

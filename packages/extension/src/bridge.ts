@@ -19,7 +19,7 @@ export default function createBridge({
   once(onRuntimeMessage, 'Versions', v => setVersions(v))
 
   const controller = new Controller({
-    onExtLocatorEnabledChange(enabled) {
+    onDevtoolsLocatorStateChange(enabled) {
       postRuntimeMessage('ExtLocatorMode', enabled)
     },
     onHighlightElementChange(data) {
@@ -51,7 +51,7 @@ export default function createBridge({
 
   onRuntimeMessage('ClientHoveredNodeChange', controller.setHoveredNode.bind(controller))
 
-  onRuntimeMessage('ClientInspectedNode', controller.setSelectedNode.bind(controller))
+  onRuntimeMessage('ClientInspectedNode', controller.setInspectedNode.bind(controller))
 
   return controller
 }

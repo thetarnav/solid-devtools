@@ -1,10 +1,26 @@
 {
   "name": "@solid-devtools/frontend",
   "version": "0.0.1",
-  "private": true,
   "license": "MIT",
   "author": "Damian Tarnawski <gthetarnav@gmail.com>",
   "contributors": [],
+  "homepage": "https://github.com/thetarnav/solid-devtools/tree/main/packages/frontend#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/thetarnav/solid-devtools.git"
+  },
+  "bugs": {
+    "url": "https://github.com/thetarnav/solid-devtools/issues"
+  },
+  "private": false,
+  "publishConfig": {
+    "access": "public"
+  },
+  "sideEffects": false,
+  "keywords": [
+    "solid",
+    "devtools"
+  ],
   "files": [
     "dist"
   ],
@@ -21,6 +37,7 @@
     "@floating-ui/dom": "^1.0.2",
     "@otonashixav/solid-flip": "^0.10.5",
     "@solid-devtools/shared": "workspace:^0.8.6",
+    "@solid-primitives/context": "^0.1.1",
     "@solid-primitives/cursor": "^0.0.100",
     "@solid-primitives/destructure": "^0.1.2",
     "@solid-primitives/event-bus": "^0.1.2",
@@ -45,13 +62,15 @@
   "devDependencies": {
     "@types/node": "^18.8.3",
     "@vanilla-extract/esbuild-plugin": "^2.2.0",
+    "autoprefixer": "^10.4.12",
+    "postcss": "^8.4.17",
     "solid-js": "^1.5.7",
-    "typescript": "^4.8.4",
     "tsup": "^6.2.3",
+    "typescript": "^4.8.4",
     "vitest": "^0.24.0"
   },
   "peerDependencies": {
     "solid-js": "^1.5.7"
   },
-  "packageManager": "pnpm@7.12.0"
+  "packageManager": "pnpm@7.13.0"
 }

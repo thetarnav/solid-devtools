@@ -6,6 +6,10 @@
 
 # @solid-devtools/locator
 
+[![pnpm](https://img.shields.io/badge/maintained%20with-pnpm-cc00ff.svg?style=for-the-badge&logo=pnpm)](https://pnpm.io/)
+[![version](https://img.shields.io/npm/v/@solid-devtools/locator?style=for-the-badge)](https://www.npmjs.com/package/@solid-devtools/locator)
+[![npm](https://img.shields.io/npm/dw/@solid-devtools/locator?style=for-the-badge)](https://www.npmjs.com/package/@solid-devtools/locator)
+
 A runtime library for locating components on the page, and going to their source code in your IDE.
 
 ## Getting Started
@@ -29,9 +33,9 @@ To be able to use the _"open source code in IDE"_ feature, you need to add vite 
 ```ts
 // vite.config.ts
 
-import { defineConfig } from "vite"
-import solidPlugin from "vite-plugin-solid"
-import devtoolsPlugin from "solid-devtools/vite"
+import { defineConfig } from 'vite'
+import solidPlugin from 'vite-plugin-solid'
+import devtoolsPlugin from 'solid-devtools/vite'
 
 export default defineConfig({
   plugins: [
@@ -49,7 +53,7 @@ export default defineConfig({
 The [`solid-devtools`](https://github.com/thetarnav/solid-devtools/tree/main/packages/main#readme) package comes together with the locator installed. All you need to do is configure it by calling `useLocator` with some options.
 
 ```ts
-import { useLocator } from "solid-devtools"
+import { useLocator } from 'solid-devtools'
 
 useLocator()
 ```
@@ -70,7 +74,7 @@ Out-of-the-box options: `vscode`, `atom`, `webstorm` and `vscode-insiders`
 
 ```ts
 useLocator({
-  targetIDE: "vscode",
+  targetIDE: 'vscode',
 })
 ```
 
@@ -105,7 +109,7 @@ Key options: `"Alt"`, `"Control"`, `"Mete"`, `"Shift"` or `string` to be compare
 
 ```tsx
 useLocator({
-  key: "Control",
+  key: 'Control',
 })
 ```
 

@@ -1,18 +1,9 @@
-import {
-  Accessor,
-  batch,
-  createContext,
-  createEffect,
-  createSignal,
-  on,
-  ParentComponent,
-  useContext,
-} from 'solid-js'
+import { batch, createEffect, createSignal, on } from 'solid-js'
+import { createContextProvider } from '@solid-primitives/context'
 import { NodeID, NodeType, RootsUpdates } from '@solid-devtools/shared/graph'
 import type { Messages } from '@solid-devtools/shared/bridge'
-import createStructure, { Structure } from './modules/structure'
-import createInspector, { Inspector } from './modules/inspector'
-import { Listen } from '@solid-primitives/event-bus'
+import createStructure from './modules/structure'
+import createInspector from './modules/inspector'
 
 type ListenersFromPayloads<T extends Record<string, any>> = {
   [K in keyof Pick<
@@ -23,7 +14,7 @@ type ListenersFromPayloads<T extends Record<string, any>> = {
 
 interface ClientListenerPayloads {
   InspectValue: Messages['ToggleInspectedValue']
-  ExtLocatorEnabledChange: boolean
+  DevtoolsLocatorStateChange: boolean
   InspectedNodeChange: Messages['InspectedNodeChange']
   HighlightElementChange: Messages['HighlightElement']
 }
@@ -85,33 +76,19 @@ export class Controller {
   setHoveredNode(node: Messages['ClientHoveredNodeChange']) {
     this.listeners.onClientHoveredNodeChange(node)
   }
-  setSelectedNode(node: Messages['ClientInspectedNode']) {
+  setInspectedNode(node: Messages['ClientInspectedNode']) {
     this.listeners.onClientInspectedNode(node)
   }
 }
 
-const ControllerContext = createContext<{
-  locatorEnabled: Accessor<boolean>
-  inspectedDetails: Accessor<Inspector.Details | null>
-  inspectedNode: Accessor<Structure.Node | null>
-  structureState: Accessor<Structure.State>
-  isNodeHovered(key: NodeID): boolean
-  isNodeInspected(key: NodeID): boolean
-  setExtLocatorState(state: boolean): void
-  setInspectedNode(node: Structure.Node | null): void
-  toggleHoveredNode(id: NodeID, hovered: boolean): Structure.Node | null
-  listenToComputationUpdate: Listen<NodeID>
-  inspector: ReturnType<typeof createInspector>
-}>()
-
-export const Provider: ParentComponent<{ controller: Controller }> = props => {
+const [Provider, useControllerCtx] = createContextProvider((props: { controller: Controller }) => {
   const { controller } = props
 
-  const [extLocatorEnabled, setExtLocatorState] = createSignal(false)
+  const [devtoolsLocatorEnabled, setDevtoolsLocatorState] = createSignal(false)
   const [clientLocatorEnabled, setClientLocator] = createSignal(false)
   const [clientHoveredNodeId, setClientHoveredId] = createSignal<NodeID | null>(null)
 
-  const locatorEnabled = () => extLocatorEnabled() || clientLocatorEnabled()
+  const locatorEnabled = () => devtoolsLocatorEnabled() || clientLocatorEnabled()
 
   function setClientLocatorState(enabled: boolean) {
     batch(() => {
@@ -134,7 +111,7 @@ export const Provider: ParentComponent<{ controller: Controller }> = props => {
       batch(() => {
         structure.updateStructure(null)
         setClientLocatorState(false)
-        setExtLocatorState(false)
+        setDevtoolsLocatorState(false)
       })
     },
     onSetInspectedDetails(ownerDetails) {
@@ -173,6 +150,17 @@ export const Provider: ParentComponent<{ controller: Controller }> = props => {
   })
 
   const client = controller.clientListeners
+
+  // send devtools locator state
+  createEffect(
+    on(
+      devtoolsLocatorEnabled,
+      enabled => {
+        client.onDevtoolsLocatorStateChange(enabled)
+      },
+      { defer: true },
+    ),
+  )
 
   // send inspected value/prop/signal
   inspector.setOnInspectValue(client.onInspectValue)
@@ -216,29 +204,25 @@ export const Provider: ParentComponent<{ controller: Controller }> = props => {
     ),
   )
 
-  return (
-    <ControllerContext.Provider
-      value={{
-        isNodeHovered: structure.isHovered,
-        locatorEnabled,
-        inspectedDetails: inspector.details,
-        structureState: structure.state,
-        inspectedNode: inspector.inspectedNode,
-        isNodeInspected: inspector.isNodeInspected,
-        setExtLocatorState,
-        setInspectedNode: inspector.setInspectedNode,
-        toggleHoveredNode: structure.toggleHoveredNode,
-        listenToComputationUpdate: structure.listenToComputationUpdate,
-        inspector,
-      }}
-    >
-      {props.children}
-    </ControllerContext.Provider>
-  )
-}
+  return {
+    isNodeHovered: structure.isHovered,
+    locatorEnabled,
+    inspectedDetails: inspector.details,
+    structureState: structure.state,
+    inspectedNode: inspector.inspectedNode,
+    isNodeInspected: inspector.isNodeInspected,
+    setLocatorState: setDevtoolsLocatorState,
+    setInspectedNode: inspector.setInspectedNode,
+    toggleHoveredNode: structure.toggleHoveredNode,
+    listenToComputationUpdate: structure.listenToComputationUpdate,
+    inspector,
+  }
+})
+
+export { Provider }
 
 export function useController() {
-  const ctx = useContext(ControllerContext)
+  const ctx = useControllerCtx()
   if (!ctx) {
     throw new Error('ControllerContext was not provided')
   }
