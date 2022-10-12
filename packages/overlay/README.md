@@ -14,6 +14,12 @@ An on-page devtools overlay for debugging SolidJS Applications without a chrome 
 
 Simply add the Overlay component to your app and get access to a powerful, in-browser devtools experience during development. _(It will be removed in production)_
 
+## Try it online!
+
+A couple of deployed demo websites where you can see the Overlay in action:
+
+- [Sandbox Website](https://solid-devtools.vercel.app) - [Source code](https://github.com/thetarnav/solid-devtools/tree/main/examples/sandbox)
+
 ## Getting started
 
 ### Installation
