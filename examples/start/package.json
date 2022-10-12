@@ -1,5 +1,5 @@
 {
-  "name": "solid-devtools-start-playground",
+  "name": "solid-devtools-start-example",
   "private": true,
   "scripts": {
     "dev": "solid-start dev",

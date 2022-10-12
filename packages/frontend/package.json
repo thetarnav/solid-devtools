@@ -1,10 +1,26 @@
 {
   "name": "@solid-devtools/frontend",
   "version": "0.0.1",
-  "private": true,
   "license": "MIT",
   "author": "Damian Tarnawski <gthetarnav@gmail.com>",
   "contributors": [],
+  "homepage": "https://github.com/thetarnav/solid-devtools/tree/main/packages/frontend#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/thetarnav/solid-devtools.git"
+  },
+  "bugs": {
+    "url": "https://github.com/thetarnav/solid-devtools/issues"
+  },
+  "private": false,
+  "publishConfig": {
+    "access": "public"
+  },
+  "sideEffects": false,
+  "keywords": [
+    "solid",
+    "devtools"
+  ],
   "files": [
     "dist"
   ],
@@ -56,5 +72,5 @@
   "peerDependencies": {
     "solid-js": "^1.5.7"
   },
-  "packageManager": "pnpm@7.12.0"
+  "packageManager": "pnpm@7.13.0"
 }

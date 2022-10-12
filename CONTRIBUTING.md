@@ -22,11 +22,11 @@ Here is a list of the commands you can run in the project:
 
 Important if you want to work on the chrome extension. _(The script may fail sometimes after changes, so keep an eye on the console, and restart it if neccessary)_
 
-#### `pnpm dev:client`
+#### `pnpm dev`
 
 **Builds all of the client packages in the watch mode.** Those are the packages that run in the users browser.
 
-#### `pnpm dev:sandbox` — Opens the [sandbox](https://github.com/thetarnav/solid-devtools/tree/main/playgrounds/sandbox) playground
+#### `pnpm dev:sandbox` — Opens the [sandbox](https://github.com/thetarnav/solid-devtools/tree/main/examples/sandbox) playground
 
 ### TEST
 

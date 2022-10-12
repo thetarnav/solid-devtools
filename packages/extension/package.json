@@ -32,5 +32,5 @@
     "@solid-devtools/shared": "workspace:^0.8.6",
     "@solid-primitives/utils": "^3.0.2"
   },
-  "packageManager": "pnpm@7.12.0"
+  "packageManager": "pnpm@7.13.0"
 }
