@@ -131,6 +131,7 @@ button {
   padding: 0;
   border: none;
   background: transparent;
+  cursor: pointer;
 }
 input[type='checkbox'] {
   margin: 0;

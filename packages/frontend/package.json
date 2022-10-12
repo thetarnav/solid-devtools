@@ -21,6 +21,7 @@
     "@floating-ui/dom": "^1.0.2",
     "@otonashixav/solid-flip": "^0.10.5",
     "@solid-devtools/shared": "workspace:^0.8.6",
+    "@solid-primitives/context": "^0.1.1",
     "@solid-primitives/cursor": "^0.0.100",
     "@solid-primitives/destructure": "^0.1.2",
     "@solid-primitives/event-bus": "^0.1.2",

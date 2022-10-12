@@ -19,7 +19,7 @@ export default function createBridge({
   once(onRuntimeMessage, 'Versions', v => setVersions(v))
 
   const controller = new Controller({
-    onExtLocatorEnabledChange(enabled) {
+    onDevtoolsLocatorStateChange(enabled) {
       postRuntimeMessage('ExtLocatorMode', enabled)
     },
     onHighlightElementChange(data) {

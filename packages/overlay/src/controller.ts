@@ -1,4 +1,4 @@
-import { createEffect, createSignal, on } from 'solid-js'
+import { createEffect, createSignal, on, onCleanup } from 'solid-js'
 import { isServer } from 'solid-js/web'
 import { enableRootsAutoattach, PluginData, useDebugger } from '@solid-devtools/debugger'
 import * as locator from '@solid-devtools/locator'
@@ -27,11 +27,13 @@ export function createController() {
     setInspectedValue,
   } = debuggerData
 
+  onCleanup(() => setInspectedNode(null))
+
   const [devtoolsLocatorEnabled, setDevtoolsLocatorState] = createSignal(false)
   locator.addLocatorModeSource(devtoolsLocatorEnabled)
 
   const controller = new Controller({
-    onExtLocatorEnabledChange(enabled) {
+    onDevtoolsLocatorStateChange(enabled) {
       queueMicrotask(() => setDevtoolsLocatorState(enabled))
     },
     onHighlightElementChange(data) {

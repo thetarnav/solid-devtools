@@ -13,7 +13,7 @@ const SelectComponent: Component<{}> = props => {
   return (
     <ToggleButton
       class={styles.select}
-      onToggle={ctx.setExtLocatorState}
+      onToggle={ctx.setLocatorState}
       selected={ctx.locatorEnabled()}
     >
       <Icon.Select class={styles.selectIcon} />
