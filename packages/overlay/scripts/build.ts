@@ -1,14 +1,17 @@
 import fs from 'fs'
 import { readFile } from 'fs/promises'
 import path from 'path'
+import { Worker } from 'worker_threads'
+import { fileURLToPath } from 'url'
 import esbuild from 'esbuild'
 import { solidPlugin } from 'esbuild-plugin-solid'
 import CleanCSS from 'clean-css'
-import { Worker } from 'worker_threads'
+import chokidar from 'chokidar'
 import { peerDependencies, dependencies } from '../package.json'
-import { emitDts, getTscOptions } from './dts'
-import { __dirname } from './utils'
 
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
+const cwd = process.cwd()
 const isDev = process.argv.includes('--watch')
 
 const externals = Object.keys(
@@ -20,65 +23,78 @@ const externals = Object.keys(
   })(),
 )
 
-const entryFile = path.resolve(process.cwd(), `src/index.tsx`)
+const entryFile = path.resolve(cwd, `src/index.tsx`)
+
+function customPlugin(output: string): esbuild.Plugin {
+  return {
+    name: 'custom',
+    setup(build) {
+      // keep the js files from frontend package as external, but inline the .css
+      build.onResolve({ filter: /^@solid-devtools\/frontend/ }, data => {
+        return data.path.endsWith('.css') ? undefined : { external: true }
+      })
+
+      // minify css during build
+      if (!isDev) {
+        build.onLoad({ filter: /\.css$/ }, async args => {
+          const finename = path.basename(args.path)
+          let time = Date.now()
+          let text = await readFile(args.path, 'utf-8')
+          text = new CleanCSS().minify(text).styles
+          console.log(
+            `${output}.js CSS minify for ${finename} in ${Math.ceil(Date.now() - time)}ms`,
+          )
+          return { loader: 'text', contents: text }
+        })
+      }
+
+      let generalTime: number
+      build.onStart(() => {
+        generalTime = Date.now()
+      })
+      build.onEnd(() => {
+        console.log(`${output}.js build complete in ${Math.round(Date.now() - generalTime)}ms`)
+      })
+    },
+  }
+}
 
 // clear dist before build
 if (!isDev) {
-  fs.rmSync(path.resolve(process.cwd(), `dist`), { recursive: true, force: true })
+  fs.rmSync(path.resolve(cwd, `dist`), { recursive: true, force: true })
 }
 
-esbuild.build({
-  entryPoints: [entryFile],
-  outfile: 'dist/index.js',
-  target: 'esnext',
-  format: 'esm',
-  bundle: true,
-  loader: { '.css': 'text' },
-  plugins: [
-    {
-      name: 'custom',
-      setup(build) {
-        // keep the js files from frontend package as external, but inline the .css
-        build.onResolve({ filter: /^@solid-devtools\/frontend/ }, data => {
-          return data.path.endsWith('.css') ? undefined : { external: true }
-        })
+// generate type declarations
+{
+  const worker = new Worker(path.resolve(__dirname, `./dts_worker.ts`), {
+    argv: isDev ? ['--watch'] : [],
+  })
 
-        // minify css during build
-        if (!isDev) {
-          build.onLoad({ filter: /\.css$/ }, async args => {
-            let time = Date.now()
-            let text = await readFile(args.path, 'utf-8')
-            text = new CleanCSS().minify(text).styles
-            console.log(`CSS minify. ${Math.ceil(Date.now() - time)}ms`)
-            return { loader: 'text', contents: text }
-          })
-        }
+  if (isDev) {
+    chokidar.watch(path.resolve(cwd, `src`)).on('change', () => {
+      worker.postMessage('change')
+    })
+    worker.postMessage('change')
+  }
+}
 
-        // generate type declarations
-        if (isDev) {
-          const worker = new Worker(path.resolve(__dirname, `./dts_worker.ts`))
+// build entry modules
 
-          build.onStart(() => {
-            worker.postMessage('change')
-          })
-        } else {
-          build.onEnd(() => {
-            emitDts(entryFile, getTscOptions())
-          })
-        }
-
-        let generalTime: number
-        build.onStart(() => {
-          generalTime = Date.now()
-        })
-        build.onEnd(() => {
-          console.log(`Build complete. ${Math.round(Date.now() - generalTime)}ms`)
-        })
-      },
+;(['dev', 'prod'] as const).flatMap(output => {
+  esbuild.build({
+    entryPoints: [entryFile],
+    outfile: `dist/${output}.js`,
+    target: 'esnext',
+    format: 'esm',
+    bundle: true,
+    loader: { '.css': 'text' },
+    define: {
+      'process.env.NODE_ENV': output === 'dev' ? '"development"' : '"production"',
     },
-    solidPlugin(),
-  ],
-  watch: isDev,
-  color: true,
-  external: externals,
+    plugins: [customPlugin(output), solidPlugin()],
+    watch: isDev,
+    color: true,
+    external: externals,
+    treeShaking: true,
+  })
 })

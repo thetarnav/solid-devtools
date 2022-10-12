@@ -272,6 +272,7 @@ importers:
       '@solid-primitives/event-listener': ^2.2.2
       '@solid-primitives/utils': ^3.0.2
       '@types/clean-css': ^4.2.6
+      chokidar: ^3.5.3
       clean-css: ^5.3.1
       esbuild: ^0.15.10
       esbuild-plugin-solid: ^0.4.2
@@ -288,6 +289,7 @@ importers:
       solid-js: 1.5.7
     devDependencies:
       '@types/clean-css': 4.2.6
+      chokidar: 3.5.3
       clean-css: 5.3.1
       esbuild: 0.15.10
       esbuild-plugin-solid: 0.4.2_2cadobjxrehtwrfj6brvelnqz4

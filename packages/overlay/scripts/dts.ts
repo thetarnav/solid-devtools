@@ -22,6 +22,6 @@ export function emitDts(entryFile: string, options: ts.CompilerOptions, oldProgr
   const timestamp = Date.now()
   const program = ts.createProgram([entryFile], options, undefined, oldProgram)
   program.emit()
-  console.log('TSC complete', Math.ceil(Date.now() - timestamp))
+  console.log(`DTS complete in ${Math.ceil(Date.now() - timestamp)}ms`)
   return program
 }

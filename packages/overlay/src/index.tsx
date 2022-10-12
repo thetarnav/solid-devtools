@@ -1,5 +1,5 @@
 import { Component, createSignal, onCleanup, Show } from 'solid-js'
-import { Dynamic, isServer, Portal } from 'solid-js/web'
+import { Dynamic, Portal } from 'solid-js/web'
 import { makeEventListener } from '@solid-primitives/event-listener'
 import { clamp } from '@solid-primitives/utils'
 import { createBodyCursor } from '@solid-primitives/cursor'
@@ -11,7 +11,7 @@ import frontendStyles from '@solid-devtools/frontend/dist/index.css'
 import overlayStyles from './styles.css'
 
 export const DevtoolsOverlay: Component = props => {
-  if (isServer) return ''
+  if (process.env.NODE_ENV === 'production') return ''
 
   let dispose: VoidFunction | undefined
   onCleanup(() => {
