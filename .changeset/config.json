@@ -8,9 +8,9 @@
   "baseBranch": "main",
   "updateInternalDependencies": "patch",
   "ignore": [
-    "solid-devtools-clock-playground",
-    "solid-devtools-sandbox-playground",
-    "solid-devtools-start-playground",
-    "solid-devtools-todomvc-playground"
+    "solid-devtools-clock-example",
+    "solid-devtools-sandbox-example",
+    "solid-devtools-start-example",
+    "solid-devtools-todomvc-example"
   ]
 }
