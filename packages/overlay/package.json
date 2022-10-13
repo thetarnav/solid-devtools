@@ -58,6 +58,7 @@
     "@solid-devtools/shared": "workspace:^0.8.6",
     "@solid-primitives/cursor": "^0.0.100",
     "@solid-primitives/event-listener": "^2.2.2",
+    "@solid-primitives/media": "^2.0.2",
     "@solid-primitives/utils": "^3.0.2"
   },
   "peerDependencies": {

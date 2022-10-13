@@ -270,6 +270,7 @@ importers:
       '@solid-devtools/shared': workspace:^0.8.6
       '@solid-primitives/cursor': ^0.0.100
       '@solid-primitives/event-listener': ^2.2.2
+      '@solid-primitives/media': ^2.0.2
       '@solid-primitives/utils': ^3.0.2
       '@types/clean-css': ^4.2.6
       chokidar: ^3.5.3
@@ -285,6 +286,7 @@ importers:
       '@solid-devtools/shared': link:../shared
       '@solid-primitives/cursor': 0.0.100_solid-js@1.5.7
       '@solid-primitives/event-listener': 2.2.2_solid-js@1.5.7
+      '@solid-primitives/media': 2.0.2_solid-js@1.5.7
       '@solid-primitives/utils': 3.0.2_solid-js@1.5.7
       solid-js: 1.5.7
     devDependencies:
@@ -2447,6 +2449,17 @@ packages:
     peerDependencies:
       solid-js: ^1.4.0
     dependencies:
+      solid-js: 1.5.7
+    dev: false
+
+  /@solid-primitives/media/2.0.2_solid-js@1.5.7:
+    resolution: {integrity: sha512-CnQUrzIJ4e7JVvPiXMse0eWhzFQn3OGHiNexWr+WZGKwMbwRudnPrSOYpZM9Ad45RHpZ2RQarZgNMCKKtNlKKg==}
+    peerDependencies:
+      solid-js: ^1.4.0
+    dependencies:
+      '@solid-primitives/event-listener': 2.2.2_solid-js@1.5.7
+      '@solid-primitives/rootless': 1.1.3_solid-js@1.5.7
+      '@solid-primitives/utils': 3.0.2_solid-js@1.5.7
       solid-js: 1.5.7
     dev: false
 
