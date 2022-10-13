@@ -34,7 +34,7 @@ const Overlay: Component = props => {
   makeEventListener(window, 'pointermove', e => {
     if (!dragging()) return
     const vh = window.innerHeight
-    setProgress(clamp(e.y, 200, vh - 200) / vh)
+    setProgress(1 - clamp(e.y, 0, vh - 300) / vh)
   })
   makeEventListener(window, 'pointerup', setDragging.bind(void 0, false))
 
@@ -42,32 +42,30 @@ const Overlay: Component = props => {
 
   return (
     <Portal useShadow mount={document.documentElement}>
-      <div
-        class="overlay__container"
-        data-open={enabled()}
-        style={{ '--progress': progress() * 100 + '%' }}
-      >
-        <button class="overlay__toggle-button" onClick={() => setEnabled(p => !p)}>
-          Devtools
-          <Dynamic
-            component={enabled() ? Icon.EyeSlash : Icon.Eye}
-            class="overlay__toggle-button__icon"
-          />
-        </button>
-        <div
-          class="overlay__container__resizer"
-          onPointerDown={e => {
-            e.preventDefault()
-            setDragging(true)
-          }}
-        />
-        <div class="overlay__container__inner">
-          <Show when={enabled()}>
-            {() => {
-              const controller = createController()
-              return <Devtools controller={controller} />
+      <div class="overlay__container" data-open={enabled()} style={{ '--progress': progress() }}>
+        <div class="overlay__container__fixed">
+          <button class="overlay__toggle-button" onClick={() => setEnabled(p => !p)}>
+            Devtools
+            <Dynamic
+              component={enabled() ? Icon.EyeSlash : Icon.Eye}
+              class="overlay__toggle-button__icon"
+            />
+          </button>
+          <div
+            class="overlay__container__resizer"
+            onPointerDown={e => {
+              e.preventDefault()
+              setDragging(true)
             }}
-          </Show>
+          />
+          <div class="overlay__container__inner">
+            <Show when={enabled()}>
+              {() => {
+                const controller = createController()
+                return <Devtools controller={controller} />
+              }}
+            </Show>
+          </div>
         </div>
       </div>
       <style>{frontendStyles}</style>
