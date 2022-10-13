@@ -30,6 +30,88 @@ importers:
       typescript: 4.8.4
       vitest: 0.23.4
 
+  examples/clock:
+    specifiers:
+      solid-devtools: workspace:^0.18.2
+      solid-js: ^1.5.7
+      typescript: ^4.8.4
+      vite: ^3.1.6
+      vite-plugin-solid: ^2.3.9
+    dependencies:
+      solid-devtools: link:../../packages/ext-client
+      solid-js: 1.5.7
+    devDependencies:
+      typescript: 4.8.4
+      vite: 3.1.6
+      vite-plugin-solid: 2.3.9_solid-js@1.5.7+vite@3.1.6
+
+  examples/sandbox:
+    specifiers:
+      '@babel/plugin-syntax-typescript': ^7.18.6
+      '@solid-devtools/locator': workspace:^0.16.6
+      '@solid-devtools/logger': workspace:^0.4.9
+      '@solid-devtools/overlay': workspace:^0.0.1
+      '@solid-devtools/transform': workspace:^0.7.4
+      '@solid-primitives/timer': ^1.3.3
+      solid-devtools: workspace:^0.18.2
+      solid-js: ^1.5.7
+      typescript: ^4.8.4
+      vite: ^3.1.6
+      vite-plugin-solid: ^2.3.9
+    dependencies:
+      '@solid-devtools/locator': link:../../packages/locator
+      '@solid-devtools/logger': link:../../packages/logger
+      '@solid-devtools/overlay': link:../../packages/overlay
+      '@solid-primitives/timer': 1.3.3_solid-js@1.5.7
+      solid-devtools: link:../../packages/ext-client
+      solid-js: 1.5.7
+    devDependencies:
+      '@babel/plugin-syntax-typescript': 7.18.6_@babel+core@7.19.3
+      '@solid-devtools/transform': link:../../packages/transform
+      typescript: 4.8.4
+      vite: 3.1.6
+      vite-plugin-solid: 2.3.9_solid-js@1.5.7+vite@3.1.6
+
+  examples/start:
+    specifiers:
+      '@solidjs/meta': ^0.28.0
+      '@solidjs/router': ^0.4.3
+      solid-devtools: workspace:^0.18.2
+      solid-js: ^1.5.7
+      solid-start: ^0.1.3
+      solid-start-node: ^0.1.3
+      typescript: ^4.8.4
+      undici: ^5.11.0
+      vite: ^3.1.6
+    dependencies:
+      '@solidjs/meta': 0.28.0_solid-js@1.5.7
+      '@solidjs/router': 0.4.3_solid-js@1.5.7
+      solid-devtools: link:../../packages/ext-client
+      solid-js: 1.5.7
+      solid-start: 0.1.3_mvcllmr6zeo5nvxhvvroogyrhq
+      undici: 5.11.0
+    devDependencies:
+      solid-start-node: 0.1.3_q3oskcihxu26fcruurufvartta
+      typescript: 4.8.4
+      vite: 3.1.6
+
+  examples/todomvc:
+    specifiers:
+      solid-js: ^1.5.7
+      todomvc-app-css: ^2.4.2
+      todomvc-common: ^1.0.5
+      typescript: ^4.8.4
+      vite: ^3.1.6
+      vite-plugin-solid: ^2.3.9
+    dependencies:
+      solid-js: 1.5.7
+      todomvc-app-css: 2.4.2
+      todomvc-common: 1.0.5
+    devDependencies:
+      typescript: 4.8.4
+      vite: 3.1.6
+      vite-plugin-solid: 2.3.9_solid-js@1.5.7+vite@3.1.6
+
   packages/debugger:
     specifiers:
       '@babel/core': ^7.19.3
@@ -360,88 +442,6 @@ importers:
       typescript: 4.8.4
       vite: 3.1.6
       vitest: 0.23.4
-
-  playgrounds/clock:
-    specifiers:
-      solid-devtools: workspace:^0.18.2
-      solid-js: ^1.5.7
-      typescript: ^4.8.4
-      vite: ^3.1.6
-      vite-plugin-solid: ^2.3.9
-    dependencies:
-      solid-devtools: link:../../packages/ext-client
-      solid-js: 1.5.7
-    devDependencies:
-      typescript: 4.8.4
-      vite: 3.1.6
-      vite-plugin-solid: 2.3.9_solid-js@1.5.7+vite@3.1.6
-
-  playgrounds/sandbox:
-    specifiers:
-      '@babel/plugin-syntax-typescript': ^7.18.6
-      '@solid-devtools/locator': workspace:^0.16.6
-      '@solid-devtools/logger': workspace:^0.4.9
-      '@solid-devtools/overlay': workspace:^0.0.1
-      '@solid-devtools/transform': workspace:^0.7.4
-      '@solid-primitives/timer': ^1.3.3
-      solid-devtools: workspace:^0.18.2
-      solid-js: ^1.5.7
-      typescript: ^4.8.4
-      vite: ^3.1.6
-      vite-plugin-solid: ^2.3.9
-    dependencies:
-      '@solid-devtools/locator': link:../../packages/locator
-      '@solid-devtools/logger': link:../../packages/logger
-      '@solid-devtools/overlay': link:../../packages/overlay
-      '@solid-primitives/timer': 1.3.3_solid-js@1.5.7
-      solid-devtools: link:../../packages/ext-client
-      solid-js: 1.5.7
-    devDependencies:
-      '@babel/plugin-syntax-typescript': 7.18.6_@babel+core@7.19.3
-      '@solid-devtools/transform': link:../../packages/transform
-      typescript: 4.8.4
-      vite: 3.1.6
-      vite-plugin-solid: 2.3.9_solid-js@1.5.7+vite@3.1.6
-
-  playgrounds/start:
-    specifiers:
-      '@solidjs/meta': ^0.28.0
-      '@solidjs/router': ^0.4.3
-      solid-devtools: workspace:^0.18.2
-      solid-js: ^1.5.7
-      solid-start: ^0.1.3
-      solid-start-node: ^0.1.3
-      typescript: ^4.8.4
-      undici: ^5.11.0
-      vite: ^3.1.6
-    dependencies:
-      '@solidjs/meta': 0.28.0_solid-js@1.5.7
-      '@solidjs/router': 0.4.3_solid-js@1.5.7
-      solid-devtools: link:../../packages/ext-client
-      solid-js: 1.5.7
-      solid-start: 0.1.3_mvcllmr6zeo5nvxhvvroogyrhq
-      undici: 5.11.0
-    devDependencies:
-      solid-start-node: 0.1.3_q3oskcihxu26fcruurufvartta
-      typescript: 4.8.4
-      vite: 3.1.6
-
-  playgrounds/todomvc:
-    specifiers:
-      solid-js: ^1.5.7
-      todomvc-app-css: ^2.4.2
-      todomvc-common: ^1.0.5
-      typescript: ^4.8.4
-      vite: ^3.1.6
-      vite-plugin-solid: ^2.3.9
-    dependencies:
-      solid-js: 1.5.7
-      todomvc-app-css: 2.4.2
-      todomvc-common: 1.0.5
-    devDependencies:
-      typescript: 4.8.4
-      vite: 3.1.6
-      vite-plugin-solid: 2.3.9_solid-js@1.5.7+vite@3.1.6
 
 packages:
 
