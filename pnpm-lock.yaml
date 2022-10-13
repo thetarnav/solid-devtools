@@ -149,7 +149,7 @@ importers:
       jest: 29.1.2_pkv5rbbrzvo2m73htz5zokbhy4
       jest-environment-jsdom: 29.1.2
       solid-js: 1.5.7
-      ts-jest: 29.0.3_zxuwrsyq5mdl5xkbp5j6pnhore
+      ts-jest: 29.0.3_trhi2uzxdx4ws5iehwwgtkh2ca
       ts-node: 10.9.1_xtdkmayvpbwqd3kc4kczaw2zvm
       tsup: 6.2.3_mwhvu7sfp6vq5ryuwb6hlbjfka
       typescript: 4.8.4
@@ -352,6 +352,7 @@ importers:
       '@solid-devtools/shared': workspace:^0.9.0
       '@solid-primitives/cursor': ^0.0.100
       '@solid-primitives/event-listener': ^2.2.2
+      '@solid-primitives/media': ^2.0.2
       '@solid-primitives/utils': ^3.0.2
       '@types/clean-css': ^4.2.6
       chokidar: ^3.5.3
@@ -367,6 +368,7 @@ importers:
       '@solid-devtools/shared': link:../shared
       '@solid-primitives/cursor': 0.0.100_solid-js@1.5.7
       '@solid-primitives/event-listener': 2.2.2_solid-js@1.5.7
+      '@solid-primitives/media': 2.0.2_solid-js@1.5.7
       '@solid-primitives/utils': 3.0.2_solid-js@1.5.7
       solid-js: 1.5.7
     devDependencies:
@@ -2447,6 +2449,17 @@ packages:
     peerDependencies:
       solid-js: ^1.4.0
     dependencies:
+      solid-js: 1.5.7
+    dev: false
+
+  /@solid-primitives/media/2.0.2_solid-js@1.5.7:
+    resolution: {integrity: sha512-CnQUrzIJ4e7JVvPiXMse0eWhzFQn3OGHiNexWr+WZGKwMbwRudnPrSOYpZM9Ad45RHpZ2RQarZgNMCKKtNlKKg==}
+    peerDependencies:
+      solid-js: ^1.4.0
+    dependencies:
+      '@solid-primitives/event-listener': 2.2.2_solid-js@1.5.7
+      '@solid-primitives/rootless': 1.1.3_solid-js@1.5.7
+      '@solid-primitives/utils': 3.0.2_solid-js@1.5.7
       solid-js: 1.5.7
     dev: false
 
@@ -7294,7 +7307,7 @@ packages:
     resolution: {integrity: sha512-Y/arvbn+rrz3JCKl9C4kVNfTfSm2/mEp5FSz5EsZSANGPSlQrpRI5M4PKF+mJnE52jOO90PnPSc3Ur3bTQw0gA==}
     dev: true
 
-  /ts-jest/29.0.3_zxuwrsyq5mdl5xkbp5j6pnhore:
+  /ts-jest/29.0.3_trhi2uzxdx4ws5iehwwgtkh2ca:
     resolution: {integrity: sha512-Ibygvmuyq1qp/z3yTh9QTwVVAbFdDy/+4BtIQR2sp6baF2SJU/8CKK/hhnGIDY2L90Az2jIqTwZPnN2p+BweiQ==}
     engines: {node: ^14.15.0 || ^16.10.0 || >=18.0.0}
     hasBin: true
@@ -7318,6 +7331,7 @@ packages:
       '@babel/core': 7.19.3
       '@jest/types': 29.1.2
       bs-logger: 0.2.6
+      esbuild: 0.15.10
       fast-json-stable-stringify: 2.1.0
       jest: 29.1.2_pkv5rbbrzvo2m73htz5zokbhy4
       jest-util: 29.1.2

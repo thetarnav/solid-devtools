@@ -1,11 +1,26 @@
 .overlay__container {
+  --height: calc(var(--progress) * 100vh);
+}
+@media screen and (max-width: 640px) {
+  .overlay__container {
+    display: none;
+  }
+}
+.overlay__container[data-open='true'] {
+  height: var(--height);
+}
+
+.overlay__container__fixed {
   position: fixed;
-  inset: var(--progress) 0 0 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: var(--height);
   transform: translateY(100%);
   z-index: 999999;
   padding: 0 0.5rem 0.5rem 0.5rem;
 }
-.overlay__container[data-open='true'] {
+.overlay__container[data-open='true'] .overlay__container__fixed {
   transition: transform 200ms;
   transform: translateY(0);
 }

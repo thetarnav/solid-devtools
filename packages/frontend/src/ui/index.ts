@@ -1,5 +1,4 @@
 import './reset.css'
-import './styles.css'
 
 export * from './components/highlight/Highlight'
 export { Splitter } from './components/splitter/Splitter'

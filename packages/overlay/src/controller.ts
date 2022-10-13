@@ -1,19 +1,23 @@
 import { createEffect, createSignal, on, onCleanup } from 'solid-js'
-import { isServer } from 'solid-js/web'
-import { enableRootsAutoattach, PluginData, useDebugger } from '@solid-devtools/debugger'
+import { createMediaQuery } from '@solid-primitives/media'
+import { createInternalRoot, enableRootsAutoattach, useDebugger } from '@solid-devtools/debugger'
 import * as locator from '@solid-devtools/locator'
 import { Controller } from '@solid-devtools/frontend'
 import { Messages } from '@solid-devtools/shared/bridge'
 
-export const [enabled, setEnabled] = createSignal(false)
-locator.addHighlightingSource(enabled)
+const { setEnabled, enabled, debuggerData } = createInternalRoot(() => {
+  const [userEnabled, setEnabled] = createSignal(false)
+  // the devtools overlay isn't supporting mobile devices at the moment
+  const isMobile = createMediaQuery('(max-width: 640px)')
+  const enabled = () => userEnabled() && !isMobile()
 
-let debuggerData: PluginData
+  const debuggerData = useDebugger({ enabled: enabled })
 
-if (!isServer) {
+  locator.addHighlightingSource(enabled)
   enableRootsAutoattach()
-  debuggerData = useDebugger({ enabled: enabled })
-}
+  return { setEnabled, enabled, debuggerData }
+})
+export { setEnabled, enabled }
 
 export function createController() {
   const {
