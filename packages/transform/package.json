@@ -1,6 +1,6 @@
 {
   "name": "@solid-devtools/transform",
-  "version": "0.7.4",
+  "version": "0.7.5",
   "description": "Babel plugin for transforming SolidJS code in development to enchance solid-devtools usage.",
   "license": "MIT",
   "author": "Damian Tarnawski <gthetarnav@gmail.com>",
@@ -62,7 +62,7 @@
     "@babel/core": "^7.19.3",
     "@babel/plugin-syntax-typescript": "^7.18.6",
     "@babel/types": "^7.19.3",
-    "@solid-devtools/shared": "workspace:^0.8.6",
+    "@solid-devtools/shared": "workspace:^0.9.0",
     "solid-js": "^1.5.7"
   },
   "peerDependencies": {

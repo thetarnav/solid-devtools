@@ -1,5 +1,12 @@
 # @solid-devtools/transform
 
+## 0.7.5
+
+### Patch Changes
+
+- Updated dependencies [8eb3fcb]
+  - @solid-devtools/shared@0.9.0
+
 ## 0.7.4
 
 ### Patch Changes

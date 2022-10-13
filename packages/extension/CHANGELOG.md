@@ -1,5 +1,19 @@
 # solid-devtools-extension
 
+## 0.15.0
+
+### Minor Changes
+
+- 8eb3fcb: Improve message names.
+
+### Patch Changes
+
+- 94178ba: Move CSS reset to frontend package. Fix controller not sending devtools locator state
+- Updated dependencies [8eb3fcb]
+- Updated dependencies [94178ba]
+  - @solid-devtools/shared@0.9.0
+  - @solid-devtools/frontend@0.0.2
+
 ## 0.14.1
 
 ### Patch Changes
