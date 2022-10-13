@@ -1,5 +1,11 @@
 # @solid-devtools/frontend
 
+## 0.0.3
+
+### Patch Changes
+
+- f3f2ca1: Fix esbuild ignoring global css import.
+
 ## 0.0.2
 
 ### Patch Changes
