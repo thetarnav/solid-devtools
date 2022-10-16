@@ -140,20 +140,46 @@ export const name = style({
     },
     [`${container}[data-frozen="true"] &:after`]: strikeThroughLine,
   },
+  color: color.black,
+  '@media': {
+    'screen and (prefers-color-scheme: dark)': {
+      color: color.gray[50],
+      selectors: {
+        [`${container}[data-frozen="true"] &`]: {
+          color: color.gray[500],
+        },
+      },
+    },
+  },
 })
 export const typeIcon = style({
   width: spacing[3],
   height: spacing[3],
-  color: color.gray[600],
   marginRight: spacing[1],
+  color: color.gray[600],
+  '@media': {
+    'screen and (prefers-color-scheme: dark)': {
+      color: color.gray[100],
+    },
+  },
 })
 
 export const type = style({
   fontSize: 10,
-  color: color.gray[500],
   userSelect: 'none',
   paddingBottom: '0.0625rem',
   selectors: {
     [`${container}[data-frozen="true"] &:after`]: strikeThroughLine,
+  },
+  color: color.gray[500],
+  '@media': {
+    'screen and (prefers-color-scheme: dark)': {
+      color: color.gray[400],
+      selectors: {
+        [`${container}[data-frozen="true"] &`]: {
+          color: color.gray[500],
+        },
+      },
+    },
   },
 })

@@ -61,7 +61,14 @@ const ValueName_name_base = style({
   marginRight: '2ch',
   ':after': {
     content: ':',
-    color: color.disabled,
+    color: color.gray[500],
+  },
+  '@media': {
+    'screen and (prefers-color-scheme: dark)': {
+      ':after': {
+        color: color.gray[500],
+      },
+    },
   },
 })
 export const ValueName = {
@@ -80,20 +87,35 @@ export const ValueName = {
     width: spacing[3],
     color: color.gray[600],
     marginRight: spacing[1],
+    '@media': {
+      'screen and (prefers-color-scheme: dark)': {
+        color: color.gray[400],
+      },
+    },
   }),
   name: styleVariants({
     base: [
       ValueName_name_base,
       {
-        color: color.gray[800],
         fontWeight: 600,
         fontFamily: theme.font.mono,
+        color: color.gray[800],
+        '@media': {
+          'screen and (prefers-color-scheme: dark)': {
+            color: color.gray[200],
+          },
+        },
       },
     ],
     title: [
       ValueName_name_base,
       {
         color: color.gray[500],
+        '@media': {
+          'screen and (prefers-color-scheme: dark)': {
+            color: color.gray[300],
+          },
+        },
       },
     ],
   }),
@@ -105,6 +127,12 @@ export const ValueName = {
 export const baseValue = style({
   fontWeight: 600,
   height: RowHeight,
+  color: color.gray[800],
+  '@media': {
+    'screen and (prefers-color-scheme: dark)': {
+      color: color.gray[200],
+    },
+  },
 })
 
 const bracketsStyles: CSSPropertiesWithVars = {
@@ -138,6 +166,11 @@ export const ValueString = style([
   {
     minHeight: RowHeight,
     color: color.green,
+    '@media': {
+      'screen and (prefers-color-scheme: dark)': {
+        color: color.green,
+      },
+    },
   },
 ])
 export const ValueNumber = style([
@@ -145,6 +178,11 @@ export const ValueNumber = style([
   {
     minHeight: RowHeight,
     color: color.cyan[600],
+    '@media': {
+      'screen and (prefers-color-scheme: dark)': {
+        color: color.green,
+      },
+    },
   },
 ])
 export const ValueBoolean = style([
@@ -176,6 +214,11 @@ export const ValueElement = {
     elHighlight.container,
     {
       color: color.amber[600],
+      '@media': {
+        'screen and (prefers-color-scheme: dark)': {
+          color: color.amber[600],
+        },
+      },
       textTransform: 'lowercase',
       vars: {
         [elHighlight.bgColorVar]: color.gray[300],

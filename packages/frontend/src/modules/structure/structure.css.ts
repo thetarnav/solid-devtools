@@ -42,4 +42,9 @@ export const pathInner = style({
   padding: `${spacing[0.5]} ${spacing[2]} calc(${spacing[0.5]} + 1px) ${spacing[2]}`,
   borderTop: `1px solid ${color.gray[200]}`,
   backgroundColor: color.gray[50],
+  '@media': {
+    'screen and (prefers-color-scheme: dark)': {
+      backgroundColor: color.gray[800],
+    },
+  },
 })

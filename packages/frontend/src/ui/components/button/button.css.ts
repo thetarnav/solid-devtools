@@ -23,6 +23,16 @@ export const toggleButtonStyles: ComplexStyleRule = {
     '&[aria-selected="true"]': selectedStyles,
     '&[aria-expanded="true"]': selectedStyles,
   },
+  '@media': {
+    'screen and (prefers-color-scheme: dark)': {
+      borderColor: color.gray[500],
+      ':hover': {
+        color: color.gray[100],
+        backgroundColor: color.gray[500],
+        borderColor: color.gray[700],
+      },
+    },
+  },
 }
 
 export const toggleButton = style(toggleButtonStyles)
