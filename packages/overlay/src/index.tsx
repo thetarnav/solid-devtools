@@ -37,7 +37,7 @@ const Overlay: Component = props => {
   const isMobile = createMediaQuery('(max-width: 640px)')
   const [progress, setProgress] = createSignal(0.5)
   const [dragging, setDragging] = createSignal(false)
-  createRenderEffect(() => setProgress(isMobile() ? 0.8 : 0.5))
+  createComputed(() => setProgress(isMobile() ? 0.8 : 0.5))
 
   makeEventListener(window, 'pointermove', e => {
     if (!dragging()) return
