@@ -1,6 +1,6 @@
 import { style } from '@vanilla-extract/css'
 import { createHighlightStyles } from '@/ui/mixins'
-import { centerChild, color, rounded, spacing, theme } from '@/ui/theme'
+import { dark, centerChild, color, rounded, spacing, theme } from '@/ui/theme'
 
 const rowHeight = spacing[3]
 
@@ -22,11 +22,9 @@ export const divider = style({
 export const carret = style({
   width: spacing[2],
   height: spacing[2],
-  '@media': {
-    'screen and (prefers-color-scheme: dark)': {
-      color: color.gray[50],
-    },
-  },
+  ...dark({
+    color: color.gray[50],
+  }),
 })
 
 const highlights = createHighlightStyles()
@@ -67,19 +65,15 @@ export const typeIcon = style({
   width: spacing[2.5],
   height: spacing[2.5],
   color: color.gray[500],
-  '@media': {
-    'screen and (prefers-color-scheme: dark)': {
-      color: color.gray[200],
-    },
-  },
+  ...dark({
+    color: color.gray[200],
+  }),
 })
 
 export const name = style({
   color: color.black,
   transform: 'translateY(0.2px)',
-  '@media': {
-    'screen and (prefers-color-scheme: dark)': {
-      color: color.gray[50],
-    },
-  },
+  ...dark({
+    color: color.gray[50],
+  }),
 })

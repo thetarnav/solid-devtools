@@ -1,6 +1,6 @@
 import { style, createVar } from '@vanilla-extract/css'
 import { CSSVarFunction } from '@vanilla-extract/private'
-import { centerChild, color, spacing, transition } from '@/ui/theme'
+import { mobile, centerChild, color, spacing, transition } from '@/ui/theme'
 
 const minWidth = spacing[36]
 const minHeight = spacing[12]
@@ -20,16 +20,14 @@ export const container = style({
       gridTemplateColumns: `minmax(${minWidth}, ${progress}) ${splitWidth} minmax(${minWidth}, 1fr)`,
     },
   },
-  '@media': {
-    'screen and (max-width: 640px)': {
-      selectors: {
-        '&[data-open="true"]': {
-          gridTemplateColumns: `1fr`,
-          gridTemplateRows: `minmax(${minHeight}, ${progress}) ${splitHeight} minmax(${minHeight}, 1fr)`,
-        },
+  ...mobile({
+    selectors: {
+      '&[data-open="true"]': {
+        gridTemplateColumns: `1fr`,
+        gridTemplateRows: `minmax(${minHeight}, ${progress}) ${splitHeight} minmax(${minHeight}, 1fr)`,
       },
     },
-  },
+  }),
 })
 
 export const mainContent = style({
@@ -54,11 +52,9 @@ export const splitHandle = style({
   bottom: 0,
   cursor: 'col-resize',
   userSelect: 'none',
-  '@media': {
-    'screen and (max-width: 640px)': {
-      cursor: 'row-resize',
-    },
-  },
+  ...mobile({
+    cursor: 'row-resize',
+  }),
 })
 
 export const toggle = style({
