@@ -1,4 +1,4 @@
-import { Component, createSignal, onCleanup, Show } from 'solid-js'
+import { onMount, Component, createSignal, onCleanup, Show } from 'solid-js'
 import { Dynamic, Portal } from 'solid-js/web'
 import { makeEventListener } from '@solid-primitives/event-listener'
 import { clamp } from '@solid-primitives/utils'
@@ -10,8 +10,13 @@ import { createController, enabled, setEnabled } from './controller'
 import frontendStyles from '@solid-devtools/frontend/dist/index.css'
 import overlayStyles from './styles.css'
 
-export const DevtoolsOverlay: Component = props => {
+interface Props {
+  defaultOpen?: boolean
+}
+
+export const DevtoolsOverlay: Component<Props> = props => {
   let dispose: VoidFunction | undefined
+  onMount(() => props.defaultOpen && setEnabled(true))
   onCleanup(() => {
     setEnabled(false)
     dispose?.()
