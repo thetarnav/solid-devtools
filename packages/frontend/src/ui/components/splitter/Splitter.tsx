@@ -4,6 +4,7 @@ import { clamp } from '@solid-primitives/utils'
 import { useWindowSize } from '@solid-primitives/resize-observer'
 import { assignInlineVars } from '@vanilla-extract/dynamic'
 import { createBodyCursor } from '@solid-primitives/cursor'
+import { createMediaQuery } from '@solid-primitives/media'
 import { Icon } from '@/ui'
 import * as styles from './Splitter.css'
 
@@ -15,27 +16,36 @@ export function Splitter(props: {
   const sideResolved = children(() => props.side)
 
   let containerWidth = window.innerWidth
+  let containerHeight = window.innerHeight
   const vSize = useWindowSize()
   createEffect(() => {
-    // update the width of the container when the window is resized
+    // update the size of the container when the window is resized
     vSize.width
-    containerWidth = container.getBoundingClientRect().width
+    vSize.height
+    ;({ width: containerWidth, height: containerHeight } = container.getBoundingClientRect())
   })
 
   const [progress, setProgress] = createSignal(0.6)
   const [dragging, setDragging] = createSignal(false)
 
+  const isMobile = createMediaQuery('(max-width: 640px)')
+
   const onPointerDown = (e: PointerEvent) => {
     e.preventDefault()
     setDragging(true)
   }
+
   makeEventListener(window, 'pointermove', e => {
     if (!dragging()) return
+    if (isMobile()) {
+      setProgress(clamp((e.y - (vSize.height - containerHeight)) / containerHeight, 0, 1))
+      return
+    }
     setProgress(clamp(e.x / containerWidth, 0, 1))
   })
   makeEventListener(window, 'pointerup', setDragging.bind(void 0, false))
 
-  createBodyCursor(() => dragging() && 'col-resize')
+  createBodyCursor(() => dragging() && (isMobile() ? 'row-resize' : 'col-resize'))
 
   let container!: HTMLDivElement
   return (

@@ -3,7 +3,9 @@ import { CSSVarFunction } from '@vanilla-extract/private'
 import { centerChild, color, spacing, transition } from '@/ui/theme'
 
 const minWidth = spacing[36]
+const minHeight = spacing[12]
 const splitWidth = '1px'
+const splitHeight = '1px'
 
 export const progress: CSSVarFunction = createVar()
 
@@ -16,6 +18,16 @@ export const container = style({
   selectors: {
     '&[data-open="true"]': {
       gridTemplateColumns: `minmax(${minWidth}, ${progress}) ${splitWidth} minmax(${minWidth}, 1fr)`,
+    },
+  },
+  '@media': {
+    'screen and (max-width: 640px)': {
+      selectors: {
+        '&[data-open="true"]': {
+          gridTemplateColumns: `1fr`,
+          gridTemplateRows: `minmax(${minHeight}, ${progress}) ${splitHeight} minmax(${minHeight}, 1fr)`,
+        },
+      },
     },
   },
 })
@@ -42,6 +54,11 @@ export const splitHandle = style({
   bottom: 0,
   cursor: 'col-resize',
   userSelect: 'none',
+  '@media': {
+    'screen and (max-width: 640px)': {
+      cursor: 'row-resize',
+    },
+  },
 })
 
 export const toggle = style({

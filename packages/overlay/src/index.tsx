@@ -1,4 +1,4 @@
-import { onMount, Component, createSignal, onCleanup, Show } from 'solid-js'
+import { createRenderEffect, onMount, Component, createSignal, onCleanup, Show } from 'solid-js'
 import { Dynamic, Portal } from 'solid-js/web'
 import { makeEventListener } from '@solid-primitives/event-listener'
 import { clamp } from '@solid-primitives/utils'
@@ -6,6 +6,7 @@ import { createBodyCursor } from '@solid-primitives/cursor'
 import { Devtools, Icon } from '@solid-devtools/frontend'
 import { createInternalRoot } from '@solid-devtools/debugger'
 import { createController, enabled, setEnabled } from './controller'
+import { createMediaQuery } from '@solid-primitives/media'
 
 import frontendStyles from '@solid-devtools/frontend/dist/index.css'
 import overlayStyles from './styles.css'
@@ -33,8 +34,10 @@ export const DevtoolsOverlay: Component<Props> = props => {
 }
 
 const Overlay: Component = props => {
+  const isMobile = createMediaQuery('(max-width: 640px)')
   const [progress, setProgress] = createSignal(0.5)
   const [dragging, setDragging] = createSignal(false)
+  createRenderEffect(() => setProgress(isMobile() ? 0.8 : 0.5))
 
   makeEventListener(window, 'pointermove', e => {
     if (!dragging()) return
