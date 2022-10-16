@@ -12,6 +12,12 @@ This project uses [pnpm](https://pnpm.io/) for package management. If you don't 
 
 The code if formatted with prettier. You can use it if you want, or not, it's up to you because the code get's formatted automatically by a github action. If you want to use it, you can run `pnpm format` to format the code.
 
+## Operating System
+
+I'm ([thetarnav](https://github.com/thetarnav)) working from a Windows PC, but it everything should work on macOS and Linux as well. If you find any issues, please open an issue.
+
+Alternatively, if something is off, I recommend using [Gitpod](https://gitpod.io) or [Codeflow](https://stackblitz.com/codeflow) for development. Both of them are free for oss projects like this one and will give you a stable development environment.
+
 ## CLI Commands
 
 Here is a list of the commands you can run in the project:
