@@ -29,10 +29,11 @@ export function Splitter(props: {
   const [dragging, setDragging] = createSignal(false)
 
   const isMobile = createMediaQuery('(max-width: 640px)')
+  const isTouch = createMediaQuery('(hover: none)')
 
   const onPointerDown = (e: PointerEvent) => {
     e.preventDefault()
-    setDragging(true)
+    setDragging(!isTouch())
   }
 
   makeEventListener(window, 'pointermove', e => {
