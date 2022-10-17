@@ -94,7 +94,7 @@ chrome.runtime.onConnect.addListener(port => {
     onPortMessage('SetInspectedDetails', e => postRuntimeMessage('SetInspectedDetails', e))
     onPortMessage('PropsUpdate', e => postRuntimeMessage('PropsUpdate', e))
     onPortMessage('ValueUpdate', e => postRuntimeMessage('ValueUpdate', e))
-    onPortMessage('ClientHoveredNodeChange', e => postRuntimeMessage('ClientHoveredNodeChange', e))
+    onPortMessage('ClientHoveredComponent', e => postRuntimeMessage('ClientHoveredComponent', e))
     onPortMessage('ClientInspectedNode', e => postRuntimeMessage('ClientInspectedNode', e))
 
     onPortMessage('ClientLocatorMode', e => postRuntimeMessage('ClientLocatorMode', e))

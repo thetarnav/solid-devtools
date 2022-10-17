@@ -64,7 +64,7 @@ onWindowMessage('PropsUpdate', e => postPortMessage('PropsUpdate', e))
 
 onWindowMessage('ValueUpdate', e => postPortMessage('ValueUpdate', e))
 
-onWindowMessage('ClientHoveredNodeChange', e => postPortMessage('ClientHoveredNodeChange', e))
+onWindowMessage('ClientHoveredComponent', e => postPortMessage('ClientHoveredComponent', e))
 
 onWindowMessage('ClientInspectedNode', e => postPortMessage('ClientInspectedNode', e))
 

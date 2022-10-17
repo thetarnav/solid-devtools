@@ -1,10 +1,5 @@
-import { Accessor, createEffect, createSignal, untrack } from 'solid-js'
-import {
-  createEventHub,
-  createSimpleEmitter,
-  EventBus,
-  EventHubOn,
-} from '@solid-primitives/event-bus'
+import { batch, createEffect, createSignal, untrack } from 'solid-js'
+import { createEventHub, createSimpleEmitter } from '@solid-primitives/event-bus'
 import { throttle } from '@solid-primitives/scheduled'
 import {
   Mapped,
@@ -14,7 +9,7 @@ import {
   ComputationUpdate,
 } from '@solid-devtools/shared/graph'
 import { EncodedValue, encodeValue, ElementMap } from '@solid-devtools/shared/serialize'
-import { createConsumers, untrackedCallback } from '@solid-devtools/shared/primitives'
+import { untrackedCallback } from '@solid-devtools/shared/primitives'
 import { createBatchedUpdateEmitter, createInternalRoot } from './utils'
 import { ComputationUpdateHandler } from './walker'
 import { walkSolidRoot } from './roots'
@@ -25,6 +20,7 @@ import {
   SignalUpdateHandler,
 } from './inspect'
 import { makeSolidUpdateListener } from './update'
+import { createLocator } from './locator'
 
 /*
 DETAILS:
@@ -44,59 +40,46 @@ DETAILS:
 
 export type BatchComputationUpdatesHandler = (payload: ComputationUpdate[]) => void
 
-export type EventHubChannels = {
-  ComputationUpdates: EventBus<ComputationUpdate[]>
-  SignalUpdates: EventBus<{ id: NodeID; value: EncodedValue<boolean> }[]>
-  PropsUpdate: EventBus<Mapped.Props>
-  ValueUpdate: EventBus<{ value: EncodedValue<boolean>; update: boolean }>
-  StructureUpdates: EventBus<RootsUpdates>
-}
-
-export type PluginData = {
-  readonly triggerUpdate: VoidFunction
-  readonly forceTriggerUpdate: VoidFunction
-  readonly listenTo: EventHubOn<EventHubChannels>
-  readonly components: Accessor<Record<NodeID, Mapped.ResolvedComponent[]>>
-  readonly findComponent: (rootId: NodeID, nodeId: NodeID) => Mapped.ResolvedComponent | undefined
-  readonly inspectedDetails: Accessor<Mapped.OwnerDetails | null>
-  readonly setInspectedNode: (payload: { rootId: NodeID; nodeId: NodeID } | null) => void
-  readonly getElementById: (id: NodeID) => HTMLElement | undefined
-  readonly setInspectedSignal: (id: NodeID, selected: boolean) => EncodedValue<boolean> | null
-  readonly setInspectedProp: (key: NodeID, selected: boolean) => void
-  readonly setInspectedValue: (selected: boolean) => void
-}
-
 type RootUpdate = { removed: NodeID } | { updated: Mapped.Root }
 
-export const debuggerConfig = {
-  gatherComponents: false,
-}
-
-const exported = createInternalRoot(() => {
+export default createInternalRoot(() => {
   /** throttled global update */
   const [onUpdate, triggerUpdate] = createSimpleEmitter()
   /** forced — immediate global update */
   const [onForceUpdate, forceTriggerUpdate] = createSimpleEmitter()
 
-  const eventHub = createEventHub<EventHubChannels>(bus => ({
-    ComputationUpdates: bus(),
-    SignalUpdates: bus(),
-    PropsUpdate: bus(),
-    ValueUpdate: bus(),
-    StructureUpdates: bus(),
+  const eventHub = createEventHub(bus => ({
+    ComputationUpdates: bus<ComputationUpdate[]>(),
+    SignalUpdates: bus<{ id: NodeID; value: EncodedValue<boolean> }[]>(),
+    PropsUpdate: bus<Mapped.Props>(),
+    ValueUpdate: bus<{ value: EncodedValue<boolean>; update: boolean }>(),
+    StructureUpdates: bus<RootsUpdates>(),
+    InspectedNodeDetails: bus<Mapped.OwnerDetails>(),
   }))
 
   //
-  // Consumers:
+  // Debugger Enabled
   //
-  const [enabled, addDebuggerConsumer] = createConsumers()
+  const [debuggerEnabled, toggleDebugger] = (() => {
+    const [debuggerEnabled, setDebuggerEnabled] = createSignal(false)
+
+    function toggleDebugger(state?: boolean) {
+      batch(() => {
+        setDebuggerEnabled(p => state ?? !p)
+        setComponents({})
+        locator.togglePluginLocatorMode(false)
+      })
+    }
+
+    return [debuggerEnabled, toggleDebugger]
+  })()
 
   //
   // Components:
   //
   const [components, setComponents] = createSignal<Record<NodeID, Mapped.ResolvedComponent[]>>({})
 
-  const findComponent: PluginData['findComponent'] = (rootId, nodeId) => {
+  function findComponent(rootId: NodeID, nodeId: NodeID) {
     const componentsList = components()[rootId] as Mapped.ResolvedComponent[] | undefined
     if (!componentsList) return
     for (const c of componentsList) {
@@ -156,8 +139,6 @@ const exported = createInternalRoot(() => {
     getValue: () => null as unknown,
   }
 
-  const [details, setDetails] = createSignal<Mapped.OwnerDetails | null>(null)
-
   const getElementById = (id: NodeID): HTMLElement | undefined => inspected.elementMap.get(id)
 
   const pushSignalUpdate = createBatchedUpdateEmitter<{
@@ -165,7 +146,7 @@ const exported = createInternalRoot(() => {
     value: EncodedValue<boolean>
   }>(updates => eventHub.emit('SignalUpdates', updates))
   const onSignalUpdate: SignalUpdateHandler = untrackedCallback((id, value) => {
-    if (!enabled() || !inspected.owner) return
+    if (!debuggerEnabled() || !inspected.owner) return
     const isSelected = inspected.signals.has(id)
     pushSignalUpdate({ id, value: encodeValue(value, isSelected, inspected.elementMap) })
   })
@@ -173,7 +154,7 @@ const exported = createInternalRoot(() => {
   const triggerValueUpdate = (() => {
     let updateNext = false
     const forceValueUpdate = () => {
-      if (!enabled() || !inspected.owner) return (updateNext = false)
+      if (!debuggerEnabled() || !inspected.owner) return (updateNext = false)
       eventHub.emit('ValueUpdate', {
         value: encodeValue(inspected.getValue(), inspected.value, inspected.elementMap),
         update: updateNext,
@@ -199,7 +180,7 @@ const exported = createInternalRoot(() => {
       onSignalUpdate,
       onValueUpdate: () => triggerValueUpdate(true),
     })
-    setDetails(result.details)
+    eventHub.emit('InspectedNodeDetails', result.details)
     inspected.signalMap = result.signalMap
     inspected.elementMap = result.elementMap
     inspected.getValue = result.getOwnerValue
@@ -207,7 +188,6 @@ const exported = createInternalRoot(() => {
   const clearInspectedDetails = () => {
     inspected.owner && clearOwnerObservers(inspected.owner)
     inspected.owner = null
-    setDetails(null)
     inspected.signals.clear()
     inspected.props.clear()
     inspected.value = false
@@ -224,7 +204,7 @@ const exported = createInternalRoot(() => {
 
   createEffect(() => {
     // make sure we clear the owner observers when the plugin is disabled
-    if (!enabled()) inspected.owner && clearOwnerObservers(inspected.owner)
+    if (!debuggerEnabled()) inspected.owner && clearOwnerObservers(inspected.owner)
     // re-observe the owner when the plugin is enabled
     else inspected.owner && setInspectedDetails(inspected.owner)
 
@@ -237,9 +217,9 @@ const exported = createInternalRoot(() => {
     )
   })
 
-  const setInspectedNode: PluginData['setInspectedNode'] = payload => {
-    if (!payload) return clearInspectedDetails()
-    const { rootId, nodeId } = payload
+  function setInspectedNode(data: { rootId: NodeID; nodeId: NodeID } | null) {
+    if (!data) return clearInspectedDetails()
+    const { rootId, nodeId } = data
 
     const walkResult = walkSolidRoot(rootId, nodeId)
     if (!walkResult || !walkResult.inspectedOwner) return clearInspectedDetails()
@@ -247,19 +227,19 @@ const exported = createInternalRoot(() => {
     setInspectedDetails(walkResult.inspectedOwner)
   }
 
-  const setInspectedSignal: PluginData['setInspectedSignal'] = (id, selected) => {
+  function setInspectedSignal(id: NodeID, selected: boolean): EncodedValue<boolean> | null {
     const signal = inspected.signalMap[id] as Solid.Signal | undefined
     if (!signal) return null
     if (selected) inspected.signals.add(id)
     else inspected.signals.delete(id)
     return untrack(() => encodeValue(signal.value, selected, inspected.elementMap))
   }
-  const setInspectedProp: PluginData['setInspectedProp'] = (key, selected) => {
+  function setInspectedProp(key: NodeID, selected: boolean) {
     if (selected) inspected.props.add(key)
     else inspected.props.delete(key)
     updateInspectedProps()
   }
-  const setInspectedValue: PluginData['setInspectedValue'] = selected => {
+  function setInspectedValue(selected: boolean) {
     if (!inspected.owner) return null
     inspected.value = selected
     triggerValueUpdate(false, true)
@@ -275,45 +255,45 @@ const exported = createInternalRoot(() => {
     _pushComputationUpdate({ rootId, id })
   }
 
-  const pluginData: PluginData = {
-    listenTo: eventHub.on,
+  //
+  // Locator
+  //
+  const locator = createLocator({
     components,
+    debuggerEnabled,
     findComponent,
-    triggerUpdate,
-    forceTriggerUpdate,
-    inspectedDetails: details,
-    setInspectedNode,
-    setInspectedSignal,
-    setInspectedProp,
-    setInspectedValue,
     getElementById,
-  }
-  function useDebugger(options: {
-    enabled?: Accessor<boolean>
-    gatherComponents?: boolean
-  }): PluginData {
-    const { enabled, gatherComponents } = options
-    enabled && addDebuggerConsumer(enabled)
-    if (gatherComponents) debuggerConfig.gatherComponents = true
-    return pluginData
+  })
+
+  function useDebugger() {
+    return {
+      listenTo: eventHub.on,
+      enabled: debuggerEnabled,
+      toggleEnabled: toggleDebugger,
+      triggerUpdate,
+      forceTriggerUpdate,
+      setInspectedNode,
+      setInspectedSignal,
+      setInspectedProp,
+      setInspectedValue,
+      locator: {
+        toggleEnabled: locator.togglePluginLocatorMode,
+        enabledByDebugger: locator.enabledByDebugger,
+        addClickInterceptor: locator.addClickInterceptor,
+        setHighlightTarget: locator.setPluginHighlightTarget,
+        onHoveredComponent: locator.onDebuggerHoveredComponentChange,
+      },
+    }
   }
 
   return {
     onUpdate,
     onForceUpdate,
-    enabled,
+    enabled: debuggerEnabled,
     useDebugger,
     updateRoot,
     removeRoot,
     pushComputationUpdate,
+    useLocator: locator.useLocator,
   }
 })
-export const {
-  onUpdate,
-  onForceUpdate,
-  enabled,
-  useDebugger,
-  updateRoot,
-  removeRoot,
-  pushComputationUpdate,
-} = exported

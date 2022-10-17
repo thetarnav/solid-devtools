@@ -13,9 +13,8 @@ type ListenersFromPayloads<T extends Record<string, any>> = {
 }
 
 interface ClientListenerPayloads {
-  InspectValue: Messages['ToggleInspectedValue']
+  Inspect: Messages['ToggleInspected']
   DevtoolsLocatorStateChange: boolean
-  InspectedNodeChange: Messages['InspectedNodeChange']
   HighlightElementChange: Messages['HighlightElement']
 }
 export type ClientListeners = ListenersFromPayloads<ClientListenerPayloads>
@@ -29,7 +28,7 @@ interface DevtoolsListenerPayloads {
   PropsUpdate: Messages['PropsUpdate']
   ValueUpdate: Messages['ValueUpdate']
   ClientLocatorModeChange: boolean
-  ClientHoveredNodeChange: Messages['ClientHoveredNodeChange']
+  ClientHoveredComponent: Messages['ClientHoveredComponent']
   ClientInspectedNode: Messages['ClientInspectedNode']
 }
 export type DevtoolsListeners = ListenersFromPayloads<DevtoolsListenerPayloads>
@@ -67,14 +66,11 @@ export class Controller {
   resetPanel() {
     this.listeners.onResetPanel()
   }
-  inspectValue(payload: Messages['ToggleInspectedValue']) {
-    this.clientListeners.onInspectValue(payload)
-  }
   setLocatorState(active: boolean) {
     this.listeners.onClientLocatorModeChange(active)
   }
-  setHoveredNode(node: Messages['ClientHoveredNodeChange']) {
-    this.listeners.onClientHoveredNodeChange(node)
+  setHoveredNode(node: Messages['ClientHoveredComponent']) {
+    this.listeners.onClientHoveredComponent(node)
   }
   setInspectedNode(node: Messages['ClientInspectedNode']) {
     this.listeners.onClientInspectedNode(node)
@@ -117,7 +113,7 @@ const [Provider, useControllerCtx] = createContextProvider((props: { controller:
     onSetInspectedDetails(ownerDetails) {
       inspector.setDetails(ownerDetails)
     },
-    onClientHoveredNodeChange({ nodeId, state }) {
+    onClientHoveredComponent({ nodeId, state }) {
       setClientHoveredId(p => {
         if (state) return nodeId ?? p
         return p && p === nodeId ? null : p
@@ -162,20 +158,18 @@ const [Provider, useControllerCtx] = createContextProvider((props: { controller:
     ),
   )
 
-  // send inspected value/prop/signal
-  inspector.setOnInspectValue(client.onInspectValue)
-
-  // send inspected node
-  createEffect(
-    on(
-      inspector.inspectedNode,
-      node => {
-        const data = node ? { nodeId: node.id, rootId: structure.getParentRoot(node).id } : null
-        client.onInspectedNodeChange(data)
-      },
-      { defer: true },
-    ),
-  )
+  // send inspected node/value/prop/signal
+  inspector.setOnInspectedHandler(payload => {
+    if (payload.type === 'node') {
+      const node = payload.data
+      const nodePayload = node
+        ? { nodeId: node.id, rootId: structure.getParentRoot(node).id }
+        : null
+      client.onInspect({ type: 'node', data: nodePayload })
+    } else {
+      client.onInspect(payload)
+    }
+  })
 
   // highlight hovered element
   createEffect(
@@ -194,7 +188,7 @@ const [Provider, useControllerCtx] = createContextProvider((props: { controller:
         // handle element
         if (elId) {
           if (typeof prev === 'string' && prev === elId) return prev
-          client.onHighlightElementChange(elId)
+          client.onHighlightElementChange({ elementId: elId })
           return elId
         }
         // no element or component

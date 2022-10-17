@@ -14,8 +14,10 @@ export function enableRootsAutoattach(): void {
   makeCreateRootListener(root => attachDebugger(root))
 }
 
-export { useDebugger } from './plugin'
-export type { BatchComputationUpdatesHandler, PluginData } from './plugin'
+import plugin from './plugin'
+export const useDebugger = plugin.useDebugger
+export const useLocator = plugin.useLocator
+export type { BatchComputationUpdatesHandler } from './plugin'
 
 export { attachDebugger } from './roots'
 
@@ -46,3 +48,5 @@ export {
   createUnownedRoot,
   createInternalRoot,
 } from './utils'
+
+export type { LocatorOptions, TargetIDE, TargetURLFunction } from './locator'

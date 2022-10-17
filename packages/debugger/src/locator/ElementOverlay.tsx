@@ -1,19 +1,8 @@
-import {
-  Component,
-  createComputed,
-  createMemo,
-  Show,
-  on,
-  createEffect,
-  Accessor,
-  Index,
-} from 'solid-js'
+import { Component, createMemo, Show, Accessor, Index } from 'solid-js'
 import { Portal } from 'solid-js/web'
-import { animate } from 'motion'
-import { clsx } from 'clsx'
 import { createElementCursor } from '@solid-primitives/cursor'
 import { createElementBounds } from '@solid-primitives/bounds'
-import { HoveredComponent } from './findComponent'
+import { LocatorComponent } from './findComponent'
 
 const styles = /*css*/ `
 .element-overlay {
@@ -88,7 +77,7 @@ export interface ElementOverlayProps {
   tag: string | undefined
 }
 
-export function attachElementOverlay(selected: Accessor<HoveredComponent[]>) {
+export function attachElementOverlay(selected: Accessor<LocatorComponent[]>) {
   return (
     <Portal useShadow>
       <Index each={selected()}>
@@ -130,26 +119,8 @@ const ElementOverlay: Component<ElementOverlayProps> = props => {
       >
         <div class="border" />
         <Show when={!!props.name}>
-          <div class={clsx('name-container', placeOnTop() ? 'top' : 'bottom')}>
-            <div
-              class="name-animated-container"
-              ref={el => {
-                let prevY = 0
-                createComputed(
-                  on(placeOnTop, () => (prevY = el.getBoundingClientRect().top), { defer: true }),
-                )
-                createEffect(
-                  on(
-                    placeOnTop,
-                    () => {
-                      const currY = el.getBoundingClientRect().top
-                      animate(el, { y: [prevY - currY, 0] }, { duration: 0.15 })
-                    },
-                    { defer: true },
-                  ),
-                )
-              }}
-            >
+          <div class={`name-container ${placeOnTop() ? 'top' : 'bottom'}`}>
+            <div class="name-animated-container">
               <div class="name-background"></div>
               <div class="name-text">
                 {props.name}: <span>{props.tag}</span>

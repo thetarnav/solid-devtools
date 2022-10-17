@@ -14,7 +14,6 @@ export type ComputationUpdateHandler = (rootId: NodeID, nodeId: NodeID) => void
 let $inspectedId: NodeID | null
 let $rootId: NodeID
 let $onComputationUpdate: ComputationUpdateHandler
-let $gatherComponents: boolean
 let $components: Mapped.ResolvedComponent[] = []
 let $inspectedOwner: Solid.Owner | null
 
@@ -62,10 +61,8 @@ function mapOwner(owner: Solid.Owner): Mapped.Owner {
       return mapped
     }
 
-    if ($gatherComponents) {
-      const element = resolveElements(owner.value)
-      if (element) $components.push({ id, name: name!, element })
-    }
+    const element = resolveElements(owner.value)
+    if (element) $components.push({ id, name: name!, element })
 
     // Refresh
     // omitting refresh memo — map it's children instead
@@ -129,7 +126,6 @@ export function walkSolidTree(
   $inspectedId = config.inspectedId
   $rootId = config.rootId
   $onComputationUpdate = config.onComputationUpdate
-  $gatherComponents = !!config.gatherComponents
   $inspectedOwner = null
   // components is an array instead of an object to preserve the order (nesting) of the components,
   // this helps the locator find the most nested component first

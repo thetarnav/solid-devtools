@@ -7,9 +7,8 @@ export {
   Debugger,
   attachDebugger,
   useDebugger,
+  useLocator,
   makeSolidUpdateListener,
 } from '@solid-devtools/debugger'
-export type { PluginData } from '@solid-devtools/debugger'
 
-export { useLocator } from '@solid-devtools/locator'
-export type { LocatorOptions, TargetIDE, TargetURLFunction } from '@solid-devtools/locator'
+export type { LocatorOptions, TargetIDE, TargetURLFunction } from '@solid-devtools/debugger'

@@ -11,12 +11,10 @@ export default defineConfig({
       // used inside packages/debugger
       '@shared': path.resolve(pathToPackages, 'shared'),
       '@ui': path.resolve(pathToPackages, 'ui', 'src'),
-      '@solid-devtools/locator': path.resolve(pathToPackages, 'locator', 'src'),
       '@solid-devtools/ext-adapter': path.resolve(pathToPackages, 'ext-adapter', 'src'),
     },
   },
   build: {
     target: 'esnext',
-    polyfillDynamicImport: false,
   },
 })

@@ -3,7 +3,7 @@ import { LOCATION_ATTRIBUTE_NAME } from '@solid-devtools/shared/variables'
 import { isWindows } from '@solid-primitives/platform'
 import { ElementLocation } from './goToSource'
 
-export type HoveredComponent = {
+export type LocatorComponent = {
   id: NodeID
   rootId: NodeID
   name: string
@@ -28,7 +28,7 @@ export function getLocationFromElement(element: Element): ElementLocation | null
   return locAttr ? getLocationFromAttribute(locAttr) : null
 }
 
-const findComponentCache = new Map<HTMLElement, HoveredComponent | null>()
+const findComponentCache = new Map<HTMLElement, LocatorComponent | null>()
 
 // for comparison — clear cache when component map changes
 let prevCompMap: Record<NodeID, Mapped.ResolvedComponent[]> = {}
@@ -42,10 +42,10 @@ let prevCompMap: Record<NodeID, Mapped.ResolvedComponent[]> = {}
  * @param target HTMLElement to find the component for
  * @returns A SelectedComponent or null if no component was found. Selected component contains also a source code location property.
  */
-export function findComponent(
+export function findLocatorComponent(
   compMap: Record<NodeID, Mapped.ResolvedComponent[]>,
   target: HTMLElement,
-): HoveredComponent | null {
+): LocatorComponent | null {
   if (prevCompMap !== compMap) {
     findComponentCache.clear()
     prevCompMap = compMap

@@ -1,11 +1,10 @@
-import { batch, createSelector, createSignal } from 'solid-js'
+import { batch, createEffect, createSelector, createSignal } from 'solid-js'
 import { createStore, produce } from 'solid-js/store'
 import { Writable } from 'type-fest'
 import { createSimpleEmitter } from '@solid-primitives/event-bus'
 import { Mapped, NodeID, NodeType } from '@solid-devtools/shared/graph'
 import { EncodedValue } from '@solid-devtools/shared/serialize'
-import { Messages } from '@solid-devtools/shared/bridge'
-import { untrackedCallback } from '@solid-devtools/shared/primitives'
+import { defer, untrackedCallback } from '@solid-devtools/shared/primitives'
 import type { Structure } from '../structure'
 
 export namespace Inspector {
@@ -154,29 +153,28 @@ export default function createInspector({
 
   const isNodeInspected = createSelector<NodeID | null, NodeID>(() => inspectedNode()?.id ?? null)
 
-  const setInspected: (data: Structure.Node | null | Messages['ClientInspectedNode']) => void =
-    untrackedCallback(data => {
-      batch(() => {
-        if (!data) {
-          setInspectedNode(null)
-          setDetails({ value: null })
-          return
-        }
+  const setInspected: (data: Structure.Node | null | NodeID) => void = untrackedCallback(data => {
+    batch(() => {
+      if (data === null) {
+        setInspectedNode(null)
+        setDetails({ value: null })
+        return
+      }
 
-        const currentNode = inspectedNode()
-        if (typeof data === 'object') {
-          if (currentNode && data.id === currentNode.id) return
-          setInspectedNode(data)
-          setDetails({ value: null })
-        } else {
-          if (currentNode && data === currentNode.id) return
-          const node = findNode(data)
-          if (!node) return
-          setInspectedNode(node)
-          setDetails({ value: null })
-        }
-      })
+      const currentNode = inspectedNode()
+      if (typeof data === 'object') {
+        if (currentNode && data.id === currentNode.id) return
+        setInspectedNode(data)
+        setDetails({ value: null })
+      } else {
+        if (currentNode && data === currentNode.id) return
+        const node = findNode(data)
+        if (!node) return
+        setInspectedNode(node)
+        setDetails({ value: null })
+      }
     })
+  })
 
   // clear the inspector when the inspected node is removed
   const handleStructureChange = untrackedCallback(() => {
@@ -227,20 +225,29 @@ export default function createInspector({
   })
 
   /** variable for a callback in bridge.ts */
-  let onInspectValue: ((payload: Messages['ToggleInspectedValue']) => void) | undefined
-  const setOnInspectValue = (fn: typeof onInspectValue) => (onInspectValue = fn)
+  let onInspectedHandler:
+    | ((
+        payload:
+          | { type: 'node'; data: Structure.Node | null }
+          | { type: 'signal' | 'prop'; data: { id: NodeID; selected: boolean } }
+          | { type: 'value'; data: boolean },
+      ) => void)
+    | undefined
+  const setOnInspectedHandler = (fn: typeof onInspectedHandler) => (onInspectedHandler = fn)
+
+  createEffect(defer(inspectedNode, node => onInspectedHandler?.({ type: 'node', data: node })))
 
   function togglePropSelection(id: string, selected?: boolean): void {
     setDetails('value', 'props', 'record', id, 'selected', p => (selected = selected ?? !p))
-    onInspectValue!({ type: 'prop', id, selected: selected! })
+    onInspectedHandler!({ type: 'prop', data: { id, selected: selected! } })
   }
   function toggleSignalSelection(id: NodeID, selected?: boolean) {
     setDetails('value', 'signals', id, 'selected', p => (selected = selected ?? !p))
-    onInspectValue!({ type: 'signal', id, selected: selected! })
+    onInspectedHandler!({ type: 'signal', data: { id, selected: selected! } })
   }
   function toggleValueSelection(selected?: boolean) {
     setDetails('value', 'valueSelected', p => (selected = selected ?? !p))
-    onInspectValue!({ type: 'value', selected: selected! })
+    onInspectedHandler!({ type: 'value', data: selected! })
   }
 
   //
@@ -265,9 +272,10 @@ export default function createInspector({
     toggleSignalSelection,
     toggleValueSelection,
     togglePropSelection,
-    setOnInspectValue,
+    onInspectedHandler,
     hoveredElement,
     toggleHoveredElement,
     handleStructureChange,
+    setOnInspectedHandler,
   }
 }
