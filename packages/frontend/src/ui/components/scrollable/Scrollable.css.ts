@@ -6,6 +6,7 @@ const containerBase = style({
   width: '100%',
   position: 'relative',
   overflow: ['auto', 'overlay'],
+  overscrollBehavior: 'none',
   '::-webkit-scrollbar': {
     display: 'block',
     width: spacing[4],
