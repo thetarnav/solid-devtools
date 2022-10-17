@@ -1,5 +1,4 @@
 import { createEffect, createSignal, on, onCleanup } from 'solid-js'
-import { createMediaQuery } from '@solid-primitives/media'
 import { createInternalRoot, enableRootsAutoattach, useDebugger } from '@solid-devtools/debugger'
 import * as locator from '@solid-devtools/locator'
 import { Controller } from '@solid-devtools/frontend'
