@@ -19,6 +19,7 @@ import { OwnerPath } from './Path'
 import { getVirtualVars } from './virtual'
 import * as styles from './structure.css'
 import { useController } from '@/controller'
+import { createResizeObserver } from '@solid-primitives/resize-observer'
 
 export default function StructureView() {
   const { inspectedDetails } = useController()
@@ -47,7 +48,6 @@ const DisplayStructureTree: Component = props => {
   const [containerScroll, setContainerScroll] = createSignal({ top: 0, height: 0 })
 
   const remSize = useRemSize()
-
   const getContainerTopMargin = () => remSize() * styles.V_MARGIN_IN_REM
   const getRowHeight = () => remSize() * styles.ROW_HEIGHT_IN_REM
 
@@ -155,6 +155,7 @@ const DisplayStructureTree: Component = props => {
       ref={el => {
         container = el
         setTimeout(() => updateScrollData(el))
+        createResizeObserver(el, (_, el) => updateScrollData(el))
       }}
       onScroll={e => updateScrollData(e.currentTarget)}
     >
