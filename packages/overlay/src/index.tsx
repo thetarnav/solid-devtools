@@ -1,4 +1,4 @@
-import { createRenderEffect, onMount, Component, createSignal, onCleanup, Show } from 'solid-js'
+import { createComputed, onMount, Component, createSignal, onCleanup, Show } from 'solid-js'
 import { Dynamic, Portal } from 'solid-js/web'
 import { makeEventListener } from '@solid-primitives/event-listener'
 import { clamp } from '@solid-primitives/utils'
