@@ -1,4 +1,4 @@
-import { Many } from '@solid-primitives/utils'
+import { asArray, Many } from '@solid-primitives/utils'
 import { StyleRule } from '@vanilla-extract/css'
 import type { CSSPropertiesWithVars } from '@vanilla-extract/css/dist/declarations/src/types'
 import { clsx } from 'clsx'
@@ -70,6 +70,25 @@ export const transition = (
   transitionTimingFunction: easing,
 })
 
-export const media = (rule: string, styles: StyleRule) => ({ '@media': { [rule]: styles } })
-export const dark = (styles: StyleRule) => media('screen and (prefers-color-scheme: dark)', styles)
-export const mobile = (styles: StyleRule) => media('screen and (max-width: 640px)', styles)
+export const media = (
+  rules: Many<({ rule: Many<string> } & StyleRule) | Record<string, StyleRule>>,
+): {
+  '@media': Record<string, StyleRule>
+} => {
+  const media: Record<string, StyleRule> = {}
+  for (const obj of asArray(rules)) {
+    if ('rule' in obj) {
+      const { rule, ...styles } = obj
+      const calcRule = ['screen', ...asArray(rule)].join(' and ')
+      media[calcRule] = styles
+    } else {
+      for (const [rule, styles] of Object.entries(obj)) {
+        media[`screen and ${rule}`] = styles
+      }
+    }
+  }
+  return { '@media': media }
+}
+export const dark = '(prefers-color-scheme: dark)'
+export const mobile = '(max-width: 640px)'
+export const touch = '(hover: none)'

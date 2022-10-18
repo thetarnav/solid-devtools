@@ -6,7 +6,7 @@ import { createBodyCursor } from '@solid-primitives/cursor'
 import { Devtools, Icon } from '@solid-devtools/frontend'
 import { createInternalRoot } from '@solid-devtools/debugger'
 import { createController, enabled, setEnabled } from './controller'
-import { createMediaQuery } from '@solid-primitives/media'
+import { useIsMobile, useIsTouch } from '@solid-devtools/shared/primitives'
 
 import frontendStyles from '@solid-devtools/frontend/dist/index.css'
 import overlayStyles from './styles.css'
@@ -17,6 +17,7 @@ interface Props {
 
 export const DevtoolsOverlay: Component<Props> = props => {
   let dispose: VoidFunction | undefined
+  // TODO: figure out why this needs to be called in onMount
   onMount(() => props.defaultOpen && setEnabled(true))
   onCleanup(() => {
     setEnabled(false)
@@ -34,7 +35,9 @@ export const DevtoolsOverlay: Component<Props> = props => {
 }
 
 const Overlay: Component = props => {
-  const isMobile = createMediaQuery('(max-width: 640px)')
+  const isMobile = useIsMobile()
+  const isTouch = useIsTouch()
+
   const [progress, setProgress] = createSignal(0.5)
   const [dragging, setDragging] = createSignal(false)
   createComputed(() => setProgress(isMobile() ? 0.8 : 0.5))
@@ -59,13 +62,15 @@ const Overlay: Component = props => {
               class="overlay__toggle-button__icon"
             />
           </button>
-          <div
-            class="overlay__container__resizer"
-            onPointerDown={e => {
-              e.preventDefault()
-              setDragging(true)
-            }}
-          />
+          <Show when={!isMobile() && !isTouch()}>
+            <div
+              class="overlay__container__resizer"
+              onPointerDown={e => {
+                e.preventDefault()
+                setDragging(true)
+              }}
+            />
+          </Show>
           <div class="overlay__container__inner">
             <Show when={enabled()}>
               {() => {

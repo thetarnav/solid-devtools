@@ -1,6 +1,6 @@
 import { style, styleVariants } from '@vanilla-extract/css'
 import { CSSPropertiesWithVars } from '@vanilla-extract/css/dist/declarations/src/types'
-import { dark, color, spacing, theme } from '@/ui/theme'
+import { dark, color, spacing, theme, media } from '@/ui/theme'
 import { createHighlightStyles } from '@/ui/mixins'
 
 const RowHeight = spacing[4.5]
@@ -63,9 +63,11 @@ const ValueName_name_base = style({
     content: ':',
     color: color.gray[500],
   },
-  ...dark({
-    ':after': {
-      color: color.gray[500],
+  ...media({
+    [dark]: {
+      ':after': {
+        color: color.gray[500],
+      },
     },
   }),
 })
@@ -85,8 +87,10 @@ export const ValueName = {
     width: spacing[3],
     color: color.gray[600],
     marginRight: spacing[1],
-    ...dark({
-      color: color.gray[400],
+    ...media({
+      [dark]: {
+        color: color.gray[400],
+      },
     }),
   }),
   name: styleVariants({
@@ -96,8 +100,10 @@ export const ValueName = {
         fontWeight: 600,
         fontFamily: theme.font.mono,
         color: color.gray[800],
-        ...dark({
-          color: color.gray[200],
+        ...media({
+          [dark]: {
+            color: color.gray[200],
+          },
         }),
       },
     ],
@@ -105,8 +111,10 @@ export const ValueName = {
       ValueName_name_base,
       {
         color: color.gray[500],
-        ...dark({
-          color: color.gray[300],
+        ...media({
+          [dark]: {
+            color: color.gray[300],
+          },
         }),
       },
     ],
@@ -120,8 +128,10 @@ export const baseValue = style({
   fontWeight: 600,
   height: RowHeight,
   color: color.gray[800],
-  ...dark({
-    color: color.gray[200],
+  ...media({
+    [dark]: {
+      color: color.gray[200],
+    },
   }),
 })
 
@@ -156,8 +166,10 @@ export const ValueString = style([
   {
     minHeight: RowHeight,
     color: color.green,
-    ...dark({
-      color: color.green,
+    ...media({
+      [dark]: {
+        color: color.green,
+      },
     }),
   },
 ])
@@ -166,8 +178,10 @@ export const ValueNumber = style([
   {
     minHeight: RowHeight,
     color: color.cyan[600],
-    ...dark({
-      color: color.green,
+    ...media({
+      [dark]: {
+        color: color.green,
+      },
     }),
   },
 ])
@@ -200,8 +214,10 @@ export const ValueElement = {
     elHighlight.container,
     {
       color: color.amber[600],
-      ...dark({
-        color: color.amber[600],
+      ...media({
+        [dark]: {
+          color: color.amber[600],
+        },
       }),
       textTransform: 'lowercase',
       vars: {

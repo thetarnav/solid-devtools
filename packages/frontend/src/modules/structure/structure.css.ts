@@ -1,4 +1,4 @@
-import { color, dark, insetX, spacing } from '@/ui/theme'
+import { color, dark, insetX, media, spacing } from '@/ui/theme'
 import { createVar, style } from '@vanilla-extract/css'
 
 export const ROW_HEIGHT_IN_REM = 1.25
@@ -42,7 +42,9 @@ export const pathInner = style({
   padding: `${spacing[0.5]} ${spacing[2]} calc(${spacing[0.5]} + 1px) ${spacing[2]}`,
   borderTop: `1px solid ${color.gray[200]}`,
   backgroundColor: color.gray[50],
-  ...dark({
-    backgroundColor: color.gray[800],
+  ...media({
+    [dark]: {
+      backgroundColor: color.gray[800],
+    },
   }),
 })

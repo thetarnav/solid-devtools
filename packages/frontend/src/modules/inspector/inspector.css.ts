@@ -1,4 +1,4 @@
-import { dark, spacing, color } from '@/ui/theme'
+import { dark, spacing, color, media } from '@/ui/theme'
 import { style } from '@vanilla-extract/css'
 
 export const scrollWrapper = style({
@@ -21,8 +21,10 @@ export const h1 = style({
   fontSize: spacing[4],
   fontWeight: 'bold',
   color: color.black,
-  ...dark({
-    color: color.gray[50],
+  ...media({
+    [dark]: {
+      color: color.gray[50],
+    },
   }),
 })
 export const id = style({
@@ -34,8 +36,10 @@ export const id = style({
 export const type = style({
   fontWeight: 400,
   color: color.gray[500],
-  ...dark({
-    color: color.gray[300],
+  ...media({
+    [dark]: {
+      color: color.gray[300],
+    },
   }),
 })
 
@@ -48,7 +52,9 @@ export const content = style({
 export const h2 = style({
   color: color.gray[500],
   marginBottom: spacing[1],
-  ...dark({
-    color: color.gray[300],
+  ...media({
+    [dark]: {
+      color: color.gray[300],
+    },
   }),
 })

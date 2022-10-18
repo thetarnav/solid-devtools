@@ -56,7 +56,7 @@ export const OwnerNode: Component<{
       data-frozen={props.owner.frozen}
       class={styles.container}
       onClick={e => onInspectChange(!props.isSelected)}
-      {...createHover(hovering => onHoverChange(hovering))}
+      {...createHover(onHoverChange)}
       style={assignInlineVars({ [styles.levelVar]: props.owner.level + '' })}
     >
       <div class={styles.selection}></div>
