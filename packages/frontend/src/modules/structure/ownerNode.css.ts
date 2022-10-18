@@ -3,9 +3,11 @@ import { CSSVarFunction } from '@vanilla-extract/private'
 import {
   centerChild,
   color,
+  dark,
   inset,
   insetX,
   insetY,
+  media,
   rounded,
   spacing,
   theme,
@@ -100,6 +102,18 @@ export const collapse = style({
       opacity: 1,
     },
   },
+  ...media({
+    [dark]: {
+      ':before': {
+        backgroundColor: color.gray[800],
+      },
+      selectors: {
+        '&:hover:before': {
+          backgroundColor: color.gray[700],
+        },
+      },
+    },
+  }),
 })
 export const collapseIcon = style({
   width: spacing[2],
@@ -114,6 +128,11 @@ export const collapseIcon = style({
       opacity: 1,
     },
   },
+  ...media({
+    [dark]: {
+      color: color.gray[400],
+    },
+  }),
 })
 
 const strikeThroughLine: CSSPropertiesWithVars = {
@@ -140,20 +159,46 @@ export const name = style({
     },
     [`${container}[data-frozen="true"] &:after`]: strikeThroughLine,
   },
+  color: color.black,
+  ...media({
+    [dark]: {
+      color: color.gray[50],
+      selectors: {
+        [`${container}[data-frozen="true"] &`]: {
+          color: color.gray[500],
+        },
+      },
+    },
+  }),
 })
 export const typeIcon = style({
   width: spacing[3],
   height: spacing[3],
-  color: color.gray[600],
   marginRight: spacing[1],
+  color: color.gray[600],
+  ...media({
+    [dark]: {
+      color: color.gray[100],
+    },
+  }),
 })
 
 export const type = style({
   fontSize: 10,
-  color: color.gray[500],
   userSelect: 'none',
   paddingBottom: '0.0625rem',
   selectors: {
     [`${container}[data-frozen="true"] &:after`]: strikeThroughLine,
   },
+  color: color.gray[500],
+  ...media({
+    [dark]: {
+      color: color.gray[400],
+      selectors: {
+        [`${container}[data-frozen="true"] &`]: {
+          color: color.gray[500],
+        },
+      },
+    },
+  }),
 })
