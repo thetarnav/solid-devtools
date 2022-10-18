@@ -1,5 +1,12 @@
 # solid-devtools-extension
 
+## 0.15.3
+
+### Patch Changes
+
+- Updated dependencies [aa9f0bb]
+  - @solid-devtools/frontend@0.0.5
+
 ## 0.15.2
 
 ### Patch Changes
