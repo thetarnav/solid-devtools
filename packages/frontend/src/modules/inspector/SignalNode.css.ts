@@ -1,6 +1,6 @@
 import { style, styleVariants } from '@vanilla-extract/css'
 import { CSSPropertiesWithVars } from '@vanilla-extract/css/dist/declarations/src/types'
-import { color, spacing, theme } from '@/ui/theme'
+import { dark, color, spacing, theme } from '@/ui/theme'
 import { createHighlightStyles } from '@/ui/mixins'
 
 const RowHeight = spacing[4.5]
@@ -61,8 +61,13 @@ const ValueName_name_base = style({
   marginRight: '2ch',
   ':after': {
     content: ':',
-    color: color.disabled,
+    color: color.gray[500],
   },
+  ...dark({
+    ':after': {
+      color: color.gray[500],
+    },
+  }),
 })
 export const ValueName = {
   container: styleVariants({
@@ -80,20 +85,29 @@ export const ValueName = {
     width: spacing[3],
     color: color.gray[600],
     marginRight: spacing[1],
+    ...dark({
+      color: color.gray[400],
+    }),
   }),
   name: styleVariants({
     base: [
       ValueName_name_base,
       {
-        color: color.gray[800],
         fontWeight: 600,
         fontFamily: theme.font.mono,
+        color: color.gray[800],
+        ...dark({
+          color: color.gray[200],
+        }),
       },
     ],
     title: [
       ValueName_name_base,
       {
         color: color.gray[500],
+        ...dark({
+          color: color.gray[300],
+        }),
       },
     ],
   }),
@@ -105,6 +119,10 @@ export const ValueName = {
 export const baseValue = style({
   fontWeight: 600,
   height: RowHeight,
+  color: color.gray[800],
+  ...dark({
+    color: color.gray[200],
+  }),
 })
 
 const bracketsStyles: CSSPropertiesWithVars = {
@@ -138,6 +156,9 @@ export const ValueString = style([
   {
     minHeight: RowHeight,
     color: color.green,
+    ...dark({
+      color: color.green,
+    }),
   },
 ])
 export const ValueNumber = style([
@@ -145,6 +166,9 @@ export const ValueNumber = style([
   {
     minHeight: RowHeight,
     color: color.cyan[600],
+    ...dark({
+      color: color.green,
+    }),
   },
 ])
 export const ValueBoolean = style([
@@ -176,6 +200,9 @@ export const ValueElement = {
     elHighlight.container,
     {
       color: color.amber[600],
+      ...dark({
+        color: color.amber[600],
+      }),
       textTransform: 'lowercase',
       vars: {
         [elHighlight.bgColorVar]: color.gray[300],

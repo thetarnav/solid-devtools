@@ -1,4 +1,5 @@
 import { Many } from '@solid-primitives/utils'
+import { StyleRule } from '@vanilla-extract/css'
 import type { CSSPropertiesWithVars } from '@vanilla-extract/css/dist/declarations/src/types'
 import { clsx } from 'clsx'
 import { Property } from 'csstype'
@@ -68,3 +69,7 @@ export const transition = (
   transitionDelay: delay,
   transitionTimingFunction: easing,
 })
+
+export const media = (rule: string, styles: StyleRule) => ({ '@media': { [rule]: styles } })
+export const dark = (styles: StyleRule) => media('screen and (prefers-color-scheme: dark)', styles)
+export const mobile = (styles: StyleRule) => media('screen and (max-width: 640px)', styles)

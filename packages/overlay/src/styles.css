@@ -1,11 +1,7 @@
 .overlay__container {
   --height: calc(var(--progress) * 100vh);
 }
-@media screen and (max-width: 640px) {
-  .overlay__container {
-    display: none;
-  }
-}
+
 .overlay__container[data-open='true'] {
   height: var(--height);
 }
@@ -82,4 +78,10 @@
 .overlay__toggle-button__icon {
   width: 0.9rem;
   height: 0.9rem;
+}
+
+@media (prefers-color-scheme: dark) {
+  .overlay__container__resizer {
+    background-color: #2a2a2a;
+  }
 }

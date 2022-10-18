@@ -226,6 +226,7 @@ importers:
       '@solid-primitives/event-listener': ^2.2.2
       '@solid-primitives/keyboard': ^1.0.2
       '@solid-primitives/keyed': ^1.1.2
+      '@solid-primitives/media': ^2.0.2
       '@solid-primitives/props': ^2.2.2
       '@solid-primitives/range': ^0.1.2
       '@solid-primitives/resize-observer': ^2.0.4
@@ -259,6 +260,7 @@ importers:
       '@solid-primitives/event-listener': 2.2.2_solid-js@1.5.7
       '@solid-primitives/keyboard': 1.0.2_solid-js@1.5.7
       '@solid-primitives/keyed': 1.1.2_solid-js@1.5.7
+      '@solid-primitives/media': 2.0.2_solid-js@1.5.7
       '@solid-primitives/props': 2.2.2_solid-js@1.5.7
       '@solid-primitives/range': 0.1.2_solid-js@1.5.7
       '@solid-primitives/resize-observer': 2.0.4_solid-js@1.5.7

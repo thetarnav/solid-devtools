@@ -85,7 +85,7 @@ const App: Component<{ headerSubtitle?: JSX.Element }> = props => {
       <header class={styles.header}>
         <SelectComponent />
         <div>
-          <h3>Welcome to Solid Devtools</h3>
+          <h3 class={styles.h3}>Welcome to Solid Devtools</h3>
           {props.headerSubtitle && <p>{props.headerSubtitle}</p>}
         </div>
         <Options />

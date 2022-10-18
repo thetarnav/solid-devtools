@@ -1,5 +1,4 @@
 import { createEffect, createSignal, on, onCleanup } from 'solid-js'
-import { createMediaQuery } from '@solid-primitives/media'
 import { createInternalRoot, enableRootsAutoattach, useDebugger } from '@solid-devtools/debugger'
 import * as locator from '@solid-devtools/locator'
 import { Controller } from '@solid-devtools/frontend'
@@ -7,9 +6,7 @@ import { Messages } from '@solid-devtools/shared/bridge'
 
 const { setEnabled, enabled, debuggerData } = createInternalRoot(() => {
   const [userEnabled, setEnabled] = createSignal(false)
-  // the devtools overlay isn't supporting mobile devices at the moment
-  const isMobile = createMediaQuery('(max-width: 640px)')
-  const enabled = () => userEnabled() && !isMobile()
+  const enabled = () => userEnabled()
 
   const debuggerData = useDebugger({ enabled: enabled })
 
