@@ -1,5 +1,18 @@
 # @solid-devtools/overlay
 
+## 0.0.4
+
+### Patch Changes
+
+- 95aaad9: Make mobile work and add dark mode
+
+  Add `defaultOpen` prop to overlay
+
+  Recalculate the tree view on container resize
+
+- Updated dependencies [95aaad9]
+  - @solid-devtools/frontend@0.0.4
+
 ## 0.0.3
 
 ### Patch Changes
