@@ -21,6 +21,9 @@ export const levelVar: CSSVarFunction = createVar()
 
 const rowHeight = `${ROW_HEIGHT_IN_REM}rem`
 
+const dataHovered = '[data-hovered="true"]'
+const dataSelected = '[data-selected="true"]'
+
 export const container = style({
   height: rowHeight,
   position: 'relative',
@@ -42,10 +45,10 @@ export const selection = style({
   opacity: 0,
   ...transition(['opacity'], theme.duration[100]),
   selectors: {
-    [`${container}[data-hovered="true"] &`]: {
+    [`${container}${dataHovered} &`]: {
       opacity: 0.2,
     },
-    [`${container}[data-selected="true"] &`]: {
+    [`${container}${dataSelected} &`]: {
       opacity: 0.4,
     },
   },
@@ -92,13 +95,13 @@ export const collapse = style({
     ...transition('background-color'),
   },
   selectors: {
-    [`${container}[data-hovered="true"] &`]: {
+    [`${container}:is(${dataHovered}, ${dataSelected}) &`]: {
       opacity: 1,
     },
     '&:hover:before': {
       backgroundColor: color.gray[200],
     },
-    '&[aria-selected="true"]': {
+    [`&${dataSelected}`]: {
       opacity: 1,
     },
   },
