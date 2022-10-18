@@ -1,4 +1,4 @@
-import { children, createEffect, createSignal, JSX, Show } from 'solid-js'
+import { createComputed, children, createEffect, createSignal, JSX, Show } from 'solid-js'
 import { makeEventListener } from '@solid-primitives/event-listener'
 import { clamp } from '@solid-primitives/utils'
 import { useWindowSize } from '@solid-primitives/resize-observer'
@@ -30,6 +30,7 @@ export function Splitter(props: {
 
   const isMobile = createMediaQuery('(max-width: 640px)')
   const isTouch = createMediaQuery('(hover: none)')
+  createComputed(() => setProgress(isTouch() ? 0.5 : 0.6))
 
   const onPointerDown = (e: PointerEvent) => {
     e.preventDefault()
