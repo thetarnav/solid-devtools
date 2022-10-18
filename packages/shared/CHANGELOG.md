@@ -1,5 +1,11 @@
 # solid-devtools-shared
 
+## 0.9.1
+
+### Patch Changes
+
+- e400eb6: Improve createHover primitive for mobile.
+
 ## 0.9.0
 
 ### Minor Changes
