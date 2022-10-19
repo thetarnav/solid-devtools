@@ -1,6 +1,7 @@
 import { style, createVar } from '@vanilla-extract/css'
 import { CSSVarFunction } from '@vanilla-extract/private'
-import { mobile, centerChild, color, spacing, transition, media } from '@/ui/theme'
+import { mobile, centerChild, color, spacing, transition, media, dark } from '@/ui/theme'
+import { panelBorderBg } from '@/ui/theme/vars.css'
 
 const minWidth = spacing[36]
 const minHeight = spacing[12]
@@ -42,7 +43,7 @@ export const mainContent = style({
 
 export const split = style({
   position: 'relative',
-  backgroundColor: color.gray[400],
+  backgroundColor: panelBorderBg,
 })
 
 export const splitHandle = style({
@@ -81,6 +82,9 @@ export const toggle = style({
       width: spacing[6],
       height: spacing[6],
       right: spacing[3],
+    },
+    [dark]: {
+      backgroundColor: color.gray[600],
     },
   }),
 })
