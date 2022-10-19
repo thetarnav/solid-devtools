@@ -1,4 +1,4 @@
-import { describe, it, expect } from '@jest/globals'
+import { describe, it, expect } from 'vitest'
 import * as API from '../src/index'
 import * as noopAPI from '../src/server'
 

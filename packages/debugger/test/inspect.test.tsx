@@ -1,4 +1,4 @@
-import { describe, beforeEach, jest, it, expect } from '@jest/globals'
+import { describe, beforeEach, vi, it, expect } from 'vitest'
 import { getOwner, NodeType, Solid } from '@solid-devtools/shared/graph'
 import { ValueType } from '@solid-devtools/shared/serialize'
 import {
@@ -11,18 +11,19 @@ import {
 } from 'solid-js'
 import type * as API from '../src/inspect'
 
-const getModule = (): typeof API.collectOwnerDetails =>
-  require('../src/inspect').collectOwnerDetails
+const getModule = async (): Promise<typeof API.collectOwnerDetails> =>
+  (await import('../src/inspect')).collectOwnerDetails
 
 describe('collectOwnerDetails', () => {
   beforeEach(() => {
     delete (window as any).Solid$$
-    jest.resetModules()
+    vi.resetModules()
   })
 
-  it('collects focused owner details', () =>
+  it('collects focused owner details', async () => {
+    const collectOwnerDetails = await getModule()
+
     createRoot(dispose => {
-      const collectOwnerDetails = getModule()
       const [s] = createSignal(0, { name: 'source' })
 
       let owner!: Solid.Owner
@@ -87,10 +88,11 @@ describe('collectOwnerDetails', () => {
       expect(elementMap.get('0')).toBe(div)
 
       dispose()
-    }))
+    })
+  })
 
-  it('component props', () => {
-    const collectOwnerDetails = getModule()
+  it('component props', async () => {
+    const collectOwnerDetails = await getModule()
 
     createRoot(dispose => {
       let owner!: Solid.Owner
@@ -121,7 +123,7 @@ describe('collectOwnerDetails', () => {
         type: NodeType.Component,
         signals: [],
         sources: [],
-        value: { type: ValueType.Element, value: { id: '0', name: 'DIV' } },
+        value: { type: ValueType.Element, value: { id: '1', name: 'DIV' } },
         props: {
           proxy: false,
           record: {
@@ -132,14 +134,14 @@ describe('collectOwnerDetails', () => {
         },
       })
 
-      expect(elementMap.get('0')).toBeInstanceOf(HTMLDivElement)
+      expect(elementMap.get('1')).toBeInstanceOf(HTMLDivElement)
     })
   })
 
-  it('dynamic component props', () =>
-    createRoot(dispose => {
-      const collectOwnerDetails = getModule()
+  it('dynamic component props', async () => {
+    const collectOwnerDetails = await getModule()
 
+    createRoot(dispose => {
       let owner!: Solid.Owner
       const Button = (props: JSX.ButtonHTMLAttributes<HTMLButtonElement>) => {
         owner = getOwner()!
@@ -161,10 +163,10 @@ describe('collectOwnerDetails', () => {
         type: NodeType.Component,
         signals: [],
         sources: [],
-        value: { type: ValueType.Element, value: { id: '0', name: 'BUTTON' } },
+        value: { type: ValueType.Element, value: { id: '2', name: 'BUTTON' } },
         props: {
           // ! this should be true, don't know what's the reason. it's working in the browser
-          proxy: false,
+          proxy: true,
           record: {
             onClick: { type: ValueType.Getter, value: 'onClick' },
             role: { type: ValueType.Getter, value: 'role' },
@@ -172,10 +174,11 @@ describe('collectOwnerDetails', () => {
         },
       })
 
-      expect(elementMap.get('0')).toBeInstanceOf(HTMLButtonElement)
+      expect(elementMap.get('2')).toBeInstanceOf(HTMLButtonElement)
 
       dispose()
-    }))
+    })
+  })
 
   // * collectOwnerDetails doesn't allow for inspected props now
   // test("inspected component props", () => {
@@ -234,8 +237,8 @@ describe('collectOwnerDetails', () => {
   //   })
   // })
 
-  it('listens to value updates', () => {
-    const collectOwnerDetails = getModule()
+  it('listens to value updates', async () => {
+    const collectOwnerDetails = await getModule()
 
     createRoot(dispose => {
       let owner!: Solid.Owner
@@ -246,7 +249,7 @@ describe('collectOwnerDetails', () => {
         return count()
       })
 
-      const onValueUpdate = jest.fn()
+      const onValueUpdate = vi.fn()
       collectOwnerDetails(owner, {
         onSignalUpdate: () => {},
         onValueUpdate: onValueUpdate,
@@ -269,15 +272,15 @@ describe('collectOwnerDetails', () => {
     })
   })
 
-  it('listens to signal updates', () => {
-    const collectOwnerDetails = getModule()
+  it('listens to signal updates', async () => {
+    const collectOwnerDetails = await getModule()
 
     createRoot(dispose => {
       let owner = getOwner()!
       const [, setCount] = createSignal(0) // id: "0"
       const [, setCount2] = createSignal(0) // id: "1"
 
-      const onSignalUpdate = jest.fn()
+      const onSignalUpdate = vi.fn()
       collectOwnerDetails(owner, {
         onSignalUpdate: onSignalUpdate,
         onValueUpdate: () => {},

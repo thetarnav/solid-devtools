@@ -1,2 +1,2 @@
-import config from '../../configs/vitest.config'
-export default config
+import { vitestFullConfig } from '../../configs/vitest.config'
+export default vitestFullConfig
