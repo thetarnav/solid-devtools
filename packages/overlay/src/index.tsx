@@ -1,4 +1,4 @@
-import { Component, createSignal, onCleanup, Show } from 'solid-js'
+import { createComputed, onMount, Component, createSignal, onCleanup, Show } from 'solid-js'
 import { Dynamic, Portal } from 'solid-js/web'
 import { makeEventListener } from '@solid-primitives/event-listener'
 import { clamp } from '@solid-primitives/utils'
@@ -6,13 +6,23 @@ import { createBodyCursor } from '@solid-primitives/cursor'
 import { Devtools, Icon } from '@solid-devtools/frontend'
 import { createInternalRoot, useDebugger } from '@solid-devtools/debugger'
 import { createController } from './controller'
+import { useIsMobile, useIsTouch } from '@solid-devtools/shared/primitives'
 
 import frontendStyles from '@solid-devtools/frontend/dist/index.css'
 import overlayStyles from './styles.css'
 
-export const DevtoolsOverlay: Component = props => {
+interface Props {
+  defaultOpen?: boolean
+}
+
+export const DevtoolsOverlay: Component<Props> = props => {
   let dispose: VoidFunction | undefined
   onCleanup(() => dispose?.())
+
+  const debug = useDebugger()
+
+  // TODO: figure out why this needs to be called in onMount
+  props.defaultOpen && onMount(() => debug.toggleEnabled(true))
 
   setTimeout(() => {
     createInternalRoot(_dispose => {
@@ -29,8 +39,12 @@ const Overlay: Component = props => {
 
   onCleanup(() => debug.toggleEnabled(false))
 
+  const isMobile = useIsMobile()
+  const isTouch = useIsTouch()
+
   const [progress, setProgress] = createSignal(0.5)
   const [dragging, setDragging] = createSignal(false)
+  createComputed(() => setProgress(isMobile() ? 0.8 : 0.5))
 
   makeEventListener(window, 'pointermove', e => {
     if (!dragging()) return
@@ -56,13 +70,15 @@ const Overlay: Component = props => {
               class="overlay__toggle-button__icon"
             />
           </button>
-          <div
-            class="overlay__container__resizer"
-            onPointerDown={e => {
-              e.preventDefault()
-              setDragging(true)
-            }}
-          />
+          <Show when={!isMobile() && !isTouch()}>
+            <div
+              class="overlay__container__resizer"
+              onPointerDown={e => {
+                e.preventDefault()
+                setDragging(true)
+              }}
+            />
+          </Show>
           <div class="overlay__container__inner">
             <Show when={debug.enabled()}>
               {() => {

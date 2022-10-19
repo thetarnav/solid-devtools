@@ -10,21 +10,13 @@ import { Accessor, createMemo, createSignal, getOwner, onCleanup, untrack } from
 import { AnyFunction, onRootCleanup } from '@solid-primitives/utils'
 import { makeEventListener } from '@solid-primitives/event-listener'
 import { createSharedRoot } from '@solid-primitives/rootless'
-import { debounce } from '@solid-primitives/scheduled'
+import { createMediaQuery } from '@solid-primitives/media'
 
 export const untrackedCallback = <Fn extends AnyFunction>(fn: Fn): Fn =>
   ((...a: Parameters<Fn>) => untrack<ReturnType<Fn>>(fn.bind(void 0, ...a))) as any
 
-const getRemSize = () => parseFloat(getComputedStyle(document.documentElement).fontSize)
-
-function createRemSize(debounceTimout = 100): Accessor<number> {
-  const [remSize, setRemSize] = createSignal(getRemSize())
-  const update = debounce(() => setRemSize(getRemSize()), debounceTimout)
-  makeEventListener(window, 'resize', update, { passive: true })
-  return remSize
-}
-
-export const useRemSize = /*#__PURE__*/ createSharedRoot(() => createRemSize())
+export const useIsTouch = createSharedRoot(() => createMediaQuery('(hover: none)'))
+export const useIsMobile = createSharedRoot(() => createMediaQuery('(max-width: 640px)'))
 
 export function createHover(handle: (hovering: boolean) => void): {
   onMouseEnter: VoidFunction
@@ -32,13 +24,22 @@ export function createHover(handle: (hovering: boolean) => void): {
 } {
   let state = false
   let mounted = true
+  const mql = window.matchMedia('(hover: none)')
+  let isTouch = mql.matches
+  makeEventListener(mql, 'change', ({ matches }) => {
+    if ((isTouch = matches)) handle((state = false))
+  })
   onCleanup(() => {
     mounted = false
     if (state) handle((state = false))
   })
+  const onChange = (newState: boolean) => {
+    if (isTouch || !mounted) return
+    state !== newState && handle((state = newState))
+  }
   return {
-    onMouseEnter: () => state || handle((state = true)),
-    onMouseLeave: () => setTimeout(() => mounted && state && handle((state = false))),
+    onMouseEnter: () => onChange(true),
+    onMouseLeave: () => setTimeout(() => onChange(false)),
   }
 }
 

@@ -1,5 +1,21 @@
 # @solid-devtools/frontend
 
+## 0.0.5
+
+### Patch Changes
+
+- aa9f0bb: Correct styes for collapse toggle on mobile.
+
+## 0.0.4
+
+### Patch Changes
+
+- 95aaad9: Make mobile work and add dark mode
+
+  Add `defaultOpen` prop to overlay
+
+  Recalculate the tree view on container resize
+
 ## 0.0.3
 
 ### Patch Changes

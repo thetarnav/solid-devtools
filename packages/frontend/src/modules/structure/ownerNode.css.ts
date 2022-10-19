@@ -3,9 +3,11 @@ import { CSSVarFunction } from '@vanilla-extract/private'
 import {
   centerChild,
   color,
+  dark,
   inset,
   insetX,
   insetY,
+  media,
   rounded,
   spacing,
   theme,
@@ -18,6 +20,9 @@ import { CSSPropertiesWithVars } from '@vanilla-extract/css/dist/declarations/sr
 export const levelVar: CSSVarFunction = createVar()
 
 const rowHeight = `${ROW_HEIGHT_IN_REM}rem`
+
+const dataHovered = '[data-hovered="true"]'
+const dataSelected = '[data-selected="true"]'
 
 export const container = style({
   height: rowHeight,
@@ -40,10 +45,10 @@ export const selection = style({
   opacity: 0,
   ...transition(['opacity'], theme.duration[100]),
   selectors: {
-    [`${container}[data-hovered="true"] &`]: {
+    [`${container}${dataHovered} &`]: {
       opacity: 0.2,
     },
-    [`${container}[data-selected="true"] &`]: {
+    [`${container}${dataSelected} &`]: {
       opacity: 0.4,
     },
   },
@@ -90,16 +95,28 @@ export const collapse = style({
     ...transition('background-color'),
   },
   selectors: {
-    [`${container}[data-hovered="true"] &`]: {
+    [`${container}:is(${dataHovered}, ${dataSelected}) &`]: {
       opacity: 1,
     },
     '&:hover:before': {
       backgroundColor: color.gray[200],
     },
-    '&[aria-selected="true"]': {
+    [`&${dataSelected}`]: {
       opacity: 1,
     },
   },
+  ...media({
+    [dark]: {
+      ':before': {
+        backgroundColor: color.gray[800],
+      },
+      selectors: {
+        '&:hover:before': {
+          backgroundColor: color.gray[700],
+        },
+      },
+    },
+  }),
 })
 export const collapseIcon = style({
   width: spacing[2],
@@ -114,6 +131,11 @@ export const collapseIcon = style({
       opacity: 1,
     },
   },
+  ...media({
+    [dark]: {
+      color: color.gray[400],
+    },
+  }),
 })
 
 const strikeThroughLine: CSSPropertiesWithVars = {
@@ -140,20 +162,46 @@ export const name = style({
     },
     [`${container}[data-frozen="true"] &:after`]: strikeThroughLine,
   },
+  color: color.black,
+  ...media({
+    [dark]: {
+      color: color.gray[50],
+      selectors: {
+        [`${container}[data-frozen="true"] &`]: {
+          color: color.gray[500],
+        },
+      },
+    },
+  }),
 })
 export const typeIcon = style({
   width: spacing[3],
   height: spacing[3],
-  color: color.gray[600],
   marginRight: spacing[1],
+  color: color.gray[600],
+  ...media({
+    [dark]: {
+      color: color.gray[100],
+    },
+  }),
 })
 
 export const type = style({
   fontSize: 10,
-  color: color.gray[500],
   userSelect: 'none',
   paddingBottom: '0.0625rem',
   selectors: {
     [`${container}[data-frozen="true"] &:after`]: strikeThroughLine,
   },
+  color: color.gray[500],
+  ...media({
+    [dark]: {
+      color: color.gray[400],
+      selectors: {
+        [`${container}[data-frozen="true"] &`]: {
+          color: color.gray[500],
+        },
+      },
+    },
+  }),
 })

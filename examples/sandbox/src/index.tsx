@@ -14,7 +14,7 @@ export const disposeApp = render(
       <ThemeProvider>
         <App />
       </ThemeProvider>
-      <DevtoolsOverlay />
+      <DevtoolsOverlay defaultOpen={true} />
     </>
   ),
   document.getElementById('root')!,

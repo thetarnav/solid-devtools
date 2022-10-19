@@ -9,8 +9,9 @@ import {
   untrack,
 } from 'solid-js'
 import { assignInlineVars } from '@vanilla-extract/dynamic'
+import { useRemSize } from '@solid-primitives/styles'
+import { createResizeObserver } from '@solid-primitives/resize-observer'
 import { NodeID } from '@solid-devtools/shared/graph'
-import { useRemSize } from '@solid-devtools/shared/primitives'
 import type { Structure } from '.'
 import { Scrollable } from '@/ui'
 import { StructureProvider } from './ctx'
@@ -47,7 +48,6 @@ const DisplayStructureTree: Component = props => {
   const [containerScroll, setContainerScroll] = createSignal({ top: 0, height: 0 })
 
   const remSize = useRemSize()
-
   const getContainerTopMargin = () => remSize() * styles.V_MARGIN_IN_REM
   const getRowHeight = () => remSize() * styles.ROW_HEIGHT_IN_REM
 
@@ -155,6 +155,7 @@ const DisplayStructureTree: Component = props => {
       ref={el => {
         container = el
         setTimeout(() => updateScrollData(el))
+        createResizeObserver(el, () => updateScrollData(el))
       }}
       onScroll={e => updateScrollData(e.currentTarget)}
     >
