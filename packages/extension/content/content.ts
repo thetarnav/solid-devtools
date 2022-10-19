@@ -73,9 +73,7 @@ onPortMessage('PanelClosed', e => postWindowMessage('PanelClosed', e))
 
 onPortMessage('ForceUpdate', () => postWindowMessage('ForceUpdate'))
 
-onPortMessage('InspectedNodeChange', e => postWindowMessage('InspectedNodeChange', e))
-
-onPortMessage('ToggleInspectedValue', e => postWindowMessage('ToggleInspectedValue', e))
+onPortMessage('ToggleInspected', e => postWindowMessage('ToggleInspected', e))
 
 onPortMessage('HighlightElement', e => postWindowMessage('HighlightElement', e))
 

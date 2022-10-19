@@ -102,18 +102,11 @@ chrome.runtime.onConnect.addListener(port => {
 
     addCleanup(
       onRuntimeMessage('PanelVisibility', visibility => {
-        panelVisibility = visibility
-        postPortMessage('PanelVisibility', visibility)
+        postPortMessage('PanelVisibility', (panelVisibility = visibility))
       }),
     )
 
-    addCleanup(
-      onRuntimeMessage('InspectedNodeChange', e => postPortMessage('InspectedNodeChange', e)),
-    )
-
-    addCleanup(
-      onRuntimeMessage('ToggleInspectedValue', e => postPortMessage('ToggleInspectedValue', e)),
-    )
+    addCleanup(onRuntimeMessage('ToggleInspected', e => postPortMessage('ToggleInspected', e)))
 
     addCleanup(onRuntimeMessage('HighlightElement', e => postPortMessage('HighlightElement', e)))
 

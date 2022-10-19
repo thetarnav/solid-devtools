@@ -19,18 +19,19 @@ export function createController() {
     },
     onInspect(payload) {
       queueMicrotask(() => {
-        if (payload.type === 'node') debug.setInspectedNode(payload.data)
-        else if (payload.type === 'value') debug.setInspectedValue(payload.data)
-        else if (payload.type === 'prop')
+        if (payload.type === 'node') {
+          debug.setInspectedNode(payload.data)
+        } else if (payload.type === 'value') {
+          debug.setInspectedValue(payload.data)
+        } else if (payload.type === 'prop') {
           debug.setInspectedProp(payload.data.id, payload.data.selected)
-        else if (payload.type === 'signal') {
+        } else if (payload.type === 'signal') {
           const { id, selected } = payload.data
           const value = debug.setInspectedSignal(id, selected)
-          if (value) {
-            queueMicrotask(() =>
-              controller.updateSignals({ signals: [{ id, value }], update: false }),
-            )
-          }
+          value &&
+            queueMicrotask(() => {
+              controller.updateSignals({ signals: [{ id, value }], update: false })
+            })
         }
       })
     },
