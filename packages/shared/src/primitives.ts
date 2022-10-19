@@ -48,12 +48,11 @@ export function createHover(handle: (hovering: boolean) => void): {
  *
  * For **IOC**
  */
-export function createConsumers(): [
-  needed: Accessor<boolean>,
-  addConsumer: (consumer: Accessor<boolean>) => void,
-] {
-  const [consumers, setConsumers] = createSignal<Accessor<boolean>[]>([], { name: 'consumers' })
-  const enabled = createMemo<boolean>(() => consumers().some(consumer => consumer()))
+export function createConsumers(
+  initial: readonly Accessor<boolean>[] = [],
+): [needed: Accessor<boolean>, addConsumer: (consumer: Accessor<boolean>) => void] {
+  const [consumers, setConsumers] = createSignal([...initial], { name: 'consumers' })
+  const enabled = createMemo(() => consumers().some(consumer => consumer()))
   return [
     enabled,
     consumer => {

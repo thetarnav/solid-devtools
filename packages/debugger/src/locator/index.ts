@@ -2,6 +2,7 @@ import { createEffect, createMemo, onCleanup, Accessor, getOwner, runWithOwner }
 import { makeEventListener } from '@solid-primitives/event-listener'
 import { createKeyHold, KbdKey } from '@solid-primitives/keyboard'
 import { onRootCleanup } from '@solid-primitives/utils'
+import { createSimpleEmitter } from '@solid-primitives/event-bus'
 import { atom, defer, makeHoverElementListener } from '@solid-devtools/shared/primitives'
 import { Mapped, NodeID } from '@solid-devtools/shared/graph'
 import { findLocatorComponent, getLocationFromElement, LocatorComponent } from './findComponent'
@@ -12,9 +13,9 @@ import {
   TargetIDE,
   TargetURLFunction,
 } from './goToSource'
-import { attachElementOverlay } from './ElementOverlay'
 import { createInternalRoot } from '../utils'
-import { createSimpleEmitter } from '@solid-primitives/event-bus'
+import { enableRootsAutoattach } from '../roots'
+import { attachElementOverlay } from './ElementOverlay'
 
 export type { TargetIDE, TargetURLFunction } from './goToSource'
 export type { LocatorComponent } from './findComponent'
@@ -37,16 +38,19 @@ export function createLocator({
   debuggerEnabled,
   findComponent,
   getElementById,
+  addLocatorModeEnabledSignal,
 }: {
   components: Accessor<Record<NodeID, Mapped.ResolvedComponent[]>>
   debuggerEnabled: Accessor<boolean>
   findComponent(rootId: NodeID, nodeId: NodeID): Mapped.ResolvedComponent | undefined
   getElementById(id: string): HTMLElement | undefined
+  addLocatorModeEnabledSignal(signal: Accessor<boolean>): void
 }) {
   // enables capturing hovered elements
   const enabledByPlugin = atom(false)
   const enabledByDebuggerSignal = atom<Accessor<boolean>>()
   const enabledByDebugger = createMemo(() => !!enabledByDebuggerSignal()?.())
+  addLocatorModeEnabledSignal(enabledByDebugger)
   // locator is enabled if debugger is enabled, and user pressed the key to activate it, or the plugin activated it
   const locatorEnabled = createMemo(
     () => debuggerEnabled() && (enabledByDebugger() || enabledByPlugin()),
@@ -180,6 +184,7 @@ export function createLocator({
    */
   function useLocator(options: LocatorOptions): void {
     runWithOwner(owner, () => {
+      enableRootsAutoattach()
       if (locatorUsed) return console.warn('useLocator can be used called once.')
       locatorUsed = true
       if (options.targetIDE) targetIDE = options.targetIDE

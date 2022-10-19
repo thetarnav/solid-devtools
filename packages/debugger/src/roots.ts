@@ -23,6 +23,7 @@ import {
   removeDebuggerContext,
   setDebuggerContext,
 } from './utils'
+import { makeCreateRootListener } from './update'
 
 const RootMap: Record<NodeID, (inspectedId?: NodeID) => WalkerResult | null> = {}
 export const walkSolidRoot = (rootId: NodeID, inspectedId?: NodeID): WalkerResult | null => {
@@ -129,6 +130,16 @@ export function attachDebugger(_owner: Core.Owner = getOwner()!): void {
       })
     }
   })
+}
+
+let autoattachEnabled = false
+/**
+ * Listens to `createRoot` calls and attaches debugger to them.
+ */
+export function enableRootsAutoattach(): void {
+  if (autoattachEnabled) return
+  autoattachEnabled = true
+  makeCreateRootListener(root => attachDebugger(root))
 }
 
 /**

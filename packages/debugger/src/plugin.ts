@@ -1,4 +1,4 @@
-import { batch, createEffect, createSignal, untrack } from 'solid-js'
+import { Accessor, batch, createEffect, createMemo, createSignal, untrack } from 'solid-js'
 import { createEventHub, createSimpleEmitter } from '@solid-primitives/event-bus'
 import { throttle } from '@solid-primitives/scheduled'
 import {
@@ -9,7 +9,7 @@ import {
   ComputationUpdate,
 } from '@solid-devtools/shared/graph'
 import { EncodedValue, encodeValue, ElementMap } from '@solid-devtools/shared/serialize'
-import { untrackedCallback } from '@solid-devtools/shared/primitives'
+import { atom, untrackedCallback } from '@solid-devtools/shared/primitives'
 import { createBatchedUpdateEmitter, createInternalRoot } from './utils'
 import { ComputationUpdateHandler } from './walker'
 import { walkSolidRoot } from './roots'
@@ -60,18 +60,26 @@ export default createInternalRoot(() => {
   //
   // Debugger Enabled
   //
-  const [debuggerEnabled, toggleDebugger] = (() => {
-    const [debuggerEnabled, setDebuggerEnabled] = createSignal(false)
+  const [debuggerEnabled, toggleDebugger, addLocatorModeEnabledSignal] = (() => {
+    const locatorModeEnabledSignal = atom<Accessor<boolean>>()
+    const debuggerEnabled = atom(false)
+    const combinedEnabled = createMemo(() => debuggerEnabled() || !!locatorModeEnabledSignal()?.())
 
     function toggleDebugger(state?: boolean) {
       batch(() => {
-        setDebuggerEnabled(p => state ?? !p)
-        setComponents({})
-        locator.togglePluginLocatorMode(false)
+        const newState = debuggerEnabled(p => state ?? !p)
+        if (!newState) {
+          setComponents({})
+          locator.togglePluginLocatorMode(false)
+        }
       })
     }
 
-    return [debuggerEnabled, toggleDebugger]
+    function addLocatorModeEnabledSignal(signal: Accessor<boolean>) {
+      locatorModeEnabledSignal(() => signal)
+    }
+
+    return [combinedEnabled, toggleDebugger, addLocatorModeEnabledSignal]
   })()
 
   //
@@ -263,6 +271,7 @@ export default createInternalRoot(() => {
     debuggerEnabled,
     findComponent,
     getElementById,
+    addLocatorModeEnabledSignal,
   })
 
   function useDebugger() {
