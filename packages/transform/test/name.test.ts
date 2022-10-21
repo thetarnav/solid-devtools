@@ -145,17 +145,13 @@ describe('wrapStores interaction', () => {
 const signal = createStore();`
 
     const expectedOutput = `import { createStore as $sdt_createStore0 } from "solid-js/store";
-
 const createStore = (obj, options) => {
   let wrappedObj = obj;
-
   if (typeof window.$sdt_wrapStore === "function") {
     wrappedObj = window.$sdt_wrapStore(obj);
   }
-
   return $sdt_createStore0(wrappedObj, options);
 };
-
 const signal = createStore(undefined, {
   name: "signal"
 });`

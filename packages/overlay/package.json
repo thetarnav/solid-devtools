@@ -47,18 +47,19 @@
     "@types/clean-css": "^4.2.6",
     "chokidar": "^3.5.3",
     "clean-css": "^5.3.1",
-    "esbuild": "^0.15.10",
+    "esbuild": "^0.15.12",
     "esbuild-plugin-solid": "^0.4.2",
-    "tsx": "^3.10.1"
+    "tsx": "^3.10.4"
   },
   "dependencies": {
     "@solid-devtools/debugger": "workspace:^0.13.0",
-    "@solid-devtools/frontend": "^0.0.6",
-    "@solid-devtools/shared": "workspace:^0.9.0",
-    "@solid-primitives/cursor": "^0.0.100",
-    "@solid-primitives/event-listener": "^2.2.2",
-    "@solid-primitives/media": "^2.0.2",
-    "@solid-primitives/utils": "^3.0.2"
+    "@solid-devtools/frontend": "workspace:^0.0.6",
+    "@solid-devtools/shared": "workspace:^0.9.1",
+    "@solid-primitives/cursor": "^0.0.101",
+    "@solid-primitives/event-listener": "^2.2.3",
+    "@solid-primitives/media": "^2.0.3",
+    "@solid-primitives/utils": "^3.1.0",
+    "solid-js": "^1.6.0"
   },
   "peerDependencies": {
     "solid-js": "^1.5.7"
