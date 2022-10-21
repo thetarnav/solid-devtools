@@ -1,5 +1,14 @@
 # @solid-devtools/frontend
 
+## 0.0.6
+
+### Patch Changes
+
+- a1ebe32: Improve dark theme styles.
+- 772de45: Simplify debugger plugin-devtools controller usage and communication.
+
+  The locator package gets removed, and the logic moved directly to @solid-devtools/debugger
+
 ## 0.0.5
 
 ### Patch Changes
