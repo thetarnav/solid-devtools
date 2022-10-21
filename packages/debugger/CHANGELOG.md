@@ -1,5 +1,13 @@
 # @solid-devtools/debugger
 
+## 0.13.1
+
+### Patch Changes
+
+- a01db71: 1.6 Improvements
+- Updated dependencies [a01db71]
+  - @solid-devtools/shared@0.9.2
+
 ## 0.13.0
 
 ### Minor Changes

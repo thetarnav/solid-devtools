@@ -1,5 +1,11 @@
 # solid-devtools-shared
 
+## 0.9.2
+
+### Patch Changes
+
+- a01db71: 1.6 Improvements
+
 ## 0.9.1
 
 ### Patch Changes
