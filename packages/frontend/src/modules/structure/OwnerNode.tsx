@@ -49,6 +49,8 @@ export const OwnerNode: Component<{
 
   const isUpdated = createPingedSignal(listener => listenToUpdate(listener))
 
+  const hoverProps = createHover(onHoverChange)
+
   return (
     <div
       data-hovered={props.isHovered}
@@ -56,7 +58,7 @@ export const OwnerNode: Component<{
       data-frozen={props.owner.frozen}
       class={styles.container}
       onClick={e => onInspectChange(!props.isSelected)}
-      {...createHover(onHoverChange)}
+      {...hoverProps}
       style={assignInlineVars({ [styles.levelVar]: props.owner.level + '' })}
     >
       <div class={styles.selection}></div>

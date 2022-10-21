@@ -96,8 +96,10 @@ const ElementValuePreview: ValueComponent<ValueType.Element> = props => {
       onHover(props.value.id, hovered)
     })
 
+  const hoverProps = handleHover && createHover(handleHover)
+
   return (
-    <span class={styles.ValueElement.container} {...(handleHover && createHover(handleHover))}>
+    <span class={styles.ValueElement.container} {...hoverProps}>
       <div class={styles.ValueElement.highlight} />
       {props.value.name}
     </span>
