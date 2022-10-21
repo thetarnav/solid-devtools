@@ -4,8 +4,8 @@ import { makeEventListener } from '@solid-primitives/event-listener'
 import { clamp } from '@solid-primitives/utils'
 import { createBodyCursor } from '@solid-primitives/cursor'
 import { Devtools, Icon } from '@solid-devtools/frontend'
-import { createInternalRoot } from '@solid-devtools/debugger'
-import { createController, enabled, setEnabled } from './controller'
+import { createInternalRoot, useDebugger } from '@solid-devtools/debugger'
+import { createController } from './controller'
 import { useIsMobile, useIsTouch } from '@solid-devtools/shared/primitives'
 
 import frontendStyles from '@solid-devtools/frontend/dist/index.css'
@@ -17,12 +17,12 @@ interface Props {
 
 export const DevtoolsOverlay: Component<Props> = props => {
   let dispose: VoidFunction | undefined
+  onCleanup(() => dispose?.())
+
+  const debug = useDebugger()
+
   // TODO: figure out why this needs to be called in onMount
-  onMount(() => props.defaultOpen && setEnabled(true))
-  onCleanup(() => {
-    setEnabled(false)
-    dispose?.()
-  })
+  props.defaultOpen && onMount(() => debug.toggleEnabled(true))
 
   setTimeout(() => {
     createInternalRoot(_dispose => {
@@ -35,6 +35,10 @@ export const DevtoolsOverlay: Component<Props> = props => {
 }
 
 const Overlay: Component = props => {
+  const debug = useDebugger()
+
+  onCleanup(() => debug.toggleEnabled(false))
+
   const isMobile = useIsMobile()
   const isTouch = useIsTouch()
 
@@ -53,12 +57,16 @@ const Overlay: Component = props => {
 
   return (
     <Portal useShadow mount={document.documentElement}>
-      <div class="overlay__container" data-open={enabled()} style={{ '--progress': progress() }}>
+      <div
+        class="overlay__container"
+        data-open={debug.enabled()}
+        style={{ '--progress': progress() }}
+      >
         <div class="overlay__container__fixed">
-          <button class="overlay__toggle-button" onClick={() => setEnabled(p => !p)}>
+          <button class="overlay__toggle-button" onClick={() => debug.toggleEnabled()}>
             Devtools
             <Dynamic
-              component={enabled() ? Icon.EyeSlash : Icon.Eye}
+              component={debug.enabled() ? Icon.EyeSlash : Icon.Eye}
               class="overlay__toggle-button__icon"
             />
           </button>
@@ -72,7 +80,7 @@ const Overlay: Component = props => {
             />
           </Show>
           <div class="overlay__container__inner">
-            <Show when={enabled()}>
+            <Show when={debug.enabled()}>
               {() => {
                 const controller = createController()
                 return <Devtools controller={controller} />

@@ -1,3 +1,6 @@
-import vitestConfig from '../../configs/vitest.config'
+import { defineConfig } from 'vitest/config'
+import { testConfig } from '../../configs/vitest.config'
 
-export default vitestConfig
+export default defineConfig({
+  test: testConfig,
+})

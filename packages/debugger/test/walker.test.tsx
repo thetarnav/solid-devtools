@@ -1,4 +1,4 @@
-import { describe, beforeEach, jest, it, expect } from '@jest/globals'
+import { describe, beforeEach, vi, it, expect } from 'vitest'
 import { getOwner, Mapped, NodeType, Solid } from '@solid-devtools/shared/graph'
 import {
   createComputed,
@@ -10,7 +10,8 @@ import {
 } from 'solid-js'
 import type * as API from '../src/walker'
 
-const getModule = (): typeof API.walkSolidTree => require('../src/walker').walkSolidTree
+const getModule = async (): Promise<typeof API.walkSolidTree> =>
+  (await import('../src/walker')).walkSolidTree
 
 const mockTree = () => {
   const [s] = createSignal('foo', { name: 's0' })
@@ -30,11 +31,11 @@ const mockTree = () => {
 describe('walkSolidTree', () => {
   beforeEach(() => {
     delete (window as any).Solid$$
-    jest.resetModules()
+    vi.resetModules()
   })
 
-  it('default options', () => {
-    const walkSolidTree = getModule()
+  it('default options', async () => {
+    const walkSolidTree = await getModule()
 
     const [dispose, owner] = createRoot(dispose => {
       mockTree()
@@ -71,10 +72,10 @@ describe('walkSolidTree', () => {
     expect(inspectedOwner).toBe(null)
   })
 
-  it('listen to computation updates', () =>
-    createRoot(dispose => {
-      const walkSolidTree = getModule()
+  it('listen to computation updates', async () => {
+    const walkSolidTree = await getModule()
 
+    createRoot(dispose => {
       const capturedComputationUpdates: [string, string][] = []
 
       const [a, setA] = createSignal(0)
@@ -96,12 +97,13 @@ describe('walkSolidTree', () => {
       expect(capturedComputationUpdates[0]).toEqual(['ff', '0'])
 
       dispose()
-    }))
+    })
+  })
 
-  it('gathers components', () =>
+  it('gathers components', async () => {
+    const walkSolidTree = await getModule()
+
     createRoot(dispose => {
-      const walkSolidTree = getModule()
-
       const TestComponent = (props: { n: number }) => {
         const [a] = createSignal(0)
         createComputed(a)
@@ -143,11 +145,13 @@ describe('walkSolidTree', () => {
       expect(btn.element).toBeInstanceOf(HTMLButtonElement)
 
       dispose()
-    }))
+    })
+  })
 
-  it('returns inspected owner', () =>
+  it('returns inspected owner', async () => {
+    const walkSolidTree = await getModule()
+
     createRoot(dispose => {
-      const walkSolidTree = getModule()
       const [s] = createSignal(0, { name: 'source' })
 
       let owner!: Solid.Owner
@@ -208,5 +212,6 @@ describe('walkSolidTree', () => {
       })
 
       dispose()
-    }))
+    })
+  })
 })

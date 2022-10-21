@@ -1,36 +1,29 @@
 import { style } from '@vanilla-extract/css'
 import { dark, spacing, color, rounded, theme, media } from '@/ui/theme'
 import { toggleButton } from '@/ui/components/button/button.css'
+import { vars, panelBg, panelBorder } from './ui/theme/vars.css'
 
-export const app = style({
-  height: '100%',
-  width: '100%',
-  overflow: 'hidden',
-  display: 'grid',
-  gridTemplateRows: `${spacing[16]} 1fr`,
-  backgroundColor: color.white,
-  fontSize: theme.fontSize.base,
-  fontFamily: theme.font.sans,
-  ...media({
-    [dark]: {
-      backgroundColor: color.gray[800],
-    },
-  }),
-})
+export const app = style([
+  vars,
+  {
+    height: '100%',
+    width: '100%',
+    overflow: 'hidden',
+    display: 'grid',
+    gridTemplateRows: `${spacing[12]} 1fr`,
+    backgroundColor: panelBg,
+    fontSize: theme.fontSize.base,
+    fontFamily: theme.font.sans,
+  },
+])
 
 export const header = style({
-  padding: spacing[4],
-  backgroundColor: color.white,
+  padding: spacing[2],
   display: 'flex',
   alignItems: 'center',
-  columnGap: spacing[4],
-  borderBottom: `1px solid ${color.gray[200]}`,
-  ...media({
-    [dark]: {
-      backgroundColor: color.gray[800],
-      borderColor: color.gray[500],
-    },
-  }),
+  columnGap: spacing[2],
+  backgroundColor: panelBg,
+  borderBottom: panelBorder,
 })
 
 export const h3 = style({
@@ -42,18 +35,12 @@ export const h3 = style({
   }),
 })
 export const select = style({
-  width: spacing[8],
-  height: spacing[8],
-  color: color.black,
-  ...media({
-    [dark]: {
-      color: color.gray[50],
-    },
-  }),
+  width: spacing[7],
+  height: spacing[7],
 })
 export const selectIcon = style({
-  width: spacing[5],
-  height: spacing[5],
+  width: spacing[4.5],
+  height: spacing[4.5],
 })
 
 export const options = style({
@@ -63,19 +50,13 @@ export const optionsButton = style([
   toggleButton,
   {
     marginLeft: 'auto',
-    width: spacing[8],
-    height: spacing[8],
-    color: color.black,
-    ...media({
-      [dark]: {
-        color: color.gray[50],
-      },
-    }),
+    width: spacing[7],
+    height: spacing[7],
   },
 ])
 export const optionsIcon = style({
-  width: spacing[5],
-  height: spacing[5],
+  width: spacing[4.5],
+  height: spacing[4.5],
 })
 
 export const optionsPanel = style({

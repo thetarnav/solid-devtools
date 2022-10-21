@@ -1,4 +1,4 @@
-import { describe, it, expect } from '@jest/globals'
+import { describe, it, expect } from 'vitest'
 import { getOwner, Solid } from '@solid-devtools/shared/graph'
 import { createComputed, createRoot, createSignal } from 'solid-js'
 import {

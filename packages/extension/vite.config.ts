@@ -3,7 +3,7 @@ import solidPlugin from 'vite-plugin-solid'
 import { crx } from '@crxjs/vite-plugin'
 import { resolve } from 'path'
 
-import vitestConfig from '../../configs/vitest.config'
+import { testConfig } from '../../configs/vitest.config'
 import manifest from './manifest'
 import pkg from './package.json'
 
@@ -14,6 +14,7 @@ const r = (str: TemplateStringsArray) => resolve(__dirname, str.join(''))
 export default defineConfig({
   plugins: [solidPlugin({ dev: false }), crx({ manifest })],
   resolve: {
+    conditions: ['browser', 'development'],
     alias: {
       '@solid-devtools/shared': r`../shared/src`,
     },
@@ -32,5 +33,5 @@ export default defineConfig({
     },
     target: 'esnext',
   },
-  ...vitestConfig,
+  test: testConfig,
 })

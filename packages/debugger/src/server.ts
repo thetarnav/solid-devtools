@@ -13,18 +13,25 @@ export const useDebugger: typeof API.useDebugger = () => ({
   triggerUpdate: () => {},
   forceTriggerUpdate: () => {},
   listenTo: () => () => {},
-  components: () => ({}),
-  findComponent: () => undefined,
   setInspectedNode: () => {},
-  getElementById: () => undefined,
   handlePropsUpdate: () => () => {},
   setInspectedSignal: () => null,
   setInspectedProp: () => {},
   inspectedDetails: () => null,
   setInspectedValue: () => null,
+  enabled: () => false,
+  toggleEnabled: () => {},
+  locator: {
+    toggleEnabled: () => {},
+    addClickInterceptor: () => {},
+    enabledByDebugger: () => false,
+    setHighlightTarget: () => {},
+    onHoveredComponent: () => () => {},
+  },
 })
 
 export const enableRootsAutoattach: typeof API.enableRootsAutoattach = () => {}
+export const useLocator: typeof API.useLocator = () => {}
 
 // update
 export const makeSolidUpdateListener: typeof API.makeSolidUpdateListener = () => () => {}

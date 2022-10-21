@@ -12,15 +12,7 @@ import { INTERNAL } from '@solid-devtools/shared/variables'
 import { untrackedCallback } from '@solid-devtools/shared/primitives'
 import { warn } from '@solid-devtools/shared/utils'
 import { ComputationUpdateHandler, WalkerResult, walkSolidTree } from './walker'
-import {
-  enabled,
-  onForceUpdate,
-  onUpdate,
-  updateRoot,
-  removeRoot,
-  pushComputationUpdate,
-  debuggerConfig,
-} from './plugin'
+import plugin from './plugin'
 import {
   createInternalRoot,
   getDebuggerContext,
@@ -31,6 +23,7 @@ import {
   removeDebuggerContext,
   setDebuggerContext,
 } from './utils'
+import { makeCreateRootListener } from './update'
 
 const RootMap: Record<NodeID, (inspectedId?: NodeID) => WalkerResult | null> = {}
 export const walkSolidRoot = (rootId: NodeID, inspectedId?: NodeID): WalkerResult | null => {
@@ -47,38 +40,37 @@ export function createGraphRoot(owner: Solid.Root): void {
 
     const onComputationUpdate: ComputationUpdateHandler = (rootId, nodeId) => {
       if (owner.isDisposed) return
-      if (untrack(enabled)) triggerRootUpdate()
-      pushComputationUpdate(rootId, nodeId)
+      if (untrack(plugin.enabled)) triggerRootUpdate()
+      plugin.pushComputationUpdate(rootId, nodeId)
     }
 
     const forceRootUpdate = untrackedCallback((inspectedId?: NodeID | void) => {
       if (owner.isDisposed) return null
       const result = walkSolidTree(owner, {
-        ...debuggerConfig,
         onComputationUpdate,
         rootId,
         inspectedId: inspectedId ?? null,
       })
-      updateRoot(result.root, result.components)
+      plugin.updateRoot(result.root, result.components)
       return result
     })
     const triggerRootUpdate = throttle(forceRootUpdate, 300)
 
     RootMap[rootId] = forceRootUpdate
 
-    onUpdate(triggerRootUpdate)
-    onForceUpdate(forceRootUpdate)
+    plugin.onUpdate(triggerRootUpdate)
+    plugin.onForceUpdate(forceRootUpdate)
 
     createEffect(() => {
       // force trigger update when enabled changes to true
-      enabled() && forceRootUpdate()
+      plugin.enabled() && forceRootUpdate()
     })
 
     setDebuggerContext(owner, { rootId, triggerRootUpdate, forceRootUpdate })
 
     onCleanup(() => {
       removeDebuggerContext(owner)
-      removeRoot(rootId)
+      plugin.removeRoot(rootId)
       owner.isDisposed = true
       delete RootMap[rootId]
     })
@@ -138,6 +130,16 @@ export function attachDebugger(_owner: Core.Owner = getOwner()!): void {
       })
     }
   })
+}
+
+let autoattachEnabled = false
+/**
+ * Listens to `createRoot` calls and attaches debugger to them.
+ */
+export function enableRootsAutoattach(): void {
+  if (autoattachEnabled) return
+  autoattachEnabled = true
+  makeCreateRootListener(root => attachDebugger(root))
 }
 
 /**

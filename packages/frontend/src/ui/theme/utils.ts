@@ -14,7 +14,7 @@ export function hexToRgbValue(hex: string) {
   return `${r} ${g} ${b}`
 }
 
-export function hexToRgb(hex: string, alpha?: number) {
+export function hexToRgb(hex: string, alpha?: number | string) {
   const value = hexToRgbValue(hex)
   return alpha === undefined ? `rgb(${value})` : `rgb(${value} / ${alpha})`
 }

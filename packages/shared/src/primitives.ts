@@ -1,6 +1,12 @@
-import type { MemoOptions } from 'solid-js/types/reactive/signal'
+import type {
+  AccessorArray,
+  EffectFunction,
+  MemoOptions,
+  NoInfer,
+  OnEffectFunction,
+  SignalOptions,
+} from 'solid-js/types/reactive/signal'
 import { Accessor, createMemo, createSignal, getOwner, onCleanup, untrack } from 'solid-js'
-import { remove } from '@solid-primitives/immutable'
 import { AnyFunction, onRootCleanup } from '@solid-primitives/utils'
 import { makeEventListener } from '@solid-primitives/event-listener'
 import { createSharedRoot } from '@solid-primitives/rootless'
@@ -42,17 +48,16 @@ export function createHover(handle: (hovering: boolean) => void): {
  *
  * For **IOC**
  */
-export function createConsumers(): [
-  needed: Accessor<boolean>,
-  addConsumer: (consumer: Accessor<boolean>) => void,
-] {
-  const [consumers, setConsumers] = createSignal<Accessor<boolean>[]>([], { name: 'consumers' })
-  const enabled = createMemo<boolean>(() => consumers().some(consumer => consumer()))
+export function createConsumers(
+  initial: readonly Accessor<boolean>[] = [],
+): [needed: Accessor<boolean>, addConsumer: (consumer: Accessor<boolean>) => void] {
+  const [consumers, setConsumers] = createSignal([...initial], { name: 'consumers' })
+  const enabled = createMemo(() => consumers().some(consumer => consumer()))
   return [
     enabled,
     consumer => {
       setConsumers(p => [...p, consumer])
-      onRootCleanup(() => setConsumers(p => remove(p, consumer)))
+      onRootCleanup(() => setConsumers(p => p.filter(p => p !== consumer)))
     },
   ]
 }
@@ -87,4 +92,75 @@ export function createDerivedSignal<T>(fallback?: T, options?: MemoOptions<T>): 
       return setSource(() => newSource)
     },
   ]
+}
+
+// TODO: contribute to solid-primitives
+
+// TODO: better support touch
+
+export function makeHoverElementListener(onHover: (el: HTMLElement | null) => void): void {
+  let last: HTMLElement | null = null
+  const handleHover = (e: { target: unknown }) => {
+    const { target } = e
+    if (target === last || (!(target instanceof HTMLElement) && target !== null)) return
+    onHover((last = target))
+  }
+  makeEventListener(window, 'mouseover', handleHover)
+  makeEventListener(document, 'mouseleave', handleHover.bind(void 0, { target: null }))
+}
+
+/**
+ * Solid's `on` helper, but always defers and returns a provided initial value when if does instead of `undefined`.
+ *
+ * @param deps
+ * @param fn
+ * @param initialValue
+ */
+export function defer<S, Next extends Prev, Prev = Next>(
+  deps: AccessorArray<S> | Accessor<S>,
+  fn: OnEffectFunction<S, undefined | NoInfer<Prev>, Next>,
+  initialValue: Next,
+): EffectFunction<undefined | NoInfer<Next>, NoInfer<Next>>
+export function defer<S, Next extends Prev, Prev = Next>(
+  deps: AccessorArray<S> | Accessor<S>,
+  fn: OnEffectFunction<S, undefined | NoInfer<Prev>, Next>,
+  initialValue?: undefined,
+): EffectFunction<undefined | NoInfer<Next>>
+export function defer<S, Next extends Prev, Prev = Next>(
+  deps: AccessorArray<S> | Accessor<S>,
+  fn: OnEffectFunction<S, undefined | NoInfer<Prev>, Next>,
+  initialValue?: Next,
+): EffectFunction<undefined | NoInfer<Next>> {
+  const isArray = Array.isArray(deps)
+  let prevInput: S
+  let defer = true
+  return prevValue => {
+    let input: S
+    if (isArray) {
+      input = Array(deps.length) as S
+      for (let i = 0; i < deps.length; i++) (input as any[])[i] = deps[i]()
+    } else input = deps()
+    if (defer) {
+      defer = false
+      return initialValue
+    }
+    const result = untrack(() => fn(input, prevInput, prevValue))
+    prevInput = input
+    return result
+  }
+}
+
+export type Atom<T> = (<U extends T>(value: (prev: T) => U) => U) &
+  (<U extends T>(value: Exclude<U, Function>) => U) &
+  (<U extends T>(value: Exclude<U, Function> | ((prev: T) => U)) => U) &
+  Accessor<T>
+
+export function atom<T>(value: T, options?: SignalOptions<T>): Atom<T>
+export function atom<T>(
+  value?: undefined,
+  options?: SignalOptions<T | undefined>,
+): Atom<T | undefined>
+export function atom<T>(value?: T, options?: SignalOptions<T | undefined>): Atom<T | undefined> {
+  const [state, setState] = createSignal(value, { internal: true, ...options })
+  return (...args: any[]) => (args.length === 1 ? setState(args[0]) : state())
 }

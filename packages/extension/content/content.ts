@@ -64,7 +64,7 @@ onWindowMessage('PropsUpdate', e => postPortMessage('PropsUpdate', e))
 
 onWindowMessage('ValueUpdate', e => postPortMessage('ValueUpdate', e))
 
-onWindowMessage('ClientHoveredNodeChange', e => postPortMessage('ClientHoveredNodeChange', e))
+onWindowMessage('ClientHoveredComponent', e => postPortMessage('ClientHoveredComponent', e))
 
 onWindowMessage('ClientInspectedNode', e => postPortMessage('ClientInspectedNode', e))
 
@@ -73,9 +73,7 @@ onPortMessage('PanelClosed', e => postWindowMessage('PanelClosed', e))
 
 onPortMessage('ForceUpdate', () => postWindowMessage('ForceUpdate'))
 
-onPortMessage('InspectedNodeChange', e => postWindowMessage('InspectedNodeChange', e))
-
-onPortMessage('ToggleInspectedValue', e => postWindowMessage('ToggleInspectedValue', e))
+onPortMessage('ToggleInspected', e => postWindowMessage('ToggleInspected', e))
 
 onPortMessage('HighlightElement', e => postWindowMessage('HighlightElement', e))
 

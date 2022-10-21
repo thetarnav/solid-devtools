@@ -25,11 +25,8 @@ export default function createBridge({
     onHighlightElementChange(data) {
       postRuntimeMessage('HighlightElement', data)
     },
-    onInspectedNodeChange(data) {
-      postRuntimeMessage('InspectedNodeChange', data)
-    },
-    onInspectValue(data) {
-      postRuntimeMessage('ToggleInspectedValue', data)
+    onInspect(payloa) {
+      postRuntimeMessage('ToggleInspected', payloa)
     },
   })
 
@@ -49,7 +46,7 @@ export default function createBridge({
 
   onRuntimeMessage('ClientLocatorMode', controller.setLocatorState.bind(controller))
 
-  onRuntimeMessage('ClientHoveredNodeChange', controller.setHoveredNode.bind(controller))
+  onRuntimeMessage('ClientHoveredComponent', controller.setHoveredNode.bind(controller))
 
   onRuntimeMessage('ClientInspectedNode', controller.setInspectedNode.bind(controller))
 

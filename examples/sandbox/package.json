@@ -19,7 +19,7 @@
     "vite-plugin-solid": "^2.3.9"
   },
   "dependencies": {
-    "@solid-devtools/locator": "workspace:^0.16.7",
+    "@solid-devtools/debugger": "workspace:^0.12.0",
     "@solid-devtools/logger": "workspace:^0.4.10",
     "@solid-devtools/overlay": "workspace:^0.0.5",
     "@solid-primitives/timer": "^1.3.3",

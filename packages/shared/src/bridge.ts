@@ -27,20 +27,19 @@ export interface Messages {
   ValueUpdate: { value: EncodedValue<boolean>; update: boolean }
   /** devtools -> client: force the debugger to walk the whole tree and send it */
   ForceUpdate: {}
-  /** devtools -> client: request for details of owner details opened in the side-panel */
-  InspectedNodeChange: null | { rootId: NodeID; nodeId: NodeID }
   /** client -> devtools: send component clicked with the locator to the extension */
   ClientInspectedNode: NodeID
   /** client -> devtools: send updates to the owner details */
   SetInspectedDetails: Mapped.OwnerDetails
-  /** devtools -> client: request for signal/prop details — subscribe or unsubscribe */
-  ToggleInspectedValue:
-    | { type: 'signal' | 'prop'; id: NodeID; selected: boolean }
-    | { type: 'value'; selected: boolean }
+  /** devtools -> client: request for node/signal/prop details — subscribe or unsubscribe */
+  ToggleInspected:
+    | { type: 'node'; data: null | { rootId: NodeID; nodeId: NodeID } }
+    | { type: 'signal' | 'prop'; data: { id: NodeID; selected: boolean } }
+    | { type: 'value'; data: boolean }
   /** devtools -> client: user hovered over component/element signal in devtools panel */
-  HighlightElement: { rootId: NodeID; nodeId: NodeID } | string | null
+  HighlightElement: { rootId: NodeID; nodeId: NodeID } | { elementId: string } | null
   /** client -> devtools: send hovered (by the locator) owner to the extension */
-  ClientHoveredNodeChange: { nodeId: NodeID; state: boolean }
+  ClientHoveredComponent: { nodeId: NodeID; state: boolean }
   /** devtools -> client: user is selecting component from the page */
   ExtLocatorMode: boolean
   /** client -> devtools */

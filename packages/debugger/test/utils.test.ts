@@ -1,4 +1,4 @@
-import { describe, it, expect } from '@jest/globals'
+import { describe, it, expect } from 'vitest'
 import { Solid, getOwner, NodeType } from '@solid-devtools/shared/graph'
 import {
   createComponent,

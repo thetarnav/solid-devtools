@@ -91,8 +91,8 @@ export function encodeValue<Deep extends boolean>(
       value: Object.keys(obj).length,
     }
     if (deep) {
-      const children = (payload.children = Object.getOwnPropertyDescriptors(value) as any)
-      for (const [key, descriptor] of Object.entries<PropertyDescriptor>(children)) {
+      const children: Record<string, EncodedValue<true>> = (payload.children = {} as any)
+      for (const [key, descriptor] of Object.entries(Object.getOwnPropertyDescriptors(value))) {
         children[key] = descriptor.get
           ? { type: ValueType.Getter, value: key }
           : encodeValue(descriptor.value, true, elementMap)

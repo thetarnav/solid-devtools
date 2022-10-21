@@ -2,7 +2,6 @@ export {
   Debugger,
   attachDebugger,
   useDebugger,
+  useLocator,
   makeSolidUpdateListener,
 } from '@solid-devtools/debugger'
-
-export * from '@solid-devtools/locator'

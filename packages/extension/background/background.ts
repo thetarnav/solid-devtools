@@ -94,7 +94,7 @@ chrome.runtime.onConnect.addListener(port => {
     onPortMessage('SetInspectedDetails', e => postRuntimeMessage('SetInspectedDetails', e))
     onPortMessage('PropsUpdate', e => postRuntimeMessage('PropsUpdate', e))
     onPortMessage('ValueUpdate', e => postRuntimeMessage('ValueUpdate', e))
-    onPortMessage('ClientHoveredNodeChange', e => postRuntimeMessage('ClientHoveredNodeChange', e))
+    onPortMessage('ClientHoveredComponent', e => postRuntimeMessage('ClientHoveredComponent', e))
     onPortMessage('ClientInspectedNode', e => postRuntimeMessage('ClientInspectedNode', e))
 
     onPortMessage('ClientLocatorMode', e => postRuntimeMessage('ClientLocatorMode', e))
@@ -102,18 +102,11 @@ chrome.runtime.onConnect.addListener(port => {
 
     addCleanup(
       onRuntimeMessage('PanelVisibility', visibility => {
-        panelVisibility = visibility
-        postPortMessage('PanelVisibility', visibility)
+        postPortMessage('PanelVisibility', (panelVisibility = visibility))
       }),
     )
 
-    addCleanup(
-      onRuntimeMessage('InspectedNodeChange', e => postPortMessage('InspectedNodeChange', e)),
-    )
-
-    addCleanup(
-      onRuntimeMessage('ToggleInspectedValue', e => postPortMessage('ToggleInspectedValue', e)),
-    )
+    addCleanup(onRuntimeMessage('ToggleInspected', e => postPortMessage('ToggleInspected', e)))
 
     addCleanup(onRuntimeMessage('HighlightElement', e => postPortMessage('HighlightElement', e)))
 

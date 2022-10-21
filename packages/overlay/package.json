@@ -54,7 +54,6 @@
   "dependencies": {
     "@solid-devtools/debugger": "workspace:^0.12.0",
     "@solid-devtools/frontend": "^0.0.5",
-    "@solid-devtools/locator": "workspace:^0.16.7",
     "@solid-devtools/shared": "workspace:^0.9.0",
     "@solid-primitives/cursor": "^0.0.100",
     "@solid-primitives/event-listener": "^2.2.2",
