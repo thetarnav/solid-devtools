@@ -66,17 +66,17 @@
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
-    "solid-js": "^1.5.7",
-    "tsup": "^6.2.3",
+    "solid-js": "^1.6.0",
+    "tsup": "^6.3.0",
     "typescript": "^4.8.4",
     "vitest": "^0.23.4"
   },
   "dependencies": {
     "@solid-devtools/debugger": "workspace:^0.12.0",
-    "@solid-devtools/shared": "workspace:^0.9.0",
+    "@solid-devtools/shared": "workspace:^0.9.1",
     "@solid-devtools/transform": "workspace:^0.7.5",
-    "@solid-primitives/utils": "^3.0.2",
-    "type-fest": "^2.19.0"
+    "@solid-primitives/utils": "^3.1.0",
+    "type-fest": "^3.1.0"
   },
   "peerDependencies": {
     "solid-js": "^1.5.5"
