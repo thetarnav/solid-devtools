@@ -12,12 +12,6 @@
 
 The main client library. It reexports the most [important tools](<(https://github.com/thetarnav/solid-devtools#available-devtools)>) and connects the client application to the [chrome extension](https://github.com/thetarnav/solid-devtools/tree/main/packages/extension#readme).
 
-It contains the following subpackages:
-
-- [Debugger](https://github.com/thetarnav/solid-devtools/tree/main/packages/debugger#readme)
-- [Locator](https://github.com/thetarnav/solid-devtools/tree/main/packages/locator#readme) — [How to use it](#using-the-locator-package)
-- [Vite Plugin](https://github.com/thetarnav/solid-devtools/tree/main/packages/transform#readme) — [How to use it](#enabling-the-babel-plugin)
-
 ## Getting started
 
 ### Installation
@@ -41,19 +35,27 @@ import 'solid-devtools'
 
 ### Using the chrome extension
 
-Importing the `solid-devtools` package will connect your Solid application to the [chrome extension](https://github.com/thetarnav/solid-devtools/tree/main/packages/extension#readme).
+Importing the `solid-devtools` package will connect your Solid application to the [chrome extension](../extension#readme).
 
-[**Follow this guide to use the extension**](https://github.com/thetarnav/solid-devtools/tree/main/packages/extension#getting-started)
+[**Follow this guide to use the extension**](../extension#getting-started)
 
 ### Using the locator package
 
-The `solid-devtools` package comes with the [Locator](https://github.com/thetarnav/solid-devtools/tree/main/packages/locator#readme) package included. It's not neccessary to use it! But you can.
+The `solid-devtools` package comes with the locator feature included. It's not neccessary to use it, but you can.
 
-[**Follow this guide of the locator package**](https://github.com/thetarnav/solid-devtools/tree/main/packages/locator#Getting-Started)
+```ts
+import { useLocator } from 'solid-devtools'
+
+useLocator({
+  targetIDE: 'vscode',
+})
+```
+
+[**Follow this locator guide to know more**](../debugger#Using-Locator)
 
 ### Enabling the Babel plugin
 
-`solid-devtools` reexports the [babel plugin](https://github.com/thetarnav/solid-devtools/tree/main/packages/transform#readme) as a vite plugin.
+`solid-devtools` reexports the [babel plugin](../transform#readme) as a vite plugin.
 
 To enable it you need to add it to plugins array in your `.vite.config.js` file:
 
