@@ -1,5 +1,19 @@
 # solid-devtools-extension
 
+## 0.16.0
+
+### Minor Changes
+
+- 772de45: Simplify debugger plugin-devtools controller usage and communication.
+
+  The locator package gets removed, and the logic moved directly to @solid-devtools/debugger
+
+### Patch Changes
+
+- Updated dependencies [a1ebe32]
+- Updated dependencies [772de45]
+  - @solid-devtools/frontend@0.0.6
+
 ## 0.15.3
 
 ### Patch Changes

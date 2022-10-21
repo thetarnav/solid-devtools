@@ -1,5 +1,18 @@
 # @solid-devtools/overlay
 
+## 0.0.6
+
+### Patch Changes
+
+- 772de45: Simplify debugger plugin-devtools controller usage and communication.
+
+  The locator package gets removed, and the logic moved directly to @solid-devtools/debugger
+
+- Updated dependencies [a1ebe32]
+- Updated dependencies [772de45]
+  - @solid-devtools/frontend@0.0.6
+  - @solid-devtools/debugger@0.13.0
+
 ## 0.0.5
 
 ### Patch Changes
