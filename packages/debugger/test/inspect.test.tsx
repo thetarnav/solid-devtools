@@ -324,7 +324,7 @@ describe.only('inspectStore', async () => {
       const [state, setState] = createStore<any>({ count: 0 })
       const store = getOwnerStore()
       const cb = vi.fn<Parameters<StoreUpdateHandler>, void>()
-      inspectStoreNode(store, cb)
+      const unsub = inspectStoreNode(store, cb)
       expect(cb).not.toBeCalled()
 
       setState({ count: 1 })
@@ -394,6 +394,10 @@ describe.only('inspectStore', async () => {
       }
       expect(cb).toBeCalledWith(args)
 
+      unsub()
+      setState({ count: 3 })
+      expect(cb).toBeCalledTimes(7)
+
       dispose()
     })
   })
@@ -403,7 +407,7 @@ describe.only('inspectStore', async () => {
       const state = createMutable<any>({ count: 0 })
       const store = getOwnerStore()
       const cb = vi.fn<Parameters<StoreUpdateHandler>, void>()
-      inspectStoreNode(store, cb)
+      const unsub = inspectStoreNode(store, cb)
       expect(cb).not.toBeCalled()
 
       state.count = 1
@@ -456,6 +460,10 @@ describe.only('inspectStore', async () => {
       }
       expect(cb).toBeCalledWith(args)
 
+      unsub()
+      state.count = 3
+      expect(cb).toBeCalledTimes(5)
+
       dispose()
     })
   })
@@ -465,7 +473,7 @@ describe.only('inspectStore', async () => {
       const state = createMutable<any>({ a: { foo: 123, bar: [1, 2, 3] } })
       const store = getOwnerStore()
       const cb = vi.fn<Parameters<StoreUpdateHandler>, void>()
-      inspectStoreNode(store, cb)
+      const unsub = inspectStoreNode(store, cb)
 
       const detached = state.a.bar
 
@@ -505,6 +513,10 @@ describe.only('inspectStore', async () => {
       detached.push(5)
       expect(cb).toBeCalledTimes(3)
 
+      unsub()
+      state.a.baz = "I'm back!"
+      expect(cb).toBeCalledTimes(3)
+
       dispose()
     })
   })
@@ -513,10 +525,10 @@ describe.only('inspectStore', async () => {
     createRoot(dispose => {
       const state = createMutable<any>({ a: { foo: 123, bar: [1, 2, 3] } })
       const rootCb = vi.fn()
-      inspectStoreNode(getOwnerStore(), rootCb)
+      const unsubRoot = inspectStoreNode(getOwnerStore(), rootCb)
 
       const cb = vi.fn()
-      inspectStoreNode(unwrap(state.a.bar), cb)
+      const unsubBranch = inspectStoreNode(unwrap(state.a.bar), cb)
 
       state.a.bar.push(4)
       let args: Parameters<StoreUpdateHandler>[0] = {
@@ -558,6 +570,13 @@ describe.only('inspectStore', async () => {
       }
       expect(cb).toBeCalledTimes(2)
       expect(cb).toBeCalledWith(args)
+
+      unsubBranch()
+      arr.push(6)
+      unsubRoot()
+      state.baz = 'hello'
+      expect(rootCb).toBeCalledTimes(2)
+      expect(cb).toBeCalledTimes(2)
 
       dispose()
     })
