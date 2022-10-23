@@ -1,6 +1,4 @@
 import { describe, beforeEach, vi, it, expect } from 'vitest'
-import { NodeType } from '@solid-devtools/shared/graph'
-import { ValueType } from '@solid-devtools/shared/serialize'
 import {
   createComputed,
   createMemo,
@@ -9,9 +7,19 @@ import {
   createSignal,
   JSX,
 } from 'solid-js'
+import {
+  createMutable,
+  createStore,
+  produce,
+  reconcile,
+  unwrap,
+  modifyMutable,
+} from 'solid-js/store'
+import { NodeType } from '@solid-devtools/shared/graph'
+import { ValueType } from '@solid-devtools/shared/serialize'
 import { Solid } from '../src/types'
-import { getOwner } from '../src/utils'
-// import { createStore } from 'solid-js/store'
+import { getOwner, isSolidStore } from '../src/utils'
+import { type StoreUpdateHandler } from '../src/inspect'
 
 const getInspectModule = async () => await import('../src/inspect')
 
@@ -305,14 +313,253 @@ describe('collectOwnerDetails', () => {
   })
 })
 
-// describe.only('inspectStore', async () => {
-//   const { inspectStoreNode } = await getInspectModule()
+const getOwnerStore = () =>
+  (Object.values(getOwner()!.sourceMap!).find(s => isSolidStore(s))! as Solid.Store).value
 
-//   it('listens to simple store updates', () => {
-//     createRoot(dispose => {
-//       const [state, setState] = createStore({ count: 0 })
+describe.only('inspectStore', async () => {
+  const { inspectStoreNode } = await getInspectModule()
 
-//       dispose()
-//     })
-//   })
-// })
+  it('listens to simple store updates', () => {
+    createRoot(dispose => {
+      const [state, setState] = createStore<any>({ count: 0 })
+      const store = getOwnerStore()
+      const cb = vi.fn<Parameters<StoreUpdateHandler>, void>()
+      inspectStoreNode(store, cb)
+      expect(cb).not.toBeCalled()
+
+      setState({ count: 1 })
+      expect(cb).toBeCalledTimes(1)
+      let args: Parameters<StoreUpdateHandler>[0] = {
+        deleting: false,
+        path: [],
+        property: 'count',
+        value: 1,
+      }
+      expect(cb).toBeCalledWith(args)
+
+      setState('count', 2)
+      expect(cb).toBeCalledTimes(2)
+      args = {
+        deleting: false,
+        path: [],
+        property: 'count',
+        value: 2,
+      }
+      expect(cb).toBeCalledWith(args)
+
+      setState(reconcile({}))
+      expect(cb).toBeCalledTimes(3)
+      args = {
+        deleting: false,
+        path: [],
+        property: 'count',
+        value: undefined,
+      }
+      expect(cb).toBeCalledWith(args)
+
+      setState({ a: { foo: 123, bar: [1, 2, 3] }, b: 'hello' })
+      expect(cb).toBeCalledTimes(5)
+      args = {
+        deleting: false,
+        path: [],
+        property: 'a',
+        value: unwrap(state.a),
+      }
+      expect(cb).toHaveBeenNthCalledWith(4, args)
+      args = {
+        deleting: false,
+        path: [],
+        property: 'b',
+        value: 'hello',
+      }
+      expect(cb).toHaveBeenNthCalledWith(5, args)
+
+      setState(produce((proxy: any) => delete proxy.a.foo))
+      expect(cb).toBeCalledTimes(6)
+      args = {
+        deleting: true,
+        path: ['a'],
+        property: 'foo',
+        value: undefined,
+      }
+      expect(cb).toBeCalledWith(args)
+
+      setState(produce((proxy: any) => proxy.a.bar.push(4)))
+      expect(cb).toBeCalledTimes(7)
+      args = {
+        deleting: false,
+        path: ['a', 'bar'],
+        property: '3',
+        value: 4,
+      }
+      expect(cb).toBeCalledWith(args)
+
+      dispose()
+    })
+  })
+
+  it('listens to mutable', () => {
+    createRoot(dispose => {
+      const state = createMutable<any>({ count: 0 })
+      const store = getOwnerStore()
+      const cb = vi.fn<Parameters<StoreUpdateHandler>, void>()
+      inspectStoreNode(store, cb)
+      expect(cb).not.toBeCalled()
+
+      state.count = 1
+      expect(cb).toBeCalledTimes(1)
+      let args: Parameters<StoreUpdateHandler>[0] = {
+        deleting: false,
+        path: [],
+        property: 'count',
+        value: 1,
+      }
+      expect(cb).toBeCalledWith(args)
+
+      modifyMutable(state, reconcile({}))
+      expect(cb).toBeCalledTimes(2)
+      args = {
+        deleting: false,
+        path: [],
+        property: 'count',
+        value: undefined,
+      }
+      expect(cb).toBeCalledWith(args)
+
+      state.a = { foo: 123, bar: [1, 2, 3] }
+      expect(cb).toBeCalledTimes(3)
+      args = {
+        deleting: false,
+        path: [],
+        property: 'a',
+        value: unwrap(state.a),
+      }
+      expect(cb).toBeCalledWith(args)
+
+      delete state.a.foo
+      expect(cb).toBeCalledTimes(4)
+      args = {
+        deleting: true,
+        path: ['a'],
+        property: 'foo',
+        value: undefined,
+      }
+      expect(cb).toBeCalledWith(args)
+
+      state.a.bar.push(4)
+      expect(cb).toBeCalledTimes(5)
+      args = {
+        deleting: false,
+        path: ['a', 'bar'],
+        property: '3',
+        value: 4,
+      }
+      expect(cb).toBeCalledWith(args)
+
+      dispose()
+    })
+  })
+
+  it('ignores updates to removed object', () => {
+    createRoot(dispose => {
+      const state = createMutable<any>({ a: { foo: 123, bar: [1, 2, 3] } })
+      const store = getOwnerStore()
+      const cb = vi.fn<Parameters<StoreUpdateHandler>, void>()
+      inspectStoreNode(store, cb)
+
+      const detached = state.a.bar
+
+      const a1 = (state.a = { other: 'hello' })
+      let args: Parameters<StoreUpdateHandler>[0] = {
+        deleting: false,
+        path: [],
+        property: 'a',
+        value: a1,
+      }
+      expect(cb).toBeCalledTimes(1)
+      expect(cb).toBeCalledWith(args)
+
+      detached.push(4)
+      expect(cb).toBeCalledTimes(1)
+
+      state.a.bar = detached
+      args = {
+        deleting: false,
+        path: ['a'],
+        property: 'bar',
+        value: detached,
+      }
+      expect(cb).toBeCalledTimes(2)
+      expect(cb).toBeCalledWith(args)
+
+      delete state.a.bar
+      args = {
+        deleting: true,
+        path: ['a'],
+        property: 'bar',
+        value: undefined,
+      }
+      expect(cb).toBeCalledTimes(3)
+      expect(cb).toBeCalledWith(args)
+
+      detached.push(5)
+      expect(cb).toBeCalledTimes(3)
+
+      dispose()
+    })
+  })
+
+  it('handles multiple inspected nodes', () => {
+    createRoot(dispose => {
+      const state = createMutable<any>({ a: { foo: 123, bar: [1, 2, 3] } })
+      const rootCb = vi.fn()
+      inspectStoreNode(getOwnerStore(), rootCb)
+
+      const cb = vi.fn()
+      inspectStoreNode(unwrap(state.a.bar), cb)
+
+      state.a.bar.push(4)
+      let args: Parameters<StoreUpdateHandler>[0] = {
+        deleting: false,
+        path: ['a', 'bar'],
+        property: '3',
+        value: 4,
+      }
+      expect(rootCb).toBeCalledTimes(1)
+      expect(rootCb).toBeCalledWith(args)
+      args = {
+        deleting: false,
+        path: [],
+        property: '3',
+        value: 4,
+      }
+      expect(cb).toBeCalledTimes(1)
+      expect(cb).toBeCalledWith(args)
+
+      const arr = state.a.bar
+      delete state.a.bar
+      args = {
+        deleting: true,
+        path: ['a'],
+        property: 'bar',
+        value: undefined,
+      }
+      expect(rootCb).toBeCalledTimes(2)
+      expect(rootCb).toBeCalledWith(args)
+      expect(cb).toBeCalledTimes(1)
+
+      arr.push(5)
+      expect(rootCb).toBeCalledTimes(2)
+      args = {
+        deleting: false,
+        path: [],
+        property: '4',
+        value: 5,
+      }
+      expect(cb).toBeCalledTimes(2)
+      expect(cb).toBeCalledWith(args)
+
+      dispose()
+    })
+  })
+})

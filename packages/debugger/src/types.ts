@@ -73,7 +73,7 @@ export namespace Solid {
   export interface Root extends Core.Owner {
     owned: Computation[] | null
     owner: Owner | null
-    sourceMap?: Record<string, Signal>
+    sourceMap?: Record<string, Signal | Store>
     // Used by the debugger
     isDisposed?: boolean
     sdtAttached?: Owner | null

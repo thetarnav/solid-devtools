@@ -1,8 +1,9 @@
 import { Mapped, NodeID, NodeType } from '@solid-devtools/shared/graph'
 import { ElementMap, encodeValue, ValueType } from '@solid-devtools/shared/serialize'
+import { pushToArrayProp } from '@solid-devtools/shared/utils'
 import { $PROXY, untrack } from 'solid-js'
 import { DEV as STORE_DEV } from 'solid-js/store'
-import { Solid, ValueUpdateListener } from './types'
+import { Core, Solid, ValueUpdateListener } from './types'
 import { observeValueUpdate, removeValueUpdateObserver } from './update'
 import {
   getComponentRefreshNode,
@@ -216,24 +217,22 @@ export function inspectStoreNode(
 
   return untrack(() => {
     trackStore(rootNode, [])
-
-    return () => {
-      untrackStore(rootNode)
-    }
+    return () => untrackStore(rootNode)
   })
 
   function trackStore(node: Solid.StoreNode, path: PropertyKey[]): void {
-    console.log('> track', path.join('.') || '__root__')
     set.add(node)
-    const handler: Solid.OnStoreNodeUpdate = ((property, value, deleting) =>
+    const handler: Solid.OnStoreNodeUpdate = ((_, property, value, deleting) =>
       untrack(() => {
         onUpdate({ deleting, path, property, value })
-        const prev = node[property] as Solid.StoreNode | undefined
+        const prev = node[property] as Solid.StoreNode | Core.Store.NotWrappable
+        // deleting not existing properties will fire an update as well
+        if (deleting && !prev) return
         if (DEV.isWrappable(prev)) untrackStore(prev)
         if (DEV.isWrappable(value)) trackStore(value as Solid.StoreNode, [...path, property])
       })) as Solid.OnStoreNodeUpdate
     handler.symbol = symbol
-    node[DEV.$ON_UPDATE] = node[DEV.$ON_UPDATE] ? [...node[DEV.$ON_UPDATE]!, handler] : [handler]
+    pushToArrayProp(node, DEV.$ON_UPDATE, handler)
     forEachStoreProp(node, (key, child) => !set.has(child) && trackStore(child, [...path, key]))
   }
 
@@ -241,6 +240,6 @@ export function inspectStoreNode(
     if (node[DEV.$ON_UPDATE]!.length === 1) delete node[DEV.$ON_UPDATE]
     else node[DEV.$ON_UPDATE] = node[DEV.$ON_UPDATE]!.filter(h => h.symbol !== symbol)
     set.delete(node)
-    forEachStoreProp(node, (key, child) => set.has(child) && untrackStore(child))
+    forEachStoreProp(node, (_, child) => set.has(child) && untrackStore(child))
   }
 }
