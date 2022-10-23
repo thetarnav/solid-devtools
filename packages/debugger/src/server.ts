@@ -1,7 +1,8 @@
-import { NodeType, Solid } from '@solid-devtools/shared/graph'
+import { NodeType } from '@solid-devtools/shared/graph'
 import { UNNAMED } from '@solid-devtools/shared/variables'
 import * as API from './index'
 import { createRoot } from 'solid-js'
+import { Solid } from './types'
 
 export { createUnownedRoot } from './index'
 
@@ -44,6 +45,7 @@ export const makeValueUpdateListener: typeof API.makeValueUpdateListener = () =>
 export const removeValueUpdateObserver: typeof API.removeValueUpdateObserver = () => {}
 
 // utils
+export const getOwner: typeof API.getOwner = () => null
 export const getOwnerType: typeof API.getOwnerType = () => NodeType.Computation
 export const getNodeType: typeof API.getNodeType = () => NodeType.Computation
 export const getNodeName: typeof API.getNodeName = () => UNNAMED

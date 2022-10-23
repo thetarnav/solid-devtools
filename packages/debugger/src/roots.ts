@@ -1,13 +1,6 @@
 import { createEffect, onCleanup, untrack } from 'solid-js'
 import { throttle } from '@solid-primitives/scheduled'
-import {
-  DebuggerContext,
-  getOwner,
-  NodeID,
-  NodeType,
-  Solid,
-  Core,
-} from '@solid-devtools/shared/graph'
+import { NodeID, NodeType } from '@solid-devtools/shared/graph'
 import { INTERNAL } from '@solid-devtools/shared/variables'
 import { untrackedCallback } from '@solid-devtools/shared/primitives'
 import { warn } from '@solid-devtools/shared/utils'
@@ -22,8 +15,10 @@ import {
   onOwnerCleanup,
   removeDebuggerContext,
   setDebuggerContext,
+  getOwner,
 } from './utils'
 import { makeCreateRootListener } from './update'
+import { Core, DebuggerContext, Solid } from './types'
 
 const RootMap: Record<NodeID, (inspectedId?: NodeID) => WalkerResult | null> = {}
 export const walkSolidRoot = (rootId: NodeID, inspectedId?: NodeID): WalkerResult | null => {

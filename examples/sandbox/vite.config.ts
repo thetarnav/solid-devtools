@@ -6,7 +6,7 @@ export default defineConfig({
   plugins: [
     devtoolsPlugin({
       // wrapStores: true,
-      jsxLocation: true,
+      // jsxLocation: true,
       name: true,
     }),
     solidPlugin({ hot: false, dev: true }),
@@ -17,5 +17,8 @@ export default defineConfig({
   mode: 'development',
   build: {
     target: 'esnext',
+  },
+  optimizeDeps: {
+    exclude: ['solid-js/store', '@solid-devtools/debugger'],
   },
 })

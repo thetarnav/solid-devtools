@@ -1,5 +1,5 @@
 import { describe, beforeEach, vi, it, expect } from 'vitest'
-import { getOwner, Mapped, NodeType, Solid } from '@solid-devtools/shared/graph'
+import { Mapped, NodeType } from '@solid-devtools/shared/graph'
 import {
   createComputed,
   createEffect,
@@ -9,6 +9,8 @@ import {
   createSignal,
 } from 'solid-js'
 import type * as API from '../src/walker'
+import { getOwner } from '../src/utils'
+import { Solid } from '../src/types'
 
 const getModule = async (): Promise<typeof API.walkSolidTree> =>
   (await import('../src/walker')).walkSolidTree

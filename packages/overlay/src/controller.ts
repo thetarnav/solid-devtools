@@ -5,6 +5,14 @@ import { defer } from '@solid-devtools/shared/primitives'
 
 enableRootsAutoattach()
 
+const clone = <T>(obj: T): T => JSON.parse(JSON.stringify(obj))
+const separate = <T>(obj: T, callback: (value: T) => void): void => {
+  queueMicrotask(() => {
+    const v = clone(obj)
+    queueMicrotask(() => callback(v))
+  })
+}
+
 export function createController() {
   const debug = useDebugger()
 
@@ -29,9 +37,9 @@ export function createController() {
           const { id, selected } = payload.data
           const value = debug.setInspectedSignal(id, selected)
           value &&
-            queueMicrotask(() => {
-              controller.updateSignals({ signals: [{ id, value }], update: false })
-            })
+            separate(value, value =>
+              controller.updateSignals({ signals: [{ id, value }], update: false }),
+            )
         }
       })
     },
@@ -46,20 +54,20 @@ export function createController() {
   })
 
   debug.listenTo('SignalUpdates', updates => {
-    queueMicrotask(() => controller.updateSignals({ signals: updates, update: true }))
+    separate(updates, updates => controller.updateSignals({ signals: updates, update: true }))
   })
 
   debug.listenTo('PropsUpdate', updates => {
-    queueMicrotask(() => controller.updateProps(updates))
+    separate(updates, updates => controller.updateProps(updates))
   })
 
   debug.listenTo('ValueUpdate', ({ value, update }) => {
-    queueMicrotask(() => controller.updateValue({ value, update }))
+    separate(value, value => controller.updateValue({ value, update }))
   })
 
   // send the focused owner details
   debug.listenTo('InspectedNodeDetails', details => {
-    queueMicrotask(() => controller.setInspectedDetails(details))
+    queueMicrotask(() => controller.setInspectedDetails(clone(details)))
   })
 
   // send the state of the client locator mode

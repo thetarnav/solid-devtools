@@ -12,8 +12,11 @@ import {
   lookupOwner,
   makeValueUpdateListener,
   removeValueUpdateObserver,
+  Core,
+  getOwner,
+  Solid,
 } from '@solid-devtools/debugger'
-import { getOwner, NodeType, Solid, Core } from '@solid-devtools/shared/graph'
+import { NodeType } from '@solid-devtools/shared/graph'
 import { dedupeArray, arrayRefEquals } from '@solid-devtools/shared/utils'
 import {
   getComputationCreatedLabel,

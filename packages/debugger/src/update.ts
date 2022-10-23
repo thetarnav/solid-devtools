@@ -1,8 +1,8 @@
 import { untrack } from 'solid-js'
 import { Observable, Observer as ObjectObserver } from 'object-observer'
-import { Solid, Core, ValueUpdateListener } from '@solid-devtools/shared/graph'
 import { WINDOW_WRAP_STORE_PROPERTY } from '@solid-devtools/shared/variables'
 import { skipInternalRoot, tryOnCleanup } from './utils'
+import { Core, Solid, ValueUpdateListener } from './types'
 
 //
 // AFTER UPDATE

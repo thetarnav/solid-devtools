@@ -1,8 +1,14 @@
 // see https://developer.chrome.com/docs/devtools/console/format-style/
 // to gen a overview of how to style console messages
 
-import { getNodeName, getNodeType, getOwnerType, isSolidMemo } from '@solid-devtools/debugger'
-import { NodeType, Solid } from '@solid-devtools/shared/graph'
+import {
+  getNodeName,
+  getNodeType,
+  getOwnerType,
+  isSolidMemo,
+  Solid,
+} from '@solid-devtools/debugger'
+import { NodeType } from '@solid-devtools/shared/graph'
 import { dedupeArray } from '@solid-devtools/shared/utils'
 import { getDiffMap, getStackDiffMap } from './utils'
 

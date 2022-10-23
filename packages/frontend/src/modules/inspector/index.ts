@@ -9,7 +9,7 @@ import type { Structure } from '../structure'
 
 export namespace Inspector {
   export type Signal = {
-    readonly type: NodeType.Signal | NodeType.Memo
+    readonly type: NodeType.Signal | NodeType.Memo | NodeType.Store
     readonly name: string
     readonly id: NodeID
     readonly observers: NodeID[]

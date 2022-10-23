@@ -1,14 +1,16 @@
-import { createEffect, createSignal, batch, For, Component, getOwner } from 'solid-js'
-import { createStore, Store, SetStoreFunction } from 'solid-js/store'
+import { debugStore } from '@solid-devtools/debugger'
+import { createSignal, batch, For, Component, getOwner } from 'solid-js'
+import { createStore, Store, SetStoreFunction, produce, unwrap } from 'solid-js/store'
 // import { isSolidMemo } from "@solid-devtools/debugger"
 
 export function createLocalStore<T extends object>(
   name: string,
   init: T,
 ): [Store<T>, SetStoreFunction<T>] {
-  const localState = localStorage.getItem(name)
-  const [state, setState] = createStore<T>(localState ? JSON.parse(localState) : init)
-  createEffect(() => localStorage.setItem(name, JSON.stringify(state)))
+  // const localState = localStorage.getItem(name)
+  const localState = undefined
+  const [state, setState] = createStore<T>(localState ? JSON.parse(localState) : init, { name })
+  // createEffect(() => localStorage.setItem(name, JSON.stringify(state)))
   return [state, setState]
 }
 
@@ -48,7 +50,50 @@ const Todo: Component<{
 
 const Todos: Component = () => {
   const [newTitle, setTitle] = createSignal('')
-  const [todos, setTodos] = createLocalStore<TodoItem[]>('todos', [])
+  const [todos, setTodos] = createLocalStore('todos-2', {
+    values: [] as TodoItem[],
+    other: {
+      name: 'todos',
+      get newTitle() {
+        return { value: newTitle() }
+      },
+      countOuter: {
+        countInner: {
+          count: 0,
+        },
+      },
+    },
+  })
+
+  debugStore(getOwner()!, ['other', 'countOuter'])
+
+  // @ts-ignore
+  setTodos('other', 'else', unwrap(todos.values))
+
+  setTimeout(() => {
+    setTodos('other', 'countOuter', p => ({
+      ...p,
+      countInner: undefined,
+    }))
+  })
+
+  const [count, setCount] = createStore(todos.other.countOuter.countInner)
+  const intervalId = setInterval(() => {
+    const newCount = count.count + 1
+    batch(() => {
+      if (newCount === 5) {
+        setTodos('other', 'countOuter', 'countInner', unwrap(count))
+        setTodos('other', 'name', 'todos-2')
+      }
+      setCount('count', newCount)
+    })
+    if (newCount === 5) {
+      console.log('AFTER BATCH')
+    }
+    if (newCount === 8) {
+      clearInterval(intervalId)
+    }
+  }, 1000)
 
   // makeStoreObserver(todos, console.log)
 
@@ -57,7 +102,7 @@ const Todos: Component = () => {
   const addTodo = (e: SubmitEvent) => {
     e.preventDefault()
     batch(() => {
-      setTodos(todos.length, {
+      setTodos('values', todos.values.length, {
         title: newTitle(),
         done: false,
       })
@@ -83,18 +128,24 @@ const Todos: Component = () => {
         <input
           placeholder="enter todo and click +"
           required
-          value={newTitle()}
+          value={todos.other.newTitle.value}
           onInput={e => setTitle(e.currentTarget.value)}
         />
         <button>+</button>
       </form>
-      <For each={todos}>
+      <For each={todos.values}>
         {(todo, i) => (
           <Todo
             {...todo}
-            onCheck={v => setTodos(i(), 'done', v)}
-            onUpdate={v => setTodos(i(), 'title', v)}
-            onRemove={() => setTodos(t => removeIndex(t, i()))}
+            onCheck={v => setTodos('values', i(), 'done', v)}
+            onUpdate={v => setTodos('values', i(), 'title', v)}
+            // onRemove={() => setTodos('values', t => removeIndex(t, i()))}
+            onRemove={() =>
+              setTodos(
+                'values',
+                produce(t => t.splice(i(), 1)),
+              )
+            }
           />
         )}
       </For>

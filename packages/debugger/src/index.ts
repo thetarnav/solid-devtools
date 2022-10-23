@@ -26,6 +26,7 @@ export {
 export type { AfterCrateRoot, ObjectObserver } from './update'
 
 export {
+  getOwner,
   getOwnerType,
   getNodeType,
   getNodeName,
@@ -42,3 +43,5 @@ export {
 } from './utils'
 
 export type { LocatorOptions, TargetIDE, TargetURLFunction } from './locator'
+
+export type { Core, Solid, ValueUpdateListener } from './types'

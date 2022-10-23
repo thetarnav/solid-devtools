@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { Solid, getOwner, NodeType } from '@solid-devtools/shared/graph'
+import { NodeType } from '@solid-devtools/shared/graph'
 import {
   createComponent,
   createComputed,
@@ -9,7 +9,8 @@ import {
   createRoot,
   createSignal,
 } from 'solid-js'
-import { getFunctionSources, getOwnerType, onDispose } from '../src/utils'
+import { getFunctionSources, getOwner, getOwnerType, onDispose } from '../src/utils'
+import { Solid } from '../src/types'
 
 describe('getOwnerType', () => {
   it('identifies Component', () => {

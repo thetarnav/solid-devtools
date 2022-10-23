@@ -1,13 +1,7 @@
 import { Accessor, batch, createEffect, createMemo, createSignal, untrack } from 'solid-js'
 import { createEventHub, createSimpleEmitter } from '@solid-primitives/event-bus'
 import { throttle } from '@solid-primitives/scheduled'
-import {
-  Mapped,
-  Solid,
-  RootsUpdates,
-  NodeID,
-  ComputationUpdate,
-} from '@solid-devtools/shared/graph'
+import { Mapped, RootsUpdates, NodeID, ComputationUpdate } from '@solid-devtools/shared/graph'
 import { EncodedValue, encodeValue, ElementMap } from '@solid-devtools/shared/serialize'
 import { atom, untrackedCallback } from '@solid-devtools/shared/primitives'
 import { createBatchedUpdateEmitter, createInternalRoot } from './utils'
@@ -17,10 +11,12 @@ import {
   clearOwnerObservers,
   collectOwnerDetails,
   encodeComponentProps,
+  SignalMap,
   SignalUpdateHandler,
 } from './inspect'
 import { makeSolidUpdateListener } from './update'
 import { createLocator } from './locator'
+import { Solid } from './types'
 
 /*
 DETAILS:
@@ -139,7 +135,7 @@ export default createInternalRoot(() => {
   //
   const inspected = {
     elementMap: new ElementMap(),
-    signalMap: {} as Record<NodeID, Solid.Signal>,
+    signalMap: {} as SignalMap,
     owner: null as Solid.Owner | null,
     signals: new Set<NodeID>(),
     props: new Set<string>(),

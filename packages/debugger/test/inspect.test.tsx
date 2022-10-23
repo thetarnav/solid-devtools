@@ -1,5 +1,5 @@
 import { describe, beforeEach, vi, it, expect } from 'vitest'
-import { getOwner, NodeType, Solid } from '@solid-devtools/shared/graph'
+import { NodeType } from '@solid-devtools/shared/graph'
 import { ValueType } from '@solid-devtools/shared/serialize'
 import {
   createComputed,
@@ -9,10 +9,11 @@ import {
   createSignal,
   JSX,
 } from 'solid-js'
-import type * as API from '../src/inspect'
+import { Solid } from '../src/types'
+import { getOwner } from '../src/utils'
+// import { createStore } from 'solid-js/store'
 
-const getModule = async (): Promise<typeof API.collectOwnerDetails> =>
-  (await import('../src/inspect')).collectOwnerDetails
+const getInspectModule = async () => await import('../src/inspect')
 
 describe('collectOwnerDetails', () => {
   beforeEach(() => {
@@ -21,7 +22,7 @@ describe('collectOwnerDetails', () => {
   })
 
   it('collects focused owner details', async () => {
-    const collectOwnerDetails = await getModule()
+    const { collectOwnerDetails } = await getInspectModule()
 
     createRoot(dispose => {
       const [s] = createSignal(0, { name: 'source' })
@@ -92,7 +93,7 @@ describe('collectOwnerDetails', () => {
   })
 
   it('component props', async () => {
-    const collectOwnerDetails = await getModule()
+    const { collectOwnerDetails } = await getInspectModule()
 
     createRoot(dispose => {
       let owner!: Solid.Owner
@@ -139,7 +140,7 @@ describe('collectOwnerDetails', () => {
   })
 
   it('dynamic component props', async () => {
-    const collectOwnerDetails = await getModule()
+    const { collectOwnerDetails } = await getInspectModule()
 
     createRoot(dispose => {
       let owner!: Solid.Owner
@@ -238,7 +239,7 @@ describe('collectOwnerDetails', () => {
   // })
 
   it('listens to value updates', async () => {
-    const collectOwnerDetails = await getModule()
+    const { collectOwnerDetails } = await getInspectModule()
 
     createRoot(dispose => {
       let owner!: Solid.Owner
@@ -273,7 +274,7 @@ describe('collectOwnerDetails', () => {
   })
 
   it('listens to signal updates', async () => {
-    const collectOwnerDetails = await getModule()
+    const { collectOwnerDetails } = await getInspectModule()
 
     createRoot(dispose => {
       let owner = getOwner()!
@@ -303,3 +304,15 @@ describe('collectOwnerDetails', () => {
     })
   })
 })
+
+// describe.only('inspectStore', async () => {
+//   const { inspectStoreNode } = await getInspectModule()
+
+//   it('listens to simple store updates', () => {
+//     createRoot(dispose => {
+//       const [state, setState] = createStore({ count: 0 })
+
+//       dispose()
+//     })
+//   })
+// })

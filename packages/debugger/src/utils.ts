@@ -1,16 +1,34 @@
-import { createComputed, createRoot, onCleanup, runWithOwner } from 'solid-js'
+import {
+  createComputed,
+  createRoot,
+  onCleanup,
+  runWithOwner,
+  getOwner as _getOwner,
+} from 'solid-js'
 import { Emit } from '@solid-primitives/event-bus'
 import { throttle } from '@solid-primitives/scheduled'
-import {
-  DebuggerContext,
-  NodeType,
-  Solid,
-  Core,
-  getOwner,
-  NodeID,
-} from '@solid-devtools/shared/graph'
+import { NodeType, NodeID } from '@solid-devtools/shared/graph'
 import { INTERNAL, UNNAMED } from '@solid-devtools/shared/variables'
 import { trimString } from '@solid-devtools/shared/utils'
+import { DEV as STORE_DEV } from 'solid-js/store'
+import { Core, DebuggerContext, Solid } from './types'
+
+// // this is a cheat to get the $NODE and $NAME symbols
+// // they are important for debugging stores, but not exposed by solid-js
+// // see issue: https://github.com/solidjs/solid/pull/1114
+// export const { $NODE, $NAME } = /*#__PURE__*/ (() => {
+//   const obj = {}
+//   ;(createMutable(obj) as any).v
+//   let $NODE!: symbol
+//   let $NAME!: symbol
+//   for (const s of Object.getOwnPropertySymbols(obj)) {
+//     if (s.description === 'store-node') $NODE = s
+//     else if (s.description === 'store-name') $NAME = s
+//   }
+//   return { $NODE, $NAME }
+// })()
+
+export const getOwner = _getOwner as () => Solid.Owner | null
 
 export const isSolidComputation = (o: Readonly<Solid.Owner>): o is Solid.Computation => 'fn' in o
 
@@ -24,6 +42,10 @@ export const isSolidRoot = (o: Readonly<Solid.Owner>): o is Solid.Root =>
   o.sdtType === NodeType.Root || !isSolidComputation(o)
 
 export const isSolidComponent = (o: Readonly<Solid.Owner>): o is Solid.Component => 'props' in o
+
+export const isSolidStore = (o: Readonly<Solid.Signal | Solid.Store>): o is Solid.Store => {
+  return !('observers' in o) && STORE_DEV!.$NAME in o.value
+}
 
 const _isMemo = (o: Readonly<Solid.Computation>): boolean =>
   'value' in o && 'comparator' in o && o.pure === true
@@ -40,6 +62,10 @@ export function getSignalName(signal: Readonly<Solid.Signal>): string {
 
 export function getNodeName(o: Readonly<Solid.Signal | Solid.Owner>): string {
   const name = isSolidOwner(o) ? getOwnerName(o) : getSignalName(o)
+  return getDisplayName(name)
+}
+
+export function getDisplayName(name: string): string {
   return trimString(name, 16)
 }
 

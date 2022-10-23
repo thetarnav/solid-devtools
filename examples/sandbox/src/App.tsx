@@ -15,6 +15,7 @@ import {
 import Todos from './Todos'
 import { disposeApp } from '.'
 import { ThemeExample } from './Theme'
+import { createMutable } from 'solid-js/store'
 
 const doMediumCalc = () => {
   Array.from({ length: 1000000 }, (_, i) => i).sort(() => Math.random() - 5)
@@ -62,17 +63,29 @@ const PassChildren: ParentComponent = props => {
 }
 
 const Article: Component = () => {
+  const state = createMutable({
+    count: 0,
+    other: { name: 'article' },
+    content: {
+      title: 'A cool headline for testing :)',
+      body: 'Lorem ipsum dolor sit amet, consectetur adipisicing elit. Dolorem odio culpa vel vitae? Quis deleniti soluta rem velit necessitatibus? ',
+    },
+  })
+
   return (
     <article>
-      <h3>A cool headline for testing :)</h3>
+      <h3>{state.content.title}</h3>
       <p>
-        Lorem ipsum dolor sit amet, consectetur adipisicing elit. Dolorem odio culpa vel vitae? Quis
-        deleniti soluta rem velit necessitatibus?{' '}
+        {state.content.body}
         <PassChildren>
           <b>
             Saepe nulla omnis nobis minima perferendis odio doloremque deleniti dolore corrupti.
           </b>
         </PassChildren>
+      </p>
+      {/* <p>Count: {state.count}</p> */}
+      <p>
+        <button onClick={() => state.count++}>Increment article count</button>
       </p>
     </article>
   )
