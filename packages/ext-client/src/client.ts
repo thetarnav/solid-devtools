@@ -26,7 +26,7 @@ createInternalRoot(() => {
   onWindowMessage('PanelClosed', () => {
     batch(() => {
       debug.toggleEnabled(false)
-      debug.setInspectedNode(null)
+      debug.inspector.setInspectedNode(null)
     })
   })
 
@@ -40,13 +40,13 @@ createInternalRoot(() => {
 
     onCleanup(
       onWindowMessage('ToggleInspected', payload => {
-        if (payload.type === 'node') debug.setInspectedNode(payload.data)
-        else if (payload.type === 'value') debug.setInspectedValue(payload.data)
+        if (payload.type === 'node') debug.inspector.setInspectedNode(payload.data)
+        else if (payload.type === 'value') debug.inspector.setInspectedValue(payload.data)
         else if (payload.type === 'prop')
-          debug.setInspectedProp(payload.data.id, payload.data.selected)
+          debug.inspector.setInspectedProp(payload.data.id, payload.data.selected)
         else if (payload.type === 'signal') {
           const { id, selected } = payload.data
-          const value = debug.setInspectedSignal(id, selected)
+          const value = debug.inspector.setInspectedSignal(id, selected)
           if (value) postWindowMessage('SignalUpdates', { signals: [{ id, value }], update: false })
         }
       }),

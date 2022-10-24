@@ -16,7 +16,7 @@ const separate = <T>(obj: T, callback: (value: T) => void): void => {
 export function createController() {
   const debug = useDebugger()
 
-  onCleanup(() => debug.setInspectedNode(null))
+  onCleanup(() => debug.inspector.setInspectedNode(null))
 
   const controller = new Controller({
     onDevtoolsLocatorStateChange(enabled) {
@@ -28,14 +28,14 @@ export function createController() {
     onInspect(payload) {
       queueMicrotask(() => {
         if (payload.type === 'node') {
-          debug.setInspectedNode(payload.data)
+          debug.inspector.setInspectedNode(payload.data)
         } else if (payload.type === 'value') {
-          debug.setInspectedValue(payload.data)
+          debug.inspector.setInspectedValue(payload.data)
         } else if (payload.type === 'prop') {
-          debug.setInspectedProp(payload.data.id, payload.data.selected)
+          debug.inspector.setInspectedProp(payload.data.id, payload.data.selected)
         } else if (payload.type === 'signal') {
           const { id, selected } = payload.data
-          const value = debug.setInspectedSignal(id, selected)
+          const value = debug.inspector.setInspectedSignal(id, selected)
           value &&
             separate(value, value =>
               controller.updateSignals({ signals: [{ id, value }], update: false }),

@@ -1,13 +1,12 @@
 import { describe, test, expect } from 'vitest'
 import {
-  ValueType,
-  INFINITY,
-  NEGATIVE_INFINITY,
-  NAN,
-  encodeValue,
   EncodedValue,
-  ElementMap,
-} from '../src/serialize'
+  INFINITY,
+  NAN,
+  NEGATIVE_INFINITY,
+  ValueType,
+} from '@solid-devtools/shared/graph'
+import { encodeValue, ElementMap } from '../src/serialize'
 
 const _testFunction = () => {}
 

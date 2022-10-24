@@ -1,5 +1,4 @@
-import { debugStore } from '@solid-devtools/debugger'
-import { createSignal, batch, For, Component, getOwner } from 'solid-js'
+import { createSignal, batch, For, Component } from 'solid-js'
 import { createStore, Store, SetStoreFunction, produce, unwrap } from 'solid-js/store'
 // import { isSolidMemo } from "@solid-devtools/debugger"
 
@@ -64,8 +63,6 @@ const Todos: Component = () => {
       },
     },
   })
-
-  debugStore(getOwner()!, ['other', 'countOuter'])
 
   // @ts-ignore
   setTodos('other', 'else', unwrap(todos.values))

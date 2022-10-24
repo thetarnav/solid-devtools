@@ -1,5 +1,4 @@
 import { NodeType } from '@solid-devtools/shared/graph'
-import { UNNAMED } from '@solid-devtools/shared/variables'
 import * as API from './index'
 import { createRoot } from 'solid-js'
 import { Solid } from './types'
@@ -22,6 +21,12 @@ export const useDebugger: typeof API.useDebugger = () => ({
   setInspectedValue: () => null,
   enabled: () => false,
   toggleEnabled: () => {},
+  inspector: {
+    setInspectedNode: () => {},
+    setInspectedSignal: () => null,
+    setInspectedProp: () => {},
+    setInspectedValue: () => null,
+  },
   locator: {
     toggleEnabled: () => {},
     addClickInterceptor: () => {},
@@ -48,7 +53,7 @@ export const removeValueUpdateObserver: typeof API.removeValueUpdateObserver = (
 export const getOwner: typeof API.getOwner = () => null
 export const getOwnerType: typeof API.getOwnerType = () => NodeType.Computation
 export const getNodeType: typeof API.getNodeType = () => NodeType.Computation
-export const getNodeName: typeof API.getNodeName = () => UNNAMED
+export const getNodeName: typeof API.getNodeName = () => '(unnamed)'
 export const isSolidComputation: typeof API.isSolidComputation = (o): o is Solid.Computation =>
   false
 export const isSolidMemo: typeof API.isSolidMemo = (o): o is Solid.Memo => false

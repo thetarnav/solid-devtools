@@ -1,6 +1,6 @@
-import { NodeID, NodeType } from '@solid-devtools/shared/graph'
-import { INTERNAL } from '@solid-devtools/shared/variables'
-import { $ON_UPDATE } from 'solid-js/store/types/store'
+import type { NodeID, NodeType } from '@solid-devtools/shared/graph'
+import type { $ON_UPDATE } from 'solid-js/store/types/store'
+import type { INTERNAL } from './utils'
 
 export type ValueUpdateListener = (newValue: unknown, oldValue: unknown) => void
 

@@ -1,7 +1,6 @@
 import { createEffect, onCleanup, untrack } from 'solid-js'
 import { throttle } from '@solid-primitives/scheduled'
 import { NodeID, NodeType } from '@solid-devtools/shared/graph'
-import { INTERNAL } from '@solid-devtools/shared/variables'
 import { untrackedCallback } from '@solid-devtools/shared/primitives'
 import { warn } from '@solid-devtools/shared/utils'
 import { ComputationUpdateHandler, WalkerResult, walkSolidTree } from './walker'
@@ -16,6 +15,7 @@ import {
   removeDebuggerContext,
   setDebuggerContext,
   getOwner,
+  INTERNAL,
 } from './utils'
 import { makeCreateRootListener } from './update'
 import { Core, DebuggerContext, Solid } from './types'

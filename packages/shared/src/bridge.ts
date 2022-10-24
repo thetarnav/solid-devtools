@@ -1,5 +1,4 @@
-import { ComputationUpdate, Mapped, NodeID, RootsUpdates } from './graph'
-import { EncodedValue } from './serialize'
+import { ComputationUpdate, EncodedValue, Mapped, NodeID, RootsUpdates } from './graph'
 import { log } from './utils'
 
 export const LOG_MESSAGES = false

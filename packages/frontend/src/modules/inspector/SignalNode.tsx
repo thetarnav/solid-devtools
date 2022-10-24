@@ -15,15 +15,16 @@ import {
   useContext,
 } from 'solid-js'
 import { Entries } from '@solid-primitives/keyed'
-import { NodeID, NodeType } from '@solid-devtools/shared/graph'
 import {
+  NodeID,
+  NodeType,
   EncodedValue,
   EncodedValueOf,
   INFINITY,
   NAN,
   NEGATIVE_INFINITY,
   ValueType,
-} from '@solid-devtools/shared/serialize'
+} from '@solid-devtools/shared/graph'
 import clsx from 'clsx'
 import { Highlight, Icon } from '@/ui'
 import { $VALUE, Inspector } from '.'

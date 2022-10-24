@@ -1,5 +1,4 @@
 import { Many } from '@solid-primitives/utils'
-import { EncodedValue } from './serialize'
 
 export enum NodeType {
   Root,
@@ -83,3 +82,52 @@ export namespace Mapped {
     observers?: NodeID[]
   }
 }
+
+export const INFINITY = '__$sdt-Infinity__'
+export const NEGATIVE_INFINITY = '__$sdt-NegativeInfinity__'
+export const NAN = '__$sdt-NaN__'
+
+export enum ValueType {
+  Number,
+  Boolean,
+  String,
+  Null,
+  Undefined,
+  Symbol,
+  Array,
+  Object,
+  Function,
+  Getter,
+  Element,
+  Instance,
+}
+
+export type EncodedPreviewPayloadMap = {
+  [ValueType.Array]: number
+  [ValueType.Object]: number
+  [ValueType.Number]: number | typeof INFINITY | typeof NEGATIVE_INFINITY | typeof NAN
+  [ValueType.Boolean]: boolean
+  [ValueType.String]: string
+  [ValueType.Symbol]: string
+  [ValueType.Function]: string
+  [ValueType.Getter]: string
+  [ValueType.Element]: { name: string; id?: string }
+  [ValueType.Instance]: string
+}
+
+export type EncodedValueOf<K extends ValueType, Deep extends boolean = false> = {
+  type: K
+} & (K extends keyof EncodedPreviewPayloadMap
+  ? { value: EncodedPreviewPayloadMap[K] }
+  : { value?: undefined }) &
+  (Deep extends true
+    ? K extends ValueType.Object
+      ? { children: Record<string, EncodedValue<true>> }
+      : K extends ValueType.Array
+      ? { children: EncodedValue<true>[] }
+      : { children?: undefined }
+    : { children?: undefined })
+
+export type EncodedValue<Deep extends boolean = false> = {
+  [K in ValueType]: EncodedValueOf<K, Deep>
+}[ValueType]

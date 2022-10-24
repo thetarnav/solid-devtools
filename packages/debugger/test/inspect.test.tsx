@@ -15,13 +15,12 @@ import {
   unwrap,
   modifyMutable,
 } from 'solid-js/store'
-import { NodeType } from '@solid-devtools/shared/graph'
-import { ValueType } from '@solid-devtools/shared/serialize'
+import { NodeType, ValueType } from '@solid-devtools/shared/graph'
 import { Solid } from '../src/types'
 import { getOwner, isSolidStore } from '../src/utils'
-import { type StoreUpdateHandler } from '../src/inspect'
+import { type StoreUpdateHandler } from '../src/inspector'
 
-const getInspectModule = async () => await import('../src/inspect')
+const getInspectModule = async () => await import('../src/inspector')
 
 describe('collectOwnerDetails', () => {
   beforeEach(() => {

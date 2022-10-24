@@ -54,11 +54,6 @@
       "require": "./dist/variables.cjs",
       "types": "./dist/variables.d.ts"
     },
-    "./serialize": {
-      "import": "./dist/serialize.js",
-      "require": "./dist/serialize.cjs",
-      "types": "./dist/serialize.d.ts"
-    },
     "./primitives": {
       "import": "./dist/primitives.js",
       "require": "./dist/primitives.cjs",
@@ -78,9 +73,6 @@
       ],
       "variables": [
         "./dist/variables.d.ts"
-      ],
-      "serialize": [
-        "./dist/serialize.d.ts"
       ],
       "primitives": [
         "./dist/primitives.d.ts"

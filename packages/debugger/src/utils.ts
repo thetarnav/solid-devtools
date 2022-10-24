@@ -8,25 +8,9 @@ import {
 import { Emit } from '@solid-primitives/event-bus'
 import { throttle } from '@solid-primitives/scheduled'
 import { NodeType, NodeID } from '@solid-devtools/shared/graph'
-import { INTERNAL, UNNAMED } from '@solid-devtools/shared/variables'
 import { trimString } from '@solid-devtools/shared/utils'
 import { DEV as STORE_DEV } from 'solid-js/store'
 import { Core, DebuggerContext, Solid } from './types'
-
-// // this is a cheat to get the $NODE and $NAME symbols
-// // they are important for debugging stores, but not exposed by solid-js
-// // see issue: https://github.com/solidjs/solid/pull/1114
-// export const { $NODE, $NAME } = /*#__PURE__*/ (() => {
-//   const obj = {}
-//   ;(createMutable(obj) as any).v
-//   let $NODE!: symbol
-//   let $NAME!: symbol
-//   for (const s of Object.getOwnPropertySymbols(obj)) {
-//     if (s.description === 'store-node') $NODE = s
-//     else if (s.description === 'store-name') $NAME = s
-//   }
-//   return { $NODE, $NAME }
-// })()
 
 export const getOwner = _getOwner as () => Solid.Owner | null
 
@@ -54,10 +38,10 @@ export function getOwnerName(owner: Readonly<Solid.Owner>): string {
   const { name, componentName: component } = owner
   if (component && typeof component === 'string')
     return component.startsWith('_Hot$$') ? component.slice(6) : component
-  return name || UNNAMED
+  return name || '(unnamed)'
 }
 export function getSignalName(signal: Readonly<Solid.Signal>): string {
-  return signal.name || UNNAMED
+  return signal.name || '(unnamed)'
 }
 
 export function getNodeName(o: Readonly<Solid.Signal | Solid.Owner>): string {
@@ -266,6 +250,8 @@ export function markNodesID(nodes?: { sdtId?: NodeID }[] | null): NodeID[] {
 }
 
 let SkipInternalRoot: Core.RootFunction<unknown> | null = null
+
+export const INTERNAL = Symbol('internal')
 
 /**
  * Sold's `createRoot` primitive that won't be tracked by the debugger.
