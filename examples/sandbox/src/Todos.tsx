@@ -64,6 +64,8 @@ const Todos: Component = () => {
     },
   })
 
+  const [valuesInASignal] = createSignal({ values: todos.values })
+
   // @ts-ignore
   setTodos('other', 'else', unwrap(todos.values))
 

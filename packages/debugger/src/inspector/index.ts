@@ -1,4 +1,4 @@
-import { $PROXY, Accessor, createEffect, createMemo, untrack } from 'solid-js'
+import { $PROXY, Accessor, createEffect, createMemo } from 'solid-js'
 import { throttle } from '@solid-primitives/scheduled'
 import { Mapped, NodeID, NodeType, EncodedValue, ValueType } from '@solid-devtools/shared/graph'
 import { Messages } from '@solid-devtools/shared/bridge'
@@ -26,6 +26,7 @@ import { ElementMap, encodeValue, HandleStoreNode } from './serialize'
 import { getStoreNodeName, observeStoreNode } from './store'
 
 export type SignalUpdateHandler = (nodeId: NodeID, value: unknown) => void
+// TODO make it into a class maybe?
 export type SignalMap = Record<
   NodeID,
   {
@@ -318,24 +319,29 @@ export function createInspector({
     setInspectedDetails(walkResult.inspectedOwner)
   }
 
-  function setInspectedSignal(id: NodeID, selected: boolean): void {
+  const setInspectedSignal = untrackedCallback((id: NodeID, selected: boolean): void => {
     const signal = signalMap[id]
     if (!signal) {
       console.warn('Could not find signal', id)
       return
     }
     signal.selected = selected
-    const value = untrack(() =>
-      encodeValue(signal.node.value, selected, elementMap, storeNode => {
+    let value: EncodedValue<boolean>
+    if (selected) {
+      value = encodeValue(signal.node.value, true, elementMap, storeNode => {
         console.log('TRACK STORE NODE', getStoreNodeName(storeNode))
         const unsub = observeStoreNode(storeNode, data => {
           console.log('STORE NODE UPDATE', getStoreNodeName(storeNode), data)
         })
         signal.trackedStores.push(unsub)
-      }),
-    )
+      })
+    } else {
+      value = encodeValue(signal.node.value, false, elementMap)
+      for (const unsub of signal.trackedStores) unsub()
+      signal.trackedStores = []
+    }
     emitUpdate('set-signal', { id, value })
-  }
+  })
   function setInspectedProp(key: NodeID, selected: boolean): void {
     if (selected) inspected.props.add(key)
     else inspected.props.delete(key)

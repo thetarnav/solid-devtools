@@ -1,5 +1,5 @@
 import { untrack } from 'solid-js'
-import { DEV as STORE_DEV } from 'solid-js/store'
+import { DEV as STORE_DEV, unwrap } from 'solid-js/store'
 import { pushToArrayProp } from '@solid-devtools/shared/utils'
 import { Core, Solid } from '../types'
 
@@ -35,6 +35,9 @@ export function observeStoreNode(
   rootNode: Solid.StoreNode,
   onUpdate: StoreUpdateHandler,
 ): VoidFunction {
+  // might still pass in a proxy
+  rootNode = unwrap(rootNode)
+
   const set = new WeakSet<Solid.StoreNode>()
   const symbol = Symbol('inspect-store')
 
