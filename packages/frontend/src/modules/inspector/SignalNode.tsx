@@ -202,6 +202,8 @@ const ValuePreview: Component<{ value: EncodedValue<boolean> }> = props =>
         return <InstanceValuePreview value={props.value.value} />
       case ValueType.Element:
         return <ElementValuePreview value={props.value.value} />
+      case ValueType.Store:
+        return <ValuePreview value={props.value.value} />
       // default:
       //   return <span>{ValueType[props.value.type]}</span>
     }

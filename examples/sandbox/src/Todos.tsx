@@ -1,4 +1,4 @@
-import { createSignal, batch, For, Component } from 'solid-js'
+import { createSignal, batch, For, Component, createMemo } from 'solid-js'
 import { createStore, Store, SetStoreFunction, produce, unwrap } from 'solid-js/store'
 // import { isSolidMemo } from "@solid-devtools/debugger"
 
@@ -64,7 +64,7 @@ const Todos: Component = () => {
     },
   })
 
-  const [valuesInASignal] = createSignal({ values: todos.values })
+  const valuesInASignal = createMemo(() => ({ values: todos.values }))
 
   // @ts-ignore
   setTodos('other', 'else', unwrap(todos.values))

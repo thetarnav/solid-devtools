@@ -267,6 +267,12 @@ export function createInspector({
     inspected.props.clear()
     inspected.owner = owner
     inspected.value = false
+    // TODO: make into a class
+    for (const signal of Object.values(signalMap)) {
+      for (const unsub of signal.trackedStores) unsub()
+      signal.trackedStores = []
+      signal.selected = false
+    }
     const result = collectOwnerDetails(owner, {
       onSignalUpdate,
       onValueUpdate: () => triggerValueUpdate(true),
@@ -282,6 +288,12 @@ export function createInspector({
     inspected.owner = null
     inspected.props.clear()
     inspected.value = false
+    // TODO: make into a class
+    for (const signal of Object.values(signalMap)) {
+      for (const unsub of signal.trackedStores) unsub()
+      signal.trackedStores = []
+      signal.selected = false
+    }
   }
 
   function updateInspectedProps() {
