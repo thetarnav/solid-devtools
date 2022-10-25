@@ -90,10 +90,8 @@ chrome.runtime.onConnect.addListener(port => {
     onPortMessage('StructureUpdate', e => postRuntimeMessage('StructureUpdate', e))
 
     onPortMessage('ComputationUpdates', e => postRuntimeMessage('ComputationUpdates', e))
-    onPortMessage('SignalUpdates', e => postRuntimeMessage('SignalUpdates', e))
     onPortMessage('SetInspectedDetails', e => postRuntimeMessage('SetInspectedDetails', e))
-    onPortMessage('PropsUpdate', e => postRuntimeMessage('PropsUpdate', e))
-    onPortMessage('ValueUpdate', e => postRuntimeMessage('ValueUpdate', e))
+    onPortMessage('InspectorUpdate', e => postRuntimeMessage('InspectorUpdate', e))
     onPortMessage('ClientHoveredComponent', e => postRuntimeMessage('ClientHoveredComponent', e))
     onPortMessage('ClientInspectedNode', e => postRuntimeMessage('ClientInspectedNode', e))
 

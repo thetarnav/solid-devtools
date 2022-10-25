@@ -26,22 +26,7 @@ export function createController() {
       queueMicrotask(() => debug.locator.setHighlightTarget(data))
     },
     onInspect(payload) {
-      queueMicrotask(() => {
-        if (payload.type === 'node') {
-          debug.inspector.setInspectedNode(payload.data)
-        } else if (payload.type === 'value') {
-          debug.inspector.setInspectedValue(payload.data)
-        } else if (payload.type === 'prop') {
-          debug.inspector.setInspectedProp(payload.data.id, payload.data.selected)
-        } else if (payload.type === 'signal') {
-          const { id, selected } = payload.data
-          const value = debug.inspector.setInspectedSignal(id, selected)
-          value &&
-            separate(value, value =>
-              controller.updateSignals({ signals: [{ id, value }], update: false }),
-            )
-        }
-      })
+      queueMicrotask(() => debug.inspector.setInspected(payload))
     },
   })
 
@@ -53,16 +38,8 @@ export function createController() {
     queueMicrotask(() => controller.updateComputation(updates))
   })
 
-  debug.listenTo('SignalUpdates', updates => {
-    separate(updates, updates => controller.updateSignals({ signals: updates, update: true }))
-  })
-
-  debug.listenTo('PropsUpdate', updates => {
-    separate(updates, updates => controller.updateProps(updates))
-  })
-
-  debug.listenTo('ValueUpdate', ({ value, update }) => {
-    separate(value, value => controller.updateValue({ value, update }))
+  debug.listenTo('InspectorUpdate', payload => {
+    separate(payload, payload => controller.updateInspector(payload))
   })
 
   // send the focused owner details

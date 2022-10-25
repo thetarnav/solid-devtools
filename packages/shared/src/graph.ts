@@ -100,6 +100,7 @@ export enum ValueType {
   Getter,
   Element,
   Instance,
+  Store,
 }
 
 export type EncodedPreviewPayloadMap = {
@@ -113,6 +114,7 @@ export type EncodedPreviewPayloadMap = {
   [ValueType.Getter]: string
   [ValueType.Element]: { name: string; id?: string }
   [ValueType.Instance]: string
+  [ValueType.Store]: EncodedValue<true>
 }
 
 export type EncodedValueOf<K extends ValueType, Deep extends boolean = false> = {

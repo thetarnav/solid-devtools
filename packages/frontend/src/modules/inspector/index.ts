@@ -5,6 +5,7 @@ import { createSimpleEmitter } from '@solid-primitives/event-bus'
 import { Mapped, NodeID, NodeType, EncodedValue } from '@solid-devtools/shared/graph'
 import { defer, untrackedCallback } from '@solid-devtools/shared/primitives'
 import type { Structure } from '../structure'
+import { Messages } from '@solid-devtools/shared/bridge'
 
 export namespace Inspector {
   export type Signal = {
@@ -188,8 +189,8 @@ export default function createInspector({
     setDetails('value', createDetails(raw, getNodePath(node)))
   })
 
-  const handleSignalUpdates = untrackedCallback(
-    (updates: { id: NodeID; value: EncodedValue<boolean> }[], isUpdate = true) => {
+  const _handleSignalUpdates = untrackedCallback(
+    (updates: { id: NodeID; value: EncodedValue<boolean> }[], isUpdate: boolean) => {
       if (!details()) return
       setDetails(
         'value',
@@ -205,7 +206,7 @@ export default function createInspector({
       isUpdate && updates.forEach(update => emitValueUpdate(update.id))
     },
   )
-  const handlePropsUpdate = untrackedCallback((props: Mapped.Props) => {
+  const _handlePropsUpdate = untrackedCallback((props: Mapped.Props) => {
     if (!details()?.props) return
     setDetails(
       'value',
@@ -213,15 +214,34 @@ export default function createInspector({
       produce(proxy => reconcileProps(proxy!, props)),
     )
   })
-  const handleValueUpdate = untrackedCallback((value: EncodedValue<boolean>, isUpdate: boolean) => {
-    if (!details()?.value) return
-    setDetails(
-      'value',
-      'value',
-      produce(proxy => reconcileValue(proxy!, value)),
-    )
-    isUpdate && emitValueUpdate($VALUE)
-  })
+  const _handleValueUpdate = untrackedCallback(
+    (value: EncodedValue<boolean>, isUpdate: boolean) => {
+      if (!details()?.value) return
+      setDetails(
+        'value',
+        'value',
+        produce(proxy => reconcileValue(proxy!, value)),
+      )
+      isUpdate && emitValueUpdate($VALUE)
+    },
+  )
+
+  function handleUpdate(payload: Messages['InspectorUpdate']) {
+    switch (payload.type) {
+      case 'set-signal':
+        _handleSignalUpdates([payload], false)
+        break
+      case 'signals':
+        _handleSignalUpdates(payload.updates, true)
+        break
+      case 'props':
+        _handlePropsUpdate(payload.value)
+        break
+      case 'value':
+        _handleValueUpdate(payload.value, payload.update)
+        break
+    }
+  }
 
   /** variable for a callback in bridge.ts */
   let onInspectedHandler:
@@ -265,9 +285,7 @@ export default function createInspector({
     setInspectedNode: setInspected,
     isNodeInspected,
     setDetails: setNewDetails,
-    handleSignalUpdates,
-    handlePropsUpdate,
-    handleValueUpdate,
+    update: handleUpdate,
     toggleSignalSelection,
     toggleValueSelection,
     togglePropSelection,

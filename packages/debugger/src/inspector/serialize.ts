@@ -6,11 +6,24 @@ import {
   NEGATIVE_INFINITY,
   ValueType,
 } from '@solid-devtools/shared/graph'
+import { Solid } from '../types'
+import { isStoreNode } from '../utils'
 
+export type HandleStoreNode = (storeNode: Solid.StoreNode) => void
+
+/**
+ * Encodes any value to a JSON-serializable object.
+ * @param value
+ * @param deep shallow, or deep encoding
+ * @param elementMap for HTML elements, to assign a unique ID to each element
+ * @param handleStore handle encountered store nodes
+ * @returns encoded value
+ */
 export function encodeValue<Deep extends boolean>(
   value: unknown,
   deep: Deep,
-  elementMap?: ElementMap,
+  elementMap: ElementMap,
+  handleStore: HandleStoreNode | false = false,
 ): EncodedValue<Deep> {
   if (typeof value === 'number') {
     if (value === Infinity) return { type: ValueType.Number, value: INFINITY }
@@ -28,17 +41,20 @@ export function encodeValue<Deep extends boolean>(
   if (value instanceof HTMLElement)
     return {
       type: ValueType.Element,
-      value: elementMap
-        ? { name: value.tagName, id: elementMap.set(value) }
-        : { name: value.tagName },
+      value: { name: value.tagName, id: elementMap.set(value) },
     }
+
+  if (deep && handleStore && isStoreNode(value)) {
+    handleStore(value)
+    return { type: ValueType.Store, value: encodeValue(value, true, elementMap) }
+  }
 
   if (Array.isArray(value)) {
     const payload = { type: ValueType.Array, value: value.length } as EncodedValueOf<
       ValueType.Array,
       boolean
     >
-    if (deep) payload.children = value.map(item => encodeValue(item, true, elementMap))
+    if (deep) payload.children = value.map(item => encodeValue(item, true, elementMap, handleStore))
     return payload
   }
 
@@ -55,7 +71,7 @@ export function encodeValue<Deep extends boolean>(
       for (const [key, descriptor] of Object.entries(Object.getOwnPropertyDescriptors(value))) {
         children[key] = descriptor.get
           ? { type: ValueType.Getter, value: key }
-          : encodeValue(descriptor.value, true, elementMap)
+          : encodeValue(descriptor.value, true, elementMap, handleStore)
       }
     }
     return payload

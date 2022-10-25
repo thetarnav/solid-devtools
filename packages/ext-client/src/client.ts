@@ -38,19 +38,7 @@ createInternalRoot(() => {
 
     onCleanup(onWindowMessage('ForceUpdate', () => debug.forceTriggerUpdate()))
 
-    onCleanup(
-      onWindowMessage('ToggleInspected', payload => {
-        if (payload.type === 'node') debug.inspector.setInspectedNode(payload.data)
-        else if (payload.type === 'value') debug.inspector.setInspectedValue(payload.data)
-        else if (payload.type === 'prop')
-          debug.inspector.setInspectedProp(payload.data.id, payload.data.selected)
-        else if (payload.type === 'signal') {
-          const { id, selected } = payload.data
-          const value = debug.inspector.setInspectedSignal(id, selected)
-          if (value) postWindowMessage('SignalUpdates', { signals: [{ id, value }], update: false })
-        }
-      }),
-    )
+    onCleanup(onWindowMessage('ToggleInspected', debug.inspector.setInspected))
 
     debug.listenTo('StructureUpdates', updates => postWindowMessage('StructureUpdate', updates))
 
@@ -58,15 +46,7 @@ createInternalRoot(() => {
       postWindowMessage('ComputationUpdates', updates),
     )
 
-    debug.listenTo('SignalUpdates', updates => {
-      postWindowMessage('SignalUpdates', { signals: updates, update: true })
-    })
-
-    debug.listenTo('PropsUpdate', updates => postWindowMessage('PropsUpdate', updates))
-
-    debug.listenTo('ValueUpdate', ({ value, update }) => {
-      postWindowMessage('ValueUpdate', { value, update })
-    })
+    debug.listenTo('InspectorUpdate', update => postWindowMessage('InspectorUpdate', update))
 
     // send the focused owner details
     debug.listenTo('InspectedNodeDetails', details => {

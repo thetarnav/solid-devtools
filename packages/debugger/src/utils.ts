@@ -27,6 +27,8 @@ export const isSolidRoot = (o: Readonly<Solid.Owner>): o is Solid.Root =>
 
 export const isSolidComponent = (o: Readonly<Solid.Owner>): o is Solid.Component => 'props' in o
 
+export const isStoreNode = (o: object): o is Solid.StoreNode => STORE_DEV!.$NAME in o
+
 export const isSolidStore = (o: Readonly<Solid.Signal | Solid.Store>): o is Solid.Store => {
   return !('observers' in o) && STORE_DEV!.$NAME in o.value
 }

@@ -56,13 +56,9 @@ onWindowMessage('StructureUpdate', graph => postPortMessage('StructureUpdate', g
 
 onWindowMessage('ComputationUpdates', e => postPortMessage('ComputationUpdates', e))
 
-onWindowMessage('SignalUpdates', e => postPortMessage('SignalUpdates', e))
-
 onWindowMessage('SetInspectedDetails', e => postPortMessage('SetInspectedDetails', e))
 
-onWindowMessage('PropsUpdate', e => postPortMessage('PropsUpdate', e))
-
-onWindowMessage('ValueUpdate', e => postPortMessage('ValueUpdate', e))
+onWindowMessage('InspectorUpdate', e => postPortMessage('InspectorUpdate', e))
 
 onWindowMessage('ClientHoveredComponent', e => postPortMessage('ClientHoveredComponent', e))
 

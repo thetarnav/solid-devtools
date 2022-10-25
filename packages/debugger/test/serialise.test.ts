@@ -6,7 +6,7 @@ import {
   NEGATIVE_INFINITY,
   ValueType,
 } from '@solid-devtools/shared/graph'
-import { encodeValue, ElementMap } from '../src/serialize'
+import { encodeValue, ElementMap } from '../src/inspector/serialize'
 
 const _testFunction = () => {}
 
@@ -45,7 +45,7 @@ const encodePreviewExpectations: [string, unknown, EncodedValue<false>][] = [
 describe('encodeValue Preview', () => {
   for (const [testName, value, expectation] of encodePreviewExpectations) {
     test(testName, () => {
-      const s = encodeValue(value, false)
+      const s = encodeValue(value, false, {} as ElementMap)
       expect(s).toEqual(expectation)
       expect(JSON.parse(JSON.stringify(s))).toEqual(s)
     })
@@ -159,7 +159,7 @@ const encodeDeepExpectations: [string, unknown, EncodedValue<true>][] = [
 describe('encodeValue Deep', () => {
   for (const [testName, value, expectation] of encodeDeepExpectations) {
     test(testName, () => {
-      const s = encodeValue(value, true)
+      const s = encodeValue(value, true, {} as ElementMap)
       expect(s).toEqual(expectation)
       expect(JSON.parse(JSON.stringify(s))).toEqual(s)
     })

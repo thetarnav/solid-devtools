@@ -24,9 +24,7 @@ interface DevtoolsListenerPayloads {
   SetInspectedDetails: Messages['SetInspectedDetails']
   StructureUpdate: RootsUpdates | null
   ComputationUpdates: Messages['ComputationUpdates']
-  SignalUpdates: Messages['SignalUpdates']
-  PropsUpdate: Messages['PropsUpdate']
-  ValueUpdate: Messages['ValueUpdate']
+  InspectorUpdate: Messages['InspectorUpdate']
   ClientLocatorModeChange: boolean
   ClientHoveredComponent: Messages['ClientHoveredComponent']
   ClientInspectedNode: Messages['ClientInspectedNode']
@@ -51,14 +49,8 @@ export class Controller {
   updateComputation(computationUpdate: Messages['ComputationUpdates']) {
     this.listeners.onComputationUpdates(computationUpdate)
   }
-  updateSignals(signalUpdates: Messages['SignalUpdates']) {
-    this.listeners.onSignalUpdates(signalUpdates)
-  }
-  updateProps(propsUpdate: Messages['PropsUpdate']) {
-    this.listeners.onPropsUpdate(propsUpdate)
-  }
-  updateValue(valueUpdate: Messages['ValueUpdate']) {
-    this.listeners.onValueUpdate(valueUpdate)
+  updateInspector(inspectorUpdate: Messages['InspectorUpdate']) {
+    this.listeners.onInspectorUpdate(inspectorUpdate)
   }
   setInspectedDetails(ownerDetails: Messages['SetInspectedDetails']) {
     this.listeners.onSetInspectedDetails(ownerDetails)
@@ -134,14 +126,8 @@ const [Provider, useControllerCtx] = createContextProvider((props: { controller:
         inspector.handleStructureChange()
       })
     },
-    onSignalUpdates({ signals, update }) {
-      inspector.handleSignalUpdates(signals, update)
-    },
-    onPropsUpdate(updated) {
-      inspector.handlePropsUpdate(updated)
-    },
-    onValueUpdate({ value, update }) {
-      inspector.handleValueUpdate(value, update)
+    onInspectorUpdate(payload) {
+      inspector.update(payload)
     },
   })
 

@@ -6,27 +6,21 @@ import {
   EventHub,
 } from '@solid-primitives/event-bus'
 import { throttle } from '@solid-primitives/scheduled'
-import {
-  Mapped,
-  RootsUpdates,
-  NodeID,
-  ComputationUpdate,
-  EncodedValue,
-} from '@solid-devtools/shared/graph'
+import { Mapped, RootsUpdates, NodeID, ComputationUpdate } from '@solid-devtools/shared/graph'
 import { atom } from '@solid-devtools/shared/primitives'
 import { createBatchedUpdateEmitter, createInternalRoot } from './utils'
 import { ComputationUpdateHandler } from './walker'
 import { createLocator } from './locator'
-import { createInspector } from './inspector'
+import { createInspector, InspectorUpdateData } from './inspector'
 
 export type BatchComputationUpdatesHandler = (payload: ComputationUpdate[]) => void
 
 type DebuggerEventHubMessages = {
   ComputationUpdates: ComputationUpdate[]
-  SignalUpdates: { id: NodeID; value: EncodedValue<boolean> }[]
-  PropsUpdate: Mapped.Props
-  ValueUpdate: { value: EncodedValue<boolean>; update: boolean }
   StructureUpdates: RootsUpdates
+  InspectorUpdate: {
+    [K in keyof InspectorUpdateData]: InspectorUpdateData[K] & { type: K }
+  }[keyof InspectorUpdateData]
   InspectedNodeDetails: Mapped.OwnerDetails
 }
 export type DebuggerEventHub = EventHub<{
@@ -41,10 +35,8 @@ export default createInternalRoot(() => {
 
   const eventHub: DebuggerEventHub = createEventHub(bus => ({
     ComputationUpdates: bus(),
-    SignalUpdates: bus(),
-    PropsUpdate: bus(),
-    ValueUpdate: bus(),
     StructureUpdates: bus(),
+    InspectorUpdate: bus(),
     InspectedNodeDetails: bus(),
   }))
 
@@ -169,6 +161,7 @@ export default createInternalRoot(() => {
         setInspectedSignal: inspector.setInspectedSignal,
         setInspectedProp: inspector.setInspectedProp,
         setInspectedValue: inspector.setInspectedValue,
+        setInspected: inspector.setInspected,
       },
       locator: {
         toggleEnabled: locator.togglePluginLocatorMode,

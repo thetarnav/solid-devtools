@@ -18,12 +18,14 @@ export interface Messages {
   ResetPanel: {}
   StructureUpdate: RootsUpdates
   ComputationUpdates: ComputationUpdate[]
-  /** client -> devtools: signal deep value */
-  SignalUpdates: { signals: { id: NodeID; value: EncodedValue<boolean> }[]; update: boolean }
-  /** client -> devtools: encoded props object */
-  PropsUpdate: Mapped.Props
-  /** client -> devtools: inspected node value update */
-  ValueUpdate: { value: EncodedValue<boolean>; update: boolean }
+  /** client -> devtools: updates from the inspector */
+  // TODO: move the bridge to the client package
+  InspectorUpdate:
+    | { type: 'set-signal'; id: NodeID; value: EncodedValue<boolean> }
+    | { type: 'signals'; updates: { id: NodeID; value: EncodedValue<boolean> }[] }
+    | { type: 'value'; value: EncodedValue<boolean>; update: boolean }
+    | { type: 'props'; value: Mapped.Props }
+
   /** devtools -> client: force the debugger to walk the whole tree and send it */
   ForceUpdate: {}
   /** client -> devtools: send component clicked with the locator to the extension */
@@ -31,10 +33,12 @@ export interface Messages {
   /** client -> devtools: send updates to the owner details */
   SetInspectedDetails: Mapped.OwnerDetails
   /** devtools -> client: request for node/signal/prop details — subscribe or unsubscribe */
+  // TODO: move the bridge to the debugger package
   ToggleInspected:
     | { type: 'node'; data: null | { rootId: NodeID; nodeId: NodeID } }
     | { type: 'signal' | 'prop'; data: { id: NodeID; selected: boolean } }
     | { type: 'value'; data: boolean }
+
   /** devtools -> client: user hovered over component/element signal in devtools panel */
   HighlightElement: { rootId: NodeID; nodeId: NodeID } | { elementId: string } | null
   /** client -> devtools: send hovered (by the locator) owner to the extension */
