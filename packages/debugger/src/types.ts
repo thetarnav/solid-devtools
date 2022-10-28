@@ -1,6 +1,6 @@
 import type { NodeID, NodeType } from '@solid-devtools/shared/graph'
 import type { $ON_UPDATE } from 'solid-js/store/types/store'
-import type { INTERNAL } from './utils'
+import type { INTERNAL, $SDT_ID } from './utils'
 
 export type ValueUpdateListener = (newValue: unknown, oldValue: unknown) => void
 
@@ -27,16 +27,16 @@ export namespace Core {
 
 declare module 'solid-js/types/reactive/signal' {
   interface SignalState<T> {
-    sdtId?: NodeID
+    [$SDT_ID]?: NodeID
     sdtName?: string
   }
   interface Owner {
-    sdtId?: NodeID
+    [$SDT_ID]?: NodeID
     sdtName?: string
     sdtType?: NodeType
   }
   interface Computation<Init, Next> {
-    sdtId?: NodeID
+    [$SDT_ID]?: NodeID
     sdtType?: NodeType
     onValueUpdate?: Record<symbol, ValueUpdateListener>
     onComputationUpdate?: VoidFunction
@@ -67,7 +67,7 @@ export namespace Solid {
 
   export interface Store {
     value: StoreNode
-    sdtId?: NodeID
+    [$SDT_ID]?: NodeID
   }
 
   export interface Root extends Core.Owner {

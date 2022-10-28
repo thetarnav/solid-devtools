@@ -120,9 +120,9 @@ export default createInternalRoot(() => {
   //
   // Computation updates:
   //
-  const _pushComputationUpdate = createBatchedUpdateEmitter<ComputationUpdate>(updates =>
-    eventHub.emit('ComputationUpdates', updates),
-  )
+  const _pushComputationUpdate = createBatchedUpdateEmitter<ComputationUpdate>(updates => {
+    eventHub.emit('ComputationUpdates', updates)
+  })
   const pushComputationUpdate: ComputationUpdateHandler = (rootId, id) => {
     _pushComputationUpdate({ rootId, id })
   }

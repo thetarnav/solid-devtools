@@ -26,6 +26,7 @@ export const useDebugger: typeof API.useDebugger = () => ({
     setInspectedSignal: () => null,
     setInspectedProp: () => {},
     setInspectedValue: () => null,
+    setInspected: () => {},
   },
   locator: {
     toggleEnabled: () => {},

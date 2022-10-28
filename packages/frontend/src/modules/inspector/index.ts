@@ -63,6 +63,16 @@ export namespace Inspector {
 // }
 
 function reconcileValue(proxy: EncodedValue<boolean>, next: EncodedValue<boolean>) {
+  if (proxy.type !== next.type) {
+    const assigned = new Set()
+    for (const key in next) {
+      ;(proxy as any)[key] = (next as any)[key]
+      assigned.add(key)
+    }
+    for (const key in proxy) {
+      if (!assigned.has(key)) delete (proxy as any)[key]
+    }
+  }
   proxy.type = next.type
   // value is a literal, so we can just assign it
   if ('value' in next) proxy.value = next.value

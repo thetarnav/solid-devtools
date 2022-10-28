@@ -112,24 +112,27 @@ export type EncodedPreviewPayloadMap = {
   [ValueType.Symbol]: string
   [ValueType.Function]: string
   [ValueType.Getter]: string
-  [ValueType.Element]: { name: string; id?: string }
+  [ValueType.Element]: { name: string; id: NodeID }
   [ValueType.Instance]: string
-  [ValueType.Store]: EncodedValue<true>
+  [ValueType.Store]: { value: EncodedValue<true>; id: NodeID }
 }
 
-export type EncodedValueOf<K extends ValueType, Deep extends boolean = false> = {
+export type EncodedPreviewChildrenMap = {
+  [ValueType.Array]: EncodedValue<true>[]
+  [ValueType.Object]: Record<string, EncodedValue<true>>
+}
+
+export type EncodedValueOf<K extends ValueType, Deep extends boolean = boolean> = {
   type: K
 } & (K extends keyof EncodedPreviewPayloadMap
   ? { value: EncodedPreviewPayloadMap[K] }
   : { value?: undefined }) &
   (Deep extends true
-    ? K extends ValueType.Object
-      ? { children: Record<string, EncodedValue<true>> }
-      : K extends ValueType.Array
-      ? { children: EncodedValue<true>[] }
+    ? K extends keyof EncodedPreviewChildrenMap
+      ? { children: EncodedPreviewChildrenMap[K] }
       : { children?: undefined }
     : { children?: undefined })
 
-export type EncodedValue<Deep extends boolean = false> = {
+export type EncodedValue<Deep extends boolean = boolean> = {
   [K in ValueType]: EncodedValueOf<K, Deep>
 }[ValueType]

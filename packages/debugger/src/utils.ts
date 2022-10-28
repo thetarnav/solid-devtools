@@ -12,6 +12,8 @@ import { trimString } from '@solid-devtools/shared/utils'
 import { DEV as STORE_DEV } from 'solid-js/store'
 import { Core, DebuggerContext, Solid } from './types'
 
+export const $SDT_ID = Symbol('solid-devtools-node-id')
+
 export const getOwner = _getOwner as () => Solid.Owner | null
 
 export const isSolidComputation = (o: Readonly<Solid.Owner>): o is Solid.Computation => 'fn' in o
@@ -82,6 +84,26 @@ export const getOwnerType = (o: Readonly<Solid.Owner>): NodeType => {
     return NodeType.Render
   }
   return NodeType.Computation
+}
+
+let LAST_ID = 0
+export const getNewSdtId = (): NodeID => (LAST_ID++).toString(36)
+
+export function markOwnerName(o: Solid.Owner): string {
+  if (o.sdtName !== undefined) return o.sdtName
+  return (o.sdtName = getNodeName(o))
+}
+export function markOwnerType(o: Solid.Owner, type?: NodeType): NodeType {
+  if (o.sdtType !== undefined) return o.sdtType
+  return (o.sdtType = type ?? getOwnerType(o))
+}
+export function markNodeID(o: { [$SDT_ID]?: NodeID }): NodeID {
+  if (o[$SDT_ID] !== undefined) return o[$SDT_ID]
+  return (o[$SDT_ID] = getNewSdtId())
+}
+export function markNodesID(nodes?: { [$SDT_ID]?: NodeID }[] | null): NodeID[] {
+  if (!nodes || !nodes.length) return []
+  return nodes.map(markNodeID)
 }
 
 export function getComponentRefreshNode(owner: Readonly<Solid.Component>): Solid.Memo | null {
@@ -229,26 +251,6 @@ export function getFunctionSources(fn: () => unknown): Solid.Signal[] {
     ),
   )
   return nodes ?? []
-}
-
-let LAST_ID = 0
-export const getNewSdtId = (): NodeID => (LAST_ID++).toString(36)
-
-export function markOwnerName(o: Solid.Owner): string {
-  if (o.sdtName !== undefined) return o.sdtName
-  return (o.sdtName = getNodeName(o))
-}
-export function markOwnerType(o: Solid.Owner, type?: NodeType): NodeType {
-  if (o.sdtType !== undefined) return o.sdtType
-  return (o.sdtType = type ?? getOwnerType(o))
-}
-export function markNodeID(o: { sdtId?: NodeID }): NodeID {
-  if (o.sdtId !== undefined) return o.sdtId
-  return (o.sdtId = getNewSdtId())
-}
-export function markNodesID(nodes?: { sdtId?: NodeID }[] | null): NodeID[] {
-  if (!nodes || !nodes.length) return []
-  return nodes.map(markNodeID)
 }
 
 let SkipInternalRoot: Core.RootFunction<unknown> | null = null

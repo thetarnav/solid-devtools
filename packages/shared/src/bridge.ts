@@ -25,6 +25,7 @@ export interface Messages {
     | { type: 'signals'; updates: { id: NodeID; value: EncodedValue<boolean> }[] }
     | { type: 'value'; value: EncodedValue<boolean>; update: boolean }
     | { type: 'props'; value: Mapped.Props }
+    | { type: 'store'; id: NodeID; value: EncodedValue<true> }
 
   /** devtools -> client: force the debugger to walk the whole tree and send it */
   ForceUpdate: {}

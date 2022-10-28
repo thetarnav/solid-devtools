@@ -4,25 +4,26 @@ import {
   INFINITY,
   NAN,
   NEGATIVE_INFINITY,
+  NodeID,
   ValueType,
 } from '@solid-devtools/shared/graph'
 import { Solid } from '../types'
 import { isStoreNode } from '../utils'
 
-export type HandleStoreNode = (storeNode: Solid.StoreNode) => void
+export type HandleStoreNode = (is: NodeID, storeNode: Solid.StoreNode) => void
 
 /**
  * Encodes any value to a JSON-serializable object.
  * @param value
  * @param deep shallow, or deep encoding
- * @param elementMap for HTML elements, to assign a unique ID to each element
+ * @param nodeMap for HTML elements and store nodes, to assign a unique ID to each element
  * @param handleStore handle encountered store nodes
  * @returns encoded value
  */
 export function encodeValue<Deep extends boolean>(
   value: unknown,
   deep: Deep,
-  elementMap: ElementMap,
+  nodeMap: NodeIDMap<HTMLElement | Solid.StoreNode>,
   handleStore: HandleStoreNode | false = false,
 ): EncodedValue<Deep> {
   if (typeof value === 'number') {
@@ -41,20 +42,24 @@ export function encodeValue<Deep extends boolean>(
   if (value instanceof HTMLElement)
     return {
       type: ValueType.Element,
-      value: { name: value.tagName, id: elementMap.set(value) },
+      value: { name: value.tagName, id: nodeMap.set(value) },
     }
 
   if (deep && handleStore && isStoreNode(value)) {
-    handleStore(value)
-    return { type: ValueType.Store, value: encodeValue(value, true, elementMap) }
+    const id = nodeMap.set(value)
+    handleStore(id, value)
+    return { type: ValueType.Store, value: { value: encodeValue(value, true, nodeMap), id } }
   }
 
   if (Array.isArray(value)) {
-    const payload = { type: ValueType.Array, value: value.length } as EncodedValueOf<
-      ValueType.Array,
-      boolean
-    >
-    if (deep) payload.children = value.map(item => encodeValue(item, true, elementMap, handleStore))
+    const payload = {
+      type: ValueType.Array,
+      value: value.length,
+    } as EncodedValueOf<ValueType.Array>
+    if (deep)
+      (payload as EncodedValueOf<ValueType.Array, true>).children = value.map(item =>
+        encodeValue(item, true, nodeMap, handleStore),
+      )
     return payload
   }
 
@@ -62,16 +67,17 @@ export function encodeValue<Deep extends boolean>(
   const name = s.slice(8, -1)
   if (name === 'Object') {
     const obj = value as Record<PropertyKey, unknown>
-    const payload: EncodedValueOf<ValueType.Object, boolean> = {
+    const payload: EncodedValueOf<ValueType.Object> = {
       type: ValueType.Object,
       value: Object.keys(obj).length,
     }
     if (deep) {
-      const children: Record<string, EncodedValue<true>> = (payload.children = {} as any)
+      const children = ((payload as unknown as EncodedValueOf<ValueType.Object, true>).children =
+        {} as Record<string, EncodedValue<true>>)
       for (const [key, descriptor] of Object.entries(Object.getOwnPropertyDescriptors(value))) {
         children[key] = descriptor.get
           ? { type: ValueType.Getter, value: key }
-          : encodeValue(descriptor.value, true, elementMap, handleStore)
+          : encodeValue(descriptor.value, true, nodeMap, handleStore)
       }
     }
     return payload
@@ -82,18 +88,18 @@ export function encodeValue<Deep extends boolean>(
 
 let lastId = 0
 
-export class ElementMap {
-  private obj: Record<string, HTMLElement> = {}
-  private map: WeakMap<HTMLElement, string> = new WeakMap()
+export class NodeIDMap<T extends object> {
+  private obj: Record<NodeID, T> = {}
+  private map: WeakMap<T, NodeID> = new WeakMap()
 
-  get(id: string): HTMLElement | undefined {
+  get(id: NodeID): T | undefined {
     return this.obj[id]
   }
 
-  set(element: HTMLElement): string {
+  set(element: T): NodeID {
     let id = this.map.get(element)
     if (id !== undefined) return id
-    id = (lastId++).toString()
+    id = (lastId++).toString(36)
     this.obj[id] = element
     this.map.set(element, id)
     return id

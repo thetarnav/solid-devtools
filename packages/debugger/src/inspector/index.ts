@@ -22,23 +22,238 @@ import {
   markOwnerName,
   markOwnerType,
 } from '../utils'
-import { ElementMap, encodeValue, HandleStoreNode } from './serialize'
+import { NodeIDMap, encodeValue, HandleStoreNode } from './serialize'
 import { getStoreNodeName, observeStoreNode } from './store'
 
-export type SignalUpdateHandler = (nodeId: NodeID, value: unknown) => void
-// TODO make it into a class maybe?
-export type SignalMap = Record<
-  NodeID,
-  {
-    node: Solid.Signal | Solid.Store
-    // unsub functions:
-    trackedStores: VoidFunction[]
-    selected: boolean
+export type InspectorUpdateData = {
+  'set-signal': { id: NodeID; value: EncodedValue<boolean> }
+  signals: { updates: { id: NodeID; value: EncodedValue<boolean> }[] }
+  value: { value: EncodedValue<boolean>; update: boolean }
+  props: { value: Mapped.Props }
+}
+
+/**
+ * Plugin module
+ */
+export function createInspector({
+  debuggerEnabled,
+  eventHub,
+}: {
+  debuggerEnabled: Accessor<boolean>
+  eventHub: DebuggerEventHub
+}) {
+  const inspected = {
+    owner: null as Solid.Owner | null,
+    props: new Set<string>(),
+    value: false,
   }
->
+  let getNodeValue = () => null as unknown
+  let nodeIdMap = new NodeIDMap<HTMLElement | Solid.StoreNode>()
+  let signalMap = new SignalMap()
+
+  const enabled = createMemo(() => debuggerEnabled() || !!inspected.owner)
+
+  const getElementById = (id: NodeID): HTMLElement | undefined => {
+    const el = nodeIdMap.get(id)
+    if (el instanceof HTMLElement) return el
+  }
+
+  const handleStoreNode: HandleStoreNode = node => {
+    console.log('handleStoreNode', getStoreNodeName(node), '\n', node)
+  }
+
+  function emitUpdate<T extends keyof InspectorUpdateData>(type: T, data: InspectorUpdateData[T]) {
+    eventHub.emit('InspectorUpdate', { type, ...data } as any)
+  }
+
+  const onSignalUpdate = (() => {
+    const pushSignalUpdate = createBatchedUpdateEmitter<{
+      id: NodeID
+      value: EncodedValue<boolean>
+    }>(updates => emitUpdate('signals', { updates }))
+
+    return untrackedCallback<SignalUpdateHandler>((id, value) => {
+      if (!enabled()) return
+      const isSelected = signalMap.get(id).selected
+      pushSignalUpdate({
+        id,
+        value: encodeValue(value, isSelected, nodeIdMap, handleStoreNode),
+      })
+    })
+  })()
+
+  const triggerValueUpdate = (() => {
+    let updateNext = false
+    const forceValueUpdate = () => {
+      if (!enabled()) return (updateNext = false)
+      emitUpdate('value', {
+        value: encodeValue(getNodeValue(), inspected.value, nodeIdMap, handleStoreNode),
+        update: updateNext,
+      })
+      updateNext = false
+    }
+    const triggerValueUpdate = throttle(forceValueUpdate)
+    function handleValueUpdate(update: boolean, force = false) {
+      if (update) updateNext = true
+      if (force) forceValueUpdate()
+      else triggerValueUpdate()
+    }
+    return handleValueUpdate
+  })()
+
+  const setInspectedDetails = untrackedCallback((owner: Solid.Owner) => {
+    inspected.owner && clearOwnerObservers(inspected.owner)
+    inspected.props.clear()
+    inspected.owner = owner
+    inspected.value = false
+    signalMap.reset()
+    const result = collectOwnerDetails(owner, {
+      onSignalUpdate,
+      onValueUpdate: () => triggerValueUpdate(true),
+      handleStoreNode,
+    })
+    eventHub.emit('InspectedNodeDetails', result.details)
+    signalMap = result.signalMap
+    nodeIdMap = result.nodeIdMap
+    getNodeValue = result.getOwnerValue
+  })
+  const clearInspectedDetails = () => {
+    inspected.owner && clearOwnerObservers(inspected.owner)
+    inspected.owner = null
+    inspected.props.clear()
+    inspected.value = false
+    signalMap.reset()
+  }
+
+  function updateInspectedProps() {
+    if (!inspected.owner) return
+    const props = encodeComponentProps(inspected.owner, {
+      inspected: inspected.props,
+      nodeIdMap: nodeIdMap,
+      handleStore: handleStoreNode,
+    })
+    props && emitUpdate('props', { value: props })
+  }
+
+  createEffect(() => {
+    // make sure we clear the owner observers when the plugin is disabled
+    if (!debuggerEnabled()) inspected.owner && clearOwnerObservers(inspected.owner)
+    // re-observe the owner when the plugin is enabled
+    else inspected.owner && setInspectedDetails(inspected.owner)
+
+    // update the owner details whenever there is a change in solid's internals
+    makeSolidUpdateListener(
+      throttle(() => {
+        updateInspectedProps()
+        triggerValueUpdate(false)
+      }, 150),
+    )
+  })
+
+  function setInspectedNode(data: { rootId: NodeID; nodeId: NodeID } | null) {
+    if (!data) return clearInspectedDetails()
+    const { rootId, nodeId } = data
+
+    const walkResult = walkSolidRoot(rootId, nodeId)
+    if (!walkResult || !walkResult.inspectedOwner) return clearInspectedDetails()
+
+    setInspectedDetails(walkResult.inspectedOwner)
+  }
+
+  const setInspectedSignal = untrackedCallback((id: NodeID, selected: boolean): void => {
+    const signal = signalMap.get(id)
+    if (!signal) {
+      console.warn('Could not find signal', id)
+      return
+    }
+    signal.selected = selected
+    let value: EncodedValue<boolean>
+    if (selected) {
+      value = encodeValue(signal.node.value, true, nodeIdMap, (nodeId, storeNode) => {
+        console.log(`TRACK STORE NODE, ${nodeId},`, getStoreNodeName(storeNode))
+        const unsub = observeStoreNode(storeNode, data => {
+          console.log(`STORE NODE UPDATE, ${nodeId},`, getStoreNodeName(storeNode), data)
+        })
+        signal.addStoreObserver(unsub)
+      })
+    } else {
+      value = encodeValue(signal.node.value, false, nodeIdMap)
+      signal.unsubscribe()
+    }
+    emitUpdate('set-signal', { id, value })
+  })
+  function setInspectedProp(key: NodeID, selected: boolean): void {
+    if (selected) inspected.props.add(key)
+    else inspected.props.delete(key)
+    updateInspectedProps()
+  }
+  function setInspectedValue(selected: boolean): void {
+    if (!inspected.owner) return
+    inspected.value = selected
+    triggerValueUpdate(false, true)
+  }
+
+  function setInspected(payload: Messages['ToggleInspected']) {
+    switch (payload.type) {
+      case 'node':
+        setInspectedNode(payload.data)
+        break
+      case 'signal':
+        setInspectedSignal(payload.data.id, payload.data.selected)
+        break
+      case 'prop':
+        setInspectedProp(payload.data.id, payload.data.selected)
+        break
+      case 'value':
+        setInspectedValue(payload.data)
+        break
+    }
+  }
+
+  return {
+    setInspectedNode,
+    setInspectedSignal,
+    setInspectedProp,
+    setInspectedValue,
+    setInspected,
+    getElementById,
+  }
+}
+
+type SignalUpdateHandler = (nodeId: NodeID, value: unknown) => void
+
+class InspectedSignal {
+  private trackedStores: VoidFunction[] = []
+  public selected = false
+  constructor(public node: Solid.Signal | Solid.Store) {}
+  addStoreObserver(unsub: VoidFunction) {
+    this.trackedStores.push(unsub)
+  }
+  unsubscribe() {
+    for (const unsub of this.trackedStores) unsub()
+    this.trackedStores = []
+  }
+  reset() {
+    this.unsubscribe()
+    this.selected = false
+  }
+}
+
+class SignalMap {
+  private record: Record<NodeID, InspectedSignal> = {}
+  get(id: NodeID) {
+    return this.record[id]
+  }
+  add(id: NodeID, node: Solid.Signal | Solid.Store) {
+    this.record[id] = new InspectedSignal(node)
+  }
+  reset() {
+    for (const signal of Object.values(this.record)) signal.reset()
+  }
+}
 
 // Globals set before collecting the owner details
-let $elementMap!: ElementMap
+let $nodeIdMap!: NodeIDMap<HTMLElement | Solid.StoreNode>
 let $signalMap!: SignalMap
 
 const INSPECTOR = Symbol('inspector')
@@ -49,7 +264,7 @@ function mapSignalNode(
 ): Mapped.Signal {
   const { value } = node
   const id = markNodeID(node)
-  $signalMap[id] = { node, trackedStores: [], selected: false }
+  $signalMap.add(id, node)
 
   // Check if is a store
   if (isSolidStore(node)) {
@@ -57,7 +272,7 @@ function mapSignalNode(
       type: NodeType.Store,
       id,
       name: getDisplayName(getStoreNodeName(value as Solid.StoreNode)),
-      value: encodeValue(value, false, $elementMap),
+      value: encodeValue(value, false, $nodeIdMap),
       // TODO: top-level values can be observed too, it's the "_" property
       observers: [],
     }
@@ -70,7 +285,7 @@ function mapSignalNode(
     name: getNodeName(node),
     id,
     observers: markNodesID(node.observers),
-    value: encodeValue(value, false, $elementMap),
+    value: encodeValue(value, false, $nodeIdMap),
   }
 }
 
@@ -88,17 +303,21 @@ export function clearOwnerObservers(owner: Solid.Owner): void {
 
 export function encodeComponentProps(
   owner: Solid.Owner,
-  config: { inspected?: Set<string>; elementMap: ElementMap; handleStore: HandleStoreNode },
+  config: {
+    inspected?: Set<string>
+    nodeIdMap: NodeIDMap<HTMLElement | Solid.StoreNode>
+    handleStore: HandleStoreNode
+  },
 ): Mapped.Props | null {
   if (!isSolidComponent(owner)) return null
-  const { elementMap, inspected, handleStore } = config
+  const { nodeIdMap, inspected, handleStore } = config
   const { props } = owner
   const proxy = !!(props as any)[$PROXY]
   const record: Mapped.Props['record'] = {}
   for (const [key, desc] of Object.entries(Object.getOwnPropertyDescriptors(props))) {
     record[key] = desc.get
       ? { type: ValueType.Getter, value: key }
-      : encodeValue(desc.value, inspected ? inspected.has(key) : false, elementMap, handleStore)
+      : encodeValue(desc.value, inspected ? inspected.has(key) : false, nodeIdMap, handleStore)
   }
   return { proxy, record }
 }
@@ -113,14 +332,14 @@ export function collectOwnerDetails(
 ): {
   details: Mapped.OwnerDetails
   signalMap: SignalMap
-  elementMap: ElementMap
+  nodeIdMap: NodeIDMap<HTMLElement | Solid.StoreNode>
   getOwnerValue: () => unknown
 } {
   const { onSignalUpdate, onValueUpdate, handleStoreNode } = config
 
   // Set globals
-  $elementMap = new ElementMap()
-  $signalMap = {}
+  $nodeIdMap = new NodeIDMap()
+  $signalMap = new SignalMap()
 
   const type = markOwnerType(owner)
   let { sourceMap, owned } = owner
@@ -172,7 +391,7 @@ export function collectOwnerDetails(
   }
 
   if (isSolidComputation(owner)) {
-    details.value = encodeValue(getValue(), false, $elementMap)
+    details.value = encodeValue(getValue(), false, $nodeIdMap)
     observeValueUpdate(owner, onValueUpdate, INSPECTOR)
     details.sources = markNodesID(owner.sources)
     if (isSolidMemo(owner)) {
@@ -180,214 +399,11 @@ export function collectOwnerDetails(
     }
     // map component props
     const props = encodeComponentProps(owner, {
-      elementMap: $elementMap,
+      nodeIdMap: $nodeIdMap,
       handleStore: handleStoreNode,
     })
     if (props) details.props = props
   }
 
-  return { details, signalMap: $signalMap, elementMap: $elementMap, getOwnerValue: getValue }
-}
-
-export type InspectorUpdateData = {
-  'set-signal': { id: NodeID; value: EncodedValue<boolean> }
-  signals: { updates: { id: NodeID; value: EncodedValue<boolean> }[] }
-  value: { value: EncodedValue<boolean>; update: boolean }
-  props: { value: Mapped.Props }
-}
-
-/**
- * Plugin module
- */
-export function createInspector({
-  debuggerEnabled,
-  eventHub,
-}: {
-  debuggerEnabled: Accessor<boolean>
-  eventHub: DebuggerEventHub
-}) {
-  const inspected = {
-    owner: null as Solid.Owner | null,
-    props: new Set<string>(),
-    value: false,
-  }
-  let getNodeValue = () => null as unknown
-  let elementMap = new ElementMap()
-  let signalMap = {} as SignalMap
-
-  const enabled = createMemo(() => debuggerEnabled() || !!inspected.owner)
-
-  const getElementById = (id: NodeID): HTMLElement | undefined => elementMap.get(id)
-
-  const handleStoreNode: HandleStoreNode = node => {
-    console.log('handleStoreNode', getStoreNodeName(node), '\n', node)
-  }
-
-  function emitUpdate<T extends keyof InspectorUpdateData>(type: T, data: InspectorUpdateData[T]) {
-    eventHub.emit('InspectorUpdate', { type, ...data } as any)
-  }
-
-  const onSignalUpdate = (() => {
-    const pushSignalUpdate = createBatchedUpdateEmitter<{
-      id: NodeID
-      value: EncodedValue<boolean>
-    }>(updates => emitUpdate('signals', { updates }))
-
-    return untrackedCallback<SignalUpdateHandler>((id, value) => {
-      if (!enabled()) return
-      const isSelected = signalMap[id]?.selected
-      pushSignalUpdate({
-        id,
-        value: encodeValue(value, isSelected, elementMap, handleStoreNode),
-      })
-    })
-  })()
-
-  const triggerValueUpdate = (() => {
-    let updateNext = false
-    const forceValueUpdate = () => {
-      if (!enabled()) return (updateNext = false)
-      emitUpdate('value', {
-        value: encodeValue(getNodeValue(), inspected.value, elementMap, handleStoreNode),
-        update: updateNext,
-      })
-      updateNext = false
-    }
-    const triggerValueUpdate = throttle(forceValueUpdate)
-    function handleValueUpdate(update: boolean, force = false) {
-      if (update) updateNext = true
-      if (force) forceValueUpdate()
-      else triggerValueUpdate()
-    }
-    return handleValueUpdate
-  })()
-
-  const setInspectedDetails = untrackedCallback((owner: Solid.Owner) => {
-    inspected.owner && clearOwnerObservers(inspected.owner)
-    inspected.props.clear()
-    inspected.owner = owner
-    inspected.value = false
-    // TODO: make into a class
-    for (const signal of Object.values(signalMap)) {
-      for (const unsub of signal.trackedStores) unsub()
-      signal.trackedStores = []
-      signal.selected = false
-    }
-    const result = collectOwnerDetails(owner, {
-      onSignalUpdate,
-      onValueUpdate: () => triggerValueUpdate(true),
-      handleStoreNode,
-    })
-    eventHub.emit('InspectedNodeDetails', result.details)
-    signalMap = result.signalMap
-    elementMap = result.elementMap
-    getNodeValue = result.getOwnerValue
-  })
-  const clearInspectedDetails = () => {
-    inspected.owner && clearOwnerObservers(inspected.owner)
-    inspected.owner = null
-    inspected.props.clear()
-    inspected.value = false
-    // TODO: make into a class
-    for (const signal of Object.values(signalMap)) {
-      for (const unsub of signal.trackedStores) unsub()
-      signal.trackedStores = []
-      signal.selected = false
-    }
-  }
-
-  function updateInspectedProps() {
-    if (!inspected.owner) return
-    const props = encodeComponentProps(inspected.owner, {
-      inspected: inspected.props,
-      elementMap: elementMap,
-      handleStore: handleStoreNode,
-    })
-    props && emitUpdate('props', { value: props })
-  }
-
-  createEffect(() => {
-    // make sure we clear the owner observers when the plugin is disabled
-    if (!debuggerEnabled()) inspected.owner && clearOwnerObservers(inspected.owner)
-    // re-observe the owner when the plugin is enabled
-    else inspected.owner && setInspectedDetails(inspected.owner)
-
-    // update the owner details whenever there is a change in solid's internals
-    makeSolidUpdateListener(
-      throttle(() => {
-        updateInspectedProps()
-        triggerValueUpdate(false)
-      }, 150),
-    )
-  })
-
-  function setInspectedNode(data: { rootId: NodeID; nodeId: NodeID } | null) {
-    if (!data) return clearInspectedDetails()
-    const { rootId, nodeId } = data
-
-    const walkResult = walkSolidRoot(rootId, nodeId)
-    if (!walkResult || !walkResult.inspectedOwner) return clearInspectedDetails()
-
-    setInspectedDetails(walkResult.inspectedOwner)
-  }
-
-  const setInspectedSignal = untrackedCallback((id: NodeID, selected: boolean): void => {
-    const signal = signalMap[id]
-    if (!signal) {
-      console.warn('Could not find signal', id)
-      return
-    }
-    signal.selected = selected
-    let value: EncodedValue<boolean>
-    if (selected) {
-      value = encodeValue(signal.node.value, true, elementMap, storeNode => {
-        console.log('TRACK STORE NODE', getStoreNodeName(storeNode))
-        const unsub = observeStoreNode(storeNode, data => {
-          console.log('STORE NODE UPDATE', getStoreNodeName(storeNode), data)
-        })
-        signal.trackedStores.push(unsub)
-      })
-    } else {
-      value = encodeValue(signal.node.value, false, elementMap)
-      for (const unsub of signal.trackedStores) unsub()
-      signal.trackedStores = []
-    }
-    emitUpdate('set-signal', { id, value })
-  })
-  function setInspectedProp(key: NodeID, selected: boolean): void {
-    if (selected) inspected.props.add(key)
-    else inspected.props.delete(key)
-    updateInspectedProps()
-  }
-  function setInspectedValue(selected: boolean): void {
-    if (!inspected.owner) return
-    inspected.value = selected
-    triggerValueUpdate(false, true)
-  }
-
-  function setInspected(payload: Messages['ToggleInspected']) {
-    switch (payload.type) {
-      case 'node':
-        setInspectedNode(payload.data)
-        break
-      case 'signal':
-        setInspectedSignal(payload.data.id, payload.data.selected)
-        break
-      case 'prop':
-        setInspectedProp(payload.data.id, payload.data.selected)
-        break
-      case 'value':
-        setInspectedValue(payload.data)
-        break
-    }
-  }
-
-  return {
-    setInspectedNode,
-    setInspectedSignal,
-    setInspectedProp,
-    setInspectedValue,
-    setInspected,
-    getElementById,
-  }
+  return { details, signalMap: $signalMap, nodeIdMap: $nodeIdMap, getOwnerValue: getValue }
 }
