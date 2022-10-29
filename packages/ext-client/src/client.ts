@@ -1,10 +1,6 @@
 import { batch, createEffect, onCleanup } from 'solid-js'
 import { createInternalRoot, useDebugger } from '@solid-devtools/debugger'
-import {
-  onWindowMessage,
-  postWindowMessage,
-  startListeningWindowMessages,
-} from '@solid-devtools/shared/bridge'
+import { onWindowMessage, postWindowMessage, startListeningWindowMessages } from './bridge'
 import { defer } from '@solid-devtools/shared/primitives'
 
 startListeningWindowMessages()
@@ -38,13 +34,14 @@ createInternalRoot(() => {
 
     onCleanup(onWindowMessage('ForceUpdate', () => debug.forceTriggerUpdate()))
 
-    onCleanup(onWindowMessage('ToggleInspected', debug.inspector.setInspected))
+    onCleanup(onWindowMessage('ToggleInspectedValue', debug.inspector.toggleValueNode))
+    onCleanup(onWindowMessage('SetInspectedNode', debug.inspector.setInspectedNode))
 
     debug.listenTo('StructureUpdates', updates => postWindowMessage('StructureUpdate', updates))
 
-    debug.listenTo('ComputationUpdates', updates =>
-      postWindowMessage('ComputationUpdates', updates),
-    )
+    debug.listenTo('ComputationUpdates', updates => {
+      postWindowMessage('ComputationUpdates', updates)
+    })
 
     debug.listenTo('InspectorUpdate', update => postWindowMessage('InspectorUpdate', update))
 

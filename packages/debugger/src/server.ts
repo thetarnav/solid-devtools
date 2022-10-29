@@ -23,10 +23,7 @@ export const useDebugger: typeof API.useDebugger = () => ({
   toggleEnabled: () => {},
   inspector: {
     setInspectedNode: () => {},
-    setInspectedSignal: () => null,
-    setInspectedProp: () => {},
-    setInspectedValue: () => null,
-    setInspected: () => {},
+    toggleValueNode: () => {},
   },
   locator: {
     toggleEnabled: () => {},

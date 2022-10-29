@@ -36,6 +36,7 @@
   "dependencies": {
     "@floating-ui/dom": "^1.0.3",
     "@otonashixav/solid-flip": "^0.10.5",
+    "@solid-devtools/debugger": "workspace:^0.13.1",
     "@solid-devtools/shared": "workspace:^0.9.2",
     "@solid-primitives/context": "^0.1.2",
     "@solid-primitives/cursor": "^0.0.101",

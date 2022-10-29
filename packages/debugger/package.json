@@ -32,16 +32,19 @@
   "module": "./dist/server.js",
   "types": "./dist/index.d.ts",
   "exports": {
-    "browser": {
-      "development": {
-        "import": "./dist/index.js",
-        "require": "./dist/index.cjs"
+    ".": {
+      "browser": {
+        "development": {
+          "import": "./dist/index.js",
+          "require": "./dist/index.cjs"
+        },
+        "import": "./dist/server.js",
+        "require": "./dist/server.cjs"
       },
       "import": "./dist/server.js",
-      "require": "./dist/server.cjs"
-    },
-    "import": "./dist/server.js",
-    "require": "./dist/server.cjs"
+      "require": "./dist/server.cjs",
+      "types": "./dist/index.d.ts"
+    }
   },
   "scripts": {
     "dev": "tsup --watch",

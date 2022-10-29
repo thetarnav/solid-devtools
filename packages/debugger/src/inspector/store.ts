@@ -24,12 +24,14 @@ function forEachStoreProp(
   }
 }
 
-export type StoreUpdateHandler = (data: {
+export type StoreUpdateData = {
   deleting: boolean
   path: PropertyKey[]
   property: PropertyKey
   value: unknown
-}) => void
+}
+
+export type StoreUpdateHandler = (data: StoreUpdateData) => void
 
 export function observeStoreNode(
   rootNode: Solid.StoreNode,

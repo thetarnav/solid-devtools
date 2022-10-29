@@ -1,4 +1,3 @@
-export * as bridge from './bridge'
 export * as graph from './graph'
 export * as primitives from './primitives'
 export * as utils from './utils'

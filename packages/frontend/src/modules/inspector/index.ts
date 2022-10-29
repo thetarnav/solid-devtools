@@ -4,8 +4,8 @@ import { Writable } from 'type-fest'
 import { createSimpleEmitter } from '@solid-primitives/event-bus'
 import { Mapped, NodeID, NodeType, EncodedValue } from '@solid-devtools/shared/graph'
 import { defer, untrackedCallback } from '@solid-devtools/shared/primitives'
+import type { InspectorUpdate, ToggleInspectedValueData } from '@solid-devtools/debugger'
 import type { Structure } from '../structure'
-import { Messages } from '@solid-devtools/shared/bridge'
 
 export namespace Inspector {
   export type Signal = {
@@ -236,47 +236,45 @@ export default function createInspector({
     },
   )
 
-  function handleUpdate(payload: Messages['InspectorUpdate']) {
-    switch (payload.type) {
-      case 'set-signal':
-        _handleSignalUpdates([payload], false)
-        break
-      case 'signals':
-        _handleSignalUpdates(payload.updates, true)
-        break
-      case 'props':
-        _handlePropsUpdate(payload.value)
-        break
-      case 'value':
-        _handleValueUpdate(payload.value, payload.update)
-        break
-    }
+  function handleUpdate(updates: InspectorUpdate[]) {
+    console.log('handleUpdate', updates)
+    // switch (payload.type) {
+    //   case 'set-signal':
+    //     _handleSignalUpdates([payload], false)
+    //     break
+    //   case 'signals':
+    //     _handleSignalUpdates(payload.updates, true)
+    //     break
+    //   case 'props':
+    //     _handlePropsUpdate(payload.value)
+    //     break
+    //   case 'value':
+    //     _handleValueUpdate(payload.value, payload.update)
+    //     break
+    // }
   }
 
   /** variable for a callback in bridge.ts */
-  let onInspectedHandler:
-    | ((
-        payload:
-          | { type: 'node'; data: Structure.Node | null }
-          | { type: 'signal' | 'prop'; data: { id: NodeID; selected: boolean } }
-          | { type: 'value'; data: boolean },
-      ) => void)
-    | undefined
-  const setOnInspectedHandler = (fn: typeof onInspectedHandler) => (onInspectedHandler = fn)
+  let onInspectedNodeHandler: (node: Structure.Node | null) => void = () => {}
+  let onInspectedValueHandler: (data: ToggleInspectedValueData) => void = () => {}
+  const setOnInspectedValueHandler = (fn: typeof onInspectedValueHandler) =>
+    (onInspectedValueHandler = fn)
+  const setOnInspectedNodeHandler = (fn: typeof onInspectedNodeHandler) =>
+    (onInspectedNodeHandler = fn)
 
-  createEffect(defer(inspectedNode, node => onInspectedHandler?.({ type: 'node', data: node })))
+  createEffect(defer(inspectedNode, node => onInspectedNodeHandler(node)))
 
   function togglePropSelection(id: string, selected?: boolean): void {
     setDetails('value', 'props', 'record', id, 'selected', p => (selected = selected ?? !p))
-    onInspectedHandler!({ type: 'prop', data: { id, selected: selected! } })
+    onInspectedValueHandler({ id: `prop:${id}`, selected: selected! })
   }
   function toggleSignalSelection(id: NodeID, selected?: boolean) {
     setDetails('value', 'signals', id, 'selected', p => (selected = selected ?? !p))
-    onInspectedHandler!({ type: 'signal', data: { id, selected: selected! } })
+    onInspectedValueHandler({ id: `signal:${id}`, selected: selected! })
   }
   function toggleValueSelection(selected?: boolean) {
     setDetails('value', 'valueSelected', p => (selected = selected ?? !p))
-    onInspectedHandler!({ type: 'value', data: selected! })
+    onInspectedValueHandler({ id: 'value', selected: selected! })
   }
 
   //
@@ -299,10 +297,11 @@ export default function createInspector({
     toggleSignalSelection,
     toggleValueSelection,
     togglePropSelection,
-    onInspectedHandler,
+    onInspectedHandler: onInspectedValueHandler,
     hoveredElement,
     toggleHoveredElement,
     handleStructureChange,
-    setOnInspectedHandler,
+    setOnInspectedValueHandler,
+    setOnInspectedNodeHandler,
   }
 }

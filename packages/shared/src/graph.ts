@@ -22,6 +22,11 @@ export type RootsUpdates = {
   updated: Record<NodeID, Mapped.Root>
 }
 
+export type HighlightElementPayload =
+  | { rootId: NodeID; nodeId: NodeID }
+  | { elementId: string }
+  | null
+
 //
 // "Mapped___" — owner/signal/etc. objects created by the solid-devtools-debugger runtime library
 // They should be JSON serialisable — to be able to send them with chrome.runtime.sendMessage

@@ -276,6 +276,18 @@ export const skipInternalRoot = () => {
   return skip
 }
 
+export function dedupeArrayById<T extends { id: NodeID }>(input: T[]): T[] {
+  const ids = new Set<NodeID>()
+  const deduped: T[] = []
+  for (let i = input.length - 1; i >= 0; i--) {
+    const update = input[i]
+    if (ids.has(update.id)) continue
+    ids.add(update.id)
+    deduped.push(update)
+  }
+  return deduped
+}
+
 /**
  * Batches series of updates to a single array of updates.
  *
@@ -287,15 +299,7 @@ export function createBatchedUpdateEmitter<T extends { id: NodeID }>(
   const updates: T[] = []
 
   const triggerUpdateEmit = throttle(() => {
-    // dedupe updates
-    const ids = new Set<NodeID>()
-    const deduped: T[] = []
-    for (let i = updates.length - 1; i >= 0; i--) {
-      const update = updates[i]
-      if (ids.has(update.id)) continue
-      ids.add(update.id)
-      deduped.push(update)
-    }
+    const deduped = dedupeArrayById(updates)
     updates.length = 0
     emit(deduped)
   })

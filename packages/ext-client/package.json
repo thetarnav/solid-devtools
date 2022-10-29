@@ -50,12 +50,20 @@
       "import": "./dist/vite.js",
       "require": "./dist/vite.cjs",
       "types": "./dist/vite.d.ts"
+    },
+    "./bridge": {
+      "import": "./dist/bridge.js",
+      "require": "./dist/bridge.cjs",
+      "types": "./dist/bridge.d.ts"
     }
   },
   "typesVersions": {
     "*": {
       "vite": [
         "./dist/vite.d.ts"
+      ],
+      "bridge": [
+        "./dist/bridge.d.ts"
       ]
     }
   },

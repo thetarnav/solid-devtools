@@ -1,7 +1,18 @@
 import { batch, createEffect, createSignal, on } from 'solid-js'
 import { createContextProvider } from '@solid-primitives/context'
-import { NodeID, NodeType, RootsUpdates } from '@solid-devtools/shared/graph'
-import type { Messages } from '@solid-devtools/shared/bridge'
+import {
+  ComputationUpdate,
+  HighlightElementPayload,
+  Mapped,
+  NodeID,
+  NodeType,
+  RootsUpdates,
+} from '@solid-devtools/shared/graph'
+import type {
+  InspectorUpdate,
+  SetInspectedNodeData,
+  ToggleInspectedValueData,
+} from '@solid-devtools/debugger'
 import createStructure from './modules/structure'
 import createInspector from './modules/inspector'
 
@@ -13,21 +24,22 @@ type ListenersFromPayloads<T extends Record<string, any>> = {
 }
 
 interface ClientListenerPayloads {
-  Inspect: Messages['ToggleInspected']
+  InspectNode: SetInspectedNodeData
+  InspectValue: ToggleInspectedValueData
   DevtoolsLocatorStateChange: boolean
-  HighlightElementChange: Messages['HighlightElement']
+  HighlightElementChange: HighlightElementPayload
 }
 export type ClientListeners = ListenersFromPayloads<ClientListenerPayloads>
 
 interface DevtoolsListenerPayloads {
   ResetPanel: void
-  SetInspectedDetails: Messages['SetInspectedDetails']
+  SetInspectedDetails: Mapped.OwnerDetails
   StructureUpdate: RootsUpdates | null
-  ComputationUpdates: Messages['ComputationUpdates']
-  InspectorUpdate: Messages['InspectorUpdate']
+  ComputationUpdates: ComputationUpdate[]
+  InspectorUpdate: InspectorUpdate[]
   ClientLocatorModeChange: boolean
-  ClientHoveredComponent: Messages['ClientHoveredComponent']
-  ClientInspectedNode: Messages['ClientInspectedNode']
+  ClientHoveredComponent: { nodeId: NodeID; state: boolean }
+  ClientInspectedNode: NodeID
 }
 export type DevtoolsListeners = ListenersFromPayloads<DevtoolsListenerPayloads>
 
@@ -46,13 +58,13 @@ export class Controller {
   updateStructure(update: RootsUpdates | null) {
     this.listeners.onStructureUpdate(update)
   }
-  updateComputation(computationUpdate: Messages['ComputationUpdates']) {
+  updateComputation(computationUpdate: DevtoolsListenerPayloads['ComputationUpdates']) {
     this.listeners.onComputationUpdates(computationUpdate)
   }
-  updateInspector(inspectorUpdate: Messages['InspectorUpdate']) {
+  updateInspector(inspectorUpdate: DevtoolsListenerPayloads['InspectorUpdate']) {
     this.listeners.onInspectorUpdate(inspectorUpdate)
   }
-  setInspectedDetails(ownerDetails: Messages['SetInspectedDetails']) {
+  setInspectedDetails(ownerDetails: DevtoolsListenerPayloads['SetInspectedDetails']) {
     this.listeners.onSetInspectedDetails(ownerDetails)
   }
   resetPanel() {
@@ -61,10 +73,10 @@ export class Controller {
   setLocatorState(active: boolean) {
     this.listeners.onClientLocatorModeChange(active)
   }
-  setHoveredNode(node: Messages['ClientHoveredComponent']) {
+  setHoveredNode(node: DevtoolsListenerPayloads['ClientHoveredComponent']) {
     this.listeners.onClientHoveredComponent(node)
   }
-  setInspectedNode(node: Messages['ClientInspectedNode']) {
+  setInspectedNode(node: DevtoolsListenerPayloads['ClientInspectedNode']) {
     this.listeners.onClientInspectedNode(node)
   }
 }
@@ -144,18 +156,14 @@ const [Provider, useControllerCtx] = createContextProvider((props: { controller:
     ),
   )
 
-  // send inspected node/value/prop/signal
-  inspector.setOnInspectedHandler(payload => {
-    if (payload.type === 'node') {
-      const node = payload.data
-      const nodePayload = node
-        ? { nodeId: node.id, rootId: structure.getParentRoot(node).id }
-        : null
-      client.onInspect({ type: 'node', data: nodePayload })
-    } else {
-      client.onInspect(payload)
-    }
+  // set inspected node
+  inspector.setOnInspectedNodeHandler(node => {
+    client.onInspectNode(
+      node ? { nodeId: node.id, rootId: structure.getParentRoot(node).id } : null,
+    )
   })
+  // toggle inspected value/prop/signal
+  inspector.setOnInspectedValueHandler(client.onInspectValue)
 
   // highlight hovered element
   createEffect(

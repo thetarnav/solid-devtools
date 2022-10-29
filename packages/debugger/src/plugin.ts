@@ -11,16 +11,14 @@ import { atom } from '@solid-devtools/shared/primitives'
 import { createBatchedUpdateEmitter, createInternalRoot } from './utils'
 import { ComputationUpdateHandler } from './walker'
 import { createLocator } from './locator'
-import { createInspector, InspectorUpdateData } from './inspector'
+import { createInspector, InspectorUpdate } from './inspector'
 
 export type BatchComputationUpdatesHandler = (payload: ComputationUpdate[]) => void
 
 type DebuggerEventHubMessages = {
   ComputationUpdates: ComputationUpdate[]
   StructureUpdates: RootsUpdates
-  InspectorUpdate: {
-    [K in keyof InspectorUpdateData]: InspectorUpdateData[K] & { type: K }
-  }[keyof InspectorUpdateData]
+  InspectorUpdate: InspectorUpdate[]
   InspectedNodeDetails: Mapped.OwnerDetails
 }
 export type DebuggerEventHub = EventHub<{
@@ -158,10 +156,7 @@ export default createInternalRoot(() => {
       forceTriggerUpdate,
       inspector: {
         setInspectedNode: inspector.setInspectedNode,
-        setInspectedSignal: inspector.setInspectedSignal,
-        setInspectedProp: inspector.setInspectedProp,
-        setInspectedValue: inspector.setInspectedValue,
-        setInspected: inspector.setInspected,
+        toggleValueNode: inspector.toggleValueNode,
       },
       locator: {
         toggleEnabled: locator.togglePluginLocatorMode,

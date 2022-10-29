@@ -25,8 +25,11 @@ export function createController() {
     onHighlightElementChange(data) {
       queueMicrotask(() => debug.locator.setHighlightTarget(data))
     },
-    onInspect(payload) {
-      queueMicrotask(() => debug.inspector.setInspected(payload))
+    onInspectNode(node) {
+      queueMicrotask(() => debug.inspector.setInspectedNode(node))
+    },
+    onInspectValue(node) {
+      queueMicrotask(() => debug.inspector.toggleValueNode(node))
     },
   })
 
@@ -44,7 +47,7 @@ export function createController() {
 
   // send the focused owner details
   debug.listenTo('InspectedNodeDetails', details => {
-    queueMicrotask(() => controller.setInspectedDetails(clone(details)))
+    separate(details, details => controller.setInspectedDetails(details))
   })
 
   // send the state of the client locator mode

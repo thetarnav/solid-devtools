@@ -1,5 +1,16 @@
-import { ComputationUpdate, EncodedValue, Mapped, NodeID, RootsUpdates } from './graph'
-import { log } from './utils'
+import type {
+  InspectorUpdate,
+  SetInspectedNodeData,
+  ToggleInspectedValueData,
+} from '@solid-devtools/debugger'
+import type {
+  ComputationUpdate,
+  HighlightElementPayload,
+  Mapped,
+  NodeID,
+  RootsUpdates,
+} from '@solid-devtools/shared/graph'
+import { log } from '@solid-devtools/shared/utils'
 
 export const LOG_MESSAGES = false
 
@@ -19,14 +30,7 @@ export interface Messages {
   StructureUpdate: RootsUpdates
   ComputationUpdates: ComputationUpdate[]
   /** client -> devtools: updates from the inspector */
-  // TODO: move the bridge to the client package
-  InspectorUpdate:
-    | { type: 'set-signal'; id: NodeID; value: EncodedValue<boolean> }
-    | { type: 'signals'; updates: { id: NodeID; value: EncodedValue<boolean> }[] }
-    | { type: 'value'; value: EncodedValue<boolean>; update: boolean }
-    | { type: 'props'; value: Mapped.Props }
-    | { type: 'store'; id: NodeID; value: EncodedValue<true> }
-
+  InspectorUpdate: InspectorUpdate[]
   /** devtools -> client: force the debugger to walk the whole tree and send it */
   ForceUpdate: {}
   /** client -> devtools: send component clicked with the locator to the extension */
@@ -34,14 +38,10 @@ export interface Messages {
   /** client -> devtools: send updates to the owner details */
   SetInspectedDetails: Mapped.OwnerDetails
   /** devtools -> client: request for node/signal/prop details — subscribe or unsubscribe */
-  // TODO: move the bridge to the debugger package
-  ToggleInspected:
-    | { type: 'node'; data: null | { rootId: NodeID; nodeId: NodeID } }
-    | { type: 'signal' | 'prop'; data: { id: NodeID; selected: boolean } }
-    | { type: 'value'; data: boolean }
-
+  ToggleInspectedValue: ToggleInspectedValueData
+  SetInspectedNode: SetInspectedNodeData
   /** devtools -> client: user hovered over component/element signal in devtools panel */
-  HighlightElement: { rootId: NodeID; nodeId: NodeID } | { elementId: string } | null
+  HighlightElement: HighlightElementPayload
   /** client -> devtools: send hovered (by the locator) owner to the extension */
   ClientHoveredComponent: { nodeId: NodeID; state: boolean }
   /** devtools -> client: user is selecting component from the page */

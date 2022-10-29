@@ -44,4 +44,6 @@ export {
 
 export type { LocatorOptions, TargetIDE, TargetURLFunction } from './locator'
 
+export type { InspectorUpdate, SetInspectedNodeData, ToggleInspectedValueData } from './inspector'
+
 export type { Core, Solid, ValueUpdateListener } from './types'
