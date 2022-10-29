@@ -1,6 +1,13 @@
 import { $PROXY, Accessor, createEffect } from 'solid-js'
 import { throttle } from '@solid-primitives/scheduled'
-import { Mapped, NodeID, NodeType, EncodedValue, ValueType } from '@solid-devtools/shared/graph'
+import {
+  Mapped,
+  NodeID,
+  NodeType,
+  EncodedValue,
+  ValueType,
+  ValueNodeId,
+} from '@solid-devtools/shared/graph'
 import { untrackedCallback } from '@solid-devtools/shared/primitives'
 import { warn } from '@solid-devtools/shared/utils'
 import { DebuggerEventHub } from '../plugin'
@@ -24,9 +31,6 @@ import {
 import { NodeIDMap, encodeValue, HandleStoreNode } from './serialize'
 import { getStoreNodeName, observeStoreNode, StoreUpdateData } from './store'
 
-export type ValueNodeId = `signal:${NodeID}` | `prop:${string}` | `value`
-export type ValueNodeType = 'signal' | 'prop' | 'value'
-
 export type ValueNodeUpdate = {
   type: 'value'
   id: ValueNodeId
@@ -43,6 +47,43 @@ export type InspectorUpdate = ValueNodeUpdate | StoreNodeUpdate
 
 export type SetInspectedNodeData = null | { rootId: NodeID; nodeId: NodeID }
 export type ToggleInspectedValueData = { id: ValueNodeId; selected: boolean }
+
+class InspectedValue {
+  private trackedStores: VoidFunction[] = []
+  private selected = false
+  constructor(public getValue: (() => unknown) | undefined) {}
+  addStoreObserver(unsub: VoidFunction) {
+    this.trackedStores.push(unsub)
+  }
+  private unsubscribe() {
+    for (const unsub of this.trackedStores) unsub()
+    this.trackedStores = []
+  }
+  reset() {
+    this.unsubscribe()
+    this.selected = false
+  }
+  isSelected() {
+    return this.selected
+  }
+  setSelected(selected: boolean) {
+    this.selected = selected
+    if (!selected) this.unsubscribe()
+  }
+}
+
+class InspectedValueMap {
+  private record = {} as Record<ValueNodeId, InspectedValue>
+  get(id: ValueNodeId) {
+    return this.record[id]
+  }
+  add(id: ValueNodeId, getValue: (() => unknown) | undefined) {
+    this.record[id] = new InspectedValue(getValue)
+  }
+  reset() {
+    for (const signal of Object.values(this.record)) signal.reset()
+  }
+}
 
 /**
  * Plugin module
@@ -167,58 +208,13 @@ export function createInspector({
     toggleValueNode({ id, selected }: ToggleInspectedValueData): void {
       const node = valueMap.get(id)
       if (!node) {
-        console.warn('Could not find value node', id)
+        console.warn('Could not find value node:', id)
         return
       }
       node.setSelected(selected)
       pushValueUpdate(id, false)
     },
     getElementById,
-  }
-}
-
-class InspectedValue {
-  private trackedStores: VoidFunction[] = []
-  private selected = false
-  constructor(public getValue: (() => unknown) | undefined) {}
-  addStoreObserver(unsub: VoidFunction) {
-    this.trackedStores.push(unsub)
-  }
-  private unsubscribe() {
-    for (const unsub of this.trackedStores) unsub()
-    this.trackedStores = []
-  }
-  reset() {
-    this.unsubscribe()
-    this.selected = false
-  }
-  isSelected() {
-    return this.selected
-  }
-  setSelected(selected: boolean) {
-    this.selected = selected
-    if (!selected) this.unsubscribe()
-  }
-}
-
-const getInspectedValueMapId = <T extends ValueNodeType>(
-  type: T,
-  id: T extends 'value' ? undefined : NodeID | string,
-): ValueNodeId => {
-  if (type === 'value') return 'value'
-  return `${type}:${id}` as ValueNodeId
-}
-
-class InspectedValueMap {
-  private record = {} as Record<ValueNodeId, InspectedValue>
-  get(id: ValueNodeId) {
-    return this.record[id]
-  }
-  add(id: ValueNodeId, getValue: (() => unknown) | undefined) {
-    this.record[id] = new InspectedValue(getValue)
-  }
-  reset() {
-    for (const signal of Object.values(this.record)) signal.reset()
   }
 }
 
@@ -368,10 +364,11 @@ export function collectOwnerDetails(
     if (props) details.props = props
   }
 
+  $valueMap.add('value', getValue)
+
   return {
     details,
     valueMap: $valueMap,
     nodeIdMap: $nodeIdMap,
-    getOwnerValue: getValue,
   }
 }

@@ -15,6 +15,21 @@ export enum NodeType {
 
 export type NodeID = string & {}
 
+export type ValueNodeId = `signal:${NodeID}` | `prop:${string}` | `value`
+export type ValueNodeType = 'signal' | 'prop' | 'value'
+
+export const getValueNodeId = <T extends ValueNodeType>(
+  type: T,
+  id: T extends 'value' ? undefined : NodeID | string,
+): ValueNodeId => {
+  if (type === 'value') return 'value'
+  return `${type}:${id}` as ValueNodeId
+}
+
+export const splitValueNodeId = (id: ValueNodeId) => {
+  return id.split(':') as [ValueNodeType, undefined | NodeID | string]
+}
+
 export type ComputationUpdate = { rootId: NodeID; id: NodeID }
 
 export type RootsUpdates = {

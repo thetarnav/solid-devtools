@@ -2,7 +2,14 @@ import { batch, createEffect, createSelector, createSignal } from 'solid-js'
 import { createStore, produce } from 'solid-js/store'
 import { Writable } from 'type-fest'
 import { createSimpleEmitter } from '@solid-primitives/event-bus'
-import { Mapped, NodeID, NodeType, EncodedValue } from '@solid-devtools/shared/graph'
+import {
+  Mapped,
+  NodeID,
+  NodeType,
+  EncodedValue,
+  splitValueNodeId,
+  ValueNodeId,
+} from '@solid-devtools/shared/graph'
 import { defer, untrackedCallback } from '@solid-devtools/shared/primitives'
 import type { InspectorUpdate, ToggleInspectedValueData } from '@solid-devtools/debugger'
 import type { Structure } from '../structure'
@@ -146,8 +153,6 @@ function createDetails(
   return details
 }
 
-export const $VALUE = Symbol('value')
-
 export default function createInspector({
   getNodePath,
   findNode,
@@ -159,7 +164,7 @@ export default function createInspector({
   const [state, setDetails] = createStore<{ value: Inspector.Details | null }>({ value: null })
   const details = () => state.value
 
-  const [listenToValueUpdates, emitValueUpdate] = createSimpleEmitter<NodeID | typeof $VALUE>()
+  const [listenToValueUpdates, emitValueUpdate] = createSimpleEmitter<ValueNodeId>()
 
   const isNodeInspected = createSelector<NodeID | null, NodeID>(() => inspectedNode()?.id ?? null)
 
@@ -199,59 +204,36 @@ export default function createInspector({
     setDetails('value', createDetails(raw, getNodePath(node)))
   })
 
-  const _handleSignalUpdates = untrackedCallback(
-    (updates: { id: NodeID; value: EncodedValue<boolean> }[], isUpdate: boolean) => {
-      if (!details()) return
-      setDetails(
-        'value',
-        'signals',
-        produce(proxy => {
-          for (const update of updates) {
-            const signal = proxy[update.id]
-            if (!signal) return
-            reconcileValue(signal.value, update.value)
-          }
-        }),
-      )
-      isUpdate && updates.forEach(update => emitValueUpdate(update.id))
-    },
-  )
-  const _handlePropsUpdate = untrackedCallback((props: Mapped.Props) => {
-    if (!details()?.props) return
+  function handleUpdate(updates: InspectorUpdate[]) {
     setDetails(
       'value',
-      'props',
-      produce(proxy => reconcileProps(proxy!, props)),
-    )
-  })
-  const _handleValueUpdate = untrackedCallback(
-    (value: EncodedValue<boolean>, isUpdate: boolean) => {
-      if (!details()?.value) return
-      setDetails(
-        'value',
-        'value',
-        produce(proxy => reconcileValue(proxy!, value)),
-      )
-      isUpdate && emitValueUpdate($VALUE)
-    },
-  )
+      produce(proxy => {
+        if (!proxy) return
 
-  function handleUpdate(updates: InspectorUpdate[]) {
-    console.log('handleUpdate', updates)
-    // switch (payload.type) {
-    //   case 'set-signal':
-    //     _handleSignalUpdates([payload], false)
-    //     break
-    //   case 'signals':
-    //     _handleSignalUpdates(payload.updates, true)
-    //     break
-    //   case 'props':
-    //     _handlePropsUpdate(payload.value)
-    //     break
-    //   case 'value':
-    //     _handleValueUpdate(payload.value, payload.update)
-    //     break
-    // }
+        for (const update of updates) {
+          if (update.type === 'value') {
+            const [type, id] = splitValueNodeId(update.id)
+            update.updated && emitValueUpdate(update.id)
+
+            if (type === 'signal') {
+              const signal = proxy.signals[id!]
+              if (!signal) return
+              reconcileValue(signal.value, update.value)
+            } else if (type === 'prop') {
+              const prop = proxy.props?.record[id!]
+              if (!prop) return
+              reconcileValue(prop.value, update.value)
+            } else {
+              if (!proxy.value) return
+              reconcileValue(proxy.value, update.value)
+            }
+          } else {
+            // TODO: store
+            console.log('update store', update)
+          }
+        }
+      }),
+    )
   }
 
   /** variable for a callback in bridge.ts */

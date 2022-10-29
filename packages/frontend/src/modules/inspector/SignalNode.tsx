@@ -24,10 +24,11 @@ import {
   NAN,
   NEGATIVE_INFINITY,
   ValueType,
+  ValueNodeId,
 } from '@solid-devtools/shared/graph'
 import clsx from 'clsx'
 import { Highlight, Icon } from '@/ui'
-import { $VALUE, Inspector } from '.'
+import { Inspector } from '.'
 import * as styles from './SignalNode.css'
 import { createHover } from '@solid-devtools/shared/primitives'
 import { Listen } from '@solid-primitives/event-bus'
@@ -291,7 +292,7 @@ export const ValueNode: Component<{
 type SignalControlls = {
   toggleSignalSelection(id: NodeID): void
   toggleHoveredElement: ToggleElementHover
-  listenToValueUpdates: Listen<NodeID | typeof $VALUE>
+  listenToValueUpdates: Listen<ValueNodeId>
 }
 
 export const Signals: Component<{ each: Inspector.Signal[] } & SignalControlls> = props => {
@@ -317,6 +318,7 @@ export const SignalNode: Component<{ signal: Inspector.Signal } & SignalControll
   listenToValueUpdates,
 }) => {
   const { type, id, name } = signal
+  const valueNodeId: ValueNodeId = `signal:${id}`
 
   return (
     <ValueNode
@@ -324,7 +326,7 @@ export const SignalNode: Component<{ signal: Inspector.Signal } & SignalControll
       isMemo={type === NodeType.Memo}
       value={signal.value}
       selected={signal.selected}
-      listenToUpdate={listener => listenToValueUpdates(id => id === signal.id && listener())}
+      listenToUpdate={listener => listenToValueUpdates(id => id === valueNodeId && listener())}
       onClick={() => toggleSignalSelection(id)}
       onElementHover={toggleHoveredElement}
     />

@@ -4,7 +4,7 @@ import { NodeType } from '@solid-devtools/shared/graph'
 import { Scrollable, Badge } from '@/ui'
 import { Signals, ValueNode } from './SignalNode'
 import { useController } from '@/controller'
-import { $VALUE, Inspector } from '.'
+import { Inspector } from '.'
 import * as styles from './inspector.css'
 
 const DetailsContent: Component<{ details: Inspector.Details }> = ({ details }) => {
@@ -54,7 +54,7 @@ const DetailsContent: Component<{ details: Inspector.Details }> = ({ details }) 
               value={nodeValue}
               selected={details.valueSelected}
               listenToUpdate={listener =>
-                inspector.listenToValueUpdates(id => id === $VALUE && listener())
+                inspector.listenToValueUpdates(id => id === 'value' && listener())
               }
               onClick={() => inspector.toggleValueSelection()}
               onElementHover={inspector.toggleHoveredElement}
