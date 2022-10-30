@@ -9,6 +9,7 @@ import {
   EncodedValue,
   splitValueNodeId,
   ValueNodeId,
+  ValueType,
 } from '@solid-devtools/shared/graph'
 import { defer, untrackedCallback } from '@solid-devtools/shared/primitives'
 import type { InspectorUpdate, ToggleInspectedValueData } from '@solid-devtools/debugger'
@@ -204,6 +205,7 @@ export default function createInspector({
     setDetails('value', createDetails(raw, getNodePath(node)))
   })
 
+  // Handle Inspector updates comming from the debugger
   function handleUpdate(updates: InspectorUpdate[]) {
     setDetails(
       'value',
@@ -234,9 +236,12 @@ export default function createInspector({
             // TODO: store
             // console.log('update store', update)
           }
-          // Props
+          // Props — add/remove changed prop keys of an proxy object
           else {
-            console.log('update props', update)
+            const props = proxy.props!
+            for (const key of update.added)
+              props.record[key] = { value: { type: ValueType.Getter, value: key }, selected: false }
+            for (const key of update.removed) delete props.record[key]
           }
         }
       }),

@@ -92,13 +92,19 @@ const Article: Component = () => {
 }
 
 const DynamicSpreadParent = () => {
-  const [props, setProps] = createSignal({
+  const [props, setProps] = createSignal<any>({
     a: 1,
     b: 2,
     c: 3,
-    style: { width: '200px', height: '50px', background: '#fcb', color: 'black' },
-    textContent: 'DynamicSpreadChild',
-    onclick: () => setProps({ ...props(), d: 4, e: 5 }),
+    style: { width: '160px', height: '30px', background: '#fcb', color: 'black' },
+    textContent: 'Before Change',
+    onclick: () =>
+      setProps({
+        style: { width: '160px', height: '30px', background: '#eba', color: 'black' },
+        textContent: 'After Change',
+        d: 4,
+        e: 5,
+      }),
   })
   const DynamicSpreadChild = (props: any) => <div {...props} />
   return <DynamicSpreadChild {...props()} />

@@ -44,7 +44,7 @@ export type StoreNodeUpdate = {
   value: EncodedValue<true> | false
 }
 /** List of new keys — all of the values are getters, so they won't change */
-export type ProxyPropsUpdate = { type: 'props'; keys: string[] }
+export type ProxyPropsUpdate = { type: 'props'; added: string[]; removed: string[] }
 export type InspectorUpdate = ValueNodeUpdate | StoreNodeUpdate | ProxyPropsUpdate
 
 export type SetInspectedNodeData = null | { rootId: NodeID; nodeId: NodeID }
@@ -97,14 +97,12 @@ export function createInspector(
   let inspectedOwner: Solid.Owner | null = null
   let nodeIdMap = new NodeIDMap<HTMLElement | Solid.StoreNode>()
   let valueMap = new ValueNodeMap()
-  let checkProxyProps: (() => string[] | undefined) | undefined
+  let checkProxyProps: (() => { added: string[]; removed: string[] } | undefined) | undefined
 
   // Batch and dedupe inspector updates
   // these will include updates to signals, stores, props, and node value
   const { pushStoreUpdate, pushValueUpdate, triggerPropsCheck, clearUpdates } = (() => {
-    let valuesUpdated = false
     let valueUpdates: Partial<Record<ValueNodeId, boolean>> = {}
-    let storesUpdated = false
     let storeUpdates: [NodeID, StoreUpdateData][] = []
     let checkProps = false
 
@@ -112,34 +110,30 @@ export function createInspector(
       const batchedUpdates: InspectorUpdate[] = []
 
       // Value Nodes (signals, props, and node value)
-      if (valuesUpdated) {
-        for (const [id, updated] of Object.entries(valueUpdates) as [ValueNodeId, boolean][]) {
-          const node = valueMap.get(id)
-          if (!node || !node.getValue) continue
-          const encoded = encodeValue(
-            node.getValue(),
-            node.isSelected(),
-            nodeIdMap,
-            handleStoreNode.bind(null, id, node),
-          )
-          batchedUpdates.push({ type: 'value', id, value: encoded, updated })
-        }
-        valueUpdates = {}
+      for (const [id, updated] of Object.entries(valueUpdates) as [ValueNodeId, boolean][]) {
+        const node = valueMap.get(id)
+        if (!node || !node.getValue) continue
+        const encoded = encodeValue(
+          node.getValue(),
+          node.isSelected(),
+          nodeIdMap,
+          handleStoreNode.bind(null, id, node),
+        )
+        batchedUpdates.push({ type: 'value', id, value: encoded, updated })
       }
+      valueUpdates = {}
 
       // Stores
-      if (storesUpdated) {
-        for (const [id, data] of storeUpdates) {
-          const value = data.value === undefined ? false : encodeValue(data.value, true, nodeIdMap)
-          batchedUpdates.push({ type: 'store', id, path: data.path, value })
-        }
-        storeUpdates = []
+      for (const [id, data] of storeUpdates) {
+        const value = data.value === undefined ? false : encodeValue(data.value, true, nodeIdMap)
+        batchedUpdates.push({ type: 'store', id, path: data.path, value })
       }
+      storeUpdates = []
 
-      // Props (top-level check)
-      if (checkProps) {
-        const keys = checkProxyProps?.()
-        if (keys) batchedUpdates.push({ type: 'props', keys })
+      // Props (top-level key check of proxy props object)
+      if (checkProps && checkProxyProps) {
+        const keys = checkProxyProps()
+        if (keys) batchedUpdates.push({ type: 'props', added: keys.added, removed: keys.removed })
         checkProps = false
       }
 
@@ -151,13 +145,11 @@ export function createInspector(
 
     return {
       pushValueUpdate(id: ValueNodeId, updated: boolean) {
-        valuesUpdated = true
         const existing = valueUpdates[id]
         if (existing === undefined || (updated && !existing)) valueUpdates[id] = updated
         flush()
       },
       pushStoreUpdate(id: NodeID, data: StoreUpdateData) {
-        storesUpdated = true
         storeUpdates.push([id, data])
         flush()
       },
@@ -354,7 +346,7 @@ export function collectOwnerDetails(
     signals,
   }
 
-  let checkProxyProps: (() => string[] | undefined) | undefined
+  let checkProxyProps: (() => { added: string[]; removed: string[] } | undefined) | undefined
 
   if (isSolidComputation(owner)) {
     details.value = encodeValue(getValue(), false, $nodeIdMap)
@@ -382,20 +374,22 @@ export function collectOwnerDetails(
       details.props = { proxy, record }
 
       if (proxy) {
-        let oldKeys = Object.keys(record)
+        let oldKeys: readonly string[] = Object.keys(record)
         checkProxyProps = () => {
           const newKeys = Object.keys(props)
           const added = new Set(newKeys)
+          const removed: string[] = []
           let changed = false
           for (const key of oldKeys) {
             if (added.has(key)) added.delete(key)
             else {
               changed = true
-              break
+              removed.push(key)
             }
           }
           if (!changed && !added.size) return
-          return (oldKeys = newKeys)
+          oldKeys = newKeys
+          return { added: Array.from(added), removed }
         }
       }
     }
