@@ -120,6 +120,8 @@ const Todos: Component = () => {
   // 	)
   // }, 1000)
 
+  const values = todos.values
+
   return (
     <>
       <h3>Simple Todos Example</h3>
@@ -132,7 +134,7 @@ const Todos: Component = () => {
         />
         <button>+</button>
       </form>
-      <For each={todos.values}>
+      <For each={values}>
         {(todo, i) => (
           <Todo
             {...todo}

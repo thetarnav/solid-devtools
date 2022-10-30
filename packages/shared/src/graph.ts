@@ -134,7 +134,7 @@ export type EncodedPreviewPayloadMap = {
   [ValueType.Getter]: string
   [ValueType.Element]: { name: string; id: NodeID }
   [ValueType.Instance]: string
-  [ValueType.Store]: { value: EncodedValue<true>; id: NodeID }
+  [ValueType.Store]: { value: EncodedValue<boolean>; id: NodeID }
 }
 
 export type EncodedPreviewChildrenMap = {

@@ -7,10 +7,9 @@ import {
   NodeID,
   ValueType,
 } from '@solid-devtools/shared/graph'
+import { unwrap } from 'solid-js/store'
 import { Solid } from '../types'
 import { isStoreNode } from '../utils'
-
-export type HandleStoreNode = (is: NodeID, storeNode: Solid.StoreNode) => void
 
 /**
  * Encodes any value to a JSON-serializable object.
@@ -24,7 +23,8 @@ export function encodeValue<Deep extends boolean>(
   value: unknown,
   deep: Deep,
   nodeMap: NodeIDMap<HTMLElement | Solid.StoreNode>,
-  handleStore: HandleStoreNode | false = false,
+  handleStore?: (storeNodeId: NodeID, storeNode: Solid.StoreNode) => void,
+  inStore = false,
 ): EncodedValue<Deep> {
   if (typeof value === 'number') {
     if (value === Infinity) return { type: ValueType.Number, value: INFINITY }
@@ -45,10 +45,18 @@ export function encodeValue<Deep extends boolean>(
       value: { name: value.tagName, id: nodeMap.set(value) },
     }
 
-  if (deep && handleStore && isStoreNode(value)) {
-    const id = nodeMap.set(value)
-    handleStore(id, value)
-    return { type: ValueType.Store, value: { value: encodeValue(value, true, nodeMap), id } }
+  if (!inStore && isStoreNode(value)) {
+    // might still pass in a proxy
+    const node = unwrap(value)
+    const id = nodeMap.set(node)
+    handleStore && handleStore(id, node)
+    return {
+      type: ValueType.Store,
+      value: {
+        value: encodeValue(node, deep, nodeMap, undefined, true) as EncodedValue<boolean>,
+        id,
+      },
+    }
   }
 
   if (Array.isArray(value)) {
@@ -94,6 +102,9 @@ export class NodeIDMap<T extends object> {
 
   get(id: NodeID): T | undefined {
     return this.obj[id]
+  }
+  getId(element: T): NodeID | undefined {
+    return this.map.get(element)
   }
 
   set(element: T): NodeID {

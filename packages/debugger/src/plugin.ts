@@ -1,4 +1,4 @@
-import { Accessor, batch, createMemo, createSignal } from 'solid-js'
+import { Accessor, batch, createEffect, createMemo, createSignal } from 'solid-js'
 import {
   createEventHub,
   createSimpleEmitter,
@@ -128,10 +128,7 @@ export default createInternalRoot(() => {
   //
   // Inspected Owner details:
   //
-  const inspector = createInspector({
-    eventHub,
-    debuggerEnabled,
-  })
+  const inspector = createInspector(debuggerEnabled, { eventHub })
 
   //
   // Locator

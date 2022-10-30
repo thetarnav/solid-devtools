@@ -1,5 +1,4 @@
-import { $PROXY, Accessor, createEffect } from 'solid-js'
-import { throttle } from '@solid-primitives/scheduled'
+import { $PROXY, Accessor, createEffect, onCleanup, untrack } from 'solid-js'
 import {
   Mapped,
   NodeID,
@@ -8,12 +7,12 @@ import {
   ValueType,
   ValueNodeId,
 } from '@solid-devtools/shared/graph'
-import { untrackedCallback } from '@solid-devtools/shared/primitives'
+import { defferIdle } from '@solid-devtools/shared/primitives'
 import { warn } from '@solid-devtools/shared/utils'
 import { DebuggerEventHub } from '../plugin'
 import { walkSolidRoot } from '../roots'
 import { Solid, ValueUpdateListener } from '../types'
-import { observeValueUpdate, removeValueUpdateObserver } from '../update'
+import { makeSolidUpdateListener, observeValueUpdate, removeValueUpdateObserver } from '../update'
 import {
   getComponentRefreshNode,
   getDisplayName,
@@ -28,8 +27,9 @@ import {
   markOwnerName,
   markOwnerType,
 } from '../utils'
-import { NodeIDMap, encodeValue, HandleStoreNode } from './serialize'
+import { NodeIDMap, encodeValue } from './serialize'
 import { getStoreNodeName, observeStoreNode, StoreUpdateData } from './store'
+import { throttle } from '@solid-primitives/scheduled'
 
 export type ValueNodeUpdate = {
   type: 'value'
@@ -40,15 +40,17 @@ export type ValueNodeUpdate = {
 export type StoreNodeUpdate = {
   type: 'store'
   id: NodeID
-  path: string[]
+  path: readonly string[]
   value: EncodedValue<true> | false
 }
-export type InspectorUpdate = ValueNodeUpdate | StoreNodeUpdate
+/** List of new keys — all of the values are getters, so they won't change */
+export type ProxyPropsUpdate = { type: 'props'; keys: string[] }
+export type InspectorUpdate = ValueNodeUpdate | StoreNodeUpdate | ProxyPropsUpdate
 
 export type SetInspectedNodeData = null | { rootId: NodeID; nodeId: NodeID }
 export type ToggleInspectedValueData = { id: ValueNodeId; selected: boolean }
 
-class InspectedValue {
+class ValueNode {
   private trackedStores: VoidFunction[] = []
   private selected = false
   constructor(public getValue: (() => unknown) | undefined) {}
@@ -72,13 +74,13 @@ class InspectedValue {
   }
 }
 
-class InspectedValueMap {
-  private record = {} as Record<ValueNodeId, InspectedValue>
-  get(id: ValueNodeId) {
+class ValueNodeMap {
+  private record = {} as Record<ValueNodeId, ValueNode>
+  get(id: ValueNodeId): ValueNode | undefined {
     return this.record[id]
   }
   add(id: ValueNodeId, getValue: (() => unknown) | undefined) {
-    this.record[id] = new InspectedValue(getValue)
+    this.record[id] = new ValueNode(getValue)
   }
   reset() {
     for (const signal of Object.values(this.record)) signal.reset()
@@ -88,111 +90,134 @@ class InspectedValueMap {
 /**
  * Plugin module
  */
-export function createInspector({
-  debuggerEnabled,
-  eventHub,
-}: {
-  debuggerEnabled: Accessor<boolean>
-  eventHub: DebuggerEventHub
-}) {
+export function createInspector(
+  debuggerEnabled: Accessor<boolean>,
+  { eventHub }: { eventHub: DebuggerEventHub },
+) {
   let inspectedOwner: Solid.Owner | null = null
   let nodeIdMap = new NodeIDMap<HTMLElement | Solid.StoreNode>()
-  let valueMap = new InspectedValueMap()
-
-  const getIsEnabled = () => debuggerEnabled() || !!inspectedOwner
-
-  const getElementById = (id: NodeID): HTMLElement | undefined => {
-    const el = nodeIdMap.get(id)
-    if (el instanceof HTMLElement) return el
-  }
-
-  const handleStoreNode: HandleStoreNode = (nodeId, storeNode) => {
-    console.log(`TRACK STORE NODE, ${nodeId},`, getStoreNodeName(storeNode))
-    // signal.addStoreObserver(
-    //   observeStoreNode(storeNode, data => {
-    //     console.log(`STORE NODE UPDATE, ${nodeId},`, getStoreNodeName(storeNode), data)
-    //   }),
-    // )
-  }
+  let valueMap = new ValueNodeMap()
+  let checkProxyProps: (() => string[] | undefined) | undefined
 
   // Batch and dedupe inspector updates
   // these will include updates to signals, stores, props, and node value
-  const { pushStoreUpdate, pushValueUpdate } = (() => {
+  const { pushStoreUpdate, pushValueUpdate, triggerPropsCheck, clearUpdates } = (() => {
+    let valuesUpdated = false
     let valueUpdates: Partial<Record<ValueNodeId, boolean>> = {}
+    let storesUpdated = false
     let storeUpdates: [NodeID, StoreUpdateData][] = []
+    let checkProps = false
 
-    const flush = throttle(() => {
-      if (!getIsEnabled()) return
-
+    const flush = defferIdle(() => {
       const batchedUpdates: InspectorUpdate[] = []
 
       // Value Nodes (signals, props, and node value)
-      for (const [id, updated] of Object.entries(valueUpdates) as [ValueNodeId, boolean][]) {
-        const node = valueMap.get(id)
-        if (!node.getValue) {
-          warn(`No value getter for ${id}`)
-          continue
+      if (valuesUpdated) {
+        for (const [id, updated] of Object.entries(valueUpdates) as [ValueNodeId, boolean][]) {
+          const node = valueMap.get(id)
+          if (!node || !node.getValue) continue
+          const encoded = encodeValue(
+            node.getValue(),
+            node.isSelected(),
+            nodeIdMap,
+            handleStoreNode.bind(null, id, node),
+          )
+          batchedUpdates.push({ type: 'value', id, value: encoded, updated })
         }
-        const encoded = encodeValue(node.getValue(), node.isSelected(), nodeIdMap, handleStoreNode)
-        batchedUpdates.push({ type: 'value', id, value: encoded, updated })
+        valueUpdates = {}
       }
-      valueUpdates = {}
 
       // Stores
-      stores: for (const [id, data] of storeUpdates) {
-        const path: string[] = []
-        const rawPath = data.path.slice()
-        rawPath.push(data.property)
-        for (const node of rawPath) {
-          if (typeof node === 'symbol') {
-            warn('Symbol path not supported', data)
-            continue stores
-          }
-          path.push(node.toString())
+      if (storesUpdated) {
+        for (const [id, data] of storeUpdates) {
+          const value = data.value === undefined ? false : encodeValue(data.value, true, nodeIdMap)
+          batchedUpdates.push({ type: 'store', id, path: data.path, value })
         }
-        const value = data.deleting ? false : encodeValue(data.value, true, nodeIdMap)
-        batchedUpdates.push({ type: 'store', id, path, value })
+        storeUpdates = []
       }
-      storeUpdates = []
+
+      // Props (top-level check)
+      if (checkProps) {
+        const keys = checkProxyProps?.()
+        if (keys) batchedUpdates.push({ type: 'props', keys })
+        checkProps = false
+      }
 
       // Emit updates
-      eventHub.emit('InspectorUpdate', batchedUpdates)
+      batchedUpdates.length && eventHub.emit('InspectorUpdate', batchedUpdates)
     })
+
+    const flushPropsCheck = throttle(flush, 200)
 
     return {
       pushValueUpdate(id: ValueNodeId, updated: boolean) {
+        valuesUpdated = true
         const existing = valueUpdates[id]
         if (existing === undefined || (updated && !existing)) valueUpdates[id] = updated
         flush()
       },
       pushStoreUpdate(id: NodeID, data: StoreUpdateData) {
+        storesUpdated = true
         storeUpdates.push([id, data])
         flush()
+      },
+      triggerPropsCheck() {
+        checkProps = true
+        flushPropsCheck()
+      },
+      // since the updates are emitten on timeout, we need to make sure that
+      // switching off the debugger or unselecting the owner will clear the updates
+      clearUpdates() {
+        valueUpdates = {}
+        storeUpdates = []
+        checkProps = false
+        flush.clear()
+        flushPropsCheck.clear()
       },
     }
   })()
 
-  const setInspectedDetails = untrackedCallback((owner: Solid.Owner | null) => {
+  function handleStoreNode(
+    valueId: ValueNodeId,
+    valueNode: ValueNode,
+    storeNodeId: NodeID,
+    storeNode: Solid.StoreNode,
+  ) {
+    console.log(`TRACK store-node: ${storeNodeId} of ${valueId}:`, getStoreNodeName(storeNode))
+    valueNode.addStoreObserver(
+      observeStoreNode(storeNode, data => pushStoreUpdate(storeNodeId, data)),
+    )
+  }
+
+  function setInspectedDetails(owner: Solid.Owner | null) {
     inspectedOwner && clearOwnerObservers(inspectedOwner)
     inspectedOwner = owner
+    checkProxyProps = undefined
     valueMap.reset()
+    clearUpdates()
     if (!owner) return
 
-    const result = collectOwnerDetails(owner, {
-      onSignalUpdate: id => pushValueUpdate(`signal:${id}`, true),
-      onValueUpdate: () => pushValueUpdate('value', true),
-      handleStoreNode,
+    untrack(() => {
+      const result = collectOwnerDetails(owner, {
+        onSignalUpdate: id => pushValueUpdate(`signal:${id}`, true),
+        onValueUpdate: () => pushValueUpdate('value', true),
+      })
+      eventHub.emit('InspectedNodeDetails', result.details)
+      valueMap = result.valueMap
+      nodeIdMap = result.nodeIdMap
+      checkProxyProps = result.checkProxyProps
     })
-    eventHub.emit('InspectedNodeDetails', result.details)
-    valueMap = result.valueMap
-    nodeIdMap = result.nodeIdMap
-  })
+  }
 
   createEffect(() => {
-    // make sure we clear the owner observers when the plugin is disabled
-    if (!debuggerEnabled()) inspectedOwner && clearOwnerObservers(inspectedOwner)
-    // re-observe the owner when the plugin is enabled
-    else inspectedOwner && setInspectedDetails(inspectedOwner)
+    if (!debuggerEnabled()) return
+
+    // Clear the inspected owner when the debugger is disabled
+    onCleanup(() => setInspectedDetails(null))
+
+    makeSolidUpdateListener(() => {
+      if (checkProxyProps) triggerPropsCheck()
+    })
   })
 
   return {
@@ -207,20 +232,20 @@ export function createInspector({
     },
     toggleValueNode({ id, selected }: ToggleInspectedValueData): void {
       const node = valueMap.get(id)
-      if (!node) {
-        console.warn('Could not find value node:', id)
-        return
-      }
+      if (!node) return warn('Could not find value node:', id)
       node.setSelected(selected)
       pushValueUpdate(id, false)
     },
-    getElementById,
+    getElementById(id: NodeID): HTMLElement | undefined {
+      const el = nodeIdMap.get(id)
+      if (el instanceof HTMLElement) return el
+    },
   }
 }
 
 // Globals set before collecting the owner details
 let $nodeIdMap!: NodeIDMap<HTMLElement | Solid.StoreNode>
-let $valueMap!: InspectedValueMap
+let $valueMap!: ValueNodeMap
 
 const INSPECTOR = Symbol('inspector')
 
@@ -267,41 +292,18 @@ export function clearOwnerObservers(owner: Solid.Owner): void {
   }
 }
 
-export function encodeComponentProps(
-  owner: Solid.Owner,
-  nodeIdMap: NodeIDMap<HTMLElement | Solid.StoreNode>,
-  propsMap: InspectedValueMap,
-): Mapped.Props | null {
-  if (!isSolidComponent(owner)) return null
-  const { props } = owner
-  const proxy = !!(props as any)[$PROXY]
-  const record: Mapped.Props['record'] = {}
-  for (const [key, desc] of Object.entries(Object.getOwnPropertyDescriptors(props))) {
-    record[key] = desc.get
-      ? { type: ValueType.Getter, value: key }
-      : encodeValue(desc.value, false, nodeIdMap)
-    // getter props or non-object props cannot be inspected (won't ever change and aren't deep)
-    propsMap.add(
-      `prop:${key}`,
-      desc.get || !(desc.value instanceof Object) ? undefined : () => desc.value,
-    )
-  }
-  return { proxy, record }
-}
-
 export function collectOwnerDetails(
   owner: Solid.Owner,
   config: {
     onSignalUpdate: (nodeId: NodeID, value: unknown) => void
     onValueUpdate: ValueUpdateListener
-    handleStoreNode: HandleStoreNode
   },
 ) {
-  const { onSignalUpdate, onValueUpdate, handleStoreNode } = config
+  const { onSignalUpdate, onValueUpdate } = config
 
   // Set globals
   $nodeIdMap = new NodeIDMap()
-  $valueMap = new InspectedValueMap()
+  $valueMap = new ValueNodeMap()
 
   const type = markOwnerType(owner)
   let { sourceMap, owned } = owner
@@ -352,6 +354,8 @@ export function collectOwnerDetails(
     signals,
   }
 
+  let checkProxyProps: (() => string[] | undefined) | undefined
+
   if (isSolidComputation(owner)) {
     details.value = encodeValue(getValue(), false, $nodeIdMap)
     observeValueUpdate(owner, onValueUpdate, INSPECTOR)
@@ -359,9 +363,42 @@ export function collectOwnerDetails(
     if (isSolidMemo(owner)) {
       details.observers = markNodesID(owner.observers)
     }
-    // map component props
-    const props = encodeComponentProps(owner, $nodeIdMap, $valueMap)
-    if (props) details.props = props
+
+    // Component Props
+    if (isSolidComponent(owner)) {
+      const { props } = owner
+      // proxy props need to be checked for changes
+      const proxy = !!(props as any)[$PROXY]
+      const record: Mapped.Props['record'] = {}
+      for (const [key, desc] of Object.entries(Object.getOwnPropertyDescriptors(props))) {
+        if (desc.get) {
+          record[key] = { type: ValueType.Getter, value: key }
+        } else {
+          record[key] = encodeValue(desc.value, false, $nodeIdMap)
+          // non-object props cannot be inspected (won't ever change and aren't deep)
+          desc.value instanceof Object && $valueMap.add(`prop:${key}`, () => desc.value)
+        }
+      }
+      details.props = { proxy, record }
+
+      if (proxy) {
+        let oldKeys = Object.keys(record)
+        checkProxyProps = () => {
+          const newKeys = Object.keys(props)
+          const added = new Set(newKeys)
+          let changed = false
+          for (const key of oldKeys) {
+            if (added.has(key)) added.delete(key)
+            else {
+              changed = true
+              break
+            }
+          }
+          if (!changed && !added.size) return
+          return (oldKeys = newKeys)
+        }
+      }
+    }
   }
 
   $valueMap.add('value', getValue)
@@ -370,5 +407,6 @@ export function collectOwnerDetails(
     details,
     valueMap: $valueMap,
     nodeIdMap: $nodeIdMap,
+    checkProxyProps,
   }
 }

@@ -9,12 +9,12 @@ export const getStoreNodeName = (node: Solid.StoreNode): string => node[DEV.$NAM
 
 function forEachStoreProp(
   node: Solid.StoreNode,
-  fn: (key: string | number, node: Solid.StoreNode) => void,
+  fn: (key: string, node: Solid.StoreNode) => void,
 ): void {
   if (Array.isArray(node)) {
     for (let i = 0; i < node.length; i++) {
       const child = node[i]
-      DEV.isWrappable(child) && fn(i, child)
+      DEV.isWrappable(child) && fn(i.toString(), child)
     }
   } else {
     for (const key in node) {
@@ -25,9 +25,7 @@ function forEachStoreProp(
 }
 
 export type StoreUpdateData = {
-  deleting: boolean
-  path: PropertyKey[]
-  property: PropertyKey
+  path: readonly string[]
   value: unknown
 }
 
@@ -48,17 +46,21 @@ export function observeStoreNode(
     return () => untrackStore(rootNode)
   })
 
-  function trackStore(node: Solid.StoreNode, path: PropertyKey[]): void {
+  function trackStore(node: Solid.StoreNode, path: readonly string[]): void {
     set.add(node)
-    const handler: Solid.OnStoreNodeUpdate = ((_, property, value, deleting) =>
+    const handler: Solid.OnStoreNodeUpdate = ((_, property, value, deleting) => {
+      if (typeof property === 'symbol') return
+      property = property.toString()
       untrack(() => {
-        onUpdate({ deleting, path, property, value })
+        const fullPath = [...path, property as string]
+        onUpdate({ path: fullPath, value: deleting ? undefined : value })
         const prev = node[property] as Solid.StoreNode | Core.Store.NotWrappable
         // deleting not existing properties will fire an update as well
         if (deleting && !prev) return
         if (DEV.isWrappable(prev)) untrackStore(prev)
-        if (DEV.isWrappable(value)) trackStore(value as Solid.StoreNode, [...path, property])
-      })) as Solid.OnStoreNodeUpdate
+        if (DEV.isWrappable(value)) trackStore(value as Solid.StoreNode, fullPath)
+      })
+    }) as Solid.OnStoreNodeUpdate
     handler.symbol = symbol
     pushToArrayProp(node, DEV.$ON_UPDATE, handler)
     forEachStoreProp(node, (key, child) => !set.has(child) && trackStore(child, [...path, key]))

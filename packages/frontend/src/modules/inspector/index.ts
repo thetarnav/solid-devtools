@@ -211,6 +211,7 @@ export default function createInspector({
         if (!proxy) return
 
         for (const update of updates) {
+          // Value node update
           if (update.type === 'value') {
             const [type, id] = splitValueNodeId(update.id)
             update.updated && emitValueUpdate(update.id)
@@ -227,9 +228,15 @@ export default function createInspector({
               if (!proxy.value) return
               reconcileValue(proxy.value, update.value)
             }
-          } else {
+          }
+          // Store
+          else if (update.type === 'store') {
             // TODO: store
-            console.log('update store', update)
+            // console.log('update store', update)
+          }
+          // Props
+          else {
+            console.log('update props', update)
           }
         }
       }),
