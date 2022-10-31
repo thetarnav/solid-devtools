@@ -1,4 +1,5 @@
 import { $PROXY, Accessor, createEffect, onCleanup, untrack } from 'solid-js'
+import { throttle } from '@solid-primitives/scheduled'
 import {
   Mapped,
   NodeID,
@@ -29,7 +30,6 @@ import {
 } from '../utils'
 import { NodeIDMap, encodeValue } from './serialize'
 import { getStoreNodeName, observeStoreNode, StoreUpdateData } from './store'
-import { throttle } from '@solid-primitives/scheduled'
 
 export type ValueNodeUpdate = {
   type: 'value'

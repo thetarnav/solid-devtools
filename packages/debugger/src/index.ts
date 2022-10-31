@@ -35,6 +35,7 @@ export {
   isSolidMemo,
   isSolidOwner,
   isSolidRoot,
+  isSolidStore,
   onOwnerCleanup,
   onParentCleanup,
   getFunctionSources,

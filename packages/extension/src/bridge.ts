@@ -1,6 +1,6 @@
 import { Controller } from '@solid-devtools/frontend'
-import { once } from '@solid-devtools/shared/bridge'
 import { createRuntimeMessanger } from '../shared/messanger'
+import { once } from 'solid-devtools/bridge'
 
 export default function createBridge({
   setVersions,
@@ -25,8 +25,11 @@ export default function createBridge({
     onHighlightElementChange(data) {
       postRuntimeMessage('HighlightElement', data)
     },
-    onInspect(payloa) {
-      postRuntimeMessage('ToggleInspected', payloa)
+    onInspectValue(payload) {
+      postRuntimeMessage('ToggleInspectedValue', payload)
+    },
+    onInspectNode(node) {
+      postRuntimeMessage('SetInspectedNode', node)
     },
   })
 
@@ -38,11 +41,7 @@ export default function createBridge({
 
   onRuntimeMessage('SetInspectedDetails', controller.setInspectedDetails.bind(controller))
 
-  onRuntimeMessage('SignalUpdates', controller.updateSignals.bind(controller))
-
-  onRuntimeMessage('PropsUpdate', controller.updateProps.bind(controller))
-
-  onRuntimeMessage('ValueUpdate', controller.updateValue.bind(controller))
+  onRuntimeMessage('InspectorUpdate', controller.updateInspector.bind(controller))
 
   onRuntimeMessage('ClientLocatorMode', controller.setLocatorState.bind(controller))
 

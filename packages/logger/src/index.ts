@@ -15,6 +15,7 @@ import {
   Core,
   getOwner,
   Solid,
+  isSolidStore,
 } from '@solid-devtools/debugger'
 import { NodeType } from '@solid-devtools/shared/graph'
 import { dedupeArray, arrayRefEquals } from '@solid-devtools/shared/utils'
@@ -428,7 +429,10 @@ export function debugOwnerSignals(owner?: Core.Owner, options: DebugSignalOption
     if (solidOwner.sourceMap) {
       const sourceList = Object.values(solidOwner.sourceMap)
       // signals can only be added
-      for (i = prevSourceListLength; i < sourceList.length; i++) signals.push(sourceList[i])
+      for (i = prevSourceListLength; i < sourceList.length; i++) {
+        const signal = sourceList[i]
+        if (!isSolidStore(signal)) signals.push(signal)
+      }
       prevSourceListLength = i
     }
     // add owned memos

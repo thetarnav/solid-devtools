@@ -1,6 +1,6 @@
 import { createCallbackStack } from '@solid-primitives/utils'
 import { log } from '@solid-devtools/shared/utils'
-import { OnMessageFn, PostMessageFn } from '@solid-devtools/shared/bridge'
+import { OnMessageFn, PostMessageFn } from 'solid-devtools/bridge'
 import {
   createPortMessanger,
   createRuntimeMessanger,
@@ -104,7 +104,10 @@ chrome.runtime.onConnect.addListener(port => {
       }),
     )
 
-    addCleanup(onRuntimeMessage('ToggleInspected', e => postPortMessage('ToggleInspected', e)))
+    addCleanup(
+      onRuntimeMessage('ToggleInspectedValue', e => postPortMessage('ToggleInspectedValue', e)),
+    )
+    addCleanup(onRuntimeMessage('SetInspectedNode', e => postPortMessage('SetInspectedNode', e)))
 
     addCleanup(onRuntimeMessage('HighlightElement', e => postPortMessage('HighlightElement', e)))
 

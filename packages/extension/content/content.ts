@@ -2,7 +2,7 @@ import {
   onWindowMessage,
   postWindowMessage,
   startListeningWindowMessages,
-} from '@solid-devtools/shared/bridge'
+} from 'solid-devtools/bridge'
 import { warn } from '@solid-devtools/shared/utils'
 import { createPortMessanger, DEVTOOLS_CONTENT_PORT } from '../shared/messanger'
 
@@ -69,7 +69,8 @@ onPortMessage('PanelClosed', e => postWindowMessage('PanelClosed', e))
 
 onPortMessage('ForceUpdate', () => postWindowMessage('ForceUpdate'))
 
-onPortMessage('ToggleInspected', e => postWindowMessage('ToggleInspected', e))
+onPortMessage('ToggleInspectedValue', e => postWindowMessage('ToggleInspectedValue', e))
+onPortMessage('SetInspectedNode', e => postWindowMessage('SetInspectedNode', e))
 
 onPortMessage('HighlightElement', e => postWindowMessage('HighlightElement', e))
 

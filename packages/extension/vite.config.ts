@@ -21,7 +21,7 @@ export default defineConfig({
   },
   define: {
     // need to insert the "" quotes manually, because vite just inserts the value as-is.
-    __CLIENT_VERSION__: `"${pkg.devDependencies['solid-devtools'].match(/\d+.\d+.\d+/)![0]}"`,
+    __CLIENT_VERSION__: `"${pkg.dependencies['solid-devtools'].match(/\d+.\d+.\d+/)![0]}"`,
   },
   build: {
     emptyOutDir: false,

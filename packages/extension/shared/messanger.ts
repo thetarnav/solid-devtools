@@ -1,4 +1,4 @@
-import { LOG_MESSAGES, OnMessageFn, PostMessageFn, Messages } from '@solid-devtools/shared/bridge'
+import { LOG_MESSAGES, OnMessageFn, PostMessageFn, Messages } from 'solid-devtools/bridge'
 import { log } from '@solid-devtools/shared/utils'
 
 export const DEVTOOLS_CONTENT_PORT = 'DEVTOOLS_CONTENT_PORT'

@@ -1,5 +1,5 @@
 import { createRuntimeMessanger, DEVTOOLS_CONNECTION_NAME } from '../shared/messanger'
-import { once } from '@solid-devtools/shared/bridge'
+import { once } from 'solid-devtools/bridge'
 import { log } from '@solid-devtools/shared/utils'
 
 log('Devtools script working.')

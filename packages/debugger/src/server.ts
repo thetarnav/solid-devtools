@@ -57,6 +57,7 @@ export const isSolidComputation: typeof API.isSolidComputation = (o): o is Solid
 export const isSolidMemo: typeof API.isSolidMemo = (o): o is Solid.Memo => false
 export const isSolidOwner: typeof API.isSolidOwner = (o): o is Solid.Owner => false
 export const isSolidRoot: typeof API.isSolidRoot = (o): o is Solid.Root => false
+export const isSolidStore: typeof API.isSolidStore = (o): o is Solid.Store => false
 export const onOwnerCleanup: typeof API.onOwnerCleanup = () => () => {}
 export const onParentCleanup: typeof API.onParentCleanup = () => () => {}
 export const getFunctionSources: typeof API.getFunctionSources = () => []
