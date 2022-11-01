@@ -32,20 +32,22 @@ import { NodeIDMap, encodeValue } from './serialize'
 import { getStoreNodeName, observeStoreNode, StoreUpdateData } from './store'
 
 export type ValueNodeUpdate = {
-  type: 'value'
   id: ValueNodeId
   value: EncodedValue<boolean>
   updated: boolean
 }
 export type StoreNodeUpdate = {
-  type: 'store'
-  id: NodeID
+  valueNodeId: ValueNodeId
+  storeId: NodeID
   path: readonly string[]
-  value: EncodedValue<true> | false
+  value: EncodedValue<true> | null
 }
 /** List of new keys — all of the values are getters, so they won't change */
-export type ProxyPropsUpdate = { type: 'props'; added: string[]; removed: string[] }
-export type InspectorUpdate = ValueNodeUpdate | StoreNodeUpdate | ProxyPropsUpdate
+export type ProxyPropsUpdate = { added: string[]; removed: string[] }
+export type InspectorUpdate =
+  | [type: 'value', update: ValueNodeUpdate]
+  | [type: 'store', update: StoreNodeUpdate]
+  | [type: 'props', update: ProxyPropsUpdate]
 
 export type SetInspectedNodeData = null | { rootId: NodeID; nodeId: NodeID }
 export type ToggleInspectedValueData = { id: ValueNodeId; selected: boolean }
@@ -103,7 +105,7 @@ export function createInspector(
   // these will include updates to signals, stores, props, and node value
   const { pushStoreUpdate, pushValueUpdate, triggerPropsCheck, clearUpdates } = (() => {
     let valueUpdates: Partial<Record<ValueNodeId, boolean>> = {}
-    let storeUpdates: [NodeID, StoreUpdateData][] = []
+    let storeUpdates: [valueNodeId: ValueNodeId, storeId: NodeID, data: StoreUpdateData][] = []
     let checkProps = false
 
     const flush = defferIdle(() => {
@@ -113,27 +115,31 @@ export function createInspector(
       for (const [id, updated] of Object.entries(valueUpdates) as [ValueNodeId, boolean][]) {
         const node = valueMap.get(id)
         if (!node || !node.getValue) continue
+        const selected = node.isSelected()
         const encoded = encodeValue(
           node.getValue(),
-          node.isSelected(),
+          selected,
           nodeIdMap,
-          handleStoreNode.bind(null, id, node),
+          selected && handleStoreNode.bind(null, id, node),
         )
-        batchedUpdates.push({ type: 'value', id, value: encoded, updated })
+        batchedUpdates.push(['value', { id, value: encoded, updated }])
       }
       valueUpdates = {}
 
       // Stores
-      for (const [id, data] of storeUpdates) {
-        const value = data.value === undefined ? false : encodeValue(data.value, true, nodeIdMap)
-        batchedUpdates.push({ type: 'store', id, path: data.path, value })
+      for (const [valueNodeId, storeId, data] of storeUpdates) {
+        const value =
+          data.value === undefined
+            ? null
+            : encodeValue(data.value, true, nodeIdMap, undefined, true)
+        batchedUpdates.push(['store', { valueNodeId, storeId, path: data.path, value }])
       }
       storeUpdates = []
 
       // Props (top-level key check of proxy props object)
       if (checkProps && checkProxyProps) {
         const keys = checkProxyProps()
-        if (keys) batchedUpdates.push({ type: 'props', added: keys.added, removed: keys.removed })
+        if (keys) batchedUpdates.push(['props', { added: keys.added, removed: keys.removed }])
         checkProps = false
       }
 
@@ -149,8 +155,8 @@ export function createInspector(
         if (existing === undefined || (updated && !existing)) valueUpdates[id] = updated
         flush()
       },
-      pushStoreUpdate(id: NodeID, data: StoreUpdateData) {
-        storeUpdates.push([id, data])
+      pushStoreUpdate(valueNodeId: ValueNodeId, storeId: NodeID, data: StoreUpdateData) {
+        storeUpdates.push([valueNodeId, storeId, data])
         flush()
       },
       triggerPropsCheck() {
@@ -177,7 +183,7 @@ export function createInspector(
   ) {
     console.log(`TRACK store-node: ${storeNodeId} of ${valueId}:`, getStoreNodeName(storeNode))
     valueNode.addStoreObserver(
-      observeStoreNode(storeNode, data => pushStoreUpdate(storeNodeId, data)),
+      observeStoreNode(storeNode, data => pushStoreUpdate(valueId, storeNodeId, data)),
     )
   }
 
@@ -255,7 +261,7 @@ function mapSignalNode(
       type: NodeType.Store,
       id,
       name: getDisplayName(getStoreNodeName(value as Solid.StoreNode)),
-      value: encodeValue(value, false, $nodeIdMap),
+      value: encodeValue(value, false, $nodeIdMap, undefined, true),
       // TODO: top-level values can be observed too, it's the "_" property
       observers: [],
     }

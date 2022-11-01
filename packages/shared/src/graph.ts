@@ -139,7 +139,7 @@ export type EncodedPreviewPayloadMap = {
 
 export type EncodedPreviewChildrenMap = {
   [ValueType.Array]: EncodedValue<true>[]
-  [ValueType.Object]: Record<string, EncodedValue<true>>
+  [ValueType.Object]: Record<string | number, EncodedValue<true>>
 }
 
 export type EncodedValueOf<K extends ValueType, Deep extends boolean = boolean> = {

@@ -24,11 +24,7 @@ function forEachStoreProp(
   }
 }
 
-export type StoreUpdateData = {
-  path: readonly string[]
-  value: unknown
-}
-
+export type StoreUpdateData = { path: readonly string[]; value: unknown }
 export type StoreUpdateHandler = (data: StoreUpdateData) => void
 
 export function observeStoreNode(

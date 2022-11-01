@@ -34,15 +34,18 @@ import { createHover } from '@solid-devtools/shared/primitives'
 import { Listen } from '@solid-primitives/event-bus'
 import { createPingedSignal } from '@/utils'
 
-type ValueComponent<K extends ValueType> = Component<Omit<EncodedValueOf<K, boolean>, 'type'>>
+type ValueComponent<K extends ValueType> = Component<{
+  value: EncodedValueOf<K, boolean>
+  extended?: boolean
+}>
 
 const StringValuePreview: ValueComponent<ValueType.String> = props => (
-  <span class={styles.ValueString}>"{props.value}"</span>
+  <span class={styles.ValueString}>"{props.value.value}"</span>
 )
 
 const NumberValuePreview: ValueComponent<ValueType.Number> = props => {
   const value = () => {
-    switch (props.value) {
+    switch (props.value.value) {
       case NAN:
         return 'NaN'
       case INFINITY:
@@ -50,7 +53,7 @@ const NumberValuePreview: ValueComponent<ValueType.Number> = props => {
       case NEGATIVE_INFINITY:
         return '-Infinity'
       default:
-        return props.value
+        return props.value.value
     }
   }
   return <span class={styles.ValueNumber}>{value()}</span>
@@ -61,27 +64,29 @@ const BooleanValuePreview: ValueComponent<ValueType.Boolean> = props => (
     type="checkbox"
     class={styles.ValueBoolean}
     onClick={e => e.preventDefault()}
-    checked={props.value}
+    checked={props.value.value}
   ></input>
 )
 
 const FunctionValuePreview: ValueComponent<ValueType.Function> = props => (
-  <span class={styles.ValueFunction}>{props.value ? `f ${props.value}()` : 'function()'}</span>
+  <span class={styles.ValueFunction}>
+    {props.value.value ? `f ${props.value.value}()` : 'function()'}
+  </span>
 )
 const GetterValuePreview: ValueComponent<ValueType.Getter> = props => (
-  <span class={styles.ValueFunction}>get {props.value}()</span>
+  <span class={styles.ValueFunction}>get {props.value.value}()</span>
 )
 
-const NullableValuePreview: Component<{ value: null | undefined }> = props => (
-  <span class={styles.Nullable}>{props.value === null ? 'null' : 'undefined'}</span>
+const NullableValuePreview: ValueComponent<ValueType.Null | ValueType.Undefined> = props => (
+  <span class={styles.Nullable}>{props.value.type === ValueType.Null ? 'null' : 'undefined'}</span>
 )
 
 const SymbolValuePreview: ValueComponent<ValueType.Symbol> = props => (
-  <span class={styles.baseValue}>Symbol({props.value})</span>
+  <span class={styles.baseValue}>Symbol({props.value.value})</span>
 )
 
 const InstanceValuePreview: ValueComponent<ValueType.Instance> = props => (
-  <span class={styles.baseValue}>{props.value}</span>
+  <span class={styles.baseValue}>{props.value.value}</span>
 )
 
 export type ToggleElementHover = (elementId: NodeID, hovered?: boolean) => void
@@ -94,8 +99,8 @@ const ElementValuePreview: ValueComponent<ValueType.Element> = props => {
   const handleHover =
     onHover &&
     ((hovered: boolean) => {
-      if (props.value.id === undefined) return
-      onHover(props.value.id, hovered)
+      if (props.value.value.id === undefined) return
+      onHover(props.value.value.id, hovered)
     })
 
   const hoverProps = handleHover && createHover(handleHover)
@@ -103,54 +108,48 @@ const ElementValuePreview: ValueComponent<ValueType.Element> = props => {
   return (
     <span class={styles.ValueElement.container} {...hoverProps}>
       <div class={styles.ValueElement.highlight} />
-      {props.value.name}
+      {props.value.value.name}
     </span>
   )
 }
 
-const ObjectValuePreview: Component<
-  EncodedValueOf<ValueType.Object | ValueType.Array, boolean> & { extended?: boolean }
-> = props => (
-  <Switch>
-    <Match when={!props.children || props.value === 0 || props.extended === false}>
-      <Show
-        when={props.value > 0}
-        fallback={
-          <span class={styles.Nullable}>
-            Empty {props.type === ValueType.Array ? 'Array' : 'Object'}
-          </span>
-        }
-      >
-        <span class={styles.baseValue}>
-          {props.type === ValueType.Array ? 'Array' : 'Object'} [{props.value}]
+const getObjectLength = (
+  obj: EncodedValueOf<ValueType.Array | ValueType.Object, boolean>,
+): number =>
+  obj.children
+    ? Array.isArray(obj.children)
+      ? obj.children.length
+      : Object.keys(obj.children).length
+    : obj.value
+
+const ObjectValuePreview: ValueComponent<ValueType.Array | ValueType.Object> = props => {
+  const length = createMemo(() => getObjectLength(props.value))
+  return (
+    <Switch fallback={<CollapsableObjectPreview value={props.value.children!} />}>
+      <Match when={length() === 0}>
+        <span class={styles.Nullable}>
+          Empty {props.value.type === ValueType.Array ? 'Array' : 'Object'}
         </span>
-      </Show>
-    </Match>
-    <Match when={props.children}>
-      <CollapsableObjectPreview value={props.children!} />
-    </Match>
-  </Switch>
-)
+      </Match>
+      <Match when={!props.extended}>
+        <span class={styles.baseValue}>
+          {props.value.type === ValueType.Array ? 'Array' : 'Object'} [{length()}]
+        </span>
+      </Match>
+    </Switch>
+  )
+}
 
 const CollapsableObjectPreview: Component<{
-  value:
-    | EncodedValueOf<ValueType.Object, true>['children']
-    | EncodedValueOf<ValueType.Array, true>['children']
+  value: EncodedValueOf<ValueType.Object | ValueType.Array, true>['children']
 }> = props => {
   return (
     <ul class={styles.collapsable.list}>
       <Entries of={props.value}>
         {(key, value) => (
           <Show
-            when={value().type === ValueType.Object || value().type === ValueType.Array}
-            fallback={
-              <ValueRow>
-                <ValueName>{key}</ValueName>
-                <ValuePreview value={value()} />
-              </ValueRow>
-            }
-          >
-            {untrack(() => {
+            when={[ValueType.Object, ValueType.Array, ValueType.Store].includes(value().type)}
+            children={untrack(() => {
               const [extended, setExtended] = createSignal(false)
               return (
                 <ValueRow
@@ -160,51 +159,51 @@ const CollapsableObjectPreview: Component<{
                     setExtended(p => !p)
                   }}
                 >
-                  <ValueName>{key}</ValueName>
-                  <ObjectValuePreview
-                    {...(value() as
-                      | EncodedValueOf<ValueType.Object, true>
-                      | EncodedValueOf<ValueType.Array, true>)}
-                    extended={extended()}
-                  />
+                  <ValueName>{value().type === ValueType.Store ? `:S:${key}` : key}</ValueName>
+                  <ValuePreview value={value()} extended={extended()} />
                 </ValueRow>
               )
             })}
-          </Show>
+            fallback={
+              <ValueRow>
+                <ValueName>{key}</ValueName>
+                <ValuePreview value={value()} />
+              </ValueRow>
+            }
+          />
         )}
       </Entries>
     </ul>
   )
 }
 
-const ValuePreview: Component<{ value: EncodedValue<boolean> }> = props =>
+const ValuePreview: Component<{ value: EncodedValue<boolean>; extended?: boolean }> = props =>
   createMemo(() => {
     switch (props.value.type) {
       case ValueType.String:
-        return <StringValuePreview value={props.value.value} />
+        return <StringValuePreview value={props.value} />
       case ValueType.Number:
-        return <NumberValuePreview value={props.value.value} />
+        return <NumberValuePreview value={props.value} />
       case ValueType.Boolean:
-        return <BooleanValuePreview value={props.value.value} />
+        return <BooleanValuePreview value={props.value} />
       case ValueType.Object:
       case ValueType.Array:
-        return <ObjectValuePreview {...props.value} />
+        return <ObjectValuePreview value={props.value} extended={props.extended} />
       case ValueType.Function:
-        return <FunctionValuePreview value={props.value.value} />
+        return <FunctionValuePreview value={props.value} />
       case ValueType.Getter:
-        return <GetterValuePreview value={props.value.value} />
+        return <GetterValuePreview value={props.value} />
       case ValueType.Null:
-        return <NullableValuePreview value={null} />
       case ValueType.Undefined:
-        return <NullableValuePreview value={undefined} />
+        return <NullableValuePreview value={props.value} />
       case ValueType.Symbol:
-        return <SymbolValuePreview value={props.value.value} />
+        return <SymbolValuePreview value={props.value} />
       case ValueType.Instance:
-        return <InstanceValuePreview value={props.value.value} />
+        return <InstanceValuePreview value={props.value} />
       case ValueType.Element:
-        return <ElementValuePreview value={props.value.value} />
+        return <ElementValuePreview value={props.value} />
       case ValueType.Store:
-        return <ValuePreview value={props.value.value.value} />
+        return <ValuePreview value={props.value.value.value} extended={props.extended} />
       // default:
       //   return <span>{ValueType[props.value.type]}</span>
     }
@@ -283,7 +282,7 @@ export const ValueNode: Component<{
         </Highlight>
       </ValueName>
       <ElementHoverContext.Provider value={props.onElementHover}>
-        <ValuePreview value={props.value} />
+        <ValuePreview value={props.value} extended={props.selected} />
       </ElementHoverContext.Provider>
     </ValueRow>
   )

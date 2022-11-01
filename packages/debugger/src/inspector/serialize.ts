@@ -23,7 +23,7 @@ export function encodeValue<Deep extends boolean>(
   value: unknown,
   deep: Deep,
   nodeMap: NodeIDMap<HTMLElement | Solid.StoreNode>,
-  handleStore?: (storeNodeId: NodeID, storeNode: Solid.StoreNode) => void,
+  handleStore?: false | undefined | ((storeNodeId: NodeID, storeNode: Solid.StoreNode) => void),
   inStore = false,
 ): EncodedValue<Deep> {
   if (typeof value === 'number') {
@@ -66,7 +66,7 @@ export function encodeValue<Deep extends boolean>(
     } as EncodedValueOf<ValueType.Array>
     if (deep)
       (payload as EncodedValueOf<ValueType.Array, true>).children = value.map(item =>
-        encodeValue(item, true, nodeMap, handleStore),
+        encodeValue(item, true, nodeMap, handleStore, inStore),
       )
     return payload
   }
@@ -85,7 +85,7 @@ export function encodeValue<Deep extends boolean>(
       for (const [key, descriptor] of Object.entries(Object.getOwnPropertyDescriptors(value))) {
         children[key] = descriptor.get
           ? { type: ValueType.Getter, value: key }
-          : encodeValue(descriptor.value, true, nodeMap, handleStore)
+          : encodeValue(descriptor.value, true, nodeMap, handleStore, inStore)
       }
     }
     return payload

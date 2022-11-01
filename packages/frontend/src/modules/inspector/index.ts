@@ -10,9 +10,16 @@ import {
   splitValueNodeId,
   ValueNodeId,
   ValueType,
+  EncodedValueOf,
 } from '@solid-devtools/shared/graph'
 import { defer, untrackedCallback } from '@solid-devtools/shared/primitives'
-import type { InspectorUpdate, ToggleInspectedValueData } from '@solid-devtools/debugger'
+import type {
+  InspectorUpdate,
+  ProxyPropsUpdate,
+  StoreNodeUpdate,
+  ToggleInspectedValueData,
+  ValueNodeUpdate,
+} from '@solid-devtools/debugger'
 import type { Structure } from '../structure'
 
 export namespace Inspector {
@@ -21,16 +28,13 @@ export namespace Inspector {
     readonly name: string
     readonly id: NodeID
     readonly observers: NodeID[]
-    readonly value: EncodedValue<boolean>
+    readonly value: EncodedValue
     readonly selected: boolean
   }
 
   export type Props = {
     readonly proxy: boolean
-    readonly record: Record<
-      string,
-      { readonly selected: boolean; readonly value: EncodedValue<boolean> }
-    >
+    readonly record: Record<string, { readonly selected: boolean; readonly value: EncodedValue }>
   }
 
   export interface Details {
@@ -40,7 +44,7 @@ export namespace Inspector {
     readonly path: Structure.Node[]
     readonly signals: Record<NodeID, Signal>
     readonly props?: Props
-    readonly value?: EncodedValue<boolean>
+    readonly value?: EncodedValue
     readonly valueSelected: boolean
     // TODO: more to come
   }
@@ -70,7 +74,7 @@ export namespace Inspector {
 //   for (const id of prev) delete signals[id]
 // }
 
-function reconcileValue(proxy: EncodedValue<boolean>, next: EncodedValue<boolean>) {
+function reconcileValue(proxy: EncodedValue, next: EncodedValue) {
   if (proxy.type !== next.type) {
     const assigned = new Set()
     for (const key in next) {
@@ -87,7 +91,7 @@ function reconcileValue(proxy: EncodedValue<boolean>, next: EncodedValue<boolean
   else delete proxy.value
   if (next.children) {
     // add new children
-    if (!proxy.children) (proxy as EncodedValue<boolean>).children = next.children
+    if (!proxy.children) (proxy as EncodedValue).children = next.children
     // reconcile children
     else {
       for (const key of Object.keys(proxy.children) as never[]) {
@@ -154,6 +158,62 @@ function createDetails(
   return details
 }
 
+function reconcileValueAtPath(
+  value: EncodedValue,
+  _path: readonly string[],
+  newValue: EncodedValue<true> | null,
+): void {
+  console.log('reconcileValueAtPath', _path, newValue && ValueType[newValue.type])
+  const path = _path.slice()
+  const last = path.pop()
+  if (!last) throw new Error('Invalid empty path')
+  for (const key of path) {
+    if (!value.children) return console.error('Invalid path', _path)
+    value = value.children[key as never]
+  }
+  const children = value.children
+  if (!children) return console.error('Invalid path', _path)
+  if (!newValue) {
+    // Removing
+    if (Array.isArray(children) && +last !== (NaN as number)) {
+      console.log("Removing array's element", last)
+      children.splice(+last, 1)
+      console.log('New array', [...children])
+    } else delete children[last as never]
+  } else {
+    value = children[last as never]
+    // Updating
+    if (value) reconcileValue(value, newValue)
+    // Adding
+    else if (Array.isArray(children) && +last !== (NaN as number))
+      children.splice(+last, 1, newValue)
+    else {
+      children[last as never] = newValue
+      console.log('added', last, newValue)
+    }
+  }
+}
+
+function findStoreNode(
+  value: EncodedValue,
+  storeId: NodeID,
+): EncodedValueOf<ValueType.Store> | undefined {
+  if (value.type === ValueType.Store && value.value.id === storeId) return value
+  if (value.children) {
+    for (const child of Object.values(value.children)) {
+      const store = findStoreNode(child, storeId)
+      if (store) return store
+    }
+  }
+}
+
+function findValueNode(details: Inspector.Details, valueId: ValueNodeId): EncodedValue | undefined {
+  const [type, id] = splitValueNodeId(valueId)
+  if (type === 'signal') return details.signals[id!]?.value
+  if (type === 'prop') return details.props?.record[id!]?.value
+  return details.value
+}
+
 export default function createInspector({
   getNodePath,
   findNode,
@@ -205,43 +265,58 @@ export default function createInspector({
     setDetails('value', createDetails(raw, getNodePath(node)))
   })
 
+  /**
+   * Value node update
+   */
+  function updateValue(
+    proxy: Inspector.Details,
+    { id: valueId, updated, value }: ValueNodeUpdate,
+  ): void {
+    const valueNode = findValueNode(proxy, valueId)
+    if (!valueNode) return console.warn(`updateValue: value node (${valueId}) not found`)
+    updated && emitValueUpdate(valueId)
+    reconcileValue(valueNode, value)
+  }
+
+  /**
+   * Props — add/remove changed prop keys of an proxy object
+   */
+  function updateProps(proxy: Inspector.Details, { added, removed }: ProxyPropsUpdate): void {
+    const props = proxy.props!
+    for (const key of added)
+      props.record[key] = { value: { type: ValueType.Getter, value: key }, selected: false }
+    for (const key of removed) delete props.record[key]
+  }
+
+  function updateStore(
+    proxy: Inspector.Details,
+    { path, storeId, value, valueNodeId }: StoreNodeUpdate,
+  ): void {
+    const valueNode = findValueNode(proxy, valueNodeId)
+    if (!valueNode) return console.warn(`updateStore: value node (${valueNodeId}) not found`)
+    // TODO cache the store node
+    const store = findStoreNode(valueNode, storeId)
+    if (!store) return console.warn(`updateStore: store node (${storeId}) not found`)
+    reconcileValueAtPath(store.value.value, path, value)
+  }
+
   // Handle Inspector updates comming from the debugger
   function handleUpdate(updates: InspectorUpdate[]) {
     setDetails(
       'value',
       produce(proxy => {
         if (!proxy) return
-
         for (const update of updates) {
-          // Value node update
-          if (update.type === 'value') {
-            const [type, id] = splitValueNodeId(update.id)
-            update.updated && emitValueUpdate(update.id)
-
-            if (type === 'signal') {
-              const signal = proxy.signals[id!]
-              if (!signal) return
-              reconcileValue(signal.value, update.value)
-            } else if (type === 'prop') {
-              const prop = proxy.props?.record[id!]
-              if (!prop) return
-              reconcileValue(prop.value, update.value)
-            } else {
-              if (!proxy.value) return
-              reconcileValue(proxy.value, update.value)
-            }
-          }
-          // Store
-          else if (update.type === 'store') {
-            // TODO: store
-            // console.log('update store', update)
-          }
-          // Props — add/remove changed prop keys of an proxy object
-          else {
-            const props = proxy.props!
-            for (const key of update.added)
-              props.record[key] = { value: { type: ValueType.Getter, value: key }, selected: false }
-            for (const key of update.removed) delete props.record[key]
+          switch (update[0]) {
+            case 'value':
+              updateValue(proxy, update[1])
+              break
+            case 'props':
+              updateProps(proxy, update[1])
+              break
+            case 'store':
+              updateStore(proxy, update[1])
+              break
           }
         }
       }),
