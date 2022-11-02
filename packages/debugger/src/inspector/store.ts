@@ -1,7 +1,7 @@
 import { untrack } from 'solid-js'
 import { DEV as STORE_DEV, unwrap } from 'solid-js/store'
 import { pushToArrayProp } from '@solid-devtools/shared/utils'
-import { Core, Solid } from '../types'
+import { Solid } from '../types'
 
 const DEV = STORE_DEV!
 
@@ -30,6 +30,13 @@ export type StoreUpdateData = { path: readonly (string | number)[]; property: st
 )
 export type StoreUpdateHandler = (data: StoreUpdateData) => void
 
+const matchesHandlerData = (
+  { _$sdtData }: Solid.OnStoreNodeUpdate,
+  { parent, symbol, property }: Solid.OnStoreNodeUpdate['_$sdtData'],
+): boolean =>
+  symbol === _$sdtData.symbol &&
+  (parent ? parent === _$sdtData.parent && property == _$sdtData.property : true)
+
 export function observeStoreNode(
   rootNode: Solid.StoreNode,
   onUpdate: StoreUpdateHandler,
@@ -37,39 +44,54 @@ export function observeStoreNode(
   // might still pass in a proxy
   rootNode = unwrap(rootNode)
 
-  const set = new WeakSet<Solid.StoreNode>()
   const symbol = Symbol('inspect-store')
 
   return untrack(() => {
-    trackStore(rootNode, [])
-    return () => untrackStore(rootNode)
+    trackStore(rootNode, [], { symbol })
+    return () => untrackStore(rootNode, { symbol })
   })
 
-  function trackStore(node: Solid.StoreNode, path: readonly (string | number)[]): void {
-    set.add(node)
+  function trackStore(
+    node: Solid.StoreNode,
+    path: readonly (string | number)[],
+    handlerData: Solid.OnStoreNodeUpdate['_$sdtData'],
+  ): void {
+    console.log('trackStore', path.join('.'))
+
+    if (node[DEV.$ON_UPDATE] && node[DEV.$ON_UPDATE]!.some(h => matchesHandlerData(h, handlerData)))
+      return
+
     const handler: Solid.OnStoreNodeUpdate = ((_, property, value, prev) => {
       if (typeof property === 'symbol') return
-      console.log('store update', property, value, prev)
+      console.log('onUpdate', [...path, property].join('.'), value)
+      const _handlerData: Solid.OnStoreNodeUpdate['_$sdtData'] = { symbol, parent: node, property }
       untrack(() => {
         if (property === 'length' && typeof value === 'number' && Array.isArray(node)) {
           // Update array length
           onUpdate({ path, property, length: value })
         } else {
-          if (DEV.isWrappable(prev)) untrackStore(prev as Solid.StoreNode)
-          if (DEV.isWrappable(value)) trackStore(value as Solid.StoreNode, [...path, property])
+          if (DEV.isWrappable(prev)) untrackStore(prev as Solid.StoreNode, _handlerData)
+          if (DEV.isWrappable(value))
+            trackStore(value as Solid.StoreNode, [...path, property], _handlerData)
           onUpdate({ path, property, value })
         }
       })
     }) as Solid.OnStoreNodeUpdate
-    handler.symbol = symbol
+    handler._$sdtData = handlerData
     pushToArrayProp(node, DEV.$ON_UPDATE, handler)
-    forEachStoreProp(node, (key, child) => !set.has(child) && trackStore(child, [...path, key]))
+    forEachStoreProp(node, (property, child) => {
+      trackStore(child, [...path, property], { symbol, parent: node, property })
+    })
   }
 
-  function untrackStore(node: Solid.StoreNode) {
-    if (node[DEV.$ON_UPDATE]!.length === 1) delete node[DEV.$ON_UPDATE]
-    else node[DEV.$ON_UPDATE] = node[DEV.$ON_UPDATE]!.filter(h => h.symbol !== symbol)
-    set.delete(node)
-    forEachStoreProp(node, (_, child) => set.has(child) && untrackStore(child))
+  function untrackStore(node: Solid.StoreNode, handlerData: Solid.OnStoreNodeUpdate['_$sdtData']) {
+    console.log('untrackStore', node, handlerData.property)
+    let handlers = node[DEV.$ON_UPDATE]
+    if (!handlers) return
+    node[DEV.$ON_UPDATE] = handlers = handlers.filter(h => !matchesHandlerData(h, handlerData))
+    if (handlers.length === 0) delete node[DEV.$ON_UPDATE]
+    forEachStoreProp(node, (property, child) => {
+      untrackStore(child, { symbol, parent: node, property })
+    })
   }
 }

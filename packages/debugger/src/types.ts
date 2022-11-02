@@ -59,7 +59,9 @@ export namespace Solid {
     observers: Computation[] | null
   }
 
-  export type OnStoreNodeUpdate = Core.Store.OnStoreNodeUpdate & { symbol: symbol }
+  export type OnStoreNodeUpdate = Core.Store.OnStoreNodeUpdate & {
+    _$sdtData: { symbol: symbol; parent?: StoreNode; property?: string | number }
+  }
 
   export interface StoreNode extends Core.Store.StoreNode {
     [$ON_UPDATE]?: OnStoreNodeUpdate[]
