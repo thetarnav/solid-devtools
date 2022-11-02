@@ -142,40 +142,38 @@ const ObjectValuePreview: ValueComponent<ValueType.Array | ValueType.Object> = p
 
 const CollapsableObjectPreview: Component<{
   value: EncodedValueOf<ValueType.Object | ValueType.Array, true>['children']
-}> = props => {
-  return (
-    <ul class={styles.collapsable.list}>
-      <Entries of={props.value}>
-        {(key, value) => (
-          <Show
-            when={[ValueType.Object, ValueType.Array, ValueType.Store].includes(value().type)}
-            children={untrack(() => {
-              const [extended, setExtended] = createSignal(false)
-              return (
-                <ValueRow
-                  selected={false}
-                  onClick={e => {
-                    e.stopPropagation()
-                    setExtended(p => !p)
-                  }}
-                >
-                  <ValueName>{value().type === ValueType.Store ? `:S:${key}` : key}</ValueName>
-                  <ValuePreview value={value()} extended={extended()} />
-                </ValueRow>
-              )
-            })}
-            fallback={
-              <ValueRow>
-                <ValueName>{key}</ValueName>
-                <ValuePreview value={value()} />
+}> = props => (
+  <ul class={styles.collapsable.list}>
+    <Entries of={props.value}>
+      {(key, value) => (
+        <Show
+          when={[ValueType.Object, ValueType.Array, ValueType.Store].includes(value().type)}
+          children={untrack(() => {
+            const [extended, setExtended] = createSignal(false)
+            return (
+              <ValueRow
+                selected={false}
+                onClick={e => {
+                  e.stopPropagation()
+                  setExtended(p => !p)
+                }}
+              >
+                <ValueName>{value().type === ValueType.Store ? `:S:${key}` : key}</ValueName>
+                <ValuePreview value={value()} extended={extended()} />
               </ValueRow>
-            }
-          />
-        )}
-      </Entries>
-    </ul>
-  )
-}
+            )
+          })}
+          fallback={
+            <ValueRow>
+              <ValueName>{key}</ValueName>
+              <ValuePreview value={value()} />
+            </ValueRow>
+          }
+        />
+      )}
+    </Entries>
+  </ul>
+)
 
 const ValuePreview: Component<{ value: EncodedValue<boolean>; extended?: boolean }> = props =>
   createMemo(() => {

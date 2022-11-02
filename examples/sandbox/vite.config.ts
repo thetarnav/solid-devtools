@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite'
 import solidPlugin from 'vite-plugin-solid'
 import devtoolsPlugin from '@solid-devtools/transform'
+import Unocss from 'unocss/vite'
 
 export default defineConfig({
   plugins: [
@@ -10,6 +11,7 @@ export default defineConfig({
       name: true,
     }),
     solidPlugin({ hot: false, dev: true }),
+    Unocss(),
   ],
   resolve: {
     conditions: ['browser', 'development'],

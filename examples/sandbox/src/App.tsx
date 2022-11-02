@@ -16,6 +16,7 @@ import Todos from './Todos'
 import { disposeApp } from '.'
 import { ThemeExample } from './Theme'
 import { createMutable } from 'solid-js/store'
+import Recursive from './Recursive'
 
 const doMediumCalc = () => {
   Array.from({ length: 1000000 }, (_, i) => i).sort(() => Math.random() - 5)
@@ -184,6 +185,7 @@ const App: Component = () => {
       <div style={{ margin: '24px' }}>
         <ThemeExample />
       </div>
+      <Recursive />
     </>
   )
 }

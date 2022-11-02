@@ -160,38 +160,19 @@ function createDetails(
 
 function reconcileValueAtPath(
   value: EncodedValue,
-  _path: readonly string[],
-  newValue: EncodedValue<true> | null,
+  path: readonly (string | number)[],
+  property: string | number,
+  newValue: EncodedValue<true> | undefined | number,
 ): void {
-  console.log('reconcileValueAtPath', _path, newValue && ValueType[newValue.type])
-  const path = _path.slice()
-  const last = path.pop()
-  if (!last) throw new Error('Invalid empty path')
+  const fullPathString = [...path, property].join('.')
   for (const key of path) {
-    if (!value.children) return console.error('Invalid path', _path)
+    if (!value.children) return console.error('Invalid path', fullPathString)
     value = value.children[key as never]
   }
   const children = value.children
-  if (!children) return console.error('Invalid path', _path)
-  if (!newValue) {
-    // Removing
-    if (Array.isArray(children) && +last !== (NaN as number)) {
-      console.log("Removing array's element", last)
-      children.splice(+last, 1)
-      console.log('New array', [...children])
-    } else delete children[last as never]
-  } else {
-    value = children[last as never]
-    // Updating
-    if (value) reconcileValue(value, newValue)
-    // Adding
-    else if (Array.isArray(children) && +last !== (NaN as number))
-      children.splice(+last, 1, newValue)
-    else {
-      children[last as never] = newValue
-      console.log('added', last, newValue)
-    }
-  }
+  if (!children) return console.error('Invalid path', fullPathString)
+  if (newValue === undefined) delete children[property as never]
+  else children[property as never] = newValue as any
 }
 
 function findStoreNode(
@@ -290,14 +271,14 @@ export default function createInspector({
 
   function updateStore(
     proxy: Inspector.Details,
-    { path, storeId, value, valueNodeId }: StoreNodeUpdate,
+    { path, property, storeId, value, valueNodeId }: StoreNodeUpdate,
   ): void {
     const valueNode = findValueNode(proxy, valueNodeId)
     if (!valueNode) return console.warn(`updateStore: value node (${valueNodeId}) not found`)
     // TODO cache the store node
     const store = findStoreNode(valueNode, storeId)
     if (!store) return console.warn(`updateStore: store node (${storeId}) not found`)
-    reconcileValueAtPath(store.value.value, path, value)
+    reconcileValueAtPath(store.value.value, path, property, value)
   }
 
   // Handle Inspector updates comming from the debugger

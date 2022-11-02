@@ -24,7 +24,10 @@ function forEachStoreProp(
   }
 }
 
-export type StoreUpdateData = { path: readonly string[]; value: unknown }
+export type StoreUpdateData = { path: readonly (string | number)[]; property: string | number } & (
+  | { value: unknown }
+  | { length: number }
+)
 export type StoreUpdateHandler = (data: StoreUpdateData) => void
 
 export function observeStoreNode(
@@ -42,19 +45,20 @@ export function observeStoreNode(
     return () => untrackStore(rootNode)
   })
 
-  function trackStore(node: Solid.StoreNode, path: readonly string[]): void {
+  function trackStore(node: Solid.StoreNode, path: readonly (string | number)[]): void {
     set.add(node)
-    const handler: Solid.OnStoreNodeUpdate = ((_, property, value, deleting) => {
+    const handler: Solid.OnStoreNodeUpdate = ((_, property, value, prev) => {
       if (typeof property === 'symbol') return
-      property = property.toString()
+      console.log('store update', property, value, prev)
       untrack(() => {
-        const fullPath = [...path, property as string]
-        onUpdate({ path: fullPath, value: deleting ? undefined : value })
-        const prev = node[property] as Solid.StoreNode | Core.Store.NotWrappable
-        // deleting not existing properties will fire an update as well
-        if (deleting && !prev) return
-        if (DEV.isWrappable(prev)) untrackStore(prev)
-        if (DEV.isWrappable(value)) trackStore(value as Solid.StoreNode, fullPath)
+        if (property === 'length' && typeof value === 'number' && Array.isArray(node)) {
+          // Update array length
+          onUpdate({ path, property, length: value })
+        } else {
+          if (DEV.isWrappable(prev)) untrackStore(prev as Solid.StoreNode)
+          if (DEV.isWrappable(value)) trackStore(value as Solid.StoreNode, [...path, property])
+          onUpdate({ path, property, value })
+        }
       })
     }) as Solid.OnStoreNodeUpdate
     handler.symbol = symbol

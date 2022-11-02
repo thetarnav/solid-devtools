@@ -39,8 +39,14 @@ export type ValueNodeUpdate = {
 export type StoreNodeUpdate = {
   valueNodeId: ValueNodeId
   storeId: NodeID
-  path: readonly string[]
-  value: EncodedValue<true> | null
+  path: readonly (string | number)[]
+  property: string | number
+  /**
+   * `undefined` - property deleted;
+   * `EncodedValue<true>` - property updated;
+   * `number` - array length updated;
+   */
+  value: EncodedValue<true> | undefined | number
 }
 /** List of new keys — all of the values are getters, so they won't change */
 export type ProxyPropsUpdate = { added: string[]; removed: string[] }
@@ -127,13 +133,22 @@ export function createInspector(
       valueUpdates = {}
 
       // Stores
-      for (const [valueNodeId, storeId, data] of storeUpdates) {
-        const value =
-          data.value === undefined
-            ? null
-            : encodeValue(data.value, true, nodeIdMap, undefined, true)
-        batchedUpdates.push(['store', { valueNodeId, storeId, path: data.path, value }])
-      }
+      for (const [valueNodeId, storeId, data] of storeUpdates)
+        batchedUpdates.push([
+          'store',
+          {
+            valueNodeId,
+            storeId,
+            value:
+              'length' in data
+                ? data.length
+                : data.value === undefined
+                ? undefined
+                : encodeValue(data.value, true, nodeIdMap, undefined, true),
+            path: data.path,
+            property: data.property,
+          },
+        ])
       storeUpdates = []
 
       // Props (top-level key check of proxy props object)
