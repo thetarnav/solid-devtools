@@ -30,12 +30,19 @@ export type StoreUpdateData = { path: readonly (string | number)[]; property: st
 )
 export type StoreUpdateHandler = (data: StoreUpdateData) => void
 
-const matchesHandlerData = (
-  { _$sdtData }: Solid.OnStoreNodeUpdate,
-  { parent, symbol, property }: Solid.OnStoreNodeUpdate['_$sdtData'],
-): boolean =>
-  symbol === _$sdtData.symbol &&
-  (parent ? parent === _$sdtData.parent && property == _$sdtData.property : true)
+function matchHandler(
+  { storePath, storeSymbol }: Solid.OnStoreNodeUpdate,
+  symbol: symbol,
+  path: readonly (string | number)[],
+) {
+  if (storeSymbol !== symbol || storePath.length !== path.length) return false
+  if (storePath == path) return true
+  for (let i = 0; i < storePath.length; i++) {
+    // loose equality is intentional — we want to match numbers and strings as they access the same property
+    if (storePath[i] != path[i]) return false
+  }
+  return true
+}
 
 export function observeStoreNode(
   rootNode: Solid.StoreNode,
@@ -47,51 +54,44 @@ export function observeStoreNode(
   const symbol = Symbol('inspect-store')
 
   return untrack(() => {
-    trackStore(rootNode, [], { symbol })
-    return () => untrackStore(rootNode, { symbol })
+    trackStore(rootNode, [])
+    return () => untrackStore(rootNode, [])
   })
 
-  function trackStore(
-    node: Solid.StoreNode,
-    path: readonly (string | number)[],
-    handlerData: Solid.OnStoreNodeUpdate['_$sdtData'],
-  ): void {
-    console.log('trackStore', path.join('.'))
-
-    if (node[DEV.$ON_UPDATE] && node[DEV.$ON_UPDATE]!.some(h => matchesHandlerData(h, handlerData)))
-      return
+  function trackStore(node: Solid.StoreNode, path: readonly (string | number)[]): void {
+    if (node[DEV.$ON_UPDATE])
+      for (const h of node[DEV.$ON_UPDATE]!) {
+        if (matchHandler(h, symbol, path)) return
+      }
 
     const handler: Solid.OnStoreNodeUpdate = ((_, property, value, prev) => {
       if (typeof property === 'symbol') return
-      console.log('onUpdate', [...path, property].join('.'), value)
-      const _handlerData: Solid.OnStoreNodeUpdate['_$sdtData'] = { symbol, parent: node, property }
+      const propertyPath = [...path, property] as const
       untrack(() => {
         if (property === 'length' && typeof value === 'number' && Array.isArray(node)) {
           // Update array length
           onUpdate({ path, property, length: value })
         } else {
-          if (DEV.isWrappable(prev)) untrackStore(prev as Solid.StoreNode, _handlerData)
-          if (DEV.isWrappable(value))
-            trackStore(value as Solid.StoreNode, [...path, property], _handlerData)
+          if (DEV.isWrappable(prev)) untrackStore(prev as Solid.StoreNode, propertyPath)
+          if (DEV.isWrappable(value)) trackStore(value as Solid.StoreNode, propertyPath)
           onUpdate({ path, property, value })
         }
       })
     }) as Solid.OnStoreNodeUpdate
-    handler._$sdtData = handlerData
+    handler.storePath = path
+    handler.storeSymbol = symbol
     pushToArrayProp(node, DEV.$ON_UPDATE, handler)
-    forEachStoreProp(node, (property, child) => {
-      trackStore(child, [...path, property], { symbol, parent: node, property })
-    })
+    forEachStoreProp(node, (property, child) => trackStore(child, [...path, property]))
   }
 
-  function untrackStore(node: Solid.StoreNode, handlerData: Solid.OnStoreNodeUpdate['_$sdtData']) {
-    console.log('untrackStore', node, handlerData.property)
+  function untrackStore(node: Solid.StoreNode, path: readonly (string | number)[]) {
     let handlers = node[DEV.$ON_UPDATE]
     if (!handlers) return
-    node[DEV.$ON_UPDATE] = handlers = handlers.filter(h => !matchesHandlerData(h, handlerData))
+    handlers.splice(
+      handlers.findIndex(h => matchHandler(h, symbol, path)),
+      1,
+    )
     if (handlers.length === 0) delete node[DEV.$ON_UPDATE]
-    forEachStoreProp(node, (property, child) => {
-      untrackStore(child, { symbol, parent: node, property })
-    })
+    forEachStoreProp(node, (property, child) => untrackStore(child, [...path, property]))
   }
 }

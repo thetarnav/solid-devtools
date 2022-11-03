@@ -60,7 +60,8 @@ export namespace Solid {
   }
 
   export type OnStoreNodeUpdate = Core.Store.OnStoreNodeUpdate & {
-    _$sdtData: { symbol: symbol; parent?: StoreNode; property?: string | number }
+    storePath: readonly (string | number)[]
+    storeSymbol: symbol
   }
 
   export interface StoreNode extends Core.Store.StoreNode {

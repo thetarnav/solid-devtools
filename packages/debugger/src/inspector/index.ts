@@ -196,7 +196,6 @@ export function createInspector(
     storeNodeId: NodeID,
     storeNode: Solid.StoreNode,
   ) {
-    console.log(`TRACK store-node: ${storeNodeId} of ${valueId}:`, getStoreNodeName(storeNode))
     valueNode.addStoreObserver(
       observeStoreNode(storeNode, data => pushStoreUpdate(valueId, storeNodeId, data)),
     )
