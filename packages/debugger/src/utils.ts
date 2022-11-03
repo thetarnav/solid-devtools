@@ -12,8 +12,6 @@ import { trimString } from '@solid-devtools/shared/utils'
 import { DEV as STORE_DEV } from 'solid-js/store'
 import { Core, DebuggerContext, Solid } from './types'
 
-export const $SDT_ID = Symbol('solid-devtools-node-id')
-
 export const getOwner = _getOwner as () => Solid.Owner | null
 
 export const isSolidComputation = (o: Readonly<Solid.Owner>): o is Solid.Computation => 'fn' in o
@@ -29,7 +27,7 @@ export const isSolidRoot = (o: Readonly<Solid.Owner>): o is Solid.Root =>
 
 export const isSolidComponent = (o: Readonly<Solid.Owner>): o is Solid.Component => 'props' in o
 
-export const isStoreNode = (o: object): o is Solid.StoreNode => STORE_DEV!.$NAME in o
+export const isStoreNode = (o: object): o is Core.Store.StoreNode => STORE_DEV!.$NAME in o
 
 export const isSolidStore = (o: Readonly<Solid.Signal | Solid.Store>): o is Solid.Store => {
   return !('observers' in o) && STORE_DEV!.$NAME in o.value
@@ -97,11 +95,11 @@ export function markOwnerType(o: Solid.Owner, type?: NodeType): NodeType {
   if (o.sdtType !== undefined) return o.sdtType
   return (o.sdtType = type ?? getOwnerType(o))
 }
-export function markNodeID(o: { [$SDT_ID]?: NodeID }): NodeID {
-  if (o[$SDT_ID] !== undefined) return o[$SDT_ID]
-  return (o[$SDT_ID] = getNewSdtId())
+export function markNodeID(o: { sdtId?: NodeID }): NodeID {
+  if (o.sdtId !== undefined) return o.sdtId
+  return (o.sdtId = getNewSdtId())
 }
-export function markNodesID(nodes?: { [$SDT_ID]?: NodeID }[] | null): NodeID[] {
+export function markNodesID(nodes?: { sdtId?: NodeID }[] | null): NodeID[] {
   if (!nodes || !nodes.length) return []
   return nodes.map(markNodeID)
 }

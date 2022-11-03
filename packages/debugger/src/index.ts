@@ -16,14 +16,13 @@ export { attachDebugger, enableRootsAutoattach } from './roots'
 export {
   makeSolidUpdateListener,
   makeCreateRootListener,
-  makeStoreObserver,
   observeComputationUpdate,
   observeValueUpdate,
   interceptComputationRerun,
   makeValueUpdateListener,
   removeValueUpdateObserver,
 } from './update'
-export type { AfterCrateRoot, ObjectObserver } from './update'
+export type { AfterCrateRoot } from './update'
 
 export {
   getOwner,

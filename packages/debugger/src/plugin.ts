@@ -1,4 +1,4 @@
-import { Accessor, batch, createEffect, createMemo, createSignal } from 'solid-js'
+import { Accessor, batch, createMemo, createSignal } from 'solid-js'
 import {
   createEventHub,
   createSimpleEmitter,

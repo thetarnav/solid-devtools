@@ -18,7 +18,6 @@ import {
 import { NodeType, ValueType } from '@solid-devtools/shared/graph'
 import { Solid } from '../src/types'
 import { getOwner, isSolidStore } from '../src/utils'
-import { type StoreUpdateHandler } from '../src/inspector'
 
 const getInspectModule = async () => await import('../src/inspector')
 
@@ -58,7 +57,7 @@ describe('collectOwnerDetails', () => {
         { name: 'WRAPPER' },
       )
 
-      const { details, signalMap, elementMap } = collectOwnerDetails(owner, {
+      const { details, valueMap, nodeIdMap } = collectOwnerDetails(owner, {
         onSignalUpdate: () => {},
         onValueUpdate: () => {},
       })
@@ -88,12 +87,10 @@ describe('collectOwnerDetails', () => {
         ],
       })
 
-      expect(signalMap).toHaveProperty('0')
-      expect(signalMap).toHaveProperty('1')
-      expect(signalMap['0'].sdtId).toBe('0')
-      expect(signalMap['1'].sdtId).toBe('1')
+      expect(valueMap.get('signal:0')).toBeTruthy()
+      expect(valueMap.get('signal:1')).toBeTruthy()
 
-      expect(elementMap.get('0')).toBe(div)
+      expect(nodeIdMap.get('0')).toBe(div)
 
       dispose()
     })
@@ -118,7 +115,7 @@ describe('collectOwnerDetails', () => {
         </TestComponent>
       ))
 
-      const { details, elementMap } = collectOwnerDetails(owner, {
+      const { details, nodeIdMap } = collectOwnerDetails(owner, {
         onSignalUpdate: () => {},
         onValueUpdate: () => {},
       })
@@ -142,7 +139,7 @@ describe('collectOwnerDetails', () => {
         },
       })
 
-      expect(elementMap.get('1')).toBeInstanceOf(HTMLDivElement)
+      expect(nodeIdMap.get('1')).toBeInstanceOf(HTMLDivElement)
     })
   })
 
@@ -160,7 +157,7 @@ describe('collectOwnerDetails', () => {
         return <Button {...props()} />
       })
 
-      const { details, elementMap } = collectOwnerDetails(owner, {
+      const { details, nodeIdMap } = collectOwnerDetails(owner, {
         onSignalUpdate: () => {},
         onValueUpdate: () => {},
       })
@@ -182,68 +179,11 @@ describe('collectOwnerDetails', () => {
         },
       })
 
-      expect(elementMap.get('2')).toBeInstanceOf(HTMLButtonElement)
+      expect(nodeIdMap.get('2')).toBeInstanceOf(HTMLButtonElement)
 
       dispose()
     })
   })
-
-  // * collectOwnerDetails doesn't allow for inspected props now
-  // test("inspected component props", () => {
-  //   const collectOwnerDetails = getModule()
-
-  //   createRoot(dispose => {
-
-  //     let owner!: Solid.Owner
-  //     const TestComponent = (props: {
-  //       count: number
-  //       children: JSX.Element
-  //       nested: { foo: number; bar: string }
-  //     }) => {
-  //       owner = getOwner()!
-  //       return <div>{props.children}</div>
-  //     }
-  //     createRenderEffect(() => (
-  //       <TestComponent count={123} nested={{ foo: 1, bar: "2" }}>
-  //         <button>Click me</button>
-  //       </TestComponent>
-  //     ))
-
-  //     const { details, elementMap } = collectOwnerDetails(owner, {
-  //       elementMap,
-  //       inspectedProps: new Set(["nested"]),
-  //       onSignalUpdate: () => {},
-  //     })
-
-  //     dispose()
-
-  //     expect(details).toEqual({
-  //       id: "0",
-  //       name: "TestComponent",
-  //       type: NodeType.Component,
-  //       signals: [],
-  //       sources: [],
-  //       value: { type: ValueType.Element, value: { id: "0", name: "DIV" } },
-  //       props: {
-  //         proxy: false,
-  //         record: {
-  //           count: { type: ValueType.Number, value: 123 },
-  //           children: { type: ValueType.Getter, value: "children" },
-  //           nested: {
-  //             type: ValueType.Object,
-  //             value: 2,
-  //             children: {
-  //               foo: { type: ValueType.Number, value: 1 },
-  //               bar: { type: ValueType.String, value: "2" },
-  //             },
-  //           },
-  //         },
-  //       },
-  //     })
-
-  //     expect(elementMap.get("0")).toBeInstanceOf(HTMLDivElement)
-  //   })
-  // })
 
   it('listens to value updates', async () => {
     const { collectOwnerDetails } = await getInspectModule()

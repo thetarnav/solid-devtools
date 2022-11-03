@@ -5,7 +5,7 @@ import {
   LOCATION_ATTRIBUTE_NAME,
   WINDOW_PROJECTPATH_PROPERTY,
 } from '@solid-devtools/shared/variables'
-import { getLocationAttribute, isLowercase, windowId } from './utils'
+import { getLocationAttribute, isLowercase } from './utils'
 
 const jsxLocationPlugin: PluginObj<any> = {
   name: '@solid-devtools/jsx-location',
@@ -21,7 +21,10 @@ const jsxLocationPlugin: PluginObj<any> = {
       const body = path.node.body
 
       const dataSourceLocId = t.identifier(WINDOW_PROJECTPATH_PROPERTY)
-      const dataSourceLocMemberExpression = t.memberExpression(windowId, dataSourceLocId)
+      const dataSourceLocMemberExpression = t.memberExpression(
+        t.identifier('window'),
+        dataSourceLocId,
+      )
       const cwdStringLiteral = t.stringLiteral(cwd)
       const assignmentExpression = t.assignmentExpression(
         '=',

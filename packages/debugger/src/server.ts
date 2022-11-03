@@ -40,7 +40,6 @@ export const useLocator: typeof API.useLocator = () => {}
 // update
 export const makeSolidUpdateListener: typeof API.makeSolidUpdateListener = () => () => {}
 export const makeCreateRootListener: typeof API.makeCreateRootListener = () => () => {}
-export const makeStoreObserver: typeof API.makeStoreObserver = () => () => {}
 export const observeComputationUpdate: typeof API.observeComputationUpdate = () => {}
 export const interceptComputationRerun: typeof API.interceptComputationRerun = () => {}
 export const observeValueUpdate: typeof API.observeValueUpdate = () => {}
