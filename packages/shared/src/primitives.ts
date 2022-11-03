@@ -11,7 +11,6 @@ import { AnyFunction, onRootCleanup } from '@solid-primitives/utils'
 import { makeEventListener } from '@solid-primitives/event-listener'
 import { createSharedRoot } from '@solid-primitives/rootless'
 import { createMediaQuery } from '@solid-primitives/media'
-import { ScheduleCallback } from '@solid-primitives/scheduled'
 
 export const untrackedCallback = <Fn extends AnyFunction>(fn: Fn): Fn =>
   ((...a: Parameters<Fn>) => untrack<ReturnType<Fn>>(fn.bind(void 0, ...a))) as any
@@ -164,31 +163,4 @@ export function atom<T>(
 export function atom<T>(value?: T, options?: SignalOptions<T | undefined>): Atom<T | undefined> {
   const [state, setState] = createSignal(value, { internal: true, ...options })
   return (...args: any[]) => (args.length === 1 ? setState(args[0]) : state())
-}
-
-export const defferIdle: ScheduleCallback = (callback, wait) => {
-  let isDeferred: boolean = false,
-    id: ReturnType<typeof requestIdleCallback>,
-    lastArgs: Parameters<typeof callback>
-
-  const throttled: typeof callback = (...args) => {
-    lastArgs = args
-    if (isDeferred) return
-    isDeferred = true
-    id = requestIdleCallback(
-      () => {
-        isDeferred = false
-        callback(...lastArgs)
-      },
-      { timeout: wait },
-    )
-  }
-
-  const clear = () => {
-    cancelIdleCallback(id)
-    isDeferred = false
-  }
-  if (getOwner()) onCleanup(clear)
-
-  return Object.assign(throttled, { clear })
 }

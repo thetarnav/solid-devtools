@@ -8,7 +8,7 @@ import {
   ValueType,
 } from '@solid-devtools/shared/graph'
 import { unwrap } from 'solid-js/store'
-import { Solid } from '../types'
+import { Core } from '../types'
 import { isStoreNode } from '../utils'
 
 /**
@@ -22,8 +22,11 @@ import { isStoreNode } from '../utils'
 export function encodeValue<Deep extends boolean>(
   value: unknown,
   deep: Deep,
-  nodeMap: NodeIDMap<HTMLElement | Solid.StoreNode>,
-  handleStore?: false | undefined | ((storeNodeId: NodeID, storeNode: Solid.StoreNode) => void),
+  nodeMap: NodeIDMap<HTMLElement | Core.Store.StoreNode>,
+  handleStore?:
+    | false
+    | undefined
+    | ((storeNodeId: NodeID, storeNode: Core.Store.StoreNode) => void),
   inStore = false,
 ): EncodedValue<Deep> {
   if (typeof value === 'number') {

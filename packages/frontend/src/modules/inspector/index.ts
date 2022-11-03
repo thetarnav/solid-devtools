@@ -165,12 +165,6 @@ function reconcileValueAtPath(
   newValue: EncodedValue<true> | undefined | number,
 ): void {
   const fullPathString = [...path, property].join('.')
-  console.log(
-    'reconcileValueAtPath',
-    fullPathString,
-    newValue && (typeof newValue === 'number' ? newValue : ValueType[newValue.type]),
-    // JSON.stringify(value, null, 2),
-  )
   for (const key of path) {
     if (!value.children) return console.error('Invalid path', fullPathString)
     value = value.children[key as never]

@@ -1,5 +1,5 @@
 import { $PROXY, Accessor, createEffect, onCleanup, untrack } from 'solid-js'
-import { throttle } from '@solid-primitives/scheduled'
+import { throttle, scheduleIdle } from '@solid-primitives/scheduled'
 import {
   Mapped,
   NodeID,
@@ -8,11 +8,10 @@ import {
   ValueType,
   ValueNodeId,
 } from '@solid-devtools/shared/graph'
-import { defferIdle } from '@solid-devtools/shared/primitives'
 import { warn } from '@solid-devtools/shared/utils'
 import { DebuggerEventHub } from '../plugin'
 import { walkSolidRoot } from '../roots'
-import { Solid, ValueUpdateListener } from '../types'
+import { Core, Solid, ValueUpdateListener } from '../types'
 import { makeSolidUpdateListener, observeValueUpdate, removeValueUpdateObserver } from '../update'
 import {
   getComponentRefreshNode,
@@ -103,7 +102,7 @@ export function createInspector(
   { eventHub }: { eventHub: DebuggerEventHub },
 ) {
   let inspectedOwner: Solid.Owner | null = null
-  let nodeIdMap = new NodeIDMap<HTMLElement | Solid.StoreNode>()
+  let nodeIdMap = new NodeIDMap<HTMLElement | Core.Store.StoreNode>()
   let valueMap = new ValueNodeMap()
   let checkProxyProps: (() => { added: string[]; removed: string[] } | undefined) | undefined
 
@@ -114,7 +113,7 @@ export function createInspector(
     let storeUpdates: [valueNodeId: ValueNodeId, storeId: NodeID, data: StoreUpdateData][] = []
     let checkProps = false
 
-    const flush = defferIdle(() => {
+    const flush = scheduleIdle(() => {
       const batchedUpdates: InspectorUpdate[] = []
 
       // Value Nodes (signals, props, and node value)
@@ -194,7 +193,7 @@ export function createInspector(
     valueId: ValueNodeId,
     valueNode: ValueNode,
     storeNodeId: NodeID,
-    storeNode: Solid.StoreNode,
+    storeNode: Core.Store.StoreNode,
   ) {
     valueNode.addStoreObserver(
       observeStoreNode(storeNode, data => pushStoreUpdate(valueId, storeNodeId, data)),
@@ -256,7 +255,7 @@ export function createInspector(
 }
 
 // Globals set before collecting the owner details
-let $nodeIdMap!: NodeIDMap<HTMLElement | Solid.StoreNode>
+let $nodeIdMap!: NodeIDMap<HTMLElement | Core.Store.StoreNode>
 let $valueMap!: ValueNodeMap
 
 const INSPECTOR = Symbol('inspector')
@@ -274,7 +273,7 @@ function mapSignalNode(
     return {
       type: NodeType.Store,
       id,
-      name: getDisplayName(getStoreNodeName(value as Solid.StoreNode)),
+      name: getDisplayName(getStoreNodeName(value as Core.Store.StoreNode)),
       value: encodeValue(value, false, $nodeIdMap, undefined, true),
       // TODO: top-level values can be observed too, it's the "_" property
       observers: [],

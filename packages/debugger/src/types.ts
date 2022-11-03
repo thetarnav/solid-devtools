@@ -1,5 +1,4 @@
 import type { NodeID, NodeType } from '@solid-devtools/shared/graph'
-import type { $ON_UPDATE } from 'solid-js/store/types/store'
 import type { INTERNAL, $SDT_ID } from './utils'
 
 export type ValueUpdateListener = (newValue: unknown, oldValue: unknown) => void
@@ -64,12 +63,8 @@ export namespace Solid {
     storeSymbol: symbol
   }
 
-  export interface StoreNode extends Core.Store.StoreNode {
-    [$ON_UPDATE]?: OnStoreNodeUpdate[]
-  }
-
   export interface Store {
-    value: StoreNode
+    value: Core.Store.StoreNode
     [$SDT_ID]?: NodeID
   }
 

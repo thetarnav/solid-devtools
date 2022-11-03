@@ -60,7 +60,7 @@
     "@solid-primitives/event-listener": "^2.2.3",
     "@solid-primitives/keyboard": "^1.0.3",
     "@solid-primitives/platform": "^0.0.102",
-    "@solid-primitives/scheduled": "^1.1.0",
+    "@solid-primitives/scheduled": "^1.2.0",
     "@solid-primitives/utils": "^3.1.0",
     "object-observer": "^5.1.6",
     "solid-js": "^1.6.0",

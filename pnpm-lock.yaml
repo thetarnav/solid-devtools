@@ -127,7 +127,7 @@ importers:
       '@solid-primitives/event-listener': ^2.2.3
       '@solid-primitives/keyboard': ^1.0.3
       '@solid-primitives/platform': ^0.0.102
-      '@solid-primitives/scheduled': ^1.1.0
+      '@solid-primitives/scheduled': ^1.2.0
       '@solid-primitives/utils': ^3.1.0
       object-observer: ^5.1.6
       solid-js: ^1.6.0
@@ -140,7 +140,7 @@ importers:
       '@solid-primitives/event-listener': 2.2.3_solid-js@1.6.0
       '@solid-primitives/keyboard': 1.0.3_solid-js@1.6.0
       '@solid-primitives/platform': 0.0.102_solid-js@1.6.0
-      '@solid-primitives/scheduled': 1.1.0_solid-js@1.6.0
+      '@solid-primitives/scheduled': 1.2.0_solid-js@1.6.0
       '@solid-primitives/utils': 3.1.0_solid-js@1.6.0
       object-observer: 5.1.6
       solid-js: 1.6.0
@@ -2142,6 +2142,14 @@ packages:
     resolution: {integrity: sha512-2A2dAiXe+lN0/KRUbIPXEcLoONRJXJmmvVda+y+qiSTbYmcoU2TtNlC04uhQBQJs8Yq2ElJuQhmFladcGLtE9g==}
     peerDependencies:
       solid-js: ^1.5.0
+    dependencies:
+      solid-js: 1.6.0
+    dev: false
+
+  /@solid-primitives/scheduled/1.2.0_solid-js@1.6.0:
+    resolution: {integrity: sha512-59QbtGACZD8RIkD0jNQVUHRBF6uW7dKzDVFYSgogRdfxRO9kgXc6aGkLrCjd4k4g3kYe+XiBLcvYKyut4F7BHg==}
+    peerDependencies:
+      solid-js: ^1.6.0
     dependencies:
       solid-js: 1.6.0
     dev: false

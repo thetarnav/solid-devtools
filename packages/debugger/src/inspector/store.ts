@@ -1,15 +1,35 @@
 import { untrack } from 'solid-js'
 import { DEV as STORE_DEV, unwrap } from 'solid-js/store'
-import { pushToArrayProp } from '@solid-devtools/shared/utils'
-import { Solid } from '../types'
+import { Core, Solid } from '../types'
+
+//
+// GLOBALS
+//
 
 const DEV = STORE_DEV!
 
-export const getStoreNodeName = (node: Solid.StoreNode): string => node[DEV.$NAME] || '(unnamed)'
+const $listeners = new WeakMap<Core.Store.StoreNode, Solid.OnStoreNodeUpdate[]>()
+
+globalThis._$onStoreNodeUpdate = (node, property, value, prev) => {
+  const listeners = $listeners.get(node)
+  if (listeners) for (const fn of listeners) fn(node, property, value, prev)
+}
+
+//
+//
+
+export type StoreUpdateData = { path: readonly (string | number)[]; property: string | number } & (
+  | { value: unknown }
+  | { length: number }
+)
+export type StoreUpdateHandler = (data: StoreUpdateData) => void
+
+export const getStoreNodeName = (node: Core.Store.StoreNode): string =>
+  node[DEV.$NAME] || '(unnamed)'
 
 function forEachStoreProp(
-  node: Solid.StoreNode,
-  fn: (key: string, node: Solid.StoreNode) => void,
+  node: Core.Store.StoreNode,
+  fn: (key: string, node: Core.Store.StoreNode) => void,
 ): void {
   if (Array.isArray(node)) {
     for (let i = 0; i < node.length; i++) {
@@ -23,12 +43,6 @@ function forEachStoreProp(
     }
   }
 }
-
-export type StoreUpdateData = { path: readonly (string | number)[]; property: string | number } & (
-  | { value: unknown }
-  | { length: number }
-)
-export type StoreUpdateHandler = (data: StoreUpdateData) => void
 
 function matchHandler(
   { storePath, storeSymbol }: Solid.OnStoreNodeUpdate,
@@ -45,7 +59,7 @@ function matchHandler(
 }
 
 export function observeStoreNode(
-  rootNode: Solid.StoreNode,
+  rootNode: Core.Store.StoreNode,
   onUpdate: StoreUpdateHandler,
 ): VoidFunction {
   // might still pass in a proxy
@@ -58,11 +72,9 @@ export function observeStoreNode(
     return () => untrackStore(rootNode, [])
   })
 
-  function trackStore(node: Solid.StoreNode, path: readonly (string | number)[]): void {
-    if (node[DEV.$ON_UPDATE])
-      for (const h of node[DEV.$ON_UPDATE]!) {
-        if (matchHandler(h, symbol, path)) return
-      }
+  function trackStore(node: Core.Store.StoreNode, path: readonly (string | number)[]): void {
+    const handlers = $listeners.get(node)
+    if (handlers && handlers.some(fn => matchHandler(fn, symbol, path))) return
 
     const handler: Solid.OnStoreNodeUpdate = ((_, property, value, prev) => {
       if (typeof property === 'symbol') return
@@ -72,26 +84,26 @@ export function observeStoreNode(
           // Update array length
           onUpdate({ path, property, length: value })
         } else {
-          if (DEV.isWrappable(prev)) untrackStore(prev as Solid.StoreNode, propertyPath)
-          if (DEV.isWrappable(value)) trackStore(value as Solid.StoreNode, propertyPath)
+          if (DEV.isWrappable(prev)) untrackStore(prev as Core.Store.StoreNode, propertyPath)
+          if (DEV.isWrappable(value)) trackStore(value as Core.Store.StoreNode, propertyPath)
           onUpdate({ path, property, value })
         }
       })
     }) as Solid.OnStoreNodeUpdate
     handler.storePath = path
     handler.storeSymbol = symbol
-    pushToArrayProp(node, DEV.$ON_UPDATE, handler)
+    handlers ? handlers.push(handler) : $listeners.set(node, [handler])
     forEachStoreProp(node, (property, child) => trackStore(child, [...path, property]))
   }
 
-  function untrackStore(node: Solid.StoreNode, path: readonly (string | number)[]) {
-    let handlers = node[DEV.$ON_UPDATE]
+  function untrackStore(node: Core.Store.StoreNode, path: readonly (string | number)[]) {
+    const handlers = $listeners.get(node)
     if (!handlers) return
     handlers.splice(
       handlers.findIndex(h => matchHandler(h, symbol, path)),
       1,
     )
-    if (handlers.length === 0) delete node[DEV.$ON_UPDATE]
+    if (handlers.length === 0) $listeners.delete(node)
     forEachStoreProp(node, (property, child) => untrackStore(child, [...path, property]))
   }
 }
