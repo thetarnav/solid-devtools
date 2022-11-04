@@ -25,9 +25,6 @@ export type StoreUpdateData = { path: readonly (string | number)[]; property: st
 )
 export type StoreUpdateHandler = (data: StoreUpdateData) => void
 
-export const getStoreNodeName = (node: Core.Store.StoreNode): string =>
-  node[DEV.$NAME] || '(unnamed)'
-
 function forEachStoreProp(
   node: Core.Store.StoreNode,
   fn: (key: string, node: Core.Store.StoreNode) => void,

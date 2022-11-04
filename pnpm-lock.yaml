@@ -214,7 +214,7 @@ importers:
       '@solid-primitives/event-bus': ^0.1.3
       '@solid-primitives/event-listener': ^2.2.3
       '@solid-primitives/keyboard': ^1.0.3
-      '@solid-primitives/keyed': ^1.1.3
+      '@solid-primitives/keyed': ^1.1.4
       '@solid-primitives/media': ^2.0.3
       '@solid-primitives/props': ^2.2.2
       '@solid-primitives/range': ^0.1.3
@@ -247,7 +247,7 @@ importers:
       '@solid-primitives/event-bus': 0.1.3_solid-js@1.6.0
       '@solid-primitives/event-listener': 2.2.3_solid-js@1.6.0
       '@solid-primitives/keyboard': 1.0.3_solid-js@1.6.0
-      '@solid-primitives/keyed': 1.1.3_solid-js@1.6.0
+      '@solid-primitives/keyed': 1.1.4_solid-js@1.6.0
       '@solid-primitives/media': 2.0.3_solid-js@1.6.0
       '@solid-primitives/props': 2.2.2_solid-js@1.6.0
       '@solid-primitives/range': 0.1.3_solid-js@1.6.0
@@ -2076,10 +2076,10 @@ packages:
       solid-js: 1.6.0
     dev: false
 
-  /@solid-primitives/keyed/1.1.3_solid-js@1.6.0:
-    resolution: {integrity: sha512-sesL9vpyBCcgYDTKGN/U4PzVzgT1zgJz2f8rFn1OAbxFzj8lWy2lKOirns0tgdzX2mAaLcRNAhcvJMfxsAd/6g==}
+  /@solid-primitives/keyed/1.1.4_solid-js@1.6.0:
+    resolution: {integrity: sha512-K4DR4qGYOh5pJXgKKWwPjBEsnEBF4Old3zo4ht9wGBEvv3UB82P+zExqJK1lFie+7dYLOkgKD+8iZle1wZSEzg==}
     peerDependencies:
-      solid-js: ^1.5.0
+      solid-js: ^1.6.0
     dependencies:
       solid-js: 1.6.0
     dev: false

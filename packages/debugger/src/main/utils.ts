@@ -8,9 +8,11 @@ import {
 import { Emit } from '@solid-primitives/event-bus'
 import { throttle } from '@solid-primitives/scheduled'
 import { trimString } from '@solid-devtools/shared/utils'
-import { DEV as STORE_DEV } from 'solid-js/store'
+import { DEV as _STORE_DEV } from 'solid-js/store'
 import { Core, DebuggerContext, NodeID, Solid, ValueNodeId, ValueNodeType } from './types'
 import { NodeType } from './constants'
+
+const STORE_DEV = _STORE_DEV!
 
 export const getOwner = _getOwner as () => Solid.Owner | null
 
@@ -19,18 +21,19 @@ export const isSolidComputation = (o: Readonly<Solid.Owner>): o is Solid.Computa
 export const isSolidMemo = (o: Readonly<Solid.Owner>): o is Solid.Memo =>
   'sdtType' in o ? o.sdtType === NodeType.Memo : isSolidComputation(o) && _isMemo(o)
 
-export const isSolidOwner = (o: Readonly<Solid.Owner> | Solid.Signal): o is Solid.Owner =>
-  'owned' in o
+export const isSolidOwner = (
+  o: Readonly<Solid.Owner | Solid.Store | Solid.Signal>,
+): o is Solid.Owner => 'owned' in o
 
 export const isSolidRoot = (o: Readonly<Solid.Owner>): o is Solid.Root =>
   o.sdtType === NodeType.Root || !isSolidComputation(o)
 
 export const isSolidComponent = (o: Readonly<Solid.Owner>): o is Solid.Component => 'props' in o
 
-export const isStoreNode = (o: object): o is Core.Store.StoreNode => STORE_DEV!.$NAME in o
+export const isStoreNode = (o: object): o is Core.Store.StoreNode => STORE_DEV.$NAME in o
 
 export const isSolidStore = (o: Readonly<Solid.Signal | Solid.Store>): o is Solid.Store => {
-  return !('observers' in o) && STORE_DEV!.$NAME in o.value
+  return !('observers' in o) && STORE_DEV.$NAME in o.value
 }
 
 const _isMemo = (o: Readonly<Solid.Computation>): boolean =>
@@ -46,8 +49,15 @@ export function getSignalName(signal: Readonly<Solid.Signal>): string {
   return signal.name || '(unnamed)'
 }
 
-export function getNodeName(o: Readonly<Solid.Signal | Solid.Owner>): string {
-  const name = isSolidOwner(o) ? getOwnerName(o) : getSignalName(o)
+export const getStoreNodeName = (node: Core.Store.StoreNode): string =>
+  node[STORE_DEV.$NAME] || '(unnamed)'
+
+export function getNodeName(o: Readonly<Solid.Signal | Solid.Owner | Solid.Store>): string {
+  const name = isSolidOwner(o)
+    ? getOwnerName(o)
+    : isSolidStore(o)
+    ? getStoreNodeName(o)
+    : getSignalName(o)
   return getDisplayName(name)
 }
 
@@ -55,9 +65,9 @@ export function getDisplayName(name: string): string {
   return trimString(name, 16)
 }
 
-export function getNodeType(o: Readonly<Solid.Signal | Solid.Owner>): NodeType {
+export function getNodeType(o: Readonly<Solid.Signal | Solid.Owner | Solid.Store>): NodeType {
   if (isSolidOwner(o)) return getOwnerType(o)
-  return NodeType.Signal
+  return isSolidStore(o) ? NodeType.Store : NodeType.Signal
 }
 
 export const getOwnerType = (o: Readonly<Solid.Owner>): NodeType => {

@@ -9,11 +9,8 @@ import { NodeIDMap, encodeValue } from './serialize'
 import { observeStoreNode, StoreUpdateData } from './store'
 import { clearOwnerObservers, collectOwnerDetails, ValueNode, ValueNodeMap } from './inspector'
 
-export type ValueNodeUpdate = {
-  id: ValueNodeId
-  value: EncodedValue<boolean>
-  updated: boolean
-}
+export type ValueNodeUpdate = { id: ValueNodeId; value: EncodedValue<boolean> }
+
 export type StoreNodeUpdate = {
   valueNodeId: ValueNodeId
   storeId: NodeID
@@ -51,7 +48,7 @@ export function createInspector(
   // Batch and dedupe inspector updates
   // these will include updates to signals, stores, props, and node value
   const { pushStoreUpdate, pushValueUpdate, triggerPropsCheck, clearUpdates } = (() => {
-    let valueUpdates: Partial<Record<ValueNodeId, boolean>> = {}
+    let valueUpdates = new Set<ValueNodeId>()
     let storeUpdates: [valueNodeId: ValueNodeId, storeId: NodeID, data: StoreUpdateData][] = []
     let checkProps = false
 
@@ -59,7 +56,7 @@ export function createInspector(
       const batchedUpdates: InspectorUpdate[] = []
 
       // Value Nodes (signals, props, and node value)
-      for (const [id, updated] of Object.entries(valueUpdates) as [ValueNodeId, boolean][]) {
+      for (const id of valueUpdates) {
         const node = valueMap.get(id)
         if (!node || !node.getValue) continue
         const selected = node.isSelected()
@@ -69,9 +66,9 @@ export function createInspector(
           nodeIdMap,
           selected && handleStoreNode.bind(null, id, node),
         )
-        batchedUpdates.push(['value', { id, value: encoded, updated }])
+        batchedUpdates.push(['value', { id, value: encoded }])
       }
-      valueUpdates = {}
+      valueUpdates.clear()
 
       // Stores
       for (const [valueNodeId, storeId, data] of storeUpdates)
@@ -106,9 +103,8 @@ export function createInspector(
     const flushPropsCheck = throttle(flush, 200)
 
     return {
-      pushValueUpdate(id: ValueNodeId, updated: boolean) {
-        const existing = valueUpdates[id]
-        if (existing === undefined || (updated && !existing)) valueUpdates[id] = updated
+      pushValueUpdate(id: ValueNodeId) {
+        valueUpdates.add(id)
         flush()
       },
       pushStoreUpdate(valueNodeId: ValueNodeId, storeId: NodeID, data: StoreUpdateData) {
@@ -122,7 +118,7 @@ export function createInspector(
       // since the updates are emitten on timeout, we need to make sure that
       // switching off the debugger or unselecting the owner will clear the updates
       clearUpdates() {
-        valueUpdates = {}
+        valueUpdates.clear()
         storeUpdates = []
         checkProps = false
         flush.clear()
@@ -152,8 +148,8 @@ export function createInspector(
 
     untrack(() => {
       const result = collectOwnerDetails(owner, {
-        onSignalUpdate: id => pushValueUpdate(`signal:${id}`, true),
-        onValueUpdate: () => pushValueUpdate('value', true),
+        onSignalUpdate: id => pushValueUpdate(`signal:${id}`),
+        onValueUpdate: () => pushValueUpdate('value'),
       })
       eventHub.emit('InspectedNodeDetails', result.details)
       valueMap = result.valueMap
@@ -187,7 +183,7 @@ export function createInspector(
       const node = valueMap.get(id)
       if (!node) return warn('Could not find value node:', id)
       node.setSelected(selected)
-      pushValueUpdate(id, false)
+      pushValueUpdate(id)
     },
     getElementById(id: NodeID): HTMLElement | undefined {
       const el = nodeIdMap.get(id)

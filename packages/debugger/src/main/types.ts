@@ -179,7 +179,6 @@ export namespace Mapped {
     type: NodeType.Signal | NodeType.Memo | NodeType.Store
     name: string
     id: NodeID
-    observers: NodeID[]
     value: EncodedValue<false>
   }
 
@@ -207,8 +206,6 @@ export namespace Mapped {
     value?: EncodedValue
     /** for computations */
     sources?: NodeID[]
-    /** for memos */
-    observers?: NodeID[]
   }
 }
 

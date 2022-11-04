@@ -2,7 +2,6 @@ import {
   Component,
   ComponentProps,
   createContext,
-  createEffect,
   createMemo,
   createSignal,
   For,
@@ -16,6 +15,7 @@ import {
   useContext,
 } from 'solid-js'
 import { Entries } from '@solid-primitives/keyed'
+import clsx from 'clsx'
 import {
   NodeID,
   NodeType,
@@ -25,13 +25,15 @@ import {
   NAN,
   NEGATIVE_INFINITY,
   ValueType,
-  ValueNodeId,
 } from '@solid-devtools/debugger/types'
-import clsx from 'clsx'
+import { createHover, createPingedSignal } from '@solid-devtools/shared/primitives'
 import { Highlight, Icon } from '@/ui'
 import { Inspector } from '.'
 import * as styles from './SignalNode.css'
-import { createHover, createPingedSignal } from '@solid-devtools/shared/primitives'
+
+export type ToggleElementHover = (elementId: NodeID, hovered?: boolean) => void
+
+const ValueContext = createContext<{ onElementHover?: ToggleElementHover; underStore: boolean }>()
 
 type ValueComponent<K extends ValueType> = Component<{
   value: EncodedValueOf<K, boolean>
@@ -88,12 +90,8 @@ const InstanceValuePreview: ValueComponent<ValueType.Instance> = props => (
   <span class={styles.baseValue}>{props.value.value}</span>
 )
 
-export type ToggleElementHover = (elementId: NodeID, hovered?: boolean) => void
-
-const ElementHoverContext = createContext<{ onHover?: ToggleElementHover }>()
-
 const ElementValuePreview: ValueComponent<ValueType.Element> = props => {
-  const { onHover } = useContext(ElementHoverContext) ?? {}
+  const { onElementHover: onHover } = useContext(ValueContext) ?? {}
 
   const handleHover =
     onHover &&
@@ -123,7 +121,6 @@ const getObjectLength = (
 
 const ObjectValuePreview: ValueComponent<ValueType.Array | ValueType.Object> = props => {
   const length = createMemo(() => getObjectLength(props.value))
-  console.log('ObjectValuePreview', props.value)
   return (
     <Switch fallback={<CollapsableObjectPreview value={props.value.children!} />}>
       <Match when={length() === 0}>
@@ -144,16 +141,9 @@ const CollapsableObjectPreview: Component<{
   value: EncodedValueOf<ValueType.Object | ValueType.Array, true>['children']
 }> = props => (
   <ul class={styles.collapsable.list}>
-    {
-      console.log(
-        'CollapsableObjectPreview',
-        untrack(() => Object.keys(props.value)),
-      ) as any
-    }
     <Entries of={props.value}>
       {(key, value) => (
         <>
-          {console.log(key, untrack(value))}
           <Show
             when={[ValueType.Object, ValueType.Array, ValueType.Store].includes(value().type)}
             children={untrack(() => {
@@ -272,16 +262,10 @@ export const ValueNode: Component<{
   onClick?: JSX.EventHandlerUnion<HTMLLIElement, MouseEvent>
   onElementHover?: ToggleElementHover
 }> = props => {
-  console.log('ValueNode created', props.name, ValueType[props.value.type], props.updateable)
-
-  if (props.updateable) {
-    createEffect(() => {
-      console.log('ValueNode updated', props.name, ValueType[props.value.type])
-    })
-  }
-
-  const isUpdated = props.updateable ? createPingedSignal(() => props.value) : undefined
-  const elementCtx = useContext(ElementHoverContext)
+  const ctx = useContext(ValueContext)
+  const isStore = () => props.value.type === ValueType.Store
+  const isUpdated =
+    props.updateable || ctx?.underStore ? createPingedSignal(() => props.value) : undefined
   const ValueContent = () => <ValuePreview value={props.value} extended={props.selected} />
 
   return (
@@ -296,13 +280,24 @@ export const ValueNode: Component<{
           {props.name}
         </Highlight>
       </ValueName>
-      {elementCtx ? (
-        <ValueContent />
-      ) : (
-        <ElementHoverContext.Provider value={{ onHover: props.onElementHover }}>
+      {
+        // provide context if one isn't already provided or if the value is a store
+        // (so that the ctx.underStore could be overwritten)
+        ctx && !isStore() ? (
           <ValueContent />
-        </ElementHoverContext.Provider>
-      )}
+        ) : (
+          <ValueContext.Provider
+            value={{
+              onElementHover: props.onElementHover || ctx?.onElementHover,
+              get underStore() {
+                return isStore()
+              },
+            }}
+          >
+            <ValueContent />
+          </ValueContext.Provider>
+        )
+      }
     </ValueRow>
   )
 }
@@ -334,7 +329,6 @@ export const SignalNode: Component<{ signal: Inspector.Signal } & SignalControll
   toggleHoveredElement,
 }) => {
   const { type, id, name } = signal
-  const valueNodeId: ValueNodeId = `signal:${id}`
 
   return (
     <ValueNode

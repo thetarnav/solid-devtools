@@ -95,24 +95,26 @@ function reconcileValueAtPath(
   }
   const children = value?.children
   if (!children) return console.error('Invalid path', fullPathString)
-  console.log('reconcileValueAtPath', fullPathString, newValue)
+  console.log('reconcileValueAtPath', fullPathString)
   if (newValue === undefined) delete children[property as never]
   else children[property as never] = newValue as any
 }
 
 const XOR = (a: unknown, b: unknown) => (a || b) && !(a && b)
 
-function updateValueNode(obj: { value?: EncodedValue }, value: EncodedValue) {
-  const expanded = obj.value && XOR('children' in obj.value, 'children' in value)
-  console.log(
-    'updateValueNode',
-    !!obj.value,
-    obj.value && 'children' in obj.value,
-    'children' in value,
-    expanded,
-  )
-  if (expanded) obj.value!.children = value.children
-  else obj.value = value
+function updateValueNode(obj: { value?: EncodedValue }, newValue: EncodedValue): void {
+  if (obj.value && obj.value.type === newValue.type) {
+    if (obj.value.type === ValueType.Store) {
+      obj = obj.value.value
+      newValue = (newValue as EncodedValueOf<ValueType.Store>).value.value
+    }
+    const expanded = XOR('children' in obj.value!, 'children' in newValue)
+    if (expanded) {
+      obj.value!.children = newValue.children
+      return
+    }
+  }
+  obj.value = newValue
 }
 
 function findStoreNode(
@@ -189,8 +191,9 @@ export default function createInspector({
    */
   function updateValue(
     proxy: WritableDeep<Inspector.Details>,
-    { id: valueId, updated, value }: ValueNodeUpdate,
+    { id: valueId, value }: ValueNodeUpdate,
   ): void {
+    console.log('updateValue', valueId, value)
     const [type, id] = splitValueNodeId(valueId)
     // Update signal/memo/store top-level value
     if (type === 'signal') {

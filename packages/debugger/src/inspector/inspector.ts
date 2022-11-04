@@ -7,6 +7,7 @@ import {
   getDisplayName,
   getNodeName,
   getNodeType,
+  getStoreNodeName,
   isSolidComponent,
   isSolidComputation,
   isSolidMemo,
@@ -17,7 +18,6 @@ import {
   markOwnerType,
 } from '../main/utils'
 import { NodeIDMap, encodeValue } from './serialize'
-import { getStoreNodeName } from './store'
 
 export class ValueNode {
   private trackedStores: VoidFunction[] = []
@@ -68,27 +68,20 @@ function mapSignalNode(
 ): Mapped.Signal {
   const { value } = node
   const id = markNodeID(node)
+  let name: string
   $valueMap.add(`signal:${id}`, () => node.value)
 
-  // Check if is a store
   if (isSolidStore(node)) {
-    return {
-      type: NodeType.Store,
-      id,
-      name: getDisplayName(getStoreNodeName(value as Core.Store.StoreNode)),
-      value: encodeValue(value, false, $nodeIdMap, undefined, true),
-      // TODO: top-level values can be observed too, it's the "_" property
-      observers: [],
-    }
+    name = getDisplayName(getStoreNodeName(value as Core.Store.StoreNode))
+  } else {
+    name = getNodeName(node)
+    observeValueUpdate(node, v => handler(id, v), INSPECTOR)
   }
 
-  observeValueUpdate(node, v => handler(id, v), INSPECTOR)
-
   return {
-    type: getNodeType(node) as NodeType.Memo | NodeType.Signal,
-    name: getNodeName(node),
+    type: getNodeType(node) as NodeType.Memo | NodeType.Signal | NodeType.Store,
+    name,
     id,
-    observers: markNodesID(node.observers),
     value: encodeValue(value, false, $nodeIdMap),
   }
 }
@@ -173,9 +166,6 @@ export function collectOwnerDetails(
     details.value = encodeValue(getValue(), false, $nodeIdMap)
     observeValueUpdate(owner, onValueUpdate, INSPECTOR)
     details.sources = markNodesID(owner.sources)
-    if (isSolidMemo(owner)) {
-      details.observers = markNodesID(owner.observers)
-    }
 
     // Component Props
     if (isSolidComponent(owner)) {
