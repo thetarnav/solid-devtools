@@ -1,132 +1,56 @@
 import { batch, createEffect, createSelector, createSignal } from 'solid-js'
 import { createStore, produce } from 'solid-js/store'
-import { Writable } from 'type-fest'
-import { createSimpleEmitter } from '@solid-primitives/event-bus'
+import { defer, untrackedCallback, WritableDeep } from '@solid-devtools/shared/primitives'
 import {
-  Mapped,
-  NodeID,
-  NodeType,
-  EncodedValue,
-  splitValueNodeId,
-  ValueNodeId,
-  ValueType,
-  EncodedValueOf,
-} from '@solid-devtools/shared/graph'
-import { defer, untrackedCallback } from '@solid-devtools/shared/primitives'
-import type {
   InspectorUpdate,
   ProxyPropsUpdate,
   StoreNodeUpdate,
   ToggleInspectedValueData,
   ValueNodeUpdate,
-} from '@solid-devtools/debugger'
+  NodeType,
+  NodeID,
+  EncodedValue,
+  ValueNodeId,
+  Mapped,
+  ValueNodeType,
+  EncodedValueOf,
+  ValueType,
+} from '@solid-devtools/debugger/types'
 import type { Structure } from '../structure'
 
 export namespace Inspector {
-  export type Signal = {
-    readonly type: NodeType.Signal | NodeType.Memo | NodeType.Store
-    readonly name: string
-    readonly id: NodeID
-    readonly observers: NodeID[]
-    readonly value: EncodedValue
-    readonly selected: boolean
-  }
+  export type Signal = Readonly<{
+    type: NodeType.Signal | NodeType.Memo | NodeType.Store
+    name: string
+    id: NodeID
+    value: EncodedValue
+    selected: boolean
+  }>
 
-  export type Props = {
-    readonly proxy: boolean
-    readonly record: Record<string, { readonly selected: boolean; readonly value: EncodedValue }>
-  }
+  export type Props = Readonly<{
+    proxy: boolean
+    record: Record<string, Readonly<{ selected: boolean; value: EncodedValue }>>
+  }>
 
-  export interface Details {
-    readonly id: NodeID
-    readonly name: string
-    readonly type: NodeType
-    readonly path: Structure.Node[]
-    readonly signals: Record<NodeID, Signal>
-    readonly props?: Props
-    readonly value?: EncodedValue
-    readonly valueSelected: boolean
+  export type Details = Readonly<{
+    id: NodeID
+    name: string
+    type: NodeType
+    path: Structure.Node[]
+    signals: Readonly<Record<NodeID, Signal>>
+    props?: Props
+    value?: EncodedValue
+    valueSelected: boolean
     // TODO: more to come
-  }
+  }>
 }
 
-// TODO: this probably needs to be done when the inspected computation is rerun
-// function reconcileSignals(
-//   newSignals: readonly Mapped.Signal[],
-//   signals: Record<NodeID, Inspector.Signal>,
-// ): void {
-//   const prev = new Set(Object.keys(signals))
-//   for (const raw of newSignals) {
-//     const { id } = raw
-//     const signal = signals[id]
-//     if (signal) {
-//       // update signal observers
-//       signal.observers.length = 0
-//       signal.observers.push.apply(signal.observers, raw.observers)
-//       // update signal value
-//       reconcileValue(signal.value, raw.value)
-//       prev.delete(id)
-//     }
-//     // add new signal
-//     else signals[id] = createSignalNode(raw)
-//   }
-//   // remove signals
-//   for (const id of prev) delete signals[id]
-// }
-
-function reconcileValue(proxy: EncodedValue, next: EncodedValue) {
-  if (proxy.type !== next.type) {
-    const assigned = new Set()
-    for (const key in next) {
-      ;(proxy as any)[key] = (next as any)[key]
-      assigned.add(key)
-    }
-    for (const key in proxy) {
-      if (!assigned.has(key)) delete (proxy as any)[key]
-    }
-  }
-  proxy.type = next.type
-  // value is a literal, so we can just assign it
-  if ('value' in next) proxy.value = next.value
-  else delete proxy.value
-  if (next.children) {
-    // add new children
-    if (!proxy.children) (proxy as EncodedValue).children = next.children
-    // reconcile children
-    else {
-      for (const key of Object.keys(proxy.children) as never[]) {
-        // remove child
-        if (!next.children[key]) delete proxy.children[key]
-        // update child
-        else reconcileValue(proxy.children[key], next.children[key])
-      }
-      for (const key of Object.keys(next.children) as never[]) {
-        // add child
-        if (!proxy.children[key]) proxy.children[key] = next.children[key]
-      }
-    }
-  }
-  // remove children
-  else delete proxy.children
+const splitValueNodeId = (id: ValueNodeId) => {
+  return id.split(':') as [ValueNodeType, undefined | NodeID | string]
 }
 
 function createSignalNode(raw: Readonly<Mapped.Signal>): Inspector.Signal {
   return { ...raw, selected: false }
-}
-
-function reconcileProps(proxy: Writable<Inspector.Props>, raw: Mapped.Props): void {
-  const record = proxy.record
-  const newRecord = raw.record
-  proxy.proxy = raw.proxy
-  // the props cannot be deleted/added, so we can just update them
-  for (const [key, prop] of Object.entries(record)) {
-    const newProp = newRecord[key]
-    if (!newProp) delete record[key]
-    else reconcileValue(prop.value, newProp)
-  }
-  for (const [key, newProp] of Object.entries(newRecord)) {
-    if (!record[key]) record[key] = { value: newProp, selected: false }
-  }
 }
 
 function createDetails(
@@ -136,8 +60,8 @@ function createDetails(
   const signals = raw.signals.reduce((signals, signal) => {
     signals[signal.id] = createSignalNode(signal)
     return signals
-  }, {} as Inspector.Details['signals'])
-  const details: Writable<Inspector.Details> = {
+  }, {} as Record<NodeID, Inspector.Signal>)
+  const details: WritableDeep<Inspector.Details> = {
     id: raw.id,
     name: raw.name,
     type: raw.type,
@@ -171,8 +95,24 @@ function reconcileValueAtPath(
   }
   const children = value?.children
   if (!children) return console.error('Invalid path', fullPathString)
+  console.log('reconcileValueAtPath', fullPathString, newValue)
   if (newValue === undefined) delete children[property as never]
   else children[property as never] = newValue as any
+}
+
+const XOR = (a: unknown, b: unknown) => (a || b) && !(a && b)
+
+function updateValueNode(obj: { value?: EncodedValue }, value: EncodedValue) {
+  const expanded = obj.value && XOR('children' in obj.value, 'children' in value)
+  console.log(
+    'updateValueNode',
+    !!obj.value,
+    obj.value && 'children' in obj.value,
+    'children' in value,
+    expanded,
+  )
+  if (expanded) obj.value!.children = value.children
+  else obj.value = value
 }
 
 function findStoreNode(
@@ -203,10 +143,8 @@ export default function createInspector({
   findNode(id: NodeID): Structure.Node | undefined
 }) {
   const [inspectedNode, setInspectedNode] = createSignal<Structure.Node | null>(null)
-  const [state, setDetails] = createStore<{ value: Inspector.Details | null }>({ value: null })
-  const details = () => state.value
-
-  const [listenToValueUpdates, emitValueUpdate] = createSimpleEmitter<ValueNodeId>()
+  const [_state, setDetails] = createStore({ value: null as Inspector.Details | null })
+  const details = () => _state.value
 
   const isNodeInspected = createSelector<NodeID | null, NodeID>(() => inspectedNode()?.id ?? null)
 
@@ -250,13 +188,24 @@ export default function createInspector({
    * Value node update
    */
   function updateValue(
-    proxy: Inspector.Details,
+    proxy: WritableDeep<Inspector.Details>,
     { id: valueId, updated, value }: ValueNodeUpdate,
   ): void {
-    const valueNode = findValueNode(proxy, valueId)
-    if (!valueNode) return console.warn(`updateValue: value node (${valueId}) not found`)
-    updated && emitValueUpdate(valueId)
-    reconcileValue(valueNode, value)
+    const [type, id] = splitValueNodeId(valueId)
+    // Update signal/memo/store top-level value
+    if (type === 'signal') {
+      const signal = proxy.signals[id!]
+      if (!signal) throw `updateValue: value node (${valueId}) not found`
+      updateValueNode(signal, value)
+    }
+    // Update prop value
+    else if (type === 'prop') {
+      const prop = proxy.props?.record[id!]
+      if (!prop) throw `updateValue: prop (${valueId}) not found`
+      updateValueNode(prop, value)
+    }
+    // Update inspected node value
+    else updateValueNode(proxy, value)
   }
 
   /**
@@ -339,7 +288,6 @@ export default function createInspector({
   return {
     inspectedNode,
     details,
-    listenToValueUpdates,
     setInspectedNode: setInspected,
     isNodeInspected,
     setDetails: setNewDetails,

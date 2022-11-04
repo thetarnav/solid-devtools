@@ -44,13 +44,25 @@
       "import": "./dist/server.js",
       "require": "./dist/server.cjs",
       "types": "./dist/index.d.ts"
+    },
+    "./types": {
+      "import": "./dist/types.js",
+      "require": "./dist/types.cjs",
+      "types": "./dist/types.d.ts"
+    }
+  },
+  "typesVersions": {
+    "*": {
+      "types": [
+        "./dist/types.d.ts"
+      ]
     }
   },
   "scripts": {
     "dev": "tsup --watch",
     "build": "tsup",
     "test": "vitest",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit --paths null"
   },
   "dependencies": {
     "@solid-devtools/shared": "workspace:^0.9.2",

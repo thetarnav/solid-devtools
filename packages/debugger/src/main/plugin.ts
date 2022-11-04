@@ -6,12 +6,12 @@ import {
   EventHub,
 } from '@solid-primitives/event-bus'
 import { throttle } from '@solid-primitives/scheduled'
-import { Mapped, RootsUpdates, NodeID, ComputationUpdate } from '@solid-devtools/shared/graph'
 import { atom } from '@solid-devtools/shared/primitives'
 import { createBatchedUpdateEmitter, createInternalRoot } from './utils'
 import { ComputationUpdateHandler } from './walker'
-import { createLocator } from './locator'
-import { createInspector, InspectorUpdate } from './inspector'
+import { createLocator } from '../locator'
+import { createInspector, InspectorUpdate } from '../inspector'
+import { ComputationUpdate, Mapped, NodeID, RootsUpdates } from './types'
 
 export type BatchComputationUpdatesHandler = (payload: ComputationUpdate[]) => void
 

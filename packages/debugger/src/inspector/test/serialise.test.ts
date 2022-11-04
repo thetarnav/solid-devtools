@@ -1,13 +1,7 @@
 import { describe, test, expect, vi } from 'vitest'
-import {
-  EncodedValue,
-  INFINITY,
-  NAN,
-  NEGATIVE_INFINITY,
-  ValueType,
-} from '@solid-devtools/shared/graph'
+import { EncodedValue, INFINITY, NAN, NEGATIVE_INFINITY, ValueType } from '../../types'
 
-const getModule = async () => await import('../src/inspector/serialize')
+const getModule = async () => await import('../serialize')
 
 const _testFunction = () => {}
 

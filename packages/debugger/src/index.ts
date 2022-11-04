@@ -1,17 +1,17 @@
 import { ParentComponent } from 'solid-js'
-import { attachDebugger } from './roots'
+import { attachDebugger } from './main/roots'
 
 export const Debugger: ParentComponent = props => {
   attachDebugger()
   return props.children
 }
 
-import plugin from './plugin'
+import plugin from './main/plugin'
 export const useDebugger = plugin.useDebugger
 export const useLocator = plugin.useLocator
-export type { BatchComputationUpdatesHandler } from './plugin'
+export type { BatchComputationUpdatesHandler } from './main/plugin'
 
-export { attachDebugger, enableRootsAutoattach } from './roots'
+export { attachDebugger, enableRootsAutoattach } from './main/roots'
 
 export {
   makeSolidUpdateListener,
@@ -21,8 +21,8 @@ export {
   interceptComputationRerun,
   makeValueUpdateListener,
   removeValueUpdateObserver,
-} from './update'
-export type { AfterCrateRoot } from './update'
+} from './main/update'
+export type { AfterCrateRoot } from './main/update'
 
 export {
   getOwner,
@@ -40,9 +40,14 @@ export {
   getFunctionSources,
   createUnownedRoot,
   createInternalRoot,
-} from './utils'
+} from './main/utils'
 
-export type { LocatorOptions, TargetIDE, TargetURLFunction } from './locator'
+export type {
+  LocatorOptions,
+  TargetIDE,
+  TargetURLFunction,
+  HighlightElementPayload,
+} from './locator'
 
 export type {
   InspectorUpdate,
@@ -53,4 +58,4 @@ export type {
   ValueNodeUpdate,
 } from './inspector'
 
-export type { Core, Solid, ValueUpdateListener } from './types'
+export * from './types'

@@ -9,8 +9,8 @@ import {
   modifyMutable,
 } from 'solid-js/store'
 import { Solid } from '../../types'
-import { getOwner, isSolidStore } from '../../utils'
 import { observeStoreNode, StoreUpdateHandler } from '../store'
+import { getOwner, isSolidStore } from '../../main/utils'
 
 const getOwnerStore = () =>
   (Object.values(getOwner()!.sourceMap!).find(s => isSolidStore(s))! as Solid.Store).value

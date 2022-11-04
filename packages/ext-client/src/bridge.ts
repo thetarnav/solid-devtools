@@ -2,14 +2,12 @@ import type {
   InspectorUpdate,
   SetInspectedNodeData,
   ToggleInspectedValueData,
-} from '@solid-devtools/debugger'
-import type {
-  ComputationUpdate,
-  HighlightElementPayload,
   Mapped,
   NodeID,
+  ComputationUpdate,
   RootsUpdates,
-} from '@solid-devtools/shared/graph'
+  HighlightElementPayload,
+} from '@solid-devtools/debugger/types'
 import { log } from '@solid-devtools/shared/utils'
 
 export const LOG_MESSAGES = false

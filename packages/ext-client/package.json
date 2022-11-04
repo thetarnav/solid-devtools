@@ -71,7 +71,7 @@
     "dev": "tsup --watch",
     "build": "tsup",
     "test": "vitest",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit --paths null"
   },
   "dependencies": {
     "@solid-devtools/debugger": "workspace:^0.13.1",

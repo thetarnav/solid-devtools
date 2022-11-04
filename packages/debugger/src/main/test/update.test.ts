@@ -6,9 +6,9 @@ import {
   makeCreateRootListener,
   observeValueUpdate,
   removeValueUpdateObserver,
-} from '../src/update'
-import { createInternalRoot, getOwner } from '../src/utils'
-import { Solid } from '../src/types'
+} from '../update'
+import { createInternalRoot, getOwner } from '../utils'
+import { Solid } from '../../types'
 
 describe('makeSolidUpdateListener', () => {
   it('listens to solid updates', () =>

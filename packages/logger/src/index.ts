@@ -17,7 +17,7 @@ import {
   Solid,
   isSolidStore,
 } from '@solid-devtools/debugger'
-import { NodeType } from '@solid-devtools/shared/graph'
+import { NodeType } from '@solid-devtools/debugger/types'
 import { dedupeArray, arrayRefEquals } from '@solid-devtools/shared/utils'
 import {
   getComputationCreatedLabel,

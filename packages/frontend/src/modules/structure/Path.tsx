@@ -1,5 +1,5 @@
 import { Component } from 'solid-js'
-import { NodeType } from '@solid-devtools/shared/graph'
+import { NodeType } from '@solid-devtools/debugger/types'
 import { createHover } from '@solid-devtools/shared/primitives'
 import { Icon } from '@/ui'
 import { NodeTypeIcon } from './OwnerNode'

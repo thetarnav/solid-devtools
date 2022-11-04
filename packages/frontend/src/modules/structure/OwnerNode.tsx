@@ -1,11 +1,10 @@
 import { Component } from 'solid-js'
 import { assignInlineVars } from '@vanilla-extract/dynamic'
-import { NodeType } from '@solid-devtools/shared/graph'
+import { NodeType } from '@solid-devtools/debugger/types'
 import { Badge, Highlight, Icon } from '@/ui'
 import { useStructure } from './ctx'
 import * as styles from './ownerNode.css'
-import { createHover } from '@solid-devtools/shared/primitives'
-import { createPingedSignal } from '@/utils'
+import { createHover, createPingedSignal, trackFromListen } from '@solid-devtools/shared/primitives'
 import type { Structure } from '.'
 
 export const NodeTypeIcon: Component<{ type: NodeType; class?: string }> = props => {
@@ -47,7 +46,7 @@ export const OwnerNode: Component<{
   const { toggleCollapsed } = ctx
   const isCollapsed = ctx.isCollapsed.bind(null, owner)
 
-  const isUpdated = createPingedSignal(listener => listenToUpdate(listener))
+  const isUpdated = createPingedSignal(trackFromListen(listener => listenToUpdate(listener)))
 
   const hoverProps = createHover(onHoverChange)
 

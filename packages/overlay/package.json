@@ -39,7 +39,7 @@
   "scripts": {
     "dev": "pnpm run build --watch",
     "build": "tsx ./scripts/build.ts",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc --noEmit --paths null",
     "build:vite": "vite build",
     "build:tsup": "tsup"
   },

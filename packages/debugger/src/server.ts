@@ -1,7 +1,9 @@
-import { NodeType } from '@solid-devtools/shared/graph'
-import * as API from './index'
+import type * as API from './index'
 import { createRoot } from 'solid-js'
-import { Solid } from './types'
+import type { Solid } from './main/types'
+import { NodeType } from './main/constants'
+
+export * from './types'
 
 export { createUnownedRoot } from './index'
 

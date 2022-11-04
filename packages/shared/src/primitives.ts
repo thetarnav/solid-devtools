@@ -1,3 +1,12 @@
+import {
+  Accessor,
+  createMemo,
+  createSignal,
+  getOwner,
+  onCleanup,
+  untrack,
+  createComputed,
+} from 'solid-js'
 import type {
   AccessorArray,
   EffectFunction,
@@ -6,11 +15,18 @@ import type {
   OnEffectFunction,
   SignalOptions,
 } from 'solid-js/types/reactive/signal'
-import { Accessor, createMemo, createSignal, getOwner, onCleanup, untrack } from 'solid-js'
 import { AnyFunction, onRootCleanup } from '@solid-primitives/utils'
 import { makeEventListener } from '@solid-primitives/event-listener'
 import { createSharedRoot } from '@solid-primitives/rootless'
 import { createMediaQuery } from '@solid-primitives/media'
+import { Primitive } from 'type-fest'
+import { Listen } from '@solid-primitives/event-bus'
+
+export type WritableDeep<T> = 0 extends 1 & T
+  ? T
+  : T extends Primitive
+  ? T
+  : { -readonly [K in keyof T]: WritableDeep<T[K]> }
 
 export const untrackedCallback = <Fn extends AnyFunction>(fn: Fn): Fn =>
   ((...a: Parameters<Fn>) => untrack<ReturnType<Fn>>(fn.bind(void 0, ...a))) as any
@@ -163,4 +179,29 @@ export function atom<T>(
 export function atom<T>(value?: T, options?: SignalOptions<T | undefined>): Atom<T | undefined> {
   const [state, setState] = createSignal(value, { internal: true, ...options })
   return (...args: any[]) => (args.length === 1 ? setState(args[0]) : state())
+}
+
+export function trackFromListen(listen: Listen): VoidFunction {
+  const [track, trigger] = createSignal(undefined, { equals: false })
+  listen(trigger)
+  return track
+}
+
+/**
+ * Creates a signal that will be activated for a given amount of time on every "ping" — a call to the listener function.
+ */
+export function createPingedSignal(track: VoidFunction, timeout = 400): Accessor<boolean> {
+  const [isUpdated, setIsUpdated] = createSignal(false)
+
+  let timeoutId: ReturnType<typeof setTimeout> | undefined
+  createComputed(
+    defer(track, () => {
+      setIsUpdated(true)
+      clearTimeout(timeoutId)
+      timeoutId = setTimeout(() => setIsUpdated(false), timeout)
+    }),
+  )
+  onCleanup(() => clearTimeout(timeoutId))
+
+  return isUpdated
 }

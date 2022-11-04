@@ -7,7 +7,7 @@ import {
   NodeID,
   NodeType,
   RootsUpdates,
-} from '@solid-devtools/shared/graph'
+} from '@solid-devtools/debugger/types'
 import type {
   InspectorUpdate,
   SetInspectedNodeData,

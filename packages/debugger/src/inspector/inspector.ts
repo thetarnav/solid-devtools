@@ -1,7 +1,7 @@
 import { $PROXY } from 'solid-js'
-import { Mapped, NodeID, NodeType, ValueType, ValueNodeId } from '@solid-devtools/shared/graph'
-import { Core, Solid, ValueUpdateListener } from '../types'
-import { observeValueUpdate, removeValueUpdateObserver } from '../update'
+import { NodeType, ValueType } from '../types'
+import type { Core, Mapped, NodeID, Solid, ValueNodeId, ValueUpdateListener } from '../types'
+import { observeValueUpdate, removeValueUpdateObserver } from '../main/update'
 import {
   getComponentRefreshNode,
   getDisplayName,
@@ -15,7 +15,7 @@ import {
   markNodesID,
   markOwnerName,
   markOwnerType,
-} from '../utils'
+} from '../main/utils'
 import { NodeIDMap, encodeValue } from './serialize'
 import { getStoreNodeName } from './store'
 

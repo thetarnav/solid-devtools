@@ -1,15 +1,15 @@
+import { unwrap } from 'solid-js/store'
 import {
+  Core,
   EncodedValue,
   EncodedValueOf,
+  NodeID,
   INFINITY,
   NAN,
   NEGATIVE_INFINITY,
-  NodeID,
   ValueType,
-} from '@solid-devtools/shared/graph'
-import { unwrap } from 'solid-js/store'
-import { Core } from '../types'
-import { isStoreNode } from '../utils'
+} from '../types'
+import { isStoreNode } from '../main/utils'
 
 /**
  * Encodes any value to a JSON-serializable object.

@@ -1,6 +1,6 @@
 import { Component, Show } from 'solid-js'
 import { Entries } from '@solid-primitives/keyed'
-import { NodeType } from '@solid-devtools/shared/graph'
+import { NodeType } from '@solid-devtools/debugger/types'
 import { Scrollable, Badge } from '@/ui'
 import { Signals, ValueNode } from './SignalNode'
 import { useController } from '@/controller'
@@ -32,6 +32,7 @@ const DetailsContent: Component<{ details: Inspector.Details }> = ({ details }) 
                   selected={value().selected}
                   onClick={() => inspector.togglePropSelection(name)}
                   onElementHover={inspector.toggleHoveredElement}
+                  updateable
                 />
               )}
             </Entries>
@@ -41,7 +42,6 @@ const DetailsContent: Component<{ details: Inspector.Details }> = ({ details }) 
           <h2 class={styles.h2}>Signals</h2>
           <Signals
             each={Object.values(signals)}
-            listenToValueUpdates={inspector.listenToValueUpdates}
             toggleHoveredElement={inspector.toggleHoveredElement}
             toggleSignalSelection={inspector.toggleSignalSelection}
           />
@@ -53,11 +53,9 @@ const DetailsContent: Component<{ details: Inspector.Details }> = ({ details }) 
               nameIsTitle
               value={nodeValue}
               selected={details.valueSelected}
-              listenToUpdate={listener =>
-                inspector.listenToValueUpdates(id => id === 'value' && listener())
-              }
               onClick={() => inspector.toggleValueSelection()}
               onElementHover={inspector.toggleHoveredElement}
+              updateable
             />
           </div>
         )}

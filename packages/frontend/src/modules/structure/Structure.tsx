@@ -11,7 +11,7 @@ import {
 import { assignInlineVars } from '@vanilla-extract/dynamic'
 import { useRemSize } from '@solid-primitives/styles'
 import { createResizeObserver } from '@solid-primitives/resize-observer'
-import { NodeID } from '@solid-devtools/shared/graph'
+import { NodeID } from '@solid-devtools/debugger/types'
 import type { Structure } from '.'
 import { Scrollable } from '@/ui'
 import { StructureProvider } from './ctx'

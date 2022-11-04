@@ -7,9 +7,8 @@ import {
   createSignal,
   JSX,
 } from 'solid-js'
-import { NodeType, ValueType } from '@solid-devtools/shared/graph'
-import { Solid } from '../../types'
-import { getOwner } from '../../utils'
+import { NodeType, Solid, ValueType } from '../../types'
+import { getOwner } from '../../main/utils'
 
 const getInspectModule = async () => await import('../inspector')
 

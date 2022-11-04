@@ -8,7 +8,7 @@ import {
   isSolidMemo,
   Solid,
 } from '@solid-devtools/debugger'
-import { NodeType } from '@solid-devtools/shared/graph'
+import { NodeType } from '@solid-devtools/debugger/types'
 import { dedupeArray } from '@solid-devtools/shared/utils'
 import { getDiffMap, getStackDiffMap } from './utils'
 

@@ -20,7 +20,7 @@
     "dev": "tsup --watch",
     "build": "tsup",
     "test": "vitest",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit --paths null"
   },
   "private": false,
   "sideEffects": false,
@@ -33,11 +33,6 @@
       "import": "./dist/index.js",
       "require": "./dist/index.cjs",
       "types": "./dist/index.d.ts"
-    },
-    "./graph": {
-      "import": "./dist/graph.js",
-      "require": "./dist/graph.cjs",
-      "types": "./dist/graph.d.ts"
     },
     "./utils": {
       "import": "./dist/utils.js",
@@ -57,9 +52,6 @@
   },
   "typesVersions": {
     "*": {
-      "graph": [
-        "./dist/graph.d.ts"
-      ],
       "utils": [
         "./dist/utils.d.ts"
       ],
