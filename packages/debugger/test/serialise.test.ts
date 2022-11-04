@@ -1,4 +1,4 @@
-import { describe, test, expect } from 'vitest'
+import { describe, test, expect, vi } from 'vitest'
 import {
   EncodedValue,
   INFINITY,
@@ -6,7 +6,8 @@ import {
   NEGATIVE_INFINITY,
   ValueType,
 } from '@solid-devtools/shared/graph'
-import { encodeValue, ElementMap } from '../src/inspector/serialize'
+
+const getModule = async () => await import('../src/inspector/serialize')
 
 const _testFunction = () => {}
 
@@ -28,9 +29,13 @@ const encodePreviewExpectations: [string, unknown, EncodedValue<false>][] = [
   [
     'Element div',
     document.createElement('div'),
-    { type: ValueType.Element, value: { name: 'DIV' } },
+    { type: ValueType.Element, value: { name: 'DIV', id: '0' } },
   ],
-  ['Element a', document.createElement('a'), { type: ValueType.Element, value: { name: 'A' } }],
+  [
+    'Element a',
+    document.createElement('a'),
+    { type: ValueType.Element, value: { name: 'A', id: '1' } },
+  ],
   ['Array empty', [], { type: ValueType.Array, value: 0 }],
   ['Array', [1, 2, 3], { type: ValueType.Array, value: 3 }],
   ['Object empty', {}, { type: ValueType.Object, value: 0 }],
@@ -42,10 +47,13 @@ const encodePreviewExpectations: [string, unknown, EncodedValue<false>][] = [
   ['Set', new Set(), { type: ValueType.Instance, value: 'Set' }],
 ]
 
-describe('encodeValue Preview', () => {
+describe('encodeValue Preview', async () => {
+  vi.resetModules()
+  const { encodeValue, NodeIDMap } = await getModule()
+
   for (const [testName, value, expectation] of encodePreviewExpectations) {
     test(testName, () => {
-      const s = encodeValue(value, false, {} as ElementMap)
+      const s = encodeValue(value, false, new NodeIDMap())
       expect(s).toEqual(expectation)
       expect(JSON.parse(JSON.stringify(s))).toEqual(s)
     })
@@ -156,17 +164,23 @@ const encodeDeepExpectations: [string, unknown, EncodedValue<true>][] = [
   ],
 ]
 
-describe('encodeValue Deep', () => {
+describe('encodeValue Deep', async () => {
+  vi.resetModules()
+  const { encodeValue, NodeIDMap } = await getModule()
+
   for (const [testName, value, expectation] of encodeDeepExpectations) {
     test(testName, () => {
-      const s = encodeValue(value, true, {} as ElementMap)
+      const s = encodeValue(value, true, new NodeIDMap())
       expect(s).toEqual(expectation)
       expect(JSON.parse(JSON.stringify(s))).toEqual(s)
     })
   }
 })
 
-describe('save elements to a map', () => {
+describe('save elements to a map', async () => {
+  vi.resetModules()
+  const { encodeValue, NodeIDMap } = await getModule()
+
   const div1 = document.createElement('div')
   const a1 = document.createElement('a')
   const div2 = document.createElement('div')
@@ -185,7 +199,7 @@ describe('save elements to a map', () => {
     ],
   ]
 
-  const map = new ElementMap()
+  const map = new NodeIDMap()
   for (const [testName, value, expectation] of elMapExpectations) {
     test(testName, () => {
       const s = encodeValue(value, true, map)

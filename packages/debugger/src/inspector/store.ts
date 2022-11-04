@@ -1,6 +1,6 @@
 import { untrack } from 'solid-js'
 import { DEV as STORE_DEV, unwrap } from 'solid-js/store'
-import { Core, Solid } from '../types'
+import type { Core, Solid } from '../types'
 
 //
 // GLOBALS
@@ -10,6 +10,7 @@ const DEV = STORE_DEV!
 
 const $listeners = new WeakMap<Core.Store.StoreNode, Solid.OnStoreNodeUpdate[]>()
 
+// path solid global dev hook
 globalThis._$onStoreNodeUpdate = (node, property, value, prev) => {
   const listeners = $listeners.get(node)
   if (listeners) for (const fn of listeners) fn(node, property, value, prev)
@@ -99,11 +100,12 @@ export function observeStoreNode(
   function untrackStore(node: Core.Store.StoreNode, path: readonly (string | number)[]) {
     const handlers = $listeners.get(node)
     if (!handlers) return
-    handlers.splice(
+    const r = handlers.splice(
       handlers.findIndex(h => matchHandler(h, symbol, path)),
       1,
     )
     if (handlers.length === 0) $listeners.delete(node)
-    forEachStoreProp(node, (property, child) => untrackStore(child, [...path, property]))
+    if (r.length)
+      forEachStoreProp(node, (property, child) => untrackStore(child, [...path, property]))
   }
 }

@@ -129,6 +129,7 @@ importers:
       '@solid-primitives/platform': ^0.0.102
       '@solid-primitives/scheduled': ^1.2.0
       '@solid-primitives/utils': ^3.1.0
+      jsdom: ^20.0.1
       object-observer: ^5.1.6
       solid-js: ^1.6.0
       type-fest: ^3.1.0
@@ -147,6 +148,8 @@ importers:
       type-fest: 3.1.0
     optionalDependencies:
       '@solid-devtools/transform': link:../transform
+    devDependencies:
+      jsdom: 20.0.1
 
   packages/ext-client:
     specifiers:

@@ -72,5 +72,8 @@
   "optionalDependencies": {
     "@solid-devtools/transform": "workspace:^0.7.5"
   },
-  "packageManager": "pnpm@7.13.0"
+  "packageManager": "pnpm@7.13.0",
+  "devDependencies": {
+    "jsdom": "^20.0.1"
+  }
 }
