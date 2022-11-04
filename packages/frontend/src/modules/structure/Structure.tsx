@@ -44,7 +44,7 @@ type DisplayNode = {
   update: VoidFunction
 }
 
-const DisplayStructureTree: Component = props => {
+const DisplayStructureTree: Component = () => {
   const [containerScroll, setContainerScroll] = createSignal({ top: 0, height: 0 })
 
   const remSize = useRemSize()

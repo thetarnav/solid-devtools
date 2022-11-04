@@ -20,7 +20,7 @@ export function createPortMessanger(port: chrome.runtime.Port): {
     port.onMessage.removeListener(onMessage)
   })
 
-  function onMessage(event: unknown, port: chrome.runtime.Port) {
+  function onMessage(event: unknown) {
     if (!event || typeof event !== 'object') return
     const e = event as Record<PropertyKey, unknown>
     if (typeof e.id !== 'string') return

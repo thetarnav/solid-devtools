@@ -1,6 +1,7 @@
 import { batch, createEffect, createSelector, createSignal } from 'solid-js'
 import { createStore, produce } from 'solid-js/store'
 import { defer, untrackedCallback, WritableDeep } from '@solid-devtools/shared/primitives'
+import { error, log, warn } from '@solid-devtools/shared/utils'
 import {
   InspectorUpdate,
   ProxyPropsUpdate,
@@ -90,12 +91,12 @@ function reconcileValueAtPath(
 ): void {
   const fullPathString = [...path, property].join('.')
   for (const key of path) {
-    if (!value.children) return console.error('Invalid path', fullPathString)
+    if (!value.children) return error('Invalid path', fullPathString)
     value = value.children[key as never]
   }
   const children = value?.children
-  if (!children) return console.error('Invalid path', fullPathString)
-  console.log('reconcileValueAtPath', fullPathString)
+  if (!children) return error('Invalid path', fullPathString)
+  log('reconcileValueAtPath', fullPathString)
   if (newValue === undefined) delete children[property as never]
   else children[property as never] = newValue as any
 }
@@ -182,7 +183,7 @@ export default function createInspector({
 
   const setNewDetails = untrackedCallback((raw: Mapped.OwnerDetails) => {
     const node = inspectedNode()
-    if (!node) return console.warn('setDetails: no node is being inspected')
+    if (!node) return warn('setDetails: no node is being inspected')
     setDetails('value', createDetails(raw, getNodePath(node)))
   })
 
@@ -193,7 +194,6 @@ export default function createInspector({
     proxy: WritableDeep<Inspector.Details>,
     { id: valueId, value }: ValueNodeUpdate,
   ): void {
-    console.log('updateValue', valueId, value)
     const [type, id] = splitValueNodeId(valueId)
     // Update signal/memo/store top-level value
     if (type === 'signal') {
@@ -226,10 +226,10 @@ export default function createInspector({
     { path, property, storeId, value, valueNodeId }: StoreNodeUpdate,
   ): void {
     const valueNode = findValueNode(proxy, valueNodeId)
-    if (!valueNode) return console.warn(`updateStore: value node (${valueNodeId}) not found`)
+    if (!valueNode) return warn(`updateStore: value node (${valueNodeId}) not found`)
     // TODO cache the store node
     const store = findStoreNode(valueNode, storeId)
-    if (!store) return console.warn(`updateStore: store node (${storeId}) not found`)
+    if (!store) return warn(`updateStore: store node (${storeId}) not found`)
     reconcileValueAtPath(store.value.value, path, property, value)
   }
 

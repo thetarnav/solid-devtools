@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { Accessor, onCleanup, $PROXY, untrack, createEffect, on } from 'solid-js'
 import { arrayEquals, asArray, Many } from '@solid-primitives/utils'
 import {
@@ -46,6 +47,7 @@ declare module 'solid-js/types/reactive/signal' {
     $debugSignals?: boolean
     $debugOwned?: boolean
   }
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   interface SignalState<T> {
     $debugSignal?: boolean
   }

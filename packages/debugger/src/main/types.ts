@@ -65,6 +65,7 @@ export namespace Core {
 }
 
 declare module 'solid-js/types/reactive/signal' {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   interface SignalState<T> {
     sdtId?: NodeID
     sdtName?: string
@@ -74,6 +75,7 @@ declare module 'solid-js/types/reactive/signal' {
     sdtName?: string
     sdtType?: NodeType
   }
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   interface Computation<Init, Next> {
     sdtId?: NodeID
     sdtType?: NodeType

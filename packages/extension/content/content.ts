@@ -18,6 +18,7 @@ startListeningWindowMessages()
 const { postPortMessage, onPortMessage } = createPortMessanger(port)
 
 onWindowMessage('SolidOnPage', clientVersion => {
+  // eslint-disable-next-line no-console
   console.log(
     '🚧 %csolid-devtools%c is in early development! 🚧\nPlease report any bugs to https://github.com/thetarnav/solid-devtools/issues',
     'color: #fff; background: rgba(181, 111, 22, 0.7); padding: 1px 4px;',

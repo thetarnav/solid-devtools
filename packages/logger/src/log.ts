@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 // see https://developer.chrome.com/docs/devtools/console/format-style/
 // to gen a overview of how to style console messages
 

@@ -56,7 +56,7 @@ export const OwnerNode: Component<{
       data-selected={props.isSelected}
       data-frozen={props.owner.frozen}
       class={styles.container}
-      onClick={e => onInspectChange(!props.isSelected)}
+      onClick={() => onInspectChange(!props.isSelected)}
       {...hoverProps}
       style={assignInlineVars({ [styles.levelVar]: props.owner.level + '' })}
     >

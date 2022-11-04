@@ -225,6 +225,8 @@ export function onParentCleanup(
   }
 }
 
+// TODO: move onDispose to solid-primitives
+
 const DISPOSE_ID = Symbol('Dispose ID')
 export function onDispose<T>(
   fn: () => T,
@@ -232,6 +234,7 @@ export function onDispose<T>(
 ): () => T {
   const owner = getOwner()
   if (!owner) {
+    // eslint-disable-next-line no-console
     console.warn('onDispose called outside of a reactive owner')
     return fn
   }

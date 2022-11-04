@@ -4,15 +4,23 @@ const getLogLabel = () => [
 ]
 
 export function info<T>(data: T): T {
+  // eslint-disable-next-line no-console
   console.info(...getLogLabel(), data)
   return data
 }
 
 export function log(...args: any[]): void {
+  // eslint-disable-next-line no-console
   console.log(...getLogLabel(), ...args)
 }
 export function warn(...args: any[]): void {
+  // eslint-disable-next-line no-console
   console.warn(...getLogLabel(), ...args)
+}
+
+export function error(...args: any[]): void {
+  // eslint-disable-next-line no-console
+  console.error(...getLogLabel(), ...args)
 }
 
 export function formatTime(d: Date = new Date()): string {
