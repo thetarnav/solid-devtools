@@ -6,14 +6,6 @@ import { createHighlightStyles } from '@/ui/mixins'
 const RowHeight = spacing[4.5]
 const RowGap = spacing[0.5]
 
-export const Signals = {
-  container: style({
-    display: 'flex',
-    flexDirection: 'column',
-    gap: RowGap,
-  }),
-}
-
 const valueRowHighlight = createHighlightStyles()
 
 export const ValueRow = {

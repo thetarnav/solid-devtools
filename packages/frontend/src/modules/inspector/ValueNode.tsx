@@ -4,7 +4,6 @@ import {
   createContext,
   createMemo,
   createSignal,
-  For,
   JSX,
   Match,
   ParentComponent,
@@ -18,7 +17,6 @@ import { Entries } from '@solid-primitives/keyed'
 import clsx from 'clsx'
 import {
   NodeID,
-  NodeType,
   EncodedValue,
   EncodedValueOf,
   INFINITY,
@@ -27,9 +25,8 @@ import {
   ValueType,
 } from '@solid-devtools/debugger/types'
 import { createHover, createPingedSignal } from '@solid-devtools/shared/primitives'
-import { Highlight, Icon } from '@/ui'
-import { Inspector } from '.'
-import * as styles from './SignalNode.css'
+import { Highlight } from '@/ui'
+import * as styles from './ValueNode.css'
 
 export type ToggleElementHover = (elementId: NodeID, hovered?: boolean) => void
 
@@ -203,10 +200,9 @@ const ValuePreview: Component<{ value: EncodedValue<boolean>; extended?: boolean
   })
 }
 
-const ValueName: ParentComponent<{ isTitle?: boolean; isMemo?: boolean }> = props => {
+const ValueName: ParentComponent<{ isTitle?: boolean }> = props => {
   return (
     <div class={styles.ValueName.container[props.isTitle !== true ? 'base' : 'title']}>
-      {props.isTitle !== true && props.isMemo && <Icon.Memo class={styles.ValueName.icon} />}
       <div class={styles.ValueName.name[props.isTitle !== true ? 'base' : 'title']}>
         {props.children}
       </div>
@@ -255,7 +251,6 @@ export const ValueNode: Component<{
   value: EncodedValue
   name: JSX.Element
   nameIsTitle?: boolean
-  isMemo?: boolean
   selected?: boolean
   /** top-level, or inside a store (the value can change) */
   updateable?: boolean
@@ -270,7 +265,7 @@ export const ValueNode: Component<{
 
   return (
     <ValueRow selected={props.selected} onClick={props.onClick}>
-      <ValueName isMemo={props.isMemo} isTitle={props.nameIsTitle}>
+      <ValueName isTitle={props.nameIsTitle}>
         <Highlight
           strong={isUpdated && isUpdated()}
           light={false}
@@ -299,46 +294,5 @@ export const ValueNode: Component<{
         )
       }
     </ValueRow>
-  )
-}
-
-type SignalControlls = {
-  toggleSignalSelection(id: NodeID): void
-  toggleHoveredElement: ToggleElementHover
-}
-
-export const Signals: Component<{ each: Inspector.Signal[] } & SignalControlls> = props => {
-  const sorted = createMemo(() =>
-    props.each.slice().sort((a, b) => {
-      if (a.type === b.type) return a.id > b.id ? 1 : -1
-      return a.type === NodeType.Memo ? 1 : -1
-    }),
-  )
-  return (
-    <Show when={props.each.length}>
-      <ul class={styles.Signals.container}>
-        <For each={sorted()}>{signal => <SignalNode signal={signal} {...props} />}</For>
-      </ul>
-    </Show>
-  )
-}
-
-export const SignalNode: Component<{ signal: Inspector.Signal } & SignalControlls> = ({
-  signal,
-  toggleSignalSelection,
-  toggleHoveredElement,
-}) => {
-  const { type, id, name } = signal
-
-  return (
-    <ValueNode
-      name={name}
-      isMemo={type === NodeType.Memo}
-      value={signal.value}
-      selected={signal.selected}
-      onClick={() => toggleSignalSelection(id)}
-      onElementHover={toggleHoveredElement}
-      updateable
-    />
   )
 }
