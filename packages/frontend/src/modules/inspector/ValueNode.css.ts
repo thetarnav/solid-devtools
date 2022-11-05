@@ -1,124 +1,128 @@
-import { style } from '@vanilla-extract/css'
+import { createVar, style, styleVariants } from '@vanilla-extract/css'
 import { CSSPropertiesWithVars } from '@vanilla-extract/css/dist/declarations/src/types'
-import { dark, color, spacing, theme, media } from '@/ui/theme'
+import { dark, color, spacing, theme, media, centerChild, transition } from '@/ui/theme'
 import { createHighlightStyles } from '@/ui/mixins'
 import { colorDisabled } from '@/ui/theme/vars.css'
 
 const RowHeight = spacing[4.5]
 const RowGap = spacing[0.5]
 
-const valueRowHighlight = createHighlightStyles()
+export const row = (() => {
+  const valueRowHighlight = createHighlightStyles()
 
-export const ValueRow = {
-  container: style([
-    valueRowHighlight.container,
-    {
-      width: '100%',
-      display: 'flex',
-      flexWrap: 'wrap',
-      alignItems: 'flex-start',
-      cursor: 'pointer',
-      vars: {
-        [valueRowHighlight.bgColorVar]: color.gray[300],
-        [valueRowHighlight.bgOpacityVar]: '0',
-      },
-      fontFamily: theme.font.mono,
-      color: color.gray[800],
-      lineHeight: RowHeight,
-      ...media({
-        [dark]: {
-          vars: {
-            [valueRowHighlight.bgColorVar]: color.gray[600],
-          },
-        },
-      }),
-    },
-  ]),
-  containerFocused: style({
-    vars: {
-      [valueRowHighlight.bgOpacityVar]: '0.2',
-    },
-  }),
-  containerHovered: style({
-    vars: { [valueRowHighlight.bgOpacityVar]: '0.3' },
-  }),
-  highlight: style([
-    valueRowHighlight.highlight,
-    {
-      border: `1px solid ${color.gray[400]}`,
-    },
-  ]),
-}
-
-export const ValueName = (() => {
-  const isTitle = style({})
-  const isSignal = style({})
   const container = style({
+    width: '100%',
     display: 'flex',
-    alignItems: 'center',
-    height: RowHeight,
-    selectors: {
-      [`&:not(${isTitle})`]: {
-        paddingLeft: spacing[3],
-      },
-    },
+    flexWrap: 'wrap',
+    alignItems: 'flex-start',
+    paddingLeft: '2ch',
+    fontFamily: theme.font.mono,
+    color: color.gray[800],
+    lineHeight: RowHeight,
   })
 
+  const collapseOpacity = createVar()
+
   return {
-    container: {
-      base: container,
-      isTitle,
-      isSignal,
-    },
-    icon: style({
-      height: spacing[3],
-      width: spacing[3],
-      color: color.gray[600],
-      marginRight: spacing[1],
-      ...media({
-        [dark]: {
-          color: color.gray[400],
-        },
-      }),
-    }),
-    name: style({
-      height: RowHeight,
-      minWidth: '5ch',
-      marginRight: '2ch',
-      ':after': {
-        content: ':',
-        color: colorDisabled,
-      },
-      fontFamily: theme.font.mono,
-      color: color.gray[800],
-      ...media({
-        [dark]: {
-          color: color.gray[200],
-        },
-      }),
-      selectors: {
-        [`${container}${isTitle} &`]: {
-          fontFamily: theme.font.sans,
-          color: colorDisabled,
-        },
-        [`${container}${isSignal}:not(${isTitle}) &`]: {
-          color: color.amber[600],
+    collapseOpacity,
+    container: styleVariants({
+      base: [container],
+      collapsable: [
+        container,
+        valueRowHighlight.container,
+        {
+          cursor: 'pointer',
+          vars: {
+            [valueRowHighlight.bgColorVar]: color.gray[300],
+            [valueRowHighlight.bgOpacityVar]: '0',
+          },
+          selectors: {
+            [`&[data-hovered=true]`]: {
+              vars: { [valueRowHighlight.bgOpacityVar]: '0.3' },
+            },
+          },
           ...media({
             [dark]: {
-              color: color.amber[500],
+              vars: {
+                [valueRowHighlight.bgColorVar]: color.gray[600],
+              },
             },
           }),
         },
-      },
+      ],
     }),
-    highlight: style({
-      display: 'inline-block',
-    }),
+    highlight: style([valueRowHighlight.highlight, { border: `1px solid ${color.gray[400]}` }]),
+    toggle: {
+      container: style({
+        position: 'absolute',
+        left: `-${spacing[1]}`,
+        width: RowHeight,
+        height: RowHeight,
+        ...centerChild,
+      }),
+      button: style({
+        opacity: collapseOpacity,
+        ...transition('opacity'),
+      }),
+    },
   }
 })()
 
+export const name = {
+  container: style({
+    display: 'flex',
+    alignItems: 'center',
+    height: RowHeight,
+  }),
+  icon: style({
+    height: spacing[3],
+    width: spacing[3],
+    color: color.gray[600],
+    marginRight: spacing[1],
+    ...media({
+      [dark]: {
+        color: color.gray[400],
+      },
+    }),
+  }),
+  name: style({
+    height: RowHeight,
+    minWidth: '5ch',
+    marginRight: '2ch',
+    userSelect: 'none',
+    ':after': {
+      content: ':',
+      color: colorDisabled,
+    },
+    fontFamily: theme.font.mono,
+    color: color.gray[800],
+    ...media({
+      [dark]: {
+        color: color.gray[200],
+      },
+    }),
+    selectors: {
+      '&[data-title=true]': {
+        fontFamily: theme.font.sans,
+        color: colorDisabled,
+      },
+      '&[data-signal=true]': {
+        color: color.amber[600],
+        ...media({
+          [dark]: {
+            color: color.amber[500],
+          },
+        }),
+      },
+    },
+  }),
+  highlight: style({
+    display: 'inline-block',
+  }),
+}
+
 export const baseValue = style({
-  fontWeight: 600,
+  fontWeight: 500,
   height: RowHeight,
   color: color.gray[800],
   ...media({
@@ -150,7 +154,6 @@ export const collapsable = {
     display: 'flex',
     flexDirection: 'column',
     gap: RowGap,
-    marginLeft: '2ch',
   }),
 }
 

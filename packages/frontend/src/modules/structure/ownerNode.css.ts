@@ -1,7 +1,6 @@
 import { createVar, style } from '@vanilla-extract/css'
 import { CSSVarFunction } from '@vanilla-extract/private'
 import {
-  centerChild,
   color,
   dark,
   inset,
@@ -79,10 +78,7 @@ export const nameContainer = style({
 
 export const collapse = style({
   position: 'absolute',
-  height: rowHeight,
-  width: rowHeight,
   left: `-${rowHeight}`,
-  ...centerChild,
   opacity: 0,
   ...transition('background-color'),
   ':before': {
@@ -101,9 +97,7 @@ export const collapse = style({
     '&:hover:before': {
       backgroundColor: color.gray[200],
     },
-    [`&${dataSelected}`]: {
-      opacity: 1,
-    },
+    [`&[aria-selected=true]`]: { opacity: 1 },
   },
   ...media({
     [dark]: {
@@ -115,25 +109,6 @@ export const collapse = style({
           backgroundColor: color.gray[700],
         },
       },
-    },
-  }),
-})
-export const collapseIcon = style({
-  width: spacing[2],
-  height: spacing[2],
-  color: color.gray[600],
-  transform: 'rotate(180deg)',
-  opacity: 0.5,
-  ...transition(['transform', 'opacity']),
-  selectors: {
-    [`${collapse}[aria-selected="true"] &`]: {
-      transform: 'rotate(90deg)',
-      opacity: 1,
-    },
-  },
-  ...media({
-    [dark]: {
-      color: color.gray[400],
     },
   }),
 })

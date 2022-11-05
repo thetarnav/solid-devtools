@@ -1,7 +1,7 @@
 import { Component } from 'solid-js'
 import { assignInlineVars } from '@vanilla-extract/dynamic'
 import { NodeType } from '@solid-devtools/debugger/types'
-import { Badge, Highlight, Icon } from '@/ui'
+import { Badge, CollapseToggle, Highlight, Icon } from '@/ui'
 import { useStructure } from './ctx'
 import * as styles from './ownerNode.css'
 import { createHover, createPingedSignal, trackFromListen } from '@solid-devtools/shared/primitives'
@@ -63,16 +63,11 @@ export const OwnerNode: Component<{
       <div class={styles.selection}></div>
       <div class={styles.levelPadding} />
       <div class={styles.nameContainer}>
-        <button
+        <CollapseToggle
           class={styles.collapse}
-          aria-selected={isCollapsed()}
-          onClick={e => {
-            e.stopPropagation()
-            toggleCollapsed(owner)
-          }}
-        >
-          <Icon.Triangle class={styles.collapseIcon} />
-        </button>
+          onToggle={() => toggleCollapsed(owner)}
+          isCollapsed={isCollapsed()}
+        />
         {/* TODO: observers and sources highlighting */}
         <Highlight strong={isUpdated()} light={false} class={styles.highlight}>
           <>

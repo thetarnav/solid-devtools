@@ -9,6 +9,7 @@ import {
   rounded,
   theme,
   transition,
+  spacing,
 } from '@/ui/theme'
 
 const selectedSelector = '&:is([aria-selected="true"], [aria-expanded="true"])'
@@ -69,3 +70,45 @@ export const toggleButtonStyles: ComplexStyleRule = {
 }
 
 export const toggleButton = style(toggleButtonStyles)
+
+export const Collapse = (() => {
+  const button = style({
+    position: 'relative',
+    height: '1.25rem',
+    width: '1.25rem',
+    flexShrink: 0,
+    ...centerChild,
+  })
+
+  const defaultCollapsed = style({})
+
+  return {
+    button,
+    defaultCollapsed,
+    icon: style({
+      width: spacing[2],
+      height: spacing[2],
+      color: color.gray[600],
+      transform: 'rotate(180deg)',
+      opacity: 0.5,
+      ...transition(['transform', 'opacity']),
+      selectors: {
+        [`${button}[aria-selected="true"] &`]: {
+          transform: 'rotate(90deg)',
+          opacity: 1,
+        },
+        [`${defaultCollapsed} &`]: {
+          opacity: 1,
+        },
+        [`${defaultCollapsed}[aria-selected="true"] &`]: {
+          opacity: 0.5,
+        },
+      },
+      ...media({
+        [dark]: {
+          color: color.gray[400],
+        },
+      }),
+    }),
+  }
+})()

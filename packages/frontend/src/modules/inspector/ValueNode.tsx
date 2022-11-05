@@ -1,20 +1,16 @@
 import {
   Component,
-  ComponentProps,
   createContext,
   createMemo,
   createSignal,
   JSX,
   Match,
-  ParentComponent,
   Show,
-  splitProps,
   Switch,
   untrack,
   useContext,
 } from 'solid-js'
 import { Entries } from '@solid-primitives/keyed'
-import clsx from 'clsx'
 import {
   NodeID,
   EncodedValue,
@@ -25,8 +21,9 @@ import {
   ValueType,
 } from '@solid-devtools/debugger/types'
 import { createHover, createPingedSignal } from '@solid-devtools/shared/primitives'
-import { Highlight } from '@/ui'
+import { CollapseToggle, Highlight } from '@/ui'
 import * as styles from './ValueNode.css'
+import { assignInlineVars } from '@vanilla-extract/dynamic'
 
 export type ToggleElementHover = (elementId: NodeID, hovered?: boolean) => void
 
@@ -134,32 +131,32 @@ const ObjectValuePreview: ValueComponent<ValueType.Array | ValueType.Object> = p
   )
 }
 
+const getIsCollapsable = (value: EncodedValue): boolean =>
+  value.type === ValueType.Object ||
+  value.type === ValueType.Array ||
+  value.type === ValueType.Store
+
 const CollapsableObjectPreview: Component<{
   value: EncodedValueOf<ValueType.Object | ValueType.Array, true>['children']
 }> = props => (
   <ul class={styles.collapsable.list}>
     <Entries of={props.value}>
       {(key, value) => (
-        <>
-          <Show
-            when={[ValueType.Object, ValueType.Array, ValueType.Store].includes(value().type)}
-            children={untrack(() => {
-              const [extended, setExtended] = createSignal(false)
-              return (
-                <ValueNode
-                  name={key}
-                  value={value()}
-                  onClick={e => {
-                    e.stopPropagation()
-                    setExtended(p => !p)
-                  }}
-                  selected={extended()}
-                />
-              )
-            })}
-            fallback={<ValueNode name={key} value={value()} />}
-          />
-        </>
+        <Show
+          when={getIsCollapsable(value())}
+          children={untrack(() => {
+            const [extended, setExtended] = createSignal(false)
+            return (
+              <ValueNode
+                name={key}
+                value={value()}
+                onClick={() => setExtended(p => !p)}
+                extended={extended()}
+              />
+            )
+          })}
+          fallback={<ValueNode name={key} value={value()} />}
+        />
       )}
     </Entries>
   </ul>
@@ -200,85 +197,60 @@ const ValuePreview: Component<{ value: EncodedValue<boolean>; extended?: boolean
   })
 }
 
-const ValueName: ParentComponent<{ isTitle?: boolean; isSignal?: boolean }> = props => {
-  return (
-    <div
-      class={styles.ValueName.container.base}
-      classList={{
-        [styles.ValueName.container.isTitle]: props.isTitle,
-        [styles.ValueName.container.isSignal]: props.isSignal,
-      }}
-    >
-      <div class={styles.ValueName.name}>{props.children}</div>
-    </div>
-  )
-}
-
-const ValueRow: ParentComponent<{ selected?: boolean } & ComponentProps<'li'>> = props => {
-  const [, attrs] = splitProps(props, ['selected', 'children', 'class'])
-
-  // early return if this value in not selectable (if undefined, this shouldn't be assigned again)
-  if (props.selected === undefined) {
-    return (
-      <li {...attrs} class={clsx(styles.ValueRow.container, props.class)}>
-        {props.children}
-      </li>
-    )
-  }
-
+function createNestedHover() {
   const [isHovered, setIsHovered] = createSignal(false)
-  return (
-    <li
-      {...attrs}
-      class={clsx(
-        styles.ValueRow.container,
-        props.selected && styles.ValueRow.containerFocused,
-        isHovered() && styles.ValueRow.containerHovered,
-        props.class,
-      )}
-      on:pointerover={e => {
+  return {
+    isHovered,
+    hoverProps: {
+      'on:pointerover': (e: PointerEvent) => {
         e.stopPropagation()
         setIsHovered(true)
-      }}
-      on:pointerout={e => {
+      },
+      'on:pointerout': (e: PointerEvent) => {
         e.stopPropagation()
         setIsHovered(false)
-      }}
-    >
-      <div class={styles.ValueRow.highlight} />
-      {props.children}
-    </li>
-  )
+      },
+    },
+  }
 }
 
 export const ValueNode: Component<{
   value: EncodedValue
   name: JSX.Element
   nameIsTitle?: boolean
-  selected?: boolean
+  extended?: boolean
   /** top-level, or inside a store (the value can change) */
   isSignal?: boolean
-  onClick?: JSX.EventHandlerUnion<HTMLLIElement, MouseEvent>
+  onClick?: VoidFunction
   onElementHover?: ToggleElementHover
 }> = props => {
   const ctx = useContext(ValueContext)
   const isStore = () => props.value.type === ValueType.Store
+  const isCollapsable = () => getIsCollapsable(props.value)
+
   const isUpdated =
     props.isSignal || ctx?.underStore ? createPingedSignal(() => props.value) : undefined
-  const ValueContent = () => <ValuePreview value={props.value} extended={props.selected} />
 
-  return (
-    <ValueRow selected={props.selected} onClick={props.onClick}>
-      <ValueName isTitle={props.nameIsTitle} isSignal={props.isSignal || ctx?.underStore}>
-        <Highlight
-          strong={isUpdated && isUpdated()}
-          light={false}
-          signal
-          class={styles.ValueName.highlight}
+  const ValueContent = () => <ValuePreview value={props.value} extended={props.extended} />
+
+  const content = createMemo(() => (
+    <>
+      <div class={styles.name.container} onClick={props.onClick}>
+        <div
+          class={styles.name.name}
+          data-title={props.nameIsTitle}
+          data-signal={props.isSignal || ctx?.underStore}
         >
-          {props.name}
-        </Highlight>
-      </ValueName>
+          <Highlight
+            strong={isUpdated && isUpdated()}
+            light={false}
+            signal
+            class={styles.name.highlight}
+          >
+            {props.name}
+          </Highlight>
+        </div>
+      </div>
       {
         // provide context if one isn't already provided or if the value is a store
         // (so that the ctx.underStore could be overwritten)
@@ -297,6 +269,35 @@ export const ValueNode: Component<{
           </ValueContext.Provider>
         )
       }
-    </ValueRow>
+    </>
+  ))
+
+  return (
+    <Show when={isCollapsable()} fallback={<li class={styles.row.container.base}>{content()}</li>}>
+      {untrack(() => {
+        const { isHovered, hoverProps } = createNestedHover()
+        return (
+          <li
+            class={styles.row.container.collapsable}
+            data-hovered={isHovered()}
+            style={assignInlineVars({
+              [styles.row.collapseOpacity]: isHovered() || props.extended ? '1' : '0',
+            })}
+            {...hoverProps}
+          >
+            <div class={styles.row.highlight} />
+            <div class={styles.row.toggle.container}>
+              <CollapseToggle
+                onToggle={props.onClick ? () => props.onClick!() : undefined}
+                class={styles.row.toggle.button}
+                isCollapsed={!props.extended}
+                defaultCollapsed
+              />
+            </div>
+            {content()}
+          </li>
+        )
+      })}
+    </Show>
   )
 }

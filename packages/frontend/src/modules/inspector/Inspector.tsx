@@ -70,7 +70,7 @@ const DetailsContent: Component<{ details: Inspector.Details }> = ({ details }) 
               <ValueNode
                 name={name}
                 value={value().value}
-                selected={value().selected}
+                extended={value().selected}
                 onClick={() => inspector.togglePropSelection(name)}
                 onElementHover={inspector.toggleHoveredElement}
                 isSignal
@@ -85,7 +85,7 @@ const DetailsContent: Component<{ details: Inspector.Details }> = ({ details }) 
                 <ValueNode
                   name={signal.name}
                   value={signal.value}
-                  selected={signal.selected}
+                  extended={signal.selected}
                   onClick={() => inspector.toggleSignalSelection(signal.id)}
                   onElementHover={inspector.toggleHoveredElement}
                   isSignal={type !== 'stores'}
@@ -100,7 +100,7 @@ const DetailsContent: Component<{ details: Inspector.Details }> = ({ details }) 
               name="Value"
               nameIsTitle
               value={nodeValue}
-              selected={details.valueSelected}
+              extended={details.valueSelected}
               onClick={() => inspector.toggleValueSelection()}
               onElementHover={inspector.toggleHoveredElement}
               isSignal
