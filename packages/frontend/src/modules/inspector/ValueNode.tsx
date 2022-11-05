@@ -200,12 +200,16 @@ const ValuePreview: Component<{ value: EncodedValue<boolean>; extended?: boolean
   })
 }
 
-const ValueName: ParentComponent<{ isTitle?: boolean }> = props => {
+const ValueName: ParentComponent<{ isTitle?: boolean; isSignal?: boolean }> = props => {
   return (
-    <div class={styles.ValueName.container[props.isTitle !== true ? 'base' : 'title']}>
-      <div class={styles.ValueName.name[props.isTitle !== true ? 'base' : 'title']}>
-        {props.children}
-      </div>
+    <div
+      class={styles.ValueName.container.base}
+      classList={{
+        [styles.ValueName.container.isTitle]: props.isTitle,
+        [styles.ValueName.container.isSignal]: props.isSignal,
+      }}
+    >
+      <div class={styles.ValueName.name}>{props.children}</div>
     </div>
   )
 }
@@ -253,19 +257,19 @@ export const ValueNode: Component<{
   nameIsTitle?: boolean
   selected?: boolean
   /** top-level, or inside a store (the value can change) */
-  updateable?: boolean
+  isSignal?: boolean
   onClick?: JSX.EventHandlerUnion<HTMLLIElement, MouseEvent>
   onElementHover?: ToggleElementHover
 }> = props => {
   const ctx = useContext(ValueContext)
   const isStore = () => props.value.type === ValueType.Store
   const isUpdated =
-    props.updateable || ctx?.underStore ? createPingedSignal(() => props.value) : undefined
+    props.isSignal || ctx?.underStore ? createPingedSignal(() => props.value) : undefined
   const ValueContent = () => <ValuePreview value={props.value} extended={props.selected} />
 
   return (
     <ValueRow selected={props.selected} onClick={props.onClick}>
-      <ValueName isTitle={props.nameIsTitle}>
+      <ValueName isTitle={props.nameIsTitle} isSignal={props.isSignal || ctx?.underStore}>
         <Highlight
           strong={isUpdated && isUpdated()}
           light={false}

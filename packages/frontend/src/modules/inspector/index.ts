@@ -1,7 +1,7 @@
 import { batch, createEffect, createSelector, createSignal } from 'solid-js'
 import { createStore, produce } from 'solid-js/store'
 import { defer, untrackedCallback, WritableDeep } from '@solid-devtools/shared/primitives'
-import { error, log, warn } from '@solid-devtools/shared/utils'
+import { error, warn } from '@solid-devtools/shared/utils'
 import {
   InspectorUpdate,
   ProxyPropsUpdate,
@@ -96,7 +96,6 @@ function reconcileValueAtPath(
   }
   const children = value?.children
   if (!children) return error('Invalid path', fullPathString)
-  log('reconcileValueAtPath', fullPathString)
   if (newValue === undefined) delete children[property as never]
   else children[property as never] = newValue as any
 }

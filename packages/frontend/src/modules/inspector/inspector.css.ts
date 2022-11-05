@@ -1,4 +1,5 @@
 import { dark, spacing, color, media } from '@/ui/theme'
+import { colorDisabled } from '@/ui/theme/vars.css'
 import { style } from '@vanilla-extract/css'
 
 export const scrollWrapper = style({
@@ -17,7 +18,6 @@ export const header = style({
 })
 
 export const h1 = style({
-  // TODO: typography
   fontSize: spacing[4],
   fontWeight: 'bold',
   color: color.black,
@@ -29,18 +29,13 @@ export const h1 = style({
 })
 export const id = style({
   fontSize: spacing[3],
-  color: color.gray[500],
+  color: colorDisabled,
   fontWeight: 400,
   textTransform: 'uppercase',
 })
 export const type = style({
   fontWeight: 400,
-  color: color.gray[500],
-  ...media({
-    [dark]: {
-      color: color.gray[300],
-    },
-  }),
+  color: colorDisabled,
 })
 
 export const content = style({
@@ -50,11 +45,7 @@ export const content = style({
 })
 
 export const h2 = style({
-  color: color.gray[500],
+  color: colorDisabled,
   marginBottom: spacing[1],
-  ...media({
-    [dark]: {
-      color: color.gray[300],
-    },
-  }),
+  textTransform: 'capitalize',
 })

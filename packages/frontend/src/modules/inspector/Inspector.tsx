@@ -63,7 +63,7 @@ const DetailsContent: Component<{ details: Inspector.Details }> = ({ details }) 
       <div class={styles.content}>
         <ListSignals
           when={componentProps && Object.keys(componentProps.record).length}
-          title={<>Props ${componentProps!.proxy && <Badge>PROXY</Badge>}</>}
+          title={<>Props {componentProps!.proxy && <Badge>PROXY</Badge>}</>}
         >
           <Entries of={componentProps!.record}>
             {(name, value) => (
@@ -73,52 +73,27 @@ const DetailsContent: Component<{ details: Inspector.Details }> = ({ details }) 
                 selected={value().selected}
                 onClick={() => inspector.togglePropSelection(name)}
                 onElementHover={inspector.toggleHoveredElement}
-                updateable
+                isSignal
               />
             )}
           </Entries>
         </ListSignals>
-        <ListSignals when={signals().stores.length} title="Stores">
-          <For each={signals().stores}>
-            {store => (
-              <ValueNode
-                name={store.name}
-                value={store.value}
-                selected={store.selected}
-                onClick={() => inspector.toggleSignalSelection(store.id)}
-                onElementHover={inspector.toggleHoveredElement}
-              />
-            )}
-          </For>
-        </ListSignals>
-        <ListSignals when={signals().signals.length} title="Signals">
-          <For each={signals().signals}>
-            {signal => (
-              <ValueNode
-                name={signal.name}
-                value={signal.value}
-                selected={signal.selected}
-                onClick={() => inspector.toggleSignalSelection(signal.id)}
-                onElementHover={inspector.toggleHoveredElement}
-                updateable
-              />
-            )}
-          </For>
-        </ListSignals>
-        <ListSignals when={signals().memos.length} title="Memos">
-          <For each={signals().memos}>
-            {memo => (
-              <ValueNode
-                name={memo.name}
-                value={memo.value}
-                selected={memo.selected}
-                onClick={() => inspector.toggleSignalSelection(memo.id)}
-                onElementHover={inspector.toggleHoveredElement}
-                updateable
-              />
-            )}
-          </For>
-        </ListSignals>
+        {(['stores', 'signals', 'memos'] as const).map(type => (
+          <ListSignals when={signals()[type].length} title={type}>
+            <For each={signals()[type]}>
+              {signal => (
+                <ValueNode
+                  name={signal.name}
+                  value={signal.value}
+                  selected={signal.selected}
+                  onClick={() => inspector.toggleSignalSelection(signal.id)}
+                  onElementHover={inspector.toggleHoveredElement}
+                  isSignal={type !== 'stores'}
+                />
+              )}
+            </For>
+          </ListSignals>
+        ))}
         {nodeValue && (
           <div>
             <ValueNode
@@ -128,7 +103,7 @@ const DetailsContent: Component<{ details: Inspector.Details }> = ({ details }) 
               selected={details.valueSelected}
               onClick={() => inspector.toggleValueSelection()}
               onElementHover={inspector.toggleHoveredElement}
-              updateable
+              isSignal
             />
           </div>
         )}

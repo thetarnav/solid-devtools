@@ -1,7 +1,8 @@
-import { style, styleVariants } from '@vanilla-extract/css'
+import { style } from '@vanilla-extract/css'
 import { CSSPropertiesWithVars } from '@vanilla-extract/css/dist/declarations/src/types'
 import { dark, color, spacing, theme, media } from '@/ui/theme'
 import { createHighlightStyles } from '@/ui/mixins'
+import { colorDisabled } from '@/ui/theme/vars.css'
 
 const RowHeight = spacing[4.5]
 const RowGap = spacing[0.5]
@@ -24,6 +25,13 @@ export const ValueRow = {
       fontFamily: theme.font.mono,
       color: color.gray[800],
       lineHeight: RowHeight,
+      ...media({
+        [dark]: {
+          vars: {
+            [valueRowHighlight.bgColorVar]: color.gray[600],
+          },
+        },
+      }),
     },
   ]),
   containerFocused: style({
@@ -42,79 +50,72 @@ export const ValueRow = {
   ]),
 }
 
-const ValueName_container_base = style({
-  display: 'flex',
-  alignItems: 'center',
-  height: RowHeight,
-})
-const ValueName_name_base = style({
-  height: RowHeight,
-  minWidth: '5ch',
-  marginRight: '2ch',
-  ':after': {
-    content: ':',
-    color: color.gray[500],
-  },
-  ...media({
-    [dark]: {
-      ':after': {
-        color: color.gray[500],
+export const ValueName = (() => {
+  const isTitle = style({})
+  const isSignal = style({})
+  const container = style({
+    display: 'flex',
+    alignItems: 'center',
+    height: RowHeight,
+    selectors: {
+      [`&:not(${isTitle})`]: {
+        paddingLeft: spacing[3],
       },
     },
-  }),
-})
-export const ValueName = {
-  container: styleVariants({
-    base: [ValueName_container_base, { paddingLeft: spacing[2] }],
-    title: [ValueName_container_base],
-  }),
-  signalDot: style({
-    width: spacing[1],
-    height: spacing[1],
-    borderRadius: '50%',
-    backgroundColor: color.amber[400],
-  }),
-  icon: style({
-    height: spacing[3],
-    width: spacing[3],
-    color: color.gray[600],
-    marginRight: spacing[1],
-    ...media({
-      [dark]: {
-        color: color.gray[400],
+  })
+
+  return {
+    container: {
+      base: container,
+      isTitle,
+      isSignal,
+    },
+    icon: style({
+      height: spacing[3],
+      width: spacing[3],
+      color: color.gray[600],
+      marginRight: spacing[1],
+      ...media({
+        [dark]: {
+          color: color.gray[400],
+        },
+      }),
+    }),
+    name: style({
+      height: RowHeight,
+      minWidth: '5ch',
+      marginRight: '2ch',
+      ':after': {
+        content: ':',
+        color: colorDisabled,
+      },
+      fontFamily: theme.font.mono,
+      color: color.gray[800],
+      ...media({
+        [dark]: {
+          color: color.gray[200],
+        },
+      }),
+      selectors: {
+        [`${container}${isTitle} &`]: {
+          fontFamily: theme.font.sans,
+          color: colorDisabled,
+        },
+        [`${container}${isSignal}:not(${isTitle}) &`]: {
+          color: color.amber[600],
+          ...media({
+            [dark]: {
+              color: color.amber[500],
+            },
+          }),
+        },
       },
     }),
-  }),
-  name: styleVariants({
-    base: [
-      ValueName_name_base,
-      {
-        fontWeight: 600,
-        fontFamily: theme.font.mono,
-        color: color.gray[800],
-        ...media({
-          [dark]: {
-            color: color.gray[200],
-          },
-        }),
-      },
-    ],
-    title: [
-      ValueName_name_base,
-      {
-        color: color.gray[500],
-        ...media({
-          [dark]: {
-            color: color.gray[300],
-          },
-        }),
-      },
-    ],
-  }),
-  highlight: style({
-    display: 'inline-block',
-  }),
-}
+    highlight: style({
+      display: 'inline-block',
+    }),
+  }
+})()
 
 export const baseValue = style({
   fontWeight: 600,
@@ -132,7 +133,7 @@ const bracketsStyles: CSSPropertiesWithVars = {
   color: color.gray[800],
 }
 export const ValueObject = style({
-  color: color.disabled,
+  color: colorDisabled,
   ':before': {
     ...bracketsStyles,
     content: '{',
@@ -194,7 +195,7 @@ export const ValueFunction = style([
 export const Nullable = style([
   baseValue,
   {
-    color: color.disabled,
+    color: colorDisabled,
   },
 ])
 
@@ -206,11 +207,6 @@ export const ValueElement = {
     elHighlight.container,
     {
       color: color.amber[600],
-      ...media({
-        [dark]: {
-          color: color.amber[600],
-        },
-      }),
       textTransform: 'lowercase',
       vars: {
         [elHighlight.bgColorVar]: color.gray[300],
@@ -222,13 +218,21 @@ export const ValueElement = {
         },
       },
       ':before': {
-        color: color.disabled,
+        color: colorDisabled,
         content: `<`,
       },
       ':after': {
-        color: color.disabled,
+        color: colorDisabled,
         content: '/>',
       },
+      ...media({
+        [dark]: {
+          color: color.amber[500],
+          vars: {
+            [elHighlight.bgColorVar]: color.gray[600],
+          },
+        },
+      }),
     },
   ]),
   highlight: elHighlight.highlight,
