@@ -217,7 +217,6 @@ function createNestedHover() {
 export const ValueNode: Component<{
   value: EncodedValue
   name: JSX.Element
-  nameIsTitle?: boolean
   extended?: boolean
   /** top-level, or inside a store (the value can change) */
   isSignal?: boolean
@@ -236,11 +235,7 @@ export const ValueNode: Component<{
   const content = createMemo(() => (
     <>
       <div class={styles.name.container} onClick={props.onClick}>
-        <div
-          class={styles.name.name}
-          data-title={props.nameIsTitle}
-          data-signal={props.isSignal || ctx?.underStore}
-        >
+        <div class={styles.name.name} data-signal={props.isSignal || ctx?.underStore}>
           <Highlight
             strong={isUpdated && isUpdated()}
             light={false}

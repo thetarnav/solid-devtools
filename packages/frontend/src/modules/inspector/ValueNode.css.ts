@@ -11,7 +11,6 @@ export const row = (() => {
   const valueRowHighlight = createHighlightStyles()
 
   const container = style({
-    width: '100%',
     display: 'flex',
     flexWrap: 'wrap',
     alignItems: 'flex-start',
@@ -102,10 +101,6 @@ export const name = {
       },
     }),
     selectors: {
-      '&[data-title=true]': {
-        fontFamily: theme.font.sans,
-        color: colorDisabled,
-      },
       '&[data-signal=true]': {
         color: color.amber[600],
         ...media({
@@ -161,6 +156,8 @@ export const ValueString = style([
   baseValue,
   {
     minHeight: RowHeight,
+    height: 'fit-content',
+    maxWidth: 'fit-content',
     color: color.green,
     ...media({
       [dark]: {

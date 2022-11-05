@@ -9,6 +9,10 @@ export const scrollWrapper = style({
 })
 
 export const root = style({
+  minWidth: '100%',
+  width: 'fit-content',
+})
+export const rootMargin = style({
   padding: spacing[4],
   paddingBottom: spacing[16],
 })

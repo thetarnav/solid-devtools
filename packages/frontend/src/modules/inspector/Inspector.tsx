@@ -54,59 +54,61 @@ const DetailsContent: Component<{ details: Inspector.Details }> = ({ details }) 
 
   return (
     <div class={styles.root}>
-      <header class={styles.header}>
-        <h1 class={styles.h1}>
-          {name} <span class={styles.id}>#{id}</span>
-        </h1>
-        <div class={styles.type}>{NodeType[type]}</div>
-      </header>
-      <div class={styles.content}>
-        <ListSignals
-          when={componentProps && Object.keys(componentProps.record).length}
-          title={<>Props {componentProps!.proxy && <Badge>PROXY</Badge>}</>}
-        >
-          <Entries of={componentProps!.record}>
-            {(name, value) => (
+      <div class={styles.rootMargin}>
+        <header class={styles.header}>
+          <h1 class={styles.h1}>
+            {name} <span class={styles.id}>#{id}</span>
+          </h1>
+          <div class={styles.type}>{NodeType[type]}</div>
+        </header>
+        <div class={styles.content}>
+          <ListSignals
+            when={componentProps && Object.keys(componentProps.record).length}
+            title={<>Props {componentProps!.proxy && <Badge>PROXY</Badge>}</>}
+          >
+            <Entries of={componentProps!.record}>
+              {(name, value) => (
+                <ValueNode
+                  name={name}
+                  value={value().value}
+                  extended={value().selected}
+                  onClick={() => inspector.togglePropSelection(name)}
+                  onElementHover={inspector.toggleHoveredElement}
+                  isSignal
+                />
+              )}
+            </Entries>
+          </ListSignals>
+          {(['stores', 'signals', 'memos'] as const).map(type => (
+            <ListSignals when={signals()[type].length} title={type}>
+              <For each={signals()[type]}>
+                {signal => (
+                  <ValueNode
+                    name={signal.name}
+                    value={signal.value}
+                    extended={signal.selected}
+                    onClick={() => inspector.toggleSignalSelection(signal.id)}
+                    onElementHover={inspector.toggleHoveredElement}
+                    isSignal={type !== 'stores'}
+                  />
+                )}
+              </For>
+            </ListSignals>
+          ))}
+          {nodeValue && (
+            <div>
+              <h2 class={styles.h2}>{NodeType[type]}</h2>
               <ValueNode
-                name={name}
-                value={value().value}
-                extended={value().selected}
-                onClick={() => inspector.togglePropSelection(name)}
+                name="value"
+                value={nodeValue}
+                extended={details.valueSelected}
+                onClick={() => inspector.toggleValueSelection()}
                 onElementHover={inspector.toggleHoveredElement}
                 isSignal
               />
-            )}
-          </Entries>
-        </ListSignals>
-        {(['stores', 'signals', 'memos'] as const).map(type => (
-          <ListSignals when={signals()[type].length} title={type}>
-            <For each={signals()[type]}>
-              {signal => (
-                <ValueNode
-                  name={signal.name}
-                  value={signal.value}
-                  extended={signal.selected}
-                  onClick={() => inspector.toggleSignalSelection(signal.id)}
-                  onElementHover={inspector.toggleHoveredElement}
-                  isSignal={type !== 'stores'}
-                />
-              )}
-            </For>
-          </ListSignals>
-        ))}
-        {nodeValue && (
-          <div>
-            <ValueNode
-              name="Value"
-              nameIsTitle
-              value={nodeValue}
-              extended={details.valueSelected}
-              onClick={() => inspector.toggleValueSelection()}
-              onElementHover={inspector.toggleHoveredElement}
-              isSignal
-            />
-          </div>
-        )}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   )

@@ -19,6 +19,7 @@ export default defineConfig({
   mode: 'development',
   build: {
     target: 'esnext',
+    minify: false,
   },
   optimizeDeps: {
     exclude: ['solid-js/store', '@solid-devtools/debugger'],
