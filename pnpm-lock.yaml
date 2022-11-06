@@ -140,7 +140,6 @@ importers:
       '@solid-primitives/scheduled': ^1.2.0
       '@solid-primitives/utils': ^3.1.0
       jsdom: ^20.0.1
-      object-observer: ^5.1.6
       solid-js: ^1.6.0
       type-fest: ^3.1.0
     dependencies:
@@ -153,7 +152,6 @@ importers:
       '@solid-primitives/platform': 0.0.102_solid-js@1.6.0
       '@solid-primitives/scheduled': 1.2.0_solid-js@1.6.0
       '@solid-primitives/utils': 3.1.0_solid-js@1.6.0
-      object-observer: 5.1.6
       solid-js: 1.6.0
       type-fest: 3.1.0
     optionalDependencies:
@@ -5469,10 +5467,6 @@ packages:
     resolution: {integrity: sha512-NuAESUOUMrlIXOfHKzD6bpPu3tYt3xvjNdRIQ+FeT0lNb4K8WR70CaDxhuNguS2XG+GjkyMwOzsN5ZktImfhLA==}
     engines: {node: '>= 0.4'}
     dev: true
-
-  /object-observer/5.1.6:
-    resolution: {integrity: sha512-3Lcp1Q9BW0ELoObPTCx6qOJlqpHo1d1TZHugoY50RjQRMLBOcGa9Dwy7FQtMYALmb/zo3GjEWjV09FJ4Ss/lQg==}
-    dev: false
 
   /object.assign/4.1.4:
     resolution: {integrity: sha512-1mxKf0e58bvyjSCtKYY4sRe9itRk3PJpquJOjeIkz885CczcI4IvJJDLPS72oowuSh+pBxUFROpX+TU++hxhZQ==}

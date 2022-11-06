@@ -74,7 +74,6 @@
     "@solid-primitives/platform": "^0.0.102",
     "@solid-primitives/scheduled": "^1.2.0",
     "@solid-primitives/utils": "^3.1.0",
-    "object-observer": "^5.1.6",
     "solid-js": "^1.6.0",
     "type-fest": "^3.1.0"
   },
