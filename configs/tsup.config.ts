@@ -28,6 +28,7 @@ export default ({
   return defineConfig(config => {
     const options: Options = {
       clean: config.watch ? false : true,
+      minify: config.watch ? false : true,
       dts: {
         entry: [entry, ...mappedAdditionalEntries],
       },

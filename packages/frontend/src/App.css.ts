@@ -24,9 +24,6 @@ export const header = style({
   columnGap: spacing[2],
   backgroundColor: panelBg,
   borderBottom: panelBorder,
-})
-
-export const h3 = style({
   color: color.black,
   ...media({
     [dark]: {
@@ -34,6 +31,7 @@ export const h3 = style({
     },
   }),
 })
+
 export const select = style({
   width: spacing[7],
   height: spacing[7],

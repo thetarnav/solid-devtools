@@ -1,4 +1,4 @@
-import { Many } from '@solid-primitives/utils'
+import type { Many } from '@solid-primitives/utils'
 import { INFINITY, NAN, NEGATIVE_INFINITY, NodeType, ValueType } from './constants'
 import type { INTERNAL } from './utils'
 

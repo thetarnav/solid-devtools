@@ -1,5 +1,4 @@
-import { createCallbackStack } from '@solid-primitives/utils'
-import { log } from '@solid-devtools/shared/utils'
+import { createCallbackStack, log } from '@solid-devtools/shared/utils'
 import { OnMessageFn, PostMessageFn } from 'solid-devtools/bridge'
 import {
   createPortMessanger,

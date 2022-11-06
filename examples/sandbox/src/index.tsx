@@ -1,7 +1,7 @@
 /* @refresh reload */
 import { render } from 'solid-js/web'
-// import 'solid-devtools'
-import { DevtoolsOverlay } from '@solid-devtools/overlay'
+import 'solid-devtools'
+// import { DevtoolsOverlay } from '@solid-devtools/overlay'
 
 import App from './App'
 import { ThemeProvider } from './Theme'
@@ -15,7 +15,7 @@ export const disposeApp = render(
       <ThemeProvider>
         <App />
       </ThemeProvider>
-      <DevtoolsOverlay defaultOpen={true} />
+      {/* <DevtoolsOverlay defaultOpen={true} /> */}
     </>
   ),
   document.getElementById('root')!,
