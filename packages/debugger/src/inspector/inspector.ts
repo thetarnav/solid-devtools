@@ -1,6 +1,6 @@
 import { $PROXY } from 'solid-js'
 import { NodeType, ValueType } from '../types'
-import type { Core, Mapped, NodeID, Solid, ValueNodeId, ValueUpdateListener } from '../types'
+import type { Core, Mapped, NodeID, Solid, ValueItemID, ValueUpdateListener } from '../types'
 import { observeValueUpdate, removeValueUpdateObserver } from '../main/update'
 import {
   getComponentRefreshNode,
@@ -44,11 +44,11 @@ export class ValueNode {
 }
 
 export class ValueNodeMap {
-  private record = {} as Record<ValueNodeId, ValueNode>
-  get(id: ValueNodeId): ValueNode | undefined {
+  private record = {} as Record<ValueItemID, ValueNode>
+  get(id: ValueItemID): ValueNode | undefined {
     return this.record[id]
   }
-  add(id: ValueNodeId, getValue: (() => unknown) | undefined) {
+  add(id: ValueItemID, getValue: (() => unknown) | undefined) {
     this.record[id] = new ValueNode(getValue)
   }
   reset() {

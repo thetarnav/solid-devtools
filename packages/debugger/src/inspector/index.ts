@@ -3,16 +3,16 @@ import { throttle, scheduleIdle } from '@solid-primitives/scheduled'
 import { warn } from '@solid-devtools/shared/utils'
 import { DebuggerEventHub } from '../main/plugin'
 import { walkSolidRoot } from '../main/roots'
-import { Core, EncodedValue, NodeID, Solid, ValueNodeId } from '../main/types'
+import { Core, EncodedValue, NodeID, Solid, ValueItemID } from '../main/types'
 import { makeSolidUpdateListener } from '../main/update'
 import { NodeIDMap, encodeValue } from './serialize'
 import { observeStoreNode, StoreUpdateData } from './store'
 import { clearOwnerObservers, collectOwnerDetails, ValueNode, ValueNodeMap } from './inspector'
 
-export type ValueNodeUpdate = { id: ValueNodeId; value: EncodedValue<boolean> }
+export type ValueNodeUpdate = { id: ValueItemID; value: EncodedValue<boolean> }
 
 export type StoreNodeUpdate = {
-  valueNodeId: ValueNodeId
+  valueNodeId: ValueItemID
   storeId: NodeID
   path: readonly (string | number)[]
   property: string | number
@@ -31,7 +31,7 @@ export type InspectorUpdate =
   | [type: 'props', update: ProxyPropsUpdate]
 
 export type SetInspectedNodeData = null | { rootId: NodeID; nodeId: NodeID }
-export type ToggleInspectedValueData = { id: ValueNodeId; selected: boolean }
+export type ToggleInspectedValueData = { id: ValueItemID; selected: boolean }
 
 /**
  * Plugin module
@@ -48,8 +48,8 @@ export function createInspector(
   // Batch and dedupe inspector updates
   // these will include updates to signals, stores, props, and node value
   const { pushStoreUpdate, pushValueUpdate, triggerPropsCheck, clearUpdates } = (() => {
-    let valueUpdates = new Set<ValueNodeId>()
-    let storeUpdates: [valueNodeId: ValueNodeId, storeId: NodeID, data: StoreUpdateData][] = []
+    let valueUpdates = new Set<ValueItemID>()
+    let storeUpdates: [valueNodeId: ValueItemID, storeId: NodeID, data: StoreUpdateData][] = []
     let checkProps = false
 
     const flush = scheduleIdle(() => {
@@ -103,11 +103,11 @@ export function createInspector(
     const flushPropsCheck = throttle(flush, 200)
 
     return {
-      pushValueUpdate(id: ValueNodeId) {
+      pushValueUpdate(id: ValueItemID) {
         valueUpdates.add(id)
         flush()
       },
-      pushStoreUpdate(valueNodeId: ValueNodeId, storeId: NodeID, data: StoreUpdateData) {
+      pushStoreUpdate(valueNodeId: ValueItemID, storeId: NodeID, data: StoreUpdateData) {
         storeUpdates.push([valueNodeId, storeId, data])
         flush()
       },
@@ -128,7 +128,7 @@ export function createInspector(
   })()
 
   function handleStoreNode(
-    valueId: ValueNodeId,
+    valueId: ValueItemID,
     valueNode: ValueNode,
     storeNodeId: NodeID,
     storeNode: Core.Store.StoreNode,

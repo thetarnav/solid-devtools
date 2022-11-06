@@ -11,73 +11,72 @@ import {
   NodeType,
   NodeID,
   EncodedValue,
-  ValueNodeId,
+  ValueItemID,
+  ValueItemType,
   Mapped,
-  ValueNodeType,
   EncodedValueOf,
   ValueType,
 } from '@solid-devtools/debugger/types'
 import type { Structure } from '../structure'
+import { Writable } from 'type-fest'
 
 export namespace Inspector {
-  export type Signal = Readonly<{
-    type: NodeType.Signal | NodeType.Memo | NodeType.Store
-    name: string
-    id: NodeID
-    value: EncodedValue
-    selected: boolean
-  }>
+  export interface ValueItem {
+    readonly itemId: ValueItemID
+    readonly selected: boolean
+    readonly value: EncodedValue
+  }
 
-  export type Props = Readonly<{
-    proxy: boolean
-    record: Record<string, Readonly<{ selected: boolean; value: EncodedValue }>>
-  }>
+  export interface Signal extends ValueItem {
+    readonly type: NodeType.Signal | NodeType.Memo | NodeType.Store
+    readonly name: string
+    readonly id: NodeID
+  }
+
+  export type PropsRecord = Readonly<Record<string, ValueItem>>
+  export type SignalsRecord = Readonly<Record<NodeID, Signal>>
 
   export type Details = Readonly<{
     id: NodeID
     name: string
     type: NodeType
     path: Structure.Node[]
-    signals: Readonly<Record<NodeID, Signal>>
-    props?: Props
-    value?: EncodedValue
-    valueSelected: boolean
-    // TODO: more to come
+    signals: SignalsRecord
+    props?: Readonly<{
+      proxy: boolean
+      record: PropsRecord
+    }>
+    ownerValue?: ValueItem | undefined
   }>
 }
 
-const splitValueNodeId = (id: ValueNodeId) => {
-  return id.split(':') as [ValueNodeType, undefined | NodeID | string]
-}
-
-function createSignalNode(raw: Readonly<Mapped.Signal>): Inspector.Signal {
-  return { ...raw, selected: false }
+const splitValueNodeId = (id: ValueItemID) => {
+  return id.split(':') as [ValueItemType, undefined | NodeID | string]
 }
 
 function createDetails(
   raw: Readonly<Mapped.OwnerDetails>,
   path: Structure.Node[],
 ): Inspector.Details {
-  const signals = raw.signals.reduce((signals, signal) => {
-    signals[signal.id] = createSignalNode(signal)
-    return signals
-  }, {} as Record<NodeID, Inspector.Signal>)
-  const details: WritableDeep<Inspector.Details> = {
+  const signals: Writable<Inspector.SignalsRecord> = {}
+  for (const { id, name, type, value } of raw.signals)
+    signals[id] = { id, name, type, selected: false, value, itemId: `signal:${id}` }
+
+  const details: Writable<Inspector.Details> = {
     id: raw.id,
     name: raw.name,
     type: raw.type,
     path,
     signals,
-    value: raw.value,
-    valueSelected: false,
+    ownerValue: raw.value ? { itemId: 'value', selected: false, value: raw.value } : undefined,
   }
   if (raw.props) {
     details.props = {
       proxy: raw.props.proxy,
       record: Object.entries(raw.props.record).reduce((props, [propName, value]) => {
-        props[propName] = { value, selected: false }
+        props[propName] = { value, selected: false, itemId: `prop:${propName}` }
         return props
-      }, {} as Inspector.Props['record']),
+      }, {} as Writable<Inspector.PropsRecord>),
     }
   }
   return details
@@ -102,8 +101,8 @@ function reconcileValueAtPath(
 
 const XOR = (a: unknown, b: unknown) => (a || b) && !(a && b)
 
-function updateValueNode(obj: { value?: EncodedValue }, newValue: EncodedValue): void {
-  if (obj.value && obj.value.type === newValue.type) {
+function updateValueNode(obj: { value: EncodedValue }, newValue: EncodedValue): void {
+  if (obj.value.type === newValue.type) {
     if (obj.value.type === ValueType.Store) {
       obj = obj.value.value
       newValue = (newValue as EncodedValueOf<ValueType.Store>).value.value
@@ -130,11 +129,61 @@ function findStoreNode(
   }
 }
 
-function findValueNode(details: Inspector.Details, valueId: ValueNodeId): EncodedValue | undefined {
+function findValueNode(details: Inspector.Details, valueId: ValueItemID): EncodedValue | undefined {
   const [type, id] = splitValueNodeId(valueId)
   if (type === 'signal') return details.signals[id!]?.value
   if (type === 'prop') return details.props?.record[id!]?.value
-  return details.value
+  return details.ownerValue?.value
+}
+
+function updateValueItem(
+  proxy: WritableDeep<Inspector.Details>,
+  { id: valueId, value }: ValueNodeUpdate,
+): void {
+  const [type, id] = splitValueNodeId(valueId)
+  // Update signal/memo/store top-level value
+  if (type === 'signal') {
+    const signal = proxy.signals[id!]
+    if (!signal) throw `updateValue: value node (${valueId}) not found`
+    updateValueNode(signal, value)
+  }
+  // Update prop value
+  else if (type === 'prop') {
+    const prop = proxy.props?.record[id!]
+    if (!prop) throw `updateValue: prop (${valueId}) not found`
+    updateValueNode(prop, value)
+  }
+  // Update inspected node value
+  else proxy.ownerValue && updateValueNode(proxy.ownerValue, value)
+}
+
+/**
+ * Props — add/remove changed prop keys of an proxy object
+ */
+function updateProps(
+  proxy: WritableDeep<Inspector.Details>,
+  { added, removed }: ProxyPropsUpdate,
+): void {
+  const props = proxy.props!
+  for (const key of added)
+    props.record[key] = {
+      value: { type: ValueType.Getter, value: key },
+      selected: false,
+      itemId: `prop:${key}`,
+    }
+  for (const key of removed) delete props.record[key]
+}
+
+function updateStore(
+  proxy: WritableDeep<Inspector.Details>,
+  { path, property, storeId, value, valueNodeId }: StoreNodeUpdate,
+): void {
+  const valueNode = findValueNode(proxy, valueNodeId)
+  if (!valueNode) return warn(`updateStore: value node (${valueNodeId}) not found`)
+  // TODO cache the store node
+  const store = findStoreNode(valueNode, storeId)
+  if (!store) return warn(`updateStore: store node (${storeId}) not found`)
+  reconcileValueAtPath(store.value.value, path, property, value)
 }
 
 export default function createInspector({
@@ -186,52 +235,6 @@ export default function createInspector({
     setDetails('value', createDetails(raw, getNodePath(node)))
   })
 
-  /**
-   * Value node update
-   */
-  function updateValue(
-    proxy: WritableDeep<Inspector.Details>,
-    { id: valueId, value }: ValueNodeUpdate,
-  ): void {
-    const [type, id] = splitValueNodeId(valueId)
-    // Update signal/memo/store top-level value
-    if (type === 'signal') {
-      const signal = proxy.signals[id!]
-      if (!signal) throw `updateValue: value node (${valueId}) not found`
-      updateValueNode(signal, value)
-    }
-    // Update prop value
-    else if (type === 'prop') {
-      const prop = proxy.props?.record[id!]
-      if (!prop) throw `updateValue: prop (${valueId}) not found`
-      updateValueNode(prop, value)
-    }
-    // Update inspected node value
-    else updateValueNode(proxy, value)
-  }
-
-  /**
-   * Props — add/remove changed prop keys of an proxy object
-   */
-  function updateProps(proxy: Inspector.Details, { added, removed }: ProxyPropsUpdate): void {
-    const props = proxy.props!
-    for (const key of added)
-      props.record[key] = { value: { type: ValueType.Getter, value: key }, selected: false }
-    for (const key of removed) delete props.record[key]
-  }
-
-  function updateStore(
-    proxy: Inspector.Details,
-    { path, property, storeId, value, valueNodeId }: StoreNodeUpdate,
-  ): void {
-    const valueNode = findValueNode(proxy, valueNodeId)
-    if (!valueNode) return warn(`updateStore: value node (${valueNodeId}) not found`)
-    // TODO cache the store node
-    const store = findStoreNode(valueNode, storeId)
-    if (!store) return warn(`updateStore: store node (${storeId}) not found`)
-    reconcileValueAtPath(store.value.value, path, property, value)
-  }
-
   // Handle Inspector updates comming from the debugger
   function handleUpdate(updates: InspectorUpdate[]) {
     setDetails(
@@ -241,7 +244,7 @@ export default function createInspector({
         for (const update of updates) {
           switch (update[0]) {
             case 'value':
-              updateValue(proxy, update[1])
+              updateValueItem(proxy, update[1])
               break
             case 'props':
               updateProps(proxy, update[1])
@@ -265,17 +268,29 @@ export default function createInspector({
 
   createEffect(defer(inspectedNode, node => onInspectedNodeHandler(node)))
 
-  function togglePropSelection(id: string, selected?: boolean): void {
-    setDetails('value', 'props', 'record', id, 'selected', p => (selected = selected ?? !p))
-    onInspectedValueHandler({ id: `prop:${id}`, selected: selected! })
-  }
-  function toggleSignalSelection(id: NodeID, selected?: boolean) {
-    setDetails('value', 'signals', id, 'selected', p => (selected = selected ?? !p))
-    onInspectedValueHandler({ id: `signal:${id}`, selected: selected! })
-  }
-  function toggleValueSelection(selected?: boolean) {
-    setDetails('value', 'valueSelected', p => (selected = selected ?? !p))
-    onInspectedValueHandler({ id: 'value', selected: selected! })
+  /**
+   * Toggle the inspection of a value item (signal, prop, or owner value)
+   */
+  function inspectValueItem(type: 'value', id?: undefined, selected?: boolean): void
+  function inspectValueItem(
+    type: Exclude<ValueItemType, 'value'>,
+    id: string,
+    selected?: boolean,
+  ): void
+  function inspectValueItem(type: ValueItemType, id?: string, selected?: boolean): void {
+    setDetails(
+      'value',
+      produce((proxy: WritableDeep<Inspector.Details> | null) => {
+        if (!proxy) return
+        let item: Writable<Inspector.ValueItem> | undefined
+        if (type === 'value') item = proxy.ownerValue
+        else if (type === 'signal') item = proxy.signals[id!]
+        else if (type === 'prop') item = proxy.props?.record[id!]
+        if (!item) return
+        item.selected = selected = selected ?? !item.selected
+        onInspectedValueHandler({ id: item.itemId, selected })
+      }),
+    )
   }
 
   //
@@ -294,9 +309,7 @@ export default function createInspector({
     isNodeInspected,
     setDetails: setNewDetails,
     update: handleUpdate,
-    toggleSignalSelection,
-    toggleValueSelection,
-    togglePropSelection,
+    inspectValueItem,
     onInspectedHandler: onInspectedValueHandler,
     hoveredElement,
     toggleHoveredElement,

@@ -35,7 +35,7 @@ function ListSignals<T>(props: { when: T; title: JSX.Element; children: JSX.Elem
 }
 
 const DetailsContent: Component<{ details: Inspector.Details }> = ({ details }) => {
-  const { name, id, type, props: componentProps, value: nodeValue } = details
+  const { name, id, type, props: componentProps, ownerValue } = details
 
   const { inspector } = useController()
 
@@ -72,7 +72,7 @@ const DetailsContent: Component<{ details: Inspector.Details }> = ({ details }) 
                   name={name}
                   value={value().value}
                   extended={value().selected}
-                  onClick={() => inspector.togglePropSelection(name)}
+                  onClick={() => inspector.inspectValueItem('prop', name)}
                   onElementHover={inspector.toggleHoveredElement}
                   isSignal
                 />
@@ -87,7 +87,7 @@ const DetailsContent: Component<{ details: Inspector.Details }> = ({ details }) 
                     name={signal.name}
                     value={signal.value}
                     extended={signal.selected}
-                    onClick={() => inspector.toggleSignalSelection(signal.id)}
+                    onClick={() => inspector.inspectValueItem('signal', signal.id)}
                     onElementHover={inspector.toggleHoveredElement}
                     isSignal={type !== 'stores'}
                   />
@@ -95,14 +95,14 @@ const DetailsContent: Component<{ details: Inspector.Details }> = ({ details }) 
               </For>
             </ListSignals>
           ))}
-          {nodeValue && (
+          {ownerValue && (
             <div>
               <h2 class={styles.h2}>{NodeType[type]}</h2>
               <ValueNode
                 name="value"
-                value={nodeValue}
-                extended={details.valueSelected}
-                onClick={() => inspector.toggleValueSelection()}
+                value={ownerValue.value}
+                extended={ownerValue.selected}
+                onClick={() => inspector.inspectValueItem('value')}
                 onElementHover={inspector.toggleHoveredElement}
                 isSignal
               />

@@ -9,7 +9,7 @@ import { Emit } from '@solid-primitives/event-bus'
 import { throttle } from '@solid-primitives/scheduled'
 import { trimString } from '@solid-devtools/shared/utils'
 import { DEV as _STORE_DEV } from 'solid-js/store'
-import { Core, DebuggerContext, NodeID, Solid, ValueNodeId, ValueNodeType } from './types'
+import { Core, DebuggerContext, NodeID, Solid } from './types'
 import { NodeType } from './constants'
 
 const STORE_DEV = _STORE_DEV!
@@ -96,14 +96,6 @@ export const getOwnerType = (o: Readonly<Solid.Owner>): NodeType => {
 
 let LAST_ID = 0
 export const getNewSdtId = (): NodeID => (LAST_ID++).toString(36)
-
-export const getValueNodeId = <T extends ValueNodeType>(
-  type: T,
-  id: T extends 'value' ? undefined : NodeID | string,
-): ValueNodeId => {
-  if (type === 'value') return 'value'
-  return `${type}:${id}` as ValueNodeId
-}
 
 export function markOwnerName(o: Solid.Owner): string {
   if (o.sdtName !== undefined) return o.sdtName

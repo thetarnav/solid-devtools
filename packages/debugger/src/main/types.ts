@@ -4,8 +4,16 @@ import type { INTERNAL } from './utils'
 
 export type NodeID = string & {}
 
-export type ValueNodeId = `signal:${NodeID}` | `prop:${string}` | `value`
-export type ValueNodeType = 'signal' | 'prop' | 'value'
+export type ValueItemID = `signal:${NodeID}` | `prop:${string}` | `value`
+export type ValueItemType = 'signal' | 'prop' | 'value'
+
+export const getValueItemId = <T extends ValueItemType>(
+  type: T,
+  id: T extends 'value' ? undefined : NodeID | string,
+): ValueItemID => {
+  if (type === 'value') return 'value'
+  return `${type}:${id}` as ValueItemID
+}
 
 export type EncodedPreviewPayloadMap = {
   [ValueType.Array]: number
