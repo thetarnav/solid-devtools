@@ -58,21 +58,18 @@ describe('collectOwnerDetails', () => {
         name: 'focused',
         type: NodeType.Memo,
         value: { type: ValueType.String, value: 'value' },
-        sources: ['3'],
-        observers: ['4'],
+        sources: ['2'],
         signals: [
           {
             type: NodeType.Signal,
             id: '0',
             name: 'element',
-            observers: [],
             value: { type: ValueType.Element, value: { name: 'DIV', id: '0' } },
           },
           {
             type: NodeType.Memo,
             id: '1',
             name: 'memo',
-            observers: ['2'],
             value: { type: ValueType.Number, value: 0 },
           },
         ],
