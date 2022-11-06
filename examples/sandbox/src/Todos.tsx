@@ -1,15 +1,14 @@
-import { createSignal, batch, For, Component, createMemo } from 'solid-js'
+import { createSignal, batch, For, Component, createMemo, createEffect } from 'solid-js'
 import { createStore, Store, SetStoreFunction, produce, unwrap } from 'solid-js/store'
-// import { isSolidMemo } from "@solid-devtools/debugger"
 
 export function createLocalStore<T extends object>(
   name: string,
   init: T,
 ): [Store<T>, SetStoreFunction<T>] {
-  // const localState = localStorage.getItem(name)
-  const localState = undefined
+  const localState = localStorage.getItem(name)
+  // const localState = undefined
   const [state, setState] = createStore<T>(localState ? JSON.parse(localState) : init, { name })
-  // createEffect(() => localStorage.setItem(name, JSON.stringify(state)))
+  createEffect(() => localStorage.setItem(name, JSON.stringify(state)))
   return [state, setState]
 }
 
@@ -26,10 +25,6 @@ const Todo: Component<{
   onUpdate: (value: string) => void
   onRemove: VoidFunction
 }> = props => {
-  // console.log(isSolidMemo(getOwner()!.owner))
-
-  // debugProps(props)
-
   return (
     <div>
       <input
@@ -69,35 +64,6 @@ const Todos: Component = () => {
   // @ts-ignore
   setTodos('other', 'else', unwrap(todos.values))
 
-  setTimeout(() => {
-    setTodos('other', 'countOuter', p => ({
-      ...p,
-      countInner: undefined,
-    }))
-  })
-
-  const [count, setCount] = createStore(todos.other.countOuter.countInner)
-  const intervalId = setInterval(() => {
-    const newCount = count.count + 1
-    batch(() => {
-      if (newCount === 5) {
-        setTodos('other', 'countOuter', 'countInner', unwrap(count))
-        setTodos('other', 'name', 'todos-2')
-      }
-      setCount('count', newCount)
-    })
-    if (newCount === 5) {
-      console.log('AFTER BATCH')
-    }
-    if (newCount === 8) {
-      clearInterval(intervalId)
-    }
-  }, 1000)
-
-  // makeStoreObserver(todos, console.log)
-
-  // debugStore(todos)
-
   const addTodo = (e: SubmitEvent) => {
     e.preventDefault()
     batch(() => {
@@ -110,17 +76,16 @@ const Todos: Component = () => {
   }
 
   // setTimeout(() => {
-  // 	setTodos(
-  // 		0,
-  // 		reconcile({
-  // 			title: "Learn Solid-JS",
-  // 			done: false,
-  // 			[Math.random() + ""]: "hello",
-  // 		}),
-  // 	)
+  //   setTodos(
+  //     'values',
+  //     0,
+  //     reconcile({
+  //       title: 'Learn Solid-JS',
+  //       done: false,
+  //       [Math.random() + '']: 'hello',
+  //     }),
+  //   )
   // }, 1000)
-
-  const values = todos.values
 
   return (
     <>
@@ -129,18 +94,17 @@ const Todos: Component = () => {
         <input
           placeholder="enter todo and click +"
           required
-          value={todos.other.newTitle.value}
+          value={newTitle()}
           onInput={e => setTitle(e.currentTarget.value)}
         />
         <button>+</button>
       </form>
-      <For each={values}>
+      <For each={todos.values}>
         {(todo, i) => (
           <Todo
             {...todo}
             onCheck={v => setTodos('values', i(), 'done', v)}
             onUpdate={v => setTodos('values', i(), 'title', v)}
-            // onRemove={() => setTodos('values', t => removeIndex(t, i()))}
             onRemove={() =>
               setTodos(
                 'values',

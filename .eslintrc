@@ -2,7 +2,7 @@
   "root": true,
   "parser": "@typescript-eslint/parser",
   "plugins": ["@typescript-eslint", "no-only-tests"],
-  "ignorePatterns": ["node_modules", "dist", "scripts"],
+  "ignorePatterns": ["node_modules", "dist", "scripts", "examples"],
   "rules": {
     "no-console": "warn",
     "no-debugger": "warn",
