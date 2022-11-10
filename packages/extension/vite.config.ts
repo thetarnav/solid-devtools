@@ -14,7 +14,6 @@ const r = (str: TemplateStringsArray) => resolve(__dirname, str.join(''))
 export default defineConfig({
   plugins: [solidPlugin({ dev: false }), crx({ manifest })],
   resolve: {
-    conditions: ['browser', 'development'],
     alias: {
       '@solid-devtools/shared': r`../shared/src`,
     },

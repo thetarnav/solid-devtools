@@ -3,16 +3,17 @@ import { NodeType } from '@solid-devtools/debugger/types'
 import { createHover } from '@solid-devtools/shared/primitives'
 import { Icon } from '@/ui'
 import { NodeTypeIcon } from './OwnerNode'
-import type { Structure } from '.'
 import { useController } from '@/controller'
 import * as styles from './path.css'
 
-export const OwnerPath: Component<{ path: Structure.Node[] }> = props => {
-  const { isNodeHovered, toggleHoveredNode, setInspectedNode } = useController()
+export const OwnerPath: Component = () => {
+  const { isNodeHovered, toggleHoveredNode, setInspectedNode, inspectedDetails } = useController()
+
+  const path = () => inspectedDetails()?.path ?? []
 
   return (
     <div class={styles.container}>
-      {props.path.map((node, index) => {
+      {path().map((node, index) => {
         const hoverProps = createHover(hovering => toggleHoveredNode(node.id, hovering))
         return (
           <>
