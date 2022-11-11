@@ -3,11 +3,11 @@ import {
   postWindowMessage,
   startListeningWindowMessages,
 } from 'solid-devtools/bridge'
-import { warn } from '@solid-devtools/shared/utils'
+import { error, warn } from '@solid-devtools/shared/utils'
 import { createPortMessanger, DEVTOOLS_CONTENT_PORT } from '../shared/messanger'
 
-const toVersionTuple = (version: string) =>
-  version.split('.').map(Number) as [number, number, number]
+// @ts-expect-error ?script&module query ensures output in ES module format and only import the script path
+import realWorld from './realWorld?script&module'
 
 const extVersion = chrome.runtime.getManifest().version
 const matchingClientVersion = __CLIENT_VERSION__
@@ -17,13 +17,26 @@ const port = chrome.runtime.connect({ name: DEVTOOLS_CONTENT_PORT })
 startListeningWindowMessages()
 const { postPortMessage, onPortMessage } = createPortMessanger(port)
 
-onWindowMessage('SolidOnPage', clientVersion => {
+{
+  // Evaluate the real-world script to detect if solid is on the page
+  const script = document.createElement('script')
+  script.src = chrome.runtime.getURL(realWorld)
+  script.type = 'module'
+  script.addEventListener('error', err => error('Real world script failed to load.', err))
+  document.head.append(script)
+  onWindowMessage('SolidOnPage', () => postPortMessage('SolidOnPage'))
+}
+
+onWindowMessage('ClientConnected', clientVersion => {
   // eslint-disable-next-line no-console
   console.log(
     '🚧 %csolid-devtools%c is in early development! 🚧\nPlease report any bugs to https://github.com/thetarnav/solid-devtools/issues',
     'color: #fff; background: rgba(181, 111, 22, 0.7); padding: 1px 4px;',
     'color: #e38b1b',
   )
+
+  const toVersionTuple = (version: string) =>
+    version.split('.').map(Number) as [number, number, number]
 
   // warn if the matching adapter version is not the same minor version range as the actual adapter
   const adapterTuple = toVersionTuple(clientVersion)
@@ -43,7 +56,6 @@ Please install "solid-devtools@${matchingClientVersion}" in your project`,
     }
   }
 
-  postPortMessage('SolidOnPage', '')
   postPortMessage('Versions', {
     client: clientVersion,
     extension: extVersion,
@@ -65,8 +77,8 @@ onWindowMessage('ClientHoveredComponent', e => postPortMessage('ClientHoveredCom
 
 onWindowMessage('ClientInspectedNode', e => postPortMessage('ClientInspectedNode', e))
 
-onPortMessage('PanelVisibility', e => postWindowMessage('PanelVisibility', e))
-onPortMessage('PanelClosed', e => postWindowMessage('PanelClosed', e))
+onPortMessage('DevtoolsOpened', () => postWindowMessage('DevtoolsOpened'))
+onPortMessage('DevtoolsClosed', () => postWindowMessage('DevtoolsClosed'))
 
 onPortMessage('ForceUpdate', () => postWindowMessage('ForceUpdate'))
 
@@ -77,5 +89,3 @@ onPortMessage('HighlightElement', e => postWindowMessage('HighlightElement', e))
 
 onWindowMessage('ClientLocatorMode', e => postPortMessage('ClientLocatorMode', e))
 onPortMessage('ExtLocatorMode', e => postWindowMessage('ExtLocatorMode', e))
-
-export {}

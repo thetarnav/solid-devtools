@@ -12,18 +12,19 @@ import { log } from '@solid-devtools/shared/utils'
 
 export const LOG_MESSAGES = false
 
+export type Versions = { client: string; expectedClient: string; extension: string }
+
 export interface Messages {
   // client -> content -> devtools.html
   // the `string` payload is the ext-client version
-  SolidOnPage: string
-  // devtools -> background: number is a tab id
-  DevtoolsScriptConnected: number
-  DevtoolsPanelConnected: {}
-  Versions: { client: string; expectedClient: string; extension: string }
-  /** devtools -> client: user switching between Solid devtools and other panel */
-  PanelVisibility: boolean
-  /** devtools -> client: the chrome devtools got entirely closed */
-  PanelClosed: true
+  SolidOnPage: {}
+  ClientConnected: string
+  Versions: Versions
+
+  /** devtools -> client: the chrome devtools got opened or entirely closed */
+  DevtoolsOpened: {}
+  DevtoolsClosed: {}
+
   ResetPanel: {}
   StructureUpdate: RootsUpdates
   ComputationUpdates: ComputationUpdate[]

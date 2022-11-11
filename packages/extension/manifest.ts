@@ -40,6 +40,7 @@ export default defineManifest(env => ({
       '128': 'assets/icons/solid-gray-128.png',
     },
     default_title: 'Solid Devtools',
+    default_popup: 'popup/popup.html',
   },
   icons: {
     '16': 'assets/icons/solid-normal-16.png',

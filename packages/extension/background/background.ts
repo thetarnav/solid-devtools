@@ -1,28 +1,26 @@
+/*
+
+Background script runs only once, when the extension is installed.
+
+*/
+
 import { createCallbackStack, log } from '@solid-devtools/shared/utils'
-import { OnMessageFn, PostMessageFn } from 'solid-devtools/bridge'
+import type { OnMessageFn, PostMessageFn, Versions } from 'solid-devtools/bridge'
 import {
   createPortMessanger,
   createRuntimeMessanger,
   DEVTOOLS_CONNECTION_NAME,
   DEVTOOLS_CONTENT_PORT,
+  POPUP_CONNECTION_NAME,
 } from '../shared/messanger'
 
-log('background script working')
+log('Background script working')
 
 const { onRuntimeMessage, postRuntimeMessage } = createRuntimeMessanger()
 
 let currentPort: chrome.runtime.Port | undefined
-
-// state reused between panels
-let panelVisibility = false
-let solidOnPage = false
-let versions:
-  | {
-      client: string
-      expectedClient: string
-      extension: string
-    }
-  | undefined
+let versions: Versions | undefined
+let SolidOnPage = false
 
 let postPortMessage: PostMessageFn
 let onPortMessage: OnMessageFn
@@ -30,13 +28,21 @@ let onPortMessage: OnMessageFn
 chrome.runtime.onConnect.addListener(port => {
   // handle the connection to the devtools page (devtools.html)
   if (port.name === DEVTOOLS_CONNECTION_NAME) {
+    if (versions) postRuntimeMessage('Versions', versions)
+
     const disconnectListener = () => {
-      panelVisibility = false
-      postPortMessage('PanelClosed', true)
+      postPortMessage('DevtoolsClosed')
       log('Devtools Port disconnected')
       port.onDisconnect.removeListener(disconnectListener)
     }
     port.onDisconnect.addListener(disconnectListener)
+    return
+  }
+
+  // handle the connection to the popup
+  if (port.name === POPUP_CONNECTION_NAME) {
+    if (versions) postRuntimeMessage('Versions', versions)
+    else if (SolidOnPage) postRuntimeMessage('SolidOnPage')
     return
   }
 
@@ -61,26 +67,21 @@ chrome.runtime.onConnect.addListener(port => {
   postPortMessage = messanger.postPortMessage
   onPortMessage = messanger.onPortMessage
 
-  onPortMessage('SolidOnPage', () => {
-    solidOnPage = true
-    postRuntimeMessage('SolidOnPage', '')
-    // respond with page visibility to the debugger, to let him know
-    // if the panel is already created and visible (after page refresh)
-    postPortMessage('PanelVisibility', panelVisibility)
+  // "Versions" from content-script, serves also as a "SolidOnPage" message
+  onPortMessage('Versions', v => {
+    versions = v
+    postRuntimeMessage('Versions', v)
   })
 
-  onPortMessage('Versions', v => (versions = v))
+  // "SolidOnPage" from realWorld script
+  onPortMessage('SolidOnPage', () => {
+    SolidOnPage = true
+    postRuntimeMessage('SolidOnPage')
+  })
 
-  // make sure the devtools script will be triggered to create devtools panel
-  addCleanup(
-    onRuntimeMessage('DevtoolsScriptConnected', tabId => {
-      postPortMessage('DevtoolsScriptConnected', tabId)
-      if (solidOnPage) postRuntimeMessage('SolidOnPage', '')
-    }),
-  )
-
-  onRuntimeMessage('DevtoolsPanelConnected', () => {
-    log('DevtoolsPanelConnected')
+  onRuntimeMessage('DevtoolsOpened', () => {
+    // notify the content script that the devtools panel is ready
+    postPortMessage('DevtoolsOpened')
 
     postRuntimeMessage('Versions', versions!)
 
@@ -96,12 +97,6 @@ chrome.runtime.onConnect.addListener(port => {
 
     onPortMessage('ClientLocatorMode', e => postRuntimeMessage('ClientLocatorMode', e))
     addCleanup(onRuntimeMessage('ExtLocatorMode', e => postPortMessage('ExtLocatorMode', e)))
-
-    addCleanup(
-      onRuntimeMessage('PanelVisibility', visibility => {
-        postPortMessage('PanelVisibility', (panelVisibility = visibility))
-      }),
-    )
 
     addCleanup(
       onRuntimeMessage('ToggleInspectedValue', e => postPortMessage('ToggleInspectedValue', e)),

@@ -3,6 +3,7 @@ import { log } from '@solid-devtools/shared/utils'
 
 export const DEVTOOLS_CONTENT_PORT = 'DEVTOOLS_CONTENT_PORT'
 export const DEVTOOLS_CONNECTION_NAME = 'SOLID_DEVTOOLS'
+export const POPUP_CONNECTION_NAME = 'SOLID_DEVTOOLS_POPUP'
 
 export function createPortMessanger(port: chrome.runtime.Port): {
   postPortMessage: PostMessageFn

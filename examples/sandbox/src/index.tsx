@@ -3,17 +3,17 @@ import { render } from 'solid-js/web'
 
 let DevtoolsOverlay: typeof import('@solid-devtools/overlay').DevtoolsOverlay | undefined
 
-if (process.env.EXT) {
-  import('solid-devtools')
-} else {
-  DevtoolsOverlay = (await import('@solid-devtools/overlay')).DevtoolsOverlay
-}
+// if (process.env.EXT) {
+//   import('solid-devtools')
+// } else {
+//   DevtoolsOverlay = (await import('@solid-devtools/overlay')).DevtoolsOverlay
+// }
 
-import { useLocator } from '@solid-devtools/debugger'
+// import { useLocator } from '@solid-devtools/debugger'
 
-useLocator({
-  targetIDE: 'vscode',
-})
+// useLocator({
+//   targetIDE: 'vscode',
+// })
 
 import App from './App'
 import { ThemeProvider } from './Theme'

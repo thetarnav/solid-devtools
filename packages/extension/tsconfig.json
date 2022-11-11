@@ -12,6 +12,7 @@
     "content/**/*",
     "devtools/**/*",
     "shared/**/*",
+    "popup/**/*",
     "../../env.d.ts",
     "env.d.ts"
   ]

@@ -1,27 +1,33 @@
+/*
+
+The devtools script is run every time the devtools are opened.
+And it creates a brand new panel every time.
+
+It connects to the background script.
+
+*/
+
 import { createRuntimeMessanger, DEVTOOLS_CONNECTION_NAME } from '../shared/messanger'
 import { once } from 'solid-devtools/bridge'
 import { error, log } from '@solid-devtools/shared/utils'
 
 log('Devtools script working.')
 
-const { onRuntimeMessage, postRuntimeMessage } = createRuntimeMessanger()
+const { onRuntimeMessage } = createRuntimeMessanger()
 
 // Create a connection to the background page
 chrome.runtime.connect({ name: DEVTOOLS_CONNECTION_NAME })
 
-postRuntimeMessage('DevtoolsScriptConnected', chrome.devtools.inspectedWindow.tabId)
-
 let panel: chrome.devtools.panels.ExtensionPanel | undefined
 
-once(onRuntimeMessage, 'SolidOnPage', async () => {
+// "Versions" mean that devtools client is on the page
+once(onRuntimeMessage, 'Versions', async () => {
   if (panel) return log('Panel already exists.')
 
   log('Solid on page – creating panel...')
   try {
     panel = await createPanel()
     log('Panel created.')
-    panel.onShown.addListener(onPanelShown)
-    panel.onHidden.addListener(onPanelHidden)
   } catch (err) {
     error(err)
   }
@@ -39,13 +45,5 @@ const createPanel = () =>
       },
     )
   })
-
-function onPanelShown() {
-  postRuntimeMessage('PanelVisibility', true)
-}
-
-function onPanelHidden() {
-  postRuntimeMessage('PanelVisibility', false)
-}
 
 export {}

@@ -14,7 +14,7 @@ export default function createBridge({
     postRuntimeMessage('ForceUpdate')
   }
 
-  postRuntimeMessage('DevtoolsPanelConnected')
+  postRuntimeMessage('DevtoolsOpened')
 
   once(onRuntimeMessage, 'Versions', v => setVersions(v))
 
