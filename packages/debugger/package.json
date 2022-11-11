@@ -74,17 +74,13 @@
     "@solid-primitives/platform": "^0.0.102",
     "@solid-primitives/scheduled": "^1.2.0",
     "@solid-primitives/utils": "^3.1.0",
-    "solid-js": "^1.6.0",
-    "type-fest": "^3.1.0"
+    "type-fest": "^3.2.0"
   },
   "peerDependencies": {
-    "solid-js": "^1.5.5"
+    "solid-js": "^1.6.2"
   },
   "optionalDependencies": {
     "@solid-devtools/transform": "workspace:^0.7.5"
   },
-  "packageManager": "pnpm@7.13.0",
-  "devDependencies": {
-    "jsdom": "^20.0.1"
-  }
+  "packageManager": "pnpm@7.13.0"
 }

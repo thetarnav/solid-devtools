@@ -25,6 +25,6 @@
     "@solid-devtools/overlay": "workspace:^0.0.7",
     "@solid-primitives/timer": "^1.3.4",
     "solid-devtools": "workspace:^0.20.1",
-    "solid-js": "^1.6.0"
+    "solid-js": "^1.6.2"
   }
 }
