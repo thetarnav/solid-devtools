@@ -36,13 +36,13 @@ The devtools frontend is controlled with a `Controller` API. It provides a set o
 
 ```ts
 const controller = new Controller({
-  onExtLocatorEnabledChange(enabled) {
+  onDevtoolsLocatorStateChange(enabled) {
     console.log(enabled)
   },
   onHighlightElementChange(data) {
     console.log(data)
   },
-  onInspectedNodeChange(data) {
+  onInspectNode(data) {
     console.log(data)
   },
   onInspectValue(data) {
@@ -51,9 +51,11 @@ const controller = new Controller({
 })
 ```
 
-This is a fresh package, so the API is still not well defined. So instead of focusing on the API, the usage examples should show how you can embed this package in different context.
+This package is continuously under development, so the API is still not well defined. So instead of focusing on the API, the usage examples should show how you can embed this package in different context.
 
 - [Chrome Extension](https://github.com/thetarnav/solid-devtools/blob/main/packages/extension/src/App.tsx) - The extension is communicating with the [debugger](https://github.com/thetarnav/solid-devtools/tree/main/packages/debugger#readme) using the [ext-client](https://github.com/thetarnav/solid-devtools/tree/main/packages/ext-client/src) npm package.
+
+- [Overlay component](https://github.com/thetarnav/solid-devtools/blob/main/packages/overlay/src/controller.ts)
 
 ## Changelog
 

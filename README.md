@@ -25,7 +25,7 @@ and interacting with Solid's reactivity graph.
 
 Chrome Developer Tools extension for debugging SolidJS applications. It allows for visualizing and interacting with Solid's reactivity graph, as well as inspecting component state and hierarchy.
 
-[**See the guide on setting started**](https://github.com/thetarnav/solid-devtools/tree/main/packages/extension#getting-started)
+[**See the guide on setting started**](./packages/extension#getting-started)
 
 ## All devtools packages
 
@@ -48,19 +48,15 @@ An on-page devtools overlay for debugging SolidJS Applications without a chrome 
 
 [**See guide on setting up**](./packages/overlay#getting-started)
 
-### [Locator](./packages/locator#readme)
-
-###### `@solid-devtools/locator`
-
-A runtime library for locating components on the page, and going to their source code in your IDE.
-
 ### [Transform](./packages/transform/)
 
 ###### `@solid-devtools/transform`
 
 A babel transform plugin for vite for transforming Solid code. For development — debugging purposes only.
 
-It can do very useful things for you: Wrap stores to let the debugger observe them. Automatically name signals, memos and stroes. It's also required by the [Locator](./packages/locator#readme) package to allow for going to the source code of the components.
+Using babel isn't required for the debugger to function, but it can provide a better debugging experience.
+
+[**See README for more information.**](./packages/transform/#readme)
 
 ### [Logger](./packages/logger#readme)
 
@@ -77,9 +73,9 @@ Provides a variaty of debugging utilities for logging the state and lifecycle of
 A runtime library, used to get information and track changes of the Solid's reactivity graph.
 It's a cornerstone of the rest of the packages.
 
-## Resources
+## Resources and prior art
 
-From of the lack of proper README, here are a couple of resources and similar projects that inspire this one:
+A couple of resources on the topic on chrome devtools extensions:
 
 - [about devtools](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/Extending_the_developer_tools)
 - [Content-script <-> background-script communication](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/runtime/Port)
@@ -90,15 +86,10 @@ From of the lack of proper README, here are a couple of resources and similar pr
   - [injecting real-world scripts](https://github.com/jacksteamdev/crx-react-devtools/blob/main/src/content-script.ts) _(for accessing the real window object)_
 - [Plugin architecture of Vue Devtools](https://devtools.vuejs.org/plugin/plugins-guide.html#architecture)
 
-Previous attempts/experiments that inspire this project:
+Other devtools projects for solid and other frameworks:
 
-- [Compendium devtools](https://github.com/CompendiumDevTools) (universal)
-- [Slugger](https://github.com/thetarnav/slugger/tree/main/packages/slugger/src) (my original proof of concept)
-- fictitious/[solid-devtools](https://github.com/fictitious/solid-devtools)
-- CM-Tech/[solid-debugger](https://github.com/CM-Tech/solid-debugger)
-
-Similar projects from other frameworks:
-
+- [fictitious/solid-devtools](https://github.com/fictitious/solid-devtools)
+- [CM-Tech/solid-debugger](https://github.com/CM-Tech/solid-debugger)
 - [Svelte Devtools](https://github.com/sveltejs/svelte-devtools)
 - [Vue Devtools](https://github.com/vuejs/devtools)
 - [MobX Devtools](https://github.com/mobxjs/mobx-devtools)
