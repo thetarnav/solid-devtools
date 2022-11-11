@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { Accessor, onCleanup, $PROXY, untrack, createEffect, on } from 'solid-js'
 import { arrayEquals, asArray, Many } from '@solid-primitives/utils'
 import {
@@ -12,8 +13,12 @@ import {
   lookupOwner,
   makeValueUpdateListener,
   removeValueUpdateObserver,
+  Core,
+  getOwner,
+  Solid,
+  isSolidStore,
 } from '@solid-devtools/debugger'
-import { getOwner, NodeType, Solid, Core } from '@solid-devtools/shared/graph'
+import { NodeType } from '@solid-devtools/debugger/types'
 import { dedupeArray, arrayRefEquals } from '@solid-devtools/shared/utils'
 import {
   getComputationCreatedLabel,
@@ -42,6 +47,7 @@ declare module 'solid-js/types/reactive/signal' {
     $debugSignals?: boolean
     $debugOwned?: boolean
   }
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   interface SignalState<T> {
     $debugSignal?: boolean
   }
@@ -425,7 +431,10 @@ export function debugOwnerSignals(owner?: Core.Owner, options: DebugSignalOption
     if (solidOwner.sourceMap) {
       const sourceList = Object.values(solidOwner.sourceMap)
       // signals can only be added
-      for (i = prevSourceListLength; i < sourceList.length; i++) signals.push(sourceList[i])
+      for (i = prevSourceListLength; i < sourceList.length; i++) {
+        const signal = sourceList[i]
+        if (!isSolidStore(signal)) signals.push(signal)
+      }
       prevSourceListLength = i
     }
     // add owned memos

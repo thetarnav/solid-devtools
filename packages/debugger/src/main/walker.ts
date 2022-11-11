@@ -1,4 +1,3 @@
-import { NodeType, NodeID, Solid, Mapped } from '@solid-devtools/shared/graph'
 import {
   getComponentRefreshNode,
   markNodeID,
@@ -7,6 +6,8 @@ import {
   resolveElements,
 } from './utils'
 import { observeComputationUpdate } from './update'
+import { Mapped, NodeID, Solid } from './types'
+import { NodeType } from './constants'
 
 export type ComputationUpdateHandler = (rootId: NodeID, nodeId: NodeID) => void
 

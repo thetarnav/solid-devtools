@@ -15,6 +15,8 @@ import {
 import Todos from './Todos'
 import { disposeApp } from '.'
 import { ThemeExample } from './Theme'
+import { createMutable } from 'solid-js/store'
+import Recursive from './Recursive'
 
 const doMediumCalc = () => {
   Array.from({ length: 1000000 }, (_, i) => i).sort(() => Math.random() - 5)
@@ -62,24 +64,51 @@ const PassChildren: ParentComponent = props => {
 }
 
 const Article: Component = () => {
+  const state = createMutable({
+    count: 0,
+    other: { name: 'article' },
+    content: {
+      title: 'A cool headline for testing :)',
+      body: 'Lorem ipsum dolor sit amet, consectetur adipisicing elit. Dolorem odio culpa vel vitae? Quis deleniti soluta rem velit necessitatibus? ',
+    },
+  })
+
   return (
     <article>
-      <h3>A cool headline for testing :)</h3>
+      <h3>{state.content.title}</h3>
       <p>
-        Lorem ipsum dolor sit amet, consectetur adipisicing elit. Dolorem odio culpa vel vitae? Quis
-        deleniti soluta rem velit necessitatibus?{' '}
+        {state.content.body}
         <PassChildren>
           <b>
             Saepe nulla omnis nobis minima perferendis odio doloremque deleniti dolore corrupti.
           </b>
         </PassChildren>
       </p>
+      {/* <p>Count: {state.count}</p> */}
+      <p>
+        <button onClick={() => state.count++}>Increment article count</button>
+      </p>
     </article>
   )
 }
 
-const obj = {
-  comp: () => <div>This is an object property component</div>,
+const DynamicSpreadParent = () => {
+  const [props, setProps] = createSignal<any>({
+    a: 1,
+    b: 2,
+    c: 3,
+    style: { width: '160px', height: '30px', background: '#fcb', color: 'black' },
+    textContent: 'Before Change',
+    onclick: () =>
+      setProps({
+        style: { width: '160px', height: '30px', background: '#eba', color: 'black' },
+        textContent: 'After Change',
+        d: 4,
+        e: 5,
+      }),
+  })
+  const DynamicSpreadChild = (props: any) => <div {...props} />
+  return <DynamicSpreadChild {...props()} />
 }
 
 const App: Component = () => {
@@ -145,7 +174,7 @@ const App: Component = () => {
 					</PassChildren>
 				</div> */}
       </div>
-      <obj.comp />
+      <DynamicSpreadParent />
       <button onClick={() => setRootCount(p => ++p)}>Update root count</button>
       <button onClick={() => disposeOuterRoot()}>Dispose OUTSIDE_ROOT</button>
       <Article />
@@ -156,6 +185,7 @@ const App: Component = () => {
       <div style={{ margin: '24px' }}>
         <ThemeExample />
       </div>
+      <Recursive />
     </>
   )
 }

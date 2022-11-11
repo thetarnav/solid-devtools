@@ -7,6 +7,8 @@ import App from './App'
 import { ThemeProvider } from './Theme'
 import './locator'
 
+import 'uno.css'
+
 export const disposeApp = render(
   () => (
     <>

@@ -20,7 +20,7 @@
     "dev": "tsup --watch",
     "build": "tsup",
     "test": "vitest",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit --paths null"
   },
   "private": false,
   "sideEffects": false,
@@ -34,16 +34,6 @@
       "require": "./dist/index.cjs",
       "types": "./dist/index.d.ts"
     },
-    "./bridge": {
-      "import": "./dist/bridge.js",
-      "require": "./dist/bridge.cjs",
-      "types": "./dist/bridge.d.ts"
-    },
-    "./graph": {
-      "import": "./dist/graph.js",
-      "require": "./dist/graph.cjs",
-      "types": "./dist/graph.d.ts"
-    },
     "./utils": {
       "import": "./dist/utils.js",
       "require": "./dist/utils.cjs",
@@ -54,11 +44,6 @@
       "require": "./dist/variables.cjs",
       "types": "./dist/variables.d.ts"
     },
-    "./serialize": {
-      "import": "./dist/serialize.js",
-      "require": "./dist/serialize.cjs",
-      "types": "./dist/serialize.d.ts"
-    },
     "./primitives": {
       "import": "./dist/primitives.js",
       "require": "./dist/primitives.cjs",
@@ -67,34 +52,19 @@
   },
   "typesVersions": {
     "*": {
-      "bridge": [
-        "./dist/bridge.d.ts"
-      ],
-      "graph": [
-        "./dist/graph.d.ts"
-      ],
       "utils": [
         "./dist/utils.d.ts"
       ],
       "variables": [
         "./dist/variables.d.ts"
       ],
-      "serialize": [
-        "./dist/serialize.d.ts"
-      ],
       "primitives": [
         "./dist/primitives.d.ts"
       ]
     }
   },
-  "devDependencies": {
-    "solid-js": "^1.6.0",
-    "tsup": "^6.3.0",
-    "typescript": "^4.8.4",
-    "vitest": "^0.23.4"
-  },
   "peerDependencies": {
-    "solid-js": "^1.5.0"
+    "solid-js": "^1.6.2"
   },
   "dependencies": {
     "@solid-primitives/event-bus": "^0.1.3",
@@ -104,6 +74,6 @@
     "@solid-primitives/scheduled": "^1.1.0",
     "@solid-primitives/styles": "^0.0.100",
     "@solid-primitives/utils": "^3.1.0",
-    "type-fest": "^3.1.0"
+    "type-fest": "^3.2.0"
   }
 }

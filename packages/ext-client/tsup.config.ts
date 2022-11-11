@@ -4,7 +4,7 @@ import { version } from './package.json'
 
 export default defineConfig({
   server: true,
-  additionalEntries: ['vite'],
+  additionalEntries: ['vite', 'bridge'],
   overwrite: config => {
     config.env = {
       ...config.env,

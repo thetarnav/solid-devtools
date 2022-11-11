@@ -1,7 +1,7 @@
 import type { Structure } from '..'
 import { reconcileStructure } from '../structure-reconcile'
 import { describe, expect, test } from 'vitest'
-import { Mapped, NodeID, NodeType } from '@solid-devtools/shared/graph'
+import { Mapped, NodeID, NodeType } from '@solid-devtools/debugger/types'
 
 describe('reconcileStructure', () => {
   let updated: Record<NodeID, Mapped.Root> = {

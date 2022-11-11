@@ -34,7 +34,7 @@ export const DevtoolsOverlay: Component<Props> = props => {
   return ''
 }
 
-const Overlay: Component = props => {
+const Overlay: Component = () => {
   const debug = useDebugger()
 
   onCleanup(() => debug.toggleEnabled(false))

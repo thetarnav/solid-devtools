@@ -4,15 +4,23 @@ const getLogLabel = () => [
 ]
 
 export function info<T>(data: T): T {
+  // eslint-disable-next-line no-console
   console.info(...getLogLabel(), data)
   return data
 }
 
 export function log(...args: any[]): void {
+  // eslint-disable-next-line no-console
   console.log(...getLogLabel(), ...args)
 }
 export function warn(...args: any[]): void {
+  // eslint-disable-next-line no-console
   console.warn(...getLogLabel(), ...args)
+}
+
+export function error(...args: any[]): void {
+  // eslint-disable-next-line no-console
+  console.error(...getLogLabel(), ...args)
 }
 
 export function formatTime(d: Date = new Date()): string {
@@ -23,6 +31,23 @@ export function formatTime(d: Date = new Date()): string {
     ':' +
     ('0' + d.getSeconds()).slice(-2)
   )
+}
+
+export const createCallbackStack = <A0 = void, A1 = void, A2 = void, A3 = void>(): {
+  push: (...callbacks: ((arg0: A0, arg1: A1, arg2: A2, arg3: A3) => void)[]) => void
+  execute: (arg0: A0, arg1: A1, arg2: A2, arg3: A3) => void
+  clear: VoidFunction
+} => {
+  let stack: Array<(arg0: A0, arg1: A1, arg2: A2, arg3: A3) => void> = []
+  const clear: VoidFunction = () => (stack = [])
+  return {
+    push: (...callbacks) => stack.push(...callbacks),
+    execute(arg0, arg1, arg2, arg3) {
+      stack.forEach(cb => cb(arg0, arg1, arg2, arg3))
+      clear()
+    },
+    clear,
+  }
 }
 
 export function callArrayProp<

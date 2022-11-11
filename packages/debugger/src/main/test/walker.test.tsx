@@ -1,5 +1,4 @@
 import { describe, beforeEach, vi, it, expect } from 'vitest'
-import { getOwner, Mapped, NodeType, Solid } from '@solid-devtools/shared/graph'
 import {
   createComputed,
   createEffect,
@@ -8,10 +7,11 @@ import {
   createRoot,
   createSignal,
 } from 'solid-js'
-import type * as API from '../src/walker'
+import { getOwner } from '../utils'
+import { Solid, Mapped } from '../types'
+import { NodeType } from '../constants'
 
-const getModule = async (): Promise<typeof API.walkSolidTree> =>
-  (await import('../src/walker')).walkSolidTree
+const getModule = async () => (await import('../walker')).walkSolidTree
 
 const mockTree = () => {
   const [s] = createSignal('foo', { name: 's0' })

@@ -1,6 +1,6 @@
 import { createRuntimeMessanger, DEVTOOLS_CONNECTION_NAME } from '../shared/messanger'
-import { once } from '@solid-devtools/shared/bridge'
-import { log } from '@solid-devtools/shared/utils'
+import { once } from 'solid-devtools/bridge'
+import { error, log } from '@solid-devtools/shared/utils'
 
 log('Devtools script working.')
 
@@ -22,8 +22,8 @@ once(onRuntimeMessage, 'SolidOnPage', async () => {
     log('Panel created.')
     panel.onShown.addListener(onPanelShown)
     panel.onHidden.addListener(onPanelHidden)
-  } catch (error) {
-    console.error(error)
+  } catch (err) {
+    error(err)
   }
 })
 

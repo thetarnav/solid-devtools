@@ -48,13 +48,10 @@
     "dev": "tsup --watch",
     "build": "tsup",
     "test": "echo \"NOOP test\"",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit --paths null"
   },
   "devDependencies": {
-    "solid-js": "^1.6.0",
-    "tsup": "^6.3.0",
-    "typescript": "^4.8.4",
-    "vitest": "^0.23.4"
+    "tsup": "^6.4.0"
   },
   "dependencies": {
     "@solid-devtools/debugger": "workspace:^0.13.1",
@@ -62,7 +59,7 @@
     "@solid-primitives/utils": "^3.1.0"
   },
   "peerDependencies": {
-    "solid-js": "^1.5.0"
+    "solid-js": "^1.6.2"
   },
   "packageManager": "pnpm@7.13.0"
 }

@@ -3,11 +3,8 @@ import { PluginOption } from 'vite'
 import { getFileExtension } from './utils'
 import jsxLocationPlugin from './jsxLocation'
 import namePlugin from './name'
-import wrapStoresPlugin from './wrapStores'
 
 export interface DevtoolsPluginOptions {
-  /** Wrap store creation to observe changes */
-  wrapStores?: boolean
   /** Inject location attributes to jsx templates */
   jsxLocation?: boolean
   /** Add automatic name when creating signals, memos, stores, or mutables */
@@ -16,7 +13,7 @@ export interface DevtoolsPluginOptions {
 
 // This export is used for configuration.
 export const devtoolsPlugin = (options: DevtoolsPluginOptions = {}): PluginOption => {
-  const { wrapStores = false, jsxLocation = false, name = false } = options
+  const { jsxLocation = false, name = false } = options
 
   let enablePlugin = false
   let projectRoot = process.cwd()
@@ -40,8 +37,7 @@ export const devtoolsPlugin = (options: DevtoolsPluginOptions = {}): PluginOptio
 
       // plugins that should only run on .tsx/.jsx files in development
       if (jsxLocation && isJSX) plugins.push(jsxLocationPlugin)
-      if (name) plugins.push(namePlugin) // must come before wrapStores
-      if (wrapStores) plugins.push(wrapStoresPlugin)
+      if (name) plugins.push(namePlugin)
 
       if (plugins.length === 0) return
 

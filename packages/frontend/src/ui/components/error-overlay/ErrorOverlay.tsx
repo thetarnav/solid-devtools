@@ -51,6 +51,7 @@ const RenderErrorOverlay: Component<
 export const ErrorOverlay: ParentComponent<{ footer?: JSX.Element }> = props => {
   return (
     <HeadlessErrorOverlay
+      // eslint-disable-next-line no-console
       onError={e => console.error(e)}
       render={overlayProps => <RenderErrorOverlay {...overlayProps} footer={props.footer} />}
     >

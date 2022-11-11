@@ -1,21 +1,63 @@
-import { getOwner as _getOwner } from 'solid-js'
-import { Many } from '@solid-primitives/utils'
-import { INTERNAL } from './variables'
-import { EncodedValue } from './serialize'
-
-export enum NodeType {
-  Root,
-  Component,
-  Effect,
-  Render,
-  Memo,
-  Computation,
-  Refresh,
-  Context,
-  Signal,
-}
+import type { Many } from '@solid-primitives/utils'
+import { INFINITY, NAN, NEGATIVE_INFINITY, NodeType, ValueType } from './constants'
+import type { INTERNAL } from './utils'
 
 export type NodeID = string & {}
+
+export type ValueItemID = `signal:${NodeID}` | `prop:${string}` | `value`
+export type ValueItemType = 'signal' | 'prop' | 'value'
+
+export const getValueItemId = <T extends ValueItemType>(
+  type: T,
+  id: T extends 'value' ? undefined : NodeID | string,
+): ValueItemID => {
+  if (type === 'value') return 'value'
+  return `${type}:${id}` as ValueItemID
+}
+
+export type EncodedPreviewPayloadMap = {
+  [ValueType.Array]: number
+  [ValueType.Object]: number
+  [ValueType.Number]: number | typeof INFINITY | typeof NEGATIVE_INFINITY | typeof NAN
+  [ValueType.Boolean]: boolean
+  [ValueType.String]: string
+  [ValueType.Symbol]: string
+  [ValueType.Function]: string
+  [ValueType.Getter]: string
+  [ValueType.Element]: { name: string; id: NodeID }
+  [ValueType.Instance]: string
+  [ValueType.Store]: { value: EncodedValue<boolean>; id: NodeID }
+}
+
+export type EncodedPreviewChildrenMap = {
+  [ValueType.Array]: EncodedValue<true>[]
+  [ValueType.Object]: Record<string | number, EncodedValue<true>>
+}
+
+export type EncodedValueOf<K extends ValueType, Deep extends boolean = boolean> = {
+  type: K
+} & (K extends keyof EncodedPreviewPayloadMap
+  ? { value: EncodedPreviewPayloadMap[K] }
+  : { value?: undefined }) &
+  (Deep extends true
+    ? K extends keyof EncodedPreviewChildrenMap
+      ? { children: EncodedPreviewChildrenMap[K] }
+      : { children?: undefined }
+    : { children?: undefined })
+
+export type EncodedValue<Deep extends boolean = boolean> = {
+  [K in ValueType]: EncodedValueOf<K, Deep>
+}[ValueType]
+
+export type ValueUpdateListener = (newValue: unknown, oldValue: unknown) => void
+
+export type DebuggerContext =
+  | {
+      rootId: NodeID
+      triggerRootUpdate: VoidFunction
+      forceRootUpdate: VoidFunction
+    }
+  | typeof INTERNAL
 
 export namespace Core {
   export type Owner = import('solid-js/types/reactive/signal').Owner
@@ -23,9 +65,15 @@ export namespace Core {
   export type Computation = import('solid-js/types/reactive/signal').Computation<unknown>
   export type RootFunction<T> = import('solid-js/types/reactive/signal').RootFunction<T>
   export type EffectFunction = import('solid-js/types/reactive/signal').EffectFunction<unknown>
+  export namespace Store {
+    export type StoreNode = import('solid-js/store').StoreNode
+    export type NotWrappable = import('solid-js/store/types/store').NotWrappable
+    export type OnStoreNodeUpdate = import('solid-js/store/types/store').OnStoreNodeUpdate
+  }
 }
 
 declare module 'solid-js/types/reactive/signal' {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   interface SignalState<T> {
     sdtId?: NodeID
     sdtName?: string
@@ -35,6 +83,7 @@ declare module 'solid-js/types/reactive/signal' {
     sdtName?: string
     sdtType?: NodeType
   }
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   interface Computation<Init, Next> {
     sdtId?: NodeID
     sdtType?: NodeType
@@ -59,10 +108,20 @@ export namespace Solid {
     observers: Computation[] | null
   }
 
+  export type OnStoreNodeUpdate = Core.Store.OnStoreNodeUpdate & {
+    storePath: readonly (string | number)[]
+    storeSymbol: symbol
+  }
+
+  export interface Store {
+    value: Core.Store.StoreNode
+    sdtId?: NodeID
+  }
+
   export interface Root extends Core.Owner {
     owned: Computation[] | null
     owner: Owner | null
-    sourceMap?: Record<string, Signal>
+    sourceMap?: Record<string, Signal | Store>
     // Used by the debugger
     isDisposed?: boolean
     sdtAttached?: Owner | null
@@ -97,33 +156,14 @@ export namespace Solid {
 
   export interface Component extends Memo {
     props: Record<string, unknown>
+    componentName: string
   }
 
   export type Owner = Computation | Root
 }
 
-export const getOwner = _getOwner as () => Solid.Owner | null
-
-export type DebuggerContext =
-  | {
-      rootId: NodeID
-      triggerRootUpdate: VoidFunction
-      forceRootUpdate: VoidFunction
-    }
-  | typeof INTERNAL
-
-export type ComputationUpdate = { rootId: NodeID; id: NodeID }
-
-export type RootsUpdates = {
-  removed: NodeID[]
-  updated: Record<NodeID, Mapped.Root>
-}
-
-export type ValueUpdateListener = (newValue: unknown, oldValue: unknown) => void
-
 //
-// "Mapped___" — owner/signal/etc. objects created by the solid-devtools-debugger runtime library
-// They should be JSON serialisable — to be able to send them with chrome.runtime.sendMessage
+// "Mapped___" should be JSON serialisable — to be able to send them with chrome.runtime.sendMessage
 //
 
 export namespace Mapped {
@@ -146,10 +186,9 @@ export namespace Mapped {
   }
 
   export interface Signal {
-    type: NodeType.Signal | NodeType.Memo
+    type: NodeType.Signal | NodeType.Memo | NodeType.Store
     name: string
     id: NodeID
-    observers: NodeID[]
     value: EncodedValue<false>
   }
 
@@ -177,7 +216,12 @@ export namespace Mapped {
     value?: EncodedValue
     /** for computations */
     sources?: NodeID[]
-    /** for memos */
-    observers?: NodeID[]
   }
+}
+
+export type ComputationUpdate = { rootId: NodeID; id: NodeID }
+
+export type RootsUpdates = {
+  removed: NodeID[]
+  updated: Record<NodeID, Mapped.Root>
 }

@@ -50,12 +50,20 @@
       "import": "./dist/vite.js",
       "require": "./dist/vite.cjs",
       "types": "./dist/vite.d.ts"
+    },
+    "./bridge": {
+      "import": "./dist/bridge.js",
+      "require": "./dist/bridge.cjs",
+      "types": "./dist/bridge.d.ts"
     }
   },
   "typesVersions": {
     "*": {
       "vite": [
         "./dist/vite.d.ts"
+      ],
+      "bridge": [
+        "./dist/bridge.d.ts"
       ]
     }
   },
@@ -63,23 +71,17 @@
     "dev": "tsup --watch",
     "build": "tsup",
     "test": "vitest",
-    "typecheck": "tsc --noEmit"
-  },
-  "devDependencies": {
-    "solid-js": "^1.6.0",
-    "tsup": "^6.3.0",
-    "typescript": "^4.8.4",
-    "vitest": "^0.23.4"
+    "typecheck": "tsc --noEmit --paths null"
   },
   "dependencies": {
     "@solid-devtools/debugger": "workspace:^0.13.1",
     "@solid-devtools/shared": "workspace:^0.9.2",
     "@solid-devtools/transform": "workspace:^0.7.5",
     "@solid-primitives/utils": "^3.1.0",
-    "type-fest": "^3.1.0"
+    "type-fest": "^3.2.0"
   },
   "peerDependencies": {
-    "solid-js": "^1.5.5"
+    "solid-js": "^1.6.2"
   },
   "packageManager": "pnpm@7.13.0"
 }

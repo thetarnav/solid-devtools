@@ -30,23 +30,16 @@ export const ThemeProvider: ParentComponent<{
   color?: string
   title?: string
 }> = props => {
-  const [color, setColor] = createSignal(props.color ?? defaultState.color)
-  const [title, setTitle] = createSignal(props.title ?? defaultState.title)
+  const [theme, setTheme] = createStore({
+    color: props.color || defaultState.color,
+    title: props.title || defaultState.title,
+  })
 
-  const changeColor = (color: string) => setColor(color)
-  const changeTitle = (title: string) => setTitle(title)
-
-  const state = {
-    get color() {
-      return color()
-    },
-    get title() {
-      return title()
-    },
-  }
+  const changeColor = (color: string) => setTheme('color', color)
+  const changeTitle = (title: string) => setTheme('title', title)
 
   return (
-    <ThemeContext.Provider value={[state, { changeColor, changeTitle }]}>
+    <ThemeContext.Provider value={[theme, { changeColor, changeTitle }]}>
       {props.children}
     </ThemeContext.Provider>
   )

@@ -1,6 +1,4 @@
 import { describe, beforeEach, vi, it, expect } from 'vitest'
-import { getOwner, NodeType, Solid } from '@solid-devtools/shared/graph'
-import { ValueType } from '@solid-devtools/shared/serialize'
 import {
   createComputed,
   createMemo,
@@ -9,10 +7,10 @@ import {
   createSignal,
   JSX,
 } from 'solid-js'
-import type * as API from '../src/inspect'
+import { NodeType, Solid, ValueType } from '../../types'
+import { getOwner } from '../../main/utils'
 
-const getModule = async (): Promise<typeof API.collectOwnerDetails> =>
-  (await import('../src/inspect')).collectOwnerDetails
+const getInspectModule = async () => await import('../inspector')
 
 describe('collectOwnerDetails', () => {
   beforeEach(() => {
@@ -21,7 +19,7 @@ describe('collectOwnerDetails', () => {
   })
 
   it('collects focused owner details', async () => {
-    const collectOwnerDetails = await getModule()
+    const { collectOwnerDetails } = await getInspectModule()
 
     createRoot(dispose => {
       const [s] = createSignal(0, { name: 'source' })
@@ -50,7 +48,7 @@ describe('collectOwnerDetails', () => {
         { name: 'WRAPPER' },
       )
 
-      const { details, signalMap, elementMap } = collectOwnerDetails(owner, {
+      const { details, valueMap, nodeIdMap } = collectOwnerDetails(owner, {
         onSignalUpdate: () => {},
         onValueUpdate: () => {},
       })
@@ -60,39 +58,34 @@ describe('collectOwnerDetails', () => {
         name: 'focused',
         type: NodeType.Memo,
         value: { type: ValueType.String, value: 'value' },
-        sources: ['3'],
-        observers: ['4'],
+        sources: ['2'],
         signals: [
           {
             type: NodeType.Signal,
             id: '0',
             name: 'element',
-            observers: [],
             value: { type: ValueType.Element, value: { name: 'DIV', id: '0' } },
           },
           {
             type: NodeType.Memo,
             id: '1',
             name: 'memo',
-            observers: ['2'],
             value: { type: ValueType.Number, value: 0 },
           },
         ],
       })
 
-      expect(signalMap).toHaveProperty('0')
-      expect(signalMap).toHaveProperty('1')
-      expect(signalMap['0'].sdtId).toBe('0')
-      expect(signalMap['1'].sdtId).toBe('1')
+      expect(valueMap.get('signal:0')).toBeTruthy()
+      expect(valueMap.get('signal:1')).toBeTruthy()
 
-      expect(elementMap.get('0')).toBe(div)
+      expect(nodeIdMap.get('0')).toBe(div)
 
       dispose()
     })
   })
 
   it('component props', async () => {
-    const collectOwnerDetails = await getModule()
+    const { collectOwnerDetails } = await getInspectModule()
 
     createRoot(dispose => {
       let owner!: Solid.Owner
@@ -110,7 +103,7 @@ describe('collectOwnerDetails', () => {
         </TestComponent>
       ))
 
-      const { details, elementMap } = collectOwnerDetails(owner, {
+      const { details, nodeIdMap } = collectOwnerDetails(owner, {
         onSignalUpdate: () => {},
         onValueUpdate: () => {},
       })
@@ -123,7 +116,7 @@ describe('collectOwnerDetails', () => {
         type: NodeType.Component,
         signals: [],
         sources: [],
-        value: { type: ValueType.Element, value: { id: '1', name: 'DIV' } },
+        value: { type: ValueType.Element, value: { id: '0', name: 'DIV' } },
         props: {
           proxy: false,
           record: {
@@ -134,12 +127,12 @@ describe('collectOwnerDetails', () => {
         },
       })
 
-      expect(elementMap.get('1')).toBeInstanceOf(HTMLDivElement)
+      expect(nodeIdMap.get('0')).toBeInstanceOf(HTMLDivElement)
     })
   })
 
   it('dynamic component props', async () => {
-    const collectOwnerDetails = await getModule()
+    const { collectOwnerDetails } = await getInspectModule()
 
     createRoot(dispose => {
       let owner!: Solid.Owner
@@ -152,7 +145,7 @@ describe('collectOwnerDetails', () => {
         return <Button {...props()} />
       })
 
-      const { details, elementMap } = collectOwnerDetails(owner, {
+      const { details, nodeIdMap } = collectOwnerDetails(owner, {
         onSignalUpdate: () => {},
         onValueUpdate: () => {},
       })
@@ -163,9 +156,8 @@ describe('collectOwnerDetails', () => {
         type: NodeType.Component,
         signals: [],
         sources: [],
-        value: { type: ValueType.Element, value: { id: '2', name: 'BUTTON' } },
+        value: { type: ValueType.Element, value: { id: '0', name: 'BUTTON' } },
         props: {
-          // ! this should be true, don't know what's the reason. it's working in the browser
           proxy: true,
           record: {
             onClick: { type: ValueType.Getter, value: 'onClick' },
@@ -174,71 +166,14 @@ describe('collectOwnerDetails', () => {
         },
       })
 
-      expect(elementMap.get('2')).toBeInstanceOf(HTMLButtonElement)
+      expect(nodeIdMap.get('0')).toBeInstanceOf(HTMLButtonElement)
 
       dispose()
     })
   })
 
-  // * collectOwnerDetails doesn't allow for inspected props now
-  // test("inspected component props", () => {
-  //   const collectOwnerDetails = getModule()
-
-  //   createRoot(dispose => {
-
-  //     let owner!: Solid.Owner
-  //     const TestComponent = (props: {
-  //       count: number
-  //       children: JSX.Element
-  //       nested: { foo: number; bar: string }
-  //     }) => {
-  //       owner = getOwner()!
-  //       return <div>{props.children}</div>
-  //     }
-  //     createRenderEffect(() => (
-  //       <TestComponent count={123} nested={{ foo: 1, bar: "2" }}>
-  //         <button>Click me</button>
-  //       </TestComponent>
-  //     ))
-
-  //     const { details, elementMap } = collectOwnerDetails(owner, {
-  //       elementMap,
-  //       inspectedProps: new Set(["nested"]),
-  //       onSignalUpdate: () => {},
-  //     })
-
-  //     dispose()
-
-  //     expect(details).toEqual({
-  //       id: "0",
-  //       name: "TestComponent",
-  //       type: NodeType.Component,
-  //       signals: [],
-  //       sources: [],
-  //       value: { type: ValueType.Element, value: { id: "0", name: "DIV" } },
-  //       props: {
-  //         proxy: false,
-  //         record: {
-  //           count: { type: ValueType.Number, value: 123 },
-  //           children: { type: ValueType.Getter, value: "children" },
-  //           nested: {
-  //             type: ValueType.Object,
-  //             value: 2,
-  //             children: {
-  //               foo: { type: ValueType.Number, value: 1 },
-  //               bar: { type: ValueType.String, value: "2" },
-  //             },
-  //           },
-  //         },
-  //       },
-  //     })
-
-  //     expect(elementMap.get("0")).toBeInstanceOf(HTMLDivElement)
-  //   })
-  // })
-
   it('listens to value updates', async () => {
-    const collectOwnerDetails = await getModule()
+    const { collectOwnerDetails } = await getInspectModule()
 
     createRoot(dispose => {
       let owner!: Solid.Owner
@@ -273,7 +208,7 @@ describe('collectOwnerDetails', () => {
   })
 
   it('listens to signal updates', async () => {
-    const collectOwnerDetails = await getModule()
+    const { collectOwnerDetails } = await getInspectModule()
 
     createRoot(dispose => {
       let owner = getOwner()!

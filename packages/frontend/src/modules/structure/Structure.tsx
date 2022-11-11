@@ -1,17 +1,8 @@
-import {
-  Accessor,
-  Component,
-  createEffect,
-  createMemo,
-  createSignal,
-  For,
-  Show,
-  untrack,
-} from 'solid-js'
+import { Accessor, Component, createEffect, createMemo, createSignal, For, untrack } from 'solid-js'
 import { assignInlineVars } from '@vanilla-extract/dynamic'
 import { useRemSize } from '@solid-primitives/styles'
 import { createResizeObserver } from '@solid-primitives/resize-observer'
-import { NodeID } from '@solid-devtools/shared/graph'
+import { NodeID } from '@solid-devtools/debugger/types'
 import type { Structure } from '.'
 import { Scrollable } from '@/ui'
 import { StructureProvider } from './ctx'
@@ -22,16 +13,12 @@ import * as styles from './structure.css'
 import { useController } from '@/controller'
 
 export default function StructureView() {
-  const { inspectedDetails } = useController()
-
   return (
     <div class={styles.panelWrapper}>
       <DisplayStructureTree />
       <div class={styles.path}>
         <div class={styles.pathInner}>
-          <Show when={inspectedDetails()?.path}>
-            <OwnerPath path={inspectedDetails()!.path} />
-          </Show>
+          <OwnerPath />
         </div>
       </div>
     </div>
@@ -44,7 +31,7 @@ type DisplayNode = {
   update: VoidFunction
 }
 
-const DisplayStructureTree: Component = props => {
+const DisplayStructureTree: Component = () => {
   const [containerScroll, setContainerScroll] = createSignal({ top: 0, height: 0 })
 
   const remSize = useRemSize()

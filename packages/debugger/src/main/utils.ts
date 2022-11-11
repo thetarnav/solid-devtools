@@ -1,29 +1,40 @@
-import { createComputed, createRoot, onCleanup, runWithOwner } from 'solid-js'
+import {
+  createComputed,
+  createRoot,
+  onCleanup,
+  runWithOwner,
+  getOwner as _getOwner,
+} from 'solid-js'
 import { Emit } from '@solid-primitives/event-bus'
 import { throttle } from '@solid-primitives/scheduled'
-import {
-  DebuggerContext,
-  NodeType,
-  Solid,
-  Core,
-  getOwner,
-  NodeID,
-} from '@solid-devtools/shared/graph'
-import { INTERNAL, UNNAMED } from '@solid-devtools/shared/variables'
 import { trimString } from '@solid-devtools/shared/utils'
+import { DEV as _STORE_DEV } from 'solid-js/store'
+import { Core, DebuggerContext, NodeID, Solid } from './types'
+import { NodeType } from './constants'
+
+const STORE_DEV = _STORE_DEV!
+
+export const getOwner = _getOwner as () => Solid.Owner | null
 
 export const isSolidComputation = (o: Readonly<Solid.Owner>): o is Solid.Computation => 'fn' in o
 
 export const isSolidMemo = (o: Readonly<Solid.Owner>): o is Solid.Memo =>
   'sdtType' in o ? o.sdtType === NodeType.Memo : isSolidComputation(o) && _isMemo(o)
 
-export const isSolidOwner = (o: Readonly<Solid.Owner> | Solid.Signal): o is Solid.Owner =>
-  'owned' in o
+export const isSolidOwner = (
+  o: Readonly<Solid.Owner | Solid.Store | Solid.Signal>,
+): o is Solid.Owner => 'owned' in o
 
 export const isSolidRoot = (o: Readonly<Solid.Owner>): o is Solid.Root =>
   o.sdtType === NodeType.Root || !isSolidComputation(o)
 
 export const isSolidComponent = (o: Readonly<Solid.Owner>): o is Solid.Component => 'props' in o
+
+export const isStoreNode = (o: object): o is Core.Store.StoreNode => STORE_DEV.$NAME in o
+
+export const isSolidStore = (o: Readonly<Solid.Signal | Solid.Store>): o is Solid.Store => {
+  return !('observers' in o) && STORE_DEV.$NAME in o.value
+}
 
 const _isMemo = (o: Readonly<Solid.Computation>): boolean =>
   'value' in o && 'comparator' in o && o.pure === true
@@ -32,20 +43,31 @@ export function getOwnerName(owner: Readonly<Solid.Owner>): string {
   const { name, componentName: component } = owner
   if (component && typeof component === 'string')
     return component.startsWith('_Hot$$') ? component.slice(6) : component
-  return name || UNNAMED
+  return name || '(unnamed)'
 }
 export function getSignalName(signal: Readonly<Solid.Signal>): string {
-  return signal.name || UNNAMED
+  return signal.name || '(unnamed)'
 }
 
-export function getNodeName(o: Readonly<Solid.Signal | Solid.Owner>): string {
-  const name = isSolidOwner(o) ? getOwnerName(o) : getSignalName(o)
+export const getStoreNodeName = (node: Core.Store.StoreNode): string =>
+  node[STORE_DEV.$NAME] || '(unnamed)'
+
+export function getNodeName(o: Readonly<Solid.Signal | Solid.Owner | Solid.Store>): string {
+  const name = isSolidOwner(o)
+    ? getOwnerName(o)
+    : isSolidStore(o)
+    ? getStoreNodeName(o)
+    : getSignalName(o)
+  return getDisplayName(name)
+}
+
+export function getDisplayName(name: string): string {
   return trimString(name, 16)
 }
 
-export function getNodeType(o: Readonly<Solid.Signal | Solid.Owner>): NodeType {
+export function getNodeType(o: Readonly<Solid.Signal | Solid.Owner | Solid.Store>): NodeType {
   if (isSolidOwner(o)) return getOwnerType(o)
-  return NodeType.Signal
+  return isSolidStore(o) ? NodeType.Store : NodeType.Signal
 }
 
 export const getOwnerType = (o: Readonly<Solid.Owner>): NodeType => {
@@ -70,6 +92,26 @@ export const getOwnerType = (o: Readonly<Solid.Owner>): NodeType => {
     return NodeType.Render
   }
   return NodeType.Computation
+}
+
+let LAST_ID = 0
+export const getNewSdtId = (): NodeID => (LAST_ID++).toString(36)
+
+export function markOwnerName(o: Solid.Owner): string {
+  if (o.sdtName !== undefined) return o.sdtName
+  return (o.sdtName = getNodeName(o))
+}
+export function markOwnerType(o: Solid.Owner, type?: NodeType): NodeType {
+  if (o.sdtType !== undefined) return o.sdtType
+  return (o.sdtType = type ?? getOwnerType(o))
+}
+export function markNodeID(o: { sdtId?: NodeID }): NodeID {
+  if (o.sdtId !== undefined) return o.sdtId
+  return (o.sdtId = getNewSdtId())
+}
+export function markNodesID(nodes?: { sdtId?: NodeID }[] | null): NodeID[] {
+  if (!nodes || !nodes.length) return []
+  return nodes.map(markNodeID)
 }
 
 export function getComponentRefreshNode(owner: Readonly<Solid.Component>): Solid.Memo | null {
@@ -175,6 +217,8 @@ export function onParentCleanup(
   }
 }
 
+// TODO: move onDispose to solid-primitives
+
 const DISPOSE_ID = Symbol('Dispose ID')
 export function onDispose<T>(
   fn: () => T,
@@ -182,6 +226,7 @@ export function onDispose<T>(
 ): () => T {
   const owner = getOwner()
   if (!owner) {
+    // eslint-disable-next-line no-console
     console.warn('onDispose called outside of a reactive owner')
     return fn
   }
@@ -219,27 +264,9 @@ export function getFunctionSources(fn: () => unknown): Solid.Signal[] {
   return nodes ?? []
 }
 
-let LAST_ID = 0
-export const getNewSdtId = (): NodeID => (LAST_ID++).toString(36)
-
-export function markOwnerName(o: Solid.Owner): string {
-  if (o.sdtName !== undefined) return o.sdtName
-  return (o.sdtName = getNodeName(o))
-}
-export function markOwnerType(o: Solid.Owner, type?: NodeType): NodeType {
-  if (o.sdtType !== undefined) return o.sdtType
-  return (o.sdtType = type ?? getOwnerType(o))
-}
-export function markNodeID(o: { sdtId?: NodeID }): NodeID {
-  if (o.sdtId !== undefined) return o.sdtId
-  return (o.sdtId = getNewSdtId())
-}
-export function markNodesID(nodes?: { sdtId?: NodeID }[] | null): NodeID[] {
-  if (!nodes || !nodes.length) return []
-  return nodes.map(markNodeID)
-}
-
 let SkipInternalRoot: Core.RootFunction<unknown> | null = null
+
+export const INTERNAL = Symbol('internal')
 
 /**
  * Sold's `createRoot` primitive that won't be tracked by the debugger.
@@ -260,6 +287,18 @@ export const skipInternalRoot = () => {
   return skip
 }
 
+export function dedupeArrayById<T extends { id: NodeID }>(input: T[]): T[] {
+  const ids = new Set<NodeID>()
+  const deduped: T[] = []
+  for (let i = input.length - 1; i >= 0; i--) {
+    const update = input[i]
+    if (ids.has(update.id)) continue
+    ids.add(update.id)
+    deduped.push(update)
+  }
+  return deduped
+}
+
 /**
  * Batches series of updates to a single array of updates.
  *
@@ -271,15 +310,7 @@ export function createBatchedUpdateEmitter<T extends { id: NodeID }>(
   const updates: T[] = []
 
   const triggerUpdateEmit = throttle(() => {
-    // dedupe updates
-    const ids = new Set<NodeID>()
-    const deduped: T[] = []
-    for (let i = updates.length - 1; i >= 0; i--) {
-      const update = updates[i]
-      if (ids.has(update.id)) continue
-      ids.add(update.id)
-      deduped.push(update)
-    }
+    const deduped = dedupeArrayById(updates)
     updates.length = 0
     emit(deduped)
   })

@@ -2,7 +2,7 @@ import {
   onWindowMessage,
   postWindowMessage,
   startListeningWindowMessages,
-} from '@solid-devtools/shared/bridge'
+} from 'solid-devtools/bridge'
 import { warn } from '@solid-devtools/shared/utils'
 import { createPortMessanger, DEVTOOLS_CONTENT_PORT } from '../shared/messanger'
 
@@ -18,6 +18,7 @@ startListeningWindowMessages()
 const { postPortMessage, onPortMessage } = createPortMessanger(port)
 
 onWindowMessage('SolidOnPage', clientVersion => {
+  // eslint-disable-next-line no-console
   console.log(
     '🚧 %csolid-devtools%c is in early development! 🚧\nPlease report any bugs to https://github.com/thetarnav/solid-devtools/issues',
     'color: #fff; background: rgba(181, 111, 22, 0.7); padding: 1px 4px;',
@@ -56,13 +57,9 @@ onWindowMessage('StructureUpdate', graph => postPortMessage('StructureUpdate', g
 
 onWindowMessage('ComputationUpdates', e => postPortMessage('ComputationUpdates', e))
 
-onWindowMessage('SignalUpdates', e => postPortMessage('SignalUpdates', e))
-
 onWindowMessage('SetInspectedDetails', e => postPortMessage('SetInspectedDetails', e))
 
-onWindowMessage('PropsUpdate', e => postPortMessage('PropsUpdate', e))
-
-onWindowMessage('ValueUpdate', e => postPortMessage('ValueUpdate', e))
+onWindowMessage('InspectorUpdate', e => postPortMessage('InspectorUpdate', e))
 
 onWindowMessage('ClientHoveredComponent', e => postPortMessage('ClientHoveredComponent', e))
 
@@ -73,7 +70,8 @@ onPortMessage('PanelClosed', e => postWindowMessage('PanelClosed', e))
 
 onPortMessage('ForceUpdate', () => postWindowMessage('ForceUpdate'))
 
-onPortMessage('ToggleInspected', e => postWindowMessage('ToggleInspected', e))
+onPortMessage('ToggleInspectedValue', e => postWindowMessage('ToggleInspectedValue', e))
+onPortMessage('SetInspectedNode', e => postWindowMessage('SetInspectedNode', e))
 
 onPortMessage('HighlightElement', e => postWindowMessage('HighlightElement', e))
 

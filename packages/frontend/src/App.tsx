@@ -8,7 +8,7 @@ import Structure from './modules/structure/Structure'
 import { useController } from './controller'
 import * as styles from './App.css'
 
-const SelectComponent: Component<{}> = props => {
+const SelectComponent: Component<{}> = () => {
   const ctx = useController()
   return (
     <ToggleButton
@@ -21,7 +21,7 @@ const SelectComponent: Component<{}> = props => {
   )
 }
 
-const Options: Component<{}> = props => {
+const Options: Component<{}> = () => {
   return (
     <Popover defaultOpen={false} class={styles.options}>
       {({ isOpen, setState }) => {
@@ -85,7 +85,7 @@ const App: Component<{ headerSubtitle?: JSX.Element }> = props => {
       <header class={styles.header}>
         <SelectComponent />
         <div>
-          <h3 class={styles.h3}>Welcome to Solid Devtools</h3>
+          <h3>Welcome to Solid Devtools</h3>
           {props.headerSubtitle && <p>{props.headerSubtitle}</p>}
         </div>
         <Options />

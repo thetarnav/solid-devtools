@@ -1,9 +1,3 @@
-import * as t from '@babel/types'
-
-export const windowId = t.identifier('window')
-export const storeOverwriteName = '$sdt_createStore'
-export const storeOverwriteNamespace = '$sdt_StoreNamespace'
-
 const LOWERCASE_REGEX = /^[a-z0-9]+$/
 
 export const isLowercase = (s: string) => LOWERCASE_REGEX.test(s)

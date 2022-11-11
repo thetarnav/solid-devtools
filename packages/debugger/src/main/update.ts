@@ -1,8 +1,6 @@
 import { untrack } from 'solid-js'
-import { Observable, Observer as ObjectObserver } from 'object-observer'
-import { Solid, Core, ValueUpdateListener } from '@solid-devtools/shared/graph'
-import { WINDOW_WRAP_STORE_PROPERTY } from '@solid-devtools/shared/variables'
 import { skipInternalRoot, tryOnCleanup } from './utils'
+import { Core, Solid, ValueUpdateListener } from './types'
 
 //
 // AFTER UPDATE
@@ -59,34 +57,6 @@ const CreateRootListeners = new Set<AfterCrateRoot>()
 export function makeCreateRootListener(onUpdate: AfterCrateRoot): VoidFunction {
   CreateRootListeners.add(onUpdate)
   return tryOnCleanup(() => CreateRootListeners.delete(onUpdate))
-}
-
-//
-// WRAP STORES
-//
-
-export type { ObjectObserver }
-
-declare global {
-  interface Window {
-    [WINDOW_WRAP_STORE_PROPERTY]?: <T extends object>(init: T) => T
-  }
-}
-
-// window[WINDOW_WRAP_STORE_PROPERTY] is internal — no need to worry about other users
-window[WINDOW_WRAP_STORE_PROPERTY] = init => {
-  return Observable.from(init)
-}
-
-export function makeStoreObserver(state: object, onUpdate: ObjectObserver): VoidFunction {
-  if (!Observable.isObservable(state)) {
-    console.warn(`Object ${state} is not wrapped`)
-    return () => {
-      /* noop */
-    }
-  }
-  Observable.observe(state, onUpdate)
-  return tryOnCleanup(() => Observable.unobserve(state, onUpdate))
 }
 
 //

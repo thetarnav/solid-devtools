@@ -1,5 +1,5 @@
 import { Accessor, createMemo, createSelector, createSignal, untrack } from 'solid-js'
-import { NodeID, NodeType, RootsUpdates } from '@solid-devtools/shared/graph'
+import { NodeID, NodeType, RootsUpdates } from '@solid-devtools/debugger/types'
 import { reconcileStructure } from './structure-reconcile'
 import { createSimpleEmitter } from '@solid-primitives/event-bus'
 

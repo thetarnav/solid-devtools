@@ -1,6 +1,5 @@
-import { createCallbackStack } from '@solid-primitives/utils'
-import { log } from '@solid-devtools/shared/utils'
-import { OnMessageFn, PostMessageFn } from '@solid-devtools/shared/bridge'
+import { createCallbackStack, log } from '@solid-devtools/shared/utils'
+import { OnMessageFn, PostMessageFn } from 'solid-devtools/bridge'
 import {
   createPortMessanger,
   createRuntimeMessanger,
@@ -90,10 +89,8 @@ chrome.runtime.onConnect.addListener(port => {
     onPortMessage('StructureUpdate', e => postRuntimeMessage('StructureUpdate', e))
 
     onPortMessage('ComputationUpdates', e => postRuntimeMessage('ComputationUpdates', e))
-    onPortMessage('SignalUpdates', e => postRuntimeMessage('SignalUpdates', e))
     onPortMessage('SetInspectedDetails', e => postRuntimeMessage('SetInspectedDetails', e))
-    onPortMessage('PropsUpdate', e => postRuntimeMessage('PropsUpdate', e))
-    onPortMessage('ValueUpdate', e => postRuntimeMessage('ValueUpdate', e))
+    onPortMessage('InspectorUpdate', e => postRuntimeMessage('InspectorUpdate', e))
     onPortMessage('ClientHoveredComponent', e => postRuntimeMessage('ClientHoveredComponent', e))
     onPortMessage('ClientInspectedNode', e => postRuntimeMessage('ClientInspectedNode', e))
 
@@ -106,7 +103,10 @@ chrome.runtime.onConnect.addListener(port => {
       }),
     )
 
-    addCleanup(onRuntimeMessage('ToggleInspected', e => postPortMessage('ToggleInspected', e)))
+    addCleanup(
+      onRuntimeMessage('ToggleInspectedValue', e => postPortMessage('ToggleInspectedValue', e)),
+    )
+    addCleanup(onRuntimeMessage('SetInspectedNode', e => postPortMessage('SetInspectedNode', e)))
 
     addCleanup(onRuntimeMessage('HighlightElement', e => postPortMessage('HighlightElement', e)))
 

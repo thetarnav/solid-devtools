@@ -1,5 +1,4 @@
 import { describe, it, expect } from 'vitest'
-import { getOwner, Solid } from '@solid-devtools/shared/graph'
 import { createComputed, createRoot, createSignal } from 'solid-js'
 import {
   interceptComputationRerun,
@@ -7,8 +6,9 @@ import {
   makeCreateRootListener,
   observeValueUpdate,
   removeValueUpdateObserver,
-} from '../src/update'
-import { createInternalRoot } from '../src/utils'
+} from '../update'
+import { createInternalRoot, getOwner } from '../utils'
+import { Solid } from '../../types'
 
 describe('makeSolidUpdateListener', () => {
   it('listens to solid updates', () =>

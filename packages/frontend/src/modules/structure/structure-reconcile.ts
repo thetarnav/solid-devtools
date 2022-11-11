@@ -1,4 +1,4 @@
-import { Mapped, NodeID, NodeType, RootsUpdates } from '@solid-devtools/shared/graph'
+import { Mapped, NodeID, NodeType, RootsUpdates } from '@solid-devtools/debugger/types'
 import type { Structure } from '.'
 
 let $nextNodeList: Structure.Node[]

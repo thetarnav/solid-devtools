@@ -4,7 +4,7 @@ import { createKeyHold, KbdKey } from '@solid-primitives/keyboard'
 import { onRootCleanup } from '@solid-primitives/utils'
 import { createSimpleEmitter } from '@solid-primitives/event-bus'
 import { atom, defer, makeHoverElementListener } from '@solid-devtools/shared/primitives'
-import { Mapped, NodeID } from '@solid-devtools/shared/graph'
+import { warn } from '@solid-devtools/shared/utils'
 import { findLocatorComponent, getLocationFromElement, LocatorComponent } from './findComponent'
 import {
   getFullSourceCodeData,
@@ -13,9 +13,10 @@ import {
   TargetIDE,
   TargetURLFunction,
 } from './goToSource'
-import { createInternalRoot } from '../utils'
-import { enableRootsAutoattach } from '../roots'
+import { createInternalRoot } from '../main/utils'
+import { enableRootsAutoattach } from '../main/roots'
 import { attachElementOverlay } from './ElementOverlay'
+import { Mapped, NodeID } from '../types'
 
 export type { TargetIDE, TargetURLFunction } from './goToSource'
 export type { LocatorComponent } from './findComponent'
@@ -26,6 +27,11 @@ export type LocatorOptions = {
   /** Holding which key should enable the locator overlay? */
   key?: KbdKey
 }
+
+export type HighlightElementPayload =
+  | { rootId: NodeID; nodeId: NodeID }
+  | { elementId: string }
+  | null
 
 export type ClickMiddleware = (
   e: MouseEvent,
@@ -105,21 +111,19 @@ export function createLocator({
     return comp?.id
   })
 
-  function setPluginHighlightTarget(
-    data: { elementId: NodeID } | { rootId: NodeID; nodeId: NodeID } | null | undefined,
-  ) {
+  function setPluginHighlightTarget(data: HighlightElementPayload) {
     if (!data) return pluginTarget(null)
     // highlight component
     if ('nodeId' in data) {
       const { rootId, nodeId } = data
       const component = findComponent(rootId, nodeId)
-      if (!component) return console.warn('No component found', nodeId)
+      if (!component) return warn('No component found', nodeId)
       pluginTarget({ ...component, rootId })
     }
     // highlight element
     else {
       const element = getElementById(data.elementId)
-      if (!element) return console.warn('No element found', data)
+      if (!element) return warn('No element found', data)
       pluginTarget(element)
     }
   }
@@ -185,7 +189,7 @@ export function createLocator({
   function useLocator(options: LocatorOptions): void {
     runWithOwner(owner, () => {
       enableRootsAutoattach()
-      if (locatorUsed) return console.warn('useLocator can be used called once.')
+      if (locatorUsed) return warn('useLocator can be used called once.')
       locatorUsed = true
       if (options.targetIDE) targetIDE = options.targetIDE
       const isHoldingKey = createKeyHold(options.key ?? 'Alt', { preventDefault: true })

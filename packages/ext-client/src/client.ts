@@ -1,10 +1,6 @@
 import { batch, createEffect, onCleanup } from 'solid-js'
 import { createInternalRoot, useDebugger } from '@solid-devtools/debugger'
-import {
-  onWindowMessage,
-  postWindowMessage,
-  startListeningWindowMessages,
-} from '@solid-devtools/shared/bridge'
+import { onWindowMessage, postWindowMessage, startListeningWindowMessages } from './bridge'
 import { defer } from '@solid-devtools/shared/primitives'
 
 startListeningWindowMessages()
@@ -26,7 +22,7 @@ createInternalRoot(() => {
   onWindowMessage('PanelClosed', () => {
     batch(() => {
       debug.toggleEnabled(false)
-      debug.setInspectedNode(null)
+      debug.inspector.setInspectedNode(null)
     })
   })
 
@@ -38,35 +34,16 @@ createInternalRoot(() => {
 
     onCleanup(onWindowMessage('ForceUpdate', () => debug.forceTriggerUpdate()))
 
-    onCleanup(
-      onWindowMessage('ToggleInspected', payload => {
-        if (payload.type === 'node') debug.setInspectedNode(payload.data)
-        else if (payload.type === 'value') debug.setInspectedValue(payload.data)
-        else if (payload.type === 'prop')
-          debug.setInspectedProp(payload.data.id, payload.data.selected)
-        else if (payload.type === 'signal') {
-          const { id, selected } = payload.data
-          const value = debug.setInspectedSignal(id, selected)
-          if (value) postWindowMessage('SignalUpdates', { signals: [{ id, value }], update: false })
-        }
-      }),
-    )
+    onCleanup(onWindowMessage('ToggleInspectedValue', debug.inspector.toggleValueNode))
+    onCleanup(onWindowMessage('SetInspectedNode', debug.inspector.setInspectedNode))
 
     debug.listenTo('StructureUpdates', updates => postWindowMessage('StructureUpdate', updates))
 
-    debug.listenTo('ComputationUpdates', updates =>
-      postWindowMessage('ComputationUpdates', updates),
-    )
-
-    debug.listenTo('SignalUpdates', updates => {
-      postWindowMessage('SignalUpdates', { signals: updates, update: true })
+    debug.listenTo('ComputationUpdates', updates => {
+      postWindowMessage('ComputationUpdates', updates)
     })
 
-    debug.listenTo('PropsUpdate', updates => postWindowMessage('PropsUpdate', updates))
-
-    debug.listenTo('ValueUpdate', ({ value, update }) => {
-      postWindowMessage('ValueUpdate', { value, update })
-    })
+    debug.listenTo('InspectorUpdate', update => postWindowMessage('InspectorUpdate', update))
 
     // send the focused owner details
     debug.listenTo('InspectedNodeDetails', details => {

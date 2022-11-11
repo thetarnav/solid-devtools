@@ -86,6 +86,7 @@ const commonOptions: esbuild.BuildOptions = {
   bundle: true,
   loader: { '.css': 'text' },
   watch: isDev,
+  minify: !isDev,
   color: true,
   external: externals,
   treeShaking: true,

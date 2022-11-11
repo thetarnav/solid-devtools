@@ -5,10 +5,18 @@ import { defer } from '@solid-devtools/shared/primitives'
 
 enableRootsAutoattach()
 
+const clone = <T>(obj: T): T => JSON.parse(JSON.stringify(obj))
+const separate = <T>(obj: T, callback: (value: T) => void): void => {
+  queueMicrotask(() => {
+    const v = clone(obj)
+    queueMicrotask(() => callback(v))
+  })
+}
+
 export function createController() {
   const debug = useDebugger()
 
-  onCleanup(() => debug.setInspectedNode(null))
+  onCleanup(() => debug.inspector.setInspectedNode(null))
 
   const controller = new Controller({
     onDevtoolsLocatorStateChange(enabled) {
@@ -17,23 +25,11 @@ export function createController() {
     onHighlightElementChange(data) {
       queueMicrotask(() => debug.locator.setHighlightTarget(data))
     },
-    onInspect(payload) {
-      queueMicrotask(() => {
-        if (payload.type === 'node') {
-          debug.setInspectedNode(payload.data)
-        } else if (payload.type === 'value') {
-          debug.setInspectedValue(payload.data)
-        } else if (payload.type === 'prop') {
-          debug.setInspectedProp(payload.data.id, payload.data.selected)
-        } else if (payload.type === 'signal') {
-          const { id, selected } = payload.data
-          const value = debug.setInspectedSignal(id, selected)
-          value &&
-            queueMicrotask(() => {
-              controller.updateSignals({ signals: [{ id, value }], update: false })
-            })
-        }
-      })
+    onInspectNode(node) {
+      queueMicrotask(() => debug.inspector.setInspectedNode(node))
+    },
+    onInspectValue(node) {
+      queueMicrotask(() => debug.inspector.toggleValueNode(node))
     },
   })
 
@@ -45,21 +41,13 @@ export function createController() {
     queueMicrotask(() => controller.updateComputation(updates))
   })
 
-  debug.listenTo('SignalUpdates', updates => {
-    queueMicrotask(() => controller.updateSignals({ signals: updates, update: true }))
-  })
-
-  debug.listenTo('PropsUpdate', updates => {
-    queueMicrotask(() => controller.updateProps(updates))
-  })
-
-  debug.listenTo('ValueUpdate', ({ value, update }) => {
-    queueMicrotask(() => controller.updateValue({ value, update }))
+  debug.listenTo('InspectorUpdate', payload => {
+    separate(payload, payload => controller.updateInspector(payload))
   })
 
   // send the focused owner details
   debug.listenTo('InspectedNodeDetails', details => {
-    queueMicrotask(() => controller.setInspectedDetails(details))
+    separate(details, details => controller.setInspectedDetails(details))
   })
 
   // send the state of the client locator mode

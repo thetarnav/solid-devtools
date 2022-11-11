@@ -46,8 +46,6 @@ All of the transforms are disabled by default—you need to pick what you want b
 
 ```ts
 interface DevtoolsPluginOptions {
-  /** Wrap store creation to observe changes */
-  wrapStores?: boolean
   /** Inject location attributes to jsx templates */
   jsxLocation?: boolean
   /** Add automatic name when creating signals, memos, stores, or mutables */
@@ -56,7 +54,6 @@ interface DevtoolsPluginOptions {
 
 // in vite.config.ts plugins array:
 devtoolsPlugin({
-  wrapStores: true,
   jsxLocation: true,
   name: true,
 })
