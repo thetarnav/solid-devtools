@@ -1,6 +1,6 @@
 {
   "name": "solid-devtools-extension",
-  "version": "0.16.1",
+  "version": "0.17.0",
   "private": true,
   "license": "MIT",
   "author": "Damian Tarnawski <gthetarnav@gmail.com>",
@@ -24,10 +24,10 @@
     "zip-a-folder": "^1.1.5"
   },
   "dependencies": {
-    "@solid-devtools/frontend": "workspace:^0.0.7",
-    "@solid-devtools/shared": "workspace:^0.9.2",
+    "@solid-devtools/frontend": "workspace:^0.1.0",
+    "@solid-devtools/shared": "workspace:^0.10.0",
     "@solid-primitives/utils": "^3.1.0",
-    "solid-devtools": "workspace:^0.20.1",
+    "solid-devtools": "workspace:^0.21.0",
     "solid-js": "^1.6.2"
   },
   "overrides": {

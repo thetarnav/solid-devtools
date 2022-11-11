@@ -1,5 +1,16 @@
 # solid-devtools-shared
 
+## 0.10.0
+
+### Minor Changes
+
+- a6b55b0: Move value serialization logic to debugger
+- 1990be5: Move graph types from `@solid-devtools/shared` to `@solid-devtools/debugger`
+
+### Patch Changes
+
+- d7e98da: Move some debugger related types from @solid-devtools/shared to @solid-devtools/debugger
+
 ## 0.9.2
 
 ### Patch Changes

@@ -49,7 +49,7 @@ importers:
 
   examples/clock:
     specifiers:
-      solid-devtools: workspace:^0.20.1
+      solid-devtools: workspace:^0.21.0
       solid-js: ^1.6.2
       typescript: ^4.8.4
       vite: ^3.1.8
@@ -65,12 +65,12 @@ importers:
   examples/sandbox:
     specifiers:
       '@babel/plugin-syntax-typescript': ^7.18.6
-      '@solid-devtools/debugger': workspace:^0.13.1
-      '@solid-devtools/logger': workspace:^0.4.12
-      '@solid-devtools/overlay': workspace:^0.0.7
-      '@solid-devtools/transform': workspace:^0.7.5
+      '@solid-devtools/debugger': workspace:^0.14.0
+      '@solid-devtools/logger': workspace:^0.5.0
+      '@solid-devtools/overlay': workspace:^0.1.0
+      '@solid-devtools/transform': workspace:^0.8.0
       '@solid-primitives/timer': ^1.3.4
-      solid-devtools: workspace:^0.20.1
+      solid-devtools: workspace:^0.21.0
       solid-js: ^1.6.2
       typescript: ^4.8.4
       unocss: ^0.46.3
@@ -95,7 +95,7 @@ importers:
     specifiers:
       '@solidjs/meta': ^0.28.0
       '@solidjs/router': ^0.4.3
-      solid-devtools: workspace:^0.20.1
+      solid-devtools: workspace:^0.21.0
       solid-js: ^1.6.2
       solid-start: ^0.1.8
       solid-start-node: ^0.1.8
@@ -133,8 +133,8 @@ importers:
 
   packages/debugger:
     specifiers:
-      '@solid-devtools/shared': workspace:^0.9.2
-      '@solid-devtools/transform': workspace:^0.7.5
+      '@solid-devtools/shared': workspace:^0.10.0
+      '@solid-devtools/transform': workspace:^0.8.0
       '@solid-primitives/bounds': ^0.0.104
       '@solid-primitives/cursor': ^0.0.101
       '@solid-primitives/event-bus': ^0.1.3
@@ -162,9 +162,9 @@ importers:
 
   packages/ext-client:
     specifiers:
-      '@solid-devtools/debugger': workspace:^0.13.1
-      '@solid-devtools/shared': workspace:^0.9.2
-      '@solid-devtools/transform': workspace:^0.7.5
+      '@solid-devtools/debugger': workspace:^0.14.0
+      '@solid-devtools/shared': workspace:^0.10.0
+      '@solid-devtools/transform': workspace:^0.8.0
       '@solid-primitives/utils': ^3.1.0
       solid-js: ^1.6.2
       type-fest: ^3.2.0
@@ -179,14 +179,14 @@ importers:
   packages/extension:
     specifiers:
       '@crxjs/vite-plugin': ^1.0.14
-      '@solid-devtools/frontend': workspace:^0.0.7
-      '@solid-devtools/shared': workspace:^0.9.2
+      '@solid-devtools/frontend': workspace:^0.1.0
+      '@solid-devtools/shared': workspace:^0.10.0
       '@solid-primitives/utils': ^3.1.0
       '@types/chrome': ^0.0.196
       '@types/webextension-polyfill': ^0.9.1
       jsdom: ^20.0.1
       rimraf: ^3.0.2
-      solid-devtools: workspace:^0.20.1
+      solid-devtools: workspace:^0.21.0
       solid-js: ^1.6.2
       vite: ^3.2.3
       webextension-polyfill: ^0.10.0
@@ -211,8 +211,8 @@ importers:
     specifiers:
       '@floating-ui/dom': ^1.0.3
       '@otonashixav/solid-flip': ^0.10.5
-      '@solid-devtools/debugger': workspace:^0.13.1
-      '@solid-devtools/shared': workspace:^0.9.2
+      '@solid-devtools/debugger': workspace:^0.14.0
+      '@solid-devtools/shared': workspace:^0.10.0
       '@solid-primitives/context': ^0.1.2
       '@solid-primitives/cursor': ^0.0.101
       '@solid-primitives/destructure': ^0.1.3
@@ -276,8 +276,8 @@ importers:
 
   packages/logger:
     specifiers:
-      '@solid-devtools/debugger': workspace:^0.13.1
-      '@solid-devtools/shared': workspace:^0.9.2
+      '@solid-devtools/debugger': workspace:^0.14.0
+      '@solid-devtools/shared': workspace:^0.10.0
       '@solid-primitives/utils': ^3.1.0
       solid-js: ^1.6.2
       tsup: ^6.4.0
@@ -291,9 +291,9 @@ importers:
 
   packages/overlay:
     specifiers:
-      '@solid-devtools/debugger': workspace:^0.13.1
-      '@solid-devtools/frontend': workspace:^0.0.7
-      '@solid-devtools/shared': workspace:^0.9.2
+      '@solid-devtools/debugger': workspace:^0.14.0
+      '@solid-devtools/frontend': workspace:^0.1.0
+      '@solid-devtools/shared': workspace:^0.10.0
       '@solid-primitives/cursor': ^0.0.101
       '@solid-primitives/event-listener': ^2.2.3
       '@solid-primitives/media': ^2.0.3
@@ -349,7 +349,7 @@ importers:
       '@babel/plugin-syntax-typescript': ^7.18.6
       '@babel/traverse': ^7.19.6
       '@babel/types': ^7.19.4
-      '@solid-devtools/shared': workspace:^0.9.1
+      '@solid-devtools/shared': workspace:^0.10.0
       '@types/babel__core': ^7.1.19
       '@types/babel__generator': ^7.6.4
       '@types/babel__traverse': ^7.18.2
