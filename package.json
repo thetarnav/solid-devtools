@@ -13,6 +13,7 @@
     "dev:frontend": "pnpm -dir packages/frontend run dev",
     "dev:overlay": "pnpm -dir packages/overlay run dev",
     "dev:sandbox": "pnpm -dir examples/sandbox run dev",
+    "dev:sandbox:ext": "pnpm -dir examples/sandbox run dev:ext",
     "dev": "concurrently pnpm:dev:client pnpm:dev:shared pnpm:dev:debugger pnpm:dev:frontend pnpm:dev:overlay",
     "build": "turbo run build --filter=!./examples/*",
     "test": "turbo run test --filter=!./examples/*",
