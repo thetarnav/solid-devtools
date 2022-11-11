@@ -1,5 +1,21 @@
 # @solid-devtools/overlay
 
+## 0.1.0
+
+### Minor Changes
+
+- 1990be5: Move graph types from `@solid-devtools/shared` to `@solid-devtools/debugger`
+
+### Patch Changes
+
+- Updated dependencies [a6b55b0]
+- Updated dependencies [d7e98da]
+- Updated dependencies [1990be5]
+- Updated dependencies [1990be5]
+  - @solid-devtools/debugger@0.14.0
+  - @solid-devtools/shared@0.10.0
+  - @solid-devtools/frontend@0.1.0
+
 ## 0.0.7
 
 ### Patch Changes

@@ -1,5 +1,21 @@
 # @solid-devtools/debugger
 
+## 0.14.0
+
+### Minor Changes
+
+- a6b55b0: Move value serialization logic to debugger
+- 1990be5: Move graph types from `@solid-devtools/shared` to `@solid-devtools/debugger`
+- 1990be5: Track and show fine-grain updates to stores in inspected values.
+
+### Patch Changes
+
+- d7e98da: Move some debugger related types from @solid-devtools/shared to @solid-devtools/debugger
+- Updated dependencies [a6b55b0]
+- Updated dependencies [d7e98da]
+- Updated dependencies [1990be5]
+  - @solid-devtools/shared@0.10.0
+
 ## 0.13.1
 
 ### Patch Changes

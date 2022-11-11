@@ -1,5 +1,18 @@
 # @solid-devtools/transform
 
+## 0.8.0
+
+### Minor Changes
+
+- 1990be5: Remove `wrapStores` transform — tracking stores is handled by the debugger.
+
+### Patch Changes
+
+- Updated dependencies [a6b55b0]
+- Updated dependencies [d7e98da]
+- Updated dependencies [1990be5]
+  - @solid-devtools/shared@0.10.0
+
 ## 0.7.5
 
 ### Patch Changes
