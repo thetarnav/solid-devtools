@@ -7,21 +7,20 @@ It connects to the background script.
 
 */
 
-import { createRuntimeMessanger, DEVTOOLS_CONNECTION_NAME } from '../shared/messanger'
+import { createPortMessanger, DEVTOOLS_CONNECTION_NAME } from '../shared/messanger'
 import { once } from 'solid-devtools/bridge'
 import { error, log } from '@solid-devtools/shared/utils'
 
 log('Devtools script working.')
 
-const { onRuntimeMessage } = createRuntimeMessanger()
-
 // Create a connection to the background page
-chrome.runtime.connect({ name: DEVTOOLS_CONNECTION_NAME })
+const port = chrome.runtime.connect({ name: DEVTOOLS_CONNECTION_NAME })
+
+const { onPortMessage: fromBackground } = createPortMessanger(port)
 
 let panel: chrome.devtools.panels.ExtensionPanel | undefined
-
 // "Versions" mean that devtools client is on the page
-once(onRuntimeMessage, 'Versions', async () => {
+once(fromBackground, 'Versions', async () => {
   if (panel) return log('Panel already exists.')
 
   log('Solid on page – creating panel...')

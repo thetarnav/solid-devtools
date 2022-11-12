@@ -1,6 +1,6 @@
 import {
-  onWindowMessage,
-  postWindowMessage,
+  onWindowMessage as fromClient,
+  postWindowMessage as toClient,
   startListeningWindowMessages,
 } from 'solid-devtools/bridge'
 import { error, warn } from '@solid-devtools/shared/utils'
@@ -15,7 +15,7 @@ const matchingClientVersion = __CLIENT_VERSION__
 const port = chrome.runtime.connect({ name: DEVTOOLS_CONTENT_PORT })
 
 startListeningWindowMessages()
-const { postPortMessage, onPortMessage } = createPortMessanger(port)
+const { postPortMessage: toBackground, onPortMessage: fromBackground } = createPortMessanger(port)
 
 {
   // Evaluate the real-world script to detect if solid is on the page
@@ -24,10 +24,10 @@ const { postPortMessage, onPortMessage } = createPortMessanger(port)
   script.type = 'module'
   script.addEventListener('error', err => error('Real world script failed to load.', err))
   document.head.append(script)
-  onWindowMessage('SolidOnPage', () => postPortMessage('SolidOnPage'))
+  fromClient('SolidOnPage', () => toBackground('SolidOnPage'))
 }
 
-onWindowMessage('ClientConnected', clientVersion => {
+fromClient('ClientConnected', clientVersion => {
   // eslint-disable-next-line no-console
   console.log(
     '🚧 %csolid-devtools%c is in early development! 🚧\nPlease report any bugs to https://github.com/thetarnav/solid-devtools/issues',
@@ -56,36 +56,36 @@ Please install "solid-devtools@${matchingClientVersion}" in your project`,
     }
   }
 
-  postPortMessage('Versions', {
+  toBackground('Versions', {
     client: clientVersion,
     extension: extVersion,
     expectedClient: matchingClientVersion,
   })
 })
 
-onWindowMessage('ResetPanel', () => postPortMessage('ResetPanel'))
+fromClient('ResetPanel', () => toBackground('ResetPanel'))
 
-onWindowMessage('StructureUpdate', graph => postPortMessage('StructureUpdate', graph))
+fromClient('StructureUpdate', graph => toBackground('StructureUpdate', graph))
 
-onWindowMessage('ComputationUpdates', e => postPortMessage('ComputationUpdates', e))
+fromClient('ComputationUpdates', e => toBackground('ComputationUpdates', e))
 
-onWindowMessage('SetInspectedDetails', e => postPortMessage('SetInspectedDetails', e))
+fromClient('SetInspectedDetails', e => toBackground('SetInspectedDetails', e))
 
-onWindowMessage('InspectorUpdate', e => postPortMessage('InspectorUpdate', e))
+fromClient('InspectorUpdate', e => toBackground('InspectorUpdate', e))
 
-onWindowMessage('ClientHoveredComponent', e => postPortMessage('ClientHoveredComponent', e))
+fromClient('ClientHoveredComponent', e => toBackground('ClientHoveredComponent', e))
 
-onWindowMessage('ClientInspectedNode', e => postPortMessage('ClientInspectedNode', e))
+fromClient('ClientInspectedNode', e => toBackground('ClientInspectedNode', e))
 
-onPortMessage('DevtoolsOpened', () => postWindowMessage('DevtoolsOpened'))
-onPortMessage('DevtoolsClosed', () => postWindowMessage('DevtoolsClosed'))
+fromBackground('DevtoolsOpened', () => toClient('DevtoolsOpened'))
+fromBackground('DevtoolsClosed', () => toClient('DevtoolsClosed'))
 
-onPortMessage('ForceUpdate', () => postWindowMessage('ForceUpdate'))
+fromBackground('ForceUpdate', () => toClient('ForceUpdate'))
 
-onPortMessage('ToggleInspectedValue', e => postWindowMessage('ToggleInspectedValue', e))
-onPortMessage('SetInspectedNode', e => postWindowMessage('SetInspectedNode', e))
+fromBackground('ToggleInspectedValue', e => toClient('ToggleInspectedValue', e))
+fromBackground('SetInspectedNode', e => toClient('SetInspectedNode', e))
 
-onPortMessage('HighlightElement', e => postWindowMessage('HighlightElement', e))
+fromBackground('HighlightElement', e => toClient('HighlightElement', e))
 
-onWindowMessage('ClientLocatorMode', e => postPortMessage('ClientLocatorMode', e))
-onPortMessage('ExtLocatorMode', e => postWindowMessage('ExtLocatorMode', e))
+fromClient('ClientLocatorMode', e => toBackground('ClientLocatorMode', e))
+fromBackground('ExtLocatorMode', e => toClient('ExtLocatorMode', e))

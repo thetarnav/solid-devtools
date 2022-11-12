@@ -1,53 +1,52 @@
 import { Controller } from '@solid-devtools/frontend'
-import { createRuntimeMessanger } from '../shared/messanger'
+import { createPortMessanger, PANEL_CONNECTION_NAME } from '../shared/messanger'
 import { once } from 'solid-devtools/bridge'
+
+const port = chrome.runtime.connect({ name: PANEL_CONNECTION_NAME })
+const { postPortMessage: toBackground, onPortMessage: fromBackground } = createPortMessanger(port)
 
 export default function createBridge({
   setVersions,
 }: {
   setVersions: (versions: { client: string; expectedClient: string; extension: string }) => void
 }) {
-  const { onRuntimeMessage, postRuntimeMessage } = createRuntimeMessanger()
-
   // in development — force update the graph on load to work with hot reloading
   if (import.meta.env.DEV) {
-    postRuntimeMessage('ForceUpdate')
+    toBackground('ForceUpdate')
   }
 
-  postRuntimeMessage('DevtoolsOpened')
-
-  once(onRuntimeMessage, 'Versions', v => setVersions(v))
+  once(fromBackground, 'Versions', v => setVersions(v))
 
   const controller = new Controller({
     onDevtoolsLocatorStateChange(enabled) {
-      postRuntimeMessage('ExtLocatorMode', enabled)
+      toBackground('ExtLocatorMode', enabled)
     },
     onHighlightElementChange(data) {
-      postRuntimeMessage('HighlightElement', data)
+      toBackground('HighlightElement', data)
     },
     onInspectValue(payload) {
-      postRuntimeMessage('ToggleInspectedValue', payload)
+      toBackground('ToggleInspectedValue', payload)
     },
     onInspectNode(node) {
-      postRuntimeMessage('SetInspectedNode', node)
+      toBackground('SetInspectedNode', node)
     },
   })
 
-  onRuntimeMessage('StructureUpdate', controller.updateStructure.bind(controller))
+  fromBackground('StructureUpdate', controller.updateStructure.bind(controller))
 
-  onRuntimeMessage('ResetPanel', controller.resetPanel.bind(controller))
+  fromBackground('ResetPanel', controller.resetPanel.bind(controller))
 
-  onRuntimeMessage('ComputationUpdates', controller.updateComputation.bind(controller))
+  fromBackground('ComputationUpdates', controller.updateComputation.bind(controller))
 
-  onRuntimeMessage('SetInspectedDetails', controller.setInspectedDetails.bind(controller))
+  fromBackground('SetInspectedDetails', controller.setInspectedDetails.bind(controller))
 
-  onRuntimeMessage('InspectorUpdate', controller.updateInspector.bind(controller))
+  fromBackground('InspectorUpdate', controller.updateInspector.bind(controller))
 
-  onRuntimeMessage('ClientLocatorMode', controller.setLocatorState.bind(controller))
+  fromBackground('ClientLocatorMode', controller.setLocatorState.bind(controller))
 
-  onRuntimeMessage('ClientHoveredComponent', controller.setHoveredNode.bind(controller))
+  fromBackground('ClientHoveredComponent', controller.setHoveredNode.bind(controller))
 
-  onRuntimeMessage('ClientInspectedNode', controller.setInspectedNode.bind(controller))
+  fromBackground('ClientInspectedNode', controller.setInspectedNode.bind(controller))
 
   return controller
 }

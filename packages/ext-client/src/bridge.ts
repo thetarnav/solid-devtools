@@ -8,9 +8,6 @@ import type {
   RootsUpdates,
   HighlightElementPayload,
 } from '@solid-devtools/debugger/types'
-import { log } from '@solid-devtools/shared/utils'
-
-export const LOG_MESSAGES = false
 
 export type Versions = { client: string; expectedClient: string; extension: string }
 
@@ -60,7 +57,6 @@ export type OnMessageFn = <K extends keyof Messages>(
 ) => VoidFunction
 
 export const postWindowMessage: PostMessageFn = (id, payload?: any) => {
-  LOG_MESSAGES && log('message posted:', id, payload)
   postMessage({ id, payload }, '*')
 }
 

@@ -1,112 +1,140 @@
 /*
 
 Background script runs only once, when the extension is installed.
+While content-script, popup and devtools scripts run on every page load.
+It has to coordinate the communication between the different scripts based on the current activeTabId.
 
 */
 
-import { createCallbackStack, log } from '@solid-devtools/shared/utils'
-import type { OnMessageFn, PostMessageFn, Versions } from 'solid-devtools/bridge'
+import { createCallbackStack, error, log } from '@solid-devtools/shared/utils'
+import { once, OnMessageFn, PostMessageFn, Versions } from 'solid-devtools/bridge'
 import {
   createPortMessanger,
-  createRuntimeMessanger,
   DEVTOOLS_CONNECTION_NAME,
   DEVTOOLS_CONTENT_PORT,
+  PANEL_CONNECTION_NAME,
   POPUP_CONNECTION_NAME,
 } from '../shared/messanger'
 
 log('Background script working')
 
-const { onRuntimeMessage, postRuntimeMessage } = createRuntimeMessanger()
+let activeTabId: number = -1
+chrome.tabs.onActivated.addListener(({ tabId }) => (activeTabId = tabId))
 
-let currentPort: chrome.runtime.Port | undefined
-let versions: Versions | undefined
-let SolidOnPage = false
+type TabData = {
+  versions: Versions | undefined
+  solidOnPage: boolean
+  toContent: PostMessageFn
+  fromContent: OnMessageFn
+  onContentScriptDisconnect: (fn: VoidFunction) => void
+}
+const tabDataMap = new Map<number, TabData>()
 
-let postPortMessage: PostMessageFn
-let onPortMessage: OnMessageFn
-
-chrome.runtime.onConnect.addListener(port => {
-  // handle the connection to the devtools page (devtools.html)
-  if (port.name === DEVTOOLS_CONNECTION_NAME) {
-    if (versions) postRuntimeMessage('Versions', versions)
-
-    const disconnectListener = () => {
-      postPortMessage('DevtoolsClosed')
-      log('Devtools Port disconnected')
-      port.onDisconnect.removeListener(disconnectListener)
-    }
-    port.onDisconnect.addListener(disconnectListener)
-    return
+function handleContentScriptConnection(port: chrome.runtime.Port, tabId: number) {
+  const { onPortMessage: fromContent, postPortMessage: toContent } = createPortMessanger(port)
+  const { push, execute: clearListeners } = createCallbackStack()
+  const data: TabData = {
+    versions: undefined,
+    solidOnPage: false,
+    toContent,
+    fromContent,
+    onContentScriptDisconnect: push,
   }
-
-  // handle the connection to the popup
-  if (port.name === POPUP_CONNECTION_NAME) {
-    if (versions) postRuntimeMessage('Versions', versions)
-    else if (SolidOnPage) postRuntimeMessage('SolidOnPage')
-    return
-  }
-
-  // handle the connection to the content script (content.js)
-  if (port.name !== DEVTOOLS_CONTENT_PORT) return log('Ignored connection:', port.name)
-
-  if (currentPort) {
-    log(`Switching Content Ports: ${currentPort.sender?.documentId} -> ${port.sender?.documentId}`)
-  }
-
-  currentPort = port
-  // lastDocumentId = port.sender?.documentId
-
-  const { push: addCleanup, execute: clearRuntimeListeners } = createCallbackStack()
-
-  port.onDisconnect.addListener(() => {
-    clearRuntimeListeners()
-    log('Content Port disconnected.')
-  })
-
-  const messanger = createPortMessanger(port)
-  postPortMessage = messanger.postPortMessage
-  onPortMessage = messanger.onPortMessage
+  tabDataMap.set(tabId, data)
 
   // "Versions" from content-script, serves also as a "SolidOnPage" message
-  onPortMessage('Versions', v => {
-    versions = v
-    postRuntimeMessage('Versions', v)
-  })
+  once(fromContent, 'Versions', v => (data.versions = v))
 
-  // "SolidOnPage" from realWorld script
-  onPortMessage('SolidOnPage', () => {
-    SolidOnPage = true
-    postRuntimeMessage('SolidOnPage')
-  })
+  // "SolidOnPage" from content-script (realWorld)
+  once(fromContent, 'SolidOnPage', () => (data.solidOnPage = true))
 
-  onRuntimeMessage('DevtoolsOpened', () => {
+  port.onDisconnect.addListener(() => {
+    log('Content Script disconnected.', tabId)
+    clearListeners()
+    tabDataMap.delete(tabId)
+  })
+}
+
+function withTabData(
+  port: chrome.runtime.Port,
+  fn: (data: TabData, from: OnMessageFn, to: PostMessageFn) => void,
+): void {
+  const data = tabDataMap.get(activeTabId)
+  if (!data) return error('No data for active tab', activeTabId)
+  const { onPortMessage, postPortMessage } = createPortMessanger(port)
+  fn(data, onPortMessage, postPortMessage)
+}
+
+function handleDevtoolsConnection(port: chrome.runtime.Port) {
+  withTabData(port, (data, fromDevtools, toDevtools) => {
+    const { toContent, fromContent, versions } = data
+    // "Versions" means the devtools client is present
+    if (versions) toDevtools('Versions', versions)
+    else once(fromContent, 'Versions', v => toDevtools('Versions', v))
+
+    port.onDisconnect.addListener(() => toContent('DevtoolsClosed'))
+  })
+}
+
+function handlePanelConnection(port: chrome.runtime.Port) {
+  withTabData(port, (data, fromPanel, toPanel) => {
+    const { onContentScriptDisconnect: push, toContent, fromContent, versions } = data
+
+    if (versions) toPanel('Versions', versions)
+    else once(fromContent, 'Versions', v => toPanel('Versions', v))
+
     // notify the content script that the devtools panel is ready
-    postPortMessage('DevtoolsOpened')
+    toContent('DevtoolsOpened')
 
-    postRuntimeMessage('Versions', versions!)
+    fromContent('ResetPanel', () => toPanel('ResetPanel'))
 
-    onPortMessage('ResetPanel', () => postRuntimeMessage('ResetPanel'))
+    fromContent('StructureUpdate', e => toPanel('StructureUpdate', e))
 
-    onPortMessage('StructureUpdate', e => postRuntimeMessage('StructureUpdate', e))
+    fromContent('ComputationUpdates', e => toPanel('ComputationUpdates', e))
+    fromContent('SetInspectedDetails', e => toPanel('SetInspectedDetails', e))
+    fromContent('InspectorUpdate', e => toPanel('InspectorUpdate', e))
+    fromContent('ClientHoveredComponent', e => toPanel('ClientHoveredComponent', e))
+    fromContent('ClientInspectedNode', e => toPanel('ClientInspectedNode', e))
 
-    onPortMessage('ComputationUpdates', e => postRuntimeMessage('ComputationUpdates', e))
-    onPortMessage('SetInspectedDetails', e => postRuntimeMessage('SetInspectedDetails', e))
-    onPortMessage('InspectorUpdate', e => postRuntimeMessage('InspectorUpdate', e))
-    onPortMessage('ClientHoveredComponent', e => postRuntimeMessage('ClientHoveredComponent', e))
-    onPortMessage('ClientInspectedNode', e => postRuntimeMessage('ClientInspectedNode', e))
+    fromContent('ClientLocatorMode', e => toPanel('ClientLocatorMode', e))
+    push(fromPanel('ExtLocatorMode', e => toContent('ExtLocatorMode', e)))
 
-    onPortMessage('ClientLocatorMode', e => postRuntimeMessage('ClientLocatorMode', e))
-    addCleanup(onRuntimeMessage('ExtLocatorMode', e => postPortMessage('ExtLocatorMode', e)))
+    push(fromPanel('ToggleInspectedValue', e => toContent('ToggleInspectedValue', e)))
+    push(fromPanel('SetInspectedNode', e => toContent('SetInspectedNode', e)))
 
-    addCleanup(
-      onRuntimeMessage('ToggleInspectedValue', e => postPortMessage('ToggleInspectedValue', e)),
-    )
-    addCleanup(onRuntimeMessage('SetInspectedNode', e => postPortMessage('SetInspectedNode', e)))
+    push(fromPanel('HighlightElement', e => toContent('HighlightElement', e)))
 
-    addCleanup(onRuntimeMessage('HighlightElement', e => postPortMessage('HighlightElement', e)))
-
-    addCleanup(onRuntimeMessage('ForceUpdate', () => postPortMessage('ForceUpdate')))
+    push(fromPanel('ForceUpdate', () => toContent('ForceUpdate')))
   })
-})
+}
 
-export {}
+function handlePopupConnection(port: chrome.runtime.Port) {
+  withTabData(port, (data, fromPopup, toPopup) => {
+    const { fromContent, versions, solidOnPage } = data
+    if (versions) toPopup('Versions', versions)
+    else if (solidOnPage) {
+      toPopup('SolidOnPage')
+      once(fromContent, 'Versions', v => toPopup('Versions', v))
+    } else {
+      once(fromContent, 'Versions', v => toPopup('Versions', v))
+      once(fromContent, 'SolidOnPage', () => toPopup('SolidOnPage'))
+    }
+  })
+}
+
+chrome.runtime.onConnect.addListener(port => {
+  switch (port.name) {
+    case DEVTOOLS_CONTENT_PORT:
+      port.sender?.tab?.id && handleContentScriptConnection(port, port.sender.tab.id)
+      break
+    case DEVTOOLS_CONNECTION_NAME:
+      handleDevtoolsConnection(port)
+      break
+    case PANEL_CONNECTION_NAME:
+      handlePanelConnection(port)
+      break
+    case POPUP_CONNECTION_NAME:
+      handlePopupConnection(port)
+      break
+  }
+})
