@@ -11,7 +11,7 @@ import { once, OnMessageFn, PostMessageFn, Versions } from 'solid-devtools/bridg
 import {
   createPortMessanger,
   DEVTOOLS_CONNECTION_NAME,
-  DEVTOOLS_CONTENT_PORT,
+  CONTENT_CONNECTION_NAME,
   PANEL_CONNECTION_NAME,
   POPUP_CONNECTION_NAME,
 } from '../shared/messanger'
@@ -49,7 +49,6 @@ function handleContentScriptConnection(port: chrome.runtime.Port, tabId: number)
   once(fromContent, 'SolidOnPage', () => (data.solidOnPage = true))
 
   port.onDisconnect.addListener(() => {
-    log('Content Script disconnected.', tabId)
     clearListeners()
     tabDataMap.delete(tabId)
   })
@@ -87,6 +86,7 @@ function handlePanelConnection(port: chrome.runtime.Port) {
     toContent('DevtoolsOpened')
 
     fromContent('ResetPanel', () => toPanel('ResetPanel'))
+    push(() => toPanel('ResetPanel'))
 
     fromContent('StructureUpdate', e => toPanel('StructureUpdate', e))
 
@@ -124,7 +124,7 @@ function handlePopupConnection(port: chrome.runtime.Port) {
 
 chrome.runtime.onConnect.addListener(port => {
   switch (port.name) {
-    case DEVTOOLS_CONTENT_PORT:
+    case CONTENT_CONNECTION_NAME:
       port.sender?.tab?.id && handleContentScriptConnection(port, port.sender.tab.id)
       break
     case DEVTOOLS_CONNECTION_NAME:

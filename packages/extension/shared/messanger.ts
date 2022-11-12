@@ -1,10 +1,10 @@
 import { OnMessageFn, PostMessageFn, Messages } from 'solid-devtools/bridge'
 import { log } from '@solid-devtools/shared/utils'
 
-export const DEVTOOLS_CONTENT_PORT = 'DEVTOOLS_CONTENT_PORT'
-export const DEVTOOLS_CONNECTION_NAME = 'SOLID_DEVTOOLS'
-export const POPUP_CONNECTION_NAME = 'SOLID_DEVTOOLS_POPUP'
-export const PANEL_CONNECTION_NAME = 'SOLID_DEVTOOLS_PANEL'
+export const CONTENT_CONNECTION_NAME = '[solid-devtools]: Content Script'
+export const DEVTOOLS_CONNECTION_NAME = '[solid-devtools]: Devtools Script'
+export const POPUP_CONNECTION_NAME = '[solid-devtools]: Popup'
+export const PANEL_CONNECTION_NAME = '[solid-devtools]: Devtools Panel'
 
 export function createPortMessanger(port: chrome.runtime.Port): {
   postPortMessage: PostMessageFn
@@ -16,7 +16,7 @@ export function createPortMessanger(port: chrome.runtime.Port): {
 
   let connected = true
   port.onDisconnect.addListener(port => {
-    log('Port', port.name, 'disconnected')
+    log(`${port.name.replace('[solid-devtools]: ', '')} port disconnected.`)
     connected = false
     listeners = {}
     port.onMessage.removeListener(onMessage)

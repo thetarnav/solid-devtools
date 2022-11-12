@@ -4,7 +4,7 @@ import {
   startListeningWindowMessages,
 } from 'solid-devtools/bridge'
 import { error, warn } from '@solid-devtools/shared/utils'
-import { createPortMessanger, DEVTOOLS_CONTENT_PORT } from '../shared/messanger'
+import { createPortMessanger, CONTENT_CONNECTION_NAME } from '../shared/messanger'
 
 // @ts-expect-error ?script&module query ensures output in ES module format and only import the script path
 import realWorld from './realWorld?script&module'
@@ -12,7 +12,7 @@ import realWorld from './realWorld?script&module'
 const extVersion = chrome.runtime.getManifest().version
 const matchingClientVersion = __CLIENT_VERSION__
 
-const port = chrome.runtime.connect({ name: DEVTOOLS_CONTENT_PORT })
+const port = chrome.runtime.connect({ name: CONTENT_CONNECTION_NAME })
 
 startListeningWindowMessages()
 const { postPortMessage: toBackground, onPortMessage: fromBackground } = createPortMessanger(port)
