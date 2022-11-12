@@ -8,21 +8,22 @@ startListeningWindowMessages()
 // in case of navigation/page reload, reset the locator mode state in the extension
 postWindowMessage('ResetPanel')
 
-postWindowMessage('SolidOnPage', process.env.VERSION!)
+postWindowMessage('ClientConnected', process.env.VERSION!)
 
 let loadedBefore = false
 
 createInternalRoot(() => {
   const debug = useDebugger()
 
-  // update the graph only if the devtools panel is in view
-  onWindowMessage('PanelVisibility', debug.toggleEnabled)
+  // devtools were opened
+  onWindowMessage('DevtoolsOpened', () => debug.toggleEnabled(true))
 
   // disable debugger and reset any state
-  onWindowMessage('PanelClosed', () => {
+  onWindowMessage('DevtoolsClosed', () => {
     batch(() => {
       debug.toggleEnabled(false)
       debug.inspector.setInspectedNode(null)
+      debug.locator.setHighlightTarget(null)
     })
   })
 

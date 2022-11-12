@@ -1,0 +1,45 @@
+body {
+  margin: 0;
+}
+
+#root {
+  display: flex;
+  flex-direction: column;
+  width: max-content;
+  padding: 1.5rem;
+  row-gap: 0.5rem;
+  font-weight: 500;
+  background-color: #f4f4f5;
+}
+
+p {
+  margin: 0;
+  color: #52525b;
+}
+p::before {
+  content: '';
+  display: inline-block;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 100%;
+  margin-right: 0.3rem;
+  background-color: #a1a1aa;
+}
+p[data-detected='true'] {
+  color: #27272a;
+}
+p[data-detected='true']::before {
+  background-color: #06b6d4;
+}
+
+.details {
+  margin: 0.3rem 0 0 0.8rem;
+  color: #52525b;
+  max-width: 50ch;
+}
+
+ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}

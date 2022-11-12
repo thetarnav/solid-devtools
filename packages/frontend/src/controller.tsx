@@ -112,6 +112,7 @@ const [Provider, useControllerCtx] = createContextProvider((props: { controller:
         structure.updateStructure(null)
         setClientLocatorState(false)
         setDevtoolsLocatorState(false)
+        inspector.setInspectedNode(null)
       })
     },
     onSetInspectedDetails(ownerDetails) {
