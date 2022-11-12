@@ -94,3 +94,4 @@ Other devtools projects for solid and other frameworks:
 - [Vue Devtools](https://github.com/vuejs/devtools)
 - [MobX Devtools](https://github.com/mobxjs/mobx-devtools)
 - [React Devtools](https://react-devtools-experimental.vercel.app)
+- [LocatorJS](https://www.locatorjs.com)
