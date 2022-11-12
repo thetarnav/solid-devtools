@@ -110,9 +110,11 @@ function ItemComponent(props){
 }
 ```
 
-### Using Locator
+### Using component locator
 
-The locator let's you locate components on the page, and go to their source code in your IDE. All you need to do is configure it by calling `useLocator` with some options.
+*Debugger feature inspired by [LocatorJS](https://www.locatorjs.com)*
+
+Locator let's you locate components on the page, and go to their source code in your IDE. All you need to do is configure it by calling `useLocator` with some options.
 
 ```ts
 import { useLocator } from 'solid-devtools'
@@ -120,7 +122,7 @@ import { useLocator } from 'solid-devtools'
 useLocator()
 ```
 
-Locator will not allow you to highlight hovered components on the page and reveal them in the IDE or the Chrome Extension. _(depending of if the extension panel is open or not)_
+It will not allow you to highlight hovered components on the page and reveal them in the IDE or the Chrome Extension. _(depending of if the extension panel is open or not)_
 
 #### Locator Options
 
