@@ -1,5 +1,11 @@
 # @solid-devtools/frontend
 
+## 0.1.1
+
+### Patch Changes
+
+- 55543c1: Reset panel state if navigated out of the page.
+
 ## 0.1.0
 
 ### Minor Changes

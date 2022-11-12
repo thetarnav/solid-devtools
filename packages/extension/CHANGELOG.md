@@ -1,5 +1,24 @@
 # solid-devtools-extension
 
+## 0.18.0
+
+### Minor Changes
+
+- 965cda1: Better organize message communication. Add a popup window with the information about solid and devtools client detection.
+- 642b517: Fixes background script not scoping messaging and data to a single page (cross-tab state leaking)
+
+### Patch Changes
+
+- 2ca645d: Improve version missmatch warning message
+- 55543c1: Reset panel state if navigated out of the page.
+- 67fdcac: Change extension action icon to blue one (not-disabled) when solid and devtools client are present on the page.
+- 965cda1: Don't disable debugger when devtools tab gets switched. Clear highlighted elements if devtools gets closed.
+- Updated dependencies [965cda1]
+- Updated dependencies [55543c1]
+- Updated dependencies [965cda1]
+  - solid-devtools@0.22.0
+  - @solid-devtools/frontend@0.1.1
+
 ## 0.17.0
 
 ### Minor Changes

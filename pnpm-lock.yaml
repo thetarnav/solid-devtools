@@ -49,7 +49,7 @@ importers:
 
   examples/clock:
     specifiers:
-      solid-devtools: workspace:^0.21.0
+      solid-devtools: workspace:^0.22.0
       solid-js: ^1.6.2
       typescript: ^4.8.4
       vite: ^3.1.8
@@ -70,7 +70,7 @@ importers:
       '@solid-devtools/overlay': workspace:^0.1.0
       '@solid-devtools/transform': workspace:^0.8.0
       '@solid-primitives/timer': ^1.3.4
-      solid-devtools: workspace:^0.21.0
+      solid-devtools: workspace:^0.22.0
       solid-js: ^1.6.2
       typescript: ^4.8.4
       unocss: ^0.46.3
@@ -95,7 +95,7 @@ importers:
     specifiers:
       '@solidjs/meta': ^0.28.0
       '@solidjs/router': ^0.4.3
-      solid-devtools: workspace:^0.21.0
+      solid-devtools: workspace:^0.22.0
       solid-js: ^1.6.2
       solid-start: ^0.1.8
       solid-start-node: ^0.1.8
@@ -179,14 +179,14 @@ importers:
   packages/extension:
     specifiers:
       '@crxjs/vite-plugin': ^1.0.14
-      '@solid-devtools/frontend': workspace:^0.1.0
+      '@solid-devtools/frontend': workspace:^0.1.1
       '@solid-devtools/shared': workspace:^0.10.0
       '@solid-primitives/utils': ^3.1.0
       '@types/chrome': ^0.0.196
       '@types/webextension-polyfill': ^0.9.1
       jsdom: ^20.0.1
       rimraf: ^3.0.2
-      solid-devtools: workspace:^0.21.0
+      solid-devtools: workspace:^0.22.0
       solid-js: ^1.6.2
       vite: ^3.2.3
       webextension-polyfill: ^0.10.0

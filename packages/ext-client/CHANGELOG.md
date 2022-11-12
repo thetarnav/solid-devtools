@@ -1,5 +1,15 @@
 # solid-devtools
 
+## 0.22.0
+
+### Minor Changes
+
+- 965cda1: Better organize message communication. Add a popup window with the information about solid and devtools client detection.
+
+### Patch Changes
+
+- 965cda1: Don't disable debugger when devtools tab gets switched. Clear highlighted elements if devtools gets closed.
+
 ## 0.21.0
 
 ### Minor Changes
