@@ -4,7 +4,7 @@ import {
   startListeningWindowMessages,
 } from 'solid-devtools/bridge'
 import { error, warn } from '@solid-devtools/shared/utils'
-import { createPortMessanger, CONTENT_CONNECTION_NAME } from '../shared/messanger'
+import { createPortMessanger, CONTENT_CONNECTION_NAME } from '../src/messanger'
 
 // @ts-expect-error ?script&module query ensures output in ES module format and only import the script path
 import realWorld from './realWorld?script&module'

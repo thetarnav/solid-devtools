@@ -14,7 +14,8 @@ import {
   CONTENT_CONNECTION_NAME,
   PANEL_CONNECTION_NAME,
   POPUP_CONNECTION_NAME,
-} from '../shared/messanger'
+} from '../src/messanger'
+import icons from '../src/icons'
 
 log('Background script working')
 
@@ -43,7 +44,12 @@ function handleContentScriptConnection(port: chrome.runtime.Port, tabId: number)
   tabDataMap.set(tabId, data)
 
   // "Versions" from content-script, serves also as a "SolidOnPage" message
-  once(fromContent, 'Versions', v => (data.versions = v))
+  once(fromContent, 'Versions', v => {
+    data.versions = v
+
+    // Change the popup icon to indicate that Solid is present on the page
+    chrome.action.setIcon({ tabId, path: icons.normal })
+  })
 
   // "SolidOnPage" from content-script (realWorld)
   once(fromContent, 'SolidOnPage', () => (data.solidOnPage = true))

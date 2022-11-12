@@ -1,5 +1,5 @@
 import { Controller } from '@solid-devtools/frontend'
-import { createPortMessanger, PANEL_CONNECTION_NAME } from '../shared/messanger'
+import { createPortMessanger, PANEL_CONNECTION_NAME } from './messanger'
 import { once } from 'solid-devtools/bridge'
 
 const port = chrome.runtime.connect({ name: PANEL_CONNECTION_NAME })

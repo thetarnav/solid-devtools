@@ -3,7 +3,7 @@
 import { render } from 'solid-js/web'
 import { batch, Component, createSignal, Show } from 'solid-js'
 
-import { createPortMessanger, POPUP_CONNECTION_NAME } from '../shared/messanger'
+import { createPortMessanger, POPUP_CONNECTION_NAME } from '../src/messanger'
 import { once } from 'solid-devtools/bridge'
 
 import './popup.css'

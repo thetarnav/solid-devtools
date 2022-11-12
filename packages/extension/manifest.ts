@@ -1,5 +1,6 @@
 import { defineManifest } from '@crxjs/vite-plugin'
 import { version } from './package.json'
+import icons from './src/icons'
 
 // Convert from Semver (example: 0.1.0-beta6)
 const [major, minor, patch, label = '0'] = version
@@ -33,19 +34,9 @@ export default defineManifest(env => ({
   },
   permissions: [],
   action: {
-    default_icon: {
-      '16': 'assets/icons/solid-gray-16.png',
-      '32': 'assets/icons/solid-gray-32.png',
-      '48': 'assets/icons/solid-gray-48.png',
-      '128': 'assets/icons/solid-gray-128.png',
-    },
+    default_icon: icons.disabled,
     default_title: 'Solid Devtools',
     default_popup: 'popup/popup.html',
   },
-  icons: {
-    '16': 'assets/icons/solid-normal-16.png',
-    '32': 'assets/icons/solid-normal-32.png',
-    '48': 'assets/icons/solid-normal-48.png',
-    '128': 'assets/icons/solid-normal-128.png',
-  },
+  icons: icons.normal,
 }))
