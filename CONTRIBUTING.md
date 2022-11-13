@@ -6,7 +6,7 @@ The following document is a _(work in progress)_ guide for contributing to Solid
 
 ## Tooling
 
-`pnpm` and `prettier` — that's it.
+[`pnpm`](https://pnpm.io/), [`prettier`](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode) and [`eslint`](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint) — that's it.
 
 This project uses [pnpm](https://pnpm.io/) for package management. If you don't have it installed, you can install it with `npm install -g pnpm` and then run `pnpm install` to install all the dependencies.
 
@@ -14,7 +14,7 @@ The code if formatted with prettier. You can use it if you want, or not, it's up
 
 ## Operating System
 
-I _([thetarnav](https://github.com/thetarnav))_ am working from a Windows PC, but it everything should work on macOS and Linux as well. If you find any issues, please open an issue.
+I _([thetarnav](https://github.com/thetarnav))_ am working from a Windows PC, but it everything should theoretically work on macOS and Linux as well. If you find any issues, please open an issue.
 
 Alternatively, if something is off, I recommend using [Gitpod](https://gitpod.io) or [Codeflow](https://stackblitz.com/codeflow) for development. Both of them are free for oss projects like this one and will give you a stable development environment.
 
@@ -32,7 +32,9 @@ Important if you want to work on the chrome extension. _(The script may fail som
 
 **Builds all of the client packages in the watch mode.** Those are the packages that run in the users browser. (client, shared, locator, debugger, frontend, overlay)
 
-#### `pnpm dev:sandbox` — Opens the [sandbox](https://github.com/thetarnav/solid-devtools/tree/main/examples/sandbox) playground
+#### `pnpm dev:sandbox` — Opens the [sandbox](https://github.com/thetarnav/solid-devtools/tree/main/examples/sandbox) playground with overlay component
+
+#### `pnpm dev:sandbox:ext` — Opens the [sandbox](https://github.com/thetarnav/solid-devtools/tree/main/examples/sandbox) playground with extension client
 
 ### TEST
 
@@ -41,6 +43,8 @@ Important if you want to work on the chrome extension. _(The script may fail som
 #### `pnpm test` — Runs all the tests
 
 #### `pnpm typecheck` — Runs the typecheck
+
+#### `pnpm lint` — Lints code with eslint
 
 #### `pnpm build-test` — Runs both the build and the tests
 
