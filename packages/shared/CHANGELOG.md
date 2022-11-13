@@ -1,5 +1,11 @@
 # solid-devtools-shared
 
+## 0.10.1
+
+### Patch Changes
+
+- 52a10b2: Move transform-related variables to transform package.
+
 ## 0.10.0
 
 ### Minor Changes

@@ -1,5 +1,15 @@
 # @solid-devtools/overlay
 
+## 0.1.1
+
+### Patch Changes
+
+- 52a10b2: Improve managing debugger enabled state.
+- Updated dependencies [52a10b2]
+- Updated dependencies [52a10b2]
+  - @solid-devtools/debugger@0.14.1
+  - @solid-devtools/shared@0.10.1
+
 ## 0.1.0
 
 ### Minor Changes

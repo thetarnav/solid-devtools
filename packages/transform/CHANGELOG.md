@@ -1,5 +1,17 @@
 # @solid-devtools/transform
 
+## 0.9.0
+
+### Minor Changes
+
+- 52a10b2: Add additional transform option: `componentLocation` for injecting code location information to component's code.
+
+### Patch Changes
+
+- 52a10b2: Move transform-related variables to transform package.
+- Updated dependencies [52a10b2]
+  - @solid-devtools/shared@0.10.1
+
 ## 0.8.0
 
 ### Minor Changes
