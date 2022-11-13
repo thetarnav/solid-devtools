@@ -16,6 +16,7 @@ import {
   Mapped,
   EncodedValueOf,
   ValueType,
+  LocationAttr,
 } from '@solid-devtools/debugger/types'
 import type { Structure } from '../structure'
 import { Writable } from 'type-fest'
@@ -42,11 +43,9 @@ export namespace Inspector {
     type: NodeType
     path: Structure.Node[]
     signals: SignalsRecord
-    props?: Readonly<{
-      proxy: boolean
-      record: PropsRecord
-    }>
     ownerValue?: ValueItem | undefined
+    props?: { readonly proxy: boolean; readonly record: PropsRecord }
+    location?: LocationAttr
   }>
 }
 
@@ -69,6 +68,7 @@ function createDetails(
     path,
     signals,
     ownerValue: raw.value ? { itemId: 'value', selected: false, value: raw.value } : undefined,
+    location: raw.location,
   }
   if (raw.props) {
     details.props = {

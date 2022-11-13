@@ -35,7 +35,7 @@ function ListSignals<T>(props: { when: T; title: JSX.Element; children: JSX.Elem
 }
 
 const DetailsContent: Component<{ details: Inspector.Details }> = ({ details }) => {
-  const { name, id, type, props: componentProps, ownerValue } = details
+  const { name, id, type, props: componentProps, ownerValue, location } = details
 
   const { inspector } = useController()
 
@@ -60,6 +60,7 @@ const DetailsContent: Component<{ details: Inspector.Details }> = ({ details }) 
             {name} <span class={styles.id}>#{id}</span>
           </h1>
           <div class={styles.type}>{NodeType[type]}</div>
+          {location && <div class={styles.type}>Location: {location}</div>}
         </header>
         <div class={styles.content}>
           <ListSignals

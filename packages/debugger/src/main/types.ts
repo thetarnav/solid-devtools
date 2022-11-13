@@ -3,6 +3,8 @@ import type { Many } from '@solid-primitives/utils'
 import { INFINITY, NAN, NEGATIVE_INFINITY, NodeType, ValueType } from './constants'
 import type { INTERNAL } from './utils'
 
+export type { LocationAttr } from '@solid-devtools/transform/types'
+
 export type NodeID = string & {}
 
 export type ValueItemID = `signal:${NodeID}` | `prop:${string}` | `value`
@@ -183,7 +185,9 @@ export namespace Mapped {
     type: Exclude<NodeType, NodeType.Root | NodeType.Refresh>
     children?: Owner[]
     name?: string
+    // component wrapped with a hmr memo?
     hmr?: boolean
+    // computation without sources
     frozen?: true
   }
 
@@ -218,6 +222,8 @@ export namespace Mapped {
     value?: EncodedValue
     /** for computations */
     sources?: NodeID[]
+    // component with a location
+    location?: LocationAttr
   }
 }
 
