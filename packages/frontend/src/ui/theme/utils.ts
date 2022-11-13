@@ -92,3 +92,47 @@ export const media = (
 export const dark = '(prefers-color-scheme: dark)'
 export const mobile = '(max-width: 640px)'
 export const touch = '(hover: none)'
+
+export const borderValue = (color: string): StyleRule['border'] => {
+  return `1px solid ${color}`
+}
+
+export const border = (
+  color: string,
+  ...edges: ('t' | 'r' | 'b' | 'l')[]
+): CSSPropertiesWithVars => {
+  if (!edges.length) return { border: borderValue(color) }
+
+  const rules: CSSPropertiesWithVars = {}
+
+  if (edges.includes('t')) rules.borderTop = borderValue(color)
+  if (edges.includes('r')) rules.borderRight = borderValue(color)
+  if (edges.includes('b')) rules.borderBottom = borderValue(color)
+  if (edges.includes('l')) rules.borderLeft = borderValue(color)
+
+  return rules
+}
+
+export function padding(allEdges: SpacingValue): CSSPropertiesWithVars
+export function padding(v: SpacingValue, h: SpacingValue): CSSPropertiesWithVars
+export function padding(t: SpacingValue, h: SpacingValue, b: SpacingValue): CSSPropertiesWithVars
+export function padding(
+  t: SpacingValue,
+  r: SpacingValue,
+  b: SpacingValue,
+  l: SpacingValue,
+): CSSPropertiesWithVars
+export function padding(
+  a: SpacingValue,
+  b?: SpacingValue,
+  c?: SpacingValue,
+  d?: SpacingValue,
+): CSSPropertiesWithVars {
+  if (b === undefined) return { padding: resolveSpacing(a) }
+  if (c === undefined) return { padding: `${resolveSpacing(a)} ${resolveSpacing(b)}` }
+  if (d === undefined)
+    return { padding: `${resolveSpacing(a)} ${resolveSpacing(b)} ${resolveSpacing(c)}` }
+  return {
+    padding: `${resolveSpacing(a)} ${resolveSpacing(b)} ${resolveSpacing(c)} ${resolveSpacing(d)}`,
+  }
+}

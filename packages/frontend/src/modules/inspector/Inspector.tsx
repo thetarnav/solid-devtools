@@ -6,6 +6,7 @@ import { ValueNode } from './ValueNode'
 import { useController } from '@/controller'
 import { Inspector } from '.'
 import * as styles from './inspector.css'
+import { OwnerName } from '@/ui/components/Owner'
 
 export default function Details() {
   const { inspector } = useController()
@@ -35,7 +36,7 @@ function ListSignals<T>(props: { when: T; title: JSX.Element; children: JSX.Elem
 }
 
 const DetailsContent: Component<{ details: Inspector.Details }> = ({ details }) => {
-  const { name, id, type, props: componentProps, ownerValue, location } = details
+  const { name, type, props: componentProps, ownerValue, location } = details
 
   const { inspector } = useController()
 
@@ -54,62 +55,62 @@ const DetailsContent: Component<{ details: Inspector.Details }> = ({ details }) 
 
   return (
     <div class={styles.root}>
-      <div class={styles.rootMargin}>
-        <header class={styles.header}>
-          <h1 class={styles.h1}>
-            {name} <span class={styles.id}>#{id}</span>
-          </h1>
-          <div class={styles.type}>{NodeType[type]}</div>
-          {location && <div class={styles.type}>Location: {location}</div>}
-        </header>
-        <div class={styles.content}>
-          <ListSignals
-            when={componentProps && Object.keys(componentProps.record).length}
-            title={<>Props {componentProps!.proxy && <Badge>PROXY</Badge>}</>}
-          >
-            <Entries of={componentProps!.record}>
-              {(name, value) => (
-                <ValueNode
-                  name={name}
-                  value={value().value}
-                  extended={value().selected}
-                  onClick={() => inspector.inspectValueItem('prop', name)}
-                  onElementHover={inspector.toggleHoveredElement}
-                  isSignal
-                />
-              )}
-            </Entries>
-          </ListSignals>
-          {(['stores', 'signals', 'memos'] as const).map(type => (
-            <ListSignals when={signals()[type].length} title={type}>
-              <For each={signals()[type]}>
-                {signal => (
-                  <ValueNode
-                    name={signal.name}
-                    value={signal.value}
-                    extended={signal.selected}
-                    onClick={() => inspector.inspectValueItem('signal', signal.id)}
-                    onElementHover={inspector.toggleHoveredElement}
-                    isSignal={type !== 'stores'}
-                  />
-                )}
-              </For>
-            </ListSignals>
-          ))}
-          {ownerValue && (
-            <div>
-              <h2 class={styles.h2}>{NodeType[type]}</h2>
+      <header class={styles.header}>
+        <OwnerName name={name} type={type} isTitle />
+      </header>
+      <div class={styles.content}>
+        <ListSignals
+          when={componentProps && Object.keys(componentProps.record).length}
+          title={<>Props {componentProps!.proxy && <Badge>PROXY</Badge>}</>}
+        >
+          <Entries of={componentProps!.record}>
+            {(name, value) => (
               <ValueNode
-                name="value"
-                value={ownerValue.value}
-                extended={ownerValue.selected}
-                onClick={() => inspector.inspectValueItem('value')}
+                name={name}
+                value={value().value}
+                extended={value().selected}
+                onClick={() => inspector.inspectValueItem('prop', name)}
                 onElementHover={inspector.toggleHoveredElement}
                 isSignal
               />
-            </div>
-          )}
-        </div>
+            )}
+          </Entries>
+        </ListSignals>
+        {(['stores', 'signals', 'memos'] as const).map(type => (
+          <ListSignals when={signals()[type].length} title={type}>
+            <For each={signals()[type]}>
+              {signal => (
+                <ValueNode
+                  name={signal.name}
+                  value={signal.value}
+                  extended={signal.selected}
+                  onClick={() => inspector.inspectValueItem('signal', signal.id)}
+                  onElementHover={inspector.toggleHoveredElement}
+                  isSignal={type !== 'stores'}
+                />
+              )}
+            </For>
+          </ListSignals>
+        ))}
+        {ownerValue && (
+          <div>
+            <h2 class={styles.h2}>{NodeType[type]}</h2>
+            <ValueNode
+              name="value"
+              value={ownerValue.value}
+              extended={ownerValue.selected}
+              onClick={() => inspector.inspectValueItem('value')}
+              onElementHover={inspector.toggleHoveredElement}
+              isSignal
+            />
+          </div>
+        )}
+        {location && (
+          <div>
+            <h2 class={styles.h2}>Location</h2>
+            <p class={styles.location}>{location}</p>
+          </div>
+        )}
       </div>
     </div>
   )
