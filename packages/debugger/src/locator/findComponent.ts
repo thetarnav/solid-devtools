@@ -1,4 +1,4 @@
-import { LOCATION_ATTRIBUTE_NAME } from '@solid-devtools/shared/variables'
+import { LOCATION_ATTRIBUTE_NAME } from '@solid-devtools/transform/types'
 import { isWindows } from '@solid-primitives/platform'
 import { Mapped, NodeID } from '../types'
 import { ElementLocation } from './goToSource'
