@@ -20,15 +20,8 @@ const isUpperCase = (s: string) => /^[A-Z]/.test(s)
 const getLocationAttribute = (filePath: string, line: number, column: number): LocationAttr =>
   `${filePath}:${line}:${column}`
 
-function getNodeLocationAttribute(node: t.Node, state: unknown): string | undefined {
-  if (
-    !node.loc ||
-    typeof state !== 'object' ||
-    state === null ||
-    !('filename' in state) ||
-    typeof state.filename !== 'string'
-  )
-    return
+function getNodeLocationAttribute(node: t.Node, state: { filename?: unknown }): string | undefined {
+  if (!node.loc || typeof state.filename !== 'string') return
   return getLocationAttribute(
     p.relative(cwd, state.filename),
     node.loc.start.line,
