@@ -354,6 +354,7 @@ importers:
       '@types/babel__traverse': ^7.18.2
       solid-js: ^1.6.2
       tsup: ^6.4.0
+      typescript: ^4.8.4
       vite: ^2.2.3 || ^3.0.0
     dependencies:
       '@babel/core': 7.20.2
@@ -370,7 +371,8 @@ importers:
       '@types/babel__core': 7.1.20
       '@types/babel__generator': 7.6.4
       '@types/babel__traverse': 7.18.2
-      tsup: 6.4.0
+      tsup: 6.4.0_typescript@4.8.4
+      typescript: 4.8.4
 
 packages:
 
