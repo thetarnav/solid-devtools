@@ -1,25 +1,19 @@
 import { PluginItem, transformAsync } from '@babel/core'
 import { PluginOption } from 'vite'
-import jsxLocationPlugin from './location'
+import { getFileExtension } from './utils'
+import jsxLocationPlugin from './jsxLocation'
 import namePlugin from './name'
 
 export interface DevtoolsPluginOptions {
-  /** Add automatic name when creating signals, memos, stores, or mutables */
-  name?: boolean
   /** Inject location attributes to jsx templates */
   jsxLocation?: boolean
-  /** Inject location information to component declarations */
-  componentLocation?: boolean
-}
-
-function getFileExtension(filename: string): string {
-  const index = filename.lastIndexOf('.')
-  return index < 0 ? '' : filename.substring(index + 1)
+  /** Add automatic name when creating signals, memos, stores, or mutables */
+  name?: boolean
 }
 
 // This export is used for configuration.
 export const devtoolsPlugin = (options: DevtoolsPluginOptions = {}): PluginOption => {
-  const { name = false, jsxLocation = false, componentLocation = false } = options
+  const { jsxLocation = false, name = false } = options
 
   let enablePlugin = false
   let projectRoot = process.cwd()
@@ -42,12 +36,8 @@ export const devtoolsPlugin = (options: DevtoolsPluginOptions = {}): PluginOptio
       const plugins: PluginItem[] = []
 
       // plugins that should only run on .tsx/.jsx files in development
-      if ((jsxLocation || componentLocation) && isJSX) {
-        plugins.push(jsxLocationPlugin({ jsx: jsxLocation, components: componentLocation }))
-      }
-      if (name) {
-        plugins.push(namePlugin)
-      }
+      if (jsxLocation && isJSX) plugins.push(jsxLocationPlugin)
+      if (name) plugins.push(namePlugin)
 
       if (plugins.length === 0) return
 

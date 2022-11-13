@@ -11,7 +11,6 @@ export default defineConfig(config => {
       devtoolsPlugin({
         // wrapStores: true,
         // jsxLocation: true,
-        componentLocation: true,
         name: true,
       }),
       solidPlugin({ hot: false, dev: true }),

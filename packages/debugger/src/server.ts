@@ -9,46 +9,44 @@ export { createUnownedRoot } from './index'
 
 export const Debugger: typeof API.Debugger = props => props.children
 
-export const attachDebugger: typeof API.attachDebugger = () => void 0
+export const attachDebugger: typeof API.attachDebugger = () => {}
 
 export const useDebugger: typeof API.useDebugger = () => ({
-  triggerUpdate: () => void 0,
-  forceTriggerUpdate: () => void 0,
-  listenTo: () => () => void 0,
-  setInspectedNode: () => void 0,
-  handlePropsUpdate: () => () => void 0,
+  triggerUpdate: () => {},
+  forceTriggerUpdate: () => {},
+  listenTo: () => () => {},
+  setInspectedNode: () => {},
+  handlePropsUpdate: () => () => {},
   setInspectedSignal: () => null,
-  setInspectedProp: () => void 0,
+  setInspectedProp: () => {},
   inspectedDetails: () => null,
   setInspectedValue: () => null,
-  setUserEnabledSignal: () => void 0,
+  enabled: () => false,
+  toggleEnabled: () => {},
   inspector: {
-    setInspectedNode: () => void 0,
-    toggleValueNode: () => void 0,
+    setInspectedNode: () => {},
+    toggleValueNode: () => {},
   },
   locator: {
-    toggleEnabled: () => void 0,
-    addClickInterceptor: () => void 0,
+    toggleEnabled: () => {},
+    addClickInterceptor: () => {},
     enabledByDebugger: () => false,
-    setHighlightTarget: () => void 0,
-    onHoveredComponent: () => () => void 0,
+    setHighlightTarget: () => {},
+    onHoveredComponent: () => () => {},
   },
 })
 
-export const enableRootsAutoattach: typeof API.enableRootsAutoattach = () => void 0
-export const useLocator: typeof API.useLocator = () => void 0
+export const enableRootsAutoattach: typeof API.enableRootsAutoattach = () => {}
+export const useLocator: typeof API.useLocator = () => {}
 
 // update
-export const makeSolidUpdateListener: typeof API.makeSolidUpdateListener = () => () => void 0
-export const makeCreateRootListener: typeof API.makeCreateRootListener = () => () => void 0
-export const observeComputationUpdate: typeof API.observeComputationUpdate = () => void 0
-export const interceptComputationRerun: typeof API.interceptComputationRerun = () => void 0
-export const observeValueUpdate: typeof API.observeValueUpdate = () => void 0
-export const makeValueUpdateListener: typeof API.makeValueUpdateListener = () => void 0
-export const removeValueUpdateObserver: typeof API.removeValueUpdateObserver = () => void 0
-
-// locator
-export const markComponentLoc: typeof API.markComponentLoc = () => void 0
+export const makeSolidUpdateListener: typeof API.makeSolidUpdateListener = () => () => {}
+export const makeCreateRootListener: typeof API.makeCreateRootListener = () => () => {}
+export const observeComputationUpdate: typeof API.observeComputationUpdate = () => {}
+export const interceptComputationRerun: typeof API.interceptComputationRerun = () => {}
+export const observeValueUpdate: typeof API.observeValueUpdate = () => {}
+export const makeValueUpdateListener: typeof API.makeValueUpdateListener = () => {}
+export const removeValueUpdateObserver: typeof API.removeValueUpdateObserver = () => {}
 
 // utils
 export const getOwner: typeof API.getOwner = () => null
@@ -61,8 +59,8 @@ export const isSolidMemo: typeof API.isSolidMemo = (o): o is Solid.Memo => false
 export const isSolidOwner: typeof API.isSolidOwner = (o): o is Solid.Owner => false
 export const isSolidRoot: typeof API.isSolidRoot = (o): o is Solid.Root => false
 export const isSolidStore: typeof API.isSolidStore = (o): o is Solid.Store => false
-export const onOwnerCleanup: typeof API.onOwnerCleanup = () => () => void 0
-export const onParentCleanup: typeof API.onParentCleanup = () => () => void 0
+export const onOwnerCleanup: typeof API.onOwnerCleanup = () => () => {}
+export const onParentCleanup: typeof API.onParentCleanup = () => () => {}
 export const getFunctionSources: typeof API.getFunctionSources = () => []
 export const createInternalRoot: typeof API.createInternalRoot = createRoot
 export const lookupOwner: typeof API.lookupOwner = () => null

@@ -1,4 +1,4 @@
-import { createEffect, createSignal, onCleanup } from 'solid-js'
+import { batch, createEffect, onCleanup } from 'solid-js'
 import { createInternalRoot, useDebugger } from '@solid-devtools/debugger'
 import { onWindowMessage, postWindowMessage, startListeningWindowMessages } from './bridge'
 import { defer } from '@solid-devtools/shared/primitives'
@@ -14,14 +14,21 @@ let loadedBefore = false
 
 createInternalRoot(() => {
   const debug = useDebugger()
-  const [enabled, setEnabled] = createSignal(false)
-  debug.setUserEnabledSignal(enabled)
 
-  onWindowMessage('DevtoolsOpened', () => setEnabled(true))
-  onWindowMessage('DevtoolsClosed', () => setEnabled(false))
+  // devtools were opened
+  onWindowMessage('DevtoolsOpened', () => debug.toggleEnabled(true))
+
+  // disable debugger and reset any state
+  onWindowMessage('DevtoolsClosed', () => {
+    batch(() => {
+      debug.toggleEnabled(false)
+      debug.inspector.setInspectedNode(null)
+      debug.locator.setHighlightTarget(null)
+    })
+  })
 
   createEffect(() => {
-    if (!enabled()) return
+    if (!debug.enabled()) return
 
     if (loadedBefore) debug.forceTriggerUpdate()
     else loadedBefore = true

@@ -42,8 +42,6 @@ export {
   createInternalRoot,
 } from './main/utils'
 
-export { markComponentLoc } from './locator'
-
 export type {
   LocatorOptions,
   TargetIDE,

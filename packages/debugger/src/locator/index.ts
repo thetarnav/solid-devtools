@@ -39,29 +39,27 @@ export type ClickMiddleware = (
   data: SourceCodeData | null,
 ) => false | void
 
-export { markComponentLoc } from './markComponent'
-
 export function createLocator({
   components,
   debuggerEnabled,
   findComponent,
   getElementById,
-  setLocatorEnabledSignal,
+  addLocatorModeEnabledSignal,
 }: {
   components: Accessor<Record<NodeID, Mapped.ResolvedComponent[]>>
   debuggerEnabled: Accessor<boolean>
   findComponent(rootId: NodeID, nodeId: NodeID): Mapped.ResolvedComponent | undefined
   getElementById(id: string): HTMLElement | undefined
-  setLocatorEnabledSignal(signal: Accessor<boolean>): void
+  addLocatorModeEnabledSignal(signal: Accessor<boolean>): void
 }) {
   // enables capturing hovered elements
   const enabledByPlugin = atom(false)
-  const enabledByPressingSignal = atom<Accessor<boolean>>()
-  const enabledByPressing = createMemo(() => !!enabledByPressingSignal()?.())
-  setLocatorEnabledSignal(enabledByPressing)
+  const enabledByDebuggerSignal = atom<Accessor<boolean>>()
+  const enabledByDebugger = createMemo(() => !!enabledByDebuggerSignal()?.())
+  addLocatorModeEnabledSignal(enabledByDebugger)
   // locator is enabled if debugger is enabled, and user pressed the key to activate it, or the plugin activated it
   const locatorEnabled = createMemo(
-    () => debuggerEnabled() && (enabledByPressing() || enabledByPlugin()),
+    () => debuggerEnabled() && (enabledByDebugger() || enabledByPlugin()),
   )
 
   function togglePluginLocatorMode(state?: boolean) {
@@ -195,14 +193,14 @@ export function createLocator({
       locatorUsed = true
       if (options.targetIDE) targetIDE = options.targetIDE
       const isHoldingKey = createKeyHold(options.key ?? 'Alt', { preventDefault: true })
-      enabledByPressingSignal(() => isHoldingKey)
+      enabledByDebuggerSignal(() => isHoldingKey)
     })
   }
 
   return {
     useLocator,
     togglePluginLocatorMode,
-    enabledByDebugger: enabledByPressing,
+    enabledByDebugger,
     addClickInterceptor,
     setPluginHighlightTarget,
     onDebuggerHoveredComponentChange,

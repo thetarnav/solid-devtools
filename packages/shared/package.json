@@ -39,6 +39,11 @@
       "require": "./dist/utils.cjs",
       "types": "./dist/utils.d.ts"
     },
+    "./variables": {
+      "import": "./dist/variables.js",
+      "require": "./dist/variables.cjs",
+      "types": "./dist/variables.d.ts"
+    },
     "./primitives": {
       "import": "./dist/primitives.js",
       "require": "./dist/primitives.cjs",
@@ -49,6 +54,9 @@
     "*": {
       "utils": [
         "./dist/utils.d.ts"
+      ],
+      "variables": [
+        "./dist/variables.d.ts"
       ],
       "primitives": [
         "./dist/primitives.d.ts"

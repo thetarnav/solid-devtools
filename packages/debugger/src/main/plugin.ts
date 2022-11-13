@@ -1,4 +1,4 @@
-import { Accessor, batch, createComputed, createMemo, createSignal } from 'solid-js'
+import { Accessor, batch, createMemo, createSignal } from 'solid-js'
 import {
   createEventHub,
   createSimpleEmitter,
@@ -6,7 +6,7 @@ import {
   EventHub,
 } from '@solid-primitives/event-bus'
 import { throttle } from '@solid-primitives/scheduled'
-import { atom, defer } from '@solid-devtools/shared/primitives'
+import { atom } from '@solid-devtools/shared/primitives'
 import { createBatchedUpdateEmitter, createInternalRoot } from './utils'
 import { ComputationUpdateHandler } from './walker'
 import { createLocator } from '../locator'
@@ -41,35 +41,26 @@ export default createInternalRoot(() => {
   //
   // Debugger Enabled
   //
-  const [debuggerEnabled, setUserEnabledSignal, setLocatorEnabledSignal] = (() => {
-    // is locator module enabled
-    const locatorEnabledSignal = atom<Accessor<boolean>>()
-    // is debugger used in the app
-    const userEnabledSignal = atom<Accessor<boolean>>()
-    const combinedEnabled = atom<boolean>(false)
+  const [debuggerEnabled, toggleDebugger, addLocatorModeEnabledSignal] = (() => {
+    const locatorModeEnabledSignal = atom<Accessor<boolean>>()
+    const debuggerEnabled = atom(false)
+    const combinedEnabled = createMemo(() => debuggerEnabled() || !!locatorModeEnabledSignal()?.())
 
-    createComputed(
-      defer(
-        createMemo(() => !!locatorEnabledSignal()?.() || !!userEnabledSignal()?.()),
-        enabled => {
-          batch(() => {
-            debuggerEnabled(enabled)
-            if (!enabled) {
-              setComponents({})
-              locator.togglePluginLocatorMode(false)
-              locator.setPluginHighlightTarget(null)
-              inspector.setInspectedNode(null)
-            }
-          })
-        },
-      ),
-    )
+    function toggleDebugger(state?: boolean) {
+      batch(() => {
+        const newState = debuggerEnabled(p => state ?? !p)
+        if (!newState) {
+          setComponents({})
+          locator.togglePluginLocatorMode(false)
+        }
+      })
+    }
 
-    return [
-      combinedEnabled,
-      (signal: Accessor<boolean>): void => void userEnabledSignal(() => signal),
-      (signal: Accessor<boolean>): void => void locatorEnabledSignal(() => signal),
-    ]
+    function addLocatorModeEnabledSignal(signal: Accessor<boolean>) {
+      locatorModeEnabledSignal(() => signal)
+    }
+
+    return [combinedEnabled, toggleDebugger, addLocatorModeEnabledSignal]
   })()
 
   //
@@ -147,7 +138,7 @@ export default createInternalRoot(() => {
     debuggerEnabled,
     findComponent,
     getElementById: inspector.getElementById,
-    setLocatorEnabledSignal,
+    addLocatorModeEnabledSignal,
   })
 
   /**
@@ -156,7 +147,8 @@ export default createInternalRoot(() => {
   function useDebugger() {
     return {
       listenTo: eventHub.on,
-      setUserEnabledSignal,
+      enabled: debuggerEnabled,
+      toggleEnabled: toggleDebugger,
       triggerUpdate,
       forceTriggerUpdate,
       inspector: {

@@ -1,4 +1,4 @@
-import { WINDOW_PROJECTPATH_PROPERTY } from '@solid-devtools/transform/types'
+import { WINDOW_PROJECTPATH_PROPERTY } from '@solid-devtools/shared/variables'
 
 export type TargetIDE = 'vscode' | 'webstorm' | 'atom' | 'vscode-insiders'
 

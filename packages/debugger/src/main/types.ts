@@ -1,4 +1,3 @@
-import { LocationAttr } from '@solid-devtools/transform/types'
 import type { Many } from '@solid-primitives/utils'
 import { INFINITY, NAN, NEGATIVE_INFINITY, NodeType, ValueType } from './constants'
 import type { INTERNAL } from './utils'
@@ -158,7 +157,6 @@ export namespace Solid {
   export interface Component extends Memo {
     props: Record<string, unknown>
     componentName: string
-    location?: LocationAttr
   }
 
   export type Owner = Computation | Root
