@@ -1,6 +1,15 @@
-import { spacing, theme, padding } from '@/ui/theme'
+import {
+  spacing,
+  theme,
+  padding,
+  rounded,
+  centerChild,
+  hexToRgb,
+  color,
+  transition,
+} from '@/ui/theme'
 import { colorDisabled, panelBorder } from '@/ui/theme/vars.css'
-import { style } from '@vanilla-extract/css'
+import { createVar, style } from '@vanilla-extract/css'
 
 export const root = style({
   height: '100%',
@@ -10,15 +19,50 @@ export const root = style({
 })
 
 export const header = style({
-  ...padding(0, 4),
+  ...padding(0, 2, 0, 4),
   display: 'flex',
   alignItems: 'center',
+  justifyContent: 'space-between',
   borderBottom: panelBorder,
 })
-export const codeIcon = style({
-  width: spacing[4],
-  height: spacing[4],
-})
+
+export const actions = (() => {
+  const textOpacity = createVar()
+  const bgOpacity = createVar()
+
+  return {
+    container: style({
+      display: 'flex',
+      alignItems: 'center',
+      columnGap: spacing[1],
+    }),
+    button: style({
+      width: spacing[6],
+      height: spacing[6],
+      ...rounded(),
+      ...centerChild,
+      color: hexToRgb(color.gray[50], textOpacity),
+      backgroundColor: hexToRgb(color.gray[100], bgOpacity),
+      vars: {
+        [bgOpacity]: '0',
+        [textOpacity]: '0.5',
+      },
+      ...transition(['background-color', 'color']),
+      selectors: {
+        '&:hover': {
+          vars: {
+            [bgOpacity]: '0.1',
+            [textOpacity]: '0.75',
+          },
+        },
+      },
+    }),
+    icon: style({
+      width: spacing[4],
+      height: spacing[4],
+    }),
+  }
+})()
 
 export const scrollWrapper = style({
   width: '100%',

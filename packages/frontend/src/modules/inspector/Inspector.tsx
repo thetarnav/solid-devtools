@@ -17,9 +17,16 @@ export default function Details() {
       <div class={styles.root}>
         <header class={styles.header}>
           <OwnerName name={inspectedNode()!.name} type={inspectedNode()!.type} isTitle />
-          <button>
-            <Icon.Code class={styles.codeIcon} />
-          </button>
+          <div class={styles.actions.container}>
+            {/* <button class={styles.actions.button}>
+              <Icon.Eye class={styles.actions.icon} />
+            </button> */}
+            {details()?.location && (
+              <button class={styles.actions.button}>
+                <Icon.Code class={styles.actions.icon} />
+              </button>
+            )}
+          </div>
         </header>
         <Scrollable>
           <Show when={details()} keyed>
