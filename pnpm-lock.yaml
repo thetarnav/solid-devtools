@@ -208,13 +208,10 @@ importers:
 
   packages/frontend:
     specifiers:
-      '@floating-ui/dom': ^1.0.3
-      '@otonashixav/solid-flip': ^0.10.5
       '@solid-devtools/debugger': workspace:^0.14.0
       '@solid-devtools/shared': workspace:^0.10.0
       '@solid-primitives/context': ^0.1.2
       '@solid-primitives/cursor': ^0.0.101
-      '@solid-primitives/destructure': ^0.1.3
       '@solid-primitives/event-bus': ^0.1.3
       '@solid-primitives/event-listener': ^2.2.3
       '@solid-primitives/keyboard': ^1.0.3
@@ -234,19 +231,14 @@ importers:
       clsx: ^1.2.1
       csstype: ^3.1.1
       postcss: ^8.4.18
-      solid-floating-ui: ^0.2.0
       solid-headless: ^0.13.0
       solid-js: ^1.6.2
-      solid-transition-group: ^0.0.12
       type-fest: ^3.2.0
     dependencies:
-      '@floating-ui/dom': 1.0.4
-      '@otonashixav/solid-flip': 0.10.5_solid-js@1.6.2
       '@solid-devtools/debugger': link:../debugger
       '@solid-devtools/shared': link:../shared
       '@solid-primitives/context': 0.1.2_solid-js@1.6.2
       '@solid-primitives/cursor': 0.0.101_solid-js@1.6.2
-      '@solid-primitives/destructure': 0.1.4_solid-js@1.6.2
       '@solid-primitives/event-bus': 0.1.4_solid-js@1.6.2
       '@solid-primitives/event-listener': 2.2.4_solid-js@1.6.2
       '@solid-primitives/keyboard': 1.0.5_solid-js@1.6.2
@@ -263,10 +255,8 @@ importers:
       '@vanilla-extract/private': 1.0.3
       clsx: 1.2.1
       csstype: 3.1.1
-      solid-floating-ui: 0.2.0_sadgqcswk3ornos2gvsiom63vu
       solid-headless: 0.13.0_solid-js@1.6.2
       solid-js: 1.6.2
-      solid-transition-group: 0.0.12_solid-js@1.6.2
       type-fest: 3.2.0
     devDependencies:
       '@vanilla-extract/esbuild-plugin': 2.2.0
@@ -1803,16 +1793,6 @@ packages:
       - supports-color
     dev: true
 
-  /@floating-ui/core/1.0.1:
-    resolution: {integrity: sha512-bO37brCPfteXQfFY0DyNDGB3+IMe4j150KFQcgJ5aBP295p9nBGeHEs/p0czrRbtlHq4Px/yoPXO/+dOCcF4uA==}
-    dev: false
-
-  /@floating-ui/dom/1.0.4:
-    resolution: {integrity: sha512-maYJRv+sAXTy4K9mzdv0JPyNW5YPVHrqtY90tEdI6XNpuLOP26Ci2pfwPsKBA/Wh4Z3FX5sUrtUFTdMYj9v+ug==}
-    dependencies:
-      '@floating-ui/core': 1.0.1
-    dev: false
-
   /@hapi/hoek/9.3.0:
     resolution: {integrity: sha512-/c6rf4UJlmHlC9b5BaNvzAcFv7HZ2QHaV0D4/HNlBdvFnvQq8RI4kYdhyPCl7Xj+oWvTWQ8ujhqS53LIgAe6KQ==}
 
@@ -1934,14 +1914,6 @@ packages:
       '@nodelib/fs.scandir': 2.1.5
       fastq: 1.13.0
 
-  /@otonashixav/solid-flip/0.10.5_solid-js@1.6.2:
-    resolution: {integrity: sha512-Tb2n9lzuktteqm26KJ1yH9NJsY2SbgNCHWnCOAKjEWBfGfw4j31vJVG1+k11WmgP2g9YzuyS8Skr7HsFntXZWA==}
-    peerDependencies:
-      solid-js: '>=1.0.0'
-    dependencies:
-      solid-js: 1.6.2
-    dev: false
-
   /@polka/url/1.0.0-next.21:
     resolution: {integrity: sha512-a5Sab1C4/icpTZVzZc5Ghpz88yQtGOyNqYXcZgOssB2uuAr+wF/MvN6bgtW32q7HHrvBki+BsZ0OuNv6EV3K9g==}
 
@@ -2054,15 +2026,6 @@ packages:
       solid-js: ^1.5.0
     dependencies:
       '@solid-primitives/utils': 3.1.0_solid-js@1.6.2
-      solid-js: 1.6.2
-    dev: false
-
-  /@solid-primitives/destructure/0.1.4_solid-js@1.6.2:
-    resolution: {integrity: sha512-PQYyz2tKWauWqe6HRqAe1p7VkZ518EcFkCcDDRgWoCTLYmtDXAbSH2QjB7FIDVj5AAxs4DbmjjmJ2Y4N9Gf+mw==}
-    peerDependencies:
-      solid-js: ^1.6.0
-    dependencies:
-      '@solid-primitives/utils': 4.0.0_solid-js@1.6.2
       solid-js: 1.6.2
     dev: false
 
@@ -6134,17 +6097,6 @@ packages:
       yargs: 15.4.1
     dev: true
 
-  /solid-floating-ui/0.2.0_sadgqcswk3ornos2gvsiom63vu:
-    resolution: {integrity: sha512-c1iXyQ8AU62bzZtPVggpp+rzTAuE1PkGs2HI9jIoaJV/RfOjGiM4HTOcAVGwkg/Gm0XFqj8w4bTptAM3rqbrRA==}
-    engines: {node: '>=10'}
-    peerDependencies:
-      '@floating-ui/dom': ^1.0
-      solid-js: ^1.3
-    dependencies:
-      '@floating-ui/dom': 1.0.4
-      solid-js: 1.6.2
-    dev: false
-
   /solid-headless/0.13.0_solid-js@1.6.2:
     resolution: {integrity: sha512-N118iPl7W5lyug4K+4c0cwM8YR2yEVJ/3H4wq6tVijATHfXfLnB1ACFI5GGHSXlwu70PUzaGSKwcVqLlloUMyA==}
     engines: {node: '>=10'}
@@ -6237,14 +6189,6 @@ packages:
       wait-on: 6.0.1_debug@4.3.4
     transitivePeerDependencies:
       - supports-color
-
-  /solid-transition-group/0.0.12_solid-js@1.6.2:
-    resolution: {integrity: sha512-Eu4MfNZSSxM67C+4EXaoDiWr4BFbDLg3j30JQJgQEIH9UDOfgNPfZlsFDhT/PxwJqhe6sn85W+dbmYJzBmjpAA==}
-    peerDependencies:
-      solid-js: ^1.0.0
-    dependencies:
-      solid-js: 1.6.2
-    dev: false
 
   /solid-use/0.5.0_solid-js@1.6.2:
     resolution: {integrity: sha512-z1AaS99SL3gNP70K4+XIVKGXDRI56m3Q6Q4X63bfgw0kaN6cwT4SAyFZAmIRjHcvf5rOMRQfNgUV4YVDha+LcQ==}

@@ -43,6 +43,7 @@ export const selectIcon = style({
 })
 
 export const options = style({
+  position: 'relative',
   marginLeft: 'auto',
 })
 export const optionsButton = style([
@@ -59,8 +60,12 @@ export const optionsIcon = style({
 })
 
 export const optionsPanel = style({
-  position: 'fixed',
+  position: 'absolute',
   zIndex: 9999,
+  width: 'max-content',
+  top: '0',
+  right: '100%',
+  marginRight: spacing[2],
   padding: spacing[2],
   ...rounded('md'),
   backgroundColor: color.gray[100],
