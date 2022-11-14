@@ -31,6 +31,11 @@ export function createController() {
     onInspectValue(node) {
       queueMicrotask(() => debug.inspector.toggleValueNode(node))
     },
+    onOpenLocation() {
+      queueMicrotask(() => {
+        console.log('onOpenLocation')
+      })
+    },
   })
 
   debug.listenTo('StructureUpdates', updates => {

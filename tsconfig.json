@@ -4,7 +4,9 @@
     "lib": ["DOM", "DOM.Iterable", "ESNext"],
     "jsx": "preserve",
     "jsxImportSource": "solid-js",
-    "types": ["node"]
+    "types": ["node"],
+    "declarationMap": true,
+    "declaration": true
   },
   "exclude": ["node_modules", "**/dist/**/*"]
 }

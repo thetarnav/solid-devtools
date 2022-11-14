@@ -28,6 +28,7 @@ interface ClientListenerPayloads {
   InspectValue: ToggleInspectedValueData
   DevtoolsLocatorStateChange: boolean
   HighlightElementChange: HighlightElementPayload
+  OpenLocation: void
 }
 export type ClientListeners = ListenersFromPayloads<ClientListenerPayloads>
 
@@ -158,13 +159,17 @@ const [Provider, useControllerCtx] = createContextProvider((props: { controller:
   )
 
   // set inspected node
-  inspector.setOnInspectedNodeHandler(node => {
+  inspector.setOnInspectNode(node => {
     client.onInspectNode(
       node ? { nodeId: node.id, rootId: structure.getParentRoot(node).id } : null,
     )
   })
   // toggle inspected value/prop/signal
-  inspector.setOnInspectedValueHandler(client.onInspectValue)
+  inspector.setOnInspectValue(client.onInspectValue)
+
+  // LOCATION
+  // open component location
+  inspector.setOnOpenLocation(client.onOpenLocation)
 
   // highlight hovered element
   createEffect(

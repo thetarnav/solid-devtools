@@ -10,7 +10,7 @@ import { OwnerName } from '@/ui/components/Owner'
 
 export default function Details() {
   const { inspector } = useController()
-  const { details, inspectedNode } = inspector
+  const { details, inspectedNode, openComponentLocation } = inspector
 
   return (
     <Show when={inspectedNode()}>
@@ -22,7 +22,7 @@ export default function Details() {
               <Icon.Eye class={styles.actions.icon} />
             </button> */}
             {details()?.location && (
-              <button class={styles.actions.button}>
+              <button class={styles.actions.button} onClick={openComponentLocation}>
                 <Icon.Code class={styles.actions.icon} />
               </button>
             )}
