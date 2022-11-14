@@ -119,8 +119,7 @@ export function createLocator({
     if ('nodeId' in data) {
       const { rootId, nodeId } = data
       const component = findComponent(rootId, nodeId)
-      if (!component) return warn('No component found', nodeId)
-      pluginTarget({ ...component, rootId })
+      component && pluginTarget({ ...component, rootId })
     }
     // highlight element
     else {

@@ -1,29 +1,31 @@
-import { Component } from 'solid-js'
+import { Component, JSX } from 'solid-js'
 import { NodeType } from '@solid-devtools/debugger'
 import { Icon } from '..'
 import * as styles from './Owner.css'
 
 export const NodeTypeIcon: Component<{ type: NodeType; class?: string }> = props => {
-  const IconComponent: Icon.IconComponent | null = (() => {
-    switch (props.type) {
-      case NodeType.Memo:
-        return Icon.Memo
-      case NodeType.Effect:
-        return Icon.Effect
-      case NodeType.Root:
-        return Icon.Root
-      case NodeType.Render:
-        return Icon.RenderEffect
-      case NodeType.Computation:
-        return Icon.Computation
-      case NodeType.Context:
-        return Icon.Context
-      default:
-        return null
-    }
-  })()
-
-  return IconComponent && <IconComponent class={props.class} />
+  let prevIcon: Icon.IconComponent | undefined
+  let prevRendered: JSX.Element | undefined
+  return () => {
+    const IconComp = (() => {
+      switch (props.type) {
+        case NodeType.Memo:
+          return Icon.Memo
+        case NodeType.Effect:
+          return Icon.Effect
+        case NodeType.Root:
+          return Icon.Root
+        case NodeType.Render:
+          return Icon.RenderEffect
+        case NodeType.Computation:
+          return Icon.Computation
+        case NodeType.Context:
+          return Icon.Context
+      }
+    })()
+    if (IconComp === prevIcon) return prevRendered
+    return (prevRendered = (prevIcon = IconComp) ? <IconComp class={props.class} /> : null)
+  }
 }
 
 export const OwnerName: Component<{

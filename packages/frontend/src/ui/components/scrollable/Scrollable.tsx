@@ -48,16 +48,15 @@ export const Scrollable: ParentComponent<ComponentProps<'div'>> = props => {
   })
 
   let container!: HTMLDivElement
+  const containerProps = combineProps(props, {
+    ref: el => (container = el),
+    get class() {
+      return styles.container[holdingSpace() ? (dragging() ? 'dragging' : 'space') : 'normal']
+    },
+    onPointerDown,
+  })
   return (
-    <div
-      {...combineProps(props, {
-        ref: el => (container = el),
-        get class() {
-          return styles.container[holdingSpace() ? (dragging() ? 'dragging' : 'space') : 'normal']
-        },
-        onPointerDown,
-      })}
-    >
+    <div {...containerProps}>
       <div class={styles.overlay[holdingSpace() ? 'space' : 'normal']}></div>
       <div class={styles.content}>{props.children}</div>
     </div>

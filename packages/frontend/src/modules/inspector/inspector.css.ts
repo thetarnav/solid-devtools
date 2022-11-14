@@ -2,26 +2,32 @@ import { spacing, theme, padding } from '@/ui/theme'
 import { colorDisabled, panelBorder } from '@/ui/theme/vars.css'
 import { style } from '@vanilla-extract/css'
 
-export const scrollWrapper = style({
-  height: '100%',
-  width: '100%',
-  overflow: 'hidden',
-})
-
 export const root = style({
-  minWidth: '100%',
-  width: 'fit-content',
+  height: '100%',
+  display: 'grid',
+  gridTemplateRows: `${spacing[8]} 1fr`,
+  gridTemplateColumns: '100%',
 })
 
 export const header = style({
   ...padding(0, 4),
-  height: spacing[10],
   display: 'flex',
   alignItems: 'center',
   borderBottom: panelBorder,
 })
+export const codeIcon = style({
+  width: spacing[4],
+  height: spacing[4],
+})
+
+export const scrollWrapper = style({
+  width: '100%',
+  overflow: 'hidden',
+})
 
 export const content = style({
+  minWidth: '100%',
+  width: 'fit-content',
   padding: spacing[4],
   paddingBottom: spacing[16],
   display: 'flex',

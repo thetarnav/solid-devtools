@@ -19,13 +19,14 @@ export const container = style({
   selectors: {
     '&[data-open="true"]': {
       gridTemplateColumns: `minmax(${minWidth}, ${progress}) ${splitWidth} minmax(${minWidth}, 1fr)`,
+      gridTemplateRows: '100%',
     },
   },
   ...media({
     [mobile]: {
       selectors: {
         '&[data-open="true"]': {
-          gridTemplateColumns: `1fr`,
+          gridTemplateColumns: `100%`,
           gridTemplateRows: `minmax(${minHeight}, ${progress}) ${splitHeight} minmax(${minHeight}, 1fr)`,
         },
       },
@@ -33,12 +34,10 @@ export const container = style({
   }),
 })
 
-export const mainContent = style({
+export const content = style({
   position: 'relative',
   zIndex: 1,
   overflow: 'hidden',
-  height: '100%',
-  width: '100%',
 })
 
 export const split = style({

@@ -59,7 +59,7 @@ export function Splitter(props: {
       })}
       ref={container}
     >
-      <div class={styles.mainContent}>{props.children}</div>
+      <div class={styles.content}>{props.children}</div>
       <Show when={sideResolved()}>
         <div class={styles.split}>
           <button class={styles.toggle} onClick={() => props.onToggle(!sideResolved())}>
@@ -67,8 +67,8 @@ export function Splitter(props: {
           </button>
           <div class={styles.splitHandle} onPointerDown={onPointerDown}></div>
         </div>
+        <div class={styles.content}>{sideResolved()}</div>
       </Show>
-      {sideResolved()}
     </div>
   )
 }
