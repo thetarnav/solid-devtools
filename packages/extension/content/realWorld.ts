@@ -1,10 +1,8 @@
-import { postWindowMessage } from 'solid-devtools/bridge'
-
 let notified = false
 function notify() {
   if (notified) return
   notified = true
-  postWindowMessage('SolidOnPage')
+  postMessage('__SolidOnPage__', '*')
 }
 
 if (window.Solid$$ == true) {

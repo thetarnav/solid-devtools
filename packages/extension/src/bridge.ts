@@ -1,9 +1,12 @@
 import { Controller } from '@solid-devtools/frontend'
 import { createPortMessanger, PANEL_CONNECTION_NAME } from './messanger'
-import { once } from 'solid-devtools/bridge'
+import { Messages, once } from 'solid-devtools/bridge'
 
 const port = chrome.runtime.connect({ name: PANEL_CONNECTION_NAME })
-const { postPortMessage: toBackground, onPortMessage: fromBackground } = createPortMessanger(port)
+const { postPortMessage: toBackground, onPortMessage: fromBackground } = createPortMessanger<
+  Messages.Client,
+  Messages.Extension
+>(port)
 
 export default function createBridge({
   setVersions,
@@ -19,19 +22,19 @@ export default function createBridge({
 
   const controller = new Controller({
     onDevtoolsLocatorStateChange(enabled) {
-      toBackground('ExtLocatorMode', enabled)
+      toBackground('LocatorMode', enabled)
     },
     onHighlightElementChange(data) {
       toBackground('HighlightElement', data)
     },
     onInspectValue(payload) {
-      toBackground('ToggleInspectedValue', payload)
+      toBackground('InspectValue', payload)
     },
     onInspectNode(node) {
-      toBackground('SetInspectedNode', node)
+      toBackground('InspectNode', node)
     },
     onOpenLocation() {
-      // TODO
+      toBackground('OpenLocation')
     },
   })
 
@@ -41,13 +44,13 @@ export default function createBridge({
 
   fromBackground('ComputationUpdates', controller.updateComputation.bind(controller))
 
-  fromBackground('SetInspectedDetails', controller.setInspectedDetails.bind(controller))
+  fromBackground('InspectedDetails', controller.setInspectedDetails.bind(controller))
 
   fromBackground('InspectorUpdate', controller.updateInspector.bind(controller))
 
-  fromBackground('ClientLocatorMode', controller.setLocatorState.bind(controller))
+  fromBackground('LocatorMode', controller.setLocatorState.bind(controller))
 
-  fromBackground('ClientHoveredComponent', controller.setHoveredNode.bind(controller))
+  fromBackground('HoverComponent', controller.setHoveredNode.bind(controller))
 
   fromBackground('ClientInspectedNode', controller.setInspectedNode.bind(controller))
 
