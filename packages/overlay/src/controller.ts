@@ -33,7 +33,7 @@ export function createController() {
     },
     onOpenLocation() {
       queueMicrotask(() => {
-        console.log('onOpenLocation')
+        // TODO
       })
     },
   })
