@@ -150,6 +150,13 @@ export default createInternalRoot(() => {
     setLocatorEnabledSignal,
   })
 
+  // Opens the source code of the inspected component
+  function openInspectedNodeLocation() {
+    const details = inspector.getLastDetails()
+    if (!details || !details.location) return
+    locator.openElementSourceCode(details.location, details.name)
+  }
+
   /**
    * Used for connecting debugger to devtools
    */
@@ -159,6 +166,7 @@ export default createInternalRoot(() => {
       setUserEnabledSignal,
       triggerUpdate,
       forceTriggerUpdate,
+      openInspectedNodeLocation,
       inspector: {
         setInspectedNode: inspector.setInspectedNode,
         toggleValueNode: inspector.toggleValueNode,

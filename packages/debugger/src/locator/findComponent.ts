@@ -1,32 +1,74 @@
-import { LOCATION_ATTRIBUTE_NAME } from '@solid-devtools/transform/types'
+import {
+  LocationAttr,
+  LOCATION_ATTRIBUTE_NAME,
+  WINDOW_PROJECTPATH_PROPERTY,
+} from '@solid-devtools/transform/types'
 import { isWindows } from '@solid-primitives/platform'
 import { Mapped, NodeID } from '../types'
-import { ElementLocation } from './goToSource'
 
 export type LocatorComponent = {
   id: NodeID
   rootId: NodeID
   name: string
   element: HTMLElement
-  location: ElementLocation | null
+  location?: LocationAttr | undefined
 }
+
+export type TargetIDE = 'vscode' | 'webstorm' | 'atom' | 'vscode-insiders'
+
+export type SourceLocation = {
+  filePath: string
+  line: number
+  column: number
+}
+
+export type SourceCodeData = SourceLocation & { projectPath: string; element: HTMLElement | string }
+
+export type TargetURLFunction = (data: SourceCodeData) => string | void
 
 const LOC_ATTR_REGEX_WIN = /^((?:\\?[^\s][^/\\:\"\?\*<>\|]+)+):([0-9]+):([0-9]+)$/
 const LOC_ATTR_REGEX_UNIX =
   /^((?:(?:\.\/|\.\.\/|\/)?(?:\.?\w+\/)*)(?:\.?\w+\.?\w+)):([0-9]+):([0-9]+)$/
 
-const LOC_ATTR_REGEX = isWindows ? LOC_ATTR_REGEX_WIN : LOC_ATTR_REGEX_UNIX
+export const LOC_ATTR_REGEX = isWindows ? LOC_ATTR_REGEX_WIN : LOC_ATTR_REGEX_UNIX
 
-export function getLocationFromAttribute(value: string): ElementLocation | null {
-  const match = value.match(LOC_ATTR_REGEX)
-  if (!match) return null
-  const [, filePath, line, column] = match
-  return { filePath, line: +line, column: +column }
+export function getLocationAttr(element: Element): LocationAttr | undefined {
+  const attr = element.getAttribute(LOCATION_ATTRIBUTE_NAME)
+  if (!attr || !LOC_ATTR_REGEX.test(attr)) return
+  return attr as LocationAttr
 }
 
-export function getLocationFromElement(element: Element): ElementLocation | null {
-  const locAttr = element.getAttribute(LOCATION_ATTRIBUTE_NAME)
-  return locAttr ? getLocationFromAttribute(locAttr) : null
+const targetIDEMap: Record<TargetIDE, (data: SourceCodeData) => string> = {
+  vscode: ({ projectPath, filePath, line, column }) =>
+    `vscode://file/${projectPath}/${filePath}:${line}:${column}`,
+  'vscode-insiders': ({ projectPath, filePath, line, column }) =>
+    `vscode-insiders://file/${projectPath}/${filePath}:${line}:${column}`,
+  atom: ({ projectPath, filePath, line, column }) =>
+    `atom://core/open/file?filename=${projectPath}/${filePath}&line=${line}&column=${column}`,
+  webstorm: ({ projectPath, filePath, line, column }) =>
+    `webstorm://open?file=${projectPath}/${filePath}&line=${line}&column=${column}`,
+}
+
+function getTargetURL(target: TargetIDE | TargetURLFunction, data: SourceCodeData): string | void {
+  if (typeof target === 'function') return target(data)
+  return targetIDEMap[target](data)
+}
+
+export function getSourceCodeData(
+  location: LocationAttr,
+  element: HTMLElement | string,
+): SourceCodeData | undefined {
+  const projectPath: string | undefined = (window as any)[WINDOW_PROJECTPATH_PROPERTY]
+  if (!projectPath) return
+  const match = location.match(LOC_ATTR_REGEX)
+  if (!match) return
+  const [, filePath, line, column] = match
+  return { filePath, line: +line, column: +column, projectPath, element }
+}
+
+export function openSourceCode(target: TargetIDE | TargetURLFunction, data: SourceCodeData): void {
+  const url = getTargetURL(target, data)
+  if (typeof url === 'string') window.open(url, '_blank')
 }
 
 const findComponentCache = new Map<HTMLElement, LocatorComponent | null>()
@@ -54,12 +96,12 @@ export function findLocatorComponent(
 
   const checked: HTMLElement[] = []
   const toCheck = [target]
-  let location: ElementLocation | null = null
-  let element: HTMLElement | null = null
+  let location: LocationAttr | undefined
+  let element: HTMLElement | undefined
 
   for (const el of toCheck) {
     if (!location) {
-      const loc = getLocationFromElement(el)
+      const loc = getLocationAttr(el)
       if (loc) {
         location = loc
         element = el

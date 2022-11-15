@@ -3,7 +3,7 @@ import { throttle, scheduleIdle } from '@solid-primitives/scheduled'
 import { warn } from '@solid-devtools/shared/utils'
 import { DebuggerEventHub } from '../main/plugin'
 import { walkSolidRoot } from '../main/roots'
-import { Core, EncodedValue, NodeID, Solid, ValueItemID } from '../main/types'
+import { Core, EncodedValue, Mapped, NodeID, Solid, ValueItemID } from '../main/types'
 import { makeSolidUpdateListener } from '../main/update'
 import { NodeIDMap, encodeValue } from './serialize'
 import { observeStoreNode, StoreUpdateData } from './store'
@@ -40,7 +40,8 @@ export function createInspector(
   debuggerEnabled: Accessor<boolean>,
   { eventHub }: { eventHub: DebuggerEventHub },
 ) {
-  let inspectedOwner: Solid.Owner | null = null
+  let lastDetails: Mapped.OwnerDetails | undefined
+  let inspectedOwner: Solid.Owner | undefined
   let nodeIdMap = new NodeIDMap<HTMLElement | Core.Store.StoreNode>()
   let valueMap = new ValueNodeMap()
   let checkProxyProps: (() => { added: string[]; removed: string[] } | undefined) | undefined
@@ -138,10 +139,11 @@ export function createInspector(
     )
   }
 
-  function setInspectedDetails(owner: Solid.Owner | null) {
+  function setInspectedDetails(owner: Solid.Owner | undefined) {
     inspectedOwner && clearOwnerObservers(inspectedOwner)
     inspectedOwner = owner
     checkProxyProps = undefined
+    lastDetails = undefined
     valueMap.reset()
     clearUpdates()
     if (!owner) return
@@ -154,6 +156,7 @@ export function createInspector(
       eventHub.emit('InspectedNodeDetails', result.details)
       valueMap = result.valueMap
       nodeIdMap = result.nodeIdMap
+      lastDetails = result.details
       checkProxyProps = result.checkProxyProps
     })
   }
@@ -162,7 +165,7 @@ export function createInspector(
     if (!debuggerEnabled()) return
 
     // Clear the inspected owner when the debugger is disabled
-    onCleanup(() => setInspectedDetails(null))
+    onCleanup(() => setInspectedDetails(undefined))
 
     makeSolidUpdateListener(() => {
       if (checkProxyProps) triggerPropsCheck()
@@ -170,12 +173,13 @@ export function createInspector(
   })
 
   return {
+    getLastDetails: () => lastDetails,
     setInspectedNode(data: { rootId: NodeID; nodeId: NodeID } | null) {
-      if (!data) return setInspectedDetails(null)
+      if (!data) return setInspectedDetails(undefined)
       const { rootId, nodeId } = data
 
       const walkResult = walkSolidRoot(rootId, nodeId)
-      if (!walkResult || !walkResult.inspectedOwner) return setInspectedDetails(null)
+      if (!walkResult || !walkResult.inspectedOwner) return setInspectedDetails(undefined)
 
       setInspectedDetails(walkResult.inspectedOwner)
     },

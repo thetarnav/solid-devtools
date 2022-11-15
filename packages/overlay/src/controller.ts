@@ -32,9 +32,7 @@ export function createController() {
       queueMicrotask(() => debug.inspector.toggleValueNode(node))
     },
     onOpenLocation() {
-      queueMicrotask(() => {
-        // TODO
-      })
+      queueMicrotask(() => debug.openInspectedNodeLocation())
     },
   })
 
