@@ -30,6 +30,9 @@ export default function createBridge({
     onInspectNode(node) {
       toBackground('SetInspectedNode', node)
     },
+    onOpenLocation() {
+      // TODO
+    },
   })
 
   fromBackground('StructureUpdate', controller.updateStructure.bind(controller))
