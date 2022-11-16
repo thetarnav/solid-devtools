@@ -107,11 +107,7 @@ export const onAllClientMessages = (fn: (data: { id: string; payload: any }) => 
 }
 
 export const isForwardMessage = (data: any): data is ForwardPayload =>
-  typeof data === 'object' &&
-  data !== null &&
-  data.forwarding === true &&
-  'id' in data &&
-  'payload' in data
+  typeof data === 'object' && data !== null && data.forwarding === true && 'id' in data
 
 export const forwardMessageToWindow = (message: ForwardPayload) => {
   postMessage({ id: message.id, payload: message.payload }, '*')

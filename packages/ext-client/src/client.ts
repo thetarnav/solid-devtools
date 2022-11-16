@@ -64,5 +64,7 @@ createInternalRoot(() => {
     debug.locator.onHoveredComponent(data => toContent('HoverComponent', data))
 
     onCleanup(fromContent('HighlightElement', payload => debug.locator.setHighlightTarget(payload)))
+
+    onCleanup(fromContent('OpenLocation', debug.openInspectedNodeLocation))
   })
 })

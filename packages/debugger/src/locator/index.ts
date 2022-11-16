@@ -165,7 +165,7 @@ export function createLocator({
         const comp = highlighted.find(({ element }) => target.contains(element)) ?? highlighted[0]
         if (!comp) return
         const sourceCodeData = comp.location && getSourceCodeData(comp.location, comp.element)
-        if (runClickInterceptors(e, comp, sourceCodeData) && targetIDE && sourceCodeData) {
+        if (!runClickInterceptors(e, comp, sourceCodeData) && targetIDE && sourceCodeData) {
           e.preventDefault()
           e.stopPropagation()
           openSourceCode(targetIDE, sourceCodeData)
