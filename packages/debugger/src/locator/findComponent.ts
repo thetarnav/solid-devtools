@@ -66,6 +66,13 @@ export function getSourceCodeData(
   return { filePath, line: +line, column: +column, projectPath, element }
 }
 
+export function getLocationFromAttribute(location: LocationAttr): SourceLocation | undefined {
+  const match = location.match(LOC_ATTR_REGEX)
+  if (!match) return
+  const [, filePath, line, column] = match
+  return { filePath, line: +line, column: +column }
+}
+
 export function openSourceCode(target: TargetIDE | TargetURLFunction, data: SourceCodeData): void {
   const url = getTargetURL(target, data)
   if (typeof url === 'string') window.open(url, '_blank')
