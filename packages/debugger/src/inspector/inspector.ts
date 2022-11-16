@@ -111,7 +111,7 @@ export function collectOwnerDetails(
   $nodeIdMap = new NodeIDMap()
   $valueMap = new ValueNodeMap()
 
-  const type = markOwnerType(owner)
+  let type = markOwnerType(owner)
   let { sourceMap, owned } = owner
   let getValue = () => owner.value
 
@@ -153,10 +153,11 @@ export function collectOwnerDetails(
     }
   }
 
+  type = markOwnerType(owner)
   const details: Mapped.OwnerDetails = {
     id: markNodeID(owner),
     name: markOwnerName(owner),
-    type: markOwnerType(owner),
+    type,
     signals,
   }
 
@@ -167,9 +168,10 @@ export function collectOwnerDetails(
     observeValueUpdate(owner, onValueUpdate, INSPECTOR)
     details.sources = markNodesID(owner.sources)
 
-    // Component Props
-    if (isSolidComponent(owner)) {
-      const { props } = owner
+    // handle Component (props and location)
+    if (type === NodeType.Component) {
+      const comp = owner as Solid.Component
+      const { props } = comp
       // proxy props need to be checked for changes
       const proxy = !!(props as any)[$PROXY]
       const record: Mapped.Props['record'] = {}
@@ -183,6 +185,7 @@ export function collectOwnerDetails(
         }
       }
       details.props = { proxy, record }
+      if (comp.location) details.location = comp.location
 
       if (proxy) {
         let oldKeys: readonly string[] = Object.keys(record)

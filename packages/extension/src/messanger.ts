@@ -1,4 +1,4 @@
-import { OnMessageFn, PostMessageFn, Messages } from 'solid-devtools/bridge'
+import { OnMessageFn, PostMessageFn, ForwardPayload } from 'solid-devtools/bridge'
 import { log } from '@solid-devtools/shared/utils'
 
 export const CONTENT_CONNECTION_NAME = '[solid-devtools]: Content Script'
@@ -6,12 +6,19 @@ export const DEVTOOLS_CONNECTION_NAME = '[solid-devtools]: Devtools Script'
 export const POPUP_CONNECTION_NAME = '[solid-devtools]: Popup'
 export const PANEL_CONNECTION_NAME = '[solid-devtools]: Devtools Panel'
 
-export function createPortMessanger(port: chrome.runtime.Port): {
-  postPortMessage: PostMessageFn
-  onPortMessage: OnMessageFn
+export function createPortMessanger<
+  IM extends { [K in string]: any } = {},
+  OM extends { [K in string]: any } = {},
+>(
+  port: chrome.runtime.Port,
+): {
+  postPortMessage: PostMessageFn<OM>
+  onPortMessage: OnMessageFn<IM>
+  onForwardMessage: (handler: (payload: ForwardPayload) => void) => void
 } {
+  let forwardHandler: ((message: ForwardPayload) => void) | undefined
   let listeners: {
-    [K in keyof Messages]?: ((payload: Messages[K]) => void)[]
+    [K in any]?: ((payload: any) => void)[]
   } = {}
 
   let connected = true
@@ -26,7 +33,9 @@ export function createPortMessanger(port: chrome.runtime.Port): {
     if (!event || typeof event !== 'object') return
     const e = event as Record<PropertyKey, unknown>
     if (typeof e.id !== 'string') return
-    listeners[e.id as keyof Messages]?.forEach(f => f(e.payload as never))
+    const arr = listeners[e.id]
+    if (arr) arr.forEach(fn => fn(e.payload))
+    else if (forwardHandler) forwardHandler({ id: e.id, payload: e.payload, forwarding: true })
   }
   port.onMessage.addListener(onMessage)
 
@@ -41,6 +50,9 @@ export function createPortMessanger(port: chrome.runtime.Port): {
       if (!arr) arr = listeners[id] = []
       arr.push(handler)
       return () => (listeners[id] = arr!.filter(l => l !== handler) as any)
+    },
+    onForwardMessage(handler) {
+      forwardHandler = handler
     },
   }
 }

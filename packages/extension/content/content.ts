@@ -1,7 +1,11 @@
 import {
-  onWindowMessage as fromClient,
-  postWindowMessage as toClient,
+  makeMessageListener,
+  makePostMessage,
   startListeningWindowMessages,
+  onAllClientMessages,
+  ForwardPayload,
+  isForwardMessage,
+  forwardMessageToWindow,
 } from 'solid-devtools/bridge'
 import { error, warn } from '@solid-devtools/shared/utils'
 import { createPortMessanger, CONTENT_CONNECTION_NAME } from '../src/messanger'
@@ -15,6 +19,9 @@ const matchingClientVersion = __CLIENT_VERSION__
 const port = chrome.runtime.connect({ name: CONTENT_CONNECTION_NAME })
 
 startListeningWindowMessages()
+const fromClient = makeMessageListener()
+const toClient = makePostMessage()
+
 const { postPortMessage: toBackground, onPortMessage: fromBackground } = createPortMessanger(port)
 
 {
@@ -24,7 +31,13 @@ const { postPortMessage: toBackground, onPortMessage: fromBackground } = createP
   script.type = 'module'
   script.addEventListener('error', err => error('Real world script failed to load.', err))
   document.head.append(script)
-  fromClient('SolidOnPage', () => toBackground('SolidOnPage'))
+  const handler = (e: MessageEvent) => {
+    if (e.data === '__SolidOnPage__') {
+      toBackground('SolidOnPage')
+      window.removeEventListener('message', handler)
+    }
+  }
+  window.addEventListener('message', handler)
 }
 
 fromClient('ClientConnected', clientVersion => {
@@ -65,27 +78,16 @@ Please install "solid-devtools@${matchingClientVersion}" in your project`,
 
 fromClient('ResetPanel', () => toBackground('ResetPanel'))
 
-fromClient('StructureUpdate', graph => toBackground('StructureUpdate', graph))
-
-fromClient('ComputationUpdates', e => toBackground('ComputationUpdates', e))
-
-fromClient('SetInspectedDetails', e => toBackground('SetInspectedDetails', e))
-
-fromClient('InspectorUpdate', e => toBackground('InspectorUpdate', e))
-
-fromClient('ClientHoveredComponent', e => toBackground('ClientHoveredComponent', e))
-
-fromClient('ClientInspectedNode', e => toBackground('ClientInspectedNode', e))
-
 fromBackground('DevtoolsOpened', () => toClient('DevtoolsOpened'))
 fromBackground('DevtoolsClosed', () => toClient('DevtoolsClosed'))
 
-fromBackground('ForceUpdate', () => toClient('ForceUpdate'))
+onAllClientMessages(data => {
+  // forward all client messages to the background script in
+  const payload: ForwardPayload = { forwarding: true, id: data.id, payload: data.payload }
+  port.postMessage(payload)
+})
 
-fromBackground('ToggleInspectedValue', e => toClient('ToggleInspectedValue', e))
-fromBackground('SetInspectedNode', e => toClient('SetInspectedNode', e))
-
-fromBackground('HighlightElement', e => toClient('HighlightElement', e))
-
-fromClient('ClientLocatorMode', e => toBackground('ClientLocatorMode', e))
-fromBackground('ExtLocatorMode', e => toClient('ExtLocatorMode', e))
+port.onMessage.addListener(data => {
+  // forward all devtools messages (from background) to the client
+  if (isForwardMessage(data)) forwardMessageToWindow(data)
+})

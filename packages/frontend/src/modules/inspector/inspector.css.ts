@@ -1,48 +1,70 @@
-import { dark, spacing, color, media } from '@/ui/theme'
-import { colorDisabled } from '@/ui/theme/vars.css'
-import { style } from '@vanilla-extract/css'
+import { createVar, style } from '@vanilla-extract/css'
+import { spacing, theme, padding, rounded, centerChild, transition } from '@/ui/theme'
+import { colorDisabled, colorDisabledValue, panelBorder } from '@/ui/theme/vars.css'
+
+export const root = style({
+  height: '100%',
+  display: 'grid',
+  gridTemplateRows: `${spacing[8]} 1fr`,
+  gridTemplateColumns: '100%',
+})
+
+export const header = style({
+  ...padding(0, 2, 0, 4),
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  borderBottom: panelBorder,
+})
+
+export const actions = (() => {
+  const textOpacity = createVar()
+  const bgOpacity = createVar()
+
+  return {
+    container: style({
+      display: 'flex',
+      alignItems: 'center',
+      columnGap: spacing[1],
+    }),
+    button: style({
+      width: spacing[6],
+      height: spacing[6],
+      ...rounded(),
+      ...centerChild,
+      color: `rgb(${colorDisabledValue} / ${textOpacity})`,
+      backgroundColor: `rgb(${colorDisabledValue} / ${bgOpacity})`,
+      vars: {
+        [bgOpacity]: '0',
+        [textOpacity]: '0.85',
+      },
+      ...transition(['background-color', 'color']),
+      selectors: {
+        '&:hover': {
+          vars: {
+            [bgOpacity]: '0.15',
+            [textOpacity]: '1',
+          },
+        },
+      },
+    }),
+    icon: style({
+      width: spacing[4],
+      height: spacing[4],
+    }),
+  }
+})()
 
 export const scrollWrapper = style({
-  height: '100%',
   width: '100%',
   overflow: 'hidden',
 })
 
-export const root = style({
+export const content = style({
   minWidth: '100%',
   width: 'fit-content',
-})
-export const rootMargin = style({
   padding: spacing[4],
   paddingBottom: spacing[16],
-})
-
-export const header = style({
-  marginBottom: spacing[4],
-})
-
-export const h1 = style({
-  fontSize: spacing[4],
-  fontWeight: 'bold',
-  color: color.black,
-  ...media({
-    [dark]: {
-      color: color.gray[50],
-    },
-  }),
-})
-export const id = style({
-  fontSize: spacing[3],
-  color: colorDisabled,
-  fontWeight: 400,
-  textTransform: 'uppercase',
-})
-export const type = style({
-  fontWeight: 400,
-  color: colorDisabled,
-})
-
-export const content = style({
   display: 'flex',
   flexDirection: 'column',
   rowGap: spacing[4],
@@ -52,4 +74,10 @@ export const h2 = style({
   color: colorDisabled,
   marginBottom: spacing[1],
   textTransform: 'capitalize',
+})
+
+export const location = style({
+  marginTop: spacing[1],
+  marginLeft: '2ch',
+  fontFamily: theme.font.mono,
 })

@@ -1,11 +1,11 @@
-import { createComputed, children, createEffect, createSignal, JSX, Show } from 'solid-js'
+import { createComputed, children, createSignal, JSX, Show } from 'solid-js'
 import { makeEventListener } from '@solid-primitives/event-listener'
 import { clamp } from '@solid-primitives/utils'
-import { useWindowSize } from '@solid-primitives/resize-observer'
 import { assignInlineVars } from '@vanilla-extract/dynamic'
 import { createBodyCursor } from '@solid-primitives/cursor'
 import { createMediaQuery } from '@solid-primitives/media'
-import { Icon } from '@/ui'
+import { scheduleIdle } from '@solid-primitives/scheduled'
+import { getPositionInElement } from '@solid-primitives/mouse'
 import * as styles from './Splitter.css'
 
 export function Splitter(props: {
@@ -14,16 +14,6 @@ export function Splitter(props: {
   onToggle: (newState: boolean) => void
 }): JSX.Element {
   const sideResolved = children(() => props.side)
-
-  let containerWidth = window.innerWidth
-  let containerHeight = window.innerHeight
-  const vSize = useWindowSize()
-  createEffect(() => {
-    // update the size of the container when the window is resized
-    vSize.width
-    vSize.height
-    ;({ width: containerWidth, height: containerHeight } = container.getBoundingClientRect())
-  })
 
   const [progress, setProgress] = createSignal(0.6)
   const [dragging, setDragging] = createSignal(false)
@@ -37,14 +27,15 @@ export function Splitter(props: {
     setDragging(!isTouch())
   }
 
-  makeEventListener(window, 'pointermove', e => {
-    if (!dragging()) return
-    if (isMobile()) {
-      setProgress(clamp((e.y - (vSize.height - containerHeight)) / containerHeight, 0, 1))
-      return
-    }
-    setProgress(clamp(e.x / containerWidth, 0, 1))
-  })
+  makeEventListener(
+    window,
+    'pointermove',
+    scheduleIdle((e: PointerEvent) => {
+      if (!dragging()) return
+      const toEl = getPositionInElement(e.pageX, e.pageY, container)
+      setProgress(clamp(isMobile() ? toEl.y / toEl.height : toEl.x / toEl.width, 0, 1))
+    }),
+  )
   makeEventListener(window, 'pointerup', setDragging.bind(void 0, false))
 
   createBodyCursor(() => dragging() && (isMobile() ? 'row-resize' : 'col-resize'))
@@ -59,16 +50,17 @@ export function Splitter(props: {
       })}
       ref={container}
     >
-      <div class={styles.mainContent}>{props.children}</div>
+      <div class={styles.content}>{props.children}</div>
       <Show when={sideResolved()}>
         <div class={styles.split}>
-          <button class={styles.toggle} onClick={() => props.onToggle(!sideResolved())}>
-            <Icon.X class={styles.x} />
-          </button>
-          <div class={styles.splitHandle} onPointerDown={onPointerDown}></div>
+          <div
+            class={styles.splitHandle}
+            data-dragging={dragging()}
+            onPointerDown={onPointerDown}
+          ></div>
         </div>
+        <div class={styles.content}>{sideResolved()}</div>
       </Show>
-      {sideResolved()}
     </div>
   )
 }

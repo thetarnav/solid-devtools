@@ -16,6 +16,7 @@ import {
   Mapped,
   EncodedValueOf,
   ValueType,
+  LocationAttr,
 } from '@solid-devtools/debugger/types'
 import type { Structure } from '../structure'
 import { Writable } from 'type-fest'
@@ -42,11 +43,9 @@ export namespace Inspector {
     type: NodeType
     path: Structure.Node[]
     signals: SignalsRecord
-    props?: Readonly<{
-      proxy: boolean
-      record: PropsRecord
-    }>
     ownerValue?: ValueItem | undefined
+    props?: { readonly proxy: boolean; readonly record: PropsRecord }
+    location?: LocationAttr
   }>
 }
 
@@ -69,6 +68,7 @@ function createDetails(
     path,
     signals,
     ownerValue: raw.value ? { itemId: 'value', selected: false, value: raw.value } : undefined,
+    location: raw.location,
   }
   if (raw.props) {
     details.props = {
@@ -259,14 +259,12 @@ export default function createInspector({
   }
 
   /** variable for a callback in bridge.ts */
-  let onInspectedNodeHandler: (node: Structure.Node | null) => void = () => {}
-  let onInspectedValueHandler: (data: ToggleInspectedValueData) => void = () => {}
-  const setOnInspectedValueHandler = (fn: typeof onInspectedValueHandler) =>
-    (onInspectedValueHandler = fn)
-  const setOnInspectedNodeHandler = (fn: typeof onInspectedNodeHandler) =>
-    (onInspectedNodeHandler = fn)
+  let onInspectNode: (node: Structure.Node | null) => void = () => {}
+  let onInspectValue: (data: ToggleInspectedValueData) => void = () => {}
+  const setOnInspectValue = (fn: typeof onInspectValue) => (onInspectValue = fn)
+  const setOnInspectNode = (fn: typeof onInspectNode) => (onInspectNode = fn)
 
-  createEffect(defer(inspectedNode, node => onInspectedNodeHandler(node)))
+  createEffect(defer(inspectedNode, node => onInspectNode(node)))
 
   /**
    * Toggle the inspection of a value item (signal, prop, or owner value)
@@ -288,7 +286,7 @@ export default function createInspector({
         else if (type === 'prop') item = proxy.props?.record[id!]
         if (!item) return
         item.selected = selected = selected ?? !item.selected
-        onInspectedValueHandler({ id: item.itemId, selected })
+        onInspectValue({ id: item.itemId, selected })
       }),
     )
   }
@@ -302,6 +300,15 @@ export default function createInspector({
     setHoveredElement(p => (p === id ? (selected ? id : null) : selected ? id : p))
   }
 
+  //
+  // LOCATION
+  //
+  let onOpenLocation: VoidFunction
+  const setOnOpenLocation = (fn: typeof onOpenLocation) => (onOpenLocation = fn)
+  function openComponentLocation() {
+    onOpenLocation()
+  }
+
   return {
     inspectedNode,
     details,
@@ -310,11 +317,13 @@ export default function createInspector({
     setDetails: setNewDetails,
     update: handleUpdate,
     inspectValueItem,
-    onInspectedHandler: onInspectedValueHandler,
+    onInspectedHandler: onInspectValue,
     hoveredElement,
     toggleHoveredElement,
     handleStructureChange,
-    setOnInspectedValueHandler,
-    setOnInspectedNodeHandler,
+    setOnInspectValue,
+    setOnInspectNode,
+    openComponentLocation,
+    setOnOpenLocation,
   }
 }

@@ -2,9 +2,9 @@ import { Component } from 'solid-js'
 import { NodeType } from '@solid-devtools/debugger/types'
 import { createHover } from '@solid-devtools/shared/primitives'
 import { Icon } from '@/ui'
-import { NodeTypeIcon } from './OwnerNode'
 import { useController } from '@/controller'
 import * as styles from './path.css'
+import { NodeTypeIcon } from '@/ui/components/Owner'
 
 export const OwnerPath: Component = () => {
   const { isNodeHovered, toggleHoveredNode, setInspectedNode, inspectedDetails } = useController()

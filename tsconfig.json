@@ -5,12 +5,8 @@
     "jsx": "preserve",
     "jsxImportSource": "solid-js",
     "types": ["node"],
-    "paths": {
-      "solid-devtools": ["./packages/ext-client/src/index.ts"],
-      "@solid-devtools/shared/*": ["./packages/shared/src/*"],
-      "@solid-devtools/debugger": ["./packages/debugger/src/index.ts"],
-      "@solid-devtools/logger": ["./packages/logger/src/index.ts"]
-    }
+    "declarationMap": true,
+    "declaration": true
   },
   "exclude": ["node_modules", "**/dist/**/*"]
 }

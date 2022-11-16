@@ -1,7 +1,7 @@
 import { style } from '@vanilla-extract/css'
 import { dark, spacing, color, rounded, theme, media } from '@/ui/theme'
 import { toggleButton } from '@/ui/components/button/button.css'
-import { vars, panelBg, panelBorder } from './ui/theme/vars.css'
+import { vars, panelBg, panelBorder, defaultTextColor } from './ui/theme/vars.css'
 
 export const app = style([
   vars,
@@ -12,6 +12,7 @@ export const app = style([
     display: 'grid',
     gridTemplateRows: `${spacing[12]} 1fr`,
     backgroundColor: panelBg,
+    color: defaultTextColor,
     fontSize: theme.fontSize.base,
     fontFamily: theme.font.sans,
   },
@@ -42,6 +43,7 @@ export const selectIcon = style({
 })
 
 export const options = style({
+  position: 'relative',
   marginLeft: 'auto',
 })
 export const optionsButton = style([
@@ -58,8 +60,12 @@ export const optionsIcon = style({
 })
 
 export const optionsPanel = style({
-  position: 'fixed',
+  position: 'absolute',
   zIndex: 9999,
+  width: 'max-content',
+  top: '0',
+  right: '100%',
+  marginRight: spacing[2],
   padding: spacing[2],
   ...rounded('md'),
   backgroundColor: color.gray[100],

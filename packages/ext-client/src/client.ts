@@ -1,78 +1,70 @@
-import { batch, createEffect, onCleanup } from 'solid-js'
+import { createEffect, createSignal, onCleanup } from 'solid-js'
 import { createInternalRoot, useDebugger } from '@solid-devtools/debugger'
-import { onWindowMessage, postWindowMessage, startListeningWindowMessages } from './bridge'
+import {
+  makeMessageListener,
+  Messages,
+  makePostMessage,
+  startListeningWindowMessages,
+} from './bridge'
 import { defer } from '@solid-devtools/shared/primitives'
 
 startListeningWindowMessages()
+const fromContent = makeMessageListener<Messages.Extension>()
+const toContent = makePostMessage<Messages.Client>()
 
 // in case of navigation/page reload, reset the locator mode state in the extension
-postWindowMessage('ResetPanel')
+toContent('ResetPanel')
 
-postWindowMessage('ClientConnected', process.env.VERSION!)
+toContent('ClientConnected', process.env.VERSION!)
 
 let loadedBefore = false
 
 createInternalRoot(() => {
   const debug = useDebugger()
+  const [enabled, setEnabled] = createSignal(false)
+  debug.setUserEnabledSignal(enabled)
 
-  // devtools were opened
-  onWindowMessage('DevtoolsOpened', () => debug.toggleEnabled(true))
-
-  // disable debugger and reset any state
-  onWindowMessage('DevtoolsClosed', () => {
-    batch(() => {
-      debug.toggleEnabled(false)
-      debug.inspector.setInspectedNode(null)
-      debug.locator.setHighlightTarget(null)
-    })
-  })
+  fromContent('DevtoolsOpened', () => setEnabled(true))
+  fromContent('DevtoolsClosed', () => setEnabled(false))
 
   createEffect(() => {
-    if (!debug.enabled()) return
+    if (!enabled()) return
 
     if (loadedBefore) debug.forceTriggerUpdate()
     else loadedBefore = true
 
-    onCleanup(onWindowMessage('ForceUpdate', () => debug.forceTriggerUpdate()))
+    onCleanup(fromContent('ForceUpdate', () => debug.forceTriggerUpdate()))
 
-    onCleanup(onWindowMessage('ToggleInspectedValue', debug.inspector.toggleValueNode))
-    onCleanup(onWindowMessage('SetInspectedNode', debug.inspector.setInspectedNode))
+    onCleanup(fromContent('InspectValue', debug.inspector.toggleValueNode))
+    onCleanup(fromContent('InspectNode', debug.inspector.setInspectedNode))
 
-    debug.listenTo('StructureUpdates', updates => postWindowMessage('StructureUpdate', updates))
+    debug.listenTo('StructureUpdates', updates => toContent('StructureUpdate', updates))
 
     debug.listenTo('ComputationUpdates', updates => {
-      postWindowMessage('ComputationUpdates', updates)
+      toContent('ComputationUpdates', updates)
     })
 
-    debug.listenTo('InspectorUpdate', update => postWindowMessage('InspectorUpdate', update))
+    debug.listenTo('InspectorUpdate', update => toContent('InspectorUpdate', update))
 
     // send the focused owner details
-    debug.listenTo('InspectedNodeDetails', details => {
-      postWindowMessage('SetInspectedDetails', details)
-    })
+    debug.listenTo('InspectedNodeDetails', details => toContent('InspectedDetails', details))
 
     // state of the extension's locator mode
-    onCleanup(onWindowMessage('ExtLocatorMode', debug.locator.toggleEnabled))
-    createEffect(
-      defer(debug.locator.enabledByDebugger, state =>
-        postWindowMessage('ClientLocatorMode', state),
-      ),
-    )
+    onCleanup(fromContent('LocatorMode', debug.locator.toggleEnabled))
+    createEffect(defer(debug.locator.enabledByDebugger, state => toContent('LocatorMode', state)))
 
     // intercept on-page components clicks and send them to the devtools panel
     debug.locator.addClickInterceptor((e, component) => {
       e.preventDefault()
       e.stopPropagation()
-      postWindowMessage('ClientInspectedNode', component.id)
+      toContent('ClientInspectedNode', component.id)
       return false
     })
 
-    debug.locator.onHoveredComponent(data => {
-      postWindowMessage('ClientHoveredComponent', data)
-    })
+    debug.locator.onHoveredComponent(data => toContent('HoverComponent', data))
 
-    onCleanup(
-      onWindowMessage('HighlightElement', payload => debug.locator.setHighlightTarget(payload)),
-    )
+    onCleanup(fromContent('HighlightElement', payload => debug.locator.setHighlightTarget(payload)))
+
+    onCleanup(fromContent('OpenLocation', debug.openInspectedNodeLocation))
   })
 })

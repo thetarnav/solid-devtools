@@ -1,25 +1,26 @@
 import { createEffect, createMemo, onCleanup, Accessor, getOwner, runWithOwner } from 'solid-js'
 import { makeEventListener } from '@solid-primitives/event-listener'
 import { createKeyHold, KbdKey } from '@solid-primitives/keyboard'
-import { onRootCleanup } from '@solid-primitives/utils'
+import { asArray, onRootCleanup } from '@solid-primitives/utils'
 import { createSimpleEmitter } from '@solid-primitives/event-bus'
 import { atom, defer, makeHoverElementListener } from '@solid-devtools/shared/primitives'
 import { warn } from '@solid-devtools/shared/utils'
-import { findLocatorComponent, getLocationFromElement, LocatorComponent } from './findComponent'
 import {
-  getFullSourceCodeData,
+  findLocatorComponent,
+  getLocationAttr,
+  getSourceCodeData,
+  LocatorComponent,
   openSourceCode,
   SourceCodeData,
   TargetIDE,
   TargetURLFunction,
-} from './goToSource'
+} from './findComponent'
 import { createInternalRoot } from '../main/utils'
 import { enableRootsAutoattach } from '../main/roots'
 import { attachElementOverlay } from './ElementOverlay'
-import { Mapped, NodeID } from '../types'
+import { LocationAttr, Mapped, NodeID } from '../types'
 
-export type { TargetIDE, TargetURLFunction } from './goToSource'
-export type { LocatorComponent } from './findComponent'
+export type { LocatorComponent, TargetIDE, TargetURLFunction } from './findComponent'
 
 export type LocatorOptions = {
   /** Choose in which IDE the component source code should be revealed. */
@@ -34,32 +35,34 @@ export type HighlightElementPayload =
   | null
 
 export type ClickMiddleware = (
-  e: MouseEvent,
+  event: MouseEvent | CustomEvent,
   component: LocatorComponent,
-  data: SourceCodeData | null,
-) => false | void
+  data: SourceCodeData | undefined,
+) => void
+
+export { markComponentLoc } from './markComponent'
 
 export function createLocator({
   components,
   debuggerEnabled,
   findComponent,
   getElementById,
-  addLocatorModeEnabledSignal,
+  setLocatorEnabledSignal,
 }: {
   components: Accessor<Record<NodeID, Mapped.ResolvedComponent[]>>
   debuggerEnabled: Accessor<boolean>
   findComponent(rootId: NodeID, nodeId: NodeID): Mapped.ResolvedComponent | undefined
   getElementById(id: string): HTMLElement | undefined
-  addLocatorModeEnabledSignal(signal: Accessor<boolean>): void
+  setLocatorEnabledSignal(signal: Accessor<boolean>): void
 }) {
   // enables capturing hovered elements
   const enabledByPlugin = atom(false)
-  const enabledByDebuggerSignal = atom<Accessor<boolean>>()
-  const enabledByDebugger = createMemo(() => !!enabledByDebuggerSignal()?.())
-  addLocatorModeEnabledSignal(enabledByDebugger)
+  const enabledByPressingSignal = atom<Accessor<boolean>>()
+  const enabledByPressing = createMemo(() => !!enabledByPressingSignal()?.())
+  setLocatorEnabledSignal(enabledByPressing)
   // locator is enabled if debugger is enabled, and user pressed the key to activate it, or the plugin activated it
   const locatorEnabled = createMemo(
-    () => debuggerEnabled() && (enabledByDebugger() || enabledByPlugin()),
+    () => debuggerEnabled() && (enabledByPressing() || enabledByPlugin()),
   )
 
   function togglePluginLocatorMode(state?: boolean) {
@@ -83,11 +86,13 @@ export function createLocator({
           return comp ? [comp] : []
         }
         // target is a component
-        const { element } = target
-        const resolvedArr = Array.isArray(element) ? element : [element]
-        return resolvedArr.map(element => {
-          return { ...target, element, location: getLocationFromElement(element) }
-        })
+        return asArray(target.element).map(element => ({
+          location: getLocationAttr(element),
+          element,
+          id: target.id,
+          rootId: target.rootId,
+          name: target.name,
+        }))
       },
       [],
     ),
@@ -117,8 +122,7 @@ export function createLocator({
     if ('nodeId' in data) {
       const { rootId, nodeId } = data
       const component = findComponent(rootId, nodeId)
-      if (!component) return warn('No component found', nodeId)
-      pluginTarget({ ...component, rootId })
+      component && pluginTarget({ ...component, rootId })
     }
     // highlight element
     else {
@@ -130,9 +134,10 @@ export function createLocator({
 
   // functions to be called when user clicks on a component
   const clickInterceptors = new Set<ClickMiddleware>()
-  function runClickInterceptors(...args: Parameters<ClickMiddleware>) {
+  function runClickInterceptors(...[e, c, l]: Parameters<ClickMiddleware>): true | undefined {
     for (const interceptor of clickInterceptors) {
-      if (interceptor(...args) === false) return false
+      interceptor(e, c, l)
+      if (e.defaultPrevented) return true
     }
   }
   function addClickInterceptor(interceptor: ClickMiddleware) {
@@ -159,19 +164,12 @@ export function createLocator({
         const highlighted = highlightedComponents()
         const comp = highlighted.find(({ element }) => target.contains(element)) ?? highlighted[0]
         if (!comp) return
-        const sourceCodeData = comp.location
-          ? getFullSourceCodeData(comp.location, comp.element)
-          : null
-        if (
-          runClickInterceptors(e, comp, sourceCodeData) === false ||
-          !targetIDE ||
-          !sourceCodeData
-        ) {
-          return
+        const sourceCodeData = comp.location && getSourceCodeData(comp.location, comp.element)
+        if (!runClickInterceptors(e, comp, sourceCodeData) && targetIDE && sourceCodeData) {
+          e.preventDefault()
+          e.stopPropagation()
+          openSourceCode(targetIDE, sourceCodeData)
         }
-        e.preventDefault()
-        e.stopPropagation()
-        openSourceCode(targetIDE, sourceCodeData)
       },
       true,
     )
@@ -189,20 +187,27 @@ export function createLocator({
   function useLocator(options: LocatorOptions): void {
     runWithOwner(owner, () => {
       enableRootsAutoattach()
-      if (locatorUsed) return warn('useLocator can be used called once.')
+      if (locatorUsed) return warn('useLocator can be called only once.')
       locatorUsed = true
       if (options.targetIDE) targetIDE = options.targetIDE
       const isHoldingKey = createKeyHold(options.key ?? 'Alt', { preventDefault: true })
-      enabledByDebuggerSignal(() => isHoldingKey)
+      enabledByPressingSignal(() => isHoldingKey)
     })
+  }
+
+  function openElementSourceCode(location: LocationAttr, element: HTMLElement | string) {
+    if (!targetIDE) return
+    const sourceCodeData = getSourceCodeData(location, element)
+    sourceCodeData && openSourceCode(targetIDE, sourceCodeData)
   }
 
   return {
     useLocator,
     togglePluginLocatorMode,
-    enabledByDebugger,
+    enabledByDebugger: enabledByPressing,
     addClickInterceptor,
     setPluginHighlightTarget,
     onDebuggerHoveredComponentChange,
+    openElementSourceCode,
   }
 }

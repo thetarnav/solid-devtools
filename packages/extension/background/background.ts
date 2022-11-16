@@ -7,7 +7,14 @@ It has to coordinate the communication between the different scripts based on th
 */
 
 import { createCallbackStack, error, log } from '@solid-devtools/shared/utils'
-import { once, OnMessageFn, PostMessageFn, Versions } from 'solid-devtools/bridge'
+import {
+  ForwardPayload,
+  isForwardMessage,
+  once,
+  OnMessageFn,
+  PostMessageFn,
+  Versions,
+} from 'solid-devtools/bridge'
 import {
   createPortMessanger,
   DEVTOOLS_CONNECTION_NAME,
@@ -28,18 +35,25 @@ type TabData = {
   toContent: PostMessageFn
   fromContent: OnMessageFn
   onContentScriptDisconnect: (fn: VoidFunction) => void
+  forwardToDevtools: (fn: (message: ForwardPayload) => void) => void
+  forwardToClient: (message: ForwardPayload) => void
 }
 const tabDataMap = new Map<number, TabData>()
 
 function handleContentScriptConnection(port: chrome.runtime.Port, tabId: number) {
   const { onPortMessage: fromContent, postPortMessage: toContent } = createPortMessanger(port)
   const { push, execute: clearListeners } = createCallbackStack()
+
+  let forwardHandler: ((message: ForwardPayload) => void) | undefined
+
   const data: TabData = {
     versions: undefined,
     solidOnPage: false,
     toContent,
     fromContent,
     onContentScriptDisconnect: push,
+    forwardToDevtools: fn => (forwardHandler = fn),
+    forwardToClient: message => port.postMessage(message),
   }
   tabDataMap.set(tabId, data)
 
@@ -58,20 +72,25 @@ function handleContentScriptConnection(port: chrome.runtime.Port, tabId: number)
     clearListeners()
     tabDataMap.delete(tabId)
   })
+
+  port.onMessage.addListener((message: ForwardPayload | any) => {
+    // HANDLE FORWARDED MESSAGES FROM CLIENT (content-script)
+    forwardHandler && isForwardMessage(message) && forwardHandler(message)
+  })
 }
 
 function withTabData(
   port: chrome.runtime.Port,
-  fn: (data: TabData, from: OnMessageFn, to: PostMessageFn) => void,
+  fn: (data: TabData, m: ReturnType<typeof createPortMessanger>) => void,
 ): void {
   const data = tabDataMap.get(activeTabId)
   if (!data) return error('No data for active tab', activeTabId)
-  const { onPortMessage, postPortMessage } = createPortMessanger(port)
-  fn(data, onPortMessage, postPortMessage)
+  const m = createPortMessanger(port)
+  fn(data, m)
 }
 
 function handleDevtoolsConnection(port: chrome.runtime.Port) {
-  withTabData(port, (data, fromDevtools, toDevtools) => {
+  withTabData(port, (data, { postPortMessage: toDevtools }) => {
     const { toContent, fromContent, versions } = data
     // "Versions" means the devtools client is present
     if (versions) toDevtools('Versions', versions)
@@ -82,8 +101,15 @@ function handleDevtoolsConnection(port: chrome.runtime.Port) {
 }
 
 function handlePanelConnection(port: chrome.runtime.Port) {
-  withTabData(port, (data, fromPanel, toPanel) => {
-    const { onContentScriptDisconnect: push, toContent, fromContent, versions } = data
+  withTabData(port, (data, { postPortMessage: toPanel, onForwardMessage }) => {
+    const {
+      onContentScriptDisconnect: push,
+      toContent,
+      fromContent,
+      versions,
+      forwardToClient,
+      forwardToDevtools,
+    } = data
 
     if (versions) toPanel('Versions', versions)
     else once(fromContent, 'Versions', v => toPanel('Versions', v))
@@ -94,28 +120,14 @@ function handlePanelConnection(port: chrome.runtime.Port) {
     fromContent('ResetPanel', () => toPanel('ResetPanel'))
     push(() => toPanel('ResetPanel'))
 
-    fromContent('StructureUpdate', e => toPanel('StructureUpdate', e))
-
-    fromContent('ComputationUpdates', e => toPanel('ComputationUpdates', e))
-    fromContent('SetInspectedDetails', e => toPanel('SetInspectedDetails', e))
-    fromContent('InspectorUpdate', e => toPanel('InspectorUpdate', e))
-    fromContent('ClientHoveredComponent', e => toPanel('ClientHoveredComponent', e))
-    fromContent('ClientInspectedNode', e => toPanel('ClientInspectedNode', e))
-
-    fromContent('ClientLocatorMode', e => toPanel('ClientLocatorMode', e))
-    push(fromPanel('ExtLocatorMode', e => toContent('ExtLocatorMode', e)))
-
-    push(fromPanel('ToggleInspectedValue', e => toContent('ToggleInspectedValue', e)))
-    push(fromPanel('SetInspectedNode', e => toContent('SetInspectedNode', e)))
-
-    push(fromPanel('HighlightElement', e => toContent('HighlightElement', e)))
-
-    push(fromPanel('ForceUpdate', () => toContent('ForceUpdate')))
+    // FORWARD MESSAGES FROM and TO CLIENT
+    forwardToDevtools(message => port.postMessage(message))
+    onForwardMessage(message => forwardToClient(message))
   })
 }
 
 function handlePopupConnection(port: chrome.runtime.Port) {
-  withTabData(port, (data, fromPopup, toPopup) => {
+  withTabData(port, (data, { postPortMessage: toPopup }) => {
     const { fromContent, versions, solidOnPage } = data
     if (versions) toPopup('Versions', versions)
     else if (solidOnPage) {
