@@ -26,16 +26,14 @@ pnpm add @solid-devtools/debugger
 
 ### Automatically Attaching Debugger
 
-[In Solid version `1.4.5`, a `_$afterCreateRoot` dev hook was added](https://github.com/solidjs/solid/pull/1067) to allow for automatic attaching of the debugger.
-
-That means that you can use the debugger in your Solid apps without having to manually attach it to every root or the reactive graph in your application. To enable automatic attaching, you need to add the following code to the entry point of your app:
+You can use the debugger in your Solid apps without having to manually attach it to every root or the reactive graph in your application. To enable automatic attaching, you need to add the following code to the entry point of your app:
 
 [**If you use `solid-devtools` package, this is already handled for you!**](https://github.com/thetarnav/solid-devtools/tree/main/packages/main)
 
 ```ts
-import { attachDebugger, makeCreateRootListener } from '@solid-devtools/debugger'
+import { enableRootsAutoattach } from '@solid-devtools/debugger'
 
-makeCreateRootListener(root => attachDebugger(root))
+enableRootsAutoattach()
 ```
 
 ### Manually Attaching Debugger
@@ -112,7 +110,7 @@ function ItemComponent(props){
 
 ### Using component locator
 
-*Debugger feature inspired by [LocatorJS](https://www.locatorjs.com)*
+_Debugger feature inspired by [LocatorJS](https://www.locatorjs.com)_
 
 Locator let's you locate components on the page, and go to their source code in your IDE. All you need to do is configure it by calling `useLocator` with some options.
 
