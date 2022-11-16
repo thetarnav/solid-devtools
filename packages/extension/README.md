@@ -77,7 +77,6 @@ import devtools from 'solid-devtools/vite'
 export default defineConfig({
   plugins: [
     devtools({
-      // Will automatically add names when creating signals, memos, stores, or mutables
       name: true,
     }),
     solid(),

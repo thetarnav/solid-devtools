@@ -44,18 +44,24 @@ export default defineConfig({
 
 All of the transforms are disabled by default—you need to pick what you want by enabling correlated option.
 
+- `name` - This option adds automatic name to signals, memos, stores, and mutables. Those names will be visible in the devtools when inspecting.
+
+- `jsxLocation` - Inject location attributes to jsx templates. This is required for the debugger's [locator](https://github.com/thetarnav/solid-devtools/tree/main/packages/debugger#Using-component-locator) feature.
+
+- `componentLocation` - Inject location information to component functions. This will add a button in the devtools inspector panel, allowing you to go to the source code of the component.
+
 ```ts
 interface DevtoolsPluginOptions {
-  /** Inject location attributes to jsx templates */
-  jsxLocation?: boolean
-  /** Add automatic name when creating signals, memos, stores, or mutables */
   name?: boolean
+  jsxLocation?: boolean
+  componentLocation?: boolean
 }
 
 // in vite.config.ts plugins array:
 devtoolsPlugin({
-  jsxLocation: true,
   name: true,
+  jsxLocation: true,
+  componentLocation: true,
 })
 ```
 
