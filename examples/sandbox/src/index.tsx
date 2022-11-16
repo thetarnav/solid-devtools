@@ -1,14 +1,8 @@
 /* @refresh reload */
 import { render } from 'solid-js/web'
 
-let DevtoolsOverlay: typeof import('@solid-devtools/overlay').DevtoolsOverlay | undefined
-
-if (process.env.EXT) {
-  import('solid-devtools')
-} else {
-  DevtoolsOverlay = (await import('@solid-devtools/overlay')).DevtoolsOverlay
-}
-
+import 'solid-devtools'
+import { DevtoolsOverlay } from '@solid-devtools/overlay'
 import { useLocator } from '@solid-devtools/debugger'
 
 useLocator({
@@ -26,7 +20,7 @@ export const disposeApp = render(
       <ThemeProvider>
         <App />
       </ThemeProvider>
-      {DevtoolsOverlay && <DevtoolsOverlay defaultOpen={true} />}
+      {!process.env.EXT && <DevtoolsOverlay defaultOpen={true} />}
     </>
   ),
   document.getElementById('root')!,
