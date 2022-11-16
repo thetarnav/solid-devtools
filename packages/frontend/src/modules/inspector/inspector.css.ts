@@ -1,15 +1,6 @@
-import {
-  spacing,
-  theme,
-  padding,
-  rounded,
-  centerChild,
-  hexToRgb,
-  color,
-  transition,
-} from '@/ui/theme'
-import { colorDisabled, panelBorder } from '@/ui/theme/vars.css'
 import { createVar, style } from '@vanilla-extract/css'
+import { spacing, theme, padding, rounded, centerChild, transition } from '@/ui/theme'
+import { colorDisabled, colorDisabledValue, panelBorder } from '@/ui/theme/vars.css'
 
 export const root = style({
   height: '100%',
@@ -41,18 +32,18 @@ export const actions = (() => {
       height: spacing[6],
       ...rounded(),
       ...centerChild,
-      color: hexToRgb(color.gray[50], textOpacity),
-      backgroundColor: hexToRgb(color.gray[100], bgOpacity),
+      color: `rgb(${colorDisabledValue} / ${textOpacity})`,
+      backgroundColor: `rgb(${colorDisabledValue} / ${bgOpacity})`,
       vars: {
         [bgOpacity]: '0',
-        [textOpacity]: '0.5',
+        [textOpacity]: '0.85',
       },
       ...transition(['background-color', 'color']),
       selectors: {
         '&:hover': {
           vars: {
-            [bgOpacity]: '0.1',
-            [textOpacity]: '0.75',
+            [bgOpacity]: '0.15',
+            [textOpacity]: '1',
           },
         },
       },

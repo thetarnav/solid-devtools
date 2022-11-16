@@ -78,6 +78,10 @@ export const theme = {
     gray,
     green: '#16a34a',
     red: '#ef4444',
+    disabled: {
+      light: gray[500],
+      dark: gray[400],
+    },
   },
   spacing: {
     px: '1px',

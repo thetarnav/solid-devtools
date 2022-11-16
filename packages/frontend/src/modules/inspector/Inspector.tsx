@@ -10,7 +10,7 @@ import { OwnerName } from '@/ui/components/Owner'
 
 export default function Details() {
   const { inspector } = useController()
-  const { details, inspectedNode, openComponentLocation } = inspector
+  const { details, inspectedNode, openComponentLocation, setInspectedNode } = inspector
 
   return (
     <Show when={inspectedNode()}>
@@ -26,6 +26,9 @@ export default function Details() {
                 <Icon.Code class={styles.actions.icon} />
               </button>
             )}
+            <button class={styles.actions.button} onClick={() => setInspectedNode(null)}>
+              <Icon.X class={styles.actions.icon} />
+            </button>
           </div>
         </header>
         <Scrollable>
