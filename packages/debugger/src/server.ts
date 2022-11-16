@@ -22,6 +22,7 @@ export const useDebugger: typeof API.useDebugger = () => ({
   inspectedDetails: () => null,
   setInspectedValue: () => null,
   setUserEnabledSignal: () => void 0,
+  openInspectedNodeLocation: () => void 0,
   inspector: {
     setInspectedNode: () => void 0,
     toggleValueNode: () => void 0,
