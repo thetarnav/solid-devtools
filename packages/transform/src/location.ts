@@ -8,10 +8,12 @@ const cwd = process.cwd()
 const projectPathAst = template(`globalThis.${WINDOW_PROJECTPATH_PROPERTY} = %%loc%%;`)({
   loc: t.stringLiteral(cwd),
 }) as t.Statement
-const importMarkComponentAst = template(
-  `import { markComponentLoc as _$markComponentLoc } from "@solid-devtools/debugger"`,
-)() as t.Statement
-const buildMarkComponent = template(`_$markComponentLoc(%%loc%%);`) as (
+
+export const MARK_COMPONENT_FN_NAME = `_$markComponentLoc`
+export const MARK_COMPONENT_IMPORT = `import { markComponentLoc as ${MARK_COMPONENT_FN_NAME} } from "@solid-devtools/debugger";`
+const importMarkComponentAst = template(MARK_COMPONENT_IMPORT)() as t.Statement
+
+const buildMarkComponent = template(`${MARK_COMPONENT_FN_NAME}(%%loc%%);`) as (
   ...args: Parameters<ReturnType<typeof template>>
 ) => t.Statement
 
@@ -20,13 +22,17 @@ const isUpperCase = (s: string) => /^[A-Z]/.test(s)
 const getLocationAttribute = (filePath: string, line: number, column: number): LocationAttr =>
   `${filePath}:${line}:${column}`
 
-function getNodeLocationAttribute(node: t.Node, state: { filename?: unknown }): string | undefined {
+function getNodeLocationAttribute(
+  node: t.Node,
+  state: { filename?: unknown },
+  isJSX = false,
+): string | undefined {
   if (!node.loc || typeof state.filename !== 'string') return
   return getLocationAttribute(
     p.relative(cwd, state.filename),
     node.loc.start.line,
     // 2 is added to place the caret after the "<" character
-    node.loc.start.column + 2,
+    node.loc.start.column + (isJSX ? 2 : 0),
   )
 }
 
@@ -40,6 +46,7 @@ const jsxLocationPlugin: (config: {
   visitor: {
     Program(path, state) {
       importMarkComponent = undefined
+
       // target only project files
       if (typeof state.filename !== 'string' || !state.filename.includes(cwd)) return
 
@@ -59,7 +66,7 @@ const jsxLocationPlugin: (config: {
         // Filter native elements
         if (isUpperCase(container.openingElement.name.name)) return
 
-        const location = getNodeLocationAttribute(container.openingElement, state)
+        const location = getNodeLocationAttribute(container.openingElement, state, true)
         if (!location) return
 
         container.openingElement.attributes.push(
