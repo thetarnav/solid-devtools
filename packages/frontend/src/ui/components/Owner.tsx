@@ -49,7 +49,7 @@ export const OwnerName: Component<{
           case NodeType.Render:
             return <span class={styles.type}>Render Effect</span>
           case NodeType.Component:
-            return <span class={styles.name}>{`<${props.name}>`}</span>
+            return <span class={styles.componentName}>{props.name}</span>
           default:
             return <span class={styles.name}>{props.name}</span>
         }

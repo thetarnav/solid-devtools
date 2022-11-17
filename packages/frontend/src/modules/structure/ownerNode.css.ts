@@ -32,13 +32,17 @@ export const container = style({
   color: color.black,
 })
 
+const selectionColor = createVar()
 export const selection = style({
   position: 'absolute',
   zIndex: -1,
   ...insetY(0),
   ...insetX(1),
   ...rounded(),
-  backgroundColor: color.gray[400],
+  vars: {
+    [selectionColor]: color.gray[400],
+  },
+  backgroundColor: selectionColor,
   border: `1px solid ${color.gray[500]}`,
   opacity: 0,
   ...transition(['opacity'], theme.duration[100]),
@@ -50,10 +54,18 @@ export const selection = style({
       opacity: 0.4,
     },
   },
+  ...media({
+    [dark]: {
+      vars: {
+        [selectionColor]: color.gray[600],
+      },
+    },
+  }),
 })
 
 const paddingMask: Property.MaskImage = `linear-gradient(to right, rgba(0,0,0, 0.4), black ${spacing[48]})`
 const remMinusPx = `calc(1rem - 1px)`
+const linesColor = createVar()
 
 export const levelPadding = style({
   position: 'relative',
@@ -62,9 +74,19 @@ export const levelPadding = style({
   width: `calc(${levelVar} * ${spacing[4]} + ${spacing[2.5]})`,
   height: rowHeight,
   // background: `linear-gradient(90deg, ${color.white}, ${color.gray[100]}) ${color.gray[100]}`,
-  background: `repeating-linear-gradient(to right, transparent, transparent ${remMinusPx}, ${color.gray[200]} ${remMinusPx}, ${color.gray[200]} 1rem)`,
+  vars: {
+    [linesColor]: color.gray[200],
+  },
+  background: `repeating-linear-gradient(to right, transparent, transparent ${remMinusPx}, ${linesColor} ${remMinusPx}, ${linesColor} 1rem)`,
   maskImage: paddingMask,
   WebkitMaskImage: paddingMask,
+  ...media({
+    [dark]: {
+      vars: {
+        [linesColor]: color.gray[600],
+      },
+    },
+  }),
 })
 
 export const nameContainer = style({

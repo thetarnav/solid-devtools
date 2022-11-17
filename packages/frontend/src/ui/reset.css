@@ -158,3 +158,10 @@ input[type='checkbox'] {
 .fade-exit-active {
   transition: opacity 0.3s ease;
 }
+
+@media screen and (prefers-color-scheme: dark) {
+  * {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}

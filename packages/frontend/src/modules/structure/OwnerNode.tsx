@@ -44,7 +44,7 @@ export const OwnerNode: Component<{
           onToggle={() => toggleCollapsed(owner)}
           isCollapsed={isCollapsed()}
         />
-        <Highlight strong={isUpdated()} light={false}>
+        <Highlight highlight={isUpdated()}>
           <OwnerName name={name} type={type} isFrozen={props.owner.frozen} />
         </Highlight>
         {hmr && <Badge>HMR</Badge>}

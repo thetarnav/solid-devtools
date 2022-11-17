@@ -1,33 +1,15 @@
-import { JSX, ParentComponent, splitProps } from 'solid-js'
-import { combineProps } from '@solid-primitives/props'
+import { ParentComponent } from 'solid-js'
 import { clsx } from 'clsx'
-import { color } from '@/ui/theme'
 import * as styles from './Highlight.css'
-import { assignInlineVars } from '@vanilla-extract/dynamic'
 
-const localPropKeys = ['signal', 'strong', 'light'] as const
-
-export const Highlight: ParentComponent<
-  {
-    signal?: boolean
-    strong?: boolean
-    light?: boolean
-  } & JSX.HTMLAttributes<HTMLDivElement>
-> = props => {
-  const [, attrs] = splitProps(props, localPropKeys)
+export const Highlight: ParentComponent<{
+  isSignal?: boolean
+  highlight?: boolean
+  class?: string
+}> = props => {
   return (
-    <div
-      {...combineProps(attrs, {
-        class: clsx(styles.container, props.strong && styles.setColor),
-      })}
-    >
-      <div
-        class={styles.highlight}
-        style={assignInlineVars({
-          [styles.bgColorVar]: props.signal ? color.amber[400] : color.cyan[400],
-          [styles.bgOpacityVar]: props.strong ? '0.7' : props.light ? '0.4' : '0',
-        })}
-      ></div>
+    <div class={clsx(styles.container, props.highlight && styles.highlighted, props.class)}>
+      <div class={styles.highlight} data-signal={props.isSignal}></div>
       {props.children}
     </div>
   )

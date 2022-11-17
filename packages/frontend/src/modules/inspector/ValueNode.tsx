@@ -77,12 +77,7 @@ export const ValueNode: Component<{
     <>
       <div class={styles.name.container} onClick={handleSelect}>
         <div class={styles.name.name} data-signal={props.isSignal || ctx?.underStore}>
-          <Highlight
-            strong={isUpdated && isUpdated()}
-            light={false}
-            signal
-            class={styles.name.highlight}
-          >
+          <Highlight highlight={isUpdated && isUpdated()} isSignal class={styles.name.highlight}>
             {props.name}
           </Highlight>
         </div>

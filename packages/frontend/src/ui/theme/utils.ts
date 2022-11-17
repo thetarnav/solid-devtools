@@ -89,6 +89,7 @@ export const media = (
   return { '@media': media }
 }
 export const dark = '(prefers-color-scheme: dark)'
+export const light = '(prefers-color-scheme: light)'
 export const mobile = '(max-width: 640px)'
 export const touch = '(hover: none)'
 

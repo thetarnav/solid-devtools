@@ -1,5 +1,6 @@
 import { style, StyleRule } from '@vanilla-extract/css'
 import { color, dark, media, spacing, theme } from '../theme'
+import { colorDisabled } from '../theme/vars.css'
 
 const strikeThroughLine: StyleRule = {
   content: '',
@@ -16,6 +17,7 @@ export const container = style({
   fontWeight: 500,
   display: 'flex',
   alignItems: 'center',
+  fontFamily: theme.font.mono,
 })
 
 export const title = style({
@@ -25,7 +27,7 @@ export const title = style({
 export const name = style({
   selectors: {
     [`${container}[data-frozen="true"] &`]: {
-      color: color.gray[600],
+      color: colorDisabled,
     },
     [`${container}[data-frozen="true"] &:after`]: strikeThroughLine,
   },
@@ -33,14 +35,22 @@ export const name = style({
   ...media({
     [dark]: {
       color: color.gray[50],
-      selectors: {
-        [`${container}[data-frozen="true"] &`]: {
-          color: color.gray[500],
-        },
-      },
     },
   }),
 })
+export const componentName = style([
+  name,
+  {
+    ':before': {
+      content: '<',
+      color: colorDisabled,
+    },
+    ':after': {
+      content: '>',
+      color: colorDisabled,
+    },
+  },
+])
 
 export const type = style({
   fontSize: '0.8em',
@@ -48,17 +58,7 @@ export const type = style({
   selectors: {
     [`${container}[data-frozen="true"] &:after`]: strikeThroughLine,
   },
-  color: color.gray[500],
-  ...media({
-    [dark]: {
-      color: color.gray[400],
-      selectors: {
-        [`${container}[data-frozen="true"] &`]: {
-          color: color.gray[500],
-        },
-      },
-    },
-  }),
+  color: colorDisabled,
 })
 
 export const typeIcon = style({
