@@ -1,5 +1,6 @@
 {
-  "name": "start",
+  "name": "solid-devtools-start-example",
+  "private": true,
   "scripts": {
     "dev": "solid-start dev",
     "build": "solid-start build",
