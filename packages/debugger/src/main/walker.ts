@@ -1,5 +1,6 @@
 import {
   getComponentRefreshNode,
+  isSolidMemo,
   markNodeID,
   markOwnerName,
   markOwnerType,
@@ -18,12 +19,21 @@ let $onComputationUpdate: ComputationUpdateHandler
 let $components: Mapped.ResolvedComponent[] = []
 let $inspectedOwner: Solid.Owner | null
 
-function mapChildren(owner: Solid.Owner): Mapped.Owner[] | undefined {
+function mapChildren<T extends Mapped.Owner | Mapped.Root>(owner: Solid.Owner, mapped: T): T {
   const { owned } = owner
-  if (!owned || !owned.length) return
+  if (!owned || !owned.length) return mapped
   const children: Mapped.Owner[] = Array(owned.length)
   for (let i = 0; i < children.length; i++) children[i] = mapOwner(owned[i])
-  return children
+  mapped.children = children
+  return mapped
+}
+
+function mapComputation(owner: Solid.Computation, idToUpdate: NodeID, mapped: Mapped.Owner): void {
+  observeComputationUpdate(
+    owner as Solid.Computation,
+    $onComputationUpdate.bind(void 0, $rootId, idToUpdate),
+  )
+  if (!owner.sources || owner.sources.length === 0) mapped.frozen = true
 }
 
 function mapOwner(owner: Solid.Owner): Mapped.Owner {
@@ -56,14 +66,25 @@ function mapOwner(owner: Solid.Owner): Mapped.Owner {
       // custom mapping for context nodes
       const id = markNodeID(contextNode)
       if (id === $inspectedId) $inspectedOwner = contextNode
-      const mapped = { id, type: NodeType.Context } as Mapped.Owner
-      const children = mapChildren(contextNode.owned![0])
-      if (children) mapped.children = children
-      return mapped
+      return mapChildren(contextNode.owned![0], { id, type: NodeType.Context } as Mapped.Owner)
     }
 
     const element = resolveElements(owner.value)
     if (element) $components.push({ id, name: name!, element })
+
+    // <Show> component
+    let showMemoCondition: Solid.Memo | undefined
+    let showMemoNode: Solid.Memo | undefined
+    if (
+      name === 'Show' &&
+      owner.owned &&
+      owner.owned.length === 2 &&
+      isSolidMemo((showMemoCondition = owner.owned[0] as Solid.Memo)) &&
+      isSolidMemo((showMemoNode = owner.owned[1] as Solid.Memo))
+    ) {
+      showMemoCondition.name = 'condition'
+      showMemoNode.name = 'value'
+    }
 
     // Refresh
     // omitting refresh memo — map it's children instead
@@ -76,19 +97,9 @@ function mapOwner(owner: Solid.Owner): Mapped.Owner {
     mapped.hmr = hmr
   }
   // Computation
-  else if (type !== NodeType.Context) {
-    observeComputationUpdate(
-      owner as Solid.Computation,
-      $onComputationUpdate.bind(void 0, $rootId, id),
-    )
-    if (!owner.sources || owner.sources.length === 0) {
-      mapped.frozen = true
-    }
-  }
+  else if (type !== NodeType.Context) mapComputation(owner as Solid.Computation, id, mapped)
 
-  const children = mapChildren(owner)
-  if (children) mapped.children = children
-  return mapped
+  return mapChildren(owner, mapped)
 }
 
 function mapRoot(
@@ -100,8 +111,7 @@ function mapRoot(
 
   const mapped: Mapped.Root = { id, type: NodeType.Root }
 
-  const children = mapChildren(root)
-  if (children) mapped.children = children
+  mapChildren(root, mapped)
 
   if (attached) mapped.attached = markNodeID(attached)
 

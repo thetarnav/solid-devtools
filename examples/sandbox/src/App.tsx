@@ -158,7 +158,7 @@ const App: Component = () => {
           <Button onClick={() => setCount(p => ++p)} text={`Count: ${count()}`} />
         </header>
         <div style={{ height: '1rem', 'margin-top': '1rem' }}>
-          <Show when={showEven()}>
+          <Show when={count() % 3 === 0}>
             <Bold>{count()} is even!</Bold>
           </Show>
         </div>

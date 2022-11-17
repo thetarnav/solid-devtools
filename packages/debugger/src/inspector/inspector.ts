@@ -111,9 +111,13 @@ export function collectOwnerDetails(
   $nodeIdMap = new NodeIDMap()
   $valueMap = new ValueNodeMap()
 
-  let type = markOwnerType(owner)
+  const id = markNodeID(owner)
+  const type = markOwnerType(owner)
+  const name = markOwnerName(owner)
   let { sourceMap, owned } = owner
   let getValue = () => owner.value
+
+  const details = { id, name, type } as Mapped.OwnerDetails
 
   // handle context node specially
   if (type === NodeType.Context) {
@@ -128,54 +132,23 @@ export function collectOwnerDetails(
     }
   }
 
-  // marge component with refresh memo
-  let refresh: Solid.Memo | null
-  if (isSolidComponent(owner) && (refresh = getComponentRefreshNode(owner))) {
-    sourceMap = refresh.sourceMap
-    owned = refresh.owned
-    getValue = () => refresh!.value
-  }
-
-  // map signals
-  let signals: Mapped.Signal[]
-  if (sourceMap) {
-    const signalNodes = Object.values(sourceMap)
-    signals = Array(signalNodes.length)
-    for (let i = 0; i < signalNodes.length; i++) {
-      signals[i] = mapSignalNode(signalNodes[i], onSignalUpdate)
-    }
-  } else signals = []
-
-  // map memos
-  if (owned) {
-    for (const node of owned) {
-      if (isSolidMemo(node)) signals.push(mapSignalNode(node, onSignalUpdate))
-    }
-  }
-
-  type = markOwnerType(owner)
-  const details: Mapped.OwnerDetails = {
-    id: markNodeID(owner),
-    name: markOwnerName(owner),
-    type,
-    signals,
-  }
-
   let checkProxyProps: (() => { added: string[]; removed: string[] } | undefined) | undefined
 
   if (isSolidComputation(owner)) {
-    details.value = encodeValue(getValue(), false, $nodeIdMap)
-    observeValueUpdate(owner, onValueUpdate, INSPECTOR)
-    details.sources = markNodesID(owner.sources)
-
     // handle Component (props and location)
-    if (type === NodeType.Component) {
-      const comp = owner as Solid.Component
-      const { props } = comp
+    if (isSolidComponent(owner)) {
+      // marge component with refresh memo
+      let refresh = getComponentRefreshNode(owner)
+      if (refresh) {
+        sourceMap = refresh.sourceMap
+        owned = refresh.owned
+        getValue = () => refresh!.value
+      }
+
       // proxy props need to be checked for changes
-      const proxy = !!(props as any)[$PROXY]
+      const proxy = !!(owner.props as any)[$PROXY]
       const record: Mapped.Props['record'] = {}
-      for (const [key, desc] of Object.entries(Object.getOwnPropertyDescriptors(props))) {
+      for (const [key, desc] of Object.entries(Object.getOwnPropertyDescriptors(owner.props))) {
         if (desc.get) {
           record[key] = { type: ValueType.Getter, value: key }
         } else {
@@ -185,12 +158,12 @@ export function collectOwnerDetails(
         }
       }
       details.props = { proxy, record }
-      if (comp.location) details.location = comp.location
+      if (owner.location) details.location = owner.location
 
       if (proxy) {
         let oldKeys: readonly string[] = Object.keys(record)
         checkProxyProps = () => {
-          const newKeys = Object.keys(props)
+          const newKeys = Object.keys(owner.props)
           const added = new Set(newKeys)
           const removed: string[] = []
           let changed = false
@@ -206,6 +179,27 @@ export function collectOwnerDetails(
           return { added: Array.from(added), removed }
         }
       }
+    } else {
+      observeValueUpdate(owner, onValueUpdate, INSPECTOR)
+      details.sources = markNodesID(owner.sources)
+    }
+
+    details.value = encodeValue(getValue(), false, $nodeIdMap)
+  }
+
+  // map signals
+  if (sourceMap) {
+    const signalNodes = Object.values(sourceMap)
+    details.signals = Array(signalNodes.length)
+    for (let i = 0; i < signalNodes.length; i++) {
+      details.signals[i] = mapSignalNode(signalNodes[i], onSignalUpdate)
+    }
+  } else details.signals = []
+
+  // map memos
+  if (owned) {
+    for (const node of owned) {
+      if (isSolidMemo(node)) details.signals.push(mapSignalNode(node, onSignalUpdate))
     }
   }
 
