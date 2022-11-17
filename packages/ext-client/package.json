@@ -1,6 +1,6 @@
 {
   "name": "solid-devtools",
-  "version": "0.22.0",
+  "version": "0.23.0",
   "description": "Runtime library for hooking up SolidJS application with Solid Devtools Extension",
   "license": "MIT",
   "author": "Damian Tarnawski <gthetarnav@gmail.com>",
@@ -74,9 +74,9 @@
     "typecheck": "tsc --noEmit --paths null"
   },
   "dependencies": {
-    "@solid-devtools/debugger": "workspace:^0.14.0",
-    "@solid-devtools/shared": "workspace:^0.10.0",
-    "@solid-devtools/transform": "workspace:^0.8.0",
+    "@solid-devtools/debugger": "workspace:^0.15.0",
+    "@solid-devtools/shared": "workspace:^0.10.1",
+    "@solid-devtools/transform": "workspace:^0.9.0",
     "@solid-primitives/utils": "^4.0.0",
     "type-fest": "^3.2.0"
   },
