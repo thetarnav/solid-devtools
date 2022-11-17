@@ -51,12 +51,12 @@
     "typecheck": "tsc --noEmit --paths null"
   },
   "devDependencies": {
-    "tsup": "^6.4.0"
+    "tsup": "^6.5.0"
   },
   "dependencies": {
     "@solid-devtools/debugger": "workspace:^0.14.0",
     "@solid-devtools/shared": "workspace:^0.10.0",
-    "@solid-primitives/utils": "^3.1.0"
+    "@solid-primitives/utils": "^4.0.0"
   },
   "peerDependencies": {
     "solid-js": "^1.6.2"

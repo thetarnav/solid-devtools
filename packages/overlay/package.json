@@ -53,10 +53,10 @@
     "@solid-devtools/debugger": "workspace:^0.14.0",
     "@solid-devtools/frontend": "workspace:^0.1.0",
     "@solid-devtools/shared": "workspace:^0.10.0",
-    "@solid-primitives/cursor": "^0.0.101",
+    "@solid-primitives/cursor": "^0.0.103",
     "@solid-primitives/event-listener": "^2.2.3",
     "@solid-primitives/media": "^2.0.3",
-    "@solid-primitives/utils": "^3.1.0"
+    "@solid-primitives/utils": "^4.0.0"
   },
   "peerDependencies": {
     "solid-js": "^1.6.2"

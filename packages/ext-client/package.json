@@ -77,7 +77,7 @@
     "@solid-devtools/debugger": "workspace:^0.14.0",
     "@solid-devtools/shared": "workspace:^0.10.0",
     "@solid-devtools/transform": "workspace:^0.8.0",
-    "@solid-primitives/utils": "^3.1.0",
+    "@solid-primitives/utils": "^4.0.0",
     "type-fest": "^3.2.0"
   },
   "peerDependencies": {

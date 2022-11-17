@@ -15,19 +15,19 @@
   },
   "devDependencies": {
     "@crxjs/vite-plugin": "^1.0.14",
-    "@types/chrome": "^0.0.196",
+    "@types/chrome": "^0.0.202",
     "@types/webextension-polyfill": "^0.9.1",
     "jsdom": "^20.0.1",
     "rimraf": "^3.0.2",
-    "vite": "^3.2.3",
-    "vitest": "^0.23.4",
+    "vite": "^3.2.4",
+    "vitest": "^0.25.2",
     "webextension-polyfill": "^0.10.0",
     "zip-a-folder": "^1.1.5"
   },
   "dependencies": {
     "@solid-devtools/frontend": "workspace:^0.1.1",
     "@solid-devtools/shared": "workspace:^0.10.0",
-    "@solid-primitives/utils": "^3.1.0",
+    "@solid-primitives/utils": "^4.0.0",
     "solid-devtools": "workspace:^0.22.0",
     "solid-js": "^1.6.2"
   },

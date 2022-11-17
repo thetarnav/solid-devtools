@@ -24,28 +24,29 @@
     "changeset": "changeset",
     "release": "pnpm run build-test && changeset publish",
     "version-packages": "changeset version && pnpm i",
-    "ci:version": "changeset version && pnpm i --no-frozen-lockfile && git add ."
+    "ci:version": "changeset version && pnpm i --no-frozen-lockfile && git add .",
+    "update-deps": "pnpm up -Lri"
   },
   "devDependencies": {
     "@changesets/cli": "^2.25.0",
     "@types/node": "^18.11.3",
-    "@typescript-eslint/eslint-plugin": "^5.42.0",
-    "@typescript-eslint/parser": "^5.42.0",
+    "@typescript-eslint/eslint-plugin": "^5.43.0",
+    "@typescript-eslint/parser": "^5.43.0",
     "babel-preset-solid": "^1.6.0",
     "concurrently": "^7.4.0",
     "cross-env": "^7.0.3",
-    "esbuild": "^0.15.12",
+    "esbuild": "^0.15.14",
     "esbuild-plugin-solid": "^0.4.2",
     "eslint": "^8.26.0",
     "eslint-plugin-no-only-tests": "^3.1.0",
+    "jsdom": "^20.0.2",
     "prettier": "2.7.1",
-    "tsup": "^6.4.0",
+    "tsup": "^6.5.0",
     "turbo": "^1.5.6",
-    "typescript": "^4.8.4",
+    "typescript": "^4.9.3",
+    "vite": "^3.2.4",
     "vite-plugin-solid": "^2.3.10",
-    "vitest": "^0.23.4",
-    "vite": "^3.2.3",
-    "jsdom": "^20.0.2"
+    "vitest": "^0.25.2"
   },
   "packageManager": "pnpm@7.13.0",
   "engines": {
