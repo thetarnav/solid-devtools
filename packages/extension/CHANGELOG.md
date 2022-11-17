@@ -1,5 +1,25 @@
 # solid-devtools-extension
 
+## 0.19.0
+
+### Minor Changes
+
+- bd8f0b4: Handle new `componentLocation` transform by adding a button to the inspector panel for opening component source code.
+
+  Improve inspector panel styles. Improve Splitter component styles and ovarall usability.
+
+- bd8f0b4: Rework communication by forwarding in bulk all the message exchange that happen only between client and the extension panel.
+
+### Patch Changes
+
+- Updated dependencies [a9f8e62]
+- Updated dependencies [bd8f0b4]
+- Updated dependencies [bd8f0b4]
+- Updated dependencies [a9f8e62]
+  - @solid-devtools/shared@0.10.1
+  - solid-devtools@0.23.0
+  - @solid-devtools/frontend@0.2.0
+
 ## 0.18.0
 
 ### Minor Changes
