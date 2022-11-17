@@ -1,6 +1,5 @@
 import { asArray, Many } from '@solid-primitives/utils'
 import { StyleRule } from '@vanilla-extract/css'
-import type { CSSPropertiesWithVars } from '@vanilla-extract/css/dist/declarations/src/types'
 import { clsx } from 'clsx'
 import { Property } from 'csstype'
 import { spacing, theme } from '.'
@@ -47,7 +46,7 @@ export const centerChild = {
 export const rounded = (
   key: keyof typeof theme.radius = 'DEFAULT',
   corners?: ('tl' | 'tr' | 'bl' | 'br')[],
-): CSSPropertiesWithVars => {
+): StyleRule => {
   if (!corners) return { borderRadius: theme.radius[key] }
 
   const radius = theme.radius[key]
@@ -63,7 +62,7 @@ export const transition = (
   duration: Property.TransitionDuration = theme.duration[150],
   delay: Property.TransitionDelay = theme.duration[0],
   easing: Property.TransitionTimingFunction = theme.easing.DEFAULT,
-): CSSPropertiesWithVars => ({
+): StyleRule => ({
   transitionProperty: clsx(property),
   transitionDuration: duration,
   transitionDelay: delay,
@@ -97,13 +96,10 @@ export const borderValue = (color: string): StyleRule['border'] => {
   return `1px solid ${color}`
 }
 
-export const border = (
-  color: string,
-  ...edges: ('t' | 'r' | 'b' | 'l')[]
-): CSSPropertiesWithVars => {
+export const border = (color: string, ...edges: ('t' | 'r' | 'b' | 'l')[]): StyleRule => {
   if (!edges.length) return { border: borderValue(color) }
 
-  const rules: CSSPropertiesWithVars = {}
+  const rules: StyleRule = {}
 
   if (edges.includes('t')) rules.borderTop = borderValue(color)
   if (edges.includes('r')) rules.borderRight = borderValue(color)
@@ -113,21 +109,21 @@ export const border = (
   return rules
 }
 
-export function padding(allEdges: SpacingValue): CSSPropertiesWithVars
-export function padding(v: SpacingValue, h: SpacingValue): CSSPropertiesWithVars
-export function padding(t: SpacingValue, h: SpacingValue, b: SpacingValue): CSSPropertiesWithVars
+export function padding(allEdges: SpacingValue): StyleRule
+export function padding(v: SpacingValue, h: SpacingValue): StyleRule
+export function padding(t: SpacingValue, h: SpacingValue, b: SpacingValue): StyleRule
 export function padding(
   t: SpacingValue,
   r: SpacingValue,
   b: SpacingValue,
   l: SpacingValue,
-): CSSPropertiesWithVars
+): StyleRule
 export function padding(
   a: SpacingValue,
   b?: SpacingValue,
   c?: SpacingValue,
   d?: SpacingValue,
-): CSSPropertiesWithVars {
+): StyleRule {
   if (b === undefined) return { padding: resolveSpacing(a) }
   if (c === undefined) return { padding: `${resolveSpacing(a)} ${resolveSpacing(b)}` }
   if (d === undefined)

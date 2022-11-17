@@ -1,7 +1,12 @@
 import p from 'path'
 import { PluginObj, template } from '@babel/core'
 import * as t from '@babel/types'
-import { LocationAttr, LOCATION_ATTRIBUTE_NAME, WINDOW_PROJECTPATH_PROPERTY } from './types'
+import {
+  LocationAttr,
+  LOCATION_ATTRIBUTE_NAME,
+  MARK_COMPONENT_FN_NAME,
+  WINDOW_PROJECTPATH_PROPERTY,
+} from './types'
 
 const cwd = process.cwd()
 
@@ -9,11 +14,7 @@ const projectPathAst = template(`globalThis.${WINDOW_PROJECTPATH_PROPERTY} = %%l
   loc: t.stringLiteral(cwd),
 }) as t.Statement
 
-export const MARK_COMPONENT_FN_NAME = `_$markComponentLoc`
-export const MARK_COMPONENT_IMPORT = `import { markComponentLoc as ${MARK_COMPONENT_FN_NAME} } from "@solid-devtools/debugger";`
-const importMarkComponentAst = template(MARK_COMPONENT_IMPORT)() as t.Statement
-
-const buildMarkComponent = template(`${MARK_COMPONENT_FN_NAME}(%%loc%%);`) as (
+const buildMarkComponent = template(`globalThis.${MARK_COMPONENT_FN_NAME}(%%loc%%);`) as (
   ...args: Parameters<ReturnType<typeof template>>
 ) => t.Statement
 
@@ -36,7 +37,7 @@ function getNodeLocationAttribute(
   )
 }
 
-let importMarkComponent: VoidFunction | undefined
+let transformCurrentFile = false
 
 const jsxLocationPlugin: (config: {
   jsx: boolean
@@ -45,48 +46,43 @@ const jsxLocationPlugin: (config: {
   name: '@solid-devtools/location',
   visitor: {
     Program(path, state) {
-      importMarkComponent = undefined
-
+      transformCurrentFile = false
       // target only project files
       if (typeof state.filename !== 'string' || !state.filename.includes(cwd)) return
+      transformCurrentFile = true
 
       // inject projectPath variable
       path.node.body.push(projectPathAst)
-
-      importMarkComponent = () => {
-        importMarkComponent = undefined
-        path.node.body.unshift(importMarkComponentAst)
-      }
     },
     ...(config.jsx && {
       JSXOpeningElement(path, state) {
-        const container = path.container as t.JSXElement
-        if (container.openingElement.name.type !== 'JSXIdentifier') return
+        const { openingElement } = path.container as t.JSXElement
+        if (!transformCurrentFile || openingElement.name.type !== 'JSXIdentifier') return
 
         // Filter native elements
-        if (isUpperCase(container.openingElement.name.name)) return
+        if (isUpperCase(openingElement.name.name)) return
 
-        const location = getNodeLocationAttribute(container.openingElement, state, true)
+        const location = getNodeLocationAttribute(openingElement, state, true)
         if (!location) return
 
-        container.openingElement.attributes.push(
+        openingElement.attributes.push(
           t.jsxAttribute(t.jsxIdentifier(LOCATION_ATTRIBUTE_NAME), t.stringLiteral(location)),
         )
       },
     }),
     ...(config.components && {
       FunctionDeclaration(path, state) {
-        if (!path.node.id || !isUpperCase(path.node.id.name)) return
+        if (!transformCurrentFile || !path.node.id || !isUpperCase(path.node.id.name)) return
 
         const location = getNodeLocationAttribute(path.node, state)
         if (!location) return
 
         path.node.body.body.unshift(buildMarkComponent({ loc: t.stringLiteral(location) }))
-        importMarkComponent?.()
       },
       VariableDeclarator(path, state) {
         const { init, id } = path.node
         if (
+          !transformCurrentFile ||
           !id ||
           !('name' in id) ||
           !isUpperCase(id.name) ||
@@ -100,7 +96,6 @@ const jsxLocationPlugin: (config: {
         if (!location) return
 
         init.body.body.unshift(buildMarkComponent({ loc: t.stringLiteral(location) }))
-        importMarkComponent?.()
       },
     }),
   },

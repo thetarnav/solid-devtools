@@ -196,7 +196,7 @@ export function createLocator({
   }
 
   function openElementSourceCode(location: LocationAttr, element: HTMLElement | string) {
-    if (!targetIDE) return
+    if (!targetIDE) return warn('Please set `targetIDE` it in useLocator options.')
     const sourceCodeData = getSourceCodeData(location, element)
     sourceCodeData && openSourceCode(targetIDE, sourceCodeData)
   }

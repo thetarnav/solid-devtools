@@ -1,8 +1,7 @@
-import { style } from '@vanilla-extract/css'
-import { CSSPropertiesWithVars } from '@vanilla-extract/css/dist/declarations/src/types'
+import { style, StyleRule } from '@vanilla-extract/css'
 import { color, dark, media, spacing, theme } from '../theme'
 
-const strikeThroughLine: CSSPropertiesWithVars = {
+const strikeThroughLine: StyleRule = {
   content: '',
   position: 'absolute',
   zIndex: -1,

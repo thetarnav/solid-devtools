@@ -1,5 +1,4 @@
-import { createVar, style, styleVariants } from '@vanilla-extract/css'
-import { CSSPropertiesWithVars } from '@vanilla-extract/css/dist/declarations/src/types'
+import { createVar, style, StyleRule, styleVariants } from '@vanilla-extract/css'
 import { dark, color, spacing, theme, media, centerChild, transition } from '@/ui/theme'
 import { createHighlightStyles } from '@/ui/mixins'
 import { colorDisabled } from '@/ui/theme/vars.css'
@@ -127,7 +126,7 @@ export const baseValue = style({
   }),
 })
 
-const bracketsStyles: CSSPropertiesWithVars = {
+const bracketsStyles: StyleRule = {
   fontWeight: 800,
   color: color.gray[800],
 }
