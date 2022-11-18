@@ -1,9 +1,12 @@
 import { createVar, style } from '@vanilla-extract/css'
-import { insetX, spacing } from '@/ui/theme'
+import { insetX, remValue, spacing } from '@/ui/theme'
 import { panelBg, panelBorder } from '@/ui/theme/vars.css'
 
-export const ROW_HEIGHT_IN_REM = 1.25
-export const V_MARGIN_IN_REM = 0.75
+export const rowHeight = spacing[4.5]
+export const vMargin = spacing[3]
+
+export const ROW_HEIGHT_IN_REM = remValue(rowHeight)
+export const V_MARGIN_IN_REM = remValue(vMargin)
 
 export const panelWrapper = style({
   height: '100%',
@@ -17,12 +20,12 @@ export const treeLength = createVar()
 export const startIndex = createVar()
 
 export const scrolledOuter = style({
-  padding: `${V_MARGIN_IN_REM}rem 0`,
-  height: `calc(${treeLength} * ${ROW_HEIGHT_IN_REM}rem)`,
+  padding: `${rowHeight} 0`,
+  height: `calc(${treeLength} * ${rowHeight})`,
   boxSizing: 'content-box',
 })
 export const scrolledInner = style({
-  transform: `translateY(calc(${startIndex} * ${ROW_HEIGHT_IN_REM}rem))`,
+  transform: `translateY(calc(${startIndex} * ${rowHeight}))`,
 })
 
 export const path = style({

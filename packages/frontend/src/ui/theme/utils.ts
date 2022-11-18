@@ -18,6 +18,10 @@ export function hexToRgb(hex: string, alpha?: number | string) {
   return alpha === undefined ? `rgb(${value})` : `rgb(${value} / ${alpha})`
 }
 
+export function remValue(value: `${number}rem`): number {
+  return +value.substring(0, value.length - 3)
+}
+
 export type SpacingValue = string | keyof typeof spacing
 
 const resolveSpacing = (n: SpacingValue) => {

@@ -51,6 +51,3 @@ export const highlight = style([
     }),
   },
 ])
-
-// [mixin.bgColorVar]: props.signal ? color.amber[400] : color.cyan[400],
-// [mixin.bgOpacityVar]: props.strong ? '0.7' : props.light ? '0.4' : '0',

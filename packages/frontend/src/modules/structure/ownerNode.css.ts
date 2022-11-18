@@ -12,12 +12,11 @@ import {
   theme,
   transition,
 } from '@/ui/theme'
-import { ROW_HEIGHT_IN_REM } from './structure.css'
+import { rowHeight } from './structure.css'
 import { Property } from 'csstype'
+import { grayHighlightBorder, grayHighlightColor } from '@/ui/theme/vars.css'
 
 export const levelVar: CSSVarFunction = createVar()
-
-const rowHeight = `${ROW_HEIGHT_IN_REM}rem`
 
 const dataHovered = '[data-hovered="true"]'
 const dataSelected = '[data-selected="true"]'
@@ -29,38 +28,26 @@ export const container = style({
   alignItems: 'center',
   paddingRight: spacing[4],
   cursor: 'pointer',
-  color: color.black,
 })
 
-const selectionColor = createVar()
 export const selection = style({
   position: 'absolute',
   zIndex: -1,
   ...insetY(0),
   ...insetX(1),
   ...rounded(),
-  vars: {
-    [selectionColor]: color.gray[400],
-  },
-  backgroundColor: selectionColor,
-  border: `1px solid ${color.gray[500]}`,
+  backgroundColor: grayHighlightColor,
+  border: grayHighlightBorder,
   opacity: 0,
   ...transition(['opacity'], theme.duration[100]),
   selectors: {
     [`${container}${dataHovered} &`]: {
-      opacity: 0.2,
+      opacity: 0.25,
     },
     [`${container}${dataSelected} &`]: {
-      opacity: 0.4,
+      opacity: 0.45,
     },
   },
-  ...media({
-    [dark]: {
-      vars: {
-        [selectionColor]: color.gray[600],
-      },
-    },
-  }),
 })
 
 const paddingMask: Property.MaskImage = `linear-gradient(to right, rgba(0,0,0, 0.4), black ${spacing[48]})`
@@ -72,8 +59,7 @@ export const levelPadding = style({
   zIndex: -2,
   marginLeft: spacing[3],
   width: `calc(${levelVar} * ${spacing[4]} + ${spacing[2.5]})`,
-  height: rowHeight,
-  // background: `linear-gradient(90deg, ${color.white}, ${color.gray[100]}) ${color.gray[100]}`,
+  height: `calc(${rowHeight} + 1px)`,
   vars: {
     [linesColor]: color.gray[200],
   },
@@ -99,7 +85,7 @@ export const nameContainer = style({
 
 export const collapse = style({
   position: 'absolute',
-  left: `-${rowHeight}`,
+  left: `calc(-${rowHeight} - 2px)`,
   opacity: 0,
   ...transition('background-color'),
   ':before': {

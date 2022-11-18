@@ -1,4 +1,4 @@
-import { ComplexStyleRule, createVar, style } from '@vanilla-extract/css'
+import { ComplexStyleRule, createVar, fallbackVar, style } from '@vanilla-extract/css'
 import {
   centerChild,
   color,
@@ -70,12 +70,13 @@ export const toggleButtonStyles: ComplexStyleRule = {
 }
 
 export const toggleButton = style(toggleButtonStyles)
+export const collapseButtonSize = createVar()
 
 export const Collapse = (() => {
   const button = style({
     position: 'relative',
-    height: '1.25rem',
-    width: '1.25rem',
+    height: fallbackVar(collapseButtonSize, spacing[4.5]),
+    width: fallbackVar(collapseButtonSize, spacing[4.5]),
     flexShrink: 0,
     ...centerChild,
   })

@@ -1,7 +1,7 @@
 import { createVar, style, StyleRule, styleVariants } from '@vanilla-extract/css'
 import { dark, color, spacing, theme, media, centerChild, transition } from '@/ui/theme'
 import { createHighlightStyles } from '@/ui/mixins'
-import { colorDisabled } from '@/ui/theme/vars.css'
+import { colorDisabled, grayHighlightBorder } from '@/ui/theme/vars.css'
 
 const RowHeight = spacing[4.5]
 const RowGap = spacing[0.5]
@@ -31,7 +31,6 @@ export const row = (() => {
         {
           cursor: 'pointer',
           vars: {
-            [valueRowHighlight.bgColorVar]: color.gray[300],
             [valueRowHighlight.bgOpacityVar]: '0',
           },
           selectors: {
@@ -39,17 +38,10 @@ export const row = (() => {
               vars: { [valueRowHighlight.bgOpacityVar]: '0.3' },
             },
           },
-          ...media({
-            [dark]: {
-              vars: {
-                [valueRowHighlight.bgColorVar]: color.gray[600],
-              },
-            },
-          }),
         },
       ],
     }),
-    highlight: style([valueRowHighlight.highlight, { border: `1px solid ${color.gray[400]}` }]),
+    highlight: style([valueRowHighlight.highlight, { border: grayHighlightBorder }]),
     toggle: {
       container: style({
         position: 'absolute',
@@ -208,7 +200,6 @@ export const ValueElement = {
       color: color.amber[600],
       textTransform: 'lowercase',
       vars: {
-        [elHighlight.bgColorVar]: color.gray[300],
         [elHighlight.bgOpacityVar]: '0',
       },
       ':hover': {
@@ -227,9 +218,6 @@ export const ValueElement = {
       ...media({
         [dark]: {
           color: color.amber[500],
-          vars: {
-            [elHighlight.bgColorVar]: color.gray[600],
-          },
         },
       }),
     },
