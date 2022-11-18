@@ -6,10 +6,12 @@ import {
   createRenderEffect,
   createRoot,
   createSignal,
+  Show,
 } from 'solid-js'
 import { getOwner } from '../utils'
 import { Solid, Mapped } from '../types'
 import { NodeType } from '../constants'
+import { render } from 'solid-js/web'
 
 const getModule = async () => (await import('../walker')).walkSolidTree
 
@@ -213,5 +215,53 @@ describe('walkSolidTree', () => {
 
       dispose()
     })
+  })
+
+  it('Hides <Show> implementation memos', async () => {
+    const walkSolidTree = await getModule()
+
+    let rootOwner!: Solid.Root
+    const rootDiv = document.createElement('div')
+    const dispose = render(() => {
+      rootOwner = getOwner()! as Solid.Root
+      return (
+        <Show when={true}>
+          <div>{rootOwner.name}</div>
+        </Show>
+      )
+    }, rootDiv)
+
+    const { root } = walkSolidTree(rootOwner, {
+      rootId: (rootOwner.sdtId = '0'),
+      inspectedId: null,
+      onComputationUpdate: () => {},
+      gatherComponents: false,
+    })
+
+    expect(root).toEqual({
+      id: '0',
+      type: NodeType.Root,
+      children: [
+        {
+          id: '0',
+          name: 'Show',
+          type: NodeType.Component,
+          frozen: true,
+          children: [
+            {
+              id: '1',
+              type: NodeType.Render,
+              frozen: true,
+            },
+          ],
+        },
+        {
+          id: '2',
+          type: NodeType.Render,
+        },
+      ],
+    })
+
+    dispose()
   })
 })

@@ -1,4 +1,4 @@
-import { createSignal, batch, For, Component, createMemo, createEffect } from 'solid-js'
+import { createSignal, batch, For, Component, createMemo, createEffect, Show } from 'solid-js'
 import { createStore, Store, SetStoreFunction, produce, unwrap } from 'solid-js/store'
 
 export function createLocalStore<T extends object>(
@@ -90,29 +90,39 @@ const Todos: Component = () => {
   return (
     <>
       <h3>Simple Todos Example</h3>
-      <form onSubmit={addTodo}>
-        <input
-          placeholder="enter todo and click +"
-          required
-          value={newTitle()}
-          onInput={e => setTitle(e.currentTarget.value)}
-        />
-        <button>+</button>
-      </form>
+      <Show when={true} keyed>
+        {v => {
+          createEffect(newTitle, undefined, { name: 'newTitle effect' })
+          return (
+            <form onSubmit={addTodo}>
+              <input
+                placeholder="enter todo and click +"
+                required
+                value={newTitle()}
+                onInput={e => setTitle(e.currentTarget.value)}
+              />
+              <button>+</button>
+            </form>
+          )
+        }}
+      </Show>
       <For each={todos.values}>
-        {(todo, i) => (
-          <Todo
-            {...todo}
-            onCheck={v => setTodos('values', i(), 'done', v)}
-            onUpdate={v => setTodos('values', i(), 'title', v)}
-            onRemove={() =>
-              setTodos(
-                'values',
-                produce(t => t.splice(i(), 1)),
-              )
-            }
-          />
-        )}
+        {(todo, i) => {
+          createEffect(i, undefined, { name: 'todo index' })
+          return (
+            <Todo
+              {...todo}
+              onCheck={v => setTodos('values', i(), 'done', v)}
+              onUpdate={v => setTodos('values', i(), 'title', v)}
+              onRemove={() =>
+                setTodos(
+                  'values',
+                  produce(t => t.splice(i(), 1)),
+                )
+              }
+            />
+          )
+        }}
       </For>
     </>
   )
