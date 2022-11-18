@@ -91,7 +91,8 @@ const DisplayStructureTree: Component = () => {
     fullLength: number
     list: readonly DisplayNode[]
     nodeList: readonly Structure.Node[]
-  }>((prev = { start: 0, end: 0, fullLength: 0, list: [], nodeList: [] }) => {
+    minLevel: number
+  }>((prev = { start: 0, end: 0, fullLength: 0, list: [], nodeList: [], minLevel: 0 }) => {
     const nodeList = collapsedList()
     const { top, height } = containerScroll()
     const { start, end, length } = getVirtualVars(nodeList.length, top, height, getRowHeight())
@@ -102,9 +103,12 @@ const DisplayStructureTree: Component = () => {
     const prevMap: Record<NodeID, DisplayNode> = {}
     for (const node of prev.list) prevMap[node.node.id] = node
 
+    let minLevel = Infinity
+
     for (let i = 0; i < length; i++) {
       const node = nodeList[start + i]
       const prev = prevMap[node.id]
+      minLevel = Math.min(minLevel, node.level)
       if (prev) {
         next[i] = prev
         prev.update()
@@ -114,7 +118,14 @@ const DisplayStructureTree: Component = () => {
       }
     }
 
-    return { list: next, start, end, nodeList, fullLength: nodeList.length }
+    if (minLevel === Infinity) minLevel = 0
+    else minLevel = Math.max(minLevel - 7, 0)
+
+    return { list: next, start, end, nodeList, fullLength: nodeList.length, minLevel }
+  })
+
+  const minLevel = createMemo(() => virtual().minLevel, 0, {
+    equals: (a, b) => a == b || (Math.abs(b - a) < 7 && b != 0),
   })
 
   createEffect(() => {
@@ -151,25 +162,28 @@ const DisplayStructureTree: Component = () => {
         style={assignInlineVars({
           [styles.treeLength]: virtual().fullLength.toString(),
           [styles.startIndex]: virtual().start.toString(),
+          [styles.minLevel]: minLevel().toString(),
         })}
       >
         <div class={styles.scrolledInner}>
-          <StructureProvider value={{ toggleCollapsed, isCollapsed }}>
-            <For each={virtual().list}>
-              {({ getNode, node }) => (
-                <OwnerNode
-                  owner={getNode()}
-                  isHovered={isNodeHovered(node.id)}
-                  isSelected={isNodeInspected(node.id)}
-                  listenToUpdate={listener =>
-                    listenToComputationUpdate(id => id === node.id && listener())
-                  }
-                  onHoverChange={hovered => toggleHoveredNode(node.id, hovered)}
-                  onInspectChange={inspected => setInspectedNode(inspected ? node : null)}
-                />
-              )}
-            </For>
-          </StructureProvider>
+          <div class={styles.scrolledInner2}>
+            <StructureProvider value={{ toggleCollapsed, isCollapsed }}>
+              <For each={virtual().list}>
+                {({ getNode, node }) => (
+                  <OwnerNode
+                    owner={getNode()}
+                    isHovered={isNodeHovered(node.id)}
+                    isSelected={isNodeInspected(node.id)}
+                    listenToUpdate={listener =>
+                      listenToComputationUpdate(id => id === node.id && listener())
+                    }
+                    onHoverChange={hovered => toggleHoveredNode(node.id, hovered)}
+                    onInspectChange={inspected => setInspectedNode(inspected ? node : null)}
+                  />
+                )}
+              </For>
+            </StructureProvider>
+          </div>
         </div>
       </div>
     </Scrollable>
