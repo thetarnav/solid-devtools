@@ -13,7 +13,6 @@ import {
   isSolidMemo,
   isSolidStore,
   markNodeID,
-  markNodesID,
   markOwnerName,
   markOwnerType,
 } from '../main/utils'
@@ -143,6 +142,21 @@ export function collectOwnerDetails(
         sourceMap = refresh.sourceMap
         owned = refresh.owned
         getValue = () => refresh!.value
+      } else {
+        // <Show> component
+        let showMemoCondition: Solid.Memo
+        let showMemoNode: Solid.Memo
+        if (
+          name === 'Show' &&
+          owner.owned &&
+          owner.owned.length === 2 &&
+          isSolidMemo((showMemoCondition = owner.owned[0] as Solid.Memo)) &&
+          isSolidMemo((showMemoNode = owner.owned[1] as Solid.Memo))
+        ) {
+          owned = [showMemoCondition]
+          getValue = () => showMemoNode.value
+          observeValueUpdate(showMemoNode, onValueUpdate, INSPECTOR)
+        }
       }
 
       // proxy props need to be checked for changes
@@ -181,7 +195,6 @@ export function collectOwnerDetails(
       }
     } else {
       observeValueUpdate(owner, onValueUpdate, INSPECTOR)
-      details.sources = markNodesID(owner.sources)
     }
 
     details.value = encodeValue(getValue(), false, $nodeIdMap)

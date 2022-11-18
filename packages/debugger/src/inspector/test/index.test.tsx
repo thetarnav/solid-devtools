@@ -58,25 +58,24 @@ describe('collectOwnerDetails', () => {
         name: 'focused',
         type: NodeType.Memo,
         value: { type: ValueType.String, value: 'value' },
-        sources: ['0'],
         signals: [
           {
             type: NodeType.Signal,
-            id: '1',
+            id: '0',
             name: 'element',
             value: { type: ValueType.Element, value: { name: 'DIV', id: '0' } },
           },
           {
             type: NodeType.Memo,
-            id: '2',
+            id: '1',
             name: 'memo',
             value: { type: ValueType.Number, value: 0 },
           },
         ],
       })
 
+      expect(valueMap.get('signal:0')).toBeTruthy()
       expect(valueMap.get('signal:1')).toBeTruthy()
-      expect(valueMap.get('signal:2')).toBeTruthy()
 
       expect(nodeIdMap.get('0')).toBe(div)
 

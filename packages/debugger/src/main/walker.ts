@@ -84,6 +84,8 @@ function mapOwner(owner: Solid.Owner): Mapped.Owner {
     ) {
       showMemoCondition.name = 'condition'
       showMemoNode.name = 'value'
+      mapComputation(showMemoCondition, id, mapped)
+      return mapChildren(showMemoNode, mapped)
     }
 
     // Refresh

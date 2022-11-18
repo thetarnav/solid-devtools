@@ -220,8 +220,6 @@ export namespace Mapped {
     signals: Signal[]
     /** for computations */
     value?: EncodedValue
-    /** for computations */
-    sources?: NodeID[]
     // component with a location
     location?: LocationAttr
   }
