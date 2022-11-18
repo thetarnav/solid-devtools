@@ -58,25 +58,25 @@ describe('collectOwnerDetails', () => {
         name: 'focused',
         type: NodeType.Memo,
         value: { type: ValueType.String, value: 'value' },
-        sources: ['2'],
+        sources: ['0'],
         signals: [
           {
             type: NodeType.Signal,
-            id: '0',
+            id: '1',
             name: 'element',
             value: { type: ValueType.Element, value: { name: 'DIV', id: '0' } },
           },
           {
             type: NodeType.Memo,
-            id: '1',
+            id: '2',
             name: 'memo',
             value: { type: ValueType.Number, value: 0 },
           },
         ],
       })
 
-      expect(valueMap.get('signal:0')).toBeTruthy()
       expect(valueMap.get('signal:1')).toBeTruthy()
+      expect(valueMap.get('signal:2')).toBeTruthy()
 
       expect(nodeIdMap.get('0')).toBe(div)
 
@@ -115,7 +115,6 @@ describe('collectOwnerDetails', () => {
         name: 'TestComponent',
         type: NodeType.Component,
         signals: [],
-        sources: [],
         value: { type: ValueType.Element, value: { id: '0', name: 'DIV' } },
         props: {
           proxy: false,
@@ -155,7 +154,6 @@ describe('collectOwnerDetails', () => {
         name: 'Button',
         type: NodeType.Component,
         signals: [],
-        sources: [],
         value: { type: ValueType.Element, value: { id: '0', name: 'BUTTON' } },
         props: {
           proxy: true,
@@ -225,14 +223,14 @@ describe('collectOwnerDetails', () => {
 
       setCount(1)
       expect(onSignalUpdate).toBeCalledTimes(1)
-      expect(onSignalUpdate).toBeCalledWith('0', 1)
+      expect(onSignalUpdate).toBeCalledWith('1', 1)
 
       setCount(1)
       expect(onSignalUpdate).toBeCalledTimes(1)
 
       setCount2(1)
       expect(onSignalUpdate).toBeCalledTimes(2)
-      expect(onSignalUpdate).toBeCalledWith('1', 1)
+      expect(onSignalUpdate).toBeCalledWith('2', 1)
 
       dispose()
     })
