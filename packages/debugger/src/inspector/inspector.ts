@@ -148,8 +148,7 @@ export function collectOwnerDetails(
         let showMemoNode: Solid.Memo
         if (
           name === 'Show' &&
-          owner.owned &&
-          owner.owned.length === 2 &&
+          owner.owned?.length === 2 &&
           isSolidMemo((showMemoCondition = owner.owned[0] as Solid.Memo)) &&
           isSolidMemo((showMemoNode = owner.owned[1] as Solid.Memo))
         ) {

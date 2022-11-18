@@ -17,8 +17,7 @@ function updateNode(
 
   if (raw) {
     // update frozen computations
-    if (raw.type !== NodeType.Root && raw.type !== NodeType.Component && raw.frozen)
-      node.frozen = true
+    if ('frozen' in raw && raw.frozen) node.frozen = true
 
     const { children: rawChildren } = raw
     const newChildren: Structure.Node[] = (node.children = [])

@@ -51,19 +51,20 @@ export const selection = style({
 })
 
 const paddingMask: Property.MaskImage = `linear-gradient(to right, rgba(0,0,0, 0.4), black ${spacing[48]})`
-const remMinusPx = `calc(1rem - 1px)`
+const paddingValue = spacing[3.5]
+const remMinusPx = `calc(${paddingValue} - 0.95px)`
 const linesColor = createVar()
 
 export const levelPadding = style({
   position: 'relative',
   zIndex: -2,
   marginLeft: spacing[3],
-  width: `calc(${levelVar} * ${spacing[4]} + ${spacing[2.5]})`,
-  height: `calc(${rowHeight} + 1px)`,
+  width: `calc(${levelVar} * ${paddingValue} + ${spacing[2.5]})`,
+  height: `calc(${rowHeight} + 0.95px)`,
   vars: {
     [linesColor]: color.gray[200],
   },
-  background: `repeating-linear-gradient(to right, transparent, transparent ${remMinusPx}, ${linesColor} ${remMinusPx}, ${linesColor} 1rem)`,
+  background: `repeating-linear-gradient(to right, transparent, transparent ${remMinusPx}, ${linesColor} ${remMinusPx}, ${linesColor} ${paddingValue})`,
   maskImage: paddingMask,
   WebkitMaskImage: paddingMask,
   ...media({
