@@ -63,9 +63,7 @@ useLocator()
 
 ### 4. Add vite plugin _(Optional)_
 
-The vite plugin is not necessary for the devtools to work, but enabling some of the options, such as `"name"` will improve the debugging experience.
-
-[**More about the available transforms.**](https://github.com/thetarnav/solid-devtools/tree/main/packages/transform#options)
+The vite plugin is not necessary for the devtools to work, but enabling some of the options, such as `"name"`, will improve the debugging experience or enable additional features.
 
 ```ts
 // vite.config.ts
@@ -78,13 +76,14 @@ export default defineConfig({
   plugins: [
     devtools({
       name: true,
+      componentLocation: true,
     }),
     solid(),
   ],
 })
 ```
 
-![name-transform-example](https://user-images.githubusercontent.com/24491503/185811011-c2031ba3-c9b7-44f7-b924-2a5e28a86230.jpg)
+[**>> More about transform options**](https://github.com/thetarnav/solid-devtools/tree/main/packages/transform#options)
 
 ### 5. Run the app and play with the devtools!
 
