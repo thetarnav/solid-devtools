@@ -1,6 +1,6 @@
 {
   "name": "@solid-devtools/frontend",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "license": "MIT",
   "author": "Damian Tarnawski <gthetarnav@gmail.com>",
   "contributors": [],
@@ -35,7 +35,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@solid-devtools/debugger": "workspace:^0.15.0",
+    "@solid-devtools/debugger": "workspace:^0.15.1",
     "@solid-devtools/shared": "workspace:^0.10.1",
     "@solid-primitives/context": "^0.1.2",
     "@solid-primitives/cursor": "^0.0.103",

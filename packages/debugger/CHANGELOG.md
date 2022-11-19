@@ -1,5 +1,11 @@
 # @solid-devtools/debugger
 
+## 0.15.1
+
+### Patch Changes
+
+- a01f839: Name Show component memos
+
 ## 0.15.0
 
 ### Minor Changes
