@@ -16,11 +16,7 @@ export default function StructureView() {
   return (
     <div class={styles.panelWrapper}>
       <DisplayStructureTree />
-      <div class={styles.path}>
-        <div class={styles.pathInner}>
-          <OwnerPath />
-        </div>
-      </div>
+      <OwnerPath />
     </div>
   )
 }
@@ -103,7 +99,7 @@ const DisplayStructureTree: Component = () => {
     const prevMap: Record<NodeID, DisplayNode> = {}
     for (const node of prev.list) prevMap[node.node.id] = node
 
-    let minLevel = Infinity
+    let minLevel = length ? Infinity : 0
 
     for (let i = 0; i < length; i++) {
       const node = nodeList[start + i]
@@ -118,13 +114,10 @@ const DisplayStructureTree: Component = () => {
       }
     }
 
-    if (minLevel === Infinity) minLevel = 0
-    else minLevel = Math.max(minLevel - 7, 0)
-
     return { list: next, start, end, nodeList, fullLength: nodeList.length, minLevel }
   })
 
-  const minLevel = createMemo(() => virtual().minLevel, 0, {
+  const minLevel = createMemo(() => Math.max(virtual().minLevel - 7, 0), 0, {
     equals: (a, b) => a == b || (Math.abs(b - a) < 7 && b != 0),
   })
 
