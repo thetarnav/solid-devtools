@@ -73,11 +73,11 @@ export default function createStructure({
   const [extHovered, setHovered] = createSignal<Structure.Node | null>(null)
   const clientHoveredComponent = createMemo(() => {
     const id = clientHoveredNodeId()
-    return id ? findNode(id) : null
+    return id ? findNode(id) ?? null : null
   })
   const hovered = () => extHovered() || clientHoveredComponent()
 
-  const isHovered = createSelector(hovered, (id: NodeID, o) => !!o && o.id === id)
+  const isHovered = createSelector<Structure.Node | null, Structure.Node>(hovered)
 
   function toggleHoveredNode(id: NodeID, hovered: boolean): Structure.Node | null {
     return setHovered(p => {
@@ -86,17 +86,36 @@ export default function createStructure({
     })
   }
 
+  const [searchResult, setSearchResult] = createSignal<Structure.Node[]>()
+  const isSearched = createSelector(
+    searchResult,
+    (node: Structure.Node, o) => !!o && o.includes(node),
+  )
+
+  function search(query: string): Structure.Node[] | undefined {
+    if (!query) return setSearchResult()
+    return untrack(() => {
+      const result: Structure.Node[] = []
+      const rgx = new RegExp('^' + query, 'i')
+      for (const node of state().nodeList) {
+        if (node.name && node.name.match(rgx)) result.push(node)
+      }
+      return setSearchResult(result.length ? result : undefined)
+    })
+  }
+
   return {
     state,
     updateStructure,
     hovered,
     extHovered,
-    isHovered,
+    isHovered: (node: Structure.Node) => isHovered(node) || isSearched(node),
     listenToComputationUpdate,
     emitComputationUpdate,
     toggleHoveredNode,
     findNode,
     getParentRoot,
     getNodePath,
+    search,
   }
 }

@@ -13,7 +13,7 @@ import {
   margin,
   remValue,
 } from '@/ui/theme'
-import { colorDisabled, panelBg, panelBorder } from '@/ui/theme/vars.css'
+import vars from '@/ui/theme/vars.css'
 
 const rowHeight = spacing[3]
 const pathHeight = spacing[4.5]
@@ -46,8 +46,8 @@ export const content = style({
   display: 'flex',
   alignItems: 'flex-end',
   ...padding(0.25, 2, 0.25, 2),
-  borderTop: panelBorder,
-  backgroundColor: panelBg,
+  borderTop: vars.panel.border,
+  backgroundColor: vars.panel.bg,
   ':hover': {
     height: 'auto',
     paddingTop: spacing[0.5],
@@ -59,7 +59,7 @@ export const expendable = style({
   inset: 0,
   pointerEvents: 'none',
   zIndex: 2,
-  backgroundImage: `linear-gradient(to right, ${panelBg} ${spacing[8]}, transparent ${spacing[32]})`,
+  backgroundImage: `linear-gradient(to right, ${vars.panel.bg} ${spacing[8]}, transparent ${spacing[32]})`,
   display: 'flex',
   alignItems: 'center',
   paddingLeft: spacing[3],
@@ -72,7 +72,7 @@ export const expendable = style({
 export const expendableIcon = style({
   width: spacing[3],
   height: spacing[3],
-  color: colorDisabled,
+  color: vars.disabled.color,
 })
 
 export const container = style({
@@ -88,12 +88,17 @@ export const divider = style({
   height: spacing[4],
   marginRight: spacing[1],
   ...centerChild,
+  selectors: {
+    [`${container} &:first-child`]: {
+      display: 'none',
+    },
+  },
 })
 
 export const carret = style({
   width: spacing[2],
   height: spacing[2],
-  color: colorDisabled,
+  color: vars.disabled.color,
 })
 
 const highlights = createHighlightStyles()
@@ -133,7 +138,7 @@ export const highlight = style([
 export const typeIcon = style({
   width: spacing[2.5],
   height: spacing[2.5],
-  color: colorDisabled,
+  color: vars.disabled.color,
 })
 
 export const name = style({

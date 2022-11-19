@@ -4,25 +4,24 @@ import {
   color,
   rounded,
   theme,
-  border,
   padding,
   insetY,
   centerChild,
   transition,
 } from '@/ui/theme'
 import { toggleButton } from '@/ui/components/button/button.css'
-import { vars, panelBg, panelBorder, defaultTextColor, colorDisabled } from './ui/theme/vars.css'
+import { varsStyle, vars } from './ui/theme/vars.css'
 
 export const app = style([
-  vars,
+  varsStyle,
   {
     height: '100%',
     width: '100%',
     overflow: 'hidden',
     display: 'grid',
     gridTemplateRows: `${spacing[12]} 1fr`,
-    backgroundColor: panelBg,
-    color: defaultTextColor,
+    backgroundColor: vars.panel.bg,
+    color: vars.defaultTextColor,
     fontSize: theme.fontSize.base,
     fontFamily: theme.font.sans,
   },
@@ -33,13 +32,13 @@ export const header = style({
   display: 'flex',
   alignItems: 'center',
   columnGap: spacing[2],
-  backgroundColor: panelBg,
-  borderBottom: panelBorder,
-  color: defaultTextColor,
+  backgroundColor: vars.panel.bg,
+  borderBottom: vars.panel.border,
+  color: vars.defaultTextColor,
 })
 
 export const subtitle = style({
-  color: colorDisabled,
+  color: vars.disabled.color,
   fontFamily: theme.font.mono,
   fontSize: theme.fontSize.sm,
   marginTop: spacing[1],
@@ -71,16 +70,16 @@ export const search = (() => {
     background: 'unset',
     color: 'inherit',
     fontFamily: 'inherit',
-    ...border(color.gray[700]),
+    border: vars.panel.border,
     ...rounded(),
     ...padding(0, 6),
     ...transition('padding'),
     lineHeight: spacing[8],
     '::placeholder': {
-      color: colorDisabled,
+      color: vars.disabled.color,
     },
     ':focus': {
-      ...border(color.gray[500]),
+      borderColor: vars.panel.string.borderColor,
     },
     selectors: {
       [`${form}:focus-within &`]: {
@@ -98,7 +97,7 @@ export const search = (() => {
   const iconBase = style({
     width: spacing[4],
     height: spacing[4],
-    color: colorDisabled,
+    color: vars.disabled.color,
   })
 
   return {

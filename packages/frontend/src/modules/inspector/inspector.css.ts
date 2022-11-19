@@ -1,6 +1,6 @@
 import { createVar, style } from '@vanilla-extract/css'
 import { spacing, theme, padding, rounded, centerChild, transition } from '@/ui/theme'
-import { colorDisabled, colorDisabledValue, panelBorder } from '@/ui/theme/vars.css'
+import vars from '@/ui/theme/vars.css'
 
 export const root = style({
   height: '100%',
@@ -14,7 +14,7 @@ export const header = style({
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'space-between',
-  borderBottom: panelBorder,
+  borderBottom: vars.panel.border,
 })
 
 export const actions = (() => {
@@ -32,8 +32,8 @@ export const actions = (() => {
       height: spacing[6],
       ...rounded(),
       ...centerChild,
-      color: `rgb(${colorDisabledValue} / ${textOpacity})`,
-      backgroundColor: `rgb(${colorDisabledValue} / ${bgOpacity})`,
+      color: `rgb(${vars.disabled.colorValue} / ${textOpacity})`,
+      backgroundColor: `rgb(${vars.disabled.colorValue} / ${bgOpacity})`,
       vars: {
         [bgOpacity]: '0',
         [textOpacity]: '0.85',
@@ -71,7 +71,7 @@ export const content = style({
 })
 
 export const h2 = style({
-  color: colorDisabled,
+  color: vars.disabled.color,
   marginBottom: spacing[1],
   textTransform: 'capitalize',
 })

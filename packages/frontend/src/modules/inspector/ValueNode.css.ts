@@ -1,7 +1,7 @@
 import { createVar, style, StyleRule, styleVariants } from '@vanilla-extract/css'
 import { dark, color, spacing, theme, media, centerChild, transition } from '@/ui/theme'
 import { createHighlightStyles } from '@/ui/mixins'
-import { colorDisabled, grayHighlightBorder } from '@/ui/theme/vars.css'
+import vars from '@/ui/theme/vars.css'
 
 const RowHeight = spacing[4.5]
 const RowGap = spacing[0.5]
@@ -41,7 +41,7 @@ export const row = (() => {
         },
       ],
     }),
-    highlight: style([valueRowHighlight.highlight, { border: grayHighlightBorder }]),
+    highlight: style([valueRowHighlight.highlight, { border: vars.grayHighlight.border }]),
     toggle: {
       container: style({
         position: 'absolute',
@@ -82,7 +82,7 @@ export const name = {
     userSelect: 'none',
     ':after': {
       content: ':',
-      color: colorDisabled,
+      color: vars.disabled.color,
     },
     fontFamily: theme.font.mono,
     color: color.gray[800],
@@ -123,7 +123,7 @@ const bracketsStyles: StyleRule = {
   color: color.gray[800],
 }
 export const ValueObject = style({
-  color: colorDisabled,
+  color: vars.disabled.color,
   ':before': {
     ...bracketsStyles,
     content: '{',
@@ -186,7 +186,7 @@ export const ValueFunction = style([
 export const Nullable = style([
   baseValue,
   {
-    color: colorDisabled,
+    color: vars.disabled.color,
   },
 ])
 
@@ -208,11 +208,11 @@ export const ValueElement = {
         },
       },
       ':before': {
-        color: colorDisabled,
+        color: vars.disabled.color,
         content: `<`,
       },
       ':after': {
-        color: colorDisabled,
+        color: vars.disabled.color,
         content: '/>',
       },
       ...media({

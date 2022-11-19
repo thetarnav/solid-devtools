@@ -5,7 +5,6 @@ import { createResizeObserver } from '@solid-primitives/resize-observer'
 import { NodeID } from '@solid-devtools/debugger/types'
 import type { Structure } from '.'
 import { Scrollable } from '@/ui'
-import { StructureProvider } from './ctx'
 import { OwnerNode } from './OwnerNode'
 import { OwnerPath } from './Path'
 import { getVirtualVars } from './virtual'
@@ -51,7 +50,7 @@ const DisplayStructureTree: Component = () => {
   const {
     structureState,
     inspectedNode,
-    isNodeHovered,
+    structure,
     isNodeInspected,
     listenToComputationUpdate,
     toggleHoveredNode,
@@ -144,8 +143,8 @@ const DisplayStructureTree: Component = () => {
       const rowHeight = getRowHeight()
       const containerTopMargin = getContainerTopMargin()
       let top: number
-      if (index < start) top = (index - 1) * rowHeight
-      else if (index > end) top = (index + 2) * rowHeight - containerScroll().height
+      if (index <= start + 2) top = (index - 1) * rowHeight
+      else if (index >= end - 2) top = (index + 2) * rowHeight - containerScroll().height
       else return
 
       container.scrollTop = top + containerTopMargin
@@ -172,24 +171,22 @@ const DisplayStructureTree: Component = () => {
       >
         <div class={styles.scrolledInner}>
           <div class={styles.scrolledInner2}>
-            <StructureProvider
-              value={{ toggleCollapsed, isCollapsed: node => collapsed().has(node) }}
-            >
-              <For each={virtual().list}>
-                {({ getNode, node }) => (
-                  <OwnerNode
-                    owner={getNode()}
-                    isHovered={isNodeHovered(node.id)}
-                    isSelected={isNodeInspected(node.id)}
-                    listenToUpdate={listener =>
-                      listenToComputationUpdate(id => id === node.id && listener())
-                    }
-                    onHoverChange={hovered => toggleHoveredNode(node.id, hovered)}
-                    onInspectChange={inspected => setInspectedNode(inspected ? node : null)}
-                  />
-                )}
-              </For>
-            </StructureProvider>
+            <For each={virtual().list}>
+              {({ getNode, node }) => (
+                <OwnerNode
+                  owner={getNode()}
+                  isHovered={structure.isHovered(node)}
+                  isSelected={isNodeInspected(node.id)}
+                  listenToUpdate={listener =>
+                    listenToComputationUpdate(id => id === node.id && listener())
+                  }
+                  onHoverChange={hovered => toggleHoveredNode(node.id, hovered)}
+                  onInspectChange={inspected => setInspectedNode(inspected ? node : null)}
+                  toggleCollapsed={toggleCollapsed}
+                  isCollapsed={collapsed().has(node)}
+                />
+              )}
+            </For>
           </div>
         </div>
       </div>

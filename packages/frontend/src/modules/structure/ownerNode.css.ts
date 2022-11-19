@@ -14,7 +14,7 @@ import {
 } from '@/ui/theme'
 import { rowHeight, rowPadding } from './structure.css'
 import { Property } from 'csstype'
-import { grayHighlightBorder, grayHighlightColor } from '@/ui/theme/vars.css'
+import vars from '@/ui/theme/vars.css'
 
 export const levelVar: CSSVarFunction = createVar()
 
@@ -36,13 +36,13 @@ export const selection = style({
   ...insetY(0),
   ...insetX(1),
   ...rounded(),
-  backgroundColor: grayHighlightColor,
-  border: grayHighlightBorder,
+  backgroundColor: vars.grayHighlight.color,
+  border: vars.grayHighlight.border,
   opacity: 0,
   ...transition(['opacity'], theme.duration[100]),
   selectors: {
     [`${container}${dataHovered} &`]: {
-      opacity: 0.25,
+      opacity: 0.2,
     },
     [`${container}${dataSelected} &`]: {
       opacity: 0.45,

@@ -24,21 +24,26 @@ const Search: Component = () => {
 
   const [value, setValue] = createSignal('')
 
+  const handleChange = (v: string) => {
+    setValue(v)
+    ctx.searchStructure('')
+  }
+
   return (
     <form
       class={styles.search.form}
       onSubmit={e => {
         e.preventDefault()
-        console.log('search', value())
+        ctx.searchStructure(value())
       }}
-      onReset={() => setValue('')}
+      onReset={() => handleChange('')}
     >
       <input
         class={styles.search.input}
         type="text"
         placeholder="Search"
-        onInput={e => setValue(e.currentTarget.value)}
-        onPaste={e => setValue(e.currentTarget.value)}
+        onInput={e => handleChange(e.currentTarget.value)}
+        onPaste={e => handleChange(e.currentTarget.value)}
       />
       <div class={styles.search.iconContainer}>
         <Icon.Search class={styles.search.icon} />

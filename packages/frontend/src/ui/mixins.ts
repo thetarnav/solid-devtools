@@ -1,7 +1,7 @@
 import { createVar, fallbackVar, style } from '@vanilla-extract/css'
 import { CSSVarFunction } from '@vanilla-extract/private'
 import { insetX, insetY, rounded, spacing, transition } from './theme'
-import { grayHighlightColor } from './theme/vars.css'
+import { vars } from './theme/vars.css'
 
 export function createHighlightStyles(
   transitionProperty:
@@ -29,7 +29,7 @@ export function createHighlightStyles(
     ...insetY(0),
     ...rounded(),
     ...transition(transitionProperty),
-    backgroundColor: fallbackVar(bgColorVar, grayHighlightColor),
+    backgroundColor: fallbackVar(bgColorVar, vars.grayHighlight.color),
     opacity: fallbackVar(bgOpacityVar, '0'),
   })
 

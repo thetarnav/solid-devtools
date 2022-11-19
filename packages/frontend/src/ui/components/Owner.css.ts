@@ -1,6 +1,6 @@
 import { style, StyleRule } from '@vanilla-extract/css'
 import { spacing, theme } from '../theme'
-import { colorDisabled, componentNameColor, defaultTextColor } from '../theme/vars.css'
+import vars from '../theme/vars.css'
 
 const strikeThroughLine: StyleRule = {
   content: '',
@@ -27,24 +27,24 @@ export const title = style({
 export const name = style({
   selectors: {
     [`${container}[data-frozen="true"] &`]: {
-      color: colorDisabled,
+      color: vars.disabled.color,
     },
     [`${container}[data-frozen="true"] &:after`]: strikeThroughLine,
   },
-  color: defaultTextColor,
+  color: vars.defaultTextColor,
 })
 export const componentName = style([
   name,
   {
     ':before': {
       content: '<',
-      color: colorDisabled,
+      color: vars.disabled.color,
     },
     ':after': {
       content: '>',
-      color: colorDisabled,
+      color: vars.disabled.color,
     },
-    color: componentNameColor,
+    color: vars.componentNameColor,
   },
 ])
 
@@ -54,7 +54,7 @@ export const type = style({
   selectors: {
     [`${container}[data-frozen="true"] &:after`]: strikeThroughLine,
   },
-  color: colorDisabled,
+  color: vars.disabled.color,
 })
 
 export const typeIcon = style({
@@ -62,5 +62,5 @@ export const typeIcon = style({
   height: spacing[3],
   marginRight: spacing[1],
   marginBottom: `-1px`,
-  color: colorDisabled,
+  color: vars.disabled.color,
 })

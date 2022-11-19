@@ -1,46 +1,60 @@
 import { createVar, style } from '@vanilla-extract/css'
 import { color, dark, hexToRgbValue, media } from '.'
 
-export const panelBorderBg = createVar()
-export const panelBorder = createVar()
-export const panelBg = createVar()
+export const vars = {
+  panel: {
+    bg: createVar(),
+    border: createVar(),
+    borderColor: createVar(),
+    string: {
+      border: createVar(),
+      borderColor: createVar(),
+    },
+  },
+  grayHighlight: {
+    color: createVar(),
+    border: createVar(),
+  },
+  disabled: {
+    color: createVar(),
+    colorValue: createVar(),
+  },
+  defaultTextColor: createVar(),
+  componentNameColor: createVar(),
+}
 
-export const grayHighlightColor = createVar()
-export const grayHighlightBorder = createVar()
-
-export const colorDisabled = createVar()
-export const colorDisabledValue = createVar()
-export const defaultTextColor = createVar()
-export const componentNameColor = createVar()
-
-export const vars = style({
+export const varsStyle = style({
   vars: {
-    [panelBorderBg]: color.gray[200],
-    [panelBorder]: `1px solid ${panelBorderBg}`,
-    [panelBg]: color.gray[50],
+    [vars.panel.borderColor]: color.gray[200],
+    [vars.panel.border]: `1px solid ${vars.panel.borderColor}`,
+    [vars.panel.bg]: color.gray[50],
+    [vars.panel.string.borderColor]: color.gray[400],
+    [vars.panel.string.border]: `1px solid ${vars.panel.string.borderColor}`,
 
-    [grayHighlightColor]: color.gray[300],
-    [grayHighlightBorder]: `1px solid ${color.gray[400]}`,
+    [vars.grayHighlight.color]: color.gray[300],
+    [vars.grayHighlight.border]: `1px solid ${color.gray[400]}`,
 
-    [colorDisabled]: color.disabled.light,
-    [colorDisabledValue]: hexToRgbValue(color.disabled.light),
-    [defaultTextColor]: color.gray[900],
-    [componentNameColor]: color.cyan[600],
+    [vars.disabled.color]: color.disabled.light,
+    [vars.disabled.colorValue]: hexToRgbValue(color.disabled.light),
+    [vars.defaultTextColor]: color.gray[900],
+    [vars.componentNameColor]: color.cyan[600],
   },
   ...media({
     [dark]: {
       vars: {
-        [panelBorderBg]: color.gray[600],
-        [panelBg]: color.gray[800],
+        [vars.panel.borderColor]: color.gray[600],
+        [vars.panel.bg]: color.gray[800],
 
-        [grayHighlightColor]: color.gray[600],
-        [grayHighlightBorder]: `1px solid ${color.gray[500]}`,
+        [vars.grayHighlight.color]: color.gray[600],
+        [vars.grayHighlight.border]: `1px solid ${color.gray[500]}`,
 
-        [colorDisabled]: color.disabled.dark,
-        [colorDisabledValue]: hexToRgbValue(color.disabled.dark),
-        [defaultTextColor]: color.gray[50],
-        [componentNameColor]: color.cyan[400],
+        [vars.disabled.color]: color.disabled.dark,
+        [vars.disabled.colorValue]: hexToRgbValue(color.disabled.dark),
+        [vars.defaultTextColor]: color.gray[50],
+        [vars.componentNameColor]: color.cyan[400],
       },
     },
   }),
 })
+
+export default vars

@@ -1,7 +1,7 @@
 import { style, createVar, StyleRule } from '@vanilla-extract/css'
 import { CSSVarFunction } from '@vanilla-extract/private'
 import { mobile, spacing, media, transition } from '@/ui/theme'
-import { panelBorderBg } from '@/ui/theme/vars.css'
+import { vars } from '@/ui/theme/vars.css'
 
 const minSize = spacing[36]
 const splitSize = '1px'
@@ -41,7 +41,7 @@ export const content = style({
 
 export const split = style({
   position: 'relative',
-  backgroundColor: panelBorderBg,
+  backgroundColor: vars.panel.borderColor,
 })
 
 export const splitHandle = style({
@@ -54,7 +54,7 @@ export const splitHandle = style({
     content: '',
     position: 'absolute',
     inset: `0 1px`,
-    backgroundColor: panelBorderBg,
+    backgroundColor: vars.panel.borderColor,
     opacity: 0,
     ...transition('opacity'),
   },
