@@ -41,8 +41,6 @@ const DisplayStructureTree: Component = () => {
     })
 
   const [collapsed, setCollapsed] = createSignal(new WeakSet<Structure.Node>(), { equals: false })
-  // this cannot be a selector, because it uses a weakset
-  const isCollapsed = (node: Structure.Node) => collapsed().has(node)
 
   const toggleCollapsed = (node: Structure.Node) =>
     setCollapsed(set => {
@@ -126,8 +124,21 @@ const DisplayStructureTree: Component = () => {
     const node = inspectedNode()
     if (!node) return
     untrack(() => {
-      const index = collapsedList().indexOf(node)
-      if (index === -1) return
+      let index = collapsedList().indexOf(node)
+      if (index === -1) {
+        // Un-collapse parents if needed
+        const set = collapsed()
+        let parent = node.parent
+        let wasCollapsed = false
+        while (parent) {
+          wasCollapsed ||= set.delete(parent)
+          parent = parent.parent
+        }
+        if (wasCollapsed) {
+          setCollapsed(set)
+          index = collapsedList().indexOf(node)
+        } else return
+      }
 
       const { start, end } = virtual()
       const rowHeight = getRowHeight()
@@ -161,7 +172,9 @@ const DisplayStructureTree: Component = () => {
       >
         <div class={styles.scrolledInner}>
           <div class={styles.scrolledInner2}>
-            <StructureProvider value={{ toggleCollapsed, isCollapsed }}>
+            <StructureProvider
+              value={{ toggleCollapsed, isCollapsed: node => collapsed().has(node) }}
+            >
               <For each={virtual().list}>
                 {({ getNode, node }) => (
                   <OwnerNode
