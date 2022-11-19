@@ -280,3 +280,93 @@ describe('mapArray example', () => {
     expect(nodeList).toEqual(prevNodeList)
   })
 })
+
+// describe('combined nodes', () => {
+//   let updated: Record<NodeID, Mapped.Root> = {
+//     '1': {
+//       id: '1',
+//       type: NodeType.Root,
+//       children: [
+//         { id: '2', name: 'child', type: NodeType.Component, children: [], combines: ['3'] },
+//       ],
+//     },
+//     '5': {
+//       id: '5',
+//       type: NodeType.Root,
+//       children: [{ id: '6', name: 'child4', type: NodeType.Component, children: [] }],
+//       attached: '3',
+//     },
+//   }
+//   let removed: NodeID[] = []
+
+//   let prevRoots: Structure.Node[] = []
+
+//   test('initial', () => {
+//     const { roots, nodeList } = reconcileStructure(prevRoots, updated, removed)
+//     prevRoots = roots
+
+//     expect(nodeList).toMatchObject([
+//       { id: '1', parent: null, level: 0, children: [{ id: '2' }] },
+//       { id: '2', parent: { id: '1' }, level: 1, children: [], subroots: [{ id: '5' }] },
+//       { id: '5', parent: { id: '2' }, level: 2, children: [{ id: '6' }] },
+//       { id: '6', parent: { id: '5' }, level: 3, children: [] },
+//     ])
+
+//     expect(roots).toMatchObject([{ id: '1' }])
+//   })
+
+//   // test('update', () => {
+//   //   updated = {
+//   //     '1': {
+//   //       id: '1',
+//   //       type: NodeType.Root,
+//   //       children: [
+//   //         // removed child (2)
+//   //         {
+//   //           id: '3',
+//   //           name: 'child2',
+//   //           type: NodeType.Effect,
+//   //           frozen: true,
+//   //           children: [
+//   //             { id: '4', name: 'child3', type: NodeType.Component, children: [], hmr: false },
+//   //           ],
+//   //         },
+//   //       ],
+//   //     },
+//   //     // added new top-level root (10)
+//   //     '10': {
+//   //       id: '10',
+//   //       type: NodeType.Root,
+//   //       children: [],
+//   //     },
+//   //     '5': {
+//   //       // removed child (6)
+//   //       id: '5',
+//   //       type: NodeType.Root,
+//   //       children: [],
+//   //       attached: '3',
+//   //     },
+//   //   }
+
+//   //   const { roots, nodeList } = reconcileStructure(prevRoots, updated, removed)
+//   //   prevRoots = roots
+
+//   //   expect(nodeList).toHaveLength(5)
+//   //   expect(nodeList).toMatchObject([
+//   //     { id: '1', parent: null, level: 0, children: [{ id: '3' }] },
+//   //     {
+//   //       id: '3',
+//   //       parent: { id: '1' },
+//   //       level: 1,
+//   //       children: [{ id: '4' }],
+//   //       subroots: [{ id: '5' }],
+//   //       frozen: true,
+//   //     },
+//   //     { id: '4', parent: { id: '3' }, level: 2, children: [] },
+//   //     { id: '5', parent: { id: '3' }, level: 2, children: [] },
+//   //     { id: '10', parent: null, level: 0, children: [] },
+//   //   ])
+
+//   //   expect(roots).toMatchObject([{ id: '1' }, { id: '10' }])
+//   // })
+// })

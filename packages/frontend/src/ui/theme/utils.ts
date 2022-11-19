@@ -137,3 +137,27 @@ export function padding(
     padding: `${resolveSpacing(a)} ${resolveSpacing(b)} ${resolveSpacing(c)} ${resolveSpacing(d)}`,
   }
 }
+
+export function margin(allEdges: SpacingValue): StyleRule
+export function margin(v: SpacingValue, h: SpacingValue): StyleRule
+export function margin(t: SpacingValue, h: SpacingValue, b: SpacingValue): StyleRule
+export function margin(
+  t: SpacingValue,
+  r: SpacingValue,
+  b: SpacingValue,
+  l: SpacingValue,
+): StyleRule
+export function margin(
+  a: SpacingValue,
+  b?: SpacingValue,
+  c?: SpacingValue,
+  d?: SpacingValue,
+): StyleRule {
+  if (b === undefined) return { margin: resolveSpacing(a) }
+  if (c === undefined) return { margin: `${resolveSpacing(a)} ${resolveSpacing(b)}` }
+  if (d === undefined)
+    return { margin: `${resolveSpacing(a)} ${resolveSpacing(b)} ${resolveSpacing(c)}` }
+  return {
+    margin: `${resolveSpacing(a)} ${resolveSpacing(b)} ${resolveSpacing(c)} ${resolveSpacing(d)}`,
+  }
+}

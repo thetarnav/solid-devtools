@@ -1,8 +1,79 @@
 import { style } from '@vanilla-extract/css'
 import { createHighlightStyles } from '@/ui/mixins'
-import { dark, centerChild, color, rounded, spacing, theme, media } from '@/ui/theme'
+import {
+  dark,
+  centerChild,
+  color,
+  rounded,
+  spacing,
+  theme,
+  media,
+  insetX,
+  padding,
+  margin,
+  remValue,
+} from '@/ui/theme'
+import { colorDisabled, panelBg, panelBorder } from '@/ui/theme/vars.css'
 
 const rowHeight = spacing[3]
+const pathHeight = spacing[4.5]
+
+export const MIN_PATH_HEIGHT_IN_REM = remValue(pathHeight)
+
+export const path = style({
+  flexShrink: 0,
+  height: pathHeight,
+  width: '100%',
+  position: 'relative',
+  display: 'flex',
+})
+
+export const expand = style({
+  height: '100%',
+  backgroundColor: color.gray[700],
+})
+
+export const content = style({
+  position: 'absolute',
+  zIndex: 1,
+  bottom: 0,
+  ...insetX(0),
+  minHeight: pathHeight,
+  height: pathHeight,
+  overflow: 'hidden',
+  width: '100%',
+  boxSizing: 'border-box',
+  display: 'flex',
+  alignItems: 'flex-end',
+  ...padding(0.25, 2, 0.25, 2),
+  borderTop: panelBorder,
+  backgroundColor: panelBg,
+  ':hover': {
+    height: 'auto',
+    paddingTop: spacing[0.5],
+  },
+})
+
+export const expendable = style({
+  position: 'absolute',
+  inset: 0,
+  pointerEvents: 'none',
+  zIndex: 2,
+  backgroundImage: `linear-gradient(to right, ${panelBg} ${spacing[8]}, transparent ${spacing[32]})`,
+  display: 'flex',
+  alignItems: 'center',
+  paddingLeft: spacing[3],
+  selectors: {
+    [`${content}:hover &`]: {
+      opacity: 0,
+    },
+  },
+})
+export const expendableIcon = style({
+  width: spacing[3],
+  height: spacing[3],
+  color: colorDisabled,
+})
 
 export const container = style({
   display: 'flex',
@@ -14,7 +85,7 @@ export const container = style({
 
 export const divider = style({
   width: rowHeight,
-  height: rowHeight,
+  height: spacing[4],
   marginRight: spacing[1],
   ...centerChild,
 })
@@ -22,11 +93,7 @@ export const divider = style({
 export const carret = style({
   width: spacing[2],
   height: spacing[2],
-  ...media({
-    [dark]: {
-      color: color.gray[50],
-    },
-  }),
+  color: colorDisabled,
 })
 
 const highlights = createHighlightStyles()
@@ -35,16 +102,16 @@ export const item = style([
   highlights.container,
   {
     height: rowHeight,
-    display: 'flex',
-    alignItems: 'center',
-    columnGap: spacing[1],
-    marginRight: spacing[1],
+    ...padding(0.25, 0),
+    ...margin(0.25, 1, 0.25, 0),
     ':last-child': {
       marginRight: 0,
     },
+    display: 'flex',
+    alignItems: 'center',
+    columnGap: spacing[1],
     cursor: 'pointer',
     vars: {
-      [highlights.bgColorVar]: color.gray[300],
       [highlights.bgOpacityVar]: '0',
     },
     selectors: {
@@ -66,20 +133,15 @@ export const highlight = style([
 export const typeIcon = style({
   width: spacing[2.5],
   height: spacing[2.5],
-  color: color.gray[500],
-  ...media({
-    [dark]: {
-      color: color.gray[200],
-    },
-  }),
+  color: colorDisabled,
 })
 
 export const name = style({
-  color: color.black,
   transform: 'translateY(0.2px)',
+  color: color.gray[600],
   ...media({
     [dark]: {
-      color: color.gray[50],
+      color: color.gray[200],
     },
   }),
 })

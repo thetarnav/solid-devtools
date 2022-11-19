@@ -1,5 +1,5 @@
 import { batch, createEffect, createSelector, createSignal } from 'solid-js'
-import { createStore, produce } from 'solid-js/store'
+import { createStore, produce, unwrap } from 'solid-js/store'
 import { defer, untrackedCallback, WritableDeep } from '@solid-devtools/shared/primitives'
 import { error, warn } from '@solid-devtools/shared/utils'
 import {
@@ -210,13 +210,13 @@ export default function createInspector({
       const currentNode = inspectedNode()
       if (typeof data === 'object') {
         if (currentNode && data.id === currentNode.id) return
-        setInspectedNode(data)
+        setInspectedNode(unwrap(data))
         setDetails({ value: null })
       } else {
         if (currentNode && data === currentNode.id) return
         const node = findNode(data)
         if (!node) return
-        setInspectedNode(node)
+        setInspectedNode(unwrap(node))
         setDetails({ value: null })
       }
     })

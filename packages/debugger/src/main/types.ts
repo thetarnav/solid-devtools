@@ -183,6 +183,7 @@ export namespace Mapped {
   export interface Owner {
     id: NodeID
     type: Exclude<NodeType, NodeType.Root | NodeType.Refresh>
+    // combines?: NodeID[]
     children?: Owner[]
     name?: string
     // component wrapped with a hmr memo?

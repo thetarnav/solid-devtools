@@ -1,4 +1,13 @@
-import { createSignal, batch, For, Component, createMemo, createEffect, Show } from 'solid-js'
+import {
+  createSignal,
+  batch,
+  For,
+  Component,
+  createMemo,
+  createEffect,
+  Show,
+  createRoot,
+} from 'solid-js'
 import { createStore, Store, SetStoreFunction, produce, unwrap } from 'solid-js/store'
 
 export function createLocalStore<T extends object>(
@@ -92,7 +101,9 @@ const Todos: Component = () => {
       <h3>Simple Todos Example</h3>
       <Show when={true} keyed>
         {v => {
-          createEffect(newTitle, undefined, { name: 'newTitle effect' })
+          createRoot(d => {
+            createEffect(newTitle, undefined, { name: 'newTitle effect' })
+          })
           return (
             <form onSubmit={addTodo}>
               <input

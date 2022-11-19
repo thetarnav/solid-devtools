@@ -73,19 +73,40 @@ function mapOwner(owner: Solid.Owner): Mapped.Owner {
     if (element) $components.push({ id, name: name!, element })
 
     // <Show> component
-    let showMemoCondition: Solid.Memo | undefined
-    let showMemoNode: Solid.Memo | undefined
+    let showMemoCondition: Solid.Memo
+    let showMemoNode: Solid.Memo
     if (
       name === 'Show' &&
-      owner.owned &&
-      owner.owned.length === 2 &&
+      owner.owned?.length === 2 &&
       isSolidMemo((showMemoCondition = owner.owned[0] as Solid.Memo)) &&
       isSolidMemo((showMemoNode = owner.owned[1] as Solid.Memo))
     ) {
       showMemoCondition.name = 'condition'
       showMemoNode.name = 'value'
-      mapComputation(showMemoCondition, id, mapped)
-      return mapChildren(showMemoNode, mapped)
+      // if (!showMemoCondition.owned) {
+      //   mapped.name = 'Show_'
+      //   // mapped.combines = [markNodeID(showMemoCondition), markNodeID(showMemoNode)]
+      //   // showMemoNode.att
+      //   mapComputation(showMemoCondition, id, mapped)
+      //   return mapChildren(showMemoNode, mapped)
+      // }
+    }
+
+    // <For> component
+    let forMemo: Solid.Memo
+    if (
+      name === 'For' &&
+      owner.owned?.length === 1 &&
+      isSolidMemo((forMemo = owner.owned[0] as Solid.Memo))
+    ) {
+      forMemo.name = 'value'
+      // mapped.combines = [markNodeID(forMemo)]
+      // mapComputation(forMemo, id, mapped)
+      // return mapChildren(forMemo, mapped)
+      // const mappedMemo = mapOwner(forMemo)
+      // mappedMemo.type = NodeType.Component
+      // mappedMemo.name = name
+      // return mappedMemo
     }
 
     // Refresh

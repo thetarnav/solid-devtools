@@ -16,11 +16,7 @@ export default function StructureView() {
   return (
     <div class={styles.panelWrapper}>
       <DisplayStructureTree />
-      <div class={styles.path}>
-        <div class={styles.pathInner}>
-          <OwnerPath />
-        </div>
-      </div>
+      <OwnerPath />
     </div>
   )
 }
@@ -45,8 +41,6 @@ const DisplayStructureTree: Component = () => {
     })
 
   const [collapsed, setCollapsed] = createSignal(new WeakSet<Structure.Node>(), { equals: false })
-  // this cannot be a selector, because it uses a weakset
-  const isCollapsed = (node: Structure.Node) => collapsed().has(node)
 
   const toggleCollapsed = (node: Structure.Node) =>
     setCollapsed(set => {
@@ -91,7 +85,8 @@ const DisplayStructureTree: Component = () => {
     fullLength: number
     list: readonly DisplayNode[]
     nodeList: readonly Structure.Node[]
-  }>((prev = { start: 0, end: 0, fullLength: 0, list: [], nodeList: [] }) => {
+    minLevel: number
+  }>((prev = { start: 0, end: 0, fullLength: 0, list: [], nodeList: [], minLevel: 0 }) => {
     const nodeList = collapsedList()
     const { top, height } = containerScroll()
     const { start, end, length } = getVirtualVars(nodeList.length, top, height, getRowHeight())
@@ -102,9 +97,12 @@ const DisplayStructureTree: Component = () => {
     const prevMap: Record<NodeID, DisplayNode> = {}
     for (const node of prev.list) prevMap[node.node.id] = node
 
+    let minLevel = length ? Infinity : 0
+
     for (let i = 0; i < length; i++) {
       const node = nodeList[start + i]
       const prev = prevMap[node.id]
+      minLevel = Math.min(minLevel, node.level)
       if (prev) {
         next[i] = prev
         prev.update()
@@ -114,15 +112,33 @@ const DisplayStructureTree: Component = () => {
       }
     }
 
-    return { list: next, start, end, nodeList, fullLength: nodeList.length }
+    return { list: next, start, end, nodeList, fullLength: nodeList.length, minLevel }
   })
 
+  const minLevel = createMemo(() => Math.max(virtual().minLevel - 7, 0), 0, {
+    equals: (a, b) => a == b || (Math.abs(b - a) < 7 && b != 0),
+  })
+
+  // Scroll to selected node when it changes
   createEffect(() => {
     const node = inspectedNode()
     if (!node) return
     untrack(() => {
-      const index = collapsedList().indexOf(node)
-      if (index === -1) return
+      let index = collapsedList().indexOf(node)
+      if (index === -1) {
+        // Un-collapse parents if needed
+        const set = collapsed()
+        let parent = node.parent
+        let wasCollapsed = false
+        while (parent) {
+          wasCollapsed ||= set.delete(parent)
+          parent = parent.parent
+        }
+        if (wasCollapsed) {
+          setCollapsed(set)
+          index = collapsedList().indexOf(node)
+        } else return
+      }
 
       const { start, end } = virtual()
       const rowHeight = getRowHeight()
@@ -151,25 +167,30 @@ const DisplayStructureTree: Component = () => {
         style={assignInlineVars({
           [styles.treeLength]: virtual().fullLength.toString(),
           [styles.startIndex]: virtual().start.toString(),
+          [styles.minLevel]: minLevel().toString(),
         })}
       >
         <div class={styles.scrolledInner}>
-          <StructureProvider value={{ toggleCollapsed, isCollapsed }}>
-            <For each={virtual().list}>
-              {({ getNode, node }) => (
-                <OwnerNode
-                  owner={getNode()}
-                  isHovered={isNodeHovered(node.id)}
-                  isSelected={isNodeInspected(node.id)}
-                  listenToUpdate={listener =>
-                    listenToComputationUpdate(id => id === node.id && listener())
-                  }
-                  onHoverChange={hovered => toggleHoveredNode(node.id, hovered)}
-                  onInspectChange={inspected => setInspectedNode(inspected ? node : null)}
-                />
-              )}
-            </For>
-          </StructureProvider>
+          <div class={styles.scrolledInner2}>
+            <StructureProvider
+              value={{ toggleCollapsed, isCollapsed: node => collapsed().has(node) }}
+            >
+              <For each={virtual().list}>
+                {({ getNode, node }) => (
+                  <OwnerNode
+                    owner={getNode()}
+                    isHovered={isNodeHovered(node.id)}
+                    isSelected={isNodeInspected(node.id)}
+                    listenToUpdate={listener =>
+                      listenToComputationUpdate(id => id === node.id && listener())
+                    }
+                    onHoverChange={hovered => toggleHoveredNode(node.id, hovered)}
+                    onInspectChange={inspected => setInspectedNode(inspected ? node : null)}
+                  />
+                )}
+              </For>
+            </StructureProvider>
+          </div>
         </div>
       </div>
     </Scrollable>

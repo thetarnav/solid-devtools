@@ -31,6 +31,7 @@
   "scripts": {
     "dev": "tsup --watch",
     "build": "tsup",
+    "test": "vitest",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

@@ -1,7 +1,7 @@
 import { style } from '@vanilla-extract/css'
 import { dark, spacing, color, rounded, theme, media } from '@/ui/theme'
 import { toggleButton } from '@/ui/components/button/button.css'
-import { vars, panelBg, panelBorder, defaultTextColor } from './ui/theme/vars.css'
+import { vars, panelBg, panelBorder, defaultTextColor, colorDisabled } from './ui/theme/vars.css'
 
 export const app = style([
   vars,
@@ -31,6 +31,13 @@ export const header = style({
       color: color.gray[50],
     },
   }),
+})
+
+export const subtitle = style({
+  color: colorDisabled,
+  fontFamily: theme.font.mono,
+  fontSize: theme.fontSize.sm,
+  marginTop: spacing[1],
 })
 
 export const select = style({

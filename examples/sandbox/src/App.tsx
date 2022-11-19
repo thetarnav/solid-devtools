@@ -11,6 +11,8 @@ import {
   createRenderEffect,
   onCleanup,
   Show,
+  createResource,
+  Suspense,
 } from 'solid-js'
 import Todos from './Todos'
 import { disposeApp } from '.'
@@ -71,21 +73,30 @@ const Article: Component = () => {
     },
   })
 
+  const [data] = createResource(
+    () => state.count,
+    async c => {
+      await new Promise(r => setTimeout(r, 1000))
+      return `Article ${c}`
+    },
+    { name: 'resource' },
+  )
+
   return (
     <article>
       <h3>{state.content.title}</h3>
       <p>
         {state.content.body}
-        <PassChildren>
-          <b>
-            Saepe nulla omnis nobis minima perferendis odio doloremque deleniti dolore corrupti.
-          </b>
-        </PassChildren>
+        <b>Saepe nulla omnis nobis minima perferendis odio doloremque deleniti dolore corrupti.</b>
       </p>
       {/* <p>Count: {state.count}</p> */}
-      <p>
-        <button onClick={() => state.count++}>Increment article count</button>
-      </p>
+      <Suspense>
+        <p>
+          <PassChildren>
+            <button onClick={() => state.count++}>Increment {data()}</button>
+          </PassChildren>
+        </p>
+      </Suspense>
     </article>
   )
 }
