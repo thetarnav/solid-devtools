@@ -121,6 +121,7 @@ const DisplayStructureTree: Component = () => {
     equals: (a, b) => a == b || (Math.abs(b - a) < 7 && b != 0),
   })
 
+  // Scroll to selected node when it changes
   createEffect(() => {
     const node = inspectedNode()
     if (!node) return
