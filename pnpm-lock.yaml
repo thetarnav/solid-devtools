@@ -65,7 +65,7 @@ importers:
   examples/sandbox:
     specifiers:
       '@babel/plugin-syntax-typescript': ^7.18.6
-      '@solid-devtools/debugger': workspace:^0.15.0
+      '@solid-devtools/debugger': workspace:^0.15.1
       '@solid-devtools/logger': workspace:^0.5.1
       '@solid-devtools/overlay': workspace:^0.2.0
       '@solid-devtools/transform': workspace:^0.9.0
@@ -180,7 +180,7 @@ importers:
   packages/extension:
     specifiers:
       '@crxjs/vite-plugin': ^1.0.14
-      '@solid-devtools/frontend': workspace:^0.2.0
+      '@solid-devtools/frontend': workspace:^0.2.1
       '@solid-devtools/shared': workspace:^0.10.1
       '@solid-primitives/utils': ^4.0.0
       '@types/chrome': ^0.0.202
@@ -212,7 +212,7 @@ importers:
 
   packages/frontend:
     specifiers:
-      '@solid-devtools/debugger': workspace:^0.15.0
+      '@solid-devtools/debugger': workspace:^0.15.1
       '@solid-devtools/shared': workspace:^0.10.1
       '@solid-primitives/context': ^0.1.2
       '@solid-primitives/cursor': ^0.0.103

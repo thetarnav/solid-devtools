@@ -1,5 +1,15 @@
 # solid-devtools-extension
 
+## 0.19.1
+
+### Patch Changes
+
+- a01f839: Improve dark theme styles
+- Updated dependencies [9d3cb57]
+- Updated dependencies [7ef99be]
+- Updated dependencies [41a60c2]
+  - @solid-devtools/frontend@0.2.1
+
 ## 0.19.0
 
 ### Minor Changes

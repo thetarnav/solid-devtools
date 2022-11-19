@@ -1,5 +1,15 @@
 # @solid-devtools/frontend
 
+## 0.2.1
+
+### Patch Changes
+
+- 9d3cb57: Improve scrolling to selected node. (Un-collapsing parents; Broken when using the structure path)
+- 7ef99be: Keep the height of the Path component fixed unless the the component is being hovered.
+- 41a60c2: Remove common left padding of structure nodes to keep them centered on the screen.
+- Updated dependencies [a01f839]
+  - @solid-devtools/debugger@0.15.1
+
 ## 0.2.0
 
 ### Minor Changes
