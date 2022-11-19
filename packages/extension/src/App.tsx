@@ -22,7 +22,9 @@ export default function App() {
     >
       <Devtools
         controller={controller}
-        headerSubtitle={`version ${versions().extension}`}
+        headerSubtitle={`#${versions().extension}_${versions().client}/${
+          versions().expectedClient
+        }`}
         errorOverlayFooter={
           <ul>
             <li>Extension: {versions().extension}</li>
