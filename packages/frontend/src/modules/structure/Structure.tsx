@@ -1,11 +1,10 @@
-import { Accessor, Component, createEffect, createMemo, createSignal, For, untrack } from 'solid-js'
+import { Accessor, Component, createEffect, createMemo, createSignal, For } from 'solid-js'
 import { assignInlineVars } from '@vanilla-extract/dynamic'
 import { useRemSize } from '@solid-primitives/styles'
 import { createResizeObserver } from '@solid-primitives/resize-observer'
 import { NodeID } from '@solid-devtools/debugger/types'
 import type { Structure } from '.'
 import { Scrollable } from '@/ui'
-import { StructureProvider } from './ctx'
 import { OwnerNode } from './OwnerNode'
 import { OwnerPath } from './Path'
 import { getVirtualVars } from './virtual'
@@ -34,11 +33,12 @@ const DisplayStructureTree: Component = () => {
   const getContainerTopMargin = () => remSize() * styles.V_MARGIN_IN_REM
   const getRowHeight = () => remSize() * styles.ROW_HEIGHT_IN_REM
 
-  const updateScrollData = (el: HTMLElement) =>
+  const updateScrollData = (el: HTMLElement) => {
     setContainerScroll({
       top: Math.max(el.scrollTop - getContainerTopMargin(), 0),
       height: el.clientHeight,
     })
+  }
 
   const [collapsed, setCollapsed] = createSignal(new WeakSet<Structure.Node>(), { equals: false })
 
@@ -51,7 +51,7 @@ const DisplayStructureTree: Component = () => {
   const {
     structureState,
     inspectedNode,
-    isNodeHovered,
+    structure,
     isNodeInspected,
     listenToComputationUpdate,
     toggleHoveredNode,
@@ -123,7 +123,9 @@ const DisplayStructureTree: Component = () => {
   createEffect(() => {
     const node = inspectedNode()
     if (!node) return
-    untrack(() => {
+    // Run in next tick to ensure the scroll data is updated and virtual list recalculated
+    // inspect node -> open inspector -> container changes height -> scroll data changes -> virtual list changes -> scroll to node
+    setTimeout(() => {
       let index = collapsedList().indexOf(node)
       if (index === -1) {
         // Un-collapse parents if needed
@@ -144,8 +146,8 @@ const DisplayStructureTree: Component = () => {
       const rowHeight = getRowHeight()
       const containerTopMargin = getContainerTopMargin()
       let top: number
-      if (index < start) top = (index - 1) * rowHeight
-      else if (index > end) top = (index + 2) * rowHeight - containerScroll().height
+      if (index <= start + 2) top = (index - 1) * rowHeight
+      else if (index >= end - 2) top = (index + 2) * rowHeight - containerScroll().height
       else return
 
       container.scrollTop = top + containerTopMargin
@@ -172,24 +174,22 @@ const DisplayStructureTree: Component = () => {
       >
         <div class={styles.scrolledInner}>
           <div class={styles.scrolledInner2}>
-            <StructureProvider
-              value={{ toggleCollapsed, isCollapsed: node => collapsed().has(node) }}
-            >
-              <For each={virtual().list}>
-                {({ getNode, node }) => (
-                  <OwnerNode
-                    owner={getNode()}
-                    isHovered={isNodeHovered(node.id)}
-                    isSelected={isNodeInspected(node.id)}
-                    listenToUpdate={listener =>
-                      listenToComputationUpdate(id => id === node.id && listener())
-                    }
-                    onHoverChange={hovered => toggleHoveredNode(node.id, hovered)}
-                    onInspectChange={inspected => setInspectedNode(inspected ? node : null)}
-                  />
-                )}
-              </For>
-            </StructureProvider>
+            <For each={virtual().list}>
+              {({ getNode, node }) => (
+                <OwnerNode
+                  owner={getNode()}
+                  isHovered={structure.isHovered(node)}
+                  isSelected={isNodeInspected(node.id)}
+                  listenToUpdate={listener =>
+                    listenToComputationUpdate(id => id === node.id && listener())
+                  }
+                  onHoverChange={hovered => toggleHoveredNode(node.id, hovered)}
+                  onInspectChange={inspected => setInspectedNode(inspected ? node : null)}
+                  toggleCollapsed={toggleCollapsed}
+                  isCollapsed={collapsed().has(node)}
+                />
+              )}
+            </For>
           </div>
         </div>
       </div>

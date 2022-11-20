@@ -13,7 +13,7 @@ import type {
   SetInspectedNodeData,
   ToggleInspectedValueData,
 } from '@solid-devtools/debugger'
-import createStructure from './modules/structure'
+import createStructure, { Structure } from './modules/structure'
 import createInspector from './modules/inspector'
 
 type ListenersFromPayloads<T extends Record<string, any>> = {
@@ -198,8 +198,25 @@ const [Provider, useControllerCtx] = createContextProvider((props: { controller:
     ),
   )
 
+  let lastSearch: string = ''
+  let lastSearchResults: Structure.Node[] | undefined
+  let lastSearchIndex = 0
+  function searchStructure(query: string): void {
+    if (query === lastSearch) {
+      if (lastSearchResults) {
+        lastSearchIndex = (lastSearchIndex + 1) % lastSearchResults.length
+        inspector.setInspectedNode(lastSearchResults[lastSearchIndex])
+      }
+      return
+    } else {
+      lastSearch = query
+      const result = structure.search(query)
+      if (result) inspector.setInspectedNode(result[(lastSearchIndex = 0)])
+      lastSearchResults = result
+    }
+  }
+
   return {
-    isNodeHovered: structure.isHovered,
     locatorEnabled,
     inspectedDetails: inspector.details,
     structureState: structure.state,
@@ -210,6 +227,8 @@ const [Provider, useControllerCtx] = createContextProvider((props: { controller:
     toggleHoveredNode: structure.toggleHoveredNode,
     listenToComputationUpdate: structure.listenToComputationUpdate,
     inspector,
+    structure,
+    searchStructure,
   }
 })
 
