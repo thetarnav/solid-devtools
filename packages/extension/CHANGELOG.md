@@ -1,5 +1,15 @@
 # solid-devtools-extension
 
+## 0.19.3
+
+### Patch Changes
+
+- b7b50bf: Adapt for new way of mounting frontend icons.
+- 6ef3c67: Focus search component when pressing `/` and blur on `Escape`. For the extension exclusively. (Fixes #176)
+- Updated dependencies [6ef3c67]
+- Updated dependencies [dc04d35]
+  - @solid-devtools/frontend@0.2.3
+
 ## 0.19.2
 
 ### Patch Changes

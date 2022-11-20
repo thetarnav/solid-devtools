@@ -1,5 +1,14 @@
 # @solid-devtools/overlay
 
+## 0.2.2
+
+### Patch Changes
+
+- b7b50bf: Adapt for new way of mounting frontend icons.
+- Updated dependencies [6ef3c67]
+- Updated dependencies [dc04d35]
+  - @solid-devtools/frontend@0.2.3
+
 ## 0.2.1
 
 ### Patch Changes
