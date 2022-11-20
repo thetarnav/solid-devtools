@@ -1,5 +1,12 @@
 # @solid-devtools/frontend
 
+## 0.2.3
+
+### Patch Changes
+
+- 6ef3c67: Focus search component when pressing `/` and blur on `Escape`. For the extension exclusively. (Fixes #176)
+- dc04d35: Improve scroll to inspected node triggering near the top edge. Disable locator after inspecting a component. (fixes #177)
+
 ## 0.2.2
 
 ### Patch Changes
