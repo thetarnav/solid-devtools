@@ -1,5 +1,6 @@
 import { Component, createSignal, JSX, Show } from 'solid-js'
 import { Menu, MenuItem, Popover, PopoverButton, PopoverPanel } from 'solid-headless'
+import { createShortcut } from '@solid-primitives/keyboard'
 import { Splitter, ToggleButton, Icon } from '@/ui'
 import Inspector from './modules/inspector/Inspector'
 import Structure from './modules/structure/Structure'
@@ -39,6 +40,15 @@ const Search: Component = () => {
       onReset={() => handleChange('')}
     >
       <input
+        ref={input => {
+          if (ctx.options.useShortcuts) {
+            createShortcut(['/'], () => input.focus())
+            createShortcut(['Escape'], () => {
+              if (document.activeElement === input) input.blur()
+              if (input.value) handleChange((input.value = ''))
+            })
+          }
+        }}
         class={styles.search.input}
         type="text"
         placeholder="Search"

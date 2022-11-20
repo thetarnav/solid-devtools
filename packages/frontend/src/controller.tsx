@@ -83,152 +83,153 @@ export class Controller {
   }
 }
 
-const [Provider, useControllerCtx] = createContextProvider((props: { controller: Controller }) => {
-  const { controller } = props
+const [Provider, useControllerCtx] = createContextProvider(
+  ({ controller, options }: { controller: Controller; options: { useShortcuts: boolean } }) => {
+    const [devtoolsLocatorEnabled, setDevtoolsLocatorState] = createSignal(false)
+    const [clientLocatorEnabled, setClientLocator] = createSignal(false)
+    const [clientHoveredNodeId, setClientHoveredId] = createSignal<NodeID | null>(null)
 
-  const [devtoolsLocatorEnabled, setDevtoolsLocatorState] = createSignal(false)
-  const [clientLocatorEnabled, setClientLocator] = createSignal(false)
-  const [clientHoveredNodeId, setClientHoveredId] = createSignal<NodeID | null>(null)
+    const locatorEnabled = () => devtoolsLocatorEnabled() || clientLocatorEnabled()
 
-  const locatorEnabled = () => devtoolsLocatorEnabled() || clientLocatorEnabled()
-
-  function setClientLocatorState(enabled: boolean) {
-    batch(() => {
-      setClientLocator(enabled)
-      if (!enabled) setClientHoveredId(null)
-    })
-  }
-
-  const structure = createStructure({
-    clientHoveredNodeId,
-  })
-
-  const inspector = createInspector({
-    findNode: structure.findNode,
-    getNodePath: structure.getNodePath,
-  })
-
-  controller.connectDevtools({
-    onResetPanel() {
+    function setClientLocatorState(enabled: boolean) {
       batch(() => {
-        structure.updateStructure(null)
-        setClientLocatorState(false)
-        setDevtoolsLocatorState(false)
-        inspector.setInspectedNode(null)
+        setClientLocator(enabled)
+        if (!enabled) setClientHoveredId(null)
       })
-    },
-    onSetInspectedDetails(ownerDetails) {
-      inspector.setDetails(ownerDetails)
-    },
-    onClientHoveredComponent({ nodeId, state }) {
-      setClientHoveredId(p => {
-        if (state) return nodeId ?? p
-        return p && p === nodeId ? null : p
-      })
-    },
-    onClientInspectedNode(node) {
-      batch(() => {
-        inspector.setInspectedNode(node)
-        setDevtoolsLocatorState(false)
-      })
-    },
-    onClientLocatorModeChange(active) {
-      setClientLocatorState(active)
-    },
-    onComputationUpdates(updated) {
-      updated.forEach(({ id }) => structure.emitComputationUpdate(id))
-    },
-    onStructureUpdate(update) {
-      batch(() => {
-        structure.updateStructure(update)
-        inspector.handleStructureChange()
-      })
-    },
-    onInspectorUpdate(payload) {
-      inspector.update(payload)
-    },
-  })
-
-  const client = controller.clientListeners
-
-  // send devtools locator state
-  createEffect(
-    defer(devtoolsLocatorEnabled, enabled => client.onDevtoolsLocatorStateChange(enabled)),
-  )
-
-  // set inspected node
-  inspector.setOnInspectNode(node => {
-    client.onInspectNode(
-      node ? { nodeId: node.id, rootId: structure.getParentRoot(node).id } : null,
-    )
-  })
-  // toggle inspected value/prop/signal
-  inspector.setOnInspectValue(client.onInspectValue)
-
-  // LOCATION
-  // open component location
-  inspector.setOnOpenLocation(client.onOpenLocation)
-
-  // highlight hovered element
-  createEffect(
-    on(
-      [structure.extHovered, inspector.hoveredElement],
-      ([hovered, elId], _, prev: string | { rootId: NodeID; nodeId: NodeID } | undefined) => {
-        // handle component
-        if (hovered && hovered.type === NodeType.Component) {
-          if (typeof prev === 'object' && prev.nodeId === hovered.id) return prev
-
-          const rootId = structure.getParentRoot(hovered).id
-          const payload = { rootId, nodeId: hovered.id }
-          client.onHighlightElementChange(payload)
-          return payload
-        }
-        // handle element
-        if (elId) {
-          if (typeof prev === 'string' && prev === elId) return prev
-          client.onHighlightElementChange({ elementId: elId })
-          return elId
-        }
-        // no element or component
-        if (prev) client.onHighlightElementChange(null)
-      },
-      { defer: true },
-    ),
-  )
-
-  let lastSearch: string = ''
-  let lastSearchResults: Structure.Node[] | undefined
-  let lastSearchIndex = 0
-  function searchStructure(query: string): void {
-    if (query === lastSearch) {
-      if (lastSearchResults) {
-        lastSearchIndex = (lastSearchIndex + 1) % lastSearchResults.length
-        inspector.setInspectedNode(lastSearchResults[lastSearchIndex])
-      }
-      return
-    } else {
-      lastSearch = query
-      const result = structure.search(query)
-      if (result) inspector.setInspectedNode(result[(lastSearchIndex = 0)])
-      lastSearchResults = result
     }
-  }
 
-  return {
-    locatorEnabled,
-    inspectedDetails: inspector.details,
-    structureState: structure.state,
-    inspectedNode: inspector.inspectedNode,
-    isNodeInspected: inspector.isNodeInspected,
-    setLocatorState: setDevtoolsLocatorState,
-    setInspectedNode: inspector.setInspectedNode,
-    toggleHoveredNode: structure.toggleHoveredNode,
-    listenToComputationUpdate: structure.listenToComputationUpdate,
-    inspector,
-    structure,
-    searchStructure,
-  }
-})
+    const structure = createStructure({
+      clientHoveredNodeId,
+    })
+
+    const inspector = createInspector({
+      findNode: structure.findNode,
+      getNodePath: structure.getNodePath,
+    })
+
+    controller.connectDevtools({
+      onResetPanel() {
+        batch(() => {
+          structure.updateStructure(null)
+          setClientLocatorState(false)
+          setDevtoolsLocatorState(false)
+          inspector.setInspectedNode(null)
+        })
+      },
+      onSetInspectedDetails(ownerDetails) {
+        inspector.setDetails(ownerDetails)
+      },
+      onClientHoveredComponent({ nodeId, state }) {
+        setClientHoveredId(p => {
+          if (state) return nodeId ?? p
+          return p && p === nodeId ? null : p
+        })
+      },
+      onClientInspectedNode(node) {
+        batch(() => {
+          inspector.setInspectedNode(node)
+          setDevtoolsLocatorState(false)
+        })
+      },
+      onClientLocatorModeChange(active) {
+        setClientLocatorState(active)
+      },
+      onComputationUpdates(updated) {
+        updated.forEach(({ id }) => structure.emitComputationUpdate(id))
+      },
+      onStructureUpdate(update) {
+        batch(() => {
+          structure.updateStructure(update)
+          inspector.handleStructureChange()
+        })
+      },
+      onInspectorUpdate(payload) {
+        inspector.update(payload)
+      },
+    })
+
+    const client = controller.clientListeners
+
+    // send devtools locator state
+    createEffect(
+      defer(devtoolsLocatorEnabled, enabled => client.onDevtoolsLocatorStateChange(enabled)),
+    )
+
+    // set inspected node
+    inspector.setOnInspectNode(node => {
+      client.onInspectNode(
+        node ? { nodeId: node.id, rootId: structure.getParentRoot(node).id } : null,
+      )
+    })
+    // toggle inspected value/prop/signal
+    inspector.setOnInspectValue(client.onInspectValue)
+
+    // LOCATION
+    // open component location
+    inspector.setOnOpenLocation(client.onOpenLocation)
+
+    // highlight hovered element
+    createEffect(
+      on(
+        [structure.extHovered, inspector.hoveredElement],
+        ([hovered, elId], _, prev: string | { rootId: NodeID; nodeId: NodeID } | undefined) => {
+          // handle component
+          if (hovered && hovered.type === NodeType.Component) {
+            if (typeof prev === 'object' && prev.nodeId === hovered.id) return prev
+
+            const rootId = structure.getParentRoot(hovered).id
+            const payload = { rootId, nodeId: hovered.id }
+            client.onHighlightElementChange(payload)
+            return payload
+          }
+          // handle element
+          if (elId) {
+            if (typeof prev === 'string' && prev === elId) return prev
+            client.onHighlightElementChange({ elementId: elId })
+            return elId
+          }
+          // no element or component
+          if (prev) client.onHighlightElementChange(null)
+        },
+        { defer: true },
+      ),
+    )
+
+    let lastSearch: string = ''
+    let lastSearchResults: Structure.Node[] | undefined
+    let lastSearchIndex = 0
+    function searchStructure(query: string): void {
+      if (query === lastSearch) {
+        if (lastSearchResults) {
+          lastSearchIndex = (lastSearchIndex + 1) % lastSearchResults.length
+          inspector.setInspectedNode(lastSearchResults[lastSearchIndex])
+        }
+        return
+      } else {
+        lastSearch = query
+        const result = structure.search(query)
+        if (result) inspector.setInspectedNode(result[(lastSearchIndex = 0)])
+        lastSearchResults = result
+      }
+    }
+
+    return {
+      locatorEnabled,
+      inspectedDetails: inspector.details,
+      structureState: structure.state,
+      inspectedNode: inspector.inspectedNode,
+      isNodeInspected: inspector.isNodeInspected,
+      setLocatorState: setDevtoolsLocatorState,
+      setInspectedNode: inspector.setInspectedNode,
+      toggleHoveredNode: structure.toggleHoveredNode,
+      listenToComputationUpdate: structure.listenToComputationUpdate,
+      inspector,
+      structure,
+      searchStructure,
+      options,
+    }
+  },
+)
 
 export { Provider }
 

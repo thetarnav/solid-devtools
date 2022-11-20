@@ -32,6 +32,7 @@ export default function App() {
             <li>Expected client: {versions().expectedClient}</li>
           </ul>
         }
+        useShortcuts
       />
     </div>
   )
