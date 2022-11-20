@@ -1,5 +1,5 @@
 import { createSignal } from 'solid-js'
-import { Devtools } from '@solid-devtools/frontend'
+import { Devtools, MountIcons } from '@solid-devtools/frontend'
 import createBridge from './bridge'
 
 export default function App() {
@@ -32,7 +32,9 @@ export default function App() {
             <li>Expected client: {versions().expectedClient}</li>
           </ul>
         }
+        useShortcuts
       />
+      <MountIcons />
     </div>
   )
 }

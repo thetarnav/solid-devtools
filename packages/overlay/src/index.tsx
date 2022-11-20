@@ -3,7 +3,7 @@ import { Dynamic, Portal } from 'solid-js/web'
 import { makeEventListener } from '@solid-primitives/event-listener'
 import { clamp } from '@solid-primitives/utils'
 import { createBodyCursor } from '@solid-primitives/cursor'
-import { Devtools, Icon } from '@solid-devtools/frontend'
+import { Devtools, Icon, MountIcons } from '@solid-devtools/frontend'
 import { createInternalRoot, useDebugger } from '@solid-devtools/debugger'
 import { createController } from './controller'
 import { useIsMobile, useIsTouch } from '@solid-devtools/shared/primitives'
@@ -80,6 +80,7 @@ const Overlay: Component<Props> = props => {
           </div>
         </div>
       </div>
+      <MountIcons />
       <style>{frontendStyles}</style>
       <style>{overlayStyles}</style>
     </Portal>

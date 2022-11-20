@@ -7,10 +7,9 @@ import { Icon } from '@/ui'
 import { useController } from '@/controller'
 import * as styles from './path.css'
 import { NodeTypeIcon } from '@/ui/components/Owner'
-import { unwrap } from 'solid-js/store'
 
 export const OwnerPath: Component = () => {
-  const { structure, toggleHoveredNode, setInspectedNode, inspectedDetails } = useController()
+  const { structure, toggleHoveredNode, setInspectedNode, inspector } = useController()
 
   const rem = useRemSize()
   const containerSize = createElementSize(() => container)
@@ -26,8 +25,7 @@ export const OwnerPath: Component = () => {
           </div>
         )}
         <div class={styles.container} ref={container}>
-          {inspectedDetails()?.path.map(nodeProxy => {
-            const node = unwrap(nodeProxy)
+          {inspector.details.path.map(node => {
             const hoverProps = createHover(hovering => toggleHoveredNode(node.id, hovering))
             return (
               <>
