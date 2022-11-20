@@ -6,7 +6,8 @@ import App from './App'
 export { Controller } from './controller'
 export type { ClientListeners } from './controller'
 
-export * as Icon from './ui/icons'
+export { Icon, MountIcons } from './ui'
+export type { IconComponent } from './ui'
 
 export const Devtools: Component<{
   controller: Controller.Controller
