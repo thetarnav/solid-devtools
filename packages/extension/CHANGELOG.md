@@ -1,5 +1,13 @@
 # solid-devtools-extension
 
+## 0.19.2
+
+### Patch Changes
+
+- 8483fe9: Bump to update frontend package.
+- Updated dependencies [7c3586f]
+  - @solid-devtools/frontend@0.2.2
+
 ## 0.19.1
 
 ### Patch Changes
