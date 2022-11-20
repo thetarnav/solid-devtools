@@ -1,7 +1,7 @@
 import { Component, createSignal, JSX, Show } from 'solid-js'
 import { Menu, MenuItem, Popover, PopoverButton, PopoverPanel } from 'solid-headless'
 import { createShortcut } from '@solid-primitives/keyboard'
-import { Splitter, ToggleButton, Icon } from '@/ui'
+import { Splitter, ToggleButton, Icon, MountIcons } from '@/ui'
 import Inspector from './modules/inspector/Inspector'
 import Structure from './modules/structure/Structure'
 import { useController } from './controller'
@@ -60,7 +60,7 @@ const Search: Component = () => {
       </div>
       {value() && (
         <button class={styles.search.clearButton} type="reset">
-          <Icon.X class={styles.search.clearIcon} />
+          <Icon.Close class={styles.search.clearIcon} />
         </button>
       )}
     </form>
@@ -118,6 +118,7 @@ const App: Component<{ headerSubtitle?: JSX.Element }> = props => {
           <Structure />
         </Splitter>
       </div>
+      <MountIcons />
     </div>
   )
 }

@@ -8,4 +8,4 @@ export * from './components/button/Button'
 export * from './components/badge/Badge'
 export * from './components/error-overlay/ErrorOverlay'
 
-export * as Icon from './icons'
+export { Icon, MountIcons } from './icons'

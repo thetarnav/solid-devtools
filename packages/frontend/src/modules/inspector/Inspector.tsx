@@ -27,7 +27,7 @@ export default function Details() {
               </button>
             )}
             <button class={styles.actions.button} onClick={() => setInspectedNode(null)}>
-              <Icon.X class={styles.actions.icon} />
+              <Icon.Close class={styles.actions.icon} />
             </button>
           </div>
         </header>
