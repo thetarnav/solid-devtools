@@ -146,7 +146,7 @@ const DisplayStructureTree: Component = () => {
       const rowHeight = getRowHeight()
       const containerTopMargin = getContainerTopMargin()
       let top: number
-      if (index <= start + 2) top = (index - 1) * rowHeight
+      if (index <= start) top = (index - 1) * rowHeight
       else if (index >= end - 2) top = (index + 2) * rowHeight - containerScroll().height
       else return
 

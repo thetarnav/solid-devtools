@@ -15,6 +15,7 @@ import type {
 } from '@solid-devtools/debugger'
 import createStructure, { Structure } from './modules/structure'
 import createInspector from './modules/inspector'
+import { defer } from '@solid-devtools/shared/primitives'
 
 type ListenersFromPayloads<T extends Record<string, any>> = {
   [K in keyof Pick<
@@ -126,7 +127,10 @@ const [Provider, useControllerCtx] = createContextProvider((props: { controller:
       })
     },
     onClientInspectedNode(node) {
-      inspector.setInspectedNode(node)
+      batch(() => {
+        inspector.setInspectedNode(node)
+        setDevtoolsLocatorState(false)
+      })
     },
     onClientLocatorModeChange(active) {
       setClientLocatorState(active)
@@ -149,13 +153,7 @@ const [Provider, useControllerCtx] = createContextProvider((props: { controller:
 
   // send devtools locator state
   createEffect(
-    on(
-      devtoolsLocatorEnabled,
-      enabled => {
-        client.onDevtoolsLocatorStateChange(enabled)
-      },
-      { defer: true },
-    ),
+    defer(devtoolsLocatorEnabled, enabled => client.onDevtoolsLocatorStateChange(enabled)),
   )
 
   // set inspected node
