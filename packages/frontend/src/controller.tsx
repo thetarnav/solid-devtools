@@ -215,7 +215,6 @@ const [Provider, useControllerCtx] = createContextProvider(
 
     return {
       locatorEnabled,
-      inspectedDetails: inspector.details,
       structureState: structure.state,
       inspectedNode: inspector.inspectedNode,
       isNodeInspected: inspector.isNodeInspected,

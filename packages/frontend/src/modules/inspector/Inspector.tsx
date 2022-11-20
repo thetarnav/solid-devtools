@@ -4,7 +4,6 @@ import { NodeType } from '@solid-devtools/debugger/types'
 import { Scrollable, Badge, Icon } from '@/ui'
 import { ValueNode } from './ValueNode'
 import { useController } from '@/controller'
-import { Inspector } from '.'
 import * as styles from './inspector.css'
 import { OwnerName } from '@/ui/components/Owner'
 
@@ -21,7 +20,7 @@ export default function Details() {
             {/* <button class={styles.actions.button}>
               <Icon.Eye class={styles.actions.icon} />
             </button> */}
-            {details()?.location && (
+            {details.location && (
               <button class={styles.actions.button} onClick={openComponentLocation}>
                 <Icon.Code class={styles.actions.icon} />
               </button>
@@ -32,19 +31,16 @@ export default function Details() {
           </div>
         </header>
         <Scrollable>
-          <Show when={details()} keyed>
-            {details => <DetailsContent details={details} />}
-          </Show>
+          <DetailsContent />
         </Scrollable>
       </div>
     </Show>
   )
 }
 
-const DetailsContent: Component<{ details: Inspector.Details }> = ({ details }) => {
-  const { type, props: componentProps, ownerValue, location } = details
-
+const DetailsContent: Component = () => {
   const { inspector } = useController()
+  const { details, inspectedNode } = inspector
 
   const signals = createMemo(() => {
     const list = Object.values(details.signals)
@@ -62,10 +58,10 @@ const DetailsContent: Component<{ details: Inspector.Details }> = ({ details }) 
   return (
     <div class={styles.content}>
       <ListSignals
-        when={componentProps && Object.keys(componentProps.record).length}
-        title={<>Props {componentProps!.proxy && <Badge>PROXY</Badge>}</>}
+        when={details.props && Object.keys(details.props).length}
+        title={<>Props {details.props!.proxy && <Badge>PROXY</Badge>}</>}
       >
-        <Entries of={componentProps!.record}>
+        <Entries of={details.props!.record}>
           {(name, value) => (
             <ValueNode
               name={name}
@@ -94,23 +90,23 @@ const DetailsContent: Component<{ details: Inspector.Details }> = ({ details }) 
           </For>
         </ListSignals>
       ))}
-      {ownerValue && (
+      {details.value && (
         <div>
-          <h2 class={styles.h2}>{NodeType[type]}</h2>
+          <h2 class={styles.h2}>{NodeType[inspectedNode()!.type]}</h2>
           <ValueNode
             name="value"
-            value={ownerValue.value}
-            extended={ownerValue.selected}
+            value={details.value.value}
+            extended={details.value.selected}
             onClick={() => inspector.inspectValueItem('value')}
             onElementHover={inspector.toggleHoveredElement}
             isSignal
           />
         </div>
       )}
-      {location && (
+      {details.location && (
         <div>
           <h2 class={styles.h2}>Location</h2>
-          <p class={styles.location}>{location}</p>
+          <p class={styles.location}>{details.location}</p>
         </div>
       )}
     </div>

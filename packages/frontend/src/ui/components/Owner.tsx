@@ -1,10 +1,10 @@
 import { Component, JSX } from 'solid-js'
 import { NodeType } from '@solid-devtools/debugger'
-import { Icon } from '..'
+import { Icon, IconComponent } from '..'
 import * as styles from './Owner.css'
 
 export const NodeTypeIcon: Component<{ type: NodeType; class?: string }> = props => {
-  let prevIcon: Icon.IconComponent | undefined
+  let prevIcon: IconComponent | undefined
   let prevRendered: JSX.Element | undefined
   return () => {
     const IconComp = (() => {

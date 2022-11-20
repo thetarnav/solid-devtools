@@ -9,3 +9,4 @@ export * from './components/badge/Badge'
 export * from './components/error-overlay/ErrorOverlay'
 
 export { Icon, MountIcons } from './icons'
+export type { IconComponent } from './icons'
