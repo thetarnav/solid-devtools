@@ -1,4 +1,4 @@
-import { Accessor, Component, createEffect, createMemo, createSignal, For, untrack } from 'solid-js'
+import { Accessor, Component, createEffect, createMemo, createSignal, For } from 'solid-js'
 import { assignInlineVars } from '@vanilla-extract/dynamic'
 import { useRemSize } from '@solid-primitives/styles'
 import { createResizeObserver } from '@solid-primitives/resize-observer'
@@ -33,11 +33,12 @@ const DisplayStructureTree: Component = () => {
   const getContainerTopMargin = () => remSize() * styles.V_MARGIN_IN_REM
   const getRowHeight = () => remSize() * styles.ROW_HEIGHT_IN_REM
 
-  const updateScrollData = (el: HTMLElement) =>
+  const updateScrollData = (el: HTMLElement) => {
     setContainerScroll({
       top: Math.max(el.scrollTop - getContainerTopMargin(), 0),
       height: el.clientHeight,
     })
+  }
 
   const [collapsed, setCollapsed] = createSignal(new WeakSet<Structure.Node>(), { equals: false })
 
@@ -122,7 +123,9 @@ const DisplayStructureTree: Component = () => {
   createEffect(() => {
     const node = inspectedNode()
     if (!node) return
-    untrack(() => {
+    // Run in next tick to ensure the scroll data is updated and virtual list recalculated
+    // inspect node -> open inspector -> container changes height -> scroll data changes -> virtual list changes -> scroll to node
+    setTimeout(() => {
       let index = collapsedList().indexOf(node)
       if (index === -1) {
         // Un-collapse parents if needed
