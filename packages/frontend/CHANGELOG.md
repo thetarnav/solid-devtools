@@ -1,5 +1,11 @@
 # @solid-devtools/frontend
 
+## 0.2.2
+
+### Patch Changes
+
+- 7c3586f: Add a Search component for searching for nodes with provided name in the Structure view.
+
 ## 0.2.1
 
 ### Patch Changes
