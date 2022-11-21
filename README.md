@@ -19,8 +19,8 @@ and interacting with Solid's reactivity graph.
 
 <a href="https://chrome.google.com/webstore/detail/solid-devtools/kmcfjchnmmaeeagadbhoofajiopoceel">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://user-images.githubusercontent.com/24491503/203096600-b5ef698c-891d-4355-9d45-2013374b2222.png">
-    <img alt="Screenshot of the chrome extension" src="https://user-images.githubusercontent.com/24491503/203096317-2f044595-1f72-40c7-bcd0-cf1bd34b220b.png">
+    <source media="(prefers-color-scheme: dark)" srcset="https://user-images.githubusercontent.com/24491503/203095796-4ca411d9-e377-4c2e-896e-f152172270cc.png">
+    <img alt="Screenshot of the chrome extension" src="https://user-images.githubusercontent.com/24491503/203095712-1c4f904a-5a63-47ef-84e1-fc50e9e1c4d4.png">
   </picture>
 </a>
 
