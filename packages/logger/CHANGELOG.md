@@ -1,5 +1,13 @@
 # @solid-devtools/logger
 
+## 0.5.2
+
+### Patch Changes
+
+- ba185c3: Add top-level "development" export condidtion.
+- Updated dependencies [ba185c3]
+  - @solid-devtools/debugger@0.15.2
+
 ## 0.5.1
 
 ### Patch Changes

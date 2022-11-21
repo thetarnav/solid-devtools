@@ -1,5 +1,11 @@
 # @solid-devtools/debugger
 
+## 0.15.2
+
+### Patch Changes
+
+- ba185c3: Add top-level "development" export condidtion.
+
 ## 0.15.1
 
 ### Patch Changes
