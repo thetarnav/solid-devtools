@@ -17,7 +17,12 @@ To change the way you write, debug and understand your SolidJS applications and 
 And also to experiment with ways of visualizing
 and interacting with Solid's reactivity graph.
 
-[![screenshot](https://user-images.githubusercontent.com/24491503/193428963-f19d4da7-940d-4c8b-8aa8-88af3e705cc1.png)](https://chrome.google.com/webstore/detail/solid-devtools/kmcfjchnmmaeeagadbhoofajiopoceel)
+<a href="https://chrome.google.com/webstore/detail/solid-devtools/kmcfjchnmmaeeagadbhoofajiopoceel">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://user-images.githubusercontent.com/24491503/203096600-b5ef698c-891d-4355-9d45-2013374b2222.png">
+    <img alt="Screenshot of the chrome extension" src="https://user-images.githubusercontent.com/24491503/203096317-2f044595-1f72-40c7-bcd0-cf1bd34b220b.png">
+  </picture>
+</a>
 
 ## [The Chrome Extension](./packages/extension#readme)
 

@@ -16,7 +16,10 @@ It allows for visualizing and interacting with Solid's reactivity graph, as well
 
 Should work in any application using SolidJS, including SolidStart and Astro.
 
-![screenshot](https://user-images.githubusercontent.com/24491503/193428963-f19d4da7-940d-4c8b-8aa8-88af3e705cc1.png)
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://user-images.githubusercontent.com/24491503/203095796-4ca411d9-e377-4c2e-896e-f152172270cc.png">
+  <img alt="Screenshot of the chrome extension" src="https://user-images.githubusercontent.com/24491503/203095712-1c4f904a-5a63-47ef-84e1-fc50e9e1c4d4.png">
+</picture>
 
 ## Getting started
 
