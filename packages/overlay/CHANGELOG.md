@@ -1,5 +1,13 @@
 # @solid-devtools/overlay
 
+## 0.2.3
+
+### Patch Changes
+
+- ba185c3: Add top-level "development" export condidtion.
+- Updated dependencies [ba185c3]
+  - @solid-devtools/debugger@0.15.2
+
 ## 0.2.2
 
 ### Patch Changes
