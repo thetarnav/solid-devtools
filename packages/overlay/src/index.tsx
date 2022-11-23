@@ -13,6 +13,8 @@ import overlayStyles from './styles.css'
 
 interface Props {
   defaultOpen?: boolean
+  alwaysOpen?: boolean
+  noPadding?: boolean
 }
 
 export const DevtoolsOverlay: Component<Props> = props => {
@@ -29,10 +31,14 @@ export const DevtoolsOverlay: Component<Props> = props => {
   return ''
 }
 
-const Overlay: Component<Props> = props => {
-  const [isOpen, setOpen] = createSignal(props.defaultOpen ?? false)
+const Overlay: Component<Props> = ({ defaultOpen, alwaysOpen, noPadding }) => {
+  const [isOpen, setOpen] = (() => {
+    if (alwaysOpen) return [() => true, () => {}] as const
+    const [isOpen, setOpen] = createSignal(defaultOpen ?? false)
+    onCleanup(() => setOpen(false))
+    return [isOpen, setOpen] as const
+  })()
   useDebugger().setUserEnabledSignal(isOpen)
-  onCleanup(() => setOpen(false))
 
   const isMobile = useIsMobile()
   const isTouch = useIsTouch()
@@ -52,16 +58,23 @@ const Overlay: Component<Props> = props => {
 
   return (
     <Portal useShadow mount={document.documentElement}>
-      <div class="overlay__container" data-open={isOpen()} style={{ '--progress': progress() }}>
+      <div
+        class="overlay__container"
+        classList={{ 'no-padding': noPadding }}
+        data-open={isOpen()}
+        style={{ '--progress': progress() }}
+      >
         <div class="overlay__container__fixed">
-          <button class="overlay__toggle-button" onClick={() => setOpen(p => !p)}>
-            Devtools
-            <Dynamic
-              component={isOpen() ? Icon.EyeSlash : Icon.Eye}
-              class="overlay__toggle-button__icon"
-            />
-          </button>
-          <Show when={!isMobile() && !isTouch()}>
+          {!alwaysOpen && (
+            <button class="overlay__toggle-button" onClick={() => setOpen(p => !p)}>
+              Devtools
+              <Dynamic
+                component={isOpen() ? Icon.EyeSlash : Icon.Eye}
+                class="overlay__toggle-button__icon"
+              />
+            </button>
+          )}
+          <Show when={!isTouch()}>
             <div
               class="overlay__container__resizer"
               onPointerDown={e => {

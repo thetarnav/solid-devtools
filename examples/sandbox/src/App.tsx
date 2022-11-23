@@ -13,6 +13,7 @@ import {
   Show,
   createResource,
   Suspense,
+  ErrorBoundary,
 } from 'solid-js'
 import Todos from './Todos'
 import { disposeApp } from '.'
@@ -120,6 +121,10 @@ const DynamicSpreadParent = () => {
   return <DynamicSpreadChild {...props()} />
 }
 
+const Broken: Component = () => {
+  throw new Error('Oh No')
+}
+
 const App: Component = () => {
   const [count, setCount] = createSignal(0)
   const [showEven, setShowEven] = createSignal(false)
@@ -159,6 +164,8 @@ const App: Component = () => {
 
   const Bold: ParentComponent = props => <b>{props.children}</b>
 
+  const [showBroken, setShowBroken] = createSignal(false)
+
   return (
     <>
       {header()}
@@ -173,15 +180,36 @@ const App: Component = () => {
             <Bold>{count()} is even!</Bold>
           </Show>
         </div>
-        <p>Dispose application</p>
-        <button onClick={() => disposeApp()}>Dispose</button>
-        {/* <div>
-					<PassChildren>
-						<Show when={showEven()} fallback={<p>\\{smiley()}/</p>}>
-							<p style={{ background: "darkgray" }}>{smiley()}</p>
-						</Show>
-					</PassChildren>
-				</div> */}
+        <label>
+          Dispose application
+          <button onClick={() => disposeApp()}>Dispose</button>
+        </label>
+        <br />
+        <br />
+        <button onClick={() => setShowBroken(p => !p)}>
+          {showBroken() ? 'Hide' : 'Show'} broken component.
+        </button>
+        <ErrorBoundary
+          fallback={(err, reset) => (
+            <>
+              {err.toString()}
+              <button
+                onClick={() => {
+                  setShowBroken(false)
+                  reset()
+                }}
+              >
+                Reset
+              </button>
+            </>
+          )}
+        >
+          <Show when={showBroken()}>
+            <Broken />
+          </Show>
+        </ErrorBoundary>
+        <br />
+        <br />
       </div>
       <DynamicSpreadParent />
       <button onClick={() => setRootCount(p => ++p)}>Update root count</button>

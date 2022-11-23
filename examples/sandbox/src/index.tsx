@@ -20,7 +20,7 @@ export const disposeApp = render(
       <ThemeProvider>
         <App />
       </ThemeProvider>
-      {!process.env.EXT && <DevtoolsOverlay defaultOpen={true} />}
+      {!process.env.EXT && <DevtoolsOverlay defaultOpen noPadding />}
     </>
   ),
   document.getElementById('root')!,
