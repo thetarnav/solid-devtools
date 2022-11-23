@@ -20,10 +20,17 @@ import { makeCreateRootListener } from './update'
 import { Core, DebuggerContext, NodeID, Solid } from './types'
 import { NodeType } from './constants'
 
-const RootMap: Record<NodeID, (inspectedId?: NodeID) => WalkerResult | null> = {}
+const RootMap = new Map<
+  NodeID,
+  {
+    forceUpdate: (inspectedId?: NodeID) => WalkerResult | null
+    dispose: VoidFunction
+  }
+>()
+
 export const walkSolidRoot = (rootId: NodeID, inspectedId?: NodeID): WalkerResult | null => {
-  const walk = RootMap[rootId]
-  return walk ? walk(inspectedId) : null
+  const root = RootMap.get(rootId)
+  return root ? root.forceUpdate(inspectedId) : null
 }
 
 export function createGraphRoot(owner: Solid.Root): void {
@@ -51,7 +58,7 @@ export function createGraphRoot(owner: Solid.Root): void {
     })
     const triggerRootUpdate = throttle(forceRootUpdate, 300)
 
-    RootMap[rootId] = forceRootUpdate
+    RootMap.set(rootId, { forceUpdate: forceRootUpdate, dispose })
 
     plugin.onUpdate(triggerRootUpdate)
     plugin.onForceUpdate(forceRootUpdate)
@@ -67,7 +74,7 @@ export function createGraphRoot(owner: Solid.Root): void {
       removeDebuggerContext(owner)
       plugin.removeRoot(rootId)
       owner.isDisposed = true
-      delete RootMap[rootId]
+      RootMap.delete(rootId)
     })
   })
 }
@@ -125,6 +132,14 @@ export function attachDebugger(_owner: Core.Owner = getOwner()!): void {
       })
     }
   })
+}
+
+/**
+ * Unobserves currently observed root owners.
+ * This is not reversable, and should be used only when you are sure that they won't be used anymore.
+ */
+export function unobserveAllRoots(): void {
+  RootMap.forEach(r => r.dispose())
 }
 
 let autoattachEnabled = false

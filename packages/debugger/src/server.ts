@@ -38,6 +38,7 @@ export const useDebugger: typeof API.useDebugger = () => ({
 
 export const enableRootsAutoattach: typeof API.enableRootsAutoattach = () => void 0
 export const useLocator: typeof API.useLocator = () => void 0
+export const unobserveAllRoots: typeof API.unobserveAllRoots = () => void 0
 
 // update
 export const makeSolidUpdateListener: typeof API.makeSolidUpdateListener = () => () => void 0

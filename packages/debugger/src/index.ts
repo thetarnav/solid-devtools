@@ -11,7 +11,7 @@ export const useDebugger = plugin.useDebugger
 export const useLocator = plugin.useLocator
 export type { BatchComputationUpdatesHandler } from './main/plugin'
 
-export { attachDebugger, enableRootsAutoattach } from './main/roots'
+export { attachDebugger, enableRootsAutoattach, unobserveAllRoots } from './main/roots'
 
 export {
   makeSolidUpdateListener,

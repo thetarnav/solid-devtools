@@ -20,6 +20,7 @@ import { disposeApp } from '.'
 import { ThemeExample } from './Theme'
 import { createMutable } from 'solid-js/store'
 import Recursive from './Recursive'
+import { unobserveAllRoots } from '@solid-devtools/debugger'
 
 const doMediumCalc = () => {
   Array.from({ length: 1000000 }, (_, i) => i).sort(() => Math.random() - 5)
@@ -180,11 +181,9 @@ const App: Component = () => {
             <Bold>{count()} is even!</Bold>
           </Show>
         </div>
-        <label>
-          Dispose application
-          <button onClick={() => disposeApp()}>Dispose</button>
-        </label>
+        <button onClick={() => disposeApp()}>Dispose whole application</button>
         <br />
+        <button onClick={unobserveAllRoots}>Unobserve all roots</button>
         <br />
         <button onClick={() => setShowBroken(p => !p)}>
           {showBroken() ? 'Hide' : 'Show'} broken component.
