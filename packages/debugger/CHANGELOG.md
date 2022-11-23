@@ -1,5 +1,11 @@
 # @solid-devtools/debugger
 
+## 0.15.3
+
+### Patch Changes
+
+- b750aae: Add `unobserveAllRoots` function
+
 ## 0.15.2
 
 ### Patch Changes
