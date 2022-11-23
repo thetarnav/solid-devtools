@@ -1,5 +1,13 @@
 # @solid-devtools/overlay
 
+## 0.2.4
+
+### Patch Changes
+
+- bd5a22d: Add alwaysOpen and noPadding props.
+- Updated dependencies [b750aae]
+  - @solid-devtools/debugger@0.15.3
+
 ## 0.2.3
 
 ### Patch Changes
