@@ -15,7 +15,7 @@ export default ({
   server?: boolean
   additionalEntries?: string[]
   additionalPlugins?: Plugin[]
-  overwrite?: (overrideOptions: Options) => Options
+  overwrite?: (overrideOptions: Options) => Options | Options[]
   jsx?: boolean
   external?: (string | RegExp)[]
 } = {}) => {
@@ -34,7 +34,7 @@ export default ({
       },
       target: 'esnext',
       format: config.watch ? 'esm' : ['cjs', 'esm'],
-      entryPoints: [...baseEntries, ...mappedAdditionalEntries],
+      entry: [...baseEntries, ...mappedAdditionalEntries],
       esbuildPlugins:
         extension === 'tsx' || jsx ? [solidPlugin(), ...additionalPlugins] : additionalPlugins,
       external: [
