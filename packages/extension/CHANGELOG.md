@@ -1,5 +1,11 @@
 # solid-devtools-extension
 
+## 0.19.4
+
+### Patch Changes
+
+- 3cfabf2: Reconnect the extension after page refresh. (#181)
+
 ## 0.19.3
 
 ### Patch Changes
