@@ -14,9 +14,10 @@ export const Devtools: Component<{
   errorOverlayFooter?: JSX.Element
   headerSubtitle?: JSX.Element
   useShortcuts?: boolean
+  catchWindowErrors?: boolean
 }> = props => {
   return (
-    <ErrorOverlay footer={props.errorOverlayFooter}>
+    <ErrorOverlay footer={props.errorOverlayFooter} catchWindowErrors={props.catchWindowErrors}>
       <Controller.Provider
         controller={props.controller}
         options={{ useShortcuts: props.useShortcuts ?? false }}

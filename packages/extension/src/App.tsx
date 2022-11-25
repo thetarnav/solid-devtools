@@ -33,6 +33,7 @@ export default function App() {
           </ul>
         }
         useShortcuts
+        catchWindowErrors
       />
       <MountIcons />
     </div>

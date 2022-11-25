@@ -1,14 +1,13 @@
+import { makeEventListener } from '@solid-primitives/event-listener'
 import {
   batch,
   ComponentProps,
   createComputed,
-  createEffect,
   createMemo,
   createSignal,
   ErrorBoundary,
   JSX,
   mergeProps,
-  onCleanup,
   onError,
   Show,
   untrack,
@@ -86,6 +85,7 @@ function ErrorOverlayInternal(props: {
 export const HeadlessErrorOverlay: ParentComponent<{
   render?: JSX.Element | ((props: HeadlessErrorOverlayRenderProps) => JSX.Element)
   onError?: (error: unknown) => void
+  catchWindowErrors?: boolean
 }> = props => {
   const [errors, setErrors] = createSignal<unknown[]>([])
   const [fallback, setFallback] = createSignal(false)
@@ -100,21 +100,8 @@ export const HeadlessErrorOverlay: ParentComponent<{
     setErrors(current => [error, ...current])
   }
 
-  createEffect(() => {
-    const onErrorEvent = (error: ErrorEvent) => {
-      pushError(error.error)
-    }
-
-    window.addEventListener('error', onErrorEvent)
-
-    onCleanup(() => {
-      window.removeEventListener('error', onErrorEvent)
-    })
-  })
-
-  onError(error => {
-    pushError(error)
-  })
+  props.catchWindowErrors && makeEventListener(window, 'error', pushError)
+  onError(pushError)
 
   const errorOverlayInternalProps: ComponentProps<typeof ErrorOverlayInternal> = {
     get errors() {
