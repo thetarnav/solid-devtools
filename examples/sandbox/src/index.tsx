@@ -9,10 +9,11 @@ useLocator({
   targetIDE: 'vscode',
 })
 
-!process.env.EXT && attachDevtoolsOverlay({
-  defaultOpen: true,
-  noPadding: true,
-})
+!process.env.EXT &&
+  attachDevtoolsOverlay({
+    defaultOpen: true,
+    noPadding: true,
+  })
 
 import App from './App'
 import { ThemeProvider } from './Theme'
