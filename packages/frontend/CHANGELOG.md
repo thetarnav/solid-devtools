@@ -1,5 +1,11 @@
 # @solid-devtools/frontend
 
+## 0.2.4
+
+### Patch Changes
+
+- e0e812b: Correct ErrorOverlay: Don't listen to window errors by default
+
 ## 0.2.3
 
 ### Patch Changes
