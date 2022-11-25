@@ -48,12 +48,16 @@ const RenderErrorOverlay: Component<
   </div>
 )
 
-export const ErrorOverlay: ParentComponent<{ footer?: JSX.Element }> = props => {
+export const ErrorOverlay: ParentComponent<{
+  footer?: JSX.Element
+  catchWindowErrors?: boolean
+}> = props => {
   return (
     <HeadlessErrorOverlay
       // eslint-disable-next-line no-console
       onError={e => console.error(e)}
       render={overlayProps => <RenderErrorOverlay {...overlayProps} footer={props.footer} />}
+      catchWindowErrors={props.catchWindowErrors}
     >
       {props.children}
     </HeadlessErrorOverlay>

@@ -29,6 +29,7 @@ export default ({
     const options: Options = {
       clean: config.watch ? false : true,
       minify: config.watch ? false : true,
+      treeshake: config.watch ? false : true,
       dts: {
         entry: [entry, ...mappedAdditionalEntries],
       },
