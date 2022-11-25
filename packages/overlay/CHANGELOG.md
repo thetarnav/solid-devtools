@@ -1,5 +1,12 @@
 # @solid-devtools/overlay
 
+## 0.3.0
+
+### Minor Changes
+
+- 8e208b0: Change overlay API, to be a normal function instead of a component. It's now called `attachDevtoolsOverlay`.
+  Preventing from attaching multiple overlays at the same time.
+
 ## 0.2.4
 
 ### Patch Changes
