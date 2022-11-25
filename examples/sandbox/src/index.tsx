@@ -9,7 +9,7 @@ useLocator({
   targetIDE: 'vscode',
 })
 
-attachDevtoolsOverlay({
+!process.env.EXT && attachDevtoolsOverlay({
   defaultOpen: true,
   noPadding: true,
 })

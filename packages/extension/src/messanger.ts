@@ -22,8 +22,9 @@ export function createPortMessanger<
   } = {}
 
   let connected = true
+  import.meta.env.DEV && log(`${port.name.replace('[solid-devtools]: ', '')} port connected.`)
   port.onDisconnect.addListener(port => {
-    log(`${port.name.replace('[solid-devtools]: ', '')} port disconnected.`)
+    import.meta.env.DEV && log(`${port.name.replace('[solid-devtools]: ', '')} port disconnected.`)
     connected = false
     listeners = {}
     port.onMessage.removeListener(onMessage)
