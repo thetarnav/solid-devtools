@@ -7,8 +7,10 @@ import {
   isForwardMessage,
   forwardMessageToWindow,
 } from 'solid-devtools/bridge'
-import { error, warn } from '@solid-devtools/shared/utils'
+import { error, log, warn } from '@solid-devtools/shared/utils'
 import { createPortMessanger, CONTENT_CONNECTION_NAME } from '../src/messanger'
+
+import.meta.env.DEV && log('Content script working.')
 
 // @ts-expect-error ?script&module query ensures output in ES module format and only import the script path
 import realWorld from './realWorld?script&module'
@@ -17,6 +19,8 @@ const extVersion = chrome.runtime.getManifest().version
 const matchingClientVersion = __CLIENT_VERSION__
 
 const port = chrome.runtime.connect({ name: CONTENT_CONNECTION_NAME })
+
+let devtoolsOpened = false
 
 startListeningWindowMessages()
 const fromClient = makeMessageListener()
@@ -74,11 +78,19 @@ Please install "solid-devtools@${matchingClientVersion}" in your project`,
     extension: extVersion,
     expectedClient: matchingClientVersion,
   })
+
+  fromClient('ResetPanel', () => toBackground('ResetPanel'))
+
+  if (devtoolsOpened) toClient('DevtoolsOpened')
 })
 
-fromClient('ResetPanel', () => toBackground('ResetPanel'))
-
-fromBackground('DevtoolsOpened', () => toClient('DevtoolsOpened'))
+// After page reload, the content script is reloaded but the background script is not.
+// This means that 'DevtoolsOpened' message will come after the Client is setup.
+// We need to send it after it connects.
+fromBackground('DevtoolsOpened', () => {
+  devtoolsOpened = true
+  toClient('DevtoolsOpened')
+})
 fromBackground('DevtoolsClosed', () => toClient('DevtoolsClosed'))
 
 onAllClientMessages(data => {

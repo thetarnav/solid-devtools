@@ -2,11 +2,16 @@
 import { render } from 'solid-js/web'
 
 import 'solid-devtools'
-import { DevtoolsOverlay } from '@solid-devtools/overlay'
+import { attachDevtoolsOverlay } from '@solid-devtools/overlay'
 import { useLocator } from '@solid-devtools/debugger'
 
 useLocator({
   targetIDE: 'vscode',
+})
+
+!process.env.EXT && attachDevtoolsOverlay({
+  defaultOpen: true,
+  noPadding: true,
 })
 
 import App from './App'
@@ -16,12 +21,9 @@ import 'uno.css'
 
 export const disposeApp = render(
   () => (
-    <>
-      <ThemeProvider>
-        <App />
-      </ThemeProvider>
-      {!process.env.EXT && <DevtoolsOverlay defaultOpen noPadding />}
-    </>
+    <ThemeProvider>
+      <App />
+    </ThemeProvider>
   ),
   document.getElementById('root')!,
 )

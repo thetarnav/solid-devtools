@@ -34,20 +34,19 @@ pnpm add @solid-devtools/overlay
 
 ### Attach the overlay
 
-Simply place the overlay component in the rendered app. Ideally as close to the `render` call as possible.
+Simply place the overlay component in the client entry file.
 
 ```tsx
-import { DevtoolsOverlay } from '@solid-devtools/overlay'
+import { attachDevtoolsOverlay } from '@solid-devtools/overlay'
 
-render(
-  () => (
-    <>
-      <App />
-      <DevtoolsOverlay />
-    </>
-  ),
-  document.getElementById('root'),
-)
+attachDevtoolsOverlay()
+
+// or with some options
+
+attachDevtoolsOverlay({
+  defaultOpen: true, // or alwaysOpen
+  noPadding: true,
+})
 ```
 
 Don't worry about wrapping it with a `isDev` guard, the Overlay takes care of that for you. It should be excluded from production builds automatically.

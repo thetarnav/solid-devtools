@@ -24,37 +24,99 @@ import {
 } from '../src/messanger'
 import icons from '../src/icons'
 
-log('Background script working')
+log('Background script working.')
 
 let activeTabId: number = -1
 chrome.tabs.onActivated.addListener(({ tabId }) => (activeTabId = tabId))
 
-type TabData = {
-  versions: Versions | undefined
-  solidOnPage: boolean
-  toContent: PostMessageFn
-  fromContent: OnMessageFn
-  onContentScriptDisconnect: (fn: VoidFunction) => void
-  forwardToDevtools: (fn: (message: ForwardPayload) => void) => void
-  forwardToClient: (message: ForwardPayload) => void
+type TabDataConfig = {
+  toContent: TabData['toContent']
+  fromContent: TabData['fromContent']
+  forwardToDevtools: TabData['forwardToDevtools']
+  forwardToClient: TabData['forwardToClient']
 }
+
+class TabData {
+  public connected = true
+  public versions: Versions | undefined
+  public solidOnPage: boolean = false
+
+  private disconnectListeners = createCallbackStack()
+  private connectListeners = new Set<(toContent: PostMessageFn, fromContent: OnMessageFn) => void>()
+
+  public toContent: PostMessageFn
+  public fromContent: OnMessageFn
+  public forwardToDevtools: (fn: (message: ForwardPayload) => void) => void
+  public forwardToClient: (message: ForwardPayload) => void
+
+  constructor(public tabId: number, config: TabDataConfig) {
+    this.toContent = config.toContent
+    this.fromContent = config.fromContent
+    this.forwardToDevtools = config.forwardToDevtools
+    this.forwardToClient = config.forwardToClient
+  }
+
+  onContentScriptConnect(
+    fn: (toContent: PostMessageFn, fromContent: OnMessageFn) => void,
+  ): VoidFunction {
+    if (this.connected) fn(this.toContent.bind(this), this.fromContent.bind(this))
+    this.connectListeners.add(fn)
+    return () => this.connectListeners.delete(fn)
+  }
+
+  reconnected(config: TabDataConfig) {
+    this.toContent = config.toContent
+    this.fromContent = config.fromContent
+    this.forwardToDevtools = config.forwardToDevtools
+    this.forwardToClient = config.forwardToClient
+
+    this.connected = true
+    this.connectListeners.forEach(fn => fn(this.toContent.bind(this), this.fromContent.bind(this)))
+  }
+
+  onContentScriptDisconnect(fn: VoidFunction): void {
+    this.disconnectListeners.push(fn)
+  }
+
+  disconnected() {
+    this.connected = false
+    this.disconnectListeners.execute()
+    this.forwardToClient = () => {}
+    this.forwardToDevtools = () => {}
+  }
+}
+
 const tabDataMap = new Map<number, TabData>()
+
+// for reconnecting after page reload
+let lastDisconnectedTabData: TabData | undefined
+let lastDisconnectedTabId: number | undefined
 
 function handleContentScriptConnection(port: chrome.runtime.Port, tabId: number) {
   const { onPortMessage: fromContent, postPortMessage: toContent } = createPortMessanger(port)
-  const { push, execute: clearListeners } = createCallbackStack()
 
   let forwardHandler: ((message: ForwardPayload) => void) | undefined
+  let data: TabData
 
-  const data: TabData = {
-    versions: undefined,
-    solidOnPage: false,
+  const config: TabDataConfig = {
     toContent,
     fromContent,
-    onContentScriptDisconnect: push,
     forwardToDevtools: fn => (forwardHandler = fn),
     forwardToClient: message => port.postMessage(message),
   }
+
+  // Page was reloaded, so we need to reinitialize the tab data
+  if (tabId === lastDisconnectedTabId) {
+    data = lastDisconnectedTabData!
+    data.reconnected(config)
+  }
+  // A fresh page
+  else {
+    data = new TabData(tabId, config)
+  }
+
+  lastDisconnectedTabId = undefined
+  lastDisconnectedTabId = undefined
   tabDataMap.set(tabId, data)
 
   // "Versions" from content-script, serves also as a "SolidOnPage" message
@@ -69,8 +131,10 @@ function handleContentScriptConnection(port: chrome.runtime.Port, tabId: number)
   once(fromContent, 'SolidOnPage', () => (data.solidOnPage = true))
 
   port.onDisconnect.addListener(() => {
-    clearListeners()
+    data.disconnected()
     tabDataMap.delete(tabId)
+    lastDisconnectedTabData = data
+    lastDisconnectedTabId = tabId
   })
 
   port.onMessage.addListener((message: ForwardPayload | any) => {
@@ -91,38 +155,38 @@ function withTabData(
 
 function handleDevtoolsConnection(port: chrome.runtime.Port) {
   withTabData(port, (data, { postPortMessage: toDevtools }) => {
-    const { toContent, fromContent, versions } = data
-    // "Versions" means the devtools client is present
-    if (versions) toDevtools('Versions', versions)
-    else once(fromContent, 'Versions', v => toDevtools('Versions', v))
+    data.onContentScriptConnect((toContent, fromContent) => {
+      // "Versions" means the devtools client is present
+      if (data.versions) toDevtools('Versions', data.versions)
+      else once(fromContent, 'Versions', v => toDevtools('Versions', v))
 
-    port.onDisconnect.addListener(() => toContent('DevtoolsClosed'))
+      port.onDisconnect.addListener(() => toContent('DevtoolsClosed'))
+    })
   })
 }
 
 function handlePanelConnection(port: chrome.runtime.Port) {
   withTabData(port, (data, { postPortMessage: toPanel, onForwardMessage }) => {
-    const {
-      onContentScriptDisconnect: push,
-      toContent,
-      fromContent,
-      versions,
-      forwardToClient,
-      forwardToDevtools,
-    } = data
+    data.onContentScriptConnect((toContent, fromContent) => {
+      const handleVersions = (v: Versions) => {
+        toPanel('Versions', v)
+        // notify the content script that the devtools panel is ready
+        toContent('DevtoolsOpened')
+      }
 
-    if (versions) toPanel('Versions', versions)
-    else once(fromContent, 'Versions', v => toPanel('Versions', v))
+      if (data.versions) handleVersions(data.versions)
+      else once(fromContent, 'Versions', handleVersions)
 
-    // notify the content script that the devtools panel is ready
-    toContent('DevtoolsOpened')
+      fromContent('ResetPanel', () => toPanel('ResetPanel'))
+      data.onContentScriptDisconnect(() => toPanel('ResetPanel'))
 
-    fromContent('ResetPanel', () => toPanel('ResetPanel'))
-    push(() => toPanel('ResetPanel'))
-
-    // FORWARD MESSAGES FROM and TO CLIENT
-    forwardToDevtools(message => port.postMessage(message))
-    onForwardMessage(message => forwardToClient(message))
+      // FORWARD MESSAGES FROM and TO CLIENT
+      data.forwardToDevtools(message => {
+        // console.log('Forwarding to panel', message)
+        port.postMessage(message)
+      })
+      onForwardMessage(message => data.forwardToClient(message))
+    })
   })
 }
 
@@ -132,10 +196,10 @@ function handlePopupConnection(port: chrome.runtime.Port) {
     if (versions) toPopup('Versions', versions)
     else if (solidOnPage) {
       toPopup('SolidOnPage')
-      once(fromContent, 'Versions', v => toPopup('Versions', v))
+      once(fromContent.bind(data), 'Versions', v => toPopup('Versions', v))
     } else {
-      once(fromContent, 'Versions', v => toPopup('Versions', v))
-      once(fromContent, 'SolidOnPage', () => toPopup('SolidOnPage'))
+      once(fromContent.bind(data), 'Versions', v => toPopup('Versions', v))
+      once(fromContent.bind(data), 'SolidOnPage', () => toPopup('SolidOnPage'))
     }
   })
 }

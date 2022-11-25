@@ -26,29 +26,30 @@
     "dist"
   ],
   "type": "module",
-  "main": "./dist/prod.js",
-  "module": "./dist/prod.js",
-  "types": "./dist/types/index.d.ts",
+  "main": "./dist/server.cjs",
+  "module": "./dist/server.js",
+  "types": "./dist/index.d.ts",
   "exports": {
     "browser": {
-      "development": "./dist/dev.js",
-      "default": "./dist/prod.js"
+      "development": {
+        "import": "./dist/index.js",
+        "require": "./dist/index.cjs"
+      },
+      "import": "./dist/server.js",
+      "require": "./dist/server.cjs"
     },
-    "development": "./dist/dev.js",
-    "default": "./dist/prod.js"
+    "development": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "import": "./dist/server.js",
+    "require": "./dist/server.cjs",
+    "types": "./dist/index.d.ts"
   },
   "scripts": {
     "dev": "pnpm run build --watch",
-    "build": "tsx ./scripts/build.ts",
-    "typecheck": "tsc --noEmit --paths null",
-    "build:vite": "vite build",
-    "build:tsup": "tsup"
-  },
-  "devDependencies": {
-    "@types/clean-css": "^4.2.6",
-    "chokidar": "^3.5.3",
-    "clean-css": "^5.3.1",
-    "tsx": "^3.10.4"
+    "build": "tsup",
+    "typecheck": "tsc --noEmit --paths null"
   },
   "dependencies": {
     "@solid-devtools/debugger": "workspace:^0.15.3",

@@ -1,25 +1,28 @@
-import { createComputed, Component, createSignal, onCleanup, Show } from 'solid-js'
+import { createComputed, Component, createSignal, onCleanup, Show, ComponentProps } from 'solid-js'
 import { Dynamic, Portal } from 'solid-js/web'
 import { makeEventListener } from '@solid-primitives/event-listener'
+import { onRootCleanup } from '@solid-primitives/utils'
 import { clamp } from '@solid-primitives/utils'
 import { createBodyCursor } from '@solid-primitives/cursor'
 import { Devtools, Icon, MountIcons } from '@solid-devtools/frontend'
 import { createInternalRoot, useDebugger } from '@solid-devtools/debugger'
-import { createController } from './controller'
 import { useIsMobile, useIsTouch } from '@solid-devtools/shared/primitives'
+import { warn } from '@solid-devtools/shared/utils'
+import { createController } from './controller'
 
 import frontendStyles from '@solid-devtools/frontend/dist/index.css'
 import overlayStyles from './styles.css'
 
-interface Props {
-  defaultOpen?: boolean
-  alwaysOpen?: boolean
-  noPadding?: boolean
-}
+let isAlreadyMounted = false
 
-export const DevtoolsOverlay: Component<Props> = props => {
+export function attachDevtoolsOverlay(props: ComponentProps<typeof Overlay>): VoidFunction {
+  if (isAlreadyMounted) {
+    warn('Devtools overlay is already mounted')
+    return () => {}
+  }
+  isAlreadyMounted = true
+
   let dispose: VoidFunction | undefined
-  onCleanup(() => dispose?.())
 
   setTimeout(() => {
     createInternalRoot(_dispose => {
@@ -28,10 +31,17 @@ export const DevtoolsOverlay: Component<Props> = props => {
     })
   })
 
-  return ''
+  return onRootCleanup(() => {
+    isAlreadyMounted = false
+    dispose && dispose()
+  })
 }
 
-const Overlay: Component<Props> = ({ defaultOpen, alwaysOpen, noPadding }) => {
+const Overlay: Component<{
+  defaultOpen?: boolean
+  alwaysOpen?: boolean
+  noPadding?: boolean
+}> = ({ defaultOpen, alwaysOpen, noPadding }) => {
   const [isOpen, setOpen] = (() => {
     if (alwaysOpen) return [() => true, () => {}] as const
     const [isOpen, setOpen] = createSignal(defaultOpen ?? false)
