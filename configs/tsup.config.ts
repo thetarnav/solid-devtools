@@ -27,6 +27,7 @@ export default ({
   })
   return defineConfig(config => {
     const options: Options = {
+      watch: config.watch,
       clean: config.watch ? false : true,
       minify: config.watch ? false : true,
       treeshake: config.watch ? false : true,
