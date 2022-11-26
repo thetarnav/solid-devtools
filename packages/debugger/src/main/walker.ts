@@ -20,13 +20,24 @@ let $onComputationUpdate: ComputationUpdateHandler
 let $components: Mapped.ResolvedComponent[] = []
 let $inspectedOwner: Solid.Owner | null
 
-function mapChildren<T extends Mapped.Owner | Mapped.Root>(owner: Solid.Owner, mapped: T): T {
+function mapChildren(owner: Solid.Owner): Mapped.Owner[] | undefined {
   const { owned } = owner
-  if (!owned || !owned.length) return mapped
-  const children: Mapped.Owner[] = Array(owned.length)
-  for (let i = 0; i < children.length; i++) children[i] = mapOwner(owned[i])
-  mapped.children = children
-  return mapped
+  if (!owned || !owned.length) return
+  const children: Mapped.Owner[] = []
+  if ($mode === TreeWalkerMode.Owners) {
+    for (const child of owned) children.push(mapOwner(child))
+  } else {
+    for (const child of owned) {
+      const type = markOwnerType(child)
+      if (type === NodeType.Component) {
+        children.push(mapOwner(child, type))
+      } else {
+        const childChildren = mapChildren(child)
+        childChildren && children.push.apply(children, childChildren)
+      }
+    }
+  }
+  return children
 }
 
 function mapComputation(owner: Solid.Computation, idToUpdate: NodeID, mapped: Mapped.Owner): void {
@@ -37,8 +48,7 @@ function mapComputation(owner: Solid.Computation, idToUpdate: NodeID, mapped: Ma
   if (!owner.sources || owner.sources.length === 0) mapped.frozen = true
 }
 
-function mapOwner(owner: Solid.Owner): Mapped.Owner {
-  const type = markOwnerType(owner) as Exclude<NodeType, NodeType.Refresh | NodeType.Root>
+function mapOwner(owner: Solid.Owner, type = markOwnerType(owner)): Mapped.Owner {
   const id = markNodeID(owner)
   const name =
     type === NodeType.Component ||
@@ -67,7 +77,7 @@ function mapOwner(owner: Solid.Owner): Mapped.Owner {
       // custom mapping for context nodes
       const id = markNodeID(contextNode)
       if (id === $inspectedId) $inspectedOwner = contextNode
-      return mapChildren(contextNode.owned![0], { id, type: NodeType.Context } as Mapped.Owner)
+      return { id, type: NodeType.Context, children: mapChildren(contextNode.owned![0]) }
     }
 
     const element = resolveElements(owner.value)
@@ -109,7 +119,9 @@ function mapOwner(owner: Solid.Owner): Mapped.Owner {
   // Computation
   else if (type !== NodeType.Context) mapComputation(owner as Solid.Computation, id, mapped)
 
-  return mapChildren(owner, mapped)
+  const children = mapChildren(owner)
+  if (children) mapped.children = children
+  return mapped
 }
 
 function mapRoot(
@@ -119,9 +131,7 @@ function mapRoot(
 ): Mapped.Root {
   if (id === $inspectedId) $inspectedOwner = root
 
-  const mapped: Mapped.Root = { id, type: NodeType.Root }
-
-  mapChildren(root, mapped)
+  const mapped: Mapped.Root = { id, type: NodeType.Root, children: mapChildren(root) }
 
   if (attached) mapped.attached = markNodeID(attached)
 
@@ -144,8 +154,6 @@ export function walkSolidTree(
     inspectedId: NodeID | null
   },
 ): WalkerResult {
-  console.log('WALK TREE:', config.rootId, ', mode:', config.mode)
-
   // set the globals to be available for this walk cycle
   $mode = config.mode
   $inspectedId = config.inspectedId
