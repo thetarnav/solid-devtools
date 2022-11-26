@@ -4,19 +4,102 @@ import { useRemSize } from '@solid-primitives/styles'
 import { createResizeObserver } from '@solid-primitives/resize-observer'
 import { NodeID } from '@solid-devtools/debugger/types'
 import type { Structure } from '.'
-import { Scrollable } from '@/ui'
+import { Scrollable, ToggleButton, Icon } from '@/ui'
 import { OwnerNode } from './OwnerNode'
 import { OwnerPath } from './Path'
 import { getVirtualVars } from './virtual'
 import * as styles from './structure.css'
 import { useController } from '@/controller'
+import { createShortcut } from '@solid-primitives/keyboard'
+import { Tab, TabGroup, TabList } from 'solid-headless'
 
 export default function StructureView() {
   return (
     <div class={styles.panelWrapper}>
+      <div class={styles.header}>
+        <LocatorButton />
+        <Search />
+        <ToggleMode />
+      </div>
       <DisplayStructureTree />
       <OwnerPath />
     </div>
+  )
+}
+
+const LocatorButton: Component = () => {
+  const ctx = useController()
+  return (
+    <ToggleButton
+      class={styles.locatorButton}
+      onToggle={ctx.setLocatorState}
+      selected={ctx.locatorEnabled()}
+    >
+      <Icon.Select class={styles.locatorIcon} />
+    </ToggleButton>
+  )
+}
+
+const Search: Component = () => {
+  const ctx = useController()
+
+  const [value, setValue] = createSignal('')
+
+  const handleChange = (v: string) => {
+    setValue(v)
+    ctx.searchStructure('')
+  }
+
+  return (
+    <form
+      class={styles.search.form}
+      onSubmit={e => {
+        e.preventDefault()
+        ctx.searchStructure(value())
+      }}
+      onReset={() => handleChange('')}
+    >
+      <input
+        ref={input => {
+          if (ctx.options.useShortcuts) {
+            createShortcut(['/'], () => input.focus())
+            createShortcut(['Escape'], () => {
+              if (document.activeElement === input) input.blur()
+              if (input.value) handleChange((input.value = ''))
+            })
+          }
+        }}
+        class={styles.search.input}
+        type="text"
+        placeholder="Search"
+        onInput={e => handleChange(e.currentTarget.value)}
+        onPaste={e => handleChange(e.currentTarget.value)}
+      />
+      <div class={styles.search.iconContainer}>
+        <Icon.Search class={styles.search.icon} />
+      </div>
+      {value() && (
+        <button class={styles.search.clearButton} type="reset">
+          <Icon.Close class={styles.search.clearIcon} />
+        </button>
+      )}
+    </form>
+  )
+}
+
+const ToggleMode: Component = () => {
+  const tabs = ['Components', 'Owners', 'DOM'] as const
+
+  return (
+    <TabGroup horizontal defaultValue={tabs[0]} class={styles.toggleMode.group}>
+      <TabList class={styles.toggleMode.list}>
+        {tabs.map(tab => (
+          <Tab as="button" value={tab} class={styles.toggleMode.tab}>
+            {tab}
+          </Tab>
+        ))}
+      </TabList>
+    </TabGroup>
   )
 }
 

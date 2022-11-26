@@ -1,5 +1,5 @@
 import { createVar, style } from '@vanilla-extract/css'
-import { color, dark, hexToRgbValue, media } from '.'
+import { color, dark, hexToRgbValue, media } from './theme.css'
 
 export const vars = {
   panel: {

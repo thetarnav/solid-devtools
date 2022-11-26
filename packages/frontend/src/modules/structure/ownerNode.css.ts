@@ -11,10 +11,10 @@ import {
   spacing,
   theme,
   transition,
+  vars,
 } from '@/ui/theme'
 import { rowHeight, rowPadding } from './structure.css'
 import { Property } from 'csstype'
-import vars from '@/ui/theme/vars.css'
 
 export const levelVar: CSSVarFunction = createVar()
 

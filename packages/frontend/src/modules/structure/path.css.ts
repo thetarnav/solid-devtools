@@ -12,11 +12,11 @@ import {
   padding,
   margin,
   remValue,
+  vars,
 } from '@/ui/theme'
-import vars from '@/ui/theme/vars.css'
+import { pathHeight } from './structure.css'
 
 const rowHeight = spacing[3]
-const pathHeight = spacing[4.5]
 
 export const MIN_PATH_HEIGHT_IN_REM = remValue(pathHeight)
 

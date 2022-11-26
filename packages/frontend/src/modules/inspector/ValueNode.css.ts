@@ -1,7 +1,6 @@
 import { createVar, style, StyleRule, styleVariants } from '@vanilla-extract/css'
-import { dark, color, spacing, theme, media, centerChild, transition } from '@/ui/theme'
+import { dark, color, spacing, theme, media, centerChild, transition, vars } from '@/ui/theme'
 import { createHighlightStyles } from '@/ui/mixins'
-import vars from '@/ui/theme/vars.css'
 
 const RowHeight = spacing[4.5]
 const RowGap = spacing[0.5]

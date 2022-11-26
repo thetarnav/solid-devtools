@@ -1,3 +1,4 @@
+/* @refresh reload */
 import {
   Component,
   createSignal,

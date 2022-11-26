@@ -1,6 +1,6 @@
 import { createVar, fallbackVar, style } from '@vanilla-extract/css'
 import { CSSVarFunction } from '@vanilla-extract/private'
-import { insetX, insetY, rounded, spacing, transition } from './theme'
+import { insetX, insetY, rounded, spacing, transition } from './theme/theme.css'
 import { vars } from './theme/vars.css'
 
 export function createHighlightStyles(

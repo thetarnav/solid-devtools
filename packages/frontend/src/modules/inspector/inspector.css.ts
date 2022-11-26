@@ -1,19 +1,26 @@
 import { createVar, style } from '@vanilla-extract/css'
-import { spacing, theme, padding, rounded, centerChild, transition } from '@/ui/theme'
-import vars from '@/ui/theme/vars.css'
+import {
+  spacing,
+  theme,
+  padding,
+  rounded,
+  centerChild,
+  transition,
+  panelHeaderHeight,
+  vars,
+  flex,
+} from '@/ui/theme'
 
 export const root = style({
   height: '100%',
   display: 'grid',
-  gridTemplateRows: `${spacing[8]} 1fr`,
+  gridTemplateRows: `${panelHeaderHeight} 1fr`,
   gridTemplateColumns: '100%',
 })
 
 export const header = style({
   ...padding(0, 2, 0, 4),
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'space-between',
+  ...flex('items-center', 'justify-space-between'),
   borderBottom: vars.panel.border,
 })
 
@@ -23,8 +30,7 @@ export const actions = (() => {
 
   return {
     container: style({
-      display: 'flex',
-      alignItems: 'center',
+      ...flex('items-center'),
       columnGap: spacing[1],
     }),
     button: style({
@@ -65,8 +71,7 @@ export const content = style({
   width: 'fit-content',
   padding: spacing[4],
   paddingBottom: spacing[16],
-  display: 'flex',
-  flexDirection: 'column',
+  ...flex('column'),
   rowGap: spacing[4],
 })
 
