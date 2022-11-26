@@ -1,5 +1,11 @@
 import { Accessor, createMemo, createSelector, createSignal, untrack } from 'solid-js'
-import { NodeID, NodeType, RootsUpdates } from '@solid-devtools/debugger/types'
+import {
+  defaultWalkerMode,
+  NodeID,
+  NodeType,
+  RootsUpdates,
+  type TreeWalkerMode,
+} from '@solid-devtools/debugger/types'
 import { reconcileStructure } from './structure-reconcile'
 import { createSimpleEmitter } from '@solid-primitives/event-bus'
 
@@ -49,6 +55,8 @@ export default function createStructure({
 }: {
   clientHoveredNodeId: Accessor<NodeID | null>
 }) {
+  const [mode, setMode] = createSignal<TreeWalkerMode>(defaultWalkerMode)
+
   const [state, setState] = createSignal<Structure.State>(
     { nodeList: [], roots: [] },
     { internal: true },
@@ -117,5 +125,7 @@ export default function createStructure({
     getParentRoot,
     getNodePath,
     search,
+    mode,
+    setMode,
   }
 }

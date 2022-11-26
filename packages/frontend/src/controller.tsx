@@ -7,6 +7,7 @@ import {
   NodeID,
   NodeType,
   RootsUpdates,
+  TreeWalkerMode,
 } from '@solid-devtools/debugger/types'
 import type {
   InspectorUpdate,
@@ -30,6 +31,7 @@ interface ClientListenerPayloads {
   DevtoolsLocatorStateChange: boolean
   HighlightElementChange: HighlightElementPayload
   OpenLocation: void
+  TreeViewModeChange: TreeWalkerMode
 }
 export type ClientListeners = ListenersFromPayloads<ClientListenerPayloads>
 
@@ -194,6 +196,9 @@ const [Provider, useControllerCtx] = createContextProvider(
         { defer: true },
       ),
     )
+
+    // TREE VIEW MODE
+    createEffect(defer(structure.mode, client.onTreeViewModeChange))
 
     let lastSearch: string = ''
     let lastSearchResults: Structure.Node[] | undefined

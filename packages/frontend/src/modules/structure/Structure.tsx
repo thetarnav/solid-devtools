@@ -2,7 +2,7 @@ import { Accessor, Component, createEffect, createMemo, createSignal, For } from
 import { assignInlineVars } from '@vanilla-extract/dynamic'
 import { useRemSize } from '@solid-primitives/styles'
 import { createResizeObserver } from '@solid-primitives/resize-observer'
-import { NodeID } from '@solid-devtools/debugger/types'
+import { NodeID, TreeWalkerMode } from '@solid-devtools/debugger/types'
 import type { Structure } from '.'
 import { Scrollable, ToggleButton, Icon } from '@/ui'
 import { OwnerNode } from './OwnerNode'
@@ -88,14 +88,25 @@ const Search: Component = () => {
 }
 
 const ToggleMode: Component = () => {
-  const tabs = ['Components', 'Owners', 'DOM'] as const
+  const ctx = useController()
+
+  const tabsContentMap: Record<TreeWalkerMode, string> = {
+    [TreeWalkerMode.Owners]: 'Owners',
+    [TreeWalkerMode.Components]: 'Components',
+    [TreeWalkerMode.DOM]: 'DOM',
+  }
 
   return (
-    <TabGroup horizontal defaultValue={tabs[0]} class={styles.toggleMode.group}>
+    <TabGroup
+      horizontal
+      value={ctx.structure.mode()}
+      onChange={ctx.structure.setMode}
+      class={styles.toggleMode.group}
+    >
       <TabList class={styles.toggleMode.list}>
-        {tabs.map(tab => (
+        {[TreeWalkerMode.Components, TreeWalkerMode.Owners, TreeWalkerMode.DOM].map(tab => (
           <Tab as="button" value={tab} class={styles.toggleMode.tab}>
-            {tab}
+            {tabsContentMap[tab]}
           </Tab>
         ))}
       </TabList>

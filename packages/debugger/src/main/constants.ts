@@ -30,3 +30,11 @@ export enum ValueType {
   Instance,
   Store,
 }
+
+export const TreeWalkerMode = {
+  Owners: 'owners',
+  Components: 'components',
+  DOM: 'dom',
+} as const
+export type TreeWalkerMode = typeof TreeWalkerMode[keyof typeof TreeWalkerMode]
+export const defaultWalkerMode = TreeWalkerMode.Components

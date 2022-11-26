@@ -12,6 +12,7 @@ import { ComputationUpdateHandler } from './walker'
 import { createLocator } from '../locator'
 import { createInspector, InspectorUpdate } from '../inspector'
 import { ComputationUpdate, Mapped, NodeID, RootsUpdates } from './types'
+import { defaultWalkerMode, TreeWalkerMode } from './constants'
 
 export type BatchComputationUpdatesHandler = (payload: ComputationUpdate[]) => void
 
@@ -72,30 +73,12 @@ export default createInternalRoot(() => {
     ]
   })()
 
-  //
-  // Components:
-  //
-  const [components, setComponents] = createSignal<Record<NodeID, Mapped.ResolvedComponent[]>>({})
+  // TREE WALKER MODE
+  let treeWalkerMode: TreeWalkerMode = defaultWalkerMode
 
-  function findComponent(rootId: NodeID, nodeId: NodeID) {
-    const componentsList = components()[rootId] as Mapped.ResolvedComponent[] | undefined
-    if (!componentsList) return
-    for (const c of componentsList) {
-      if (c.id === nodeId) return c
-    }
-  }
-
-  function removeRoot(rootId: NodeID) {
-    setComponents(prev => {
-      const copy = Object.assign({}, prev)
-      delete copy[rootId]
-      return copy
-    })
-    pushStructureUpdate({ removed: rootId })
-  }
-  function updateRoot(newRoot: Mapped.Root, newComponents: Mapped.ResolvedComponent[]): void {
-    setComponents(prev => Object.assign(prev, { [newRoot.id]: newComponents }))
-    pushStructureUpdate({ updated: newRoot })
+  function changeTreeWalkerMode(newMode: TreeWalkerMode): void {
+    treeWalkerMode = newMode
+    triggerUpdate()
   }
 
   //
@@ -135,6 +118,32 @@ export default createInternalRoot(() => {
   }
 
   //
+  // Components:
+  //
+  const [components, setComponents] = createSignal<Record<NodeID, Mapped.ResolvedComponent[]>>({})
+
+  function findComponent(rootId: NodeID, nodeId: NodeID) {
+    const componentsList = components()[rootId] as Mapped.ResolvedComponent[] | undefined
+    if (!componentsList) return
+    for (const c of componentsList) {
+      if (c.id === nodeId) return c
+    }
+  }
+
+  function removeRoot(rootId: NodeID) {
+    setComponents(prev => {
+      const copy = Object.assign({}, prev)
+      delete copy[rootId]
+      return copy
+    })
+    pushStructureUpdate({ removed: rootId })
+  }
+  function updateRoot(newRoot: Mapped.Root, newComponents: Mapped.ResolvedComponent[]): void {
+    setComponents(prev => Object.assign(prev, { [newRoot.id]: newComponents }))
+    pushStructureUpdate({ updated: newRoot })
+  }
+
+  //
   // Inspected Owner details:
   //
   const inspector = createInspector(debuggerEnabled, { eventHub })
@@ -167,6 +176,7 @@ export default createInternalRoot(() => {
       triggerUpdate,
       forceTriggerUpdate,
       openInspectedNodeLocation,
+      changeTreeWalkerMode,
       inspector: {
         setInspectedNode: inspector.setInspectedNode,
         toggleValueNode: inspector.toggleValueNode,
@@ -190,5 +200,6 @@ export default createInternalRoot(() => {
     removeRoot,
     pushComputationUpdate,
     useLocator: locator.useLocator,
+    getTreeWalkerMode: () => treeWalkerMode,
   }
 })

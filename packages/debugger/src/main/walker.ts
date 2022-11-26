@@ -8,11 +8,12 @@ import {
 } from './utils'
 import { observeComputationUpdate } from './update'
 import { Mapped, NodeID, Solid } from './types'
-import { NodeType } from './constants'
+import { NodeType, TreeWalkerMode } from './constants'
 
 export type ComputationUpdateHandler = (rootId: NodeID, nodeId: NodeID) => void
 
 // Globals set before each walker cycle
+let $mode: TreeWalkerMode
 let $inspectedId: NodeID | null
 let $rootId: NodeID
 let $onComputationUpdate: ComputationUpdateHandler
@@ -83,13 +84,6 @@ function mapOwner(owner: Solid.Owner): Mapped.Owner {
     ) {
       showMemoCondition.name = 'condition'
       showMemoNode.name = 'value'
-      // if (!showMemoCondition.owned) {
-      //   mapped.name = 'Show_'
-      //   // mapped.combines = [markNodeID(showMemoCondition), markNodeID(showMemoNode)]
-      //   // showMemoNode.att
-      //   mapComputation(showMemoCondition, id, mapped)
-      //   return mapChildren(showMemoNode, mapped)
-      // }
     }
 
     // <For> component
@@ -100,13 +94,6 @@ function mapOwner(owner: Solid.Owner): Mapped.Owner {
       isSolidMemo((forMemo = owner.owned[0] as Solid.Memo))
     ) {
       forMemo.name = 'value'
-      // mapped.combines = [markNodeID(forMemo)]
-      // mapComputation(forMemo, id, mapped)
-      // return mapChildren(forMemo, mapped)
-      // const mappedMemo = mapOwner(forMemo)
-      // mappedMemo.type = NodeType.Component
-      // mappedMemo.name = name
-      // return mappedMemo
     }
 
     // Refresh
@@ -150,13 +137,17 @@ export type WalkerResult = {
 export function walkSolidTree(
   owner: Solid.Root,
   config: {
+    mode: TreeWalkerMode
     rootId: NodeID
     onComputationUpdate: ComputationUpdateHandler
     gatherComponents?: boolean
     inspectedId: NodeID | null
   },
 ): WalkerResult {
+  console.log('WALK TREE:', config.rootId, ', mode:', config.mode)
+
   // set the globals to be available for this walk cycle
+  $mode = config.mode
   $inspectedId = config.inspectedId
   $rootId = config.rootId
   $onComputationUpdate = config.onComputationUpdate

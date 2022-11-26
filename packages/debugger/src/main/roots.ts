@@ -49,6 +49,7 @@ export function createGraphRoot(owner: Solid.Root): void {
     const forceRootUpdate = untrackedCallback((inspectedId?: NodeID | void) => {
       if (owner.isDisposed) return null
       const result = walkSolidTree(owner, {
+        mode: plugin.getTreeWalkerMode(),
         onComputationUpdate,
         rootId,
         inspectedId: inspectedId ?? null,

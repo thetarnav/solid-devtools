@@ -7,6 +7,7 @@ import type {
   ComputationUpdate,
   RootsUpdates,
   HighlightElementPayload,
+  TreeWalkerMode,
 } from '@solid-devtools/debugger/types'
 
 export type Versions = { client: string; expectedClient: string; extension: string }
@@ -51,6 +52,8 @@ export namespace Messages {
     LocatorMode: boolean
     /** open the location of the inspected component in the code editor */
     OpenLocation: {}
+    /** toggle treeview mode */
+    TreeViewMode: TreeWalkerMode
   }
 }
 
