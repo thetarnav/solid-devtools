@@ -1,18 +1,19 @@
 import { Accessor, batch, createComputed, createMemo, createSignal } from 'solid-js'
-import {
-  createEventHub,
-  createSimpleEmitter,
-  EventBus,
-  EventHub,
-} from '@solid-primitives/event-bus'
-import { throttle } from '@solid-primitives/scheduled'
+import { createEventHub, EventBus, EventHub } from '@solid-primitives/event-bus'
 import { atom, defer } from '@solid-devtools/shared/primitives'
-import { createBatchedUpdateEmitter, createInternalRoot } from './utils'
-import { ComputationUpdateHandler } from './walker'
+import { createBatchedUpdateEmitter } from './utils'
+import {
+  changeTreeWalkerMode,
+  createInternalRoot,
+  forceUpdateAllRoots,
+  updateAllRoots,
+  setComputationUpdateHandler,
+  setRootUpdatesHandler,
+} from './roots'
+import { WalkerResult } from './walker'
 import { createLocator } from '../locator'
 import { createInspector, InspectorUpdate } from '../inspector'
 import { ComputationUpdate, Mapped, NodeID, RootsUpdates } from './types'
-import { defaultWalkerMode, TreeWalkerMode } from './constants'
 
 export type BatchComputationUpdatesHandler = (payload: ComputationUpdate[]) => void
 
@@ -27,11 +28,6 @@ export type DebuggerEventHub = EventHub<{
 }>
 
 export default createInternalRoot(() => {
-  /** throttled global update */
-  const [onUpdate, triggerUpdate] = createSimpleEmitter()
-  /** forced — immediate global update */
-  const [onForceUpdate, forceTriggerUpdate] = createSimpleEmitter()
-
   const eventHub: DebuggerEventHub = createEventHub(bus => ({
     ComputationUpdates: bus(),
     StructureUpdates: bus(),
@@ -54,8 +50,11 @@ export default createInternalRoot(() => {
         createMemo(() => !!locatorEnabledSignal()?.() || !!userEnabledSignal()?.()),
         enabled => {
           batch(() => {
-            debuggerEnabled(enabled)
-            if (!enabled) {
+            combinedEnabled(enabled)
+            if (enabled) {
+              setRootUpdatesHandler(setRootUpdates)
+            } else {
+              setRootUpdatesHandler(null)
               setComponents({})
               locator.togglePluginLocatorMode(false)
               locator.setPluginHighlightTarget(null)
@@ -67,54 +66,36 @@ export default createInternalRoot(() => {
     )
 
     return [
-      combinedEnabled,
+      () => combinedEnabled(),
       (signal: Accessor<boolean>): void => void userEnabledSignal(() => signal),
       (signal: Accessor<boolean>): void => void locatorEnabledSignal(() => signal),
     ]
   })()
 
-  // TREE WALKER MODE
-  let treeWalkerMode: TreeWalkerMode = defaultWalkerMode
-
-  function changeTreeWalkerMode(newMode: TreeWalkerMode): void {
-    treeWalkerMode = newMode
-    triggerUpdate()
-  }
-
   //
-  // Structure updates:
+  // Structure & Computation updates:
   //
-  const pushStructureUpdate = (() => {
-    const updates: Mapped.Root[] = []
-    const removedIds = new Set<NodeID>()
-    const trigger = throttle(() => {
-      const updated: Record<NodeID, Mapped.Root> = {}
-      for (let i = updates.length - 1; i >= 0; i--) {
-        const update = updates[i]
-        const { id } = update
-        if (!removedIds.has(id) && !updated[id]) updated[id] = update
-      }
-      eventHub.emit('StructureUpdates', { updated, removed: [...removedIds] })
-      updates.length = 0
-      removedIds.clear()
-    }, 50)
-    const pushStructureUpdate = (update: { removed: NodeID } | { updated: Mapped.Root }) => {
-      if ('removed' in update) removedIds.add(update.removed)
-      else if (removedIds.has(update.updated.id)) return
-      else updates.push(update.updated)
-      trigger()
-    }
-    return pushStructureUpdate
-  })()
-
-  //
-  // Computation updates:
-  //
-  const _pushComputationUpdate = createBatchedUpdateEmitter<ComputationUpdate>(updates => {
+  const pushComputationUpdate = createBatchedUpdateEmitter<ComputationUpdate>(updates => {
     eventHub.emit('ComputationUpdates', updates)
   })
-  const pushComputationUpdate: ComputationUpdateHandler = (rootId, id) => {
-    _pushComputationUpdate({ rootId, id })
+  setComputationUpdateHandler((rootId, id) => pushComputationUpdate({ rootId, id }))
+
+  function setRootUpdates(updateResults: WalkerResult[], removedIds: ReadonlySet<NodeID>): void {
+    const updated: Record<NodeID, Mapped.Root> = {}
+    setComponents(prevComponents => {
+      const newComponents = Object.assign({}, prevComponents)
+
+      for (const { root, components } of updateResults) {
+        updated[root.id] = root
+        newComponents[root.id] = components
+      }
+      for (const rootId of removedIds) {
+        delete newComponents[rootId]
+      }
+
+      return newComponents
+    })
+    eventHub.emit('StructureUpdates', { updated, removed: [...removedIds] })
   }
 
   //
@@ -128,19 +109,6 @@ export default createInternalRoot(() => {
     for (const c of componentsList) {
       if (c.id === nodeId) return c
     }
-  }
-
-  function removeRoot(rootId: NodeID) {
-    setComponents(prev => {
-      const copy = Object.assign({}, prev)
-      delete copy[rootId]
-      return copy
-    })
-    pushStructureUpdate({ removed: rootId })
-  }
-  function updateRoot(newRoot: Mapped.Root, newComponents: Mapped.ResolvedComponent[]): void {
-    setComponents(prev => Object.assign(prev, { [newRoot.id]: newComponents }))
-    pushStructureUpdate({ updated: newRoot })
   }
 
   //
@@ -173,8 +141,8 @@ export default createInternalRoot(() => {
     return {
       listenTo: eventHub.on,
       setUserEnabledSignal,
-      triggerUpdate,
-      forceTriggerUpdate,
+      triggerUpdate: updateAllRoots,
+      forceTriggerUpdate: forceUpdateAllRoots,
       openInspectedNodeLocation,
       changeTreeWalkerMode,
       inspector: {
@@ -192,14 +160,7 @@ export default createInternalRoot(() => {
   }
 
   return {
-    onUpdate,
-    onForceUpdate,
-    enabled: debuggerEnabled,
     useDebugger,
-    updateRoot,
-    removeRoot,
-    pushComputationUpdate,
     useLocator: locator.useLocator,
-    getTreeWalkerMode: () => treeWalkerMode,
   }
 })

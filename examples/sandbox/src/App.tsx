@@ -33,8 +33,6 @@ let disposeOuterRoot: VoidFunction
 createRoot(dispose => {
   disposeOuterRoot = dispose
 
-  getOwner()!.name = 'OUTSIDE_ROOT'
-
   const [count, setCount] = createSignal(0)
   setRootCount = setCount
 
@@ -42,12 +40,9 @@ createRoot(dispose => {
     count()
     if (count() === 1) {
       createRoot(dispose => {
-        getOwner()!.name = 'OUTSIDE_TEMP_ROOT'
-
         createEffect(() => count() === 4 && dispose())
 
         createRoot(_ => {
-          getOwner()!.name = 'OUTSIDE_INSIDE_ROOT'
           createEffect(() => count())
         })
       })

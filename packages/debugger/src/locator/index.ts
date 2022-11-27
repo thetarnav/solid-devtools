@@ -15,8 +15,7 @@ import {
   TargetIDE,
   TargetURLFunction,
 } from './findComponent'
-import { createInternalRoot } from '../main/utils'
-import { enableRootsAutoattach } from '../main/roots'
+import { enableRootsAutoattach, createInternalRoot } from '../main/roots'
 import { attachElementOverlay } from './ElementOverlay'
 import { LocationAttr, Mapped, NodeID } from '../types'
 

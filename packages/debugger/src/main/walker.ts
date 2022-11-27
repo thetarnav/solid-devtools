@@ -1,5 +1,6 @@
 import {
   getComponentRefreshNode,
+  isSolidComponent,
   isSolidMemo,
   markNodeID,
   markOwnerName,
@@ -14,11 +15,9 @@ export type ComputationUpdateHandler = (rootId: NodeID, nodeId: NodeID) => void
 
 // Globals set before each walker cycle
 let $mode: TreeWalkerMode
-let $inspectedId: NodeID | null
 let $rootId: NodeID
 let $onComputationUpdate: ComputationUpdateHandler
 let $components: Mapped.ResolvedComponent[] = []
-let $inspectedOwner: Solid.Owner | null
 
 function mapChildren(owner: Solid.Owner): Mapped.Owner[] | undefined {
   const { owned } = owner
@@ -61,8 +60,6 @@ function mapOwner(owner: Solid.Owner, type = markOwnerType(owner)): Mapped.Owner
   const mapped = { id, type } as Mapped.Owner
   if (name) mapped.name = name
 
-  if (id === $inspectedId) $inspectedOwner = owner
-
   // Component
   if (type === NodeType.Component) {
     // Context
@@ -76,7 +73,6 @@ function mapOwner(owner: Solid.Owner, type = markOwnerType(owner)): Mapped.Owner
     ) {
       // custom mapping for context nodes
       const id = markNodeID(contextNode)
-      if (id === $inspectedId) $inspectedOwner = contextNode
       return { id, type: NodeType.Context, children: mapChildren(contextNode.owned![0]) }
     }
 
@@ -124,23 +120,26 @@ function mapOwner(owner: Solid.Owner, type = markOwnerType(owner)): Mapped.Owner
   return mapped
 }
 
-function mapRoot(
-  root: Solid.Root,
-  id: NodeID,
-  attached: Solid.Owner | null | undefined,
-): Mapped.Root {
-  if (id === $inspectedId) $inspectedOwner = root
+function mapRoot(root: Solid.Root, id: NodeID): Mapped.Root {
+  const { sdtAttached } = root
 
   const mapped: Mapped.Root = { id, type: NodeType.Root, children: mapChildren(root) }
 
-  if (attached) mapped.attached = markNodeID(attached)
+  if (sdtAttached) {
+    if ($mode === TreeWalkerMode.Owners) mapped.attached = markNodeID(sdtAttached)
+    // Attach only to components in Components mode
+    else {
+      let parent: Solid.Owner | null = sdtAttached
+      while (parent && !isSolidComponent(parent)) parent = parent.owner
+      if (parent) mapped.attached = markNodeID(parent)
+    }
+  }
 
   return mapped
 }
 
 export type WalkerResult = {
   root: Mapped.Root
-  inspectedOwner: Solid.Owner | null
   components: Mapped.ResolvedComponent[]
 }
 
@@ -151,20 +150,17 @@ export function walkSolidTree(
     rootId: NodeID
     onComputationUpdate: ComputationUpdateHandler
     gatherComponents?: boolean
-    inspectedId: NodeID | null
   },
 ): WalkerResult {
   // set the globals to be available for this walk cycle
   $mode = config.mode
-  $inspectedId = config.inspectedId
   $rootId = config.rootId
   $onComputationUpdate = config.onComputationUpdate
-  $inspectedOwner = null
   // components is an array instead of an object to preserve the order (nesting) of the components,
   // this helps the locator find the most nested component first
   $components = []
 
-  const root = mapRoot(owner, $rootId, owner.sdtAttached)
+  const root = mapRoot(owner, $rootId)
 
-  return { root, inspectedOwner: $inspectedOwner, components: $components }
+  return { root, components: $components }
 }

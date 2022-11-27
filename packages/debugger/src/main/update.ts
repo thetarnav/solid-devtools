@@ -31,35 +31,6 @@ export function makeSolidUpdateListener(onUpdate: VoidFunction): VoidFunction {
 }
 
 //
-// AFTER CREATE ROOT
-//
-
-export type AfterCrateRoot = (root: Solid.Root) => void
-
-const CreateRootListeners = new Set<AfterCrateRoot>()
-
-// Patch window._$afterCreateRoot
-{
-  const runListeners: AfterCrateRoot = root => {
-    if (skipInternalRoot()) return
-    CreateRootListeners.forEach(f => f(root))
-  }
-  if (typeof window._$afterCreateRoot === 'function') {
-    CreateRootListeners.add(window._$afterCreateRoot)
-  }
-  window._$afterCreateRoot = runListeners as (root: Core.Owner) => void
-}
-
-/**
- * Runs the callback every time a new Solid Root is created.
- * The listener is automatically cleaned-up on root dispose.
- */
-export function makeCreateRootListener(onUpdate: AfterCrateRoot): VoidFunction {
-  CreateRootListeners.add(onUpdate)
-  return tryOnCleanup(() => CreateRootListeners.delete(onUpdate))
-}
-
-//
 // OBSERVE NODES
 //
 

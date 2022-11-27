@@ -1,7 +1,6 @@
 import { LocationAttr } from '@solid-devtools/transform/types'
 import type { Many } from '@solid-primitives/utils'
 import { INFINITY, NAN, NEGATIVE_INFINITY, NodeType, ValueType } from './constants'
-import type { INTERNAL } from './utils'
 
 export type { LocationAttr } from '@solid-devtools/transform/types'
 
@@ -53,14 +52,6 @@ export type EncodedValue<Deep extends boolean = boolean> = {
 }[ValueType]
 
 export type ValueUpdateListener = (newValue: unknown, oldValue: unknown) => void
-
-export type DebuggerContext =
-  | {
-      rootId: NodeID
-      triggerRootUpdate: VoidFunction
-      forceRootUpdate: VoidFunction
-    }
-  | typeof INTERNAL
 
 export namespace Core {
   export type Owner = import('solid-js/types/reactive/signal').Owner
@@ -127,8 +118,8 @@ export namespace Solid {
     sourceMap?: Record<string, Signal | Store>
     // Used by the debugger
     isDisposed?: boolean
-    sdtAttached?: Owner | null
-    sdtContext?: DebuggerContext
+    sdtAttached?: Owner
+    isInternal?: true
     // Computation compatibility
     value?: undefined
     sources?: undefined
