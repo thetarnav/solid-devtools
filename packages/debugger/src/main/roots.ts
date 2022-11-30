@@ -1,6 +1,5 @@
-import { createRoot, onCleanup } from 'solid-js'
+import { createRoot, untrack } from 'solid-js'
 import { throttle } from '@solid-primitives/scheduled'
-import { untrackedCallback } from '@solid-devtools/shared/primitives'
 import { warn } from '@solid-devtools/shared/utils'
 import { ComputationUpdateHandler, WalkerResult, walkSolidTree } from './walker'
 import { markNodeID, isSolidRoot, onOwnerCleanup, getOwner } from './utils'
@@ -32,16 +31,24 @@ export type RootUpdatesHandler = (
   updateResults: WalkerResult[],
   removedIds: ReadonlySet<NodeID>,
 ) => void
-let $onRootUpdates: RootUpdatesHandler | null = null
 
+let $onRootUpdates: RootUpdatesHandler | null = null
 export function setRootUpdatesHandler(handler: RootUpdatesHandler | null): void {
   $onRootUpdates = handler
   if (handler) updateAllRoots()
 }
 
-let $onComputationUpdate: ComputationUpdateHandler | null = null
-export function setComputationUpdateHandler(handler: ComputationUpdateHandler | null): void {
+// will be set in `plugin.ts`
+let $onComputationUpdate!: ComputationUpdateHandler
+export function setComputationUpdateHandler(handler: ComputationUpdateHandler): void {
   $onComputationUpdate = handler
+}
+const onComputationUpdate: ComputationUpdateHandler = (rootId, nodeId, changedStructure) => {
+  // only if debugger is enabled
+  if ($onRootUpdates) {
+    changedStructure && updateRoot(rootId)
+    $onComputationUpdate(rootId, nodeId, changedStructure)
+  }
 }
 
 function forceFlushRootUpdateQueue(): void {
@@ -80,35 +87,22 @@ export function forceUpdateAllRoots(): void {
 }
 
 export function createGraphRoot(owner: Solid.Root): void {
-  // setup the debugger in a separate root, so that it doesn't walk and track itself
-  createInternalRoot(dispose => {
-    onOwnerCleanup(owner, dispose)
+  const rootId = markNodeID(owner)
 
-    const rootId = markNodeID(owner)
+  const update = () =>
+    untrack(() => walkSolidTree(owner, { mode: $treeWalkerMode, onComputationUpdate, rootId }))
 
-    const onComputationUpdate: ComputationUpdateHandler = (rootId, nodeId) => {
-      updateRoot(rootId)
-      $onComputationUpdate?.(rootId, nodeId)
-    }
+  const dispose = () => {
+    $rootMap.delete(rootId)
+    $rootUpdateQueue.delete(rootId)
+    $removedRoots.add(rootId)
+    flushRootUpdateQueue()
+    removeDispose()
+  }
+  const removeDispose = onOwnerCleanup(owner, dispose)
 
-    const update = untrackedCallback(() => {
-      return walkSolidTree(owner, {
-        mode: $treeWalkerMode,
-        onComputationUpdate,
-        rootId,
-      })
-    })
-
-    $rootMap.set(rootId, { update, dispose, owner })
-    updateRoot(rootId)
-
-    onCleanup(() => {
-      $rootMap.delete(rootId)
-      $rootUpdateQueue.delete(rootId)
-      $removedRoots.add(rootId)
-      flushRootUpdateQueue()
-    })
-  })
+  $rootMap.set(rootId, { update, dispose, owner })
+  updateRoot(rootId)
 }
 
 /**

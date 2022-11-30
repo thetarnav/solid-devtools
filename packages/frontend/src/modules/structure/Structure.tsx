@@ -1,17 +1,18 @@
-import { Accessor, Component, createEffect, createMemo, createSignal, For } from 'solid-js'
+import { Component, createEffect, createMemo, createSignal, For, Setter } from 'solid-js'
 import { assignInlineVars } from '@vanilla-extract/dynamic'
 import { useRemSize } from '@solid-primitives/styles'
 import { createResizeObserver } from '@solid-primitives/resize-observer'
-import { NodeID, TreeWalkerMode } from '@solid-devtools/debugger/types'
-import type { Structure } from '.'
+import { createShortcut } from '@solid-primitives/keyboard'
+import { Tab, TabGroup, TabList } from 'solid-headless'
+import { defer } from '@solid-devtools/shared/primitives'
+import { NodeID, TreeWalkerMode, NodeType } from '@solid-devtools/debugger/types'
+import { useController } from '@/controller'
 import { Scrollable, ToggleButton, Icon } from '@/ui'
+import type { Structure } from '.'
 import { OwnerNode } from './OwnerNode'
 import { OwnerPath } from './Path'
 import { getVirtualVars } from './virtual'
 import * as styles from './structure.css'
-import { useController } from '@/controller'
-import { createShortcut } from '@solid-primitives/keyboard'
-import { Tab, TabGroup, TabList } from 'solid-headless'
 
 export default function StructureView() {
   return (
@@ -100,7 +101,7 @@ const ToggleMode: Component = () => {
     <TabGroup
       horizontal
       value={ctx.structure.mode()}
-      onChange={ctx.structure.setMode}
+      onChange={v => v && ctx.structure.setMode(v)}
       class={styles.toggleMode.group}
     >
       <TabList class={styles.toggleMode.list}>
@@ -116,8 +117,23 @@ const ToggleMode: Component = () => {
 
 type DisplayNode = {
   node: Structure.Node
-  getNode: Accessor<Structure.Node>
-  update: VoidFunction
+  update: Setter<Structure.Node>
+}
+
+const getFocusedComponentData = (
+  list: Structure.Node[],
+  start: number,
+  end: number,
+  index: number,
+): [node: NodeID, position: number] | undefined => {
+  if (index < start || index > end) index = Math.floor((start + end - 1) / 2)
+  let node = list[index]
+  let move = 0
+  while (node) {
+    if (node.type === NodeType.Component) return [node.id, index - start]
+    move = move <= 0 ? -move + 1 : -move
+    node = list[(index += move)]
+  }
 }
 
 const DisplayStructureTree: Component = () => {
@@ -144,7 +160,7 @@ const DisplayStructureTree: Component = () => {
 
   const {
     structureState,
-    inspectedNode,
+    inspector,
     structure,
     isNodeInspected,
     listenToComputationUpdate,
@@ -152,7 +168,28 @@ const DisplayStructureTree: Component = () => {
     setInspectedNode,
   } = useController()
 
-  const collapsedList = createMemo(() => {
+  let lastVirtualStart = 0
+  let lastVirtualEnd = 0
+  let lastInspectedIndex = 0
+  let lastFocusedComponentData: ReturnType<typeof getFocusedComponentData>
+
+  createEffect(() => {
+    ;({ start: lastVirtualStart, end: lastVirtualEnd } = virtual())
+    lastInspectedIndex = inspectedIndex()
+  })
+
+  const collapsedList = createMemo((prev: Structure.Node[] = []) => {
+    // position of focused component needs to be calculated right before the collapsed list is recalculated
+    // to be compated with it after the changes
+    // `list data` has to be updated in an effect, so that this memo can run before it, instead of reading it here
+    // because of solid's pull-based memo behavior (reading from a memo invalidates it, and it's dependencies)
+    lastFocusedComponentData = getFocusedComponentData(
+      prev,
+      lastVirtualStart,
+      lastVirtualEnd,
+      lastInspectedIndex,
+    )
+
     const nodeList = structureState().nodeList
     const collapsedList: Structure.Node[] = []
     const set = collapsed()
@@ -199,10 +236,15 @@ const DisplayStructureTree: Component = () => {
       minLevel = Math.min(minLevel, node.level)
       if (prev) {
         next[i] = prev
-        prev.update()
+        prev.update(node)
       } else {
-        const [getNode, setNode] = createSignal(node, { equals: false, internal: true })
-        next[i] = { node, getNode, update: () => setNode(node) }
+        const [getNode, update] = createSignal(node, { equals: false, internal: true })
+        next[i] = {
+          get node() {
+            return getNode()
+          },
+          update,
+        }
       }
     }
 
@@ -213,15 +255,42 @@ const DisplayStructureTree: Component = () => {
     equals: (a, b) => a == b || (Math.abs(b - a) < 7 && b != 0),
   })
 
+  // calculate node index in the collapsed list
+  const getNodeIndexById = (id: NodeID) => {
+    const nodeList = collapsedList()
+    for (let i = 0; i < nodeList.length; i++) if (nodeList[i].id === id) return i
+    return -1
+  }
+
+  // Index of the inspected node in the collapsed list
+  const inspectedIndex = createMemo(() => {
+    const id = inspector.inspectedId()
+    return id ? getNodeIndexById(id) : -1
+  })
+
+  // Seep the inspected or central node in view when the list is changing
+  createEffect(
+    defer(collapsedList, () => {
+      if (!lastFocusedComponentData) return
+      const [nodeId, lastPosition] = lastFocusedComponentData
+      const index = getNodeIndexById(nodeId)
+      if (index === -1) return
+      const move = index - virtual().start - lastPosition
+      container.scrollTop += move * getRowHeight()
+    }),
+  )
+
   // Scroll to selected node when it changes
+  // listen to inspected ID, instead of node, because node reference can change
   createEffect(() => {
-    const node = inspectedNode()
-    if (!node) return
+    if (!inspector.inspectedId()) return
     // Run in next tick to ensure the scroll data is updated and virtual list recalculated
     // inspect node -> open inspector -> container changes height -> scroll data changes -> virtual list changes -> scroll to node
     setTimeout(() => {
-      let index = collapsedList().indexOf(node)
+      let index = inspectedIndex()
       if (index === -1) {
+        const node = inspector.inspectedNode()
+        if (!node) return
         // Un-collapse parents if needed
         const set = collapsed()
         let parent = node.parent
@@ -232,7 +301,7 @@ const DisplayStructureTree: Component = () => {
         }
         if (wasCollapsed) {
           setCollapsed(set)
-          index = collapsedList().indexOf(node)
+          index = inspectedIndex()
         } else return
       }
 
@@ -269,20 +338,23 @@ const DisplayStructureTree: Component = () => {
         <div class={styles.scrolledInner}>
           <div class={styles.scrolledInner2}>
             <For each={virtual().list}>
-              {({ getNode, node }) => (
-                <OwnerNode
-                  owner={getNode()}
-                  isHovered={structure.isHovered(node)}
-                  isSelected={isNodeInspected(node.id)}
-                  listenToUpdate={listener =>
-                    listenToComputationUpdate(id => id === node.id && listener())
-                  }
-                  onHoverChange={hovered => toggleHoveredNode(node.id, hovered)}
-                  onInspectChange={inspected => setInspectedNode(inspected ? node : null)}
-                  toggleCollapsed={toggleCollapsed}
-                  isCollapsed={collapsed().has(node)}
-                />
-              )}
+              {data => {
+                const { id } = data.node
+                return (
+                  <OwnerNode
+                    owner={data.node}
+                    isHovered={structure.isHovered(id)}
+                    isSelected={isNodeInspected(id)}
+                    listenToUpdate={listener =>
+                      listenToComputationUpdate(updatedId => updatedId === id && listener())
+                    }
+                    onHoverChange={hovered => toggleHoveredNode(id, hovered)}
+                    onInspectChange={inspected => setInspectedNode(inspected ? id : null)}
+                    toggleCollapsed={toggleCollapsed}
+                    isCollapsed={collapsed().has(data.node)}
+                  />
+                )
+              }}
             </For>
           </div>
         </div>

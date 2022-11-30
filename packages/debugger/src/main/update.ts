@@ -1,6 +1,5 @@
-import { untrack } from 'solid-js'
-import { skipInternalRoot, tryOnCleanup } from './utils'
-import { Core, Solid, ValueUpdateListener } from './types'
+import { tryOnCleanup } from './utils'
+import { Solid, ValueUpdateListener } from './types'
 
 //
 // AFTER UPDATE
@@ -33,20 +32,6 @@ export function makeSolidUpdateListener(onUpdate: VoidFunction): VoidFunction {
 //
 // OBSERVE NODES
 //
-
-/**
- * Wraps the fn prop of owner object to trigger handler whenever the computation is executed.
- */
-export function observeComputationUpdate(owner: Solid.Computation, onRun: VoidFunction): void {
-  // owner already patched
-  if (owner.onComputationUpdate) return void (owner.onComputationUpdate = onRun)
-  // patch owner
-  owner.onComputationUpdate = onRun
-  interceptComputationRerun(owner, fn => {
-    untrack(owner.onComputationUpdate!)
-    fn()
-  })
-}
 
 /**
  * Patches the "fn" prop of SolidComputation. Will execute the {@link onRun} callback whenever the computation is executed.

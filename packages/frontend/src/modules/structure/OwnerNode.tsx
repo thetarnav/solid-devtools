@@ -1,10 +1,11 @@
 import { Component } from 'solid-js'
 import { assignInlineVars } from '@vanilla-extract/dynamic'
-import { Badge, CollapseToggle, Highlight } from '@/ui'
-import * as styles from './ownerNode.css'
+import { NodeID } from '@solid-devtools/debugger/types'
 import { createHover, createPingedSignal, trackFromListen } from '@solid-devtools/shared/primitives'
-import type { Structure } from '.'
+import { Badge, CollapseToggle, Highlight } from '@/ui'
 import { OwnerName } from '@/ui/components/Owner'
+import * as styles from './ownerNode.css'
+import type { Structure } from '.'
 
 export const OwnerNode: Component<{
   owner: Structure.Node
@@ -17,8 +18,7 @@ export const OwnerNode: Component<{
   toggleCollapsed: (node: Structure.Node) => void
 }> = props => {
   const { onHoverChange, listenToUpdate, onInspectChange } = props
-  const owner = props.owner
-  const { name, type, hmr } = owner
+  const { name, type, hmr } = props.owner
 
   const { toggleCollapsed } = props
 
@@ -40,7 +40,7 @@ export const OwnerNode: Component<{
       <div class={styles.nameContainer}>
         <CollapseToggle
           class={styles.collapse}
-          onToggle={() => toggleCollapsed(owner)}
+          onToggle={() => toggleCollapsed(props.owner)}
           isCollapsed={props.isCollapsed}
         />
         <Highlight highlight={isUpdated()}>

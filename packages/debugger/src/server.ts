@@ -43,7 +43,6 @@ export const unobserveAllRoots: typeof API.unobserveAllRoots = () => void 0
 
 // update
 export const makeSolidUpdateListener: typeof API.makeSolidUpdateListener = () => () => void 0
-export const observeComputationUpdate: typeof API.observeComputationUpdate = () => void 0
 export const interceptComputationRerun: typeof API.interceptComputationRerun = () => void 0
 export const observeValueUpdate: typeof API.observeValueUpdate = () => void 0
 export const makeValueUpdateListener: typeof API.makeValueUpdateListener = () => void 0

@@ -27,7 +27,6 @@ export {
 
 export {
   makeSolidUpdateListener,
-  observeComputationUpdate,
   observeValueUpdate,
   interceptComputationRerun,
   makeValueUpdateListener,

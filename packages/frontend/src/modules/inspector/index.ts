@@ -1,4 +1,4 @@
-import { batch, createEffect, createSelector, createSignal } from 'solid-js'
+import { batch, createEffect, createMemo, createSelector, createSignal } from 'solid-js'
 import { createStore, produce } from 'solid-js/store'
 import { defer, untrackedCallback, WritableDeep } from '@solid-devtools/shared/primitives'
 import { error, warn } from '@solid-devtools/shared/utils'
@@ -170,8 +170,12 @@ export default function createInspector({
   getNodePath(node: Structure.Node): Structure.Node[]
   findNode(id: NodeID): Structure.Node | undefined
 }) {
+  const [inspectedId, setInspectedId] = createSignal<NodeID | null>(null)
   const [inspectedNode, setInspectedNode] = createSignal<Structure.Node | null>(null)
-  const [path, setPath] = createSignal<Structure.Node[]>([])
+  const path = createMemo(() => {
+    const node = inspectedNode()
+    return node ? getNodePath(node) : []
+  })
   const [location, setLocation] = createSignal<LocationAttr | null>(null)
   const [signalDetails, setSignalDetails] = createStore<Inspector.SignalDetails>({
     signals: {},
@@ -199,27 +203,21 @@ export default function createInspector({
 
   const isNodeInspected = createSelector<NodeID | null, NodeID>(() => inspectedNode()?.id ?? null)
 
-  const setInspected: (data: Structure.Node | null | NodeID) => void = untrackedCallback(data => {
+  const setInspected: (data: Structure.Node | NodeID | null) => void = untrackedCallback(data => {
     batch(() => {
       if (data === null) {
+        setInspectedId(null)
         setInspectedNode(null)
-        setPath([])
         return
       }
 
-      const currentNode = inspectedNode()
-      let newNode: Structure.Node | undefined
-      if (typeof data === 'object') {
-        if (currentNode && data.id === currentNode.id) return
-        newNode = data
-      } else {
-        if (currentNode && data === currentNode.id) return
-        const node = findNode(data)
-        if (!node) return
-        newNode = node
-      }
-      setInspectedNode(newNode)
-      setPath(getNodePath(newNode))
+      const newId = typeof data === 'string' ? data : data.id
+      if (newId === inspectedId()) return
+      const node = typeof data === 'string' ? findNode(data) : data
+      if (!node) return warn(`setInspected: node (${newId}) not found`)
+
+      setInspectedId(newId)
+      setInspectedNode(node)
       setLocation(null)
       setSignalDetails({ signals: {}, value: null, props: null })
     })
@@ -330,6 +328,7 @@ export default function createInspector({
   }
 
   return {
+    inspectedId,
     inspectedNode,
     details,
     setInspectedNode: setInspected,

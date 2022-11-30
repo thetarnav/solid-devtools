@@ -1,3 +1,5 @@
+import { Mapped, NodeID, Solid } from './types'
+import { NodeType, TreeWalkerMode } from './constants'
 import {
   getComponentRefreshNode,
   isSolidComponent,
@@ -7,17 +9,45 @@ import {
   markOwnerType,
   resolveElements,
 } from './utils'
-import { observeComputationUpdate } from './update'
-import { Mapped, NodeID, Solid } from './types'
-import { NodeType, TreeWalkerMode } from './constants'
+import { interceptComputationRerun } from './update'
+import { untrack } from 'solid-js'
 
-export type ComputationUpdateHandler = (rootId: NodeID, nodeId: NodeID) => void
+export type ComputationUpdateHandler = (
+  rootId: NodeID,
+  nodeId: NodeID,
+  changedStructure: boolean,
+) => void
 
 // Globals set before each walker cycle
 let $mode: TreeWalkerMode
 let $rootId: NodeID
 let $onComputationUpdate: ComputationUpdateHandler
 let $components: Mapped.ResolvedComponent[] = []
+
+function observeComputation(_owner: Solid.Owner, nodeId: NodeID): void {
+  const owner = _owner as Solid.Computation
+  let isLeaf = !owner.owned || owner.owned.length === 0
+  const boundHandler = $onComputationUpdate.bind(void 0, $rootId, nodeId)
+  const handler = isLeaf
+    ? () => {
+        if (isLeaf && (!owner.owned || owner.owned.length === 0)) {
+          boundHandler(false)
+        } else {
+          isLeaf = false
+          boundHandler(true)
+        }
+      }
+    : boundHandler.bind(void 0, true)
+
+  // owner already patched
+  if (owner.onComputationUpdate) return void (owner.onComputationUpdate = handler)
+  // patch owner
+  owner.onComputationUpdate = handler
+  interceptComputationRerun(owner, fn => {
+    fn()
+    untrack(owner.onComputationUpdate!)
+  })
+}
 
 function mapChildren(owner: Solid.Owner): Mapped.Owner[] | undefined {
   const { owned } = owner
@@ -26,25 +56,19 @@ function mapChildren(owner: Solid.Owner): Mapped.Owner[] | undefined {
   if ($mode === TreeWalkerMode.Owners) {
     for (const child of owned) children.push(mapOwner(child))
   } else {
+    const nodeId = markNodeID(owner)
     for (const child of owned) {
       const type = markOwnerType(child)
       if (type === NodeType.Component) {
         children.push(mapOwner(child, type))
       } else {
+        if (type !== NodeType.Context) observeComputation(child, nodeId)
         const childChildren = mapChildren(child)
         childChildren && children.push.apply(children, childChildren)
       }
     }
   }
   return children
-}
-
-function mapComputation(owner: Solid.Computation, idToUpdate: NodeID, mapped: Mapped.Owner): void {
-  observeComputationUpdate(
-    owner as Solid.Computation,
-    $onComputationUpdate.bind(void 0, $rootId, idToUpdate),
-  )
-  if (!owner.sources || owner.sources.length === 0) mapped.frozen = true
 }
 
 function mapOwner(owner: Solid.Owner, type = markOwnerType(owner)): Mapped.Owner {
@@ -113,7 +137,10 @@ function mapOwner(owner: Solid.Owner, type = markOwnerType(owner)): Mapped.Owner
     mapped.hmr = hmr
   }
   // Computation
-  else if (type !== NodeType.Context) mapComputation(owner as Solid.Computation, id, mapped)
+  else if (type !== NodeType.Context) {
+    observeComputation(owner, id)
+    if (!owner.sources || owner.sources.length === 0) mapped.frozen = true
+  }
 
   const children = mapChildren(owner)
   if (children) mapped.children = children

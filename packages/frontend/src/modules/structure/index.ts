@@ -1,4 +1,4 @@
-import { Accessor, createMemo, createSelector, createSignal, untrack } from 'solid-js'
+import { Accessor, createSelector, createSignal, untrack } from 'solid-js'
 import {
   defaultWalkerMode,
   NodeID,
@@ -71,42 +71,35 @@ export default function createStructure({
   }
 
   function findNode(id: NodeID): Structure.Node | undefined {
-    for (const node of untrack(state).nodeList) {
+    for (const node of state().nodeList) {
       if (node.id === id) return node
     }
   }
 
   const [listenToComputationUpdate, emitComputationUpdate] = createSimpleEmitter<NodeID>()
 
-  const [extHovered, setHovered] = createSignal<Structure.Node | null>(null)
-  const clientHoveredComponent = createMemo(() => {
-    const id = clientHoveredNodeId()
-    return id ? findNode(id) ?? null : null
-  })
-  const hovered = () => extHovered() || clientHoveredComponent()
+  const [extHovered, setHovered] = createSignal<NodeID | null>(null)
+  const hovered = () => extHovered() || clientHoveredNodeId()
 
-  const isHovered = createSelector<Structure.Node | null, Structure.Node>(hovered)
+  const isHovered = createSelector<NodeID | null, NodeID>(hovered)
 
-  function toggleHoveredNode(id: NodeID, hovered: boolean): Structure.Node | null {
+  function toggleHoveredNode(id: NodeID, hovered: boolean): NodeID | null {
     return setHovered(p => {
-      if (hovered) return findNode(id) ?? p
-      return p && p.id === id ? null : p
+      if (hovered) return id
+      return p && p === id ? null : p
     })
   }
 
-  const [searchResult, setSearchResult] = createSignal<Structure.Node[]>()
-  const isSearched = createSelector(
-    searchResult,
-    (node: Structure.Node, o) => !!o && o.includes(node),
-  )
+  const [searchResult, setSearchResult] = createSignal<NodeID[]>()
+  const isSearched = createSelector(searchResult, (node: NodeID, o) => !!o && o.includes(node))
 
-  function search(query: string): Structure.Node[] | undefined {
+  function search(query: string): NodeID[] | undefined {
     if (!query) return setSearchResult()
     return untrack(() => {
-      const result: Structure.Node[] = []
+      const result: NodeID[] = []
       const rgx = new RegExp('^' + query, 'i')
       for (const node of state().nodeList) {
-        if (node.name && node.name.match(rgx)) result.push(node)
+        if (node.name && node.name.match(rgx)) result.push(node.id)
       }
       return setSearchResult(result.length ? result : undefined)
     })
@@ -117,7 +110,7 @@ export default function createStructure({
     updateStructure,
     hovered,
     extHovered,
-    isHovered: (node: Structure.Node) => isHovered(node) || isSearched(node),
+    isHovered: (node: NodeID) => isHovered(node) || isSearched(node),
     listenToComputationUpdate,
     emitComputationUpdate,
     toggleHoveredNode,

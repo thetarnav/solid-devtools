@@ -34,7 +34,7 @@ export const OwnerPath: Component = () => {
                 </div>
                 <div
                   class={styles.item}
-                  data-hovered={structure.isHovered(node)}
+                  data-hovered={structure.isHovered(node.id)}
                   {...hoverProps}
                   onClick={() => setInspectedNode(node)}
                 >

@@ -14,7 +14,7 @@ import type {
   SetInspectedNodeData,
   ToggleInspectedValueData,
 } from '@solid-devtools/debugger'
-import createStructure, { Structure } from './modules/structure'
+import createStructure from './modules/structure'
 import createInspector from './modules/inspector'
 import { defer } from '@solid-devtools/shared/primitives'
 
@@ -174,15 +174,18 @@ const [Provider, useControllerCtx] = createContextProvider(
     createEffect(
       on(
         [structure.extHovered, inspector.hoveredElement],
-        ([hovered, elId], _, prev: string | { rootId: NodeID; nodeId: NodeID } | undefined) => {
+        ([hoveredId, elId], _, prev: string | { rootId: NodeID; nodeId: NodeID } | undefined) => {
           // handle component
-          if (hovered && hovered.type === NodeType.Component) {
-            if (typeof prev === 'object' && prev.nodeId === hovered.id) return prev
+          if (hoveredId) {
+            const hovered = structure.findNode(hoveredId)
+            if (hovered && hovered.type === NodeType.Component) {
+              if (typeof prev === 'object' && prev.nodeId === hoveredId) return prev
 
-            const rootId = structure.getParentRoot(hovered).id
-            const payload = { rootId, nodeId: hovered.id }
-            client.onHighlightElementChange(payload)
-            return payload
+              const rootId = structure.getParentRoot(hovered).id
+              const payload = { rootId, nodeId: hoveredId }
+              client.onHighlightElementChange(payload)
+              return payload
+            }
           }
           // handle element
           if (elId) {
@@ -201,7 +204,7 @@ const [Provider, useControllerCtx] = createContextProvider(
     createEffect(defer(structure.mode, client.onTreeViewModeChange))
 
     let lastSearch: string = ''
-    let lastSearchResults: Structure.Node[] | undefined
+    let lastSearchResults: NodeID[] | undefined
     let lastSearchIndex = 0
     function searchStructure(query: string): void {
       if (query === lastSearch) {
