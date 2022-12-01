@@ -69,7 +69,7 @@ function forceFlushRootUpdateQueue(): void {
   flushRootUpdateQueue.clear()
   $removedRoots.clear()
 }
-const flushRootUpdateQueue = throttle(forceFlushRootUpdateQueue, 300)
+const flushRootUpdateQueue = throttle(forceFlushRootUpdateQueue, 250)
 
 function updateRoot(rootId: NodeID): void {
   $rootUpdateQueue.add(rootId)

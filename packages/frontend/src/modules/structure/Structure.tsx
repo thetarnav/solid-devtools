@@ -120,17 +120,18 @@ type DisplayNode = {
   update: Setter<Structure.Node>
 }
 
-const getFocusedComponentData = (
+const getFocusedNodeData = (
   list: Structure.Node[],
   start: number,
   end: number,
   index: number,
 ): [node: NodeID, position: number] | undefined => {
-  if (index < start || index > end) index = Math.floor((start + end - 1) / 2)
+  if (index < start || index > end) index = Math.floor(end - (end - start) / 1.618)
   let node = list[index]
   let move = 0
   while (node) {
-    if (node.type === NodeType.Component) return [node.id, index - start]
+    if (node.type === NodeType.Component || node.type === NodeType.Root)
+      return [node.id, index - start]
     move = move <= 0 ? -move + 1 : -move
     node = list[(index += move)]
   }
@@ -171,7 +172,7 @@ const DisplayStructureTree: Component = () => {
   let lastVirtualStart = 0
   let lastVirtualEnd = 0
   let lastInspectedIndex = 0
-  let lastFocusedComponentData: ReturnType<typeof getFocusedComponentData>
+  let lastFocusedNodeData: ReturnType<typeof getFocusedNodeData>
 
   createEffect(() => {
     ;({ start: lastVirtualStart, end: lastVirtualEnd } = virtual())
@@ -183,7 +184,7 @@ const DisplayStructureTree: Component = () => {
     // to be compated with it after the changes
     // `list data` has to be updated in an effect, so that this memo can run before it, instead of reading it here
     // because of solid's pull-based memo behavior (reading from a memo invalidates it, and it's dependencies)
-    lastFocusedComponentData = getFocusedComponentData(
+    lastFocusedNodeData = getFocusedNodeData(
       prev,
       lastVirtualStart,
       lastVirtualEnd,
@@ -271,12 +272,12 @@ const DisplayStructureTree: Component = () => {
   // Seep the inspected or central node in view when the list is changing
   createEffect(
     defer(collapsedList, () => {
-      if (!lastFocusedComponentData) return
-      const [nodeId, lastPosition] = lastFocusedComponentData
+      if (!lastFocusedNodeData) return
+      const [nodeId, lastPosition] = lastFocusedNodeData
       const index = getNodeIndexById(nodeId)
       if (index === -1) return
       const move = index - virtual().start - lastPosition
-      container.scrollTop += move * getRowHeight()
+      if (move !== 0) container.scrollTop += move * getRowHeight()
     }),
   )
 
@@ -307,13 +308,12 @@ const DisplayStructureTree: Component = () => {
 
       const { start, end } = virtual()
       const rowHeight = getRowHeight()
-      const containerTopMargin = getContainerTopMargin()
       let top: number
       if (index <= start) top = (index - 1) * rowHeight
       else if (index >= end - 2) top = (index + 2) * rowHeight - containerScroll().height
       else return
 
-      container.scrollTop = top + containerTopMargin
+      container.scrollTop = top + getContainerTopMargin()
     })
   })
 

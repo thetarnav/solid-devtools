@@ -15,7 +15,7 @@ import overlayStyles from './styles.css'
 
 let isAlreadyMounted = false
 
-export function attachDevtoolsOverlay(props: ComponentProps<typeof Overlay>): VoidFunction {
+export function attachDevtoolsOverlay(props: ComponentProps<typeof Overlay> = {}): VoidFunction {
   if (isAlreadyMounted) {
     warn('Devtools overlay is already mounted')
     return () => {}
