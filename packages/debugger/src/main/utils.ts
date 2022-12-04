@@ -185,7 +185,7 @@ export function onOwnerCleanup(
   prepend = false,
 ): VoidFunction {
   if (owner.cleanups === null) owner.cleanups = [fn]
-  else if (prepend) owner.cleanups.splice(0, 0, fn)
+  else if (prepend) owner.cleanups.unshift(fn)
   else owner.cleanups.push(fn)
   return () => owner.cleanups?.splice(owner.cleanups.indexOf(fn), 1)
 }

@@ -1,12 +1,12 @@
 import { Accessor, createSelector, createSignal, untrack } from 'solid-js'
 import {
   defaultWalkerMode,
+  Mapped,
   NodeID,
   NodeType,
-  RootsUpdates,
+  StructureUpdates,
   type TreeWalkerMode,
 } from '@solid-devtools/debugger/types'
-import { reconcileStructure } from './structure-reconcile'
 import { createSimpleEmitter } from '@solid-primitives/event-bus'
 
 export namespace Structure {
@@ -17,7 +17,6 @@ export namespace Structure {
     level: number
     parent: Node | null
     children: Node[]
-    subroots?: Node[]
     hmr?: boolean
     frozen?: true
   }
@@ -30,6 +29,103 @@ export namespace Structure {
 
   export type State = { roots: Node[]; nodeList: Node[] }
 }
+
+const { reconcileStructure } = (() => {
+  let $_updated: StructureUpdates['updated']
+  let $_node_list: Structure.Node[]
+
+  function createNode(
+    raw: Mapped.Owner,
+    parent: Structure.Node | null,
+    level: number,
+  ): Structure.Node {
+    const { id, name, type, children: rawChildren } = raw
+
+    const children: Structure.Node[] = []
+    const node: Structure.Node = { id, type, children, parent, level }
+
+    if (name) node.name = name
+    if (type === NodeType.Component) node.hmr = raw.hmr
+    else if (type !== NodeType.Root && raw.frozen) node.frozen = true
+
+    $_node_list.push(node)
+
+    // map children
+    if (rawChildren) {
+      for (const child of rawChildren) children.push(createNode(child, node, level + 1))
+    }
+
+    return node
+  }
+
+  function updateNode(
+    node: Structure.Node,
+    rootId: NodeID,
+    raw: Mapped.Owner | undefined,
+    level: number,
+  ): Structure.Node {
+    const { id, children } = node
+    $_node_list.push(node)
+    node.level = level
+
+    if (!raw) raw = $_updated[rootId]?.[id]
+
+    if (raw) {
+      // update frozen computations
+      if ('frozen' in raw && raw.frozen) node.frozen = true
+
+      const { children: rawChildren } = raw
+      const newChildren: Structure.Node[] = (node.children = [])
+
+      if (rawChildren) {
+        const prevChildrenMap: Record<NodeID, Structure.Node> = {}
+        for (const child of children) prevChildrenMap[child.id] = child
+
+        for (const childRaw of rawChildren) {
+          const childNode = prevChildrenMap[childRaw.id] as Structure.Node | undefined
+          newChildren.push(
+            childNode
+              ? updateNode(childNode, rootId, childRaw, level + 1)
+              : createNode(childRaw, node, level + 1),
+          )
+        }
+      }
+    } else {
+      for (const child of children) {
+        updateNode(child, rootId, $_updated[rootId]?.[child.id], level + 1)
+      }
+    }
+
+    return node
+  }
+
+  function reconcileStructure(
+    prevRoots: Structure.Node[],
+    { removed, updated }: StructureUpdates,
+  ): Structure.State {
+    $_updated = updated
+    $_node_list = []
+    const nextRoots: Structure.Node[] = []
+
+    const upatedTopLevelRoots = new Set<NodeID>()
+    for (const root of prevRoots) {
+      const { id } = root
+      if (removed.includes(id)) continue
+      upatedTopLevelRoots.add(id)
+      nextRoots.push(updateNode(root, id, $_updated[id]?.[id], 0))
+    }
+
+    for (const [rootId, updatedNodes] of Object.entries($_updated)) {
+      const root = updatedNodes![rootId]
+      if (!root || upatedTopLevelRoots.has(rootId)) continue
+      nextRoots.push(createNode(root, null, 0))
+    }
+
+    return { roots: nextRoots, nodeList: $_node_list }
+  }
+
+  return { reconcileStructure }
+})()
 
 function getParentRoot(node: Structure.Node): Structure.Node {
   let current: Structure.Node | null = node
@@ -62,11 +158,9 @@ export default function createStructure({
     { internal: true },
   )
 
-  function updateStructure(update: RootsUpdates | null): void {
+  function updateStructure(update: StructureUpdates | null): void {
     setState(prev =>
-      update
-        ? reconcileStructure(prev.roots, update.updated, update.removed)
-        : { nodeList: [], roots: [] },
+      update ? reconcileStructure(prev.roots, update) : { nodeList: [], roots: [] },
     )
   }
 

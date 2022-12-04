@@ -6,7 +6,7 @@ import {
   Mapped,
   NodeID,
   NodeType,
-  RootsUpdates,
+  StructureUpdates,
   TreeWalkerMode,
 } from '@solid-devtools/debugger/types'
 import type {
@@ -38,7 +38,7 @@ export type ClientListeners = ListenersFromPayloads<ClientListenerPayloads>
 interface DevtoolsListenerPayloads {
   ResetPanel: void
   SetInspectedDetails: Mapped.OwnerDetails
-  StructureUpdate: RootsUpdates | null
+  StructureUpdate: StructureUpdates
   ComputationUpdates: ComputationUpdate[]
   InspectorUpdate: InspectorUpdate[]
   ClientLocatorModeChange: boolean
@@ -59,7 +59,7 @@ export class Controller {
     this.listeners = devtoolsListeners
   }
 
-  updateStructure(update: RootsUpdates | null) {
+  updateStructure(update: StructureUpdates) {
     this.listeners.onStructureUpdate(update)
   }
   updateComputation(computationUpdate: DevtoolsListenerPayloads['ComputationUpdates']) {

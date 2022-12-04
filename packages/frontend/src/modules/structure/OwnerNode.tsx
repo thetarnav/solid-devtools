@@ -1,6 +1,5 @@
 import { Component } from 'solid-js'
 import { assignInlineVars } from '@vanilla-extract/dynamic'
-import { NodeID } from '@solid-devtools/debugger/types'
 import { createHover, createPingedSignal, trackFromListen } from '@solid-devtools/shared/primitives'
 import { Badge, CollapseToggle, Highlight } from '@/ui'
 import { OwnerName } from '@/ui/components/Owner'

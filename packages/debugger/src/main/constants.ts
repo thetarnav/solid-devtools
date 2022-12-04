@@ -3,38 +3,38 @@ export const NEGATIVE_INFINITY = '__$sdt-NegativeInfinity__'
 export const NAN = '__$sdt-NaN__'
 
 export enum NodeType {
-  Root,
-  Component,
-  Effect,
-  Render,
-  Memo,
-  Computation,
-  Refresh,
-  Context,
-  Signal,
-  Store,
+  Root = 'root',
+  Component = 'component',
+  Element = 'element',
+  Effect = 'effect',
+  Render = 'render',
+  Memo = 'memo',
+  Computation = 'computation',
+  Refresh = 'refresh',
+  Context = 'context',
+  Signal = 'signal',
+  Store = 'store',
 }
 
 export enum ValueType {
-  Number,
-  Boolean,
-  String,
-  Null,
-  Undefined,
-  Symbol,
-  Array,
-  Object,
-  Function,
-  Getter,
-  Element,
-  Instance,
-  Store,
+  Number = 'number',
+  Boolean = 'boolean',
+  String = 'string',
+  Null = 'null',
+  Undefined = 'undefined',
+  Symbol = 'symbol',
+  Array = 'array',
+  Object = 'object',
+  Function = 'function',
+  Getter = 'getter',
+  Element = 'element',
+  Instance = 'instance',
+  Store = 'store',
 }
 
-export const TreeWalkerMode = {
-  Owners: 'owners',
-  Components: 'components',
-  DOM: 'dom',
-} as const
-export type TreeWalkerMode = typeof TreeWalkerMode[keyof typeof TreeWalkerMode]
+export enum TreeWalkerMode {
+  Owners = 'owners',
+  Components = 'components',
+  DOM = 'dom',
+}
 export const defaultWalkerMode = TreeWalkerMode.Components

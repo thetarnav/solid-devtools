@@ -76,6 +76,7 @@ declare module 'solid-js/types/reactive/signal' {
     sdtId?: NodeID
     sdtName?: string
     sdtType?: NodeType
+    sdtSubRoots?: Solid.Root[] | null
   }
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   interface Computation<Init, Next> {
@@ -118,6 +119,7 @@ export namespace Solid {
     sourceMap?: Record<string, Signal | Store>
     // Used by the debugger
     isDisposed?: boolean
+    // TODO: remove
     sdtAttached?: Owner
     isInternal?: true
     // Computation compatibility
@@ -138,8 +140,6 @@ export namespace Solid {
     owner: Owner | null
     sourceMap?: Record<string, Signal>
     sources: Signal[] | null
-    // devtools:
-    sdtContext?: undefined
   }
 
   export interface Memo extends Signal, Computation {
@@ -162,18 +162,9 @@ export namespace Solid {
 //
 
 export namespace Mapped {
-  export interface Root {
-    id: NodeID
-    name?: undefined
-    type: NodeType.Root
-    children?: Owner[]
-    // sub-roots will have an owner
-    attached?: NodeID
-  }
-
   export interface Owner {
     id: NodeID
-    type: Exclude<NodeType, NodeType.Root | NodeType.Refresh>
+    type: Exclude<NodeType, NodeType.Refresh | NodeType.Signal | NodeType.Store>
     // combines?: NodeID[]
     children?: Owner[]
     name?: string
@@ -219,7 +210,8 @@ export namespace Mapped {
 
 export type ComputationUpdate = { rootId: NodeID; id: NodeID }
 
-export type RootsUpdates = {
+export type StructureUpdates = {
   removed: NodeID[]
-  updated: Record<NodeID, Mapped.Root>
+  /** Record: `rootId` -- Record of updated nodes by `nodeId` */
+  updated: Partial<Record<NodeID, Partial<Record<NodeID, Mapped.Owner>>>>
 }

@@ -13,13 +13,13 @@ import {
 import { WalkerResult } from './walker'
 import { createLocator } from '../locator'
 import { createInspector, InspectorUpdate } from '../inspector'
-import { ComputationUpdate, Mapped, NodeID, RootsUpdates } from './types'
+import { ComputationUpdate, Mapped, NodeID, StructureUpdates } from './types'
 
 export type BatchComputationUpdatesHandler = (payload: ComputationUpdate[]) => void
 
 type DebuggerEventHubMessages = {
   ComputationUpdates: ComputationUpdate[]
-  StructureUpdates: RootsUpdates
+  StructureUpdates: StructureUpdates
   InspectorUpdate: InspectorUpdate[]
   InspectedNodeDetails: Mapped.OwnerDetails
 }
@@ -81,13 +81,16 @@ export default createInternalRoot(() => {
   setComputationUpdateHandler((rootId, id) => pushComputationUpdate({ rootId, id }))
 
   function setRootUpdates(updateResults: WalkerResult[], removedIds: ReadonlySet<NodeID>): void {
-    const updated: Record<NodeID, Mapped.Root> = {}
+    const updated: StructureUpdates['updated'] = {}
     setComponents(prevComponents => {
-      const newComponents = Object.assign({}, prevComponents)
+      // TODO gathering components needs to change
+      const newComponents = { ...prevComponents }
 
-      for (const { root, components } of updateResults) {
-        updated[root.id] = root
-        newComponents[root.id] = components
+      for (const { components, rootId, tree } of updateResults) {
+        newComponents[rootId] = components
+        const obj = updated[rootId]
+        if (obj) obj[tree.id] = tree
+        else updated[rootId] = { [tree.id]: tree }
       }
       for (const rootId of removedIds) {
         delete newComponents[rootId]
@@ -95,6 +98,7 @@ export default createInternalRoot(() => {
 
       return newComponents
     })
+
     eventHub.emit('StructureUpdates', { updated, removed: [...removedIds] })
   }
 

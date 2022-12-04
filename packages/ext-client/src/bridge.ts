@@ -5,7 +5,7 @@ import type {
   Mapped,
   NodeID,
   ComputationUpdate,
-  RootsUpdates,
+  StructureUpdates,
   HighlightElementPayload,
   TreeWalkerMode,
 } from '@solid-devtools/debugger/types'
@@ -28,7 +28,7 @@ export namespace Messages {
   }
 
   export interface Client {
-    StructureUpdate: RootsUpdates
+    StructureUpdate: StructureUpdates
     ComputationUpdates: ComputationUpdate[]
     InspectorUpdate: InspectorUpdate[]
     /** send component clicked with the locator to the extension */

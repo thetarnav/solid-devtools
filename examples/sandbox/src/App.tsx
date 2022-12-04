@@ -4,7 +4,6 @@ import {
   createSignal,
   createEffect,
   createMemo,
-  getOwner,
   createComputed,
   Setter,
   ParentComponent,
@@ -36,18 +35,22 @@ createRoot(dispose => {
   const [count, setCount] = createSignal(0)
   setRootCount = setCount
 
-  createEffect(() => {
-    count()
-    if (count() === 1) {
-      createRoot(dispose => {
-        createEffect(() => count() === 4 && dispose())
+  createEffect(
+    () => {
+      count()
+      if (count() === 1) {
+        createRoot(dispose => {
+          createEffect(() => count() === 4 && dispose(), undefined, { name: 'eff_2' })
 
-        createRoot(_ => {
-          createEffect(() => count())
+          createRoot(_ => {
+            createEffect(() => count(), undefined, { name: 'eff_3' })
+          })
         })
-      })
-    }
-  })
+      }
+    },
+    undefined,
+    { name: 'eff_1' },
+  )
 })
 
 const Button = (props: { text: string; onClick: VoidFunction }) => {

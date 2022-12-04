@@ -44,8 +44,9 @@ export const OwnerName: Component<{
       {() => {
         switch (props.type) {
           case NodeType.Root:
+            return <span class={styles.type}>Root</span>
           case NodeType.Context:
-            return <span class={styles.type}>{NodeType[props.type]}</span>
+            return <span class={styles.type}>Context</span>
           case NodeType.Render:
             return <span class={styles.type}>Render Effect</span>
           case NodeType.Component:
