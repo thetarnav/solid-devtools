@@ -95,47 +95,41 @@ let $_added_to_parent_elements = false
 function mapElements(els: Element[], parentChildren: Mapped.Owner[] | undefined): Mapped.Owner[] {
   const r = [] as Mapped.Owner[]
 
-  for (const el of els) {
+  els: for (const el of els) {
     if (!(el instanceof HTMLElement)) continue
-
-    let searchChildrenInParent = !!parentChildren
-
-    const tag = el.tagName.toLowerCase()
-    const elChildren = [] as Mapped.Owner[]
-    const mappedEl: Mapped.Owner = {
-      id: `el_${$_el_id++}`,
-      type: NodeType.Element,
-      name: tag,
-      children: elChildren,
-    }
-    r.push(mappedEl)
-    $_elements_map.set(mappedEl, el)
 
     if (parentChildren) {
       // find el in parent els and remove it
       const toCheck = [parentChildren]
-      w: while (toCheck.length) {
-        const elNodes = toCheck.shift()!
+      let index = 0
+      let elNodes = toCheck[index++]
+      while (elNodes) {
         for (let i = 0; i < elNodes.length; i++) {
           const elNode = elNodes[i]
           if ($_elements_map.get(elNode) === el) {
-            $_added_to_parent_elements
-              ? elNodes.splice(i, 1)
-              : elNodes.splice(i, 1, $_mapped_owner_node)
-            searchChildrenInParent = false
+            const mappedEl = $_added_to_parent_elements
+              ? elNodes.splice(i, 1)[0]
+              : elNodes.splice(i, 1, $_mapped_owner_node)[0]
             $_added_to_parent_elements = true
-            break w
+            r.push(mappedEl)
+            $_elements_map.set(mappedEl, el)
+            continue els
           }
           if (elNode.children && elNode.children.length) toCheck.push(elNode.children)
         }
+        elNodes = toCheck[index++]
       }
     }
 
-    if (el.children.length)
-      elChildren.push.apply(
-        elChildren,
-        mapElements(Array.from(el.children), searchChildrenInParent ? parentChildren : undefined),
-      )
+    const mappedEl: Mapped.Owner = {
+      id: `el_${$_el_id++}`,
+      type: NodeType.Element,
+      name: el.tagName.toLowerCase(),
+    }
+    r.push(mappedEl)
+    $_elements_map.set(mappedEl, el)
+
+    if (el.children.length) mappedEl.children = mapElements(Array.from(el.children), parentChildren)
   }
 
   return r
