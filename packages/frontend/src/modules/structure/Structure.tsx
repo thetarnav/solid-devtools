@@ -201,11 +201,7 @@ const DisplayStructureTree: Component = () => {
       if (skipped) skip--
       else collapsedList.push(node)
 
-      if (skipped || set.has(node)) {
-        const { children, subroots } = node
-        skip += children.length
-        if (subroots) skip += subroots.length
-      }
+      if (skipped || set.has(node)) skip += node.children.length
     }
 
     return collapsedList
