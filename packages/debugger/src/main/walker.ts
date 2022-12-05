@@ -1,4 +1,3 @@
-import { untrack } from 'solid-js'
 import { Mapped, NodeID, Solid } from './types'
 import { NodeType, TreeWalkerMode } from './constants'
 import {
@@ -25,19 +24,24 @@ let $_components: Mapped.ResolvedComponent[] = []
 
 const $_elements_map = new Map<Mapped.Owner, HTMLElement>()
 
+// TODO: this could be optimized. owners should only need to be re-observed when the walker mode changes
 function observeComputation(owner: Solid.Computation, attachedData: Solid.Owner): void {
+  // leaf nodes (ones that don't have children) don't have to cause a structure update
+  // Unless the walker is in DOM mode, then we need to observe all computations
+  // This is because DOM can change without the owner structure changing
   let isLeaf = !owner.owned || owner.owned.length === 0
   const boundHandler = $_on_computation_update.bind(void 0, $_root_id, attachedData)
-  const handler = isLeaf
-    ? () => {
-        if (isLeaf && (!owner.owned || owner.owned.length === 0)) {
-          boundHandler(false)
-        } else {
-          isLeaf = false
-          boundHandler(true)
+  let handler =
+    isLeaf && $_mode !== TreeWalkerMode.DOM
+      ? () => {
+          if (isLeaf && (!owner.owned || owner.owned.length === 0)) {
+            boundHandler(false)
+          } else {
+            isLeaf = false
+            boundHandler(true)
+          }
         }
-      }
-    : boundHandler.bind(void 0, true)
+      : boundHandler.bind(void 0, true)
 
   // owner already patched
   if (owner.onComputationUpdate) return void (owner.onComputationUpdate = handler)
@@ -45,15 +49,11 @@ function observeComputation(owner: Solid.Computation, attachedData: Solid.Owner)
   owner.onComputationUpdate = handler
   interceptComputationRerun(owner, fn => {
     fn()
-    untrack(owner.onComputationUpdate!)
+    queueMicrotask(owner.onComputationUpdate!)
   })
 }
 
-function mapChildren(
-  owner: Solid.Owner,
-  mappedOwner: Mapped.Owner | null,
-  parent: Mapped.Owner | null,
-): Mapped.Owner[] {
+function mapChildren(owner: Solid.Owner, mappedOwner: Mapped.Owner | null): Mapped.Owner[] {
   const children: Mapped.Owner[] = []
 
   const rawChildren: Solid.Owner[] = owner.owned ? owner.owned.slice() : []
@@ -73,7 +73,7 @@ function mapChildren(
       } else {
         if (type !== NodeType.Context && type !== NodeType.Root)
           observeComputation(child as Solid.Computation, owner)
-        children.push.apply(children, mapChildren(child, mappedOwner, parent))
+        children.push.apply(children, mapChildren(child, mappedOwner))
       }
     }
   }
@@ -239,7 +239,7 @@ function mapOwner(
   // global $_added_to_parent_elements will be changed in mapChildren
   const addedToParent = $_added_to_parent_elements
 
-  children.push.apply(children, mapChildren(owner, mapped, parent))
+  children.push.apply(children, mapChildren(owner, mapped))
 
   return addedToParent ? undefined : mapped
 }
