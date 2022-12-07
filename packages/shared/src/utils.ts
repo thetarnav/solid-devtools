@@ -33,6 +33,9 @@ export function formatTime(d: Date = new Date()): string {
   )
 }
 
+export const asArray = <T>(value: T): (T extends any[] ? T[number] : T)[] =>
+  Array.isArray(value) ? (value as any) : [value]
+
 export const createCallbackStack = <A0 = void, A1 = void, A2 = void, A3 = void>(): {
   push: (...callbacks: ((arg0: A0, arg1: A1, arg2: A2, arg3: A3) => void)[]) => void
   execute: (arg0: A0, arg1: A1, arg2: A2, arg3: A3) => void

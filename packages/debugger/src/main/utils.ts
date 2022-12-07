@@ -123,10 +123,10 @@ export function getComponentRefreshNode(owner: Readonly<Solid.Component>): Solid
   return null
 }
 
-export function resolveElements(value: unknown): HTMLElement | HTMLElement[] | null {
-  let resolved = getResolvedElements(value)
-  if (Array.isArray(resolved) && !resolved.length) resolved = null
-  return resolved
+export function resolveElements(value: unknown): HTMLElement[] | null {
+  const resolved = getResolvedElements(value)
+  if (Array.isArray(resolved)) return resolved.length ? resolved : null
+  return resolved ? [resolved] : null
 }
 function getResolvedElements(value: unknown): HTMLElement | HTMLElement[] | null {
   // do not call a function, unless it's a signal (to prevent creating new nodes)
@@ -183,10 +183,23 @@ export function onOwnerCleanup(
   owner: Solid.Owner,
   fn: VoidFunction,
   prepend = false,
+  symbol?: symbol,
 ): VoidFunction {
   if (owner.cleanups === null) owner.cleanups = [fn]
-  else if (prepend) owner.cleanups.unshift(fn)
-  else owner.cleanups.push(fn)
+  else {
+    if (symbol) {
+      if (owner.cleanups.some(c => (c as any)[symbol])) {
+        return () =>
+          owner.cleanups?.splice(
+            owner.cleanups.findIndex(c => (c as any)[symbol]),
+            1,
+          )
+      }
+      ;(fn as any)[symbol] = true
+    }
+    if (prepend) owner.cleanups.unshift(fn)
+    else owner.cleanups.push(fn)
+  }
   return () => owner.cleanups?.splice(owner.cleanups.indexOf(fn), 1)
 }
 

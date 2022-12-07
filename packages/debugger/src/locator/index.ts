@@ -1,12 +1,19 @@
-import { createEffect, createMemo, onCleanup, Accessor, getOwner, runWithOwner } from 'solid-js'
+import {
+  createEffect,
+  createMemo,
+  onCleanup,
+  Accessor,
+  getOwner,
+  runWithOwner,
+  createSignal,
+} from 'solid-js'
 import { makeEventListener } from '@solid-primitives/event-listener'
 import { createKeyHold, KbdKey } from '@solid-primitives/keyboard'
-import { asArray, onRootCleanup } from '@solid-primitives/utils'
+import { onRootCleanup } from '@solid-primitives/utils'
 import { createSimpleEmitter } from '@solid-primitives/event-bus'
 import { atom, defer, makeHoverElementListener } from '@solid-devtools/shared/primitives'
-import { warn } from '@solid-devtools/shared/utils'
+import { asArray, warn } from '@solid-devtools/shared/utils'
 import {
-  findLocatorComponent,
   getLocationAttr,
   getSourceCodeData,
   LocatorComponent,
@@ -17,7 +24,9 @@ import {
 } from './findComponent'
 import { enableRootsAutoattach, createInternalRoot } from '../main/roots'
 import { attachElementOverlay } from './ElementOverlay'
-import { LocationAttr, Mapped, NodeID } from '../types'
+import { LocationAttr, NodeID } from '../types'
+import { type ComponentsMap } from '../main/componentsMap'
+import { scheduleIdle } from '@solid-primitives/scheduled'
 
 export type { LocatorComponent, TargetIDE, TargetURLFunction } from './findComponent'
 
@@ -28,10 +37,7 @@ export type LocatorOptions = {
   key?: KbdKey
 }
 
-export type HighlightElementPayload =
-  | { rootId: NodeID; nodeId: NodeID }
-  | { elementId: string }
-  | null
+export type HighlightElementPayload = { nodeId: NodeID } | { elementId: string } | null
 
 export type ClickMiddleware = (
   event: MouseEvent | CustomEvent,
@@ -42,15 +48,15 @@ export type ClickMiddleware = (
 export { markComponentLoc } from './markComponent'
 
 export function createLocator({
-  components,
-  debuggerEnabled,
+  getComponent,
   findComponent,
+  debuggerEnabled,
   getElementById,
   setLocatorEnabledSignal,
 }: {
-  components: Accessor<Record<NodeID, Mapped.ResolvedComponent[]>>
+  getComponent: ComponentsMap['getComponent']
+  findComponent: ComponentsMap['findComponent']
   debuggerEnabled: Accessor<boolean>
-  findComponent(rootId: NodeID, nodeId: NodeID): Mapped.ResolvedComponent | undefined
   getElementById(id: string): HTMLElement | undefined
   setLocatorEnabledSignal(signal: Accessor<boolean>): void
 }) {
@@ -69,33 +75,49 @@ export function createLocator({
   }
 
   const hoverTarget = atom<HTMLElement | null>(null)
-  const pluginTarget = atom<HTMLElement | (Mapped.ResolvedComponent & { rootId: NodeID }) | null>(
-    null,
-  )
+  const pluginTarget = atom<HTMLElement | NodeID | null>(null)
 
-  // TODO: selected is an array, but it still only selects only one component at a time — only elements with location should be stored as array
-  const highlightedComponents = createMemo<LocatorComponent[]>(
+  const [highlightedComponents, setHighlightedComponents] = createSignal<LocatorComponent[]>([])
+
+  const calcHighlightedComponents = (target: HTMLElement | NodeID | null) => {
+    if (!target) return []
+    // target is an element
+    if (target instanceof HTMLElement) {
+      const comp = findComponent(target)
+      if (!comp) return []
+      return [
+        {
+          location: getLocationAttr(target),
+          element: target,
+          id: comp.id,
+          name: comp.name,
+        },
+      ]
+    }
+
+    // target is a component
+    const comp = getComponent(target)
+    if (!comp) return []
+    return asArray(comp.elements).map(element => ({
+      location: getLocationAttr(element),
+      element,
+      id: target,
+      name: comp.name,
+    }))
+  }
+
+  createEffect(
     defer(
-      [components, () => hoverTarget() ?? pluginTarget()],
-      ([components, target]) => {
-        if (!target) return []
-        // target is an element
-        if (target instanceof HTMLElement) {
-          const comp = findLocatorComponent(components, target)
-          return comp ? [comp] : []
-        }
-        // target is a component
-        return asArray(target.element).map(element => ({
-          location: getLocationAttr(element),
-          element,
-          id: target.id,
-          rootId: target.rootId,
-          name: target.name,
-        }))
-      },
-      [],
+      () => hoverTarget() ?? pluginTarget(),
+      scheduleIdle(target => setHighlightedComponents(() => calcHighlightedComponents(target))),
     ),
   )
+
+  // TODO invalidate when components change
+
+  // components.onComponentsChange(() => {
+  //   // TODO
+  // })
 
   // wait a second to let the framework mess with the document before attaching the overlay
   setTimeout(() => {
@@ -109,20 +131,19 @@ export function createLocator({
   createEffect((prev: NodeID | undefined) => {
     const target = hoverTarget()
     if (!target) return
-    const comp = findLocatorComponent(components(), target)
+    const comp = findComponent(target)
     if (prev) emitDebuggerHoveredComponentChange({ nodeId: prev, state: false })
-    if (comp) emitDebuggerHoveredComponentChange({ nodeId: comp.id, state: true })
-    return comp?.id
+    if (comp) {
+      const { id } = comp
+      emitDebuggerHoveredComponentChange({ nodeId: id, state: true })
+      return id
+    }
   })
 
   function setPluginHighlightTarget(data: HighlightElementPayload) {
     if (!data) return pluginTarget(null)
     // highlight component
-    if ('nodeId' in data) {
-      const { rootId, nodeId } = data
-      const component = findComponent(rootId, nodeId)
-      component && pluginTarget({ ...component, rootId })
-    }
+    if ('nodeId' in data) pluginTarget(data.nodeId)
     // highlight element
     else {
       const element = getElementById(data.elementId)

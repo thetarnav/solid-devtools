@@ -1,10 +1,11 @@
-import { createRoot, untrack } from 'solid-js'
+import { createRoot } from 'solid-js'
 import { throttle } from '@solid-primitives/scheduled'
 import { warn } from '@solid-devtools/shared/utils'
-import { ComputationUpdateHandler, WalkerResult, walkSolidTree } from './walker'
+import { ComputationUpdateHandler, walkSolidTree } from './walker'
 import { markNodeID, isSolidRoot, onOwnerCleanup, getOwner } from './utils'
-import { Core, NodeID, Solid } from './types'
+import { Core, NodeID, Solid, StructureUpdates } from './types'
 import { defaultWalkerMode, NodeType, TreeWalkerMode } from './constants'
+import { createComponentsMap } from './componentsMap'
 
 // TREE WALKER MODE
 let $_tree_walker_mode: TreeWalkerMode = defaultWalkerMode
@@ -21,13 +22,19 @@ const $_root_of_owners = new Map<Solid.Owner, NodeID>()
 const $_removed_roots = new Set<NodeID>()
 let $_update_all_roots = false
 
-export type RootUpdatesHandler = (
-  updateResults: WalkerResult[],
+const $_components_map = createComponentsMap()
+
+export function useComponentsMap() {
+  return $_components_map
+}
+
+export type StructureUpdateHandler = (
+  structureUpdates: StructureUpdates['updated'],
   removedIds: ReadonlySet<NodeID>,
 ) => void
 
-let $_on_root_updates: RootUpdatesHandler | null = null
-export function setRootUpdatesHandler(handler: RootUpdatesHandler | null): void {
+let $_on_root_updates: StructureUpdateHandler | null = null
+export function setRootUpdatesHandler(handler: StructureUpdateHandler | null): void {
   $_on_root_updates = handler
   if (handler) updateAllRoots()
 }
@@ -39,39 +46,34 @@ export function setComputationUpdateHandler(handler: typeof $_on_computation_upd
 }
 const onComputationUpdate: ComputationUpdateHandler = (rootId, node, changedStructure) => {
   // only if debugger is enabled
-  if ($_on_root_updates) {
-    changedStructure && updateOwner(node, rootId)
-    $_on_computation_update(rootId, markNodeID(node))
-  }
+  if (!$_on_root_updates) return
+  changedStructure && updateOwner(node, rootId)
+  $_on_computation_update(rootId, markNodeID(node))
 }
 
 function forceFlushRootUpdateQueue(): void {
+  // $_on_root_updates being null means debugger is disabled
   if ($_on_root_updates) {
-    const updated: WalkerResult[] = []
-    untrack(() => {
-      if ($_update_all_roots) {
-        for (const root of $_root_map.values()) {
-          const rootId = root.sdtId!
-          const update = walkSolidTree(root, {
-            mode: $_tree_walker_mode,
-            onComputationUpdate,
-            rootId,
-          })
-          updated.push(update)
-        }
-        $_update_all_roots = false
-      } else {
-        for (const owner of $_update_queue) {
-          const rootId = $_root_of_owners.get(owner)!
-          const update = walkSolidTree(owner, {
-            mode: $_tree_walker_mode,
-            onComputationUpdate,
-            rootId,
-          })
-          updated.push(update)
-        }
-      }
-    })
+    const updated: StructureUpdates['updated'] = {}
+
+    const [owners, getRootId] = $_update_all_roots
+      ? [$_root_map.values(), (owner: Solid.Owner) => owner.sdtId!]
+      : [$_update_queue, (owner: Solid.Owner) => $_root_of_owners.get(owner)!]
+    $_update_all_roots = false
+
+    for (const owner of owners) {
+      const rootId = getRootId(owner)
+      const tree = walkSolidTree(owner, {
+        rootId,
+        mode: $_tree_walker_mode,
+        onComputationUpdate,
+        registerComponent: $_components_map.register,
+      })
+      const map = updated[rootId]
+      if (map) map[tree.id] = tree
+      else updated[rootId] = { [tree.id]: tree }
+    }
+
     $_on_root_updates(updated, $_removed_roots)
   }
   $_update_queue.clear()
@@ -94,7 +96,7 @@ export function updateAllRoots(): void {
 
 export function forceUpdateAllRoots(): void {
   $_update_all_roots = true
-  forceFlushRootUpdateQueue()
+  queueMicrotask(forceFlushRootUpdateQueue)
 }
 
 export function createStructureRoot(owner: Solid.Root): void {
@@ -218,6 +220,7 @@ export function attachDebugger(_owner: Core.Owner = getOwner()!): void {
  */
 export function unobserveAllRoots(): void {
   $_root_map.forEach(r => cleanupRoot(r))
+  $_components_map.clear()
 }
 
 //

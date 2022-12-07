@@ -1,5 +1,4 @@
 import { LocationAttr } from '@solid-devtools/transform/types'
-import type { Many } from '@solid-primitives/utils'
 import { INFINITY, NAN, NEGATIVE_INFINITY, NodeType, ValueType } from './constants'
 
 export type { LocationAttr } from '@solid-devtools/transform/types'
@@ -179,15 +178,6 @@ export namespace Mapped {
     name: string
     id: NodeID
     value: EncodedValue<false>
-  }
-
-  export type ResolvedComponent = {
-    id: NodeID
-    name: string
-    /**
-     * ! HTMLElements aren't JSON serialisable
-     */
-    element: Many<HTMLElement>
   }
 
   export type Props = {

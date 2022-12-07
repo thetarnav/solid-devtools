@@ -9,6 +9,7 @@ import {
   resolveElements,
 } from './utils'
 import { interceptComputationRerun } from './update'
+import { type ComponentRegisterHandler } from './componentsMap'
 
 export type ComputationUpdateHandler = (
   rootId: NodeID,
@@ -20,11 +21,10 @@ export type ComputationUpdateHandler = (
 let $_mode: TreeWalkerMode
 let $_root_id: NodeID
 let $_on_computation_update: ComputationUpdateHandler
-let $_components: Mapped.ResolvedComponent[] = []
+let $_register_component: ComponentRegisterHandler
 
 const $_elements_map = new Map<Mapped.Owner, HTMLElement>()
 
-// TODO: this could be optimized. owners should only need to be re-observed when the walker mode changes
 function observeComputation(owner: Solid.Computation, attachedData: Solid.Owner): void {
   // leaf nodes (ones that don't have children) don't have to cause a structure update
   // Unless the walker is in DOM mode, then we need to observe all computations
@@ -172,8 +172,13 @@ function mapOwner(
       return mapped
     }
 
-    resolvedElements = resolveElements(owner.value)
-    if (resolvedElements) $_components.push({ id, name: name!, element: resolvedElements })
+    // Register component to global map
+    $_register_component(
+      owner as Solid.Component,
+      id,
+      name!,
+      (resolvedElements = resolveElements(owner.value)),
+    )
 
     // <Show> component
     let showMemoCondition: Solid.Memo
@@ -244,33 +249,21 @@ function mapOwner(
   return addedToParent ? undefined : mapped
 }
 
-export type WalkerResult = {
-  components: Mapped.ResolvedComponent[]
-  rootId: NodeID
-  tree: Mapped.Owner
-}
-
-export function walkSolidTree<T extends Solid.Owner | Solid.Root>(
-  owner: T,
+export function walkSolidTree(
+  owner: Solid.Owner | Solid.Root,
   config: {
     mode: TreeWalkerMode
     rootId: NodeID
     onComputationUpdate: ComputationUpdateHandler
-    gatherComponents?: boolean
+    registerComponent: ComponentRegisterHandler
   },
-): WalkerResult {
-  $_elements_map.clear()
-
+): Mapped.Owner {
   // set the globals to be available for this walk cycle
+  $_elements_map.clear()
   $_mode = config.mode
   $_root_id = config.rootId
   $_on_computation_update = config.onComputationUpdate
-  // components is an array instead of an object to preserve the order (nesting) of the components,
-  // this helps the locator find the most nested component first
-  // TODO: gathering components need to be rethinked (walker doesn't start from root anymore)
-  $_components = []
+  $_register_component = config.registerComponent
 
-  let tree = mapOwner(owner, null)
-
-  return { tree: tree!, components: $_components, rootId: $_root_id }
+  return mapOwner(owner, null)!
 }

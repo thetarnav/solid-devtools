@@ -1,4 +1,4 @@
-import { Accessor, batch, createComputed, createMemo, createSignal } from 'solid-js'
+import { Accessor, batch, createComputed, createMemo } from 'solid-js'
 import { createEventHub, EventBus, EventHub } from '@solid-primitives/event-bus'
 import { atom, defer } from '@solid-devtools/shared/primitives'
 import { createBatchedUpdateEmitter } from './utils'
@@ -9,11 +9,12 @@ import {
   updateAllRoots,
   setComputationUpdateHandler,
   setRootUpdatesHandler,
+  StructureUpdateHandler,
+  useComponentsMap,
 } from './roots'
-import { WalkerResult } from './walker'
 import { createLocator } from '../locator'
 import { createInspector, InspectorUpdate } from '../inspector'
-import { ComputationUpdate, Mapped, NodeID, StructureUpdates } from './types'
+import { ComputationUpdate, Mapped, StructureUpdates } from './types'
 
 export type BatchComputationUpdatesHandler = (payload: ComputationUpdate[]) => void
 
@@ -52,10 +53,9 @@ export default createInternalRoot(() => {
           batch(() => {
             combinedEnabled(enabled)
             if (enabled) {
-              setRootUpdatesHandler(setRootUpdates)
+              setRootUpdatesHandler(handleStructureUpdates)
             } else {
               setRootUpdatesHandler(null)
-              setComponents({})
               locator.togglePluginLocatorMode(false)
               locator.setPluginHighlightTarget(null)
               inspector.setInspectedNode(null)
@@ -73,6 +73,24 @@ export default createInternalRoot(() => {
   })()
 
   //
+  // Inspected Owner details:
+  //
+  const inspector = createInspector(debuggerEnabled, { eventHub })
+
+  const { findComponent, getComponent } = useComponentsMap()
+
+  //
+  // Locator
+  //
+  const locator = createLocator({
+    findComponent,
+    getComponent,
+    debuggerEnabled,
+    getElementById: inspector.getElementById,
+    setLocatorEnabledSignal,
+  })
+
+  //
   // Structure & Computation updates:
   //
   const pushComputationUpdate = createBatchedUpdateEmitter<ComputationUpdate>(updates => {
@@ -80,56 +98,9 @@ export default createInternalRoot(() => {
   })
   setComputationUpdateHandler((rootId, id) => pushComputationUpdate({ rootId, id }))
 
-  function setRootUpdates(updateResults: WalkerResult[], removedIds: ReadonlySet<NodeID>): void {
-    const updated: StructureUpdates['updated'] = {}
-    setComponents(prevComponents => {
-      // TODO gathering components needs to change
-      const newComponents = { ...prevComponents }
-
-      for (const { components, rootId, tree } of updateResults) {
-        newComponents[rootId] = components
-        const obj = updated[rootId]
-        if (obj) obj[tree.id] = tree
-        else updated[rootId] = { [tree.id]: tree }
-      }
-      for (const rootId of removedIds) {
-        delete newComponents[rootId]
-      }
-
-      return newComponents
-    })
-
+  const handleStructureUpdates: StructureUpdateHandler = (updated, removedIds) => {
     eventHub.emit('StructureUpdates', { updated, removed: [...removedIds] })
   }
-
-  //
-  // Components:
-  //
-  const [components, setComponents] = createSignal<Record<NodeID, Mapped.ResolvedComponent[]>>({})
-
-  function findComponent(rootId: NodeID, nodeId: NodeID) {
-    const componentsList = components()[rootId] as Mapped.ResolvedComponent[] | undefined
-    if (!componentsList) return
-    for (const c of componentsList) {
-      if (c.id === nodeId) return c
-    }
-  }
-
-  //
-  // Inspected Owner details:
-  //
-  const inspector = createInspector(debuggerEnabled, { eventHub })
-
-  //
-  // Locator
-  //
-  const locator = createLocator({
-    components,
-    debuggerEnabled,
-    findComponent,
-    getElementById: inspector.getElementById,
-    setLocatorEnabledSignal,
-  })
 
   // Opens the source code of the inspected component
   function openInspectedNodeLocation() {
