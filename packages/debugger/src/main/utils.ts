@@ -109,10 +109,6 @@ export function markNodeID(o: { sdtId?: NodeID }): NodeID {
   if (o.sdtId !== undefined) return o.sdtId
   return (o.sdtId = getNewSdtId())
 }
-export function markNodesID(nodes?: { sdtId?: NodeID }[] | null): NodeID[] {
-  if (!nodes || !nodes.length) return []
-  return nodes.map(markNodeID)
-}
 
 export function getComponentRefreshNode(owner: Readonly<Solid.Component>): Solid.Memo | null {
   const { owned } = owner

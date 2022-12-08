@@ -3,6 +3,7 @@ import { NodeType, TreeWalkerMode } from './constants'
 import {
   getComponentRefreshNode,
   isSolidMemo,
+  isSolidRoot,
   markNodeID,
   markOwnerName,
   markOwnerType,
@@ -265,4 +266,34 @@ export function walkSolidTree(
   $_register_component = config.registerComponent
 
   return mapOwner(owner, null)!
+}
+
+/**
+ * Finds the top-level root owner of a given owner.
+ */
+export function getTopRoot(owner: Solid.Owner): Solid.Root | null {
+  let root: Solid.Root | null = null
+  while (owner) {
+    if (isSolidRoot(owner)) root = owner
+    owner = owner.owner!
+  }
+  return root
+}
+
+/**
+ * Finds the closest owner of a given owner that is included in the tree walker.
+ */
+export function getClosestIncludedOwner(
+  owner: Solid.Owner,
+  mode: TreeWalkerMode,
+): Solid.Owner | null {
+  if (mode === TreeWalkerMode.Owners) return owner
+  let root: Solid.Owner | null = null
+  do {
+    const type = markOwnerType(owner)
+    if (type === NodeType.Component || type === NodeType.Context) return owner
+    if (type === NodeType.Root) root = owner
+    owner = owner.owner!
+  } while (owner)
+  return root
 }

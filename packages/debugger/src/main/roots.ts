@@ -1,7 +1,12 @@
 import { createRoot } from 'solid-js'
 import { throttle } from '@solid-primitives/scheduled'
 import { warn } from '@solid-devtools/shared/utils'
-import { ComputationUpdateHandler, walkSolidTree } from './walker'
+import {
+  ComputationUpdateHandler,
+  getClosestIncludedOwner,
+  getTopRoot,
+  walkSolidTree,
+} from './walker'
 import { markNodeID, isSolidRoot, onOwnerCleanup, getOwner } from './utils'
 import { Core, NodeID, Solid, StructureUpdates } from './types'
 import { defaultWalkerMode, NodeType, TreeWalkerMode } from './constants'
@@ -94,6 +99,11 @@ function updateOwner(node: Solid.Owner, topRootId: NodeID): void {
   flushRootUpdateQueue()
 }
 
+function updateClosestIncludedOwner(node: Solid.Owner, topRootId: NodeID): void {
+  const closestIncludedOwner = getClosestIncludedOwner(node, $_tree_walker_mode)
+  closestIncludedOwner && updateOwner(closestIncludedOwner, topRootId)
+}
+
 export function updateAllRoots(): void {
   $_update_all_roots = true
   flushRootUpdateQueue()
@@ -132,7 +142,7 @@ function changeRootAttachment(root: Solid.Root, newParent: Solid.Owner | null): 
   if (root.sdtAttached) {
     root.sdtAttached.sdtSubRoots!.splice(root.sdtAttached.sdtSubRoots!.indexOf(root), 1)
     topRoot = getTopRoot(root.sdtAttached)
-    if (topRoot) updateOwner(root.sdtAttached, topRoot.sdtId!)
+    if (topRoot) updateClosestIncludedOwner(root.sdtAttached, topRoot.sdtId!)
   }
 
   if (newParent) {
@@ -141,7 +151,7 @@ function changeRootAttachment(root: Solid.Root, newParent: Solid.Owner | null): 
     else newParent.sdtSubRoots = [root]
 
     if (topRoot === undefined) topRoot = getTopRoot(newParent)
-    if (topRoot) updateOwner(newParent, topRoot.sdtId!)
+    if (topRoot) updateClosestIncludedOwner(newParent, topRoot.sdtId!)
   } else {
     delete root.sdtAttached
   }
@@ -282,15 +292,6 @@ export const findOwnerById = (rootId: NodeID, id: NodeID): Solid.Owner | undefin
     if (owner.sdtSubRoots) toCheck.push.apply(toCheck, owner.sdtSubRoots)
     owner = toCheck[index++]
   } while (owner)
-}
-
-function getTopRoot(owner: Solid.Owner): Solid.Root | null {
-  let root: Solid.Root | null = null
-  while (owner) {
-    if (isSolidRoot(owner)) root = owner
-    owner = owner.owner!
-  }
-  return root
 }
 
 /**

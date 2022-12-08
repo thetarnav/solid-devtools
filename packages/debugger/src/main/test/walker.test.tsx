@@ -8,11 +8,21 @@ import {
   createSignal,
 } from 'solid-js'
 import { getNodeName, getOwner } from '../utils'
-import { Solid, Mapped } from '../types'
+import { Solid, Mapped, NodeID } from '../types'
 import { NodeType, TreeWalkerMode } from '../constants'
-import { ComputationUpdateHandler } from '../walker'
+import { ComputationUpdateHandler, walkSolidTree } from '../walker'
 
-const getModule = async () => (await import('../walker')).walkSolidTree
+let mockLAST_ID = 0
+
+vi.mock('../utils', async () => {
+  const module: any = await vi.importActual('../utils')
+  const getNewSdtId = (): NodeID => (mockLAST_ID++).toString(36)
+  function markNodeID(o: { sdtId?: NodeID }): NodeID {
+    if (o.sdtId !== undefined) return o.sdtId
+    return (o.sdtId = getNewSdtId())
+  }
+  return { ...module, getNewSdtId, markNodeID }
+})
 
 const mockTree = () => {
   const [s] = createSignal('foo', { name: 's0' })
@@ -31,13 +41,10 @@ const mockTree = () => {
 
 describe('TreeWalkerMode.Owners', () => {
   beforeEach(() => {
-    delete (window as any).Solid$$
-    vi.resetModules()
+    mockLAST_ID = 0
   })
 
-  it('default options', async () => {
-    const walkSolidTree = await getModule()
-
+  it('default options', () => {
     {
       const [dispose, owner] = createRoot(dispose => {
         mockTree()
@@ -133,9 +140,7 @@ describe('TreeWalkerMode.Owners', () => {
     }
   })
 
-  it('listen to computation updates', async () => {
-    const walkSolidTree = await getModule()
-
+  it('listen to computation updates', () => {
     createRoot(dispose => {
       const capturedComputationUpdates: Parameters<ComputationUpdateHandler>[] = []
 
@@ -165,9 +170,7 @@ describe('TreeWalkerMode.Owners', () => {
     })
   })
 
-  it('gathers components', async () => {
-    const walkSolidTree = await getModule()
-
+  it('gathers components', () => {
     createRoot(dispose => {
       const TestComponent = (props: { n: number }) => {
         const [a] = createSignal(0)
@@ -216,13 +219,10 @@ describe('TreeWalkerMode.Owners', () => {
 
 describe('TreeWalkerMode.Components', () => {
   beforeEach(() => {
-    delete (window as any).Solid$$
-    vi.resetModules()
+    mockLAST_ID = 0
   })
 
-  it('map component tree', async () => {
-    const walkSolidTree = await getModule()
-
+  it('map component tree', () => {
     const toTrigger: VoidFunction[] = []
     const testComponents: Solid.Component[] = []
 
