@@ -50,7 +50,10 @@ const onComputationUpdate: ComputationUpdateHandler = (rootId, node, changedStru
   // only if debugger is enabled
   if (!$_on_root_updates) return
   changedStructure && updateOwner(node, rootId)
-  $_on_computation_update(rootId, markNodeID(node))
+  queueMicrotask(() => {
+    if (!$_on_root_updates) return
+    $_on_computation_update(rootId, markNodeID(node))
+  })
 }
 
 function forceFlushRootUpdateQueue(): void {

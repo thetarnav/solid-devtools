@@ -49,7 +49,7 @@ function observeComputation(owner: Solid.Computation, attachedData: Solid.Owner)
   owner.onComputationUpdate = handler
   interceptComputationRerun(owner, fn => {
     fn()
-    queueMicrotask(owner.onComputationUpdate!)
+    owner.onComputationUpdate!()
   })
 }
 
@@ -125,6 +125,7 @@ function mapElements(els: Element[], parentChildren: Mapped.Owner[] | undefined)
       id: `el_${$_el_id++}`,
       type: NodeType.Element,
       name: el.tagName.toLowerCase(),
+      children: [],
     }
     r.push(mappedEl)
     $_elements_map.set(mappedEl, el)

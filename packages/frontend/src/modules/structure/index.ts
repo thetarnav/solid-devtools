@@ -51,9 +51,7 @@ const { reconcileStructure } = (() => {
     $_node_list.push(node)
 
     // map children
-    if (rawChildren) {
-      for (const child of rawChildren) children.push(createNode(child, node, level + 1))
-    }
+    for (const child of rawChildren) children.push(createNode(child, node, level + 1))
 
     return node
   }
@@ -77,7 +75,7 @@ const { reconcileStructure } = (() => {
       const { children: rawChildren } = raw
       const newChildren: Structure.Node[] = (node.children = [])
 
-      if (rawChildren) {
+      if (rawChildren.length) {
         const prevChildrenMap: Record<NodeID, Structure.Node> = {}
         for (const child of children) prevChildrenMap[child.id] = child
 

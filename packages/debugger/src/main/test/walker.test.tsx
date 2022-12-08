@@ -7,9 +7,10 @@ import {
   createRoot,
   createSignal,
 } from 'solid-js'
-import { getOwner } from '../utils'
+import { getNodeName, getOwner } from '../utils'
 import { Solid, Mapped } from '../types'
-import { NodeType } from '../constants'
+import { NodeType, TreeWalkerMode } from '../constants'
+import { ComputationUpdateHandler } from '../walker'
 
 const getModule = async () => (await import('../walker')).walkSolidTree
 
@@ -28,7 +29,7 @@ const mockTree = () => {
   )
 }
 
-describe('walkSolidTree', () => {
+describe('TreeWalkerMode.Owners', () => {
   beforeEach(() => {
     delete (window as any).Solid$$
     vi.resetModules()
@@ -37,56 +38,120 @@ describe('walkSolidTree', () => {
   it('default options', async () => {
     const walkSolidTree = await getModule()
 
-    const [dispose, owner] = createRoot(dispose => {
-      mockTree()
-      return [dispose, getOwner()! as Solid.Root]
-    })
+    {
+      const [dispose, owner] = createRoot(dispose => {
+        mockTree()
+        return [dispose, getOwner()! as Solid.Root]
+      })
 
-    const { root, components, inspectedOwner } = walkSolidTree(owner, {
-      onComputationUpdate: () => {},
-      rootId: (owner.sdtId = 'ff'),
-      inspectedId: null,
-      gatherComponents: false,
-    })
+      const tree = walkSolidTree(owner, {
+        onComputationUpdate: () => {},
+        rootId: (owner.sdtId = 'ff'),
+        registerComponent: () => {},
+        mode: TreeWalkerMode.Owners,
+      })
 
-    dispose()
+      dispose()
 
-    expect(root).toEqual({
-      id: 'ff',
-      type: NodeType.Root,
-      children: [
-        {
+      expect(tree).toEqual({
+        id: 'ff',
+        type: NodeType.Root,
+        children: [
+          {
+            id: '0',
+            name: 'e0',
+            type: NodeType.Effect,
+            frozen: true,
+            children: [
+              { id: '1', name: 'c0', type: NodeType.Computation, children: [] },
+              { id: '2', name: 'c1', type: NodeType.Computation, frozen: true, children: [] },
+            ],
+          },
+        ],
+      } satisfies Mapped.Owner)
+      expect(tree, 'is json serializable').toEqual(JSON.parse(JSON.stringify(tree)))
+    }
+
+    {
+      createRoot(dispose => {
+        const [s] = createSignal(0, { name: 'source' })
+
+        const div = document.createElement('div')
+
+        createComputed(
+          () => {
+            const focused = createMemo(
+              () => {
+                s()
+                createSignal(div, { name: 'element' })
+                const memo = createMemo(() => 0, undefined, { name: 'memo' })
+                createRenderEffect(memo, undefined, { name: 'render' })
+                return 'value'
+              },
+              undefined,
+              { name: 'focused' },
+            )
+            focused()
+          },
+          undefined,
+          { name: 'WRAPPER' },
+        )
+
+        const rootOwner = getOwner()! as Solid.Root
+        const tree = walkSolidTree(rootOwner, {
+          rootId: (rootOwner.sdtId = '0'),
+          onComputationUpdate: () => {},
+          registerComponent: () => {},
+          mode: TreeWalkerMode.Owners,
+        })
+
+        expect(tree).toEqual({
           id: '0',
-          name: 'e0',
-          type: NodeType.Effect,
-          frozen: true,
+          type: NodeType.Root,
           children: [
-            { id: '1', name: 'c0', type: NodeType.Computation },
-            { id: '2', name: 'c1', type: NodeType.Computation, frozen: true },
+            {
+              id: '3',
+              name: 'WRAPPER',
+              type: NodeType.Computation,
+              children: [
+                {
+                  id: '4',
+                  name: 'focused',
+                  type: NodeType.Memo,
+                  children: [
+                    { id: '5', name: 'memo', type: NodeType.Memo, frozen: true, children: [] },
+                    { id: '6', type: NodeType.Render, children: [] },
+                  ],
+                },
+              ],
+            },
           ],
-        },
-      ],
-    })
-    expect(root).toEqual(JSON.parse(JSON.stringify(root)))
-    expect(components).toEqual([])
-    expect(inspectedOwner).toBe(null)
+        } satisfies Mapped.Owner)
+
+        dispose()
+      })
+    }
   })
 
   it('listen to computation updates', async () => {
     const walkSolidTree = await getModule()
 
     createRoot(dispose => {
-      const capturedComputationUpdates: [string, string][] = []
+      const capturedComputationUpdates: Parameters<ComputationUpdateHandler>[] = []
 
+      let computedOwner!: Solid.Owner
       const [a, setA] = createSignal(0)
-      createComputed(a)
+      createComputed(() => {
+        computedOwner = getOwner()!
+        a()
+      })
 
       const owner = getOwner()! as Solid.Root
       walkSolidTree(owner, {
-        onComputationUpdate: (rootId, id) => capturedComputationUpdates.push([rootId, id]),
+        onComputationUpdate: (...a) => capturedComputationUpdates.push(a),
         rootId: (owner.sdtId = 'ff'),
-        inspectedId: null,
-        gatherComponents: false,
+        mode: TreeWalkerMode.Owners,
+        registerComponent: () => {},
       })
 
       expect(capturedComputationUpdates.length).toBe(0)
@@ -94,7 +159,7 @@ describe('walkSolidTree', () => {
       setA(1)
 
       expect(capturedComputationUpdates.length).toBe(1)
-      expect(capturedComputationUpdates[0]).toEqual(['ff', '0'])
+      expect(capturedComputationUpdates[0]).toEqual(['ff', computedOwner, false])
 
       dispose()
     })
@@ -123,143 +188,28 @@ describe('walkSolidTree', () => {
       })
 
       const owner = getOwner()! as Solid.Root
-      const { components } = walkSolidTree(owner, {
+
+      const components: Solid.Component[] = []
+
+      walkSolidTree(owner, {
         onComputationUpdate: () => {},
         rootId: (owner.sdtId = 'ff'),
-        inspectedId: null,
-        gatherComponents: true,
+        mode: TreeWalkerMode.Owners,
+        registerComponent: c => components.push(c),
       })
 
       expect(components.length).toBe(7)
 
       let testCompsLength = 0
-      let btn!: Mapped.ResolvedComponent
+      let btn!: Solid.Component
       components.forEach(c => {
-        if (c.name === 'TestComponent' && c.element instanceof HTMLDivElement) testCompsLength++
-        else btn = c
+        if (getNodeName(c) === 'TestComponent') testCompsLength++
+        else if (getNodeName(c) === 'Button') btn = c
       })
       expect(testCompsLength).toBe(6)
-
       expect(btn).toBeTruthy()
-      expect(btn.name).toBe('Button')
-      expect(btn.element).toBeInstanceOf(HTMLButtonElement)
 
       dispose()
     })
   })
-
-  it('returns inspected owner', async () => {
-    const walkSolidTree = await getModule()
-
-    createRoot(dispose => {
-      const [s] = createSignal(0, { name: 'source' })
-
-      let owner!: Solid.Owner
-      const div = document.createElement('div')
-
-      createComputed(
-        () => {
-          const focused = createMemo(
-            () => {
-              owner = getOwner()!
-              owner.sdtId = 'ff'
-              s()
-              createSignal(div, { name: 'element' })
-              const memo = createMemo(() => 0, undefined, { name: 'memo' })
-              createRenderEffect(memo, undefined, { name: 'render' })
-              return 'value'
-            },
-            undefined,
-            { name: 'focused' },
-          )
-          focused()
-        },
-        undefined,
-        { name: 'WRAPPER' },
-      )
-
-      const rootOwner = getOwner()! as Solid.Root
-      const { root, inspectedOwner } = walkSolidTree(rootOwner, {
-        rootId: (rootOwner.sdtId = '0'),
-        inspectedId: 'ff',
-        onComputationUpdate: () => {},
-        gatherComponents: false,
-      })
-
-      expect(owner).toBe(inspectedOwner)
-
-      expect(root).toEqual({
-        id: '0',
-        type: NodeType.Root,
-        children: [
-          {
-            id: '0',
-            name: 'WRAPPER',
-            type: NodeType.Computation,
-            children: [
-              {
-                id: 'ff',
-                name: 'focused',
-                type: NodeType.Memo,
-                children: [
-                  { id: '1', name: 'memo', type: NodeType.Memo, frozen: true },
-                  { id: '2', type: NodeType.Render },
-                ],
-              },
-            ],
-          },
-        ],
-      })
-
-      dispose()
-    })
-  })
-
-  // it('Hides <Show> implementation memos', async () => {
-  //   const walkSolidTree = await getModule()
-
-  //   let rootOwner!: Solid.Root
-  //   const rootDiv = document.createElement('div')
-  //   const dispose = render(() => {
-  //     rootOwner = getOwner()! as Solid.Root
-  //     return (
-  //       <Show when={true}>
-  //         <div>{rootOwner.name}</div>
-  //       </Show>
-  //     )
-  //   }, rootDiv)
-
-  //   const { root } = walkSolidTree(rootOwner, {
-  //     rootId: (rootOwner.sdtId = '0'),
-  //     inspectedId: null,
-  //     onComputationUpdate: () => {},
-  //     gatherComponents: false,
-  //   })
-
-  //   expect(root).toEqual({
-  //     id: '0',
-  //     type: NodeType.Root,
-  //     children: [
-  //       {
-  //         id: '0',
-  //         name: 'Show',
-  //         type: NodeType.Component,
-  //         frozen: true,
-  //         children: [
-  //           {
-  //             id: '1',
-  //             type: NodeType.Render,
-  //             frozen: true,
-  //           },
-  //         ],
-  //       },
-  //       {
-  //         id: '2',
-  //         type: NodeType.Render,
-  //       },
-  //     ],
-  //   })
-
-  //   dispose()
-  // })
 })

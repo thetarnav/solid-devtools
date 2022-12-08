@@ -165,7 +165,7 @@ export namespace Mapped {
     id: NodeID
     type: Exclude<NodeType, NodeType.Refresh | NodeType.Signal | NodeType.Store>
     // combines?: NodeID[]
-    children?: Owner[]
+    children: Owner[]
     name?: string
     // component wrapped with a hmr memo?
     hmr?: boolean
