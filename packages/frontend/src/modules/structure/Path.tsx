@@ -39,11 +39,10 @@ export const OwnerPath: Component = () => {
                   onClick={() => setInspectedNode(node)}
                 >
                   <div class={styles.highlight} />
-                  {node.type === NodeType.Component ? (
-                    <>
-                      <NodeTypeIcon type={NodeType.Component} class={styles.typeIcon} />
-                      <div class={styles.name}>{node.name}</div>
-                    </>
+                  {node.type === NodeType.Component || node.type === NodeType.Element ? (
+                    <div class={styles.name[node.type === NodeType.Component ? 'default' : 'gray']}>
+                      {node.name}
+                    </div>
                   ) : (
                     <NodeTypeIcon type={node.type} class={styles.typeIcon} />
                   )}

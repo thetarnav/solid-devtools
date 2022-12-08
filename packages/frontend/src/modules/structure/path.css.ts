@@ -1,13 +1,11 @@
-import { style } from '@vanilla-extract/css'
+import { style, styleVariants } from '@vanilla-extract/css'
 import { createHighlightStyles } from '@/ui/mixins'
 import {
-  dark,
   centerChild,
   color,
   rounded,
   spacing,
   theme,
-  media,
   insetX,
   padding,
   margin,
@@ -86,7 +84,7 @@ export const container = style({
 export const divider = style({
   width: rowHeight,
   height: spacing[4],
-  marginRight: spacing[1],
+  ...margin(0, 0.5),
   ...centerChild,
   selectors: {
     [`${container} &:first-child`]: {
@@ -108,10 +106,7 @@ export const item = style([
   {
     height: rowHeight,
     ...padding(0.25, 0),
-    ...margin(0.25, 1, 0.25, 0),
-    ':last-child': {
-      marginRight: 0,
-    },
+    ...margin(0.25, 0),
     display: 'flex',
     alignItems: 'center',
     columnGap: spacing[1],
@@ -141,12 +136,10 @@ export const typeIcon = style({
   color: vars.disabled.color,
 })
 
-export const name = style({
+const nameBase = style({
   transform: 'translateY(0.2px)',
-  color: color.gray[600],
-  ...media({
-    [dark]: {
-      color: color.gray[200],
-    },
-  }),
+})
+export const name = styleVariants({
+  default: [nameBase, { color: vars.defaultTextColor }],
+  gray: [nameBase, { color: vars.disabled.color }],
 })
