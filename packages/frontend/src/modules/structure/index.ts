@@ -127,12 +127,17 @@ const { reconcileStructure } = (() => {
   return { reconcileStructure }
 })()
 
-function getParentRoot(node: Structure.Node): Structure.Node {
+/**
+ * Finds the top-root node
+ */
+function getRootNode(node: Structure.Node): Structure.Node {
   let current: Structure.Node | null = node
+  let lastRoot: Structure.Node | undefined
   while (current) {
-    if (current.type === NodeType.Root) return current
+    if (current.type === NodeType.Root) lastRoot = current
     current = current.parent
   }
+  if (lastRoot) return lastRoot
   throw new Error('Parent root not found')
 }
 
@@ -209,7 +214,7 @@ export default function createStructure({
     emitComputationUpdate,
     toggleHoveredNode,
     findNode,
-    getParentRoot,
+    getRootNode,
     getNodePath,
     search,
     mode,

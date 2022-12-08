@@ -15,6 +15,8 @@ export function changeTreeWalkerMode(newMode: TreeWalkerMode): void {
   updateAllRoots()
 }
 
+// ROOTS
+// map of all top-roots
 const $_root_map = new Map<NodeID, Solid.Root>()
 
 const $_update_queue = new Set<Solid.Owner>()
@@ -99,9 +101,8 @@ export function forceUpdateAllRoots(): void {
   queueMicrotask(forceFlushRootUpdateQueue)
 }
 
-export function createStructureRoot(owner: Solid.Root): void {
+export function createTopRoot(owner: Solid.Root): void {
   const rootId = markNodeID(owner)
-
   $_root_map.set(rootId, owner)
   updateOwner(owner, rootId)
 }
@@ -187,7 +188,7 @@ export function attachDebugger(_owner: Core.Owner = getOwner()!): void {
 
     // root (top-level)
     if (isTopLevel) {
-      createStructureRoot(root)
+      createTopRoot(root)
       return
     }
     // sub-root (nested)
@@ -206,7 +207,7 @@ export function attachDebugger(_owner: Core.Owner = getOwner()!): void {
       // becomes a root
       else {
         removeOwnCleanup()
-        createStructureRoot(root)
+        createTopRoot(root)
       }
     }
     const removeParentCleanup = onOwnerCleanup(parent.root, onParentCleanup)
@@ -264,17 +265,20 @@ export const createInternalRoot: typeof createRoot = (fn, detachedOwner) => {
 }
 
 /**
- * Looks though the children of the given root to find owner of given {@link id}.
+ * Looks though the children and subroots of the given root to find owner of given {@link id}.
  */
 export const findOwnerById = (rootId: NodeID, id: NodeID): Solid.Owner | undefined => {
   const root = $_root_map.get(rootId)
   if (!root) return
   const toCheck: Solid.Owner[] = [root]
-  while (toCheck.length) {
-    const owner = toCheck.pop()!
+  let index = 0
+  let owner = toCheck[index++]
+  do {
     if (owner.sdtId === id) return owner
     if (owner.owned) toCheck.push.apply(toCheck, owner.owned)
-  }
+    if (owner.sdtSubRoots) toCheck.push.apply(toCheck, owner.sdtSubRoots)
+    owner = toCheck[index++]
+  } while (owner)
 }
 
 function getTopRoot(owner: Solid.Owner): Solid.Root | null {

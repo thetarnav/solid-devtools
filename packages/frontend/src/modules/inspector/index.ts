@@ -278,7 +278,7 @@ export default function createInspector({
     )
   }
 
-  /** variable for a callback in bridge.ts */
+  /** variable for a callback in controller.tsx */
   let onInspectNode: (node: Structure.Node | null) => void = () => {}
   let onInspectValue: (data: ToggleInspectedValueData) => void = () => {}
   const setOnInspectValue = (fn: typeof onInspectValue) => (onInspectValue = fn)

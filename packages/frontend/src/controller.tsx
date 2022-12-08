@@ -160,7 +160,7 @@ const [Provider, useControllerCtx] = createContextProvider(
     // set inspected node
     inspector.setOnInspectNode(node => {
       client.onInspectNode(
-        node ? { nodeId: node.id, rootId: structure.getParentRoot(node).id } : null,
+        node ? { nodeId: node.id, rootId: structure.getRootNode(node).id } : null,
       )
     })
     // toggle inspected value/prop/signal
@@ -174,24 +174,25 @@ const [Provider, useControllerCtx] = createContextProvider(
     createEffect(
       on(
         [structure.extHovered, inspector.hoveredElement],
-        ([hoveredId, elId], _, prev: string | { rootId: NodeID; nodeId: NodeID } | undefined) => {
+        ([nodeId, elementId], _, prev: HighlightElementPayload = null) => {
           // handle component
-          if (hoveredId) {
-            const hovered = structure.findNode(hoveredId)
+          if (nodeId) {
+            const hovered = structure.findNode(nodeId)
             if (hovered && hovered.type === NodeType.Component) {
-              if (typeof prev === 'object' && prev.nodeId === hoveredId) return prev
+              if (prev && 'nodeId' in prev && prev.nodeId === nodeId) return prev
 
-              const rootId = structure.getParentRoot(hovered).id
-              const payload = { rootId, nodeId: hoveredId }
+              const payload = { nodeId }
               client.onHighlightElementChange(payload)
               return payload
             }
           }
           // handle element
-          if (elId) {
-            if (typeof prev === 'string' && prev === elId) return prev
-            client.onHighlightElementChange({ elementId: elId })
-            return elId
+          if (elementId) {
+            if (prev && 'elementId' in prev && prev.elementId === elementId) return prev
+
+            const payload = { elementId }
+            client.onHighlightElementChange(payload)
+            return payload
           }
           // no element or component
           if (prev) client.onHighlightElementChange(null)
