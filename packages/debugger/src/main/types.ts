@@ -168,7 +168,7 @@ export namespace Mapped {
     children: Owner[]
     name?: string
     // component wrapped with a hmr memo?
-    hmr?: boolean
+    hmr?: true
     // computation without sources
     frozen?: true
   }

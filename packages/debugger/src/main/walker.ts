@@ -206,13 +206,11 @@ function mapOwner(
 
     // Refresh
     // omitting refresh memo — map it's children instead
-    let hmr = false
     let refresh = getComponentRefreshNode(owner as Solid.Component)
     if (refresh) {
-      hmr = true
+      mapped.hmr = true
       owner = refresh
     }
-    mapped.hmr = hmr
   }
   // Computation
   else if (type !== NodeType.Context && type !== NodeType.Root) {

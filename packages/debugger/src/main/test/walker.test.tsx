@@ -213,3 +213,120 @@ describe('TreeWalkerMode.Owners', () => {
     })
   })
 })
+
+describe('TreeWalkerMode.Components', () => {
+  beforeEach(() => {
+    delete (window as any).Solid$$
+    vi.resetModules()
+  })
+
+  it('map component tree', async () => {
+    const walkSolidTree = await getModule()
+
+    const toTrigger: VoidFunction[] = []
+    const testComponents: Solid.Component[] = []
+
+    createRoot(dispose => {
+      const Wrapper = (props: { children: any }) => {
+        return <div>{props.children}</div>
+      }
+      const TestComponent = (props: { n: number }) => {
+        const [a, set] = createSignal(0)
+        createComputed(a)
+        toTrigger.push(() => set(1))
+        testComponents.push(getOwner()! as Solid.Component)
+        // * this is a hack to get the subroots
+        // * normally subroots are attached by a separate module
+        const subroots: Solid.Root[] = (getOwner()!.sdtSubRoots = [])
+        return createRoot(_ => {
+          subroots.push(getOwner()! as Solid.Root)
+          return <div>{props.n === 0 ? 'end' : <TestComponent n={props.n - 1} />}</div>
+        })
+      }
+      const Button = () => {
+        return <button>Click me</button>
+      }
+
+      createRenderEffect(() => {
+        return (
+          <>
+            <Wrapper>
+              <TestComponent n={3} />
+              <Button />
+            </Wrapper>
+          </>
+        )
+      })
+
+      const owner = getOwner()! as Solid.Root
+
+      const computationUpdates: Parameters<ComputationUpdateHandler>[] = []
+
+      const tree = walkSolidTree(owner, {
+        onComputationUpdate: (...a) => computationUpdates.push(a),
+        rootId: (owner.sdtId = 'ff'),
+        mode: TreeWalkerMode.Components,
+        registerComponent: () => {},
+      })
+
+      expect(tree).toEqual({
+        id: 'ff',
+        type: NodeType.Root,
+        children: [
+          {
+            id: '0',
+            type: NodeType.Component,
+            name: 'Wrapper',
+            children: [
+              {
+                id: '1',
+                type: NodeType.Component,
+                name: 'TestComponent',
+                children: [
+                  {
+                    id: '2',
+                    type: NodeType.Component,
+                    name: 'TestComponent',
+                    children: [
+                      {
+                        id: '3',
+                        type: NodeType.Component,
+                        name: 'TestComponent',
+                        children: [
+                          {
+                            id: '4',
+                            type: NodeType.Component,
+                            name: 'TestComponent',
+                            children: [],
+                          },
+                        ],
+                      },
+                    ],
+                  },
+                ],
+              },
+              {
+                id: '5',
+                type: NodeType.Component,
+                name: 'Button',
+                children: [],
+              },
+            ],
+          },
+        ],
+      })
+
+      expect(computationUpdates.length).toBe(0)
+
+      toTrigger.forEach(t => t())
+
+      expect(computationUpdates.length).toBe(4)
+
+      for (let i = 0; i < 4; i++) {
+        expect(computationUpdates[i]).toEqual(['ff', testComponents[i], false])
+      }
+
+      dispose()
+    })
+  })
+})
