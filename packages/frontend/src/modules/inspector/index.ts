@@ -82,9 +82,9 @@ function updateValueNode(obj: { value: EncodedValue }, newValue: EncodedValue): 
       obj = obj.value.value
       newValue = (newValue as EncodedValueOf<ValueType.Store>).value.value
     }
-    const expanded = XOR('children' in obj.value!, 'children' in newValue)
+    const expanded = XOR('children' in obj.value, 'children' in newValue)
     if (expanded) {
-      obj.value!.children = newValue.children
+      obj.value.children = newValue.children
       return
     }
   }

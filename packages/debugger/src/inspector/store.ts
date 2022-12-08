@@ -82,8 +82,8 @@ export function observeStoreNode(
           // Update array length
           onUpdate({ path, property, length: value })
         } else {
-          if (DEV.isWrappable(prev)) untrackStore(prev as Core.Store.StoreNode, propertyPath)
-          if (DEV.isWrappable(value)) trackStore(value as Core.Store.StoreNode, propertyPath)
+          if (DEV.isWrappable(prev)) untrackStore(prev, propertyPath)
+          if (DEV.isWrappable(value)) trackStore(value, propertyPath)
           onUpdate({ path, property, value })
         }
       })
