@@ -28,6 +28,7 @@
     "update-deps": "pnpm up -Lri"
   },
   "devDependencies": {
+    "solid-js": "^1.6.2",
     "@changesets/cli": "^2.25.0",
     "@types/node": "^18.11.3",
     "@typescript-eslint/eslint-plugin": "^5.44.0",
@@ -51,8 +52,5 @@
   "packageManager": "pnpm@7.18.1",
   "engines": {
     "node": ">=18"
-  },
-  "dependencies": {
-    "solid-js": "^1.6.2"
   }
 }
