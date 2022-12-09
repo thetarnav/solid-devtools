@@ -215,6 +215,8 @@ export default function createInspector({
       if (newId === inspectedId()) return
       const node = typeof data === 'string' ? findNode(data) : data
       if (!node) return warn(`setInspected: node (${newId}) not found`)
+      // html elements are not inspectable
+      if (node.type === NodeType.Element) return
 
       setInspectedId(newId)
       setInspectedNode(node)

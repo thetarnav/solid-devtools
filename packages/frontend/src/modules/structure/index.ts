@@ -196,7 +196,8 @@ export default function createStructure({
       const result: NodeID[] = []
       const rgx = new RegExp('^' + query, 'i')
       for (const node of state().nodeList) {
-        if (node.name && node.name.match(rgx)) result.push(node.id)
+        if (node.type !== NodeType.Element && node.name && node.name.match(rgx))
+          result.push(node.id)
       }
       return setSearchResult(result.length ? result : undefined)
     })

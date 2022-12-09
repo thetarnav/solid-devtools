@@ -14,7 +14,7 @@ export const OwnerNode: Component<{
   onHoverChange(hovered: boolean): void
   onInspectChange(inspect: boolean): void
   listenToUpdate(cb: VoidFunction): VoidFunction
-  toggleCollapsed: (node: Structure.Node) => void
+  toggleCollapsed(node: Structure.Node): void
 }> = props => {
   const { onHoverChange, listenToUpdate, onInspectChange } = props
   const { name, type, hmr } = props.owner

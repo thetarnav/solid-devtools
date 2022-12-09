@@ -204,6 +204,7 @@ const [Provider, useControllerCtx] = createContextProvider(
     // TREE VIEW MODE
     createEffect(defer(structure.mode, client.onTreeViewModeChange))
 
+    // SEARCH NODES
     let lastSearch: string = ''
     let lastSearchResults: NodeID[] | undefined
     let lastSearchIndex = 0
