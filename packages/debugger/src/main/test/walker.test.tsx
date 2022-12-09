@@ -14,6 +14,10 @@ import { ComputationUpdateHandler, walkSolidTree } from '../walker'
 
 let mockLAST_ID = 0
 
+beforeEach(() => {
+  mockLAST_ID = 0
+})
+
 vi.mock('../utils', async () => {
   const module: any = await vi.importActual('../utils')
   const getNewSdtId = (): NodeID => (mockLAST_ID++).toString(36)
@@ -40,10 +44,6 @@ const mockTree = () => {
 }
 
 describe('TreeWalkerMode.Owners', () => {
-  beforeEach(() => {
-    mockLAST_ID = 0
-  })
-
   it('default options', () => {
     {
       const [dispose, owner] = createRoot(dispose => {
@@ -218,10 +218,6 @@ describe('TreeWalkerMode.Owners', () => {
 })
 
 describe('TreeWalkerMode.Components', () => {
-  beforeEach(() => {
-    mockLAST_ID = 0
-  })
-
   it('map component tree', () => {
     const toTrigger: VoidFunction[] = []
     const testComponents: Solid.Component[] = []
@@ -269,32 +265,26 @@ describe('TreeWalkerMode.Components', () => {
         registerComponent: () => {},
       })
 
-      expect(tree).toEqual({
-        id: 'ff',
+      expect(tree).toMatchObject({
         type: NodeType.Root,
         children: [
           {
-            id: '0',
             type: NodeType.Component,
             name: 'Wrapper',
             children: [
               {
-                id: '1',
                 type: NodeType.Component,
                 name: 'TestComponent',
                 children: [
                   {
-                    id: '2',
                     type: NodeType.Component,
                     name: 'TestComponent',
                     children: [
                       {
-                        id: '3',
                         type: NodeType.Component,
                         name: 'TestComponent',
                         children: [
                           {
-                            id: '4',
                             type: NodeType.Component,
                             name: 'TestComponent',
                             children: [],
@@ -306,7 +296,6 @@ describe('TreeWalkerMode.Components', () => {
                 ],
               },
               {
-                id: '5',
                 type: NodeType.Component,
                 name: 'Button',
                 children: [],
@@ -324,6 +313,151 @@ describe('TreeWalkerMode.Components', () => {
 
       for (let i = 0; i < 4; i++) {
         expect(computationUpdates[i]).toEqual(['ff', testComponents[i], false])
+      }
+
+      dispose()
+    })
+  })
+})
+
+describe('TreeWalkerMode.DOM', () => {
+  it('map dom tree', () => {
+    const toTrigger: VoidFunction[] = []
+    const testComponents: Solid.Component[] = []
+
+    createRoot(dispose => {
+      const Wrapper = (props: { children: any }) => {
+        return <div>{props.children}</div>
+      }
+      const TestComponent = (props: { n: number }) => {
+        const [a, set] = createSignal(0)
+        createComputed(a)
+        toTrigger.push(() => set(1))
+        testComponents.push(getOwner()! as Solid.Component)
+        // * this is a hack to get the subroots
+        // * normally subroots are attached by a separate module
+        const subroots: Solid.Root[] = (getOwner()!.sdtSubRoots = [])
+        return createRoot(_ => {
+          subroots.push(getOwner()! as Solid.Root)
+          return <div>{props.n === 0 ? 'end' : <TestComponent n={props.n - 1} />}</div>
+        })
+      }
+      const Button = () => {
+        return <button>Click me</button>
+      }
+      const App = () => {
+        return (
+          <>
+            <Wrapper>
+              <main>
+                <TestComponent n={2} />
+                <Button />
+              </main>
+            </Wrapper>
+            <footer />
+          </>
+        )
+      }
+      createRenderEffect(() => <App />)
+
+      const owner = getOwner()! as Solid.Root
+
+      const computationUpdates: Parameters<ComputationUpdateHandler>[] = []
+
+      const tree = walkSolidTree(owner, {
+        onComputationUpdate: (...a) => computationUpdates.push(a),
+        rootId: (owner.sdtId = 'ff'),
+        mode: TreeWalkerMode.DOM,
+        registerComponent: () => {},
+      })
+
+      expect(tree).toMatchObject({
+        type: NodeType.Root,
+        children: [
+          {
+            type: NodeType.Component,
+            name: 'App',
+            children: [
+              {
+                type: NodeType.Component,
+                name: 'Wrapper',
+                children: [
+                  {
+                    type: NodeType.Element,
+                    name: 'div',
+                    children: [
+                      {
+                        type: NodeType.Element,
+                        name: 'main',
+                        children: [
+                          {
+                            type: NodeType.Component,
+                            name: 'TestComponent',
+                            children: [
+                              {
+                                type: NodeType.Element,
+                                name: 'div',
+                                children: [
+                                  {
+                                    type: NodeType.Component,
+                                    name: 'TestComponent',
+                                    children: [
+                                      {
+                                        type: NodeType.Element,
+                                        name: 'div',
+                                        children: [
+                                          {
+                                            type: NodeType.Component,
+                                            name: 'TestComponent',
+                                            children: [
+                                              {
+                                                type: NodeType.Element,
+                                                name: 'div',
+                                                children: [],
+                                              },
+                                            ],
+                                          },
+                                        ],
+                                      },
+                                    ],
+                                  },
+                                ],
+                              },
+                            ],
+                          },
+                          {
+                            type: NodeType.Component,
+                            name: 'Button',
+                            children: [
+                              {
+                                type: NodeType.Element,
+                                name: 'button',
+                                children: [],
+                              },
+                            ],
+                          },
+                        ],
+                      },
+                    ],
+                  },
+                ],
+              },
+              {
+                type: NodeType.Element,
+                name: 'footer',
+                children: [],
+              },
+            ],
+          },
+        ],
+      })
+
+      expect(computationUpdates.length).toBe(0)
+
+      toTrigger.forEach(t => t())
+
+      for (let i = 0; i < 3; i++) {
+        expect(computationUpdates[i]).toEqual(['ff', testComponents[i], true])
       }
 
       dispose()
