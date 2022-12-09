@@ -1,7 +1,7 @@
 {
   "name": "solid-devtools-monorepo",
   "private": true,
-  "version": "0.0.1",
+  "version": "0.0.0",
   "license": "MIT",
   "author": "Damian Tarnawski <gthetarnav@gmail.com>",
   "contributors": [],
@@ -48,9 +48,9 @@
     "vite-plugin-solid": "^2.3.10",
     "vitest": "^0.25.3"
   },
-  "packageManager": "pnpm@7.13.0",
+  "packageManager": "pnpm@7.18.1",
   "engines": {
-    "node": ">=16"
+    "node": ">=18"
   },
   "dependencies": {
     "solid-js": "^1.6.2"

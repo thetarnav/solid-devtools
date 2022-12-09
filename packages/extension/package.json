@@ -35,5 +35,5 @@
       "vite": "^3"
     }
   },
-  "packageManager": "pnpm@7.13.0"
+  "packageManager": "pnpm@7.18.1"
 }
