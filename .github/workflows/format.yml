@@ -14,12 +14,12 @@ jobs:
           # Personal access token is required to get around the protected main branch restriction
           token: ${{ secrets.PAT }}
 
-      - uses: pnpm/action-setup@v2.2.2
+      - uses: pnpm/action-setup@v2.2.4
 
       - name: Setup Node.js environment
         uses: actions/setup-node@v3
         with:
-          node-version: 16
+          node-version: 18
 
       - name: Install dependencies
         run: pnpm install --no-frozen-lockfile
