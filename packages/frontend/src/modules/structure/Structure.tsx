@@ -1,9 +1,16 @@
-import { Component, createEffect, createMemo, createSignal, For, Setter } from 'solid-js'
+import {
+  Component,
+  createEffect,
+  createMemo,
+  createSelector,
+  createSignal,
+  For,
+  Setter,
+} from 'solid-js'
 import { assignInlineVars } from '@vanilla-extract/dynamic'
 import { useRemSize } from '@solid-primitives/styles'
 import { createResizeObserver } from '@solid-primitives/resize-observer'
 import { createShortcut } from '@solid-primitives/keyboard'
-import { Tab, TabGroup, TabList } from 'solid-headless'
 import { defer } from '@solid-devtools/shared/primitives'
 import { NodeID, TreeWalkerMode, NodeType } from '@solid-devtools/debugger/types'
 import { useController } from '@/controller'
@@ -91,27 +98,28 @@ const Search: Component = () => {
 const ToggleMode: Component = () => {
   const ctx = useController()
 
-  const tabsContentMap: Record<TreeWalkerMode, string> = {
-    [TreeWalkerMode.Owners]: 'Owners',
+  const tabsContentMap: Readonly<Record<TreeWalkerMode, string>> = {
+    [TreeWalkerMode.Owners]: 'Ownership',
     [TreeWalkerMode.Components]: 'Components',
     [TreeWalkerMode.DOM]: 'DOM',
   }
 
+  const isSelected = createSelector<TreeWalkerMode, TreeWalkerMode>(ctx.structure.mode)
+
   return (
-    <TabGroup
-      horizontal
-      value={ctx.structure.mode()}
-      onChange={v => v && ctx.structure.changeMode(v)}
-      class={styles.toggleMode.group}
-    >
-      <TabList class={styles.toggleMode.list}>
-        {[TreeWalkerMode.Components, TreeWalkerMode.Owners, TreeWalkerMode.DOM].map(tab => (
-          <Tab as="button" value={tab} class={styles.toggleMode.tab}>
-            {tabsContentMap[tab]}
-          </Tab>
+    <div class={styles.toggleMode.group}>
+      <div class={styles.toggleMode.list} role="group">
+        {[TreeWalkerMode.Components, TreeWalkerMode.Owners, TreeWalkerMode.DOM].map(mode => (
+          <button
+            aria-selected={isSelected(mode)}
+            class={styles.toggleMode.tab[mode]}
+            onClick={() => ctx.structure.changeMode(mode)}
+          >
+            <span class={styles.toggleMode.span}>{tabsContentMap[mode]}</span>
+          </button>
         ))}
-      </TabList>
-    </TabGroup>
+      </div>
+    </div>
   )
 }
 

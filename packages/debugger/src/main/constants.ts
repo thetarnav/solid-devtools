@@ -21,7 +21,7 @@ export const NODE_TYPE_NAMES: Readonly<Record<NodeType, string>> = {
   [NodeType.Component]: 'Component',
   [NodeType.Element]: 'Element',
   [NodeType.Effect]: 'Effect',
-  [NodeType.Render]: 'Render',
+  [NodeType.Render]: 'Render Effect',
   [NodeType.Memo]: 'Memo',
   [NodeType.Computation]: 'Computation',
   [NodeType.Refresh]: 'Refresh',

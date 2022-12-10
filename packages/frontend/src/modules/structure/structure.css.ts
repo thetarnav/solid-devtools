@@ -1,5 +1,7 @@
-import { createVar, style } from '@vanilla-extract/css'
+import { createVar, style, styleVariants } from '@vanilla-extract/css'
 import {
+  border,
+  borderValue,
   centerChild,
   color,
   flex,
@@ -34,13 +36,14 @@ export const panelWrapper = style({
 })
 
 export const header = style({
-  ...padding(0, 2),
   ...flex('items-center', 'wrap-wrap'),
   columnGap: spacing[2],
   borderBottom: vars.panel.border,
+  overflow: 'hidden',
 })
 
 export const locatorButton = style({
+  marginLeft: spacing[2],
   width: spacing[7],
   height: spacing[7],
 })
@@ -65,7 +68,7 @@ export const search = (() => {
     outline: 'unset',
     background: 'unset',
     color: 'inherit',
-    fontFamily: 'inherit',
+    fontSize: theme.fontSize.lg,
     border: vars.panel.border,
     ...rounded(),
     ...padding(0, 6),
@@ -129,6 +132,51 @@ export const search = (() => {
 })()
 
 export const toggleMode = (() => {
+  const tabColor = createVar()
+
+  const tabBase = style({
+    borderRight: borderValue(color.gray[700]),
+    ':last-child': {
+      borderRight: 'unset',
+    },
+    ...padding(0, 2.5),
+    ...centerChild,
+    columnGap: spacing[1.5],
+    color: vars.disabled.color,
+    ...transition('color'),
+    position: 'relative',
+    outline: 'unset',
+    ':before': {
+      content: '',
+      width: spacing[2],
+      height: spacing[2],
+      ...rounded('full'),
+      ...border(tabColor),
+      opacity: 0.6,
+      ...transition('opacity'),
+    },
+    ':after': {
+      content: '',
+      position: 'absolute',
+      inset: 0,
+      opacity: 0,
+      background: `radial-gradient(circle at 50% 130%, ${tabColor}, transparent 70%);`,
+      zIndex: -1,
+      ...transition('opacity'),
+    },
+    selectors: {
+      '&:is(:hover, :focus, [aria-selected=true]):before': {
+        opacity: 0.9,
+      },
+      '&:is(:hover, :focus):after': {
+        opacity: 0.2,
+      },
+      '&[aria-selected=true]': {
+        color: vars.defaultTextColor,
+      },
+    },
+  })
+
   return {
     group: style({
       marginLeft: 'auto',
@@ -137,15 +185,29 @@ export const toggleMode = (() => {
     list: style({
       height: '100%',
       ...flex('items-stretch'),
-      columnGap: spacing[1],
     }),
-    tab: style({
-      ...centerChild,
-      selectors: {
-        '&[aria-selected=true]': {
-          color: color.cyan[500],
-        },
-      },
+    tab: styleVariants({
+      components: [
+        tabBase,
+        style({
+          vars: { [tabColor]: color.cyan[600] },
+        }),
+      ],
+      owners: [
+        tabBase,
+        style({
+          vars: { [tabColor]: color.gray[400] },
+        }),
+      ],
+      dom: [
+        tabBase,
+        style({
+          vars: { [tabColor]: color.amber[600] },
+        }),
+      ],
+    }),
+    span: style({
+      marginBottom: spacing[0.5],
     }),
   }
 })()

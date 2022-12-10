@@ -58,7 +58,7 @@ const DetailsContent: Component = () => {
   return (
     <div class={styles.content}>
       <ListSignals
-        when={details.props && Object.keys(details.props).length}
+        when={details.props && Object.keys(details.props.record).length}
         title={<>Props {details.props!.proxy && <Badge>PROXY</Badge>}</>}
       >
         <Entries of={details.props!.record}>

@@ -134,9 +134,19 @@ button {
   cursor: pointer;
   color: inherit;
   font-family: inherit;
+  font-size: inherit;
+}
+input {
+  font-size: inherit;
+  font-family: inherit;
 }
 input[type='checkbox'] {
   margin: 0;
+}
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
 }
 
 .sr-only {
