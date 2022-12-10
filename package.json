@@ -20,7 +20,7 @@
     "typecheck": "turbo run typecheck --filter=!./examples/*",
     "build-test": "turbo run build test typecheck --filter=!./examples/*",
     "format": "prettier -w packages/**/*.{js,ts,json,css,tsx,jsx} examples/**/*.{js,ts,json,css,tsx,jsx}",
-    "lint": "eslint --ignore-path .gitignore --max-warnings 0 packages/**/*.{js,ts,tsx,jsx}",
+    "lint": "eslint --ignore-path .gitignore --max-warnings 0 packages/**/*.{js,ts,tsx,jsx} --rule \"@typescript-eslint/no-unnecessary-type-assertion: off\"",
     "changeset": "changeset",
     "release": "pnpm run build-test && changeset publish",
     "version-packages": "changeset version && pnpm i",
