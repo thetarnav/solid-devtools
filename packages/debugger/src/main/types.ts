@@ -52,6 +52,12 @@ export type EncodedValue<Deep extends boolean = boolean> = {
 
 export type ValueUpdateListener = (newValue: unknown, oldValue: unknown) => void
 
+declare global {
+  interface HTMLElement {
+    sdtId?: NodeID
+  }
+}
+
 export namespace Core {
   export type Owner = import('solid-js/types/reactive/signal').Owner
   export type SignalState = import('solid-js/types/reactive/signal').SignalState<unknown>

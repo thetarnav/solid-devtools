@@ -2,7 +2,6 @@ import { Mapped, NodeID, Solid } from './types'
 import { NodeType, TreeWalkerMode } from './constants'
 import {
   getComponentRefreshNode,
-  isSolidMemo,
   isSolidRoot,
   markNodeID,
   markOwnerName,
@@ -10,7 +9,7 @@ import {
   resolveElements,
 } from './utils'
 import { interceptComputationRerun } from './update'
-import { type ComponentRegisterHandler } from './componentsMap'
+import type { ComponentRegisterHandler } from './componentRegistry'
 
 export type ComputationUpdateHandler = (
   rootId: NodeID,
@@ -82,8 +81,6 @@ function mapChildren(owner: Solid.Owner, mappedOwner: Mapped.Owner | null): Mapp
   return children
 }
 
-// TODO make into a proper id
-let $_el_id = 0
 let $_mapped_owner_node: Mapped.Owner
 let $_added_to_parent_elements = false
 
@@ -123,7 +120,7 @@ function mapElements(els: Element[], parentChildren: Mapped.Owner[] | undefined)
     }
 
     const mappedEl: Mapped.Owner = {
-      id: `el_${$_el_id++}`,
+      id: markNodeID(el),
       type: NodeType.Element,
       name: el.tagName.toLowerCase(),
       children: [],
@@ -181,29 +178,6 @@ function mapOwner(
       name!,
       (resolvedElements = resolveElements(owner.value)),
     )
-
-    // <Show> component
-    let showMemoCondition: Solid.Memo
-    let showMemoNode: Solid.Memo
-    if (
-      name === 'Show' &&
-      owner.owned?.length === 2 &&
-      isSolidMemo((showMemoCondition = owner.owned[0] as Solid.Memo)) &&
-      isSolidMemo((showMemoNode = owner.owned[1] as Solid.Memo))
-    ) {
-      showMemoCondition.name = 'condition'
-      showMemoNode.name = 'value'
-    }
-
-    // <For> component
-    let forMemo: Solid.Memo
-    if (
-      name === 'For' &&
-      owner.owned?.length === 1 &&
-      isSolidMemo((forMemo = owner.owned[0] as Solid.Memo))
-    ) {
-      forMemo.name = 'value'
-    }
 
     // Refresh
     // omitting refresh memo — map it's children instead

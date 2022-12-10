@@ -25,7 +25,7 @@ import {
 import { enableRootsAutoattach, createInternalRoot } from '../main/roots'
 import { attachElementOverlay } from './ElementOverlay'
 import { LocationAttr, NodeID } from '../types'
-import { type ComponentsMap } from '../main/componentsMap'
+import * as registry from '../main/componentRegistry'
 import { scheduleIdle } from '@solid-primitives/scheduled'
 
 export type { LocatorComponent, TargetIDE, TargetURLFunction } from './findComponent'
@@ -37,7 +37,16 @@ export type LocatorOptions = {
   key?: KbdKey
 }
 
-export type HighlightElementPayload = { nodeId: NodeID } | { elementId: string } | null
+type HighlightElementPayloads = {
+  elementNode: { componentId: NodeID; elementId: NodeID }
+  componentNode: { componentId: NodeID }
+  element: { elementId: NodeID }
+}
+export type HighlightElementPayload =
+  | {
+      [K in keyof HighlightElementPayloads]: HighlightElementPayloads[K] & { type: K }
+    }[keyof HighlightElementPayloads]
+  | null
 
 export type ClickMiddleware = (
   event: MouseEvent | CustomEvent,
@@ -48,14 +57,10 @@ export type ClickMiddleware = (
 export { markComponentLoc } from './markComponent'
 
 export function createLocator({
-  getComponent,
-  findComponent,
   debuggerEnabled,
   getElementById,
   setLocatorEnabledSignal,
 }: {
-  getComponent: ComponentsMap['getComponent']
-  findComponent: ComponentsMap['findComponent']
   debuggerEnabled: Accessor<boolean>
   getElementById(id: string): HTMLElement | undefined
   setLocatorEnabledSignal(signal: Accessor<boolean>): void
@@ -75,15 +80,25 @@ export function createLocator({
   }
 
   const hoverTarget = atom<HTMLElement | null>(null)
-  const pluginTarget = atom<HTMLElement | NodeID | null>(null)
+  const devtoolsTarget = atom<HighlightElementPayload>(null)
 
   const [highlightedComponents, setHighlightedComponents] = createSignal<LocatorComponent[]>([])
 
-  const calcHighlightedComponents = (target: HTMLElement | NodeID | null) => {
+  const calcHighlightedComponents = (
+    target: HTMLElement | HighlightElementPayload,
+  ): LocatorComponent[] => {
     if (!target) return []
+
+    // target is an elementId
+    if ('type' in target && target.type === 'element') {
+      const element = getElementById(target.elementId)
+      if (!element) return []
+      target = element
+    }
+
     // target is an element
     if (target instanceof HTMLElement) {
-      const comp = findComponent(target)
+      const comp = registry.findComponent(target)
       if (!comp) return []
       return [
         {
@@ -96,19 +111,25 @@ export function createLocator({
     }
 
     // target is a component
-    const comp = getComponent(target)
-    if (!comp) return []
-    return asArray(comp.elements).map(element => ({
-      location: getLocationAttr(element),
-      element,
-      id: target,
-      name: comp.name,
-    }))
+    if (target.type === 'componentNode') {
+      const { componentId } = target
+      const comp = registry.getComponent(componentId)
+      if (!comp) return []
+      return asArray(comp.elements).map(element => ({
+        element,
+        id: componentId,
+        name: comp.name,
+      }))
+    }
+
+    // target is an element of a component (in DOM walker mode)
+    const comp = registry.findComponentElement(target.componentId, target.elementId)
+    return comp ? [comp] : []
   }
 
   createEffect(
     defer(
-      () => hoverTarget() ?? pluginTarget(),
+      () => hoverTarget() ?? devtoolsTarget(),
       scheduleIdle(target => setHighlightedComponents(() => calcHighlightedComponents(target))),
     ),
   )
@@ -131,7 +152,7 @@ export function createLocator({
   createEffect((prev: NodeID | undefined) => {
     const target = hoverTarget()
     if (!target) return
-    const comp = findComponent(target)
+    const comp = registry.findComponent(target)
     if (prev) emitDebuggerHoveredComponentChange({ nodeId: prev, state: false })
     if (comp) {
       const { id } = comp
@@ -140,16 +161,8 @@ export function createLocator({
     }
   })
 
-  function setPluginHighlightTarget(data: HighlightElementPayload) {
-    if (!data) return pluginTarget(null)
-    // highlight component
-    if ('nodeId' in data) pluginTarget(data.nodeId)
-    // highlight element
-    else {
-      const element = getElementById(data.elementId)
-      if (!element) return warn('No element found', data)
-      pluginTarget(element)
-    }
+  function setDevtoolsHighlightTarget(data: HighlightElementPayload) {
+    devtoolsTarget(data)
   }
 
   // functions to be called when user clicks on a component
@@ -226,7 +239,7 @@ export function createLocator({
     togglePluginLocatorMode,
     enabledByDebugger: enabledByPressing,
     addClickInterceptor,
-    setPluginHighlightTarget,
+    setPluginHighlightTarget: setDevtoolsHighlightTarget,
     onDebuggerHoveredComponentChange,
     openElementSourceCode,
   }

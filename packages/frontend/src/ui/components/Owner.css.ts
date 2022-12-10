@@ -53,6 +53,7 @@ export const elementName = style([
   componentName,
   {
     color: color.amber[500],
+    textTransform: 'lowercase',
   },
 ])
 

@@ -1,4 +1,4 @@
-import { batch, createEffect, createSignal, on } from 'solid-js'
+import { batch, createEffect, createMemo, createSignal } from 'solid-js'
 import { createContextProvider } from '@solid-primitives/context'
 import {
   ComputationUpdate,
@@ -171,34 +171,67 @@ const [Provider, useControllerCtx] = createContextProvider(
     inspector.setOnOpenLocation(client.onOpenLocation)
 
     // highlight hovered element
-    createEffect(
-      on(
-        [structure.extHovered, inspector.hoveredElement],
-        ([nodeId, elementId], _, prev: HighlightElementPayload = null) => {
-          // handle component
-          if (nodeId) {
-            const hovered = structure.findNode(nodeId)
-            if (hovered && hovered.type === NodeType.Component) {
-              if (prev && 'nodeId' in prev && prev.nodeId === nodeId) return prev
 
-              const payload = { nodeId }
-              client.onHighlightElementChange(payload)
-              return payload
-            }
+    const hovered = createMemo<{ elementId: NodeID } | { nodeId: NodeID } | undefined>(
+      () => {
+        const elementId = inspector.hoveredElement()
+        if (elementId) return { elementId }
+        const nodeId = structure.extHovered()
+        if (nodeId) return { nodeId }
+      },
+      undefined,
+      {
+        equals: (a, b) => {
+          if (a && b) {
+            if ('elementId' in a && 'elementId' in b) return a.elementId === b.elementId
+            if ('nodeId' in a && 'nodeId' in b) return a.nodeId === b.nodeId
           }
-          // handle element
-          if (elementId) {
-            if (prev && 'elementId' in prev && prev.elementId === elementId) return prev
-
-            const payload = { elementId }
-            client.onHighlightElementChange(payload)
-            return payload
-          }
-          // no element or component
-          if (prev) client.onHighlightElementChange(null)
+          return false
         },
-        { defer: true },
-      ),
+      },
+    )
+
+    const getHightlightPayload = (
+      id: NonNullable<ReturnType<typeof hovered>>,
+    ): undefined | NonNullable<HighlightElementPayload> => {
+      // handle element
+      if ('elementId' in id)
+        return {
+          elementId: id.elementId,
+          type: 'element',
+        }
+
+      // handle component | element node
+      const { nodeId } = id
+      const node = structure.findNode(nodeId)
+
+      if (!node || (node.type !== NodeType.Component && node.type !== NodeType.Element)) return
+
+      if (node.type === NodeType.Component)
+        return {
+          componentId: nodeId,
+          type: 'componentNode',
+        }
+
+      const component = structure.getClosestComponentNode(node)
+      if (component)
+        return {
+          componentId: component.id,
+          elementId: nodeId,
+          type: 'elementNode',
+        }
+    }
+
+    createEffect(
+      defer(hovered, (hovered, _, prev: ReturnType<typeof getHightlightPayload> | void) => {
+        if (!hovered) return client.onHighlightElementChange(null)
+
+        const payload = getHightlightPayload(hovered)
+        if (!payload && !prev) return
+
+        client.onHighlightElementChange(payload ?? null)
+        return payload
+      }),
     )
 
     // TREE VIEW MODE

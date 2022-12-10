@@ -117,3 +117,16 @@ export function findItemById<T extends { id: string }>(array: T[], id: string): 
     if (item.id === id) return item
   }
 }
+
+export function whileArray<T, U>(
+  toCheck: T[],
+  callback: (item: T, toCheck: T[]) => U | undefined,
+): U | undefined {
+  let index = 0
+  let current: T = toCheck[index++]
+  while (current) {
+    const result = callback(current, toCheck)
+    if (result !== undefined) return result
+    current = toCheck[index++]
+  }
+}

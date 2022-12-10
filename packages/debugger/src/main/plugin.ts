@@ -10,7 +10,6 @@ import {
   setComputationUpdateHandler,
   setRootUpdatesHandler,
   StructureUpdateHandler,
-  useComponentsMap,
 } from './roots'
 import { createLocator } from '../locator'
 import { createInspector, InspectorUpdate } from '../inspector'
@@ -77,14 +76,10 @@ export default createInternalRoot(() => {
   //
   const inspector = createInspector(debuggerEnabled, { eventHub })
 
-  const { findComponent, getComponent } = useComponentsMap()
-
   //
   // Locator
   //
   const locator = createLocator({
-    findComponent,
-    getComponent,
     debuggerEnabled,
     getElementById: inspector.getElementById,
     setLocatorEnabledSignal,

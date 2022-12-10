@@ -1,6 +1,6 @@
 import { createRoot } from 'solid-js'
 import { throttle } from '@solid-primitives/scheduled'
-import { warn } from '@solid-devtools/shared/utils'
+import { warn, whileArray } from '@solid-devtools/shared/utils'
 import {
   ComputationUpdateHandler,
   getClosestIncludedOwner,
@@ -10,113 +10,108 @@ import {
 import { markNodeID, isSolidRoot, onOwnerCleanup, getOwner } from './utils'
 import { Core, NodeID, Solid, StructureUpdates } from './types'
 import { defaultWalkerMode, NodeType, TreeWalkerMode } from './constants'
-import { createComponentsMap } from './componentsMap'
+import { clearComponentRegistry, registerComponent } from './componentRegistry'
 
 // TREE WALKER MODE
-let $_tree_walker_mode: TreeWalkerMode = defaultWalkerMode
+let CurrentTreeWalkerMode: TreeWalkerMode = defaultWalkerMode
 
 export function changeTreeWalkerMode(newMode: TreeWalkerMode): void {
-  $_tree_walker_mode = newMode
+  CurrentTreeWalkerMode = newMode
   updateAllRoots()
+  clearComponentRegistry()
 }
 
 // ROOTS
 // map of all top-roots
-const $_root_map = new Map<NodeID, Solid.Root>()
+const RootMap = new Map<NodeID, Solid.Root>()
 
-const $_update_queue = new Set<Solid.Owner>()
-const $_root_of_owners = new Map<Solid.Owner, NodeID>()
-const $_removed_roots = new Set<NodeID>()
-let $_update_all_roots = false
-
-const $_components_map = createComponentsMap()
-
-export function useComponentsMap() {
-  return $_components_map
-}
+const UpdateQueue = new Set<Solid.Owner>()
+const OwnerRoots = new Map<Solid.Owner, NodeID>()
+const RemovedRoots = new Set<NodeID>()
+let UpdateAllRoots = false
 
 export type StructureUpdateHandler = (
   structureUpdates: StructureUpdates['updated'],
   removedIds: ReadonlySet<NodeID>,
 ) => void
 
-let $_on_root_updates: StructureUpdateHandler | null = null
+let OnRootUpdates: StructureUpdateHandler | null = null
 export function setRootUpdatesHandler(handler: StructureUpdateHandler | null): void {
-  $_on_root_updates = handler
+  OnRootUpdates = handler
   if (handler) updateAllRoots()
 }
 
 // will be set in `plugin.ts`
-let $_on_computation_update!: (rootId: NodeID, nodeId: NodeID) => void
-export function setComputationUpdateHandler(handler: typeof $_on_computation_update): void {
-  $_on_computation_update = handler
+let OnComputationUpdates!: (rootId: NodeID, nodeId: NodeID) => void
+export function setComputationUpdateHandler(handler: typeof OnComputationUpdates): void {
+  OnComputationUpdates = handler
 }
 const onComputationUpdate: ComputationUpdateHandler = (rootId, node, changedStructure) => {
   // only if debugger is enabled
-  if (!$_on_root_updates) return
+  if (!OnRootUpdates) return
   changedStructure && updateOwner(node, rootId)
   queueMicrotask(() => {
-    if (!$_on_root_updates) return
-    $_on_computation_update(rootId, markNodeID(node))
+    if (!OnRootUpdates) return
+    OnComputationUpdates(rootId, markNodeID(node))
   })
 }
 
 function forceFlushRootUpdateQueue(): void {
   // $_on_root_updates being null means debugger is disabled
-  if ($_on_root_updates) {
+  if (OnRootUpdates) {
     const updated: StructureUpdates['updated'] = {}
 
-    const [owners, getRootId] = $_update_all_roots
-      ? [$_root_map.values(), (owner: Solid.Owner) => owner.sdtId!]
-      : [$_update_queue, (owner: Solid.Owner) => $_root_of_owners.get(owner)!]
-    $_update_all_roots = false
+    const [owners, getRootId] = UpdateAllRoots
+      ? [RootMap.values(), (owner: Solid.Owner) => owner.sdtId!]
+      : [UpdateQueue, (owner: Solid.Owner) => OwnerRoots.get(owner)!]
+    UpdateAllRoots = false
 
     for (const owner of owners) {
       const rootId = getRootId(owner)
       const tree = walkSolidTree(owner, {
         rootId,
-        mode: $_tree_walker_mode,
+        mode: CurrentTreeWalkerMode,
         onComputationUpdate,
-        registerComponent: $_components_map.register,
+        registerComponent,
       })
       const map = updated[rootId]
       if (map) map[tree.id] = tree
       else updated[rootId] = { [tree.id]: tree }
     }
 
-    $_on_root_updates(updated, $_removed_roots)
+    OnRootUpdates(updated, RemovedRoots)
   }
-  $_update_queue.clear()
+  UpdateQueue.clear()
   flushRootUpdateQueue.clear()
-  $_removed_roots.clear()
-  $_root_of_owners.clear()
+  RemovedRoots.clear()
+  OwnerRoots.clear()
 }
 const flushRootUpdateQueue = throttle(forceFlushRootUpdateQueue, 250)
 
 function updateOwner(node: Solid.Owner, topRootId: NodeID): void {
-  $_update_queue.add(node)
-  $_root_of_owners.set(node, topRootId)
+  UpdateQueue.add(node)
+  OwnerRoots.set(node, topRootId)
   flushRootUpdateQueue()
 }
 
 function updateClosestIncludedOwner(node: Solid.Owner, topRootId: NodeID): void {
-  const closestIncludedOwner = getClosestIncludedOwner(node, $_tree_walker_mode)
+  const closestIncludedOwner = getClosestIncludedOwner(node, CurrentTreeWalkerMode)
   closestIncludedOwner && updateOwner(closestIncludedOwner, topRootId)
 }
 
 export function updateAllRoots(): void {
-  $_update_all_roots = true
+  UpdateAllRoots = true
   flushRootUpdateQueue()
 }
 
 export function forceUpdateAllRoots(): void {
-  $_update_all_roots = true
+  UpdateAllRoots = true
   queueMicrotask(forceFlushRootUpdateQueue)
 }
 
 export function createTopRoot(owner: Solid.Root): void {
   const rootId = markNodeID(owner)
-  $_root_map.set(rootId, owner)
+  RootMap.set(rootId, owner)
   updateOwner(owner, rootId)
 }
 
@@ -125,9 +120,9 @@ function cleanupRoot(root: Solid.Root): void {
   root.isDisposed = true
   changeRootAttachment(root, null)
 
-  const wasTarcked = $_root_map.delete(rootId)
+  const wasTarcked = RootMap.delete(rootId)
   if (wasTarcked) {
-    $_removed_roots.add(rootId)
+    RemovedRoots.add(rootId)
     flushRootUpdateQueue()
   }
 }
@@ -181,7 +176,7 @@ export function attachDebugger(_owner: Core.Owner = getOwner()!): void {
       // INTERNAL | disposed
       if (owner.isInternal || owner.isDisposed) return
       // already attached
-      if ($_root_map.has(markNodeID(owner))) {
+      if (RootMap.has(markNodeID(owner))) {
         isFirstTopLevel = false
         break
       }
@@ -233,25 +228,25 @@ export function attachDebugger(_owner: Core.Owner = getOwner()!): void {
  * This is not reversable, and should be used only when you are sure that they won't be used anymore.
  */
 export function unobserveAllRoots(): void {
-  $_root_map.forEach(r => cleanupRoot(r))
-  $_components_map.clear()
+  RootMap.forEach(r => cleanupRoot(r))
+  clearComponentRegistry()
 }
 
 //
 // AFTER CREATE ROOT
 //
 
-let $_autoattach_enabled = false
-let $_internal_root_count = 0
+let AutoattachEnabled = false
+let InternalRootCount = 0
 /**
  * Listens to `createRoot` calls and attaches debugger to them.
  */
 export function enableRootsAutoattach(): void {
-  if ($_autoattach_enabled) return
-  $_autoattach_enabled = true
+  if (AutoattachEnabled) return
+  AutoattachEnabled = true
 
   const autoattach = (root: Core.Owner) => {
-    if ($_internal_root_count) return
+    if (InternalRootCount) return
     attachDebugger(root)
   }
 
@@ -268,12 +263,12 @@ export function enableRootsAutoattach(): void {
  * Sold's `createRoot` primitive that won't be tracked by the debugger.
  */
 export const createInternalRoot: typeof createRoot = (fn, detachedOwner) => {
-  $_internal_root_count++
+  InternalRootCount++
   const r = createRoot(dispose => {
     ;(getOwner() as Solid.Root).isInternal = true
     return fn(dispose)
   }, detachedOwner)
-  $_internal_root_count--
+  InternalRootCount--
   return r
 }
 
@@ -281,17 +276,13 @@ export const createInternalRoot: typeof createRoot = (fn, detachedOwner) => {
  * Looks though the children and subroots of the given root to find owner of given {@link id}.
  */
 export const findOwnerById = (rootId: NodeID, id: NodeID): Solid.Owner | undefined => {
-  const root = $_root_map.get(rootId)
+  const root = RootMap.get(rootId)
   if (!root) return
-  const toCheck: Solid.Owner[] = [root]
-  let index = 0
-  let owner = toCheck[index++]
-  do {
+  return whileArray([root], (owner: Solid.Owner, toCheck) => {
     if (owner.sdtId === id) return owner
     if (owner.owned) toCheck.push.apply(toCheck, owner.owned)
     if (owner.sdtSubRoots) toCheck.push.apply(toCheck, owner.sdtSubRoots)
-    owner = toCheck[index++]
-  } while (owner)
+  })
 }
 
 /**
