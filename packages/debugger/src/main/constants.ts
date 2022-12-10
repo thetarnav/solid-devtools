@@ -16,6 +16,20 @@ export enum NodeType {
   Store = 'store',
 }
 
+export const NODE_TYPE_NAMES: Readonly<Record<NodeType, string>> = {
+  [NodeType.Root]: 'Root',
+  [NodeType.Component]: 'Component',
+  [NodeType.Element]: 'Element',
+  [NodeType.Effect]: 'Effect',
+  [NodeType.Render]: 'Render',
+  [NodeType.Memo]: 'Memo',
+  [NodeType.Computation]: 'Computation',
+  [NodeType.Refresh]: 'Refresh',
+  [NodeType.Context]: 'Context',
+  [NodeType.Signal]: 'Signal',
+  [NodeType.Store]: 'Store',
+}
+
 export enum ValueType {
   Number = 'number',
   Boolean = 'boolean',

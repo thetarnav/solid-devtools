@@ -1,6 +1,6 @@
 import { Component, createMemo, For, JSX, Show } from 'solid-js'
 import { Entries } from '@solid-primitives/keyed'
-import { NodeType } from '@solid-devtools/debugger/types'
+import { NodeType, NODE_TYPE_NAMES } from '@solid-devtools/debugger/types'
 import { Scrollable, Badge, Icon } from '@/ui'
 import { ValueNode } from './ValueNode'
 import { useController } from '@/controller'
@@ -92,7 +92,7 @@ const DetailsContent: Component = () => {
       ))}
       {details.value && (
         <div>
-          <h2 class={styles.h2}>{NodeType[inspectedNode()!.type]}</h2>
+          <h2 class={styles.h2}>{NODE_TYPE_NAMES[inspectedNode()!.type]}</h2>
           <ValueNode
             name="value"
             value={details.value.value}

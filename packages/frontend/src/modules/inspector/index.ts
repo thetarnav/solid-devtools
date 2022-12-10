@@ -166,12 +166,14 @@ function updateStore(
 export default function createInspector({
   getNodePath,
   findNode,
+  findClosestInspectableNode,
 }: {
   getNodePath(node: Structure.Node): Structure.Node[]
   findNode(id: NodeID): Structure.Node | undefined
+  findClosestInspectableNode(node: Structure.Node): Structure.Node | undefined
 }) {
-  const [inspectedId, setInspectedId] = createSignal<NodeID | null>(null)
   const [inspectedNode, setInspectedNode] = createSignal<Structure.Node | null>(null)
+  const inspectedId = createMemo(() => inspectedNode()?.id ?? null)
   const path = createMemo(() => {
     const node = inspectedNode()
     return node ? getNodePath(node) : []
@@ -206,19 +208,18 @@ export default function createInspector({
   const setInspected: (data: Structure.Node | NodeID | null) => void = untrackedCallback(data => {
     batch(() => {
       if (data === null) {
-        setInspectedId(null)
         setInspectedNode(null)
         return
       }
 
+      const prev = inspectedNode()
       const newId = typeof data === 'string' ? data : data.id
-      if (newId === inspectedId()) return
+      if (prev && newId === prev.id) return
       const node = typeof data === 'string' ? findNode(data) : data
       if (!node) return warn(`setInspected: node (${newId}) not found`)
       // html elements are not inspectable
       if (node.type === NodeType.Element) return
 
-      setInspectedId(newId)
       setInspectedNode(node)
       setLocation(null)
       setSignalDetails({ signals: {}, value: null, props: null })
@@ -227,9 +228,9 @@ export default function createInspector({
 
   // clear the inspector when the inspected node is removed
   const handleStructureChange = untrackedCallback(() => {
-    const node = inspectedNode()
-    if (!node) return
-    findNode(node.id) || setInspectedNode(null)
+    const prevNode = inspectedNode()
+    if (!prevNode) return
+    setInspected(findNode(prevNode.id) ?? findClosestInspectableNode(prevNode) ?? null)
   })
 
   const setNewDetails = untrackedCallback((raw: Mapped.OwnerDetails) => {

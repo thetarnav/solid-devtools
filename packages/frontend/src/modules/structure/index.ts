@@ -147,6 +147,17 @@ export function getClosestComponentNode(node: Structure.Node): Structure.Node | 
   }
 }
 
+export function findClosestInspectableNode(node: Structure.Node): Structure.Node | undefined {
+  let current: Structure.Node | null = node
+  let lastRoot: Structure.Node | undefined
+  while (current) {
+    if (current.type === NodeType.Component || current.type === NodeType.Context) return current
+    if (current.type === NodeType.Root) lastRoot = current
+    current = current.parent
+  }
+  return lastRoot
+}
+
 export function getNodePath(node: Structure.Node): Structure.Node[] {
   const path = [node]
   let parent = node.parent
@@ -231,6 +242,7 @@ export default function createStructure({
     findNode,
     getRootNode,
     getClosestComponentNode,
+    findClosestInspectableNode,
     getNodePath,
     search,
     mode,
