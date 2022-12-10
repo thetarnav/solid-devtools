@@ -68,8 +68,6 @@ createInternalRoot(() => {
 
     fromContent('OpenLocation', debug.openInspectedNodeLocation)
 
-    fromContent('TreeViewMode', mode => {
-      console.log('TreeViewMode', mode)
-    })
+    fromContent('TreeViewMode', debug.changeTreeWalkerMode)
   })
 })

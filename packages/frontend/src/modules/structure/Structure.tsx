@@ -101,7 +101,7 @@ const ToggleMode: Component = () => {
     <TabGroup
       horizontal
       value={ctx.structure.mode()}
-      onChange={v => v && ctx.structure.setMode(v)}
+      onChange={v => v && ctx.structure.changeMode(v)}
       class={styles.toggleMode.group}
     >
       <TabList class={styles.toggleMode.list}>

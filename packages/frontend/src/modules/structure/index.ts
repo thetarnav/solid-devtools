@@ -1,4 +1,4 @@
-import { Accessor, createSelector, createSignal, untrack } from 'solid-js'
+import { Accessor, batch, createSelector, createSignal, untrack } from 'solid-js'
 import {
   defaultWalkerMode,
   Mapped,
@@ -211,6 +211,14 @@ export default function createStructure({
     })
   }
 
+  function changeMode(newMode: TreeWalkerMode): void {
+    if (newMode === mode()) return
+    batch(() => {
+      setMode(newMode)
+      setSearchResult([])
+    })
+  }
+
   return {
     state,
     updateStructure,
@@ -226,6 +234,6 @@ export default function createStructure({
     getNodePath,
     search,
     mode,
-    setMode,
+    changeMode,
   }
 }
