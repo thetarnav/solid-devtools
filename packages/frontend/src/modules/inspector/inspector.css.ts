@@ -1,6 +1,7 @@
 import { createVar, style } from '@vanilla-extract/css'
 import { spacing, theme, padding, rounded, centerChild, transition, vars, flex } from '@/ui/theme'
 import { panelHeaderHeight, panelHeaderAfterEl } from '../structure/structure.css'
+import { createHoverBackground } from '@/ui/mixins'
 
 export const root = style({
   height: '100%',
@@ -19,34 +20,35 @@ export const header = style([
 
 export const actions = (() => {
   const textOpacity = createVar()
-  const bgOpacity = createVar()
+
+  const { hoverBgStyle } = createHoverBackground()
 
   return {
     container: style({
       ...flex('items-center'),
       columnGap: spacing[1],
     }),
-    button: style({
-      width: spacing[6],
-      height: spacing[6],
-      ...rounded(),
-      ...centerChild,
-      color: `rgb(${vars.disabled.colorValue} / ${textOpacity})`,
-      backgroundColor: `rgb(${vars.disabled.colorValue} / ${bgOpacity})`,
-      vars: {
-        [bgOpacity]: '0',
-        [textOpacity]: '0.85',
-      },
-      ...transition(['background-color', 'color']),
-      selectors: {
-        '&:hover': {
-          vars: {
-            [bgOpacity]: '0.15',
-            [textOpacity]: '1',
+    button: style([
+      hoverBgStyle,
+      {
+        width: spacing[6],
+        height: spacing[6],
+        ...rounded(),
+        ...centerChild,
+        color: `rgb(${vars.disabled.colorValue} / ${textOpacity})`,
+        vars: {
+          [textOpacity]: '0.85',
+        },
+        ...transition(['background-color', 'color']),
+        selectors: {
+          '&:hover': {
+            vars: {
+              [textOpacity]: '1',
+            },
           },
         },
       },
-    }),
+    ]),
     icon: style({
       width: spacing[4],
       height: spacing[4],

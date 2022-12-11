@@ -1,5 +1,5 @@
 import { style } from '@vanilla-extract/css'
-import { spacing, color, rounded, theme, flex } from '@/ui/theme'
+import { spacing, color, rounded, theme, flex, borderValue } from '@/ui/theme'
 import { toggleButton } from '@/ui/components/button/button.css'
 import { varsStyle, vars } from './ui/theme/vars.css'
 
@@ -25,7 +25,7 @@ export const header = (() => {
       ...flex('items-center'),
       columnGap: spacing[2],
       backgroundColor: vars.panel.bg,
-      borderBottom: vars.panel.border,
+      borderBottom: borderValue(vars.panel.border),
       color: vars.defaultTextColor,
     }),
     identity: style({

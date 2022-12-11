@@ -11,6 +11,7 @@ import {
   margin,
   remValue,
   vars,
+  borderValue,
 } from '@/ui/theme'
 import { pathHeight } from './structure.css'
 
@@ -44,7 +45,7 @@ export const content = style({
   display: 'flex',
   alignItems: 'flex-end',
   ...padding(0.25, 2, 0.25, 2),
-  borderTop: vars.panel.border,
+  borderTop: borderValue(vars.panel.border),
   backgroundColor: vars.panel.bg,
   ':hover': {
     height: 'auto',

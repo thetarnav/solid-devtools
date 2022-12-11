@@ -41,7 +41,7 @@ export const content = style({
 
 export const split = style({
   position: 'relative',
-  backgroundColor: vars.panel.borderColor,
+  backgroundColor: vars.panel.border,
 })
 
 export const splitHandle = style({
@@ -54,7 +54,7 @@ export const splitHandle = style({
     content: '',
     position: 'absolute',
     inset: `0 1px`,
-    backgroundColor: vars.panel.borderColor,
+    backgroundColor: vars.panel.border,
     opacity: 0,
     ...transition('opacity'),
   },

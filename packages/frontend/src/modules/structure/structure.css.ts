@@ -5,7 +5,6 @@ import {
   centerChild,
   color,
   flex,
-  hexToRgb,
   insetX,
   insetY,
   padding,
@@ -16,6 +15,7 @@ import {
   transition,
   vars,
 } from '@/ui/theme'
+import { createHoverBackground } from '@/ui/mixins'
 
 export const pathHeight = spacing[4.5]
 
@@ -46,7 +46,7 @@ export const panelHeaderAfterEl = style({
     ...insetX(0),
     top: '100%',
     height: '0.6px',
-    backgroundColor: vars.panel.borderColor,
+    backgroundColor: vars.panel.border,
   },
 })
 
@@ -70,16 +70,17 @@ export const locatorIcon = style({
 export const search = (() => {
   const height = panelHeaderHeight
 
-  const form = style({
-    ...border(color.gray[700], 'l', 'r'),
-    flexGrow: 1,
-    position: 'relative',
-    overflow: 'hidden',
-    ...transition('background-color'),
-    ':hover': {
-      backgroundColor: hexToRgb(color.gray[400], 0.1),
+  const { hoverBgStyle } = createHoverBackground()
+
+  const form = style([
+    hoverBgStyle,
+    {
+      ...border(vars.panel.lightBorder, 'l', 'r'),
+      flexGrow: 1,
+      position: 'relative',
+      overflow: 'hidden',
     },
-  })
+  ])
 
   const input = style({
     height,
@@ -134,13 +135,11 @@ export const search = (() => {
     icon: iconBase,
     clearButton: style([
       edgeContainerBase,
+      hoverBgStyle,
       {
         right: spacing[1],
         ...padding(0, 0.5),
         ...rounded(),
-        ':hover': {
-          backgroundColor: color.gray[700],
-        },
       },
     ]),
     clearIcon: iconBase,
@@ -151,7 +150,7 @@ export const toggleMode = (() => {
   const tabColor = createVar()
 
   const tabBase = style({
-    borderRight: borderValue(color.gray[700]),
+    borderRight: borderValue(vars.panel.lightBorder),
     ':last-child': {
       borderRight: 'unset',
     },
@@ -182,7 +181,7 @@ export const toggleMode = (() => {
     },
     selectors: {
       '&:is(:hover, :focus, [aria-selected=true]):before': {
-        opacity: 0.9,
+        opacity: 1,
       },
       '&:is(:hover, :focus):after': {
         opacity: 0.2,
