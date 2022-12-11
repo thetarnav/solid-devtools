@@ -196,7 +196,7 @@ export const ValueElement = {
     baseValue,
     elHighlight.container,
     {
-      color: color.amber[600],
+      color: vars.domColor,
       textTransform: 'lowercase',
       vars: {
         [elHighlight.bgOpacityVar]: '0',
@@ -214,11 +214,6 @@ export const ValueElement = {
         color: vars.disabled.color,
         content: '/>',
       },
-      ...media({
-        [dark]: {
-          color: color.amber[500],
-        },
-      }),
     },
   ]),
   highlight: elHighlight.highlight,

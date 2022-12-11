@@ -3,7 +3,6 @@ import {
   border,
   borderValue,
   centerChild,
-  color,
   flex,
   insetX,
   insetY,
@@ -205,19 +204,19 @@ export const toggleMode = (() => {
       components: [
         tabBase,
         style({
-          vars: { [tabColor]: color.cyan[600] },
+          vars: { [tabColor]: vars.componentNameColor },
         }),
       ],
       owners: [
         tabBase,
         style({
-          vars: { [tabColor]: color.gray[400] },
+          vars: { [tabColor]: vars.defaultTextColor },
         }),
       ],
       dom: [
         tabBase,
         style({
-          vars: { [tabColor]: color.amber[600] },
+          vars: { [tabColor]: vars.domColor },
         }),
       ],
     }),

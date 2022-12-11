@@ -17,6 +17,7 @@ export const vars = {
   },
   defaultTextColor: createVar(),
   componentNameColor: createVar(),
+  domColor: createVar(),
 }
 
 export const varsStyle = style({
@@ -32,6 +33,7 @@ export const varsStyle = style({
     [vars.disabled.colorValue]: hexToRgbValue(color.disabled.light),
     [vars.defaultTextColor]: color.gray[900],
     [vars.componentNameColor]: color.cyan[600],
+    [vars.domColor]: color.amber[600],
   },
   ...media({
     [dark]: {
@@ -47,6 +49,7 @@ export const varsStyle = style({
         [vars.disabled.colorValue]: hexToRgbValue(color.disabled.dark),
         [vars.defaultTextColor]: color.gray[50],
         [vars.componentNameColor]: color.cyan[400],
+        [vars.domColor]: color.amber[500],
       },
     },
   }),

@@ -35,6 +35,7 @@ export const header = (() => {
     logo: style({
       width: spacing[4],
       height: spacing[4],
+      color: vars.disabled.color,
     }),
     subtitle: style({
       color: vars.disabled.color,

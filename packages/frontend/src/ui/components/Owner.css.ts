@@ -52,7 +52,7 @@ export const componentName = style([
 export const elementName = style([
   componentName,
   {
-    color: color.amber[500],
+    color: vars.domColor,
     textTransform: 'lowercase',
   },
 ])
