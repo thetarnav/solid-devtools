@@ -113,9 +113,9 @@ const ToggleMode: Component = () => {
           <button
             aria-selected={isSelected(mode)}
             class={styles.toggleMode.tab[mode]}
-            onClick={() => ctx.structure.changeMode(mode)}
+            onClick={() => ctx.changeTreeViewMode(mode)}
           >
-            <span class={styles.toggleMode.span}>{tabsContentMap[mode]}</span>
+            {tabsContentMap[mode]}
           </button>
         ))}
       </div>

@@ -5,9 +5,10 @@ import {
   centerChild,
   color,
   flex,
+  hexToRgb,
+  insetX,
   insetY,
   padding,
-  panelHeaderHeight,
   remValue,
   rounded,
   spacing,
@@ -22,6 +23,8 @@ export const rowHeight = spacing[4.5]
 export const rowPadding = spacing[3.5]
 export const vMargin = spacing[3]
 
+export const panelHeaderHeight = spacing[7]
+
 export const ROW_HEIGHT_IN_REM = remValue(rowHeight)
 export const V_MARGIN_IN_REM = remValue(vMargin)
 
@@ -35,50 +38,62 @@ export const panelWrapper = style({
   gridTemplateColumns: '100%',
 })
 
-export const header = style({
-  ...flex('items-center', 'wrap-wrap'),
-  columnGap: spacing[2],
-  borderBottom: vars.panel.border,
-  overflow: 'hidden',
+export const panelHeaderAfterEl = style({
+  position: 'relative',
+  ':after': {
+    content: '',
+    position: 'absolute',
+    ...insetX(0),
+    top: '100%',
+    height: '0.6px',
+    backgroundColor: vars.panel.borderColor,
+  },
 })
 
+export const header = style([
+  panelHeaderAfterEl,
+  {
+    ...flex('items-stretch'),
+  },
+])
+
 export const locatorButton = style({
-  marginLeft: spacing[2],
+  flexShrink: 0,
   width: spacing[7],
   height: spacing[7],
 })
 export const locatorIcon = style({
-  width: spacing[4.5],
-  height: spacing[4.5],
+  width: spacing[4],
+  height: spacing[4],
 })
 
 export const search = (() => {
-  const height = spacing[7]
+  const height = panelHeaderHeight
 
   const form = style({
+    ...border(color.gray[700], 'l', 'r'),
+    flexGrow: 1,
     position: 'relative',
-    height,
     overflow: 'hidden',
+    ...transition('background-color'),
+    ':hover': {
+      backgroundColor: hexToRgb(color.gray[400], 0.1),
+    },
   })
 
   const input = style({
     height,
-    boxSizing: 'border-box',
-    width: spacing[48],
+    width: '100%',
     outline: 'unset',
     background: 'unset',
+    border: 'unset',
     color: 'inherit',
     fontSize: theme.fontSize.lg,
-    border: vars.panel.border,
-    ...rounded(),
     ...padding(0, 6),
     ...transition('padding'),
-    lineHeight: spacing[8],
+    lineHeight: spacing[9],
     '::placeholder': {
       color: vars.disabled.color,
-    },
-    ':focus': {
-      borderColor: vars.panel.string.borderColor,
     },
     selectors: {
       [`${form}:focus-within &`]: {
@@ -94,8 +109,8 @@ export const search = (() => {
     ...centerChild,
   })
   const iconBase = style({
-    width: spacing[4],
-    height: spacing[4],
+    width: spacing[3.5],
+    height: spacing[3.5],
     color: vars.disabled.color,
   })
 
@@ -105,6 +120,7 @@ export const search = (() => {
     iconContainer: style([
       edgeContainerBase,
       {
+        pointerEvents: 'none',
         left: 0,
         paddingLeft: spacing[1.5],
         ...transition('transform'),
@@ -205,9 +221,6 @@ export const toggleMode = (() => {
           vars: { [tabColor]: color.amber[600] },
         }),
       ],
-    }),
-    span: style({
-      marginBottom: spacing[0.5],
     }),
   }
 })()

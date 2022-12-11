@@ -18,21 +18,31 @@ export const app = style([
   },
 ])
 
-export const header = style({
-  padding: spacing[2],
-  ...flex('items-center'),
-  columnGap: spacing[2],
-  backgroundColor: vars.panel.bg,
-  borderBottom: vars.panel.border,
-  color: vars.defaultTextColor,
-})
-
-export const subtitle = style({
-  color: vars.disabled.color,
-  fontFamily: theme.font.mono,
-  fontSize: theme.fontSize.sm,
-  marginTop: spacing[1],
-})
+export const header = (() => {
+  return {
+    header: style({
+      padding: spacing[2],
+      ...flex('items-center'),
+      columnGap: spacing[2],
+      backgroundColor: vars.panel.bg,
+      borderBottom: vars.panel.border,
+      color: vars.defaultTextColor,
+    }),
+    identity: style({
+      ...flex('items-center'),
+      columnGap: spacing[2],
+    }),
+    logo: style({
+      width: spacing[4],
+      height: spacing[4],
+    }),
+    subtitle: style({
+      color: vars.disabled.color,
+      fontFamily: theme.font.mono,
+      fontSize: theme.fontSize.sm,
+    }),
+  }
+})()
 
 export const options = (() => {
   return {
@@ -43,6 +53,7 @@ export const options = (() => {
     button: style([
       toggleButton,
       {
+        ...rounded('md'),
         marginLeft: 'auto',
         width: spacing[7],
         height: spacing[7],

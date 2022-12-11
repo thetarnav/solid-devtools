@@ -152,7 +152,7 @@ export const theme = {
     1000: '1000ms',
   },
   font: {
-    sans: "ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji'",
+    sans: "ui-sans-serif, -apple-system, BlinkMacSystemFont, Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji', 'Noto Color Emoji'",
     serif: "ui-serif, Georgia, Cambria, 'Times New Roman', Times, serif",
     mono: "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace",
   },
@@ -161,7 +161,5 @@ export const theme = {
 } as const
 
 export const { spacing, color } = theme
-
-export const panelHeaderHeight = spacing[8]
 
 export * from './utils'

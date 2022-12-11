@@ -238,6 +238,14 @@ const [Provider, useControllerCtx] = createContextProvider(
     // TREE VIEW MODE
     createEffect(defer(structure.mode, client.onTreeViewModeChange))
 
+    function changeTreeViewMode(newMode: TreeWalkerMode): void {
+      if (newMode === structure.mode()) return
+      batch(() => {
+        structure.setMode(newMode)
+        searchStructure('')
+      })
+    }
+
     // SEARCH NODES
     let lastSearch: string = ''
     let lastSearchResults: NodeID[] | undefined
@@ -266,6 +274,7 @@ const [Provider, useControllerCtx] = createContextProvider(
       setInspectedNode: inspector.setInspectedNode,
       toggleHoveredNode: structure.toggleHoveredNode,
       listenToComputationUpdate: structure.listenToComputationUpdate,
+      changeTreeViewMode,
       inspector,
       structure,
       searchStructure,

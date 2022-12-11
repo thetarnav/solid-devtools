@@ -43,10 +43,13 @@ const App: Component<{ headerSubtitle?: JSX.Element }> = props => {
   const ctx = useController()
   return (
     <div class={styles.app}>
-      <header class={styles.header}>
-        <div>
-          <h3>Solid Devtools</h3>
-          {props.headerSubtitle && <p class={styles.subtitle}>{props.headerSubtitle}</p>}
+      <header class={styles.header.header}>
+        <div class={styles.header.identity}>
+          <Icon.SolidWhite class={styles.header.logo} />
+          <div>
+            <h3>Solid Developer Tools</h3>
+            {props.headerSubtitle && <p class={styles.header.subtitle}>{props.headerSubtitle}</p>}
+          </div>
         </div>
         <Options />
       </header>

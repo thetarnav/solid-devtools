@@ -222,14 +222,6 @@ export default function createStructure({
     })
   }
 
-  function changeMode(newMode: TreeWalkerMode): void {
-    if (newMode === mode()) return
-    batch(() => {
-      setMode(newMode)
-      setSearchResult([])
-    })
-  }
-
   return {
     state,
     updateStructure,
@@ -246,6 +238,6 @@ export default function createStructure({
     getNodePath,
     search,
     mode,
-    changeMode,
+    setMode,
   }
 }

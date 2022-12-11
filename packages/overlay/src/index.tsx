@@ -97,7 +97,7 @@ const Overlay: Component<{
             <Show when={isOpen()}>
               {() => {
                 const controller = createController()
-                return <Devtools controller={controller} />
+                return <Devtools controller={controller} headerSubtitle="overlay" />
               }}
             </Show>
           </div>

@@ -96,6 +96,7 @@ export const divider = style({
 export const carret = style({
   width: spacing[2],
   height: spacing[2],
+  marginBottom: '0.15rem',
   color: vars.disabled.color,
 })
 
@@ -136,10 +137,7 @@ export const typeIcon = style({
   color: vars.disabled.color,
 })
 
-const nameBase = style({
-  transform: 'translateY(0.2px)',
-})
 export const name = styleVariants({
-  default: [nameBase, { color: vars.defaultTextColor }],
-  gray: [nameBase, { color: vars.disabled.color }],
+  default: { color: vars.defaultTextColor },
+  gray: { color: vars.disabled.color },
 })

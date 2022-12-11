@@ -1,15 +1,6 @@
 import { createVar, style } from '@vanilla-extract/css'
-import {
-  spacing,
-  theme,
-  padding,
-  rounded,
-  centerChild,
-  transition,
-  panelHeaderHeight,
-  vars,
-  flex,
-} from '@/ui/theme'
+import { spacing, theme, padding, rounded, centerChild, transition, vars, flex } from '@/ui/theme'
+import { panelHeaderHeight, panelHeaderAfterEl } from '../structure/structure.css'
 
 export const root = style({
   height: '100%',
@@ -18,11 +9,13 @@ export const root = style({
   gridTemplateColumns: '100%',
 })
 
-export const header = style({
-  ...padding(0, 2, 0, 4),
-  ...flex('items-center', 'justify-space-between'),
-  borderBottom: vars.panel.border,
-})
+export const header = style([
+  panelHeaderAfterEl,
+  {
+    ...padding(0, 2, 0, 4),
+    ...flex('items-center', 'justify-space-between'),
+  },
+])
 
 export const actions = (() => {
   const textOpacity = createVar()

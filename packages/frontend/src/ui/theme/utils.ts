@@ -1,6 +1,5 @@
 import { asArray, Many } from '@solid-primitives/utils'
 import { StyleRule } from '@vanilla-extract/css'
-import { clsx } from 'clsx'
 import { Property } from 'csstype'
 import { spacing, theme } from './theme.css'
 
@@ -67,7 +66,7 @@ export const transition = (
   delay: Property.TransitionDelay = theme.duration[0],
   easing: Property.TransitionTimingFunction = theme.easing.DEFAULT,
 ): StyleRule => ({
-  transitionProperty: clsx(property),
+  transitionProperty: property,
   transitionDuration: duration,
   transitionDelay: delay,
   transitionTimingFunction: easing,

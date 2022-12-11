@@ -1,10 +1,10 @@
 /**
- * Icons taken from https://phosphoricons.com
+ * Some icons taken from https://phosphoricons.com
  */
 
 import { Component } from 'solid-js'
 
-export type ProxyIconComponent<ID extends keyof typeof iconComponents> = Component<{ id: ID }>
+export type ProxyIconComponent<ID extends keyof typeof embedIconComponents> = Component<{ id: ID }>
 
 export type IconComponent = Component<{ class?: string }>
 
@@ -527,7 +527,72 @@ const Search: ProxyIconComponent<'Search'> = ({ id }) => (
   </svg>
 )
 
-const iconComponents = {
+export const SolidWhite: IconComponent = props => (
+  <svg viewBox="0 0 24 25" fill="none" xmlns="http://www.w3.org/2000/svg" class={props.class}>
+    <path
+      d="M20.2203 10.095C20.2286 10.1493 20.2347 10.2007 20.2391 10.2488L11.9568 13.0541C10.936 13.3502 9.76195 13.2959 8.67088 12.948C7.58546 12.6019 6.64806 11.9866 6.05809 11.2346C5.4171 10.2164 5.48558 9.25071 6.06541 8.3466L6.08312 8.31899L6.09867 8.29011C6.35114 7.82102 6.57651 7.45205 6.80478 7.07833C6.9359 6.86367 7.06796 6.64744 7.20667 6.40979L9.69156 4.48973C15.7789 5.32405 18.347 7.05147 19.4227 8.39002C19.9681 9.06873 20.1575 9.67917 20.2203 10.095Z"
+      stroke="black"
+      stroke-width="1.71429"
+    />
+    <path
+      d="M20.2203 10.095C20.2286 10.1493 20.2347 10.2007 20.2391 10.2488L11.9568 13.0541C10.936 13.3502 9.76195 13.2959 8.67088 12.948C7.58546 12.6019 6.64806 11.9866 6.05809 11.2346C5.4171 10.2164 5.48558 9.25071 6.06541 8.3466L6.08312 8.31899L6.09867 8.29011C6.35114 7.82102 6.57651 7.45205 6.80478 7.07833C6.9359 6.86367 7.06796 6.64744 7.20667 6.40979L9.69156 4.48973C15.7789 5.32405 18.347 7.05147 19.4227 8.39002C19.9681 9.06873 20.1575 9.67917 20.2203 10.095Z"
+      stroke="white"
+      stroke-opacity="0.84"
+      stroke-width="1.71429"
+    />
+    <path
+      fill-rule="evenodd"
+      clip-rule="evenodd"
+      d="M10.2141 2.29861C16.072 1.01272 23.6445 6.58491 23.6445 6.58491L21.0728 10.871C21.0728 10.871 13.5003 5.29885 7.78529 6.58474L7.21378 6.72761C6.41508 6.96253 5.80177 7.36738 5.38401 7.87614L5.35626 7.8708L7.49941 4.15601L7.78516 3.72738C8.21379 3.15587 8.92818 2.72724 9.78544 2.44149L10.2141 2.29861ZM21.0724 10.8712L21.0728 10.871L21.0727 10.8712L21.0724 10.8712Z"
+      fill="url(#paint0_linear_1202_2317)"
+    />
+    <path
+      d="M2.66436 18.8785C2.43425 18.7311 2.23235 18.5972 2.06241 18.4819L3.97128 15.1957C4.90788 14.9546 7.2354 14.4246 9.59109 13.9603C10.936 13.6952 12.2692 13.4557 13.3359 13.3064C13.8706 13.2316 14.3247 13.1814 14.6736 13.1606C14.8483 13.1503 14.9846 13.148 15.0848 13.1518C15.1581 13.1546 15.192 13.16 15.198 13.1608C15.6459 13.3042 16.2066 13.6586 16.7856 14.1457C17.2387 14.5269 17.6628 14.9551 18.002 15.3448C17.5413 17.8033 17.1498 19.2255 16.6437 20.1648C16.1603 21.062 15.5543 21.5508 14.464 22.0769L14.1212 22.1912C11.502 22.8156 8.39278 21.8625 5.81423 20.6347C4.54202 20.0288 3.44429 19.3782 2.66436 18.8785Z"
+      stroke="black"
+      stroke-width="1.71429"
+    />
+    <path
+      d="M2.66436 18.8785C2.43425 18.7311 2.23235 18.5972 2.06241 18.4819L3.97128 15.1957C4.90788 14.9546 7.2354 14.4246 9.59109 13.9603C10.936 13.6952 12.2692 13.4557 13.3359 13.3064C13.8706 13.2316 14.3247 13.1814 14.6736 13.1606C14.8483 13.1503 14.9846 13.148 15.0848 13.1518C15.1581 13.1546 15.192 13.16 15.198 13.1608C15.6459 13.3042 16.2066 13.6586 16.7856 14.1457C17.2387 14.5269 17.6628 14.9551 18.002 15.3448C17.5413 17.8033 17.1498 19.2255 16.6437 20.1648C16.1603 21.062 15.5543 21.5508 14.464 22.0769L14.1212 22.1912C11.502 22.8156 8.39278 21.8625 5.81423 20.6347C4.54202 20.0288 3.44429 19.3782 2.66436 18.8785Z"
+      stroke="white"
+      stroke-opacity="0.84"
+      stroke-width="1.71429"
+    />
+    <path
+      fill-rule="evenodd"
+      clip-rule="evenodd"
+      d="M16.3995 10.8957C17.6213 11.2775 18.7013 12.0153 19.5012 13.0147C20.2156 14.1577 20.3585 15.3007 19.787 16.3008L16.9294 21.4444L16.9178 21.4424C17.5576 20.5015 17.534 19.2973 16.6788 18.1855C15.8789 17.1862 14.7638 16.2778 13.542 15.896C12.3202 15.5142 11.0122 15.5058 9.78561 15.8718L0.927511 18.7293L3.78478 13.7291L12.6431 10.8715C13.8697 10.5055 15.1777 10.5139 16.3995 10.8957ZM0.9274 18.7295L0.927246 18.7297L0.927908 18.7299C0.927679 18.7297 0.927509 18.7296 0.9274 18.7295Z"
+      fill="url(#paint1_linear_1202_2317)"
+    />
+    <defs>
+      <linearGradient
+        id="paint0_linear_1202_2317"
+        x1="4.28469"
+        y1="2.01286"
+        x2="22.0728"
+        y2="10.6569"
+        gradientUnits="userSpaceOnUse"
+      >
+        <stop offset="0.1" stop-color="#B8B8B8" />
+        <stop offset="0.3" stop-color="#F5F5F5" />
+        <stop offset="1" stop-color="#EBEBEB" />
+      </linearGradient>
+      <linearGradient
+        id="paint1_linear_1202_2317"
+        x1="2.98467"
+        y1="10.7572"
+        x2="20.9728"
+        y2="22.9875"
+        gradientUnits="userSpaceOnUse"
+      >
+        <stop stop-color="#E6E5E5" />
+        <stop offset="0.5" stop-color="#F5F5F5" />
+        <stop offset="1" stop-color="#B8B8B8" />
+      </linearGradient>
+    </defs>
+  </svg>
+)
+
+const embedIconComponents = {
   ArrowLeft,
   ArrowRight,
   CarretRight,
@@ -548,11 +613,15 @@ const iconComponents = {
   Search,
 } as const
 
+const iconComponents = {
+  SolidWhite,
+} as const
+
 export let Icon: {
-  [key in keyof typeof iconComponents]: IconComponent
+  [key in keyof typeof embedIconComponents | keyof typeof iconComponents]: IconComponent
 } = {} as any
 
-for (const name in iconComponents) {
+for (const name in embedIconComponents) {
   ;(Icon as any)[name] = (props: { class?: string }) => (
     <svg class={props.class}>
       <use href={`#sdt_icon_${name.toString()}`} />
@@ -560,13 +629,17 @@ for (const name in iconComponents) {
   )
 }
 
+for (const name in iconComponents) {
+  ;(Icon as any)[name] = iconComponents[name as keyof typeof iconComponents]
+}
+
 export default Icon
 
 export const MountIcons: Component = () => {
   return (
     <div style="display:none">
-      {(Object.keys(iconComponents) as (keyof typeof iconComponents)[]).map(name => {
-        const Icon = iconComponents[name] as ProxyIconComponent<any>
+      {(Object.keys(embedIconComponents) as (keyof typeof embedIconComponents)[]).map(name => {
+        const Icon = embedIconComponents[name] as ProxyIconComponent<any>
         return <Icon id={name} />
       })}
     </div>
