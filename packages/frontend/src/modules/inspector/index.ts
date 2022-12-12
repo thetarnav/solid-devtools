@@ -230,7 +230,13 @@ export default function createInspector({
   const handleStructureChange = untrackedCallback(() => {
     const prevNode = inspectedNode()
     if (!prevNode) return
-    setInspected(findNode(prevNode.id) ?? findClosestInspectableNode(prevNode) ?? null)
+    let node = findNode(prevNode.id)
+    // if the previous inspected node is not found, try to find the closest component, context ot top-level root
+    if (!node) {
+      node = findClosestInspectableNode(prevNode)
+      node &&= findNode(node.id)
+    }
+    setInspected(node ?? null)
   })
 
   const setNewDetails = untrackedCallback((raw: Mapped.OwnerDetails) => {
