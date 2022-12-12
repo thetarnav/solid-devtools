@@ -9,7 +9,7 @@ import {
   isSolidMemo,
   Solid,
 } from '@solid-devtools/debugger'
-import { NodeType } from '@solid-devtools/debugger/types'
+import { NodeType, NODE_TYPE_NAMES } from '@solid-devtools/debugger/types'
 import { dedupeArray } from '@solid-devtools/shared/utils'
 import { getDiffMap, getStackDiffMap } from './utils'
 
@@ -63,7 +63,7 @@ export function getNodeState(owner: Solid.Owner | Solid.Signal | NodeState): Nod
   const type = getNodeType(owner)
   return {
     type,
-    typeName: NodeType[type],
+    typeName: NODE_TYPE_NAMES[type],
     name: getNodeName(owner),
   }
 }
@@ -74,7 +74,7 @@ export function getNodeStateWithValue(
   const type = getNodeType(owner)
   return {
     type,
-    typeName: NodeType[type],
+    typeName: NODE_TYPE_NAMES[type],
     name: getNodeName(owner),
     value: owner.value,
   }
@@ -304,7 +304,7 @@ function logOwnersDiff<T extends Solid.Owner>(
 
   paddedForEach(
     owners,
-    owner => NodeType[getOwnerType(owner)],
+    owner => NODE_TYPE_NAMES[getOwnerType(owner)],
     (type, owner) => {
       const mark = getMark(owner)
       const name = getNodeName(owner)
@@ -333,7 +333,7 @@ export function logOwnerList<T extends Solid.Owner>(
 ): void {
   paddedForEach(
     owners,
-    owner => NodeType[getOwnerType(owner)],
+    owner => NODE_TYPE_NAMES[getOwnerType(owner)],
     (type, owner) => {
       const label = [`${inGray(type)} %c${getNodeName(owner)}`, STYLES.grayBackground]
       if (logGroup) {
