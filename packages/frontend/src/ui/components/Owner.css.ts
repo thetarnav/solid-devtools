@@ -1,5 +1,5 @@
 import { style, StyleRule } from '@vanilla-extract/css'
-import { color, spacing, theme } from '../theme/theme.css'
+import { spacing, theme } from '../theme/theme.css'
 import vars from '../theme/vars.css'
 
 const strikeThroughLine: StyleRule = {

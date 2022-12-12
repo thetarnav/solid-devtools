@@ -1,4 +1,4 @@
-import { Accessor, batch, createSelector, createSignal, untrack } from 'solid-js'
+import { Accessor, createSelector, createSignal, untrack } from 'solid-js'
 import {
   defaultWalkerMode,
   Mapped,
@@ -17,7 +17,7 @@ export namespace Structure {
     level: number
     parent: Node | null
     children: Node[]
-    hmr?: boolean
+    hmr?: true
     frozen?: true
   }
 
@@ -30,7 +30,7 @@ export namespace Structure {
   export type State = { roots: Node[]; nodeList: Node[] }
 }
 
-const { reconcileStructure } = (() => {
+export const { reconcileStructure } = (() => {
   let $_updated: StructureUpdates['updated']
   let $_node_list: Structure.Node[]
 
@@ -45,7 +45,7 @@ const { reconcileStructure } = (() => {
     const node: Structure.Node = { id, type, children, parent, level }
 
     if (name) node.name = name
-    if (type === NodeType.Component) node.hmr = raw.hmr
+    if (type === NodeType.Component && raw.hmr) node.hmr = raw.hmr
     else if (type !== NodeType.Root && raw.frozen) node.frozen = true
 
     $_node_list.push(node)
