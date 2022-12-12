@@ -1,5 +1,20 @@
 # @solid-devtools/debugger
 
+## 0.16.0
+
+### Minor Changes
+
+- 5743522: Adds an ability to switch between different tree-view modes:
+
+  - Components (only components and context nodes)
+  - Ownership (structure of solids reactivity graph)
+  - DOM (components + html elements)
+
+### Patch Changes
+
+- Updated dependencies [5743522]
+  - @solid-devtools/shared@0.10.2
+
 ## 0.15.3
 
 ### Patch Changes

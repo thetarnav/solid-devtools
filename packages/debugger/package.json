@@ -1,6 +1,6 @@
 {
   "name": "@solid-devtools/debugger",
-  "version": "0.15.3",
+  "version": "0.16.0",
   "description": "Debugger of the Solid's reactivity graph — a cornerstone of all solid-devtools.",
   "license": "MIT",
   "author": "Damian Tarnawski <gthetarnav@gmail.com>",
@@ -69,7 +69,7 @@
     "typecheck": "tsc --noEmit --paths null"
   },
   "dependencies": {
-    "@solid-devtools/shared": "workspace:^0.10.1",
+    "@solid-devtools/shared": "workspace:^0.10.2",
     "@solid-devtools/transform": "workspace:^0.9.0",
     "@solid-primitives/bounds": "^0.0.105",
     "@solid-primitives/cursor": "^0.0.103",
