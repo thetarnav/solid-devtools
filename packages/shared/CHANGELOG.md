@@ -1,5 +1,11 @@
 # solid-devtools-shared
 
+## 0.10.2
+
+### Patch Changes
+
+- 5743522: Add `asArray` and `whileArray` helpers
+
 ## 0.10.1
 
 ### Patch Changes

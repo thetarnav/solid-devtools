@@ -1,5 +1,23 @@
 # solid-devtools-extension
 
+## 0.20.0
+
+### Minor Changes
+
+- 5743522: Adds an ability to switch between different tree-view modes:
+
+  - Components (only components and context nodes)
+  - Ownership (structure of solids reactivity graph)
+  - DOM (components + html elements)
+
+### Patch Changes
+
+- Updated dependencies [5743522]
+- Updated dependencies [5743522]
+  - @solid-devtools/shared@0.10.2
+  - solid-devtools@0.24.0
+  - @solid-devtools/frontend@0.3.0
+
 ## 0.19.4
 
 ### Patch Changes
