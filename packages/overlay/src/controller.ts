@@ -34,6 +34,9 @@ export function createController() {
     onOpenLocation() {
       queueMicrotask(() => debug.openInspectedNodeLocation())
     },
+    onTreeViewModeChange(mode) {
+      queueMicrotask(() => debug.changeTreeWalkerMode(mode))
+    },
   })
 
   debug.listenTo('StructureUpdates', updates => {

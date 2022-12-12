@@ -2,7 +2,7 @@ import { Accessor, createEffect, onCleanup, untrack } from 'solid-js'
 import { throttle, scheduleIdle } from '@solid-primitives/scheduled'
 import { warn } from '@solid-devtools/shared/utils'
 import { DebuggerEventHub } from '../main/plugin'
-import { walkSolidRoot } from '../main/roots'
+import { findOwnerById } from '../main/roots'
 import { Core, EncodedValue, Mapped, NodeID, Solid, ValueItemID } from '../main/types'
 import { makeSolidUpdateListener } from '../main/update'
 import { NodeIDMap, encodeValue } from './serialize'
@@ -139,7 +139,7 @@ export function createInspector(
     )
   }
 
-  function setInspectedDetails(owner: Solid.Owner | undefined) {
+  function setInspectedOwner(owner: Solid.Owner | undefined) {
     inspectedOwner && clearOwnerObservers(inspectedOwner)
     inspectedOwner = owner
     checkProxyProps = undefined
@@ -165,7 +165,7 @@ export function createInspector(
     if (!debuggerEnabled()) return
 
     // Clear the inspected owner when the debugger is disabled
-    onCleanup(() => setInspectedDetails(undefined))
+    onCleanup(() => setInspectedOwner(undefined))
 
     makeSolidUpdateListener(() => {
       if (checkProxyProps) triggerPropsCheck()
@@ -175,13 +175,8 @@ export function createInspector(
   return {
     getLastDetails: () => lastDetails,
     setInspectedNode(data: { rootId: NodeID; nodeId: NodeID } | null) {
-      if (!data) return setInspectedDetails(undefined)
-      const { rootId, nodeId } = data
-
-      const walkResult = walkSolidRoot(rootId, nodeId)
-      if (!walkResult || !walkResult.inspectedOwner) return setInspectedDetails(undefined)
-
-      setInspectedDetails(walkResult.inspectedOwner)
+      if (!data) return setInspectedOwner(undefined)
+      setInspectedOwner(findOwnerById(data.rootId, data.nodeId))
     },
     toggleValueNode({ id, selected }: ToggleInspectedValueData): void {
       const node = valueMap.get(id)

@@ -1,5 +1,5 @@
 import { style, StyleRule } from '@vanilla-extract/css'
-import { spacing, theme } from '../theme'
+import { spacing, theme } from '../theme/theme.css'
 import vars from '../theme/vars.css'
 
 const strikeThroughLine: StyleRule = {
@@ -33,6 +33,7 @@ export const name = style({
   },
   color: vars.defaultTextColor,
 })
+
 export const componentName = style([
   name,
   {
@@ -45,6 +46,14 @@ export const componentName = style([
       color: vars.disabled.color,
     },
     color: vars.componentNameColor,
+  },
+])
+
+export const elementName = style([
+  componentName,
+  {
+    color: vars.domColor,
+    textTransform: 'lowercase',
   },
 ])
 

@@ -9,7 +9,7 @@ import { Emit } from '@solid-primitives/event-bus'
 import { throttle } from '@solid-primitives/scheduled'
 import { trimString } from '@solid-devtools/shared/utils'
 import { DEV as _STORE_DEV } from 'solid-js/store'
-import { Core, DebuggerContext, NodeID, Solid } from './types'
+import { Core, NodeID, Solid } from './types'
 import { NodeType } from './constants'
 
 const STORE_DEV = _STORE_DEV!
@@ -101,17 +101,13 @@ export function markOwnerName(o: Solid.Owner): string {
   if (o.sdtName !== undefined) return o.sdtName
   return (o.sdtName = getNodeName(o))
 }
-export function markOwnerType(o: Solid.Owner, type?: NodeType): NodeType {
+export function markOwnerType(o: Solid.Owner): NodeType {
   if (o.sdtType !== undefined) return o.sdtType
-  return (o.sdtType = type ?? getOwnerType(o))
+  return (o.sdtType = getOwnerType(o))
 }
 export function markNodeID(o: { sdtId?: NodeID }): NodeID {
   if (o.sdtId !== undefined) return o.sdtId
   return (o.sdtId = getNewSdtId())
-}
-export function markNodesID(nodes?: { sdtId?: NodeID }[] | null): NodeID[] {
-  if (!nodes || !nodes.length) return []
-  return nodes.map(markNodeID)
 }
 
 export function getComponentRefreshNode(owner: Readonly<Solid.Component>): Solid.Memo | null {
@@ -123,10 +119,10 @@ export function getComponentRefreshNode(owner: Readonly<Solid.Component>): Solid
   return null
 }
 
-export function resolveElements(value: unknown): HTMLElement | HTMLElement[] | null {
-  let resolved = getResolvedElements(value)
-  if (Array.isArray(resolved) && !resolved.length) resolved = null
-  return resolved
+export function resolveElements(value: unknown): HTMLElement[] | null {
+  const resolved = getResolvedElements(value)
+  if (Array.isArray(resolved)) return resolved.length ? resolved : null
+  return resolved ? [resolved] : null
 }
 function getResolvedElements(value: unknown): HTMLElement | HTMLElement[] | null {
   // do not call a function, unless it's a signal (to prevent creating new nodes)
@@ -169,17 +165,6 @@ export function lookupOwner(
   return null
 }
 
-export function setDebuggerContext(owner: Solid.Root, ctx: DebuggerContext): void {
-  owner.sdtContext = ctx
-}
-export function getDebuggerContext(owner: Solid.Owner): DebuggerContext | undefined {
-  while (!owner.sdtContext && owner.owner) owner = owner.owner
-  return owner.sdtContext
-}
-export function removeDebuggerContext(owner: Solid.Owner): void {
-  delete owner.sdtContext
-}
-
 /**
  * Solid's `onCleanup` that is registered only if there is a root.
  */
@@ -194,10 +179,23 @@ export function onOwnerCleanup(
   owner: Solid.Owner,
   fn: VoidFunction,
   prepend = false,
+  symbol?: symbol,
 ): VoidFunction {
   if (owner.cleanups === null) owner.cleanups = [fn]
-  else if (prepend) owner.cleanups.splice(0, 0, fn)
-  else owner.cleanups.push(fn)
+  else {
+    if (symbol) {
+      if (owner.cleanups.some(c => (c as any)[symbol])) {
+        return () =>
+          owner.cleanups?.splice(
+            owner.cleanups.findIndex(c => (c as any)[symbol]),
+            1,
+          )
+      }
+      ;(fn as any)[symbol] = true
+    }
+    if (prepend) owner.cleanups.unshift(fn)
+    else owner.cleanups.push(fn)
+  }
   return () => owner.cleanups?.splice(owner.cleanups.indexOf(fn), 1)
 }
 
@@ -262,29 +260,6 @@ export function getFunctionSources(fn: () => unknown): Solid.Signal[] {
     ),
   )
   return nodes ?? []
-}
-
-let SkipInternalRoot: Core.RootFunction<unknown> | null = null
-
-export const INTERNAL = Symbol('internal')
-
-/**
- * Sold's `createRoot` primitive that won't be tracked by the debugger.
- */
-export const createInternalRoot: typeof createRoot = (fn, detachedOwner) => {
-  SkipInternalRoot = fn
-  const v = createRoot(dispose => {
-    const owner = getOwner() as Solid.Root
-    setDebuggerContext(owner, INTERNAL)
-    return fn(dispose)
-  }, detachedOwner)
-  if (SkipInternalRoot === fn) SkipInternalRoot = null
-  return v
-}
-export const skipInternalRoot = () => {
-  const skip = !!SkipInternalRoot
-  if (skip) SkipInternalRoot = null
-  return skip
 }
 
 export function dedupeArrayById<T extends { id: NodeID }>(input: T[]): T[] {

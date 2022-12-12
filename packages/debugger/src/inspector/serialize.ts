@@ -11,6 +11,8 @@ import {
 } from '../types'
 import { isStoreNode } from '../main/utils'
 
+// TODO handle circular references
+
 /**
  * Encodes any value to a JSON-serializable object.
  * @param value

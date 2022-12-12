@@ -9,7 +9,8 @@ import {
 import { defer } from '@solid-devtools/shared/primitives'
 
 startListeningWindowMessages()
-const fromContent = makeMessageListener<Messages.Extension>()
+const _fromContent = makeMessageListener<Messages.Extension>()
+const fromContent: typeof _fromContent = (...args) => onCleanup(_fromContent(...args))
 const toContent = makePostMessage<Messages.Client>()
 
 // in case of navigation/page reload, reset the locator mode state in the extension
@@ -33,10 +34,10 @@ createInternalRoot(() => {
     if (loadedBefore) debug.forceTriggerUpdate()
     else loadedBefore = true
 
-    onCleanup(fromContent('ForceUpdate', () => debug.forceTriggerUpdate()))
+    fromContent('ForceUpdate', () => debug.forceTriggerUpdate())
 
-    onCleanup(fromContent('InspectValue', debug.inspector.toggleValueNode))
-    onCleanup(fromContent('InspectNode', debug.inspector.setInspectedNode))
+    fromContent('InspectValue', debug.inspector.toggleValueNode)
+    fromContent('InspectNode', debug.inspector.setInspectedNode)
 
     debug.listenTo('StructureUpdates', updates => toContent('StructureUpdate', updates))
 
@@ -50,7 +51,7 @@ createInternalRoot(() => {
     debug.listenTo('InspectedNodeDetails', details => toContent('InspectedDetails', details))
 
     // state of the extension's locator mode
-    onCleanup(fromContent('LocatorMode', debug.locator.toggleEnabled))
+    fromContent('LocatorMode', debug.locator.toggleEnabled)
     createEffect(defer(debug.locator.enabledByDebugger, state => toContent('LocatorMode', state)))
 
     // intercept on-page components clicks and send them to the devtools panel
@@ -63,8 +64,10 @@ createInternalRoot(() => {
 
     debug.locator.onHoveredComponent(data => toContent('HoverComponent', data))
 
-    onCleanup(fromContent('HighlightElement', payload => debug.locator.setHighlightTarget(payload)))
+    fromContent('HighlightElement', payload => debug.locator.setHighlightTarget(payload))
 
-    onCleanup(fromContent('OpenLocation', debug.openInspectedNodeLocation))
+    fromContent('OpenLocation', debug.openInspectedNodeLocation)
+
+    fromContent('TreeViewMode', debug.changeTreeWalkerMode)
   })
 })

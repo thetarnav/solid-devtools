@@ -3,10 +3,16 @@
   "parser": "@typescript-eslint/parser",
   "plugins": ["@typescript-eslint", "no-only-tests"],
   "ignorePatterns": ["node_modules", "dist", "scripts", "examples"],
+  "parserOptions": {
+    "project": "./tsconfig.json",
+    "tsconfigRootDir": ".",
+    "sourceType": "module"
+  },
   "rules": {
     "no-console": "warn",
     "no-debugger": "warn",
-    "@typescript-eslint/no-unused-vars": "warn",
+    "@typescript-eslint/no-unused-vars": ["warn", { "argsIgnorePattern": "^_" }],
+    "@typescript-eslint/no-unnecessary-type-assertion": "warn",
     "no-only-tests/no-only-tests": "warn"
   }
 }

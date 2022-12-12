@@ -1,4 +1,4 @@
-import { ComplexStyleRule, createVar, fallbackVar, style } from '@vanilla-extract/css'
+import { createVar, fallbackVar, style } from '@vanilla-extract/css'
 import {
   centerChild,
   color,
@@ -6,7 +6,6 @@ import {
   hexToRgbValue,
   hexToRgb,
   media,
-  rounded,
   theme,
   transition,
   spacing,
@@ -19,37 +18,34 @@ const colorOpacityVar = createVar()
 const bgOpacityVar = createVar()
 const borderOpacityVar = createVar()
 
-export const toggleButtonStyles: ComplexStyleRule = {
+export const toggleButton = style({
   ...centerChild,
   vars: {
     [colorVar]: hexToRgbValue(color.gray[600]),
     [colorOpacityVar]: '1',
     [bgOpacityVar]: '0',
-    [borderOpacityVar]: '0.2',
+    [borderOpacityVar]: '0',
   },
   color: hexToRgb(colorVar, colorOpacityVar),
   backgroundColor: hexToRgb(colorVar, bgOpacityVar),
   border: `1px solid ${hexToRgb(colorVar, borderOpacityVar)}`,
+  outline: 'unset',
   ...transition(['color', 'backgroundColor', 'borderColor'], theme.duration[200]),
-  ...rounded('md'),
-  ':hover': {
-    vars: {
-      [bgOpacityVar]: '0.1',
-      [borderOpacityVar]: '0.25',
-    },
-  },
-  ':active': {
-    vars: {
-      [bgOpacityVar]: '0.05',
-      [borderOpacityVar]: '0.2',
-    },
-  },
+
   selectors: {
+    '&:is(:hover, :active:hover)': {
+      vars: { [bgOpacityVar]: '0.1' },
+    },
+    '&:focus': {
+      vars: { [borderOpacityVar]: '0.3' },
+    },
+    '&:active': {
+      vars: { [bgOpacityVar]: '0.05' },
+    },
     [selectedSelector]: {
       vars: {
         [colorVar]: hexToRgbValue(color.cyan[600]),
         [bgOpacityVar]: '0.05',
-        [borderOpacityVar]: '0.2',
       },
     },
   },
@@ -67,9 +63,7 @@ export const toggleButtonStyles: ComplexStyleRule = {
       },
     },
   }),
-}
-
-export const toggleButton = style(toggleButtonStyles)
+})
 export const collapseButtonSize = createVar()
 
 export const Collapse = (() => {

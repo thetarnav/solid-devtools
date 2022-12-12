@@ -1,29 +1,148 @@
-import { Accessor, Component, createEffect, createMemo, createSignal, For } from 'solid-js'
+import {
+  Component,
+  createEffect,
+  createMemo,
+  createSelector,
+  createSignal,
+  For,
+  Setter,
+} from 'solid-js'
 import { assignInlineVars } from '@vanilla-extract/dynamic'
 import { useRemSize } from '@solid-primitives/styles'
 import { createResizeObserver } from '@solid-primitives/resize-observer'
-import { NodeID } from '@solid-devtools/debugger/types'
+import { createShortcut } from '@solid-primitives/keyboard'
+import { defer } from '@solid-devtools/shared/primitives'
+import { NodeID, TreeWalkerMode, NodeType } from '@solid-devtools/debugger/types'
+import { useController } from '@/controller'
+import { Scrollable, ToggleButton, Icon } from '@/ui'
 import type { Structure } from '.'
-import { Scrollable } from '@/ui'
 import { OwnerNode } from './OwnerNode'
 import { OwnerPath } from './Path'
 import { getVirtualVars } from './virtual'
 import * as styles from './structure.css'
-import { useController } from '@/controller'
 
 export default function StructureView() {
   return (
     <div class={styles.panelWrapper}>
+      <div class={styles.header}>
+        <LocatorButton />
+        <Search />
+        <ToggleMode />
+      </div>
       <DisplayStructureTree />
       <OwnerPath />
     </div>
   )
 }
 
+const LocatorButton: Component = () => {
+  const ctx = useController()
+  return (
+    <ToggleButton
+      class={styles.locatorButton}
+      onToggle={ctx.setLocatorState}
+      selected={ctx.locatorEnabled()}
+    >
+      <Icon.Select class={styles.locatorIcon} />
+    </ToggleButton>
+  )
+}
+
+const Search: Component = () => {
+  const ctx = useController()
+
+  const [value, setValue] = createSignal('')
+
+  const handleChange = (v: string) => {
+    setValue(v)
+    ctx.searchStructure('')
+  }
+
+  return (
+    <form
+      class={styles.search.form}
+      onSubmit={e => {
+        e.preventDefault()
+        ctx.searchStructure(value())
+      }}
+      onReset={() => handleChange('')}
+    >
+      <input
+        ref={input => {
+          if (ctx.options.useShortcuts) {
+            createShortcut(['/'], () => input.focus())
+            createShortcut(['Escape'], () => {
+              if (document.activeElement === input) input.blur()
+              if (input.value) handleChange((input.value = ''))
+            })
+          }
+        }}
+        class={styles.search.input}
+        type="text"
+        placeholder="Search"
+        onInput={e => handleChange(e.currentTarget.value)}
+        onPaste={e => handleChange(e.currentTarget.value)}
+      />
+      <div class={styles.search.iconContainer}>
+        <Icon.Search class={styles.search.icon} />
+      </div>
+      {value() && (
+        <button class={styles.search.clearButton} type="reset">
+          <Icon.Close class={styles.search.clearIcon} />
+        </button>
+      )}
+    </form>
+  )
+}
+
+const ToggleMode: Component = () => {
+  const ctx = useController()
+
+  const tabsContentMap: Readonly<Record<TreeWalkerMode, string>> = {
+    [TreeWalkerMode.Owners]: 'Ownership',
+    [TreeWalkerMode.Components]: 'Components',
+    [TreeWalkerMode.DOM]: 'DOM',
+  }
+
+  const isSelected = createSelector<TreeWalkerMode, TreeWalkerMode>(ctx.structure.mode)
+
+  return (
+    <div class={styles.toggleMode.group}>
+      <div class={styles.toggleMode.list} role="group">
+        {[TreeWalkerMode.Components, TreeWalkerMode.Owners, TreeWalkerMode.DOM].map(mode => (
+          <button
+            aria-selected={isSelected(mode)}
+            class={styles.toggleMode.tab[mode]}
+            onClick={() => ctx.changeTreeViewMode(mode)}
+          >
+            {tabsContentMap[mode]}
+          </button>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 type DisplayNode = {
   node: Structure.Node
-  getNode: Accessor<Structure.Node>
-  update: VoidFunction
+  update: Setter<Structure.Node>
+}
+
+const getFocusedNodeData = (
+  list: Structure.Node[],
+  start: number,
+  end: number,
+  index: number,
+): [node: NodeID, position: number] | undefined => {
+  if (index < start || index > end) index = Math.floor(end - (end - start) / 1.618)
+  let node = list[index]
+  let move = 0
+  while (node) {
+    if (node.type === NodeType.Component || node.type === NodeType.Root)
+      return [node.id, index - start]
+    move = move <= 0 ? -move + 1 : -move
+    node = list[(index += move)]
+  }
 }
 
 const DisplayStructureTree: Component = () => {
@@ -50,7 +169,7 @@ const DisplayStructureTree: Component = () => {
 
   const {
     structureState,
-    inspectedNode,
+    inspector,
     structure,
     isNodeInspected,
     listenToComputationUpdate,
@@ -58,7 +177,28 @@ const DisplayStructureTree: Component = () => {
     setInspectedNode,
   } = useController()
 
-  const collapsedList = createMemo(() => {
+  let lastVirtualStart = 0
+  let lastVirtualEnd = 0
+  let lastInspectedIndex = 0
+  let lastFocusedNodeData: ReturnType<typeof getFocusedNodeData>
+
+  createEffect(() => {
+    ;({ start: lastVirtualStart, end: lastVirtualEnd } = virtual())
+    lastInspectedIndex = inspectedIndex()
+  })
+
+  const collapsedList = createMemo((prev: Structure.Node[] = []) => {
+    // position of focused component needs to be calculated right before the collapsed list is recalculated
+    // to be compated with it after the changes
+    // `list data` has to be updated in an effect, so that this memo can run before it, instead of reading it here
+    // because of solid's pull-based memo behavior (reading from a memo invalidates it, and it's dependencies)
+    lastFocusedNodeData = getFocusedNodeData(
+      prev,
+      lastVirtualStart,
+      lastVirtualEnd,
+      lastInspectedIndex,
+    )
+
     const nodeList = structureState().nodeList
     const collapsedList: Structure.Node[] = []
     const set = collapsed()
@@ -69,11 +209,7 @@ const DisplayStructureTree: Component = () => {
       if (skipped) skip--
       else collapsedList.push(node)
 
-      if (skipped || set.has(node)) {
-        const { children, subroots } = node
-        skip += children.length
-        if (subroots) skip += subroots.length
-      }
+      if (skipped || set.has(node)) skip += node.children.length
     }
 
     return collapsedList
@@ -105,10 +241,15 @@ const DisplayStructureTree: Component = () => {
       minLevel = Math.min(minLevel, node.level)
       if (prev) {
         next[i] = prev
-        prev.update()
+        prev.update(node)
       } else {
-        const [getNode, setNode] = createSignal(node, { equals: false, internal: true })
-        next[i] = { node, getNode, update: () => setNode(node) }
+        const [getNode, update] = createSignal(node, { equals: false, internal: true })
+        next[i] = {
+          get node() {
+            return getNode()
+          },
+          update,
+        }
       }
     }
 
@@ -119,15 +260,42 @@ const DisplayStructureTree: Component = () => {
     equals: (a, b) => a == b || (Math.abs(b - a) < 7 && b != 0),
   })
 
+  // calculate node index in the collapsed list
+  const getNodeIndexById = (id: NodeID) => {
+    const nodeList = collapsedList()
+    for (let i = 0; i < nodeList.length; i++) if (nodeList[i].id === id) return i
+    return -1
+  }
+
+  // Index of the inspected node in the collapsed list
+  const inspectedIndex = createMemo(() => {
+    const id = inspector.inspectedId()
+    return id ? getNodeIndexById(id) : -1
+  })
+
+  // Seep the inspected or central node in view when the list is changing
+  createEffect(
+    defer(collapsedList, () => {
+      if (!lastFocusedNodeData) return
+      const [nodeId, lastPosition] = lastFocusedNodeData
+      const index = getNodeIndexById(nodeId)
+      if (index === -1) return
+      const move = index - virtual().start - lastPosition
+      if (move !== 0) container.scrollTop += move * getRowHeight()
+    }),
+  )
+
   // Scroll to selected node when it changes
+  // listen to inspected ID, instead of node, because node reference can change
   createEffect(() => {
-    const node = inspectedNode()
-    if (!node) return
+    if (!inspector.inspectedId()) return
     // Run in next tick to ensure the scroll data is updated and virtual list recalculated
     // inspect node -> open inspector -> container changes height -> scroll data changes -> virtual list changes -> scroll to node
     setTimeout(() => {
-      let index = collapsedList().indexOf(node)
+      let index = inspectedIndex()
       if (index === -1) {
+        const node = inspector.inspectedNode()
+        if (!node) return
         // Un-collapse parents if needed
         const set = collapsed()
         let parent = node.parent
@@ -138,19 +306,18 @@ const DisplayStructureTree: Component = () => {
         }
         if (wasCollapsed) {
           setCollapsed(set)
-          index = collapsedList().indexOf(node)
+          index = inspectedIndex()
         } else return
       }
 
       const { start, end } = virtual()
       const rowHeight = getRowHeight()
-      const containerTopMargin = getContainerTopMargin()
       let top: number
       if (index <= start) top = (index - 1) * rowHeight
       else if (index >= end - 2) top = (index + 2) * rowHeight - containerScroll().height
       else return
 
-      container.scrollTop = top + containerTopMargin
+      container.scrollTop = top + getContainerTopMargin()
     })
   })
 
@@ -175,20 +342,23 @@ const DisplayStructureTree: Component = () => {
         <div class={styles.scrolledInner}>
           <div class={styles.scrolledInner2}>
             <For each={virtual().list}>
-              {({ getNode, node }) => (
-                <OwnerNode
-                  owner={getNode()}
-                  isHovered={structure.isHovered(node)}
-                  isSelected={isNodeInspected(node.id)}
-                  listenToUpdate={listener =>
-                    listenToComputationUpdate(id => id === node.id && listener())
-                  }
-                  onHoverChange={hovered => toggleHoveredNode(node.id, hovered)}
-                  onInspectChange={inspected => setInspectedNode(inspected ? node : null)}
-                  toggleCollapsed={toggleCollapsed}
-                  isCollapsed={collapsed().has(node)}
-                />
-              )}
+              {data => {
+                const { id } = data.node
+                return (
+                  <OwnerNode
+                    owner={data.node}
+                    isHovered={structure.isHovered(id)}
+                    isSelected={isNodeInspected(id)}
+                    listenToUpdate={listener =>
+                      listenToComputationUpdate(updatedId => updatedId === id && listener())
+                    }
+                    onHoverChange={hovered => toggleHoveredNode(id, hovered)}
+                    onInspectChange={inspected => setInspectedNode(inspected ? id : null)}
+                    toggleCollapsed={toggleCollapsed}
+                    isCollapsed={collapsed().has(data.node)}
+                  />
+                )
+              }}
             </For>
           </div>
         </div>

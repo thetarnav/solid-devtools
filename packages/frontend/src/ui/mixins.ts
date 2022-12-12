@@ -1,6 +1,6 @@
 import { createVar, fallbackVar, style } from '@vanilla-extract/css'
 import { CSSVarFunction } from '@vanilla-extract/private'
-import { insetX, insetY, rounded, spacing, transition } from './theme'
+import { insetX, insetY, rounded, spacing, transition } from './theme/theme.css'
 import { vars } from './theme/vars.css'
 
 export function createHighlightStyles(
@@ -34,4 +34,36 @@ export function createHighlightStyles(
   })
 
   return { container, highlight, bgColorVar, bgOpacityVar }
+}
+
+export const createHoverBackground = () => {
+  const colorValueVar = createVar()
+  const opacityVar = createVar()
+
+  return {
+    hoverBgStyle: style({
+      vars: {
+        [opacityVar]: '0',
+      },
+      backgroundColor: `rgb(${fallbackVar(
+        colorValueVar,
+        vars.disabled.colorValue,
+      )} / ${opacityVar})`,
+      ...transition('background-color'),
+      selectors: {
+        '&:is(:hover, [aria-selected=true]:hover)': {
+          vars: { [opacityVar]: '0.1' },
+        },
+        '&:is(:active, :hover:active)': {
+          vars: { [opacityVar]: '0.05' },
+        },
+        '&[aria-selected=true]': {
+          vars: {
+            [opacityVar]: '0.05',
+          },
+        },
+      },
+    }),
+    colorValueVar,
+  }
 }

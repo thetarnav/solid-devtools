@@ -4,11 +4,10 @@ import {
   WINDOW_PROJECTPATH_PROPERTY,
 } from '@solid-devtools/transform/types'
 import { isWindows } from '@solid-primitives/platform'
-import { Mapped, NodeID } from '../types'
+import { NodeID } from '../types'
 
 export type LocatorComponent = {
   id: NodeID
-  rootId: NodeID
   name: string
   element: HTMLElement
   location?: LocationAttr | undefined
@@ -76,68 +75,4 @@ export function getLocationFromAttribute(location: LocationAttr): SourceLocation
 export function openSourceCode(target: TargetIDE | TargetURLFunction, data: SourceCodeData): void {
   const url = getTargetURL(target, data)
   if (typeof url === 'string') window.open(url, '_blank')
-}
-
-const findComponentCache = new Map<HTMLElement, LocatorComponent | null>()
-
-// for comparison — clear cache when component map changes
-let prevCompMap: Record<NodeID, Mapped.ResolvedComponent[]> = {}
-
-/**
- * Given an array of components and a HTML Element, find the closest component that contains the element.
- *
- * All the finds are stored in a cache to avoid re-computation. To clear the cache, use `clearFindComponentCache()`.
- *
- * @param compMap An array of MappedComponents
- * @param target HTMLElement to find the component for
- * @returns A SelectedComponent or null if no component was found. Selected component contains also a source code location property.
- */
-export function findLocatorComponent(
-  compMap: Record<NodeID, Mapped.ResolvedComponent[]>,
-  target: HTMLElement,
-): LocatorComponent | null {
-  if (prevCompMap !== compMap) {
-    findComponentCache.clear()
-    prevCompMap = compMap
-  }
-
-  const checked: HTMLElement[] = []
-  const toCheck = [target]
-  let location: LocationAttr | undefined
-  let element: HTMLElement | undefined
-
-  for (const el of toCheck) {
-    if (!location) {
-      const loc = getLocationAttr(el)
-      if (loc) {
-        location = loc
-        element = el
-      }
-    }
-
-    const cached = findComponentCache.get(el)
-    if (cached !== undefined) {
-      checked.forEach(cel => findComponentCache.set(cel, cached))
-      return cached
-        ? { ...cached, location: location ?? cached.location, element: element ?? cached.element }
-        : null
-    }
-
-    checked.push(el)
-
-    for (const [rootId, comps] of Object.entries(compMap)) {
-      for (let i = comps.length - 1; i >= 0; i--) {
-        const comp = comps[i]
-        const { element: resolved } = comp
-        if ((Array.isArray(resolved) && resolved.some(e => e === el)) || el === resolved) {
-          const obj = { ...comp, element: element ?? el, location, rootId }
-          checked.forEach(cel => findComponentCache.set(cel, obj))
-          return obj
-        }
-      }
-    }
-
-    el.parentElement && toCheck.push(el.parentElement)
-  }
-  return null
 }

@@ -36,6 +36,9 @@ export default function createBridge({
     onOpenLocation() {
       toBackground('OpenLocation')
     },
+    onTreeViewModeChange(mode) {
+      toBackground('TreeViewMode', mode)
+    },
   })
 
   fromBackground('StructureUpdate', controller.updateStructure.bind(controller))

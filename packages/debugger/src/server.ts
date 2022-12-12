@@ -23,6 +23,7 @@ export const useDebugger: typeof API.useDebugger = () => ({
   setInspectedValue: () => null,
   setUserEnabledSignal: () => void 0,
   openInspectedNodeLocation: () => void 0,
+  changeTreeWalkerMode: () => void 0,
   inspector: {
     setInspectedNode: () => void 0,
     toggleValueNode: () => void 0,
@@ -42,8 +43,6 @@ export const unobserveAllRoots: typeof API.unobserveAllRoots = () => void 0
 
 // update
 export const makeSolidUpdateListener: typeof API.makeSolidUpdateListener = () => () => void 0
-export const makeCreateRootListener: typeof API.makeCreateRootListener = () => () => void 0
-export const observeComputationUpdate: typeof API.observeComputationUpdate = () => void 0
 export const interceptComputationRerun: typeof API.interceptComputationRerun = () => void 0
 export const observeValueUpdate: typeof API.observeValueUpdate = () => void 0
 export const makeValueUpdateListener: typeof API.makeValueUpdateListener = () => void 0

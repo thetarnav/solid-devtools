@@ -11,10 +11,10 @@ import {
   spacing,
   theme,
   transition,
+  vars,
 } from '@/ui/theme'
 import { rowHeight, rowPadding } from './structure.css'
 import { Property } from 'csstype'
-import vars from '@/ui/theme/vars.css'
 
 export const levelVar: CSSVarFunction = createVar()
 
@@ -59,7 +59,7 @@ export const levelPadding = style({
   zIndex: -2,
   marginLeft: spacing[3],
   width: `calc(${levelVar} * ${rowPadding} + ${spacing[2.5]})`,
-  ...transition('width'),
+  // ...transition('width'),
   height: `calc(${rowHeight} + 0.95px)`,
   vars: {
     [linesColor]: color.gray[200],

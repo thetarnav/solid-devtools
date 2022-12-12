@@ -15,7 +15,7 @@ import overlayStyles from './styles.css'
 
 let isAlreadyMounted = false
 
-export function attachDevtoolsOverlay(props: ComponentProps<typeof Overlay>): VoidFunction {
+export function attachDevtoolsOverlay(props: ComponentProps<typeof Overlay> = {}): VoidFunction {
   if (isAlreadyMounted) {
     warn('Devtools overlay is already mounted')
     return () => {}
@@ -97,7 +97,7 @@ const Overlay: Component<{
             <Show when={isOpen()}>
               {() => {
                 const controller = createController()
-                return <Devtools controller={controller} />
+                return <Devtools controller={controller} headerSubtitle="overlay" />
               }}
             </Show>
           </div>

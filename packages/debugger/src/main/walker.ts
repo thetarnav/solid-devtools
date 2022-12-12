@@ -1,44 +1,146 @@
+import { Mapped, NodeID, Solid } from './types'
+import { NodeType, TreeWalkerMode } from './constants'
 import {
   getComponentRefreshNode,
-  isSolidMemo,
+  isSolidRoot,
   markNodeID,
   markOwnerName,
   markOwnerType,
   resolveElements,
 } from './utils'
-import { observeComputationUpdate } from './update'
-import { Mapped, NodeID, Solid } from './types'
-import { NodeType } from './constants'
+import { interceptComputationRerun } from './update'
+import type { ComponentRegisterHandler } from './componentRegistry'
 
-export type ComputationUpdateHandler = (rootId: NodeID, nodeId: NodeID) => void
+export type ComputationUpdateHandler = (
+  rootId: NodeID,
+  owner: Solid.Owner,
+  changedStructure: boolean,
+) => void
 
 // Globals set before each walker cycle
-let $inspectedId: NodeID | null
-let $rootId: NodeID
-let $onComputationUpdate: ComputationUpdateHandler
-let $components: Mapped.ResolvedComponent[] = []
-let $inspectedOwner: Solid.Owner | null
+let $_mode: TreeWalkerMode
+let $_root_id: NodeID
+let $_on_computation_update: ComputationUpdateHandler
+let $_register_component: ComponentRegisterHandler
 
-function mapChildren<T extends Mapped.Owner | Mapped.Root>(owner: Solid.Owner, mapped: T): T {
-  const { owned } = owner
-  if (!owned || !owned.length) return mapped
-  const children: Mapped.Owner[] = Array(owned.length)
-  for (let i = 0; i < children.length; i++) children[i] = mapOwner(owned[i])
-  mapped.children = children
-  return mapped
+const $_elements_map = new Map<Mapped.Owner, HTMLElement>()
+
+function observeComputation(owner: Solid.Computation, attachedData: Solid.Owner): void {
+  // leaf nodes (ones that don't have children) don't have to cause a structure update
+  // Unless the walker is in DOM mode, then we need to observe all computations
+  // This is because DOM can change without the owner structure changing
+  let isLeaf = !owner.owned || owner.owned.length === 0
+  const boundHandler = $_on_computation_update.bind(void 0, $_root_id, attachedData)
+  let handler =
+    isLeaf && $_mode !== TreeWalkerMode.DOM
+      ? () => {
+          if (isLeaf && (!owner.owned || owner.owned.length === 0)) {
+            boundHandler(false)
+          } else {
+            isLeaf = false
+            boundHandler(true)
+          }
+        }
+      : boundHandler.bind(void 0, true)
+
+  // owner already patched
+  if (owner.onComputationUpdate) return void (owner.onComputationUpdate = handler)
+  // patch owner
+  owner.onComputationUpdate = handler
+  interceptComputationRerun(owner, fn => {
+    fn()
+    owner.onComputationUpdate!()
+  })
 }
 
-function mapComputation(owner: Solid.Computation, idToUpdate: NodeID, mapped: Mapped.Owner): void {
-  observeComputationUpdate(
-    owner as Solid.Computation,
-    $onComputationUpdate.bind(void 0, $rootId, idToUpdate),
-  )
-  if (!owner.sources || owner.sources.length === 0) mapped.frozen = true
+function mapChildren(owner: Solid.Owner, mappedOwner: Mapped.Owner | null): Mapped.Owner[] {
+  const children: Mapped.Owner[] = []
+
+  const rawChildren: Solid.Owner[] = owner.owned ? owner.owned.slice() : []
+  if (owner.sdtSubRoots) rawChildren.push.apply(rawChildren, owner.sdtSubRoots)
+
+  if ($_mode === TreeWalkerMode.Owners) {
+    for (const child of rawChildren) {
+      const mappedChild = mapOwner(child, mappedOwner)
+      if (mappedChild) children.push(mappedChild)
+    }
+  } else {
+    for (const child of rawChildren) {
+      const type = markOwnerType(child)
+      if (type === NodeType.Component) {
+        const mappedChild = mapOwner(child, mappedOwner)
+        if (mappedChild) children.push(mappedChild)
+      } else {
+        if (type !== NodeType.Context && type !== NodeType.Root)
+          observeComputation(child as Solid.Computation, owner)
+        children.push.apply(children, mapChildren(child, mappedOwner))
+      }
+    }
+  }
+
+  return children
 }
 
-function mapOwner(owner: Solid.Owner): Mapped.Owner {
-  const type = markOwnerType(owner) as Exclude<NodeType, NodeType.Refresh | NodeType.Root>
+let $_mapped_owner_node: Mapped.Owner
+let $_added_to_parent_elements = false
+
+/**
+ * @param els elements to map
+ * @param parentChildren parent owner children.
+ * Will be checked for existing elements, and if found, `$_mapped_owner_node` will be injected in the place of the element.
+ * Passing `undefined` will skip this check.
+ */
+function mapElements(els: Element[], parentChildren: Mapped.Owner[] | undefined): Mapped.Owner[] {
+  const r = [] as Mapped.Owner[]
+
+  els: for (const el of els) {
+    if (!(el instanceof HTMLElement)) continue
+
+    if (parentChildren) {
+      // find el in parent els and remove it
+      const toCheck = [parentChildren]
+      let index = 0
+      let elNodes = toCheck[index++]
+      while (elNodes) {
+        for (let i = 0; i < elNodes.length; i++) {
+          const elNode = elNodes[i]
+          if ($_elements_map.get(elNode) === el) {
+            const mappedEl = $_added_to_parent_elements
+              ? elNodes.splice(i, 1)[0]
+              : elNodes.splice(i, 1, $_mapped_owner_node)[0]
+            $_added_to_parent_elements = true
+            r.push(mappedEl)
+            $_elements_map.set(mappedEl, el)
+            continue els
+          }
+          if (elNode.children && elNode.children.length) toCheck.push(elNode.children)
+        }
+        elNodes = toCheck[index++]
+      }
+    }
+
+    const mappedEl: Mapped.Owner = {
+      id: markNodeID(el),
+      type: NodeType.Element,
+      name: el.tagName.toLowerCase(),
+      children: [],
+    }
+    r.push(mappedEl)
+    $_elements_map.set(mappedEl, el)
+
+    if (el.children.length) mappedEl.children = mapElements(Array.from(el.children), parentChildren)
+  }
+
+  return r
+}
+
+function mapOwner(
+  owner: Solid.Owner,
+  parent: Mapped.Owner | null,
+  overwriteType?: NodeType,
+): Mapped.Owner | undefined {
   const id = markNodeID(owner)
+  const type = overwriteType ?? markOwnerType(owner)
   const name =
     type === NodeType.Component ||
     type === NodeType.Memo ||
@@ -50,7 +152,7 @@ function mapOwner(owner: Solid.Owner): Mapped.Owner {
   const mapped = { id, type } as Mapped.Owner
   if (name) mapped.name = name
 
-  if (id === $inspectedId) $inspectedOwner = owner
+  let resolvedElements: ReturnType<typeof resolveElements> | undefined
 
   // Component
   if (type === NodeType.Component) {
@@ -64,108 +166,108 @@ function mapOwner(owner: Solid.Owner): Mapped.Owner {
       markOwnerType((contextNode = owner.owned[0])) === NodeType.Context
     ) {
       // custom mapping for context nodes
-      const id = markNodeID(contextNode)
-      if (id === $inspectedId) $inspectedOwner = contextNode
-      return mapChildren(contextNode.owned![0], { id, type: NodeType.Context } as Mapped.Owner)
+      const mapped = mapOwner(contextNode.owned![0], parent, NodeType.Context)
+      if (mapped) mapped.id = markNodeID(contextNode)
+      return mapped
     }
 
-    const element = resolveElements(owner.value)
-    if (element) $components.push({ id, name: name!, element })
-
-    // <Show> component
-    let showMemoCondition: Solid.Memo
-    let showMemoNode: Solid.Memo
-    if (
-      name === 'Show' &&
-      owner.owned?.length === 2 &&
-      isSolidMemo((showMemoCondition = owner.owned[0] as Solid.Memo)) &&
-      isSolidMemo((showMemoNode = owner.owned[1] as Solid.Memo))
-    ) {
-      showMemoCondition.name = 'condition'
-      showMemoNode.name = 'value'
-      // if (!showMemoCondition.owned) {
-      //   mapped.name = 'Show_'
-      //   // mapped.combines = [markNodeID(showMemoCondition), markNodeID(showMemoNode)]
-      //   // showMemoNode.att
-      //   mapComputation(showMemoCondition, id, mapped)
-      //   return mapChildren(showMemoNode, mapped)
-      // }
-    }
-
-    // <For> component
-    let forMemo: Solid.Memo
-    if (
-      name === 'For' &&
-      owner.owned?.length === 1 &&
-      isSolidMemo((forMemo = owner.owned[0] as Solid.Memo))
-    ) {
-      forMemo.name = 'value'
-      // mapped.combines = [markNodeID(forMemo)]
-      // mapComputation(forMemo, id, mapped)
-      // return mapChildren(forMemo, mapped)
-      // const mappedMemo = mapOwner(forMemo)
-      // mappedMemo.type = NodeType.Component
-      // mappedMemo.name = name
-      // return mappedMemo
-    }
+    // Register component to global map
+    $_register_component(
+      owner as Solid.Component,
+      id,
+      name!,
+      (resolvedElements = resolveElements(owner.value)),
+    )
 
     // Refresh
     // omitting refresh memo — map it's children instead
-    let hmr = false
     let refresh = getComponentRefreshNode(owner as Solid.Component)
     if (refresh) {
-      hmr = true
+      mapped.hmr = true
       owner = refresh
     }
-    mapped.hmr = hmr
   }
   // Computation
-  else if (type !== NodeType.Context) mapComputation(owner as Solid.Computation, id, mapped)
+  else if (type !== NodeType.Context && type !== NodeType.Root) {
+    observeComputation(owner as Solid.Computation, owner)
+    if (!owner.sources || owner.sources.length === 0) mapped.frozen = true
+  }
 
-  return mapChildren(owner, mapped)
-}
+  const children: Mapped.Owner[] = []
+  mapped.children = children
 
-function mapRoot(
-  root: Solid.Root,
-  id: NodeID,
-  attached: Solid.Owner | null | undefined,
-): Mapped.Root {
-  if (id === $inspectedId) $inspectedOwner = root
+  $_added_to_parent_elements = false
+  $_mapped_owner_node = mapped
 
-  const mapped: Mapped.Root = { id, type: NodeType.Root }
+  // Map html elements in DOM mode
+  // elements might already be resolved when mapping components
+  if (
+    $_mode === TreeWalkerMode.DOM &&
+    (resolvedElements =
+      resolvedElements === undefined ? resolveElements(owner.value) : resolvedElements)
+  ) {
+    children.push.apply(
+      children,
+      mapElements(
+        Array.isArray(resolvedElements) ? resolvedElements : [resolvedElements],
+        parent?.children,
+      ),
+    )
+  }
 
-  mapChildren(root, mapped)
+  // global $_added_to_parent_elements will be changed in mapChildren
+  const addedToParent = $_added_to_parent_elements
 
-  if (attached) mapped.attached = markNodeID(attached)
+  children.push.apply(children, mapChildren(owner, mapped))
 
-  return mapped
-}
-
-export type WalkerResult = {
-  root: Mapped.Root
-  inspectedOwner: Solid.Owner | null
-  components: Mapped.ResolvedComponent[]
+  return addedToParent ? undefined : mapped
 }
 
 export function walkSolidTree(
-  owner: Solid.Root,
+  owner: Solid.Owner | Solid.Root,
   config: {
+    mode: TreeWalkerMode
     rootId: NodeID
     onComputationUpdate: ComputationUpdateHandler
-    gatherComponents?: boolean
-    inspectedId: NodeID | null
+    registerComponent: ComponentRegisterHandler
   },
-): WalkerResult {
+): Mapped.Owner {
   // set the globals to be available for this walk cycle
-  $inspectedId = config.inspectedId
-  $rootId = config.rootId
-  $onComputationUpdate = config.onComputationUpdate
-  $inspectedOwner = null
-  // components is an array instead of an object to preserve the order (nesting) of the components,
-  // this helps the locator find the most nested component first
-  $components = []
+  $_elements_map.clear()
+  $_mode = config.mode
+  $_root_id = config.rootId
+  $_on_computation_update = config.onComputationUpdate
+  $_register_component = config.registerComponent
 
-  const root = mapRoot(owner, $rootId, owner.sdtAttached)
+  return mapOwner(owner, null)!
+}
 
-  return { root, inspectedOwner: $inspectedOwner, components: $components }
+/**
+ * Finds the top-level root owner of a given owner.
+ */
+export function getTopRoot(owner: Solid.Owner): Solid.Root | null {
+  let root: Solid.Root | null = null
+  while (owner) {
+    if (isSolidRoot(owner)) root = owner
+    owner = owner.owner!
+  }
+  return root
+}
+
+/**
+ * Finds the closest owner of a given owner that is included in the tree walker.
+ */
+export function getClosestIncludedOwner(
+  owner: Solid.Owner,
+  mode: TreeWalkerMode,
+): Solid.Owner | null {
+  if (mode === TreeWalkerMode.Owners) return owner
+  let root: Solid.Owner | null = null
+  do {
+    const type = markOwnerType(owner)
+    if (type === NodeType.Component || type === NodeType.Context) return owner
+    if (type === NodeType.Root) root = owner
+    owner = owner.owner!
+  } while (owner)
+  return root
 }

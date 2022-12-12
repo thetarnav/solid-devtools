@@ -14,7 +14,7 @@ export default defineConfig(config => {
         componentLocation: true,
         name: true,
       }),
-      solidPlugin({ hot: false, dev: true }),
+      solidPlugin({ hot: true, dev: true }),
       Unocss(),
     ],
     define: {
@@ -28,8 +28,6 @@ export default defineConfig(config => {
       target: 'esnext',
       minify: false,
     },
-    optimizeDeps: {
-      exclude: ['solid-js/store', '@solid-devtools/debugger'],
-    },
+    optimizeDeps: {},
   }
 })

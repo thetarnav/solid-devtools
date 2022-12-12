@@ -1,7 +1,5 @@
 import { LocationAttr } from '@solid-devtools/transform/types'
-import type { Many } from '@solid-primitives/utils'
 import { INFINITY, NAN, NEGATIVE_INFINITY, NodeType, ValueType } from './constants'
-import type { INTERNAL } from './utils'
 
 export type { LocationAttr } from '@solid-devtools/transform/types'
 
@@ -54,13 +52,11 @@ export type EncodedValue<Deep extends boolean = boolean> = {
 
 export type ValueUpdateListener = (newValue: unknown, oldValue: unknown) => void
 
-export type DebuggerContext =
-  | {
-      rootId: NodeID
-      triggerRootUpdate: VoidFunction
-      forceRootUpdate: VoidFunction
-    }
-  | typeof INTERNAL
+declare global {
+  interface HTMLElement {
+    sdtId?: NodeID
+  }
+}
 
 export namespace Core {
   export type Owner = import('solid-js/types/reactive/signal').Owner
@@ -85,6 +81,7 @@ declare module 'solid-js/types/reactive/signal' {
     sdtId?: NodeID
     sdtName?: string
     sdtType?: NodeType
+    sdtSubRoots?: Solid.Root[] | null
   }
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   interface Computation<Init, Next> {
@@ -127,8 +124,9 @@ export namespace Solid {
     sourceMap?: Record<string, Signal | Store>
     // Used by the debugger
     isDisposed?: boolean
-    sdtAttached?: Owner | null
-    sdtContext?: DebuggerContext
+    // TODO: remove
+    sdtAttached?: Owner
+    isInternal?: true
     // Computation compatibility
     value?: undefined
     sources?: undefined
@@ -147,8 +145,6 @@ export namespace Solid {
     owner: Owner | null
     sourceMap?: Record<string, Signal>
     sources: Signal[] | null
-    // devtools:
-    sdtContext?: undefined
   }
 
   export interface Memo extends Signal, Computation {
@@ -171,23 +167,14 @@ export namespace Solid {
 //
 
 export namespace Mapped {
-  export interface Root {
-    id: NodeID
-    name?: undefined
-    type: NodeType.Root
-    children?: Owner[]
-    // sub-roots will have an owner
-    attached?: NodeID
-  }
-
   export interface Owner {
     id: NodeID
-    type: Exclude<NodeType, NodeType.Root | NodeType.Refresh>
+    type: Exclude<NodeType, NodeType.Refresh | NodeType.Signal | NodeType.Store>
     // combines?: NodeID[]
-    children?: Owner[]
+    children: Owner[]
     name?: string
     // component wrapped with a hmr memo?
-    hmr?: boolean
+    hmr?: true
     // computation without sources
     frozen?: true
   }
@@ -197,15 +184,6 @@ export namespace Mapped {
     name: string
     id: NodeID
     value: EncodedValue<false>
-  }
-
-  export type ResolvedComponent = {
-    id: NodeID
-    name: string
-    /**
-     * ! HTMLElements aren't JSON serialisable
-     */
-    element: Many<HTMLElement>
   }
 
   export type Props = {
@@ -228,7 +206,8 @@ export namespace Mapped {
 
 export type ComputationUpdate = { rootId: NodeID; id: NodeID }
 
-export type RootsUpdates = {
+export type StructureUpdates = {
   removed: NodeID[]
-  updated: Record<NodeID, Mapped.Root>
+  /** Record: `rootId` -- Record of updated nodes by `nodeId` */
+  updated: Partial<Record<NodeID, Partial<Record<NodeID, Mapped.Owner>>>>
 }

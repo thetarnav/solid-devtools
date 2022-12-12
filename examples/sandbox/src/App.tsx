@@ -1,9 +1,9 @@
+/* @refresh reload */
 import {
   Component,
   createSignal,
   createEffect,
   createMemo,
-  getOwner,
   createComputed,
   Setter,
   ParentComponent,
@@ -32,26 +32,25 @@ let disposeOuterRoot: VoidFunction
 createRoot(dispose => {
   disposeOuterRoot = dispose
 
-  getOwner()!.name = 'OUTSIDE_ROOT'
-
   const [count, setCount] = createSignal(0)
   setRootCount = setCount
 
-  createEffect(() => {
-    count()
-    if (count() === 1) {
-      createRoot(dispose => {
-        getOwner()!.name = 'OUTSIDE_TEMP_ROOT'
+  createEffect(
+    () => {
+      count()
+      if (count() === 1) {
+        createRoot(dispose => {
+          createEffect(() => count() === 4 && dispose(), undefined, { name: 'eff_2' })
 
-        createEffect(() => count() === 4 && dispose())
-
-        createRoot(_ => {
-          getOwner()!.name = 'OUTSIDE_INSIDE_ROOT'
-          createEffect(() => count())
+          createRoot(_ => {
+            createEffect(() => count(), undefined, { name: 'eff_3' })
+          })
         })
-      })
-    }
-  })
+      }
+    },
+    undefined,
+    { name: 'eff_1' },
+  )
 })
 
 const Button = (props: { text: string; onClick: VoidFunction }) => {

@@ -1,22 +1,21 @@
-import { style } from '@vanilla-extract/css'
+import { style, styleVariants } from '@vanilla-extract/css'
 import { createHighlightStyles } from '@/ui/mixins'
 import {
-  dark,
   centerChild,
   color,
   rounded,
   spacing,
   theme,
-  media,
   insetX,
   padding,
   margin,
   remValue,
+  vars,
+  borderValue,
 } from '@/ui/theme'
-import vars from '@/ui/theme/vars.css'
+import { pathHeight } from './structure.css'
 
 const rowHeight = spacing[3]
-const pathHeight = spacing[4.5]
 
 export const MIN_PATH_HEIGHT_IN_REM = remValue(pathHeight)
 
@@ -46,7 +45,7 @@ export const content = style({
   display: 'flex',
   alignItems: 'flex-end',
   ...padding(0.25, 2, 0.25, 2),
-  borderTop: vars.panel.border,
+  borderTop: borderValue(vars.panel.border),
   backgroundColor: vars.panel.bg,
   ':hover': {
     height: 'auto',
@@ -86,7 +85,7 @@ export const container = style({
 export const divider = style({
   width: rowHeight,
   height: spacing[4],
-  marginRight: spacing[1],
+  ...margin(0, 0.5),
   ...centerChild,
   selectors: {
     [`${container} &:first-child`]: {
@@ -98,6 +97,7 @@ export const divider = style({
 export const carret = style({
   width: spacing[2],
   height: spacing[2],
+  marginBottom: '0.15rem',
   color: vars.disabled.color,
 })
 
@@ -108,10 +108,7 @@ export const item = style([
   {
     height: rowHeight,
     ...padding(0.25, 0),
-    ...margin(0.25, 1, 0.25, 0),
-    ':last-child': {
-      marginRight: 0,
-    },
+    ...margin(0.25, 0),
     display: 'flex',
     alignItems: 'center',
     columnGap: spacing[1],
@@ -141,12 +138,7 @@ export const typeIcon = style({
   color: vars.disabled.color,
 })
 
-export const name = style({
-  transform: 'translateY(0.2px)',
-  color: color.gray[600],
-  ...media({
-    [dark]: {
-      color: color.gray[200],
-    },
-  }),
+export const name = styleVariants({
+  default: { color: vars.defaultTextColor },
+  gray: { color: vars.disabled.color },
 })

@@ -26,29 +26,20 @@
     "dist"
   ],
   "type": "module",
-  "main": "./dist/server.cjs",
-  "module": "./dist/server.js",
-  "types": "./dist/index.d.ts",
+  "main": "./dist/prod.js",
+  "module": "./dist/prod.js",
+  "types": "./dist/types/index.d.ts",
   "exports": {
     "browser": {
-      "development": {
-        "import": "./dist/index.js",
-        "require": "./dist/index.cjs"
-      },
-      "import": "./dist/server.js",
-      "require": "./dist/server.cjs"
+      "development": "./dist/dev.js",
+      "default": "./dist/prod.js"
     },
-    "development": {
-      "import": "./dist/index.js",
-      "require": "./dist/index.cjs"
-    },
-    "import": "./dist/server.js",
-    "require": "./dist/server.cjs",
-    "types": "./dist/index.d.ts"
+    "development": "./dist/dev.js",
+    "default": "./dist/prod.js"
   },
   "scripts": {
     "dev": "pnpm run build --watch",
-    "build": "tsup",
+    "build": "tsx ./scripts/build.ts",
     "typecheck": "tsc --noEmit --paths null"
   },
   "dependencies": {
@@ -63,5 +54,11 @@
   "peerDependencies": {
     "solid-js": "^1.6.2"
   },
-  "packageManager": "pnpm@7.13.0"
+  "packageManager": "pnpm@7.18.1",
+  "devDependencies": {
+    "@types/clean-css": "^4.2.6",
+    "chokidar": "^3.5.3",
+    "clean-css": "^5.3.1",
+    "tsx": "^3.12.1"
+  }
 }

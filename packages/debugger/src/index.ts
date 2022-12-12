@@ -6,23 +6,7 @@ export const Debugger: ParentComponent = props => {
   return props.children
 }
 
-import plugin from './main/plugin'
-export const useDebugger = plugin.useDebugger
-export const useLocator = plugin.useLocator
-export type { BatchComputationUpdatesHandler } from './main/plugin'
-
-export { attachDebugger, enableRootsAutoattach, unobserveAllRoots } from './main/roots'
-
-export {
-  makeSolidUpdateListener,
-  makeCreateRootListener,
-  observeComputationUpdate,
-  observeValueUpdate,
-  interceptComputationRerun,
-  makeValueUpdateListener,
-  removeValueUpdateObserver,
-} from './main/update'
-export type { AfterCrateRoot } from './main/update'
+export * from './types'
 
 export {
   getOwner,
@@ -39,8 +23,22 @@ export {
   onParentCleanup,
   getFunctionSources,
   createUnownedRoot,
-  createInternalRoot,
 } from './main/utils'
+
+export {
+  makeSolidUpdateListener,
+  observeValueUpdate,
+  interceptComputationRerun,
+  makeValueUpdateListener,
+  removeValueUpdateObserver,
+} from './main/update'
+
+export {
+  attachDebugger,
+  enableRootsAutoattach,
+  unobserveAllRoots,
+  createInternalRoot,
+} from './main/roots'
 
 export { markComponentLoc } from './locator'
 
@@ -60,4 +58,7 @@ export type {
   ValueNodeUpdate,
 } from './inspector'
 
-export * from './types'
+import plugin from './main/plugin'
+export const useDebugger = plugin.useDebugger
+export const useLocator = plugin.useLocator
+export type { BatchComputationUpdatesHandler } from './main/plugin'

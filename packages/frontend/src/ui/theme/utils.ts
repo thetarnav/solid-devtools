@@ -1,8 +1,7 @@
 import { asArray, Many } from '@solid-primitives/utils'
 import { StyleRule } from '@vanilla-extract/css'
-import { clsx } from 'clsx'
 import { Property } from 'csstype'
-import { spacing, theme } from '.'
+import { spacing, theme } from './theme.css'
 
 export function hexToRgbValue(hex: string) {
   var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex)
@@ -67,7 +66,7 @@ export const transition = (
   delay: Property.TransitionDelay = theme.duration[0],
   easing: Property.TransitionTimingFunction = theme.easing.DEFAULT,
 ): StyleRule => ({
-  transitionProperty: clsx(property),
+  transitionProperty: property,
   transitionDuration: duration,
   transitionDelay: delay,
   transitionTimingFunction: easing,
@@ -160,4 +159,47 @@ export function margin(
   return {
     margin: `${resolveSpacing(a)} ${resolveSpacing(b)} ${resolveSpacing(c)} ${resolveSpacing(d)}`,
   }
+}
+
+type OnlyStringValues<T> = keyof {
+  [K in T as string extends K
+    ? never
+    : K extends string
+    ? K extends
+        | `var${string}`
+        | 'inherit'
+        | 'initial'
+        | '-moz-initial'
+        | 'unset'
+        | 'revert'
+        | 'none'
+        | 'revert-layer'
+      ? never
+      : K
+    : never]: never
+}
+
+export function flex(
+  ...rules: (
+    | OnlyStringValues<StyleRule['flexDirection']>
+    | `items-${OnlyStringValues<StyleRule['alignItems']>}`
+    | `justify-${OnlyStringValues<StyleRule['justifyContent']>}`
+    | `wrap-${OnlyStringValues<StyleRule['flexWrap']>}`
+  )[]
+): StyleRule {
+  const styles: StyleRule = {
+    display: 'flex',
+  }
+  for (const rule of rules) {
+    if (rule.startsWith('items-')) {
+      styles.alignItems = rule.slice(6) as StyleRule['alignItems']
+    } else if (rule.startsWith('justify-')) {
+      styles.justifyContent = rule.slice(8) as StyleRule['justifyContent']
+    } else if (rule.startsWith('wrap-')) {
+      styles.flexWrap = rule.slice(5) as StyleRule['flexWrap']
+    } else {
+      styles.flexDirection = rule as StyleRule['flexDirection']
+    }
+  }
+  return styles
 }

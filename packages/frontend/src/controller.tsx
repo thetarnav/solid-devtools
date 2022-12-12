@@ -1,4 +1,4 @@
-import { batch, createEffect, createSignal, on } from 'solid-js'
+import { batch, createEffect, createMemo, createSignal } from 'solid-js'
 import { createContextProvider } from '@solid-primitives/context'
 import {
   ComputationUpdate,
@@ -6,14 +6,15 @@ import {
   Mapped,
   NodeID,
   NodeType,
-  RootsUpdates,
+  StructureUpdates,
+  TreeWalkerMode,
 } from '@solid-devtools/debugger/types'
 import type {
   InspectorUpdate,
   SetInspectedNodeData,
   ToggleInspectedValueData,
 } from '@solid-devtools/debugger'
-import createStructure, { Structure } from './modules/structure'
+import createStructure from './modules/structure'
 import createInspector from './modules/inspector'
 import { defer } from '@solid-devtools/shared/primitives'
 
@@ -30,13 +31,14 @@ interface ClientListenerPayloads {
   DevtoolsLocatorStateChange: boolean
   HighlightElementChange: HighlightElementPayload
   OpenLocation: void
+  TreeViewModeChange: TreeWalkerMode
 }
 export type ClientListeners = ListenersFromPayloads<ClientListenerPayloads>
 
 interface DevtoolsListenerPayloads {
   ResetPanel: void
   SetInspectedDetails: Mapped.OwnerDetails
-  StructureUpdate: RootsUpdates | null
+  StructureUpdate: StructureUpdates
   ComputationUpdates: ComputationUpdate[]
   InspectorUpdate: InspectorUpdate[]
   ClientLocatorModeChange: boolean
@@ -57,7 +59,7 @@ export class Controller {
     this.listeners = devtoolsListeners
   }
 
-  updateStructure(update: RootsUpdates | null) {
+  updateStructure(update: StructureUpdates) {
     this.listeners.onStructureUpdate(update)
   }
   updateComputation(computationUpdate: DevtoolsListenerPayloads['ComputationUpdates']) {
@@ -104,6 +106,7 @@ const [Provider, useControllerCtx] = createContextProvider(
 
     const inspector = createInspector({
       findNode: structure.findNode,
+      findClosestInspectableNode: structure.findClosestInspectableNode,
       getNodePath: structure.getNodePath,
     })
 
@@ -158,7 +161,7 @@ const [Provider, useControllerCtx] = createContextProvider(
     // set inspected node
     inspector.setOnInspectNode(node => {
       client.onInspectNode(
-        node ? { nodeId: node.id, rootId: structure.getParentRoot(node).id } : null,
+        node ? { nodeId: node.id, rootId: structure.getRootNode(node).id } : null,
       )
     })
     // toggle inspected value/prop/signal
@@ -169,34 +172,83 @@ const [Provider, useControllerCtx] = createContextProvider(
     inspector.setOnOpenLocation(client.onOpenLocation)
 
     // highlight hovered element
-    createEffect(
-      on(
-        [structure.extHovered, inspector.hoveredElement],
-        ([hovered, elId], _, prev: string | { rootId: NodeID; nodeId: NodeID } | undefined) => {
-          // handle component
-          if (hovered && hovered.type === NodeType.Component) {
-            if (typeof prev === 'object' && prev.nodeId === hovered.id) return prev
 
-            const rootId = structure.getParentRoot(hovered).id
-            const payload = { rootId, nodeId: hovered.id }
-            client.onHighlightElementChange(payload)
-            return payload
+    const hovered = createMemo<{ elementId: NodeID } | { nodeId: NodeID } | undefined>(
+      () => {
+        const elementId = inspector.hoveredElement()
+        if (elementId) return { elementId }
+        const nodeId = structure.extHovered()
+        if (nodeId) return { nodeId }
+      },
+      undefined,
+      {
+        equals: (a, b) => {
+          if (a && b) {
+            if ('elementId' in a && 'elementId' in b) return a.elementId === b.elementId
+            if ('nodeId' in a && 'nodeId' in b) return a.nodeId === b.nodeId
           }
-          // handle element
-          if (elId) {
-            if (typeof prev === 'string' && prev === elId) return prev
-            client.onHighlightElementChange({ elementId: elId })
-            return elId
-          }
-          // no element or component
-          if (prev) client.onHighlightElementChange(null)
+          return false
         },
-        { defer: true },
-      ),
+      },
     )
 
+    const getHightlightPayload = (
+      id: NonNullable<ReturnType<typeof hovered>>,
+    ): undefined | NonNullable<HighlightElementPayload> => {
+      // handle element
+      if ('elementId' in id)
+        return {
+          elementId: id.elementId,
+          type: 'element',
+        }
+
+      // handle component | element node
+      const { nodeId } = id
+      const node = structure.findNode(nodeId)
+
+      if (!node || (node.type !== NodeType.Component && node.type !== NodeType.Element)) return
+
+      if (node.type === NodeType.Component)
+        return {
+          componentId: nodeId,
+          type: 'componentNode',
+        }
+
+      const component = structure.getClosestComponentNode(node)
+      if (component)
+        return {
+          componentId: component.id,
+          elementId: nodeId,
+          type: 'elementNode',
+        }
+    }
+
+    createEffect(
+      defer(hovered, (hovered, _, prev: ReturnType<typeof getHightlightPayload> | void) => {
+        if (!hovered) return client.onHighlightElementChange(null)
+
+        const payload = getHightlightPayload(hovered)
+        if (!payload && !prev) return
+
+        client.onHighlightElementChange(payload ?? null)
+        return payload
+      }),
+    )
+
+    // TREE VIEW MODE
+    createEffect(defer(structure.mode, client.onTreeViewModeChange))
+
+    function changeTreeViewMode(newMode: TreeWalkerMode): void {
+      if (newMode === structure.mode()) return
+      batch(() => {
+        structure.setMode(newMode)
+        searchStructure('')
+      })
+    }
+
+    // SEARCH NODES
     let lastSearch: string = ''
-    let lastSearchResults: Structure.Node[] | undefined
+    let lastSearchResults: NodeID[] | undefined
     let lastSearchIndex = 0
     function searchStructure(query: string): void {
       if (query === lastSearch) {
@@ -222,6 +274,7 @@ const [Provider, useControllerCtx] = createContextProvider(
       setInspectedNode: inspector.setInspectedNode,
       toggleHoveredNode: structure.toggleHoveredNode,
       listenToComputationUpdate: structure.listenToComputationUpdate,
+      changeTreeViewMode,
       inspector,
       structure,
       searchStructure,

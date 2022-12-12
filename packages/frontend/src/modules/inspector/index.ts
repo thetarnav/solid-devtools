@@ -1,4 +1,4 @@
-import { batch, createEffect, createSelector, createSignal } from 'solid-js'
+import { batch, createEffect, createMemo, createSelector, createSignal } from 'solid-js'
 import { createStore, produce } from 'solid-js/store'
 import { defer, untrackedCallback, WritableDeep } from '@solid-devtools/shared/primitives'
 import { error, warn } from '@solid-devtools/shared/utils'
@@ -82,9 +82,9 @@ function updateValueNode(obj: { value: EncodedValue }, newValue: EncodedValue): 
       obj = obj.value.value
       newValue = (newValue as EncodedValueOf<ValueType.Store>).value.value
     }
-    const expanded = XOR('children' in obj.value!, 'children' in newValue)
+    const expanded = XOR('children' in obj.value, 'children' in newValue)
     if (expanded) {
-      obj.value!.children = newValue.children
+      obj.value.children = newValue.children
       return
     }
   }
@@ -166,12 +166,18 @@ function updateStore(
 export default function createInspector({
   getNodePath,
   findNode,
+  findClosestInspectableNode,
 }: {
   getNodePath(node: Structure.Node): Structure.Node[]
   findNode(id: NodeID): Structure.Node | undefined
+  findClosestInspectableNode(node: Structure.Node): Structure.Node | undefined
 }) {
   const [inspectedNode, setInspectedNode] = createSignal<Structure.Node | null>(null)
-  const [path, setPath] = createSignal<Structure.Node[]>([])
+  const inspectedId = createMemo(() => inspectedNode()?.id ?? null)
+  const path = createMemo(() => {
+    const node = inspectedNode()
+    return node ? getNodePath(node) : []
+  })
   const [location, setLocation] = createSignal<LocationAttr | null>(null)
   const [signalDetails, setSignalDetails] = createStore<Inspector.SignalDetails>({
     signals: {},
@@ -199,27 +205,22 @@ export default function createInspector({
 
   const isNodeInspected = createSelector<NodeID | null, NodeID>(() => inspectedNode()?.id ?? null)
 
-  const setInspected: (data: Structure.Node | null | NodeID) => void = untrackedCallback(data => {
+  const setInspected: (data: Structure.Node | NodeID | null) => void = untrackedCallback(data => {
     batch(() => {
       if (data === null) {
         setInspectedNode(null)
-        setPath([])
         return
       }
 
-      const currentNode = inspectedNode()
-      let newNode: Structure.Node | undefined
-      if (typeof data === 'object') {
-        if (currentNode && data.id === currentNode.id) return
-        newNode = data
-      } else {
-        if (currentNode && data === currentNode.id) return
-        const node = findNode(data)
-        if (!node) return
-        newNode = node
-      }
-      setInspectedNode(newNode)
-      setPath(getNodePath(newNode))
+      const prev = inspectedNode()
+      const newId = typeof data === 'string' ? data : data.id
+      if (prev && newId === prev.id) return
+      const node = typeof data === 'string' ? findNode(data) : data
+      if (!node) return warn(`setInspected: node (${newId}) not found`)
+      // html elements are not inspectable
+      if (node.type === NodeType.Element) return
+
+      setInspectedNode(node)
       setLocation(null)
       setSignalDetails({ signals: {}, value: null, props: null })
     })
@@ -227,9 +228,15 @@ export default function createInspector({
 
   // clear the inspector when the inspected node is removed
   const handleStructureChange = untrackedCallback(() => {
-    const node = inspectedNode()
-    if (!node) return
-    findNode(node.id) || setInspectedNode(null)
+    const prevNode = inspectedNode()
+    if (!prevNode) return
+    let node = findNode(prevNode.id)
+    // if the previous inspected node is not found, try to find the closest component, context ot top-level root
+    if (!node) {
+      node = findClosestInspectableNode(prevNode)
+      node &&= findNode(node.id)
+    }
+    setInspected(node ?? null)
   })
 
   const setNewDetails = untrackedCallback((raw: Mapped.OwnerDetails) => {
@@ -280,7 +287,7 @@ export default function createInspector({
     )
   }
 
-  /** variable for a callback in bridge.ts */
+  /** variable for a callback in controller.tsx */
   let onInspectNode: (node: Structure.Node | null) => void = () => {}
   let onInspectValue: (data: ToggleInspectedValueData) => void = () => {}
   const setOnInspectValue = (fn: typeof onInspectValue) => (onInspectValue = fn)
@@ -330,6 +337,7 @@ export default function createInspector({
   }
 
   return {
+    inspectedId,
     inspectedNode,
     details,
     setInspectedNode: setInspected,
