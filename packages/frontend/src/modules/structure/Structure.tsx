@@ -99,7 +99,7 @@ const ToggleMode: Component = () => {
   const ctx = useController()
 
   const tabsContentMap: Readonly<Record<TreeWalkerMode, string>> = {
-    [TreeWalkerMode.Owners]: 'Ownership',
+    [TreeWalkerMode.Owners]: 'Owners',
     [TreeWalkerMode.Components]: 'Components',
     [TreeWalkerMode.DOM]: 'DOM',
   }

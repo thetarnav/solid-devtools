@@ -16,6 +16,7 @@ export const vars = {
     colorValue: createVar(),
   },
   defaultTextColor: createVar(),
+  lighterTextColor: createVar(),
   componentNameColor: createVar(),
   domColor: createVar(),
 }
@@ -32,6 +33,7 @@ export const varsStyle = style({
     [vars.disabled.color]: color.disabled.light,
     [vars.disabled.colorValue]: hexToRgbValue(color.disabled.light),
     [vars.defaultTextColor]: color.gray[900],
+    [vars.lighterTextColor]: color.gray[800],
     [vars.componentNameColor]: color.cyan[600],
     [vars.domColor]: color.amber[600],
   },
@@ -47,7 +49,8 @@ export const varsStyle = style({
 
         [vars.disabled.color]: color.disabled.dark,
         [vars.disabled.colorValue]: hexToRgbValue(color.disabled.dark),
-        [vars.defaultTextColor]: color.gray[50],
+        [vars.defaultTextColor]: color.gray[100],
+        [vars.lighterTextColor]: color.gray[200],
         [vars.componentNameColor]: color.cyan[400],
         [vars.domColor]: color.amber[500],
       },

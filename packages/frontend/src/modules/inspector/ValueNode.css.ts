@@ -109,12 +109,7 @@ export const name = {
 export const baseValue = style({
   fontWeight: 500,
   height: RowHeight,
-  color: color.gray[800],
-  ...media({
-    [dark]: {
-      color: color.gray[200],
-    },
-  }),
+  color: vars.lighterTextColor,
 })
 
 const bracketsStyles: StyleRule = {
