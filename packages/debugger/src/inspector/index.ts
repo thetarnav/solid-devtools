@@ -65,7 +65,7 @@ export function createInspector(
           node.getValue(),
           selected,
           nodeIdMap,
-          selected && handleStoreNode.bind(null, id, node),
+          selected ? handleStoreNode.bind(null, id, node) : undefined,
         )
         batchedUpdates.push(['value', { id, value: encoded }])
       }

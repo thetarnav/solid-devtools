@@ -27,12 +27,12 @@ export type EncodedPreviewPayloadMap = {
   [ValueType.Getter]: string
   [ValueType.Element]: { name: string; id: NodeID }
   [ValueType.Instance]: string
-  [ValueType.Store]: { value: EncodedValue<boolean>; id: NodeID }
+  [ValueType.Store]: { value: number; id: NodeID }
 }
 
 export type EncodedPreviewChildrenMap = {
-  [ValueType.Array]: EncodedValue<true>[]
-  [ValueType.Object]: Record<string | number, EncodedValue<true>>
+  [ValueType.Array]: number[]
+  [ValueType.Object]: { [key: string]: number }
 }
 
 export type EncodedValueOf<K extends ValueType, Deep extends boolean = boolean> = {

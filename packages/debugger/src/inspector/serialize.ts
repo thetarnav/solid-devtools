@@ -1,17 +1,86 @@
 import { unwrap } from 'solid-js/store'
-import {
-  Core,
-  EncodedValue,
-  EncodedValueOf,
-  NodeID,
-  INFINITY,
-  NAN,
-  NEGATIVE_INFINITY,
-  ValueType,
-} from '../types'
+import { Core, EncodedValue, NodeID, INFINITY, NAN, NEGATIVE_INFINITY, ValueType } from '../types'
 import { isStoreNode } from '../main/utils'
 
-// TODO handle circular references
+// globals
+let Deep: boolean
+let NodeMap: NodeIDMap<HTMLElement | Core.Store.StoreNode>
+let List: EncodedValue<true>[]
+let Seen: WeakMap<object, number>
+let HandleStore: ((storeNodeId: NodeID, storeNode: Core.Store.StoreNode) => void) | undefined
+
+const encodeNonObject = (value: unknown): EncodedValue<true> => {
+  switch (typeof value) {
+    case 'number':
+      if (value === Infinity) return { type: ValueType.Number, value: INFINITY }
+      if (value === -Infinity) return { type: ValueType.Number, value: NEGATIVE_INFINITY }
+      if (isNaN(value)) return { type: ValueType.Number, value: NAN }
+      return { type: ValueType.Number, value }
+    case 'boolean':
+      return { type: ValueType.Boolean, value }
+    case 'string':
+      return { type: ValueType.String, value }
+    case 'symbol':
+      return { type: ValueType.Symbol, value: value.description || '' }
+    case 'function':
+      return { type: ValueType.Function, value: value.name }
+    case 'object':
+      return { type: ValueType.Null }
+    default:
+      return { type: ValueType.Undefined }
+  }
+}
+
+function encode(value: unknown, inStore: boolean): number {
+  if (!value || typeof value !== 'object') return List.push(encodeNonObject(value)) - 1
+
+  const seen = Seen.get(value)
+  if (seen !== undefined) return seen
+  const encoded: EncodedValue<true> = {} as any
+  const index = List.push(encoded) - 1
+  Seen.set(value, index)
+
+  // HTML Elements
+  if (value instanceof Element) {
+    encoded.type = ValueType.Element
+    encoded.value = { name: value.localName, id: NodeMap.set(value) }
+  }
+  // Store Nodes
+  else if (!inStore && isStoreNode(value)) {
+    // might still pass in a proxy
+    const node = unwrap(value)
+    const id = NodeMap.set(node)
+    HandleStore && HandleStore(id, node)
+    encoded.type = ValueType.Store
+    encoded.value = { value: encode(node, true), id }
+  }
+  // Arrays
+  else if (Array.isArray(value)) {
+    encoded.type = ValueType.Array
+    encoded.value = value.length
+    if (Deep) encoded.children = value.map(item => encode(item, inStore))
+  } else {
+    const name = Object.prototype.toString.call(value).slice(8, -1)
+    // normal objects (records)
+    if (name === 'Object') {
+      encoded.type = ValueType.Object
+      encoded.value = Object.keys(value).length
+      if (Deep) {
+        const children = (encoded.children = {} as { [key: string]: number })
+        for (const [key, descriptor] of Object.entries(Object.getOwnPropertyDescriptors(value))) {
+          children[key] = descriptor.get ? -1 : encode(descriptor.value, inStore)
+        }
+      }
+    }
+    // custom objects
+    else {
+      encoded.type = ValueType.Instance
+      encoded.value = name
+    }
+  }
+
+  return index
+}
 
 /**
  * Encodes any value to a JSON-serializable object.
@@ -25,81 +94,25 @@ export function encodeValue<Deep extends boolean>(
   value: unknown,
   deep: Deep,
   nodeMap: NodeIDMap<HTMLElement | Core.Store.StoreNode>,
-  handleStore?:
-    | false
-    | undefined
-    | ((storeNodeId: NodeID, storeNode: Core.Store.StoreNode) => void),
+  handleStore?: (storeNodeId: NodeID, storeNode: Core.Store.StoreNode) => void,
   inStore = false,
-): EncodedValue<Deep> {
-  if (typeof value === 'number') {
-    if (value === Infinity) return { type: ValueType.Number, value: INFINITY }
-    if (value === -Infinity) return { type: ValueType.Number, value: NEGATIVE_INFINITY }
-    if (Number.isNaN(value)) return { type: ValueType.Number, value: NAN }
-    return { type: ValueType.Number, value }
-  }
-  if (typeof value === 'boolean') return { type: ValueType.Boolean, value }
-  if (typeof value === 'string') return { type: ValueType.String, value }
-  if (value === null) return { type: ValueType.Null }
-  if (value === undefined) return { type: ValueType.Undefined }
-  if (typeof value === 'symbol') return { type: ValueType.Symbol, value: value.description ?? '' }
-  if (typeof value === 'function') return { type: ValueType.Function, value: value.name }
+): EncodedValue<Deep>[] {
+  Deep = deep
+  NodeMap = nodeMap
+  List = []
+  Seen = new WeakMap()
+  HandleStore = handleStore
 
-  if (value instanceof HTMLElement)
-    return {
-      type: ValueType.Element,
-      value: { name: value.localName, id: nodeMap.set(value) },
-    }
+  encode(value, inStore)
+  const result = List
 
-  if (!inStore && isStoreNode(value)) {
-    // might still pass in a proxy
-    const node = unwrap(value)
-    const id = nodeMap.set(node)
-    handleStore && handleStore(id, node)
-    return {
-      type: ValueType.Store,
-      value: {
-        value: encodeValue(node, deep, nodeMap, undefined, true) as EncodedValue<boolean>,
-        id,
-      },
-    }
-  }
+  // @ts-expect-error clear global values
+  Deep = NodeMap = List = Seen = undefined
 
-  if (Array.isArray(value)) {
-    const payload = {
-      type: ValueType.Array,
-      value: value.length,
-    } as EncodedValueOf<ValueType.Array>
-    if (deep)
-      (payload as EncodedValueOf<ValueType.Array, true>).children = value.map(item =>
-        encodeValue(item, true, nodeMap, handleStore, inStore),
-      )
-    return payload
-  }
-
-  const s = Object.prototype.toString.call(value)
-  const name = s.slice(8, -1)
-  if (name === 'Object') {
-    const obj = value as Record<PropertyKey, unknown>
-    const payload: EncodedValueOf<ValueType.Object> = {
-      type: ValueType.Object,
-      value: Object.keys(obj).length,
-    }
-    if (deep) {
-      const children = ((payload as unknown as EncodedValueOf<ValueType.Object, true>).children =
-        {} as Record<string, EncodedValue<true>>)
-      for (const [key, descriptor] of Object.entries(Object.getOwnPropertyDescriptors(value))) {
-        children[key] = descriptor.get
-          ? { type: ValueType.Getter, value: key }
-          : encodeValue(descriptor.value, true, nodeMap, handleStore, inStore)
-      }
-    }
-    return payload
-  }
-
-  return { type: ValueType.Instance, value: name }
+  return result
 }
 
-let lastId = 0
+let LastId = 0
 
 export class NodeIDMap<T extends object> {
   private obj: Record<NodeID, T> = {}
@@ -115,7 +128,7 @@ export class NodeIDMap<T extends object> {
   set(element: T): NodeID {
     let id = this.map.get(element)
     if (id !== undefined) return id
-    id = (lastId++).toString(36)
+    id = (LastId++).toString(36)
     this.obj[id] = element
     this.map.set(element, id)
     return id
