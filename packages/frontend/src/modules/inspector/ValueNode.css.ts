@@ -192,7 +192,6 @@ export const ValueElement = {
     elHighlight.container,
     {
       color: vars.domColor,
-      textTransform: 'lowercase',
       vars: {
         [elHighlight.bgOpacityVar]: '0',
       },

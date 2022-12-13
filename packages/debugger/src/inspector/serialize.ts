@@ -47,7 +47,7 @@ export function encodeValue<Deep extends boolean>(
   if (value instanceof HTMLElement)
     return {
       type: ValueType.Element,
-      value: { name: value.tagName, id: nodeMap.set(value) },
+      value: { name: value.localName, id: nodeMap.set(value) },
     }
 
   if (!inStore && isStoreNode(value)) {
