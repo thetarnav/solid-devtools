@@ -1,7 +1,7 @@
 import { batch, createEffect, createMemo, createSelector, createSignal } from 'solid-js'
 import { createStore, produce } from 'solid-js/store'
 import { defer, untrackedCallback, WritableDeep } from '@solid-devtools/shared/primitives'
-import { error, warn } from '@solid-devtools/shared/utils'
+import { warn } from '@solid-devtools/shared/utils'
 import {
   InspectorUpdate,
   ProxyPropsUpdate,
@@ -230,13 +230,20 @@ function updateStore(
   let value = store.value
   for (const key of path) {
     if (!value || typeof value !== 'object')
-      return error('Invalid path', [...path, property].join('.'))
+      throw new Error(`Invalid path ${[...path, property].join('.')}`)
     value = value[key as never]
   }
   if (!value || typeof value !== 'object')
-    return error('Invalid path', [...path, property].join('.'))
-  if (newValue === undefined) delete value[property as never]
-  else value[property as never] = newValue as never
+    throw new Error(`Invalid path ${[...path, property].join('.')}`)
+
+  if (newValue === undefined) {
+    delete value[property as never]
+  } else if (typeof newValue === 'number') {
+    if (Array.isArray(value)) value.length = newValue
+    else throw new Error(`Invalid path ${[...path, property].join('.')}`)
+  } else {
+    ;(value as any)[property] = deserializeEncodedValue(newValue)
+  }
 }
 
 export default function createInspector({

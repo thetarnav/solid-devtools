@@ -29,6 +29,21 @@ type ToggleElementHover = (elementId: NodeID, hovered?: boolean) => void
 
 const ValueContext = createContext<{ onElementHover?: ToggleElementHover; underStore: boolean }>()
 
+const getIsCollapsable = (value: DeserializedValue): boolean =>
+  !!value &&
+  typeof value === 'object' &&
+  (Array.isArray(value) ||
+    Object.getPrototypeOf(value) === Object.prototype ||
+    (value instanceof ObjectPreviewNode && value.length > 0) ||
+    (value instanceof StoreNode && getIsCollapsable(value.value)))
+
+const getObjectValueLength = (
+  value: DeserializedValue<ValueType.Array | ValueType.Object>,
+): number =>
+  value instanceof ObjectPreviewNode || Array.isArray(value)
+    ? value.length
+    : Object.keys(value).length
+
 const CollapsableObjectPreview: Component<{
   value: Exclude<DeserializedValue<ValueType.Array | ValueType.Object>, ObjectPreviewNode>
 }> = props => (
@@ -60,25 +75,35 @@ const ObjectValuePreview: Component<{
   extended?: boolean
 }> = props => {
   return (
-    <>
-      {props.value instanceof ObjectPreviewNode ? (
-        <Show
-          when={props.value.length}
-          children={
-            <span class={styles.baseValue}>
-              {props.value.type === ValueType.Array ? 'Array' : 'Object'} [{props.value.length}]
-            </span>
-          }
-          fallback={
-            <span class={styles.Nullable}>
-              Empty {props.value.type === ValueType.Array ? 'Array' : 'Object'}
-            </span>
-          }
+    <Show
+      when={props.value instanceof ObjectPreviewNode || !props.extended}
+      fallback={
+        <CollapsableObjectPreview
+          value={props.value as Exclude<typeof props.value, ObjectPreviewNode>}
         />
-      ) : (
-        <CollapsableObjectPreview value={props.value} />
-      )}
-    </>
+      }
+    >
+      {() => {
+        const type = () =>
+          props.value instanceof ObjectPreviewNode
+            ? props.value.type
+            : Array.isArray(props.value)
+            ? ValueType.Array
+            : ValueType.Object
+        const name = () => (type() === ValueType.Array ? 'Array' : 'Object')
+
+        return (
+          <Show
+            when={getObjectValueLength(props.value)}
+            fallback={<span class={styles.Nullable}>Empty {name()}</span>}
+          >
+            <span class={styles.baseValue}>
+              {name()} [{getObjectValueLength(props.value)}]
+            </span>
+          </Show>
+        )
+      }}
+    </Show>
   )
 }
 
@@ -160,14 +185,6 @@ function createNestedHover() {
   }
 }
 
-const getIsCollapsable = (value: DeserializedValue): boolean =>
-  !!value &&
-  typeof value === 'object' &&
-  (Array.isArray(value) ||
-    Object.getPrototypeOf(value) === Object.prototype ||
-    (value instanceof ObjectPreviewNode && value.length > 0) ||
-    (value instanceof StoreNode && getIsCollapsable(value.value)))
-
 export const ValueNode: Component<{
   value: DeserializedValue
   name: JSX.Element
@@ -180,6 +197,7 @@ export const ValueNode: Component<{
   const ctx = useContext(ValueContext)
   const value = () => props.value
 
+  // this is to prevent the value from being considered updated when the collapse is toggled
   let toggledCollapse = false
 
   const isUpdated =
