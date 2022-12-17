@@ -1,57 +1,64 @@
-import { createStore } from 'solid-js/store'
+import { createMutable, createStore } from 'solid-js/store'
 import { describe, test, expect, vi } from 'vitest'
-import { EncodedValue, INFINITY, NAN, NEGATIVE_INFINITY, ValueType } from '../../types'
+import { EncodedValue, INFINITY, NAN, NEGATIVE_INFINITY, UNDEFINED, ValueType } from '../serialize'
 
 const getModule = async () => {
   vi.resetModules()
   return await import('../serialize')
 }
 
-type Expectations<Deep extends boolean> = [
-  name: string,
-  value: unknown,
-  encoded: EncodedValue<Deep>[],
-][]
+type Expectations = [name: string, data: unknown, encoded: EncodedValue[]][]
 
 describe('encodeValue Preview', async () => {
   const { encodeValue, NodeIDMap } = await getModule()
 
   const _testFunction = () => {}
 
-  const encodePreviewExpectations: Expectations<false> = [
-    ['Infinity', Infinity, [{ type: ValueType.Number, value: INFINITY }]],
-    ['Negative Infinity', -Infinity, [{ type: ValueType.Number, value: NEGATIVE_INFINITY }]],
-    ['NaN', NaN, [{ type: ValueType.Number, value: NAN }]],
-    ['Number', 1, [{ type: ValueType.Number, value: 1 }]],
-    ['Boolean true', true, [{ type: ValueType.Boolean, value: true }]],
-    ['Boolean false', false, [{ type: ValueType.Boolean, value: false }]],
-    ['String', '', [{ type: ValueType.String, value: '' }]],
-    ['String', 'foo', [{ type: ValueType.String, value: 'foo' }]],
-    ['Null', null, [{ type: ValueType.Null }]],
-    ['Undefined', undefined, [{ type: ValueType.Undefined }]],
-    ['Named Symbol', Symbol('foo'), [{ type: ValueType.Symbol, value: 'foo' }]],
-    ['Symbol', Symbol(), [{ type: ValueType.Symbol, value: '' }]],
-    ['Function', () => {}, [{ type: ValueType.Function, value: '' }]],
-    ['Named Function', _testFunction, [{ type: ValueType.Function, value: '_testFunction' }]],
+  const [state] = createStore({ a: 1, b: 2, c: 3 })
+  const mutable = createMutable({ a: 1, b: 2, c: 3 })
+
+  const encodePreviewExpectations: Expectations = [
+    ['Infinity', Infinity, [[ValueType.Number, INFINITY]]],
+    ['Negative Infinity', -Infinity, [[ValueType.Number, NEGATIVE_INFINITY]]],
+    ['NaN', NaN, [[ValueType.Number, NAN]]],
+    ['Number', 1, [[ValueType.Number, 1]]],
+    ['Boolean true', true, [[ValueType.Boolean, true]]],
+    ['Boolean false', false, [[ValueType.Boolean, false]]],
+    ['String', '', [[ValueType.String, '']]],
+    ['String', 'foo', [[ValueType.String, 'foo']]],
+    ['Null', null, [[ValueType.Null, null]]],
+    ['Undefined', undefined, [[ValueType.Null, UNDEFINED]]],
+    ['Named Symbol', Symbol('foo'), [[ValueType.Symbol, 'foo']]],
+    ['Symbol', Symbol(), [[ValueType.Symbol, '']]],
+    ['Function', () => {}, [[ValueType.Function, '']]],
+    ['Named Function', _testFunction, [[ValueType.Function, '_testFunction']]],
+    ['Element div', document.createElement('div'), [[ValueType.Element, { name: 'div', id: '0' }]]],
+    ['Element a', document.createElement('a'), [[ValueType.Element, { name: 'a', id: '1' }]]],
+    ['Array empty', [], [[ValueType.Array, 0]]],
+    ['Array', [1, 2, 3], [[ValueType.Array, 3]]],
+    ['Object empty', {}, [[ValueType.Object, 0]]],
+    ['Object', { a: 1, b: 2, c: 3 }, [[ValueType.Object, 3]]],
+    ['Date', new Date(), [[ValueType.Instance, 'Date']]],
+    ['Error', new Error(), [[ValueType.Instance, 'Error']]],
+    ['Map', new Map(), [[ValueType.Instance, 'Map']]],
+    ['WeakMap', new WeakMap(), [[ValueType.Instance, 'WeakMap']]],
+    ['Set', new Set(), [[ValueType.Instance, 'Set']]],
     [
-      'Element div',
-      document.createElement('div'),
-      [{ type: ValueType.Element, value: { name: 'div', id: '0' } }],
+      'Store',
+      state,
+      [
+        [ValueType.Store, { id: '2', value: 1 }],
+        [ValueType.Object, 3],
+      ],
     ],
     [
-      'Element a',
-      document.createElement('a'),
-      [{ type: ValueType.Element, value: { name: 'a', id: '1' } }],
+      'Mutable',
+      mutable,
+      [
+        [ValueType.Store, { id: '3', value: 1 }],
+        [ValueType.Object, 3],
+      ],
     ],
-    ['Array empty', [], [{ type: ValueType.Array, value: 0 }]],
-    ['Array', [1, 2, 3], [{ type: ValueType.Array, value: 3 }]],
-    ['Object empty', {}, [{ type: ValueType.Object, value: 0 }]],
-    ['Object', { a: 1, b: 2, c: 3 }, [{ type: ValueType.Object, value: 3 }]],
-    ['Date', new Date(), [{ type: ValueType.Instance, value: 'Date' }]],
-    ['Error', new Error(), [{ type: ValueType.Instance, value: 'Error' }]],
-    ['Map', new Map(), [{ type: ValueType.Instance, value: 'Map' }]],
-    ['WeakMap', new WeakMap(), [{ type: ValueType.Instance, value: 'WeakMap' }]],
-    ['Set', new Set(), [{ type: ValueType.Instance, value: 'Set' }]],
   ]
 
   for (const [testName, value, expectation] of encodePreviewExpectations) {
@@ -66,20 +73,15 @@ describe('encodeValue Preview', async () => {
 describe('encodeValue Deep', async () => {
   const { encodeValue, NodeIDMap } = await getModule()
 
-  const encodeDeepExpectations: Expectations<true> = [
-    ['Array empty', [], [{ type: ValueType.Array, value: 0, children: [] }]],
+  const encodeDeepExpectations: Expectations = [
+    ['Array empty', [], [[ValueType.Array, []]]],
     [
       'Array shallow',
-      [1, 2, 4],
+      [1, 1, 4],
       [
-        {
-          type: ValueType.Array,
-          value: 3,
-          children: [1, 2, 3],
-        },
-        { type: ValueType.Number, value: 1 },
-        { type: ValueType.Number, value: 2 },
-        { type: ValueType.Number, value: 4 },
+        [ValueType.Array, [1, 1, 2]],
+        [ValueType.Number, 1],
+        [ValueType.Number, 4],
       ],
     ],
 
@@ -87,75 +89,38 @@ describe('encodeValue Deep', async () => {
       'Array nested',
       [[1, { foo: 'bar' }], 2, { map: new Map() }],
       [
-        {
-          type: ValueType.Array,
-          value: 3,
-          children: [1, 5, 6],
-        },
-        {
-          type: ValueType.Array,
-          value: 2,
-          children: [2, 3],
-        },
-        { type: ValueType.Number, value: 1 },
-        {
-          type: ValueType.Object,
-          value: 1,
-          children: { foo: 4 },
-        },
-        { type: ValueType.String, value: 'bar' },
-        { type: ValueType.Number, value: 2 },
-        {
-          type: ValueType.Object,
-          value: 1,
-          children: { map: 7 },
-        },
-        { type: ValueType.Instance, value: 'Map' },
+        [ValueType.Array, [1, 5, 6]],
+        [ValueType.Array, [2, 3]],
+        [ValueType.Number, 1],
+        [ValueType.Object, { foo: 4 }],
+        [ValueType.String, 'bar'],
+        [ValueType.Number, 2],
+        [ValueType.Object, { map: 7 }],
+        [ValueType.Instance, 'Map'],
       ],
     ],
-    ['Object empty', {}, [{ type: ValueType.Object, value: 0, children: {} }]],
+    ['Object empty', {}, [[ValueType.Object, {}]]],
     [
       'Object shallow',
-      { a: 1, b: 2, c: 4 },
+      { a: 2, b: 2, c: 4 },
       [
-        {
-          type: ValueType.Object,
-          value: 3,
-          children: { a: 1, b: 2, c: 3 },
-        },
-        { type: ValueType.Number, value: 1 },
-        { type: ValueType.Number, value: 2 },
-        { type: ValueType.Number, value: 4 },
+        [ValueType.Object, { a: 1, b: 1, c: 2 }],
+        [ValueType.Number, 2],
+        [ValueType.Number, 4],
       ],
     ],
     [
       'Object nested',
       { a: [1, { foo: 'bar' }], b: 2, c: { map: new Map() } },
       [
-        {
-          type: ValueType.Object,
-          value: 3,
-          children: { a: 1, b: 5, c: 6 },
-        },
-        {
-          type: ValueType.Array,
-          value: 2,
-          children: [2, 3],
-        },
-        { type: ValueType.Number, value: 1 },
-        {
-          type: ValueType.Object,
-          value: 1,
-          children: { foo: 4 },
-        },
-        { type: ValueType.String, value: 'bar' },
-        { type: ValueType.Number, value: 2 },
-        {
-          type: ValueType.Object,
-          value: 1,
-          children: { map: 7 },
-        },
-        { type: ValueType.Instance, value: 'Map' },
+        [ValueType.Object, { a: 1, b: 5, c: 6 }],
+        [ValueType.Array, [2, 3]],
+        [ValueType.Number, 1],
+        [ValueType.Object, { foo: 4 }],
+        [ValueType.String, 'bar'],
+        [ValueType.Number, 2],
+        [ValueType.Object, { map: 7 }],
+        [ValueType.Instance, 'Map'],
       ],
     ],
     [
@@ -167,12 +132,8 @@ describe('encodeValue Deep', async () => {
         },
       },
       [
-        {
-          type: ValueType.Object,
-          value: 2,
-          children: { a: 1, b: -1 },
-        },
-        { type: ValueType.Number, value: 123 },
+        [ValueType.Object, { a: 1, b: -1 }],
+        [ValueType.Number, 123],
       ],
     ],
   ]
@@ -193,19 +154,15 @@ describe('save elements to a map', async () => {
   const a1 = document.createElement('a')
   const div2 = document.createElement('div')
 
-  const elMapExpectations: Expectations<true> = [
-    ['Element div', div1, [{ type: ValueType.Element, value: { name: 'div', id: '0' } }]],
-    ['Element a', a1, [{ type: ValueType.Element, value: { name: 'a', id: '1' } }]],
+  const elMapExpectations: Expectations = [
+    ['Element div', div1, [[ValueType.Element, { name: 'div', id: '0' }]]],
+    ['Element a', a1, [[ValueType.Element, { name: 'a', id: '1' }]]],
     [
       'Element in object',
       { el: div2 },
       [
-        {
-          type: ValueType.Object,
-          value: 1,
-          children: { el: 1 },
-        },
-        { type: ValueType.Element, value: { name: 'div', id: '2' } },
+        [ValueType.Object, { el: 1 }],
+        [ValueType.Element, { name: 'div', id: '2' }],
       ],
     ],
   ]
@@ -232,61 +189,33 @@ describe('encodeValue with repeated references', async () => {
   one.b = one
   const two: any = { c: 2 }
 
-  const circularExpectations: Expectations<true> = [
+  const circularExpectations: Expectations = [
     [
       'Repeated reference',
       [[two], { two: two }],
       [
-        {
-          type: ValueType.Array,
-          value: 2,
-          children: [1, 4],
-        },
-        {
-          type: ValueType.Array,
-          value: 1,
-          children: [2],
-        },
-        {
-          type: ValueType.Object,
-          value: 1,
-          children: { c: 3 },
-        },
-        { type: ValueType.Number, value: 2 },
-        {
-          type: ValueType.Object,
-          value: 1,
-          children: { two: 2 },
-        },
+        [ValueType.Array, [1, 4]],
+        [ValueType.Array, [2]],
+        [ValueType.Object, { c: 3 }],
+        [ValueType.Number, 2],
+        [ValueType.Object, { two: 2 }],
       ],
     ],
     [
       'Circular reference',
       one,
       [
-        {
-          type: ValueType.Object,
-          value: 2,
-          children: { a: 1, b: 0 },
-        },
-        { type: ValueType.Number, value: 1 },
+        [ValueType.Object, { a: 1, b: 0 }],
+        [ValueType.Number, 1],
       ],
     ],
     [
       'Circular reference in array',
       [one],
       [
-        {
-          type: ValueType.Array,
-          value: 1,
-          children: [1],
-        },
-        {
-          type: ValueType.Object,
-          value: 2,
-          children: { a: 2, b: 1 },
-        },
-        { type: ValueType.Number, value: 1 },
+        [ValueType.Array, [1]],
+        [ValueType.Object, { a: 2, b: 1 }],
+        [ValueType.Number, 1],
       ],
     ],
   ]
@@ -308,24 +237,17 @@ describe('finding stores in values', async () => {
 
   const storeExpectations: [
     name: string,
-    value: unknown,
-    encoded: EncodedValue<true>[],
+    data: unknown,
+    encoded: EncodedValue[],
     calledWith: Parameters<NonNullable<Parameters<typeof encodeValue>[3]>>[],
   ][] = [
     [
       'Store',
       state,
       [
-        {
-          type: ValueType.Store,
-          value: { value: 1, id: '0' },
-        },
-        {
-          type: ValueType.Object,
-          value: 1,
-          children: { a: 2 },
-        },
-        { type: ValueType.Number, value: 1 },
+        [ValueType.Store, { value: 1, id: '0' }],
+        [ValueType.Object, { a: 2 }],
+        [ValueType.Number, 1],
       ],
       [['0', state]],
     ],
@@ -333,21 +255,10 @@ describe('finding stores in values', async () => {
       'Store in array',
       [state],
       [
-        {
-          type: ValueType.Array,
-          value: 1,
-          children: [1],
-        },
-        {
-          type: ValueType.Store,
-          value: { value: 2, id: '1' },
-        },
-        {
-          type: ValueType.Object,
-          value: 1,
-          children: { a: 3 },
-        },
-        { type: ValueType.Number, value: 1 },
+        [ValueType.Array, [1]],
+        [ValueType.Store, { value: 2, id: '1' }],
+        [ValueType.Object, { a: 3 }],
+        [ValueType.Number, 1],
       ],
       [['1', state]],
     ],
@@ -355,26 +266,11 @@ describe('finding stores in values', async () => {
       'nested store',
       { state2 },
       [
-        {
-          type: ValueType.Object,
-          value: 1,
-          children: { state2: 1 },
-        },
-        {
-          type: ValueType.Store,
-          value: { value: 2, id: '2' },
-        },
-        {
-          type: ValueType.Object,
-          value: 1,
-          children: { nested: 3 },
-        },
-        {
-          type: ValueType.Object,
-          value: 1,
-          children: { a: 4 },
-        },
-        { type: ValueType.Number, value: 1 },
+        [ValueType.Object, { state2: 1 }],
+        [ValueType.Store, { value: 2, id: '2' }],
+        [ValueType.Object, { nested: 3 }],
+        [ValueType.Object, { a: 4 }],
+        [ValueType.Number, 1],
       ],
       [['2', state2]],
     ],

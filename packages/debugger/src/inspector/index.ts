@@ -3,13 +3,13 @@ import { throttle, scheduleIdle } from '@solid-primitives/scheduled'
 import { warn } from '@solid-devtools/shared/utils'
 import { DebuggerEventHub } from '../main/plugin'
 import { findOwnerById } from '../main/roots'
-import { Core, EncodedValue, Mapped, NodeID, Solid, ValueItemID } from '../main/types'
+import { Core, Mapped, NodeID, Solid, ValueItemID } from '../main/types'
 import { makeSolidUpdateListener } from '../main/update'
-import { NodeIDMap, encodeValue } from './serialize'
+import { NodeIDMap, encodeValue, EncodedValue } from './serialize'
 import { observeStoreNode, StoreUpdateData } from './store'
 import { clearOwnerObservers, collectOwnerDetails, ValueNode, ValueNodeMap } from './inspector'
 
-export type ValueNodeUpdate = { id: ValueItemID; value: EncodedValue<boolean> }
+export type ValueNodeUpdate = { id: ValueItemID; value: EncodedValue[] }
 
 export type StoreNodeUpdate = {
   valueNodeId: ValueItemID
@@ -18,10 +18,10 @@ export type StoreNodeUpdate = {
   property: string | number
   /**
    * `undefined` - property deleted;
-   * `EncodedValue<true>` - property updated;
+   * `EncodedValue` - property updated;
    * `number` - array length updated;
    */
-  value: EncodedValue<true> | undefined | number
+  value: EncodedValue[] | undefined | number
 }
 /** List of new keys — all of the values are getters, so they won't change */
 export type ProxyPropsUpdate = { added: string[]; removed: string[] }

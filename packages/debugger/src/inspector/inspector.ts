@@ -149,7 +149,7 @@ export function collectOwnerDetails(
       const record: Mapped.Props['record'] = {}
       for (const [key, desc] of Object.entries(Object.getOwnPropertyDescriptors(owner.props))) {
         if (desc.get) {
-          record[key] = { type: ValueType.Getter, value: key }
+          record[key] = [[ValueType.Getter, key]]
         } else {
           record[key] = encodeValue(desc.value, false, $nodeIdMap)
           // non-object props cannot be inspected (won't ever change and aren't deep)

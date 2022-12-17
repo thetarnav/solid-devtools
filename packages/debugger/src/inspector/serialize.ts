@@ -1,81 +1,127 @@
 import { unwrap } from 'solid-js/store'
-import { Core, EncodedValue, NodeID, INFINITY, NAN, NEGATIVE_INFINITY, ValueType } from '../types'
+import { Core, NodeID } from '../types'
 import { isStoreNode } from '../main/utils'
+
+export const INFINITY = 'Infinity'
+export const NEGATIVE_INFINITY = 'NegativeInfinity'
+export const NAN = 'NaN'
+export const UNDEFINED = 'undefined'
+
+export enum ValueType {
+  Number = 'number',
+  Boolean = 'boolean',
+  String = 'string',
+  Null = 'null',
+  Symbol = 'symbol',
+  Array = 'array',
+  Object = 'object',
+  Function = 'function',
+  Getter = 'getter',
+  Element = 'element',
+  Instance = 'instance',
+  Store = 'store',
+}
+
+type EncodedValueDataMap = {
+  [ValueType.Null]: null | typeof UNDEFINED
+  [ValueType.Array]: number | number[]
+  [ValueType.Object]: number | { [key: string]: number }
+  [ValueType.Number]: number | typeof INFINITY | typeof NEGATIVE_INFINITY | typeof NAN
+  [ValueType.Boolean]: boolean
+  [ValueType.String]: string
+  [ValueType.Symbol]: string
+  [ValueType.Function]: string
+  [ValueType.Getter]: string
+  [ValueType.Element]: { name: string; id: NodeID }
+  [ValueType.Instance]: string
+  [ValueType.Store]: { value: number; id: NodeID }
+}
+
+export type EncodedValueMap = {
+  [T in ValueType]: [type: T, data: EncodedValueDataMap[T]]
+}
+export type EncodedValue<T extends ValueType = ValueType> = EncodedValueMap[T]
 
 // globals
 let Deep: boolean
 let NodeMap: NodeIDMap<HTMLElement | Core.Store.StoreNode>
-let List: EncodedValue<true>[]
-let Seen: WeakMap<object, number>
+let List: EncodedValue[]
+let Seen: Map<unknown, number>
 let HandleStore: ((storeNodeId: NodeID, storeNode: Core.Store.StoreNode) => void) | undefined
 
-const encodeNonObject = (value: unknown): EncodedValue<true> => {
+const encodeNonObject = (value: unknown): EncodedValue => {
   switch (typeof value) {
     case 'number':
-      if (value === Infinity) return { type: ValueType.Number, value: INFINITY }
-      if (value === -Infinity) return { type: ValueType.Number, value: NEGATIVE_INFINITY }
-      if (isNaN(value)) return { type: ValueType.Number, value: NAN }
-      return { type: ValueType.Number, value }
+      if (value === Infinity) return [ValueType.Number, INFINITY]
+      if (value === -Infinity) return [ValueType.Number, NEGATIVE_INFINITY]
+      if (isNaN(value)) return [ValueType.Number, NAN]
+      return [ValueType.Number, value]
     case 'boolean':
-      return { type: ValueType.Boolean, value }
+      return [ValueType.Boolean, value]
     case 'string':
-      return { type: ValueType.String, value }
+      return [ValueType.String, value]
     case 'symbol':
-      return { type: ValueType.Symbol, value: value.description || '' }
+      return [ValueType.Symbol, value.description || '']
     case 'function':
-      return { type: ValueType.Function, value: value.name }
+      return [ValueType.Function, value.name]
     case 'object':
-      return { type: ValueType.Null }
+      return [ValueType.Null, null]
     default:
-      return { type: ValueType.Undefined }
+      return [ValueType.Null, UNDEFINED]
   }
 }
 
 function encode(value: unknown, inStore: boolean): number {
-  if (!value || typeof value !== 'object') return List.push(encodeNonObject(value)) - 1
-
   const seen = Seen.get(value)
   if (seen !== undefined) return seen
-  const encoded: EncodedValue<true> = {} as any
+
+  // Non-Objects
+  if (!value || typeof value !== 'object') {
+    const index = List.push(encodeNonObject(value)) - 1
+    Seen.set(value, index)
+    return index
+  }
+
+  const encoded: EncodedValue = [] as any
   const index = List.push(encoded) - 1
   Seen.set(value, index)
 
   // HTML Elements
   if (value instanceof Element) {
-    encoded.type = ValueType.Element
-    encoded.value = { name: value.localName, id: NodeMap.set(value) }
+    encoded[0] = ValueType.Element
+    encoded[1] = { name: value.localName, id: NodeMap.set(value) }
   }
   // Store Nodes
   else if (!inStore && isStoreNode(value)) {
     // might still pass in a proxy
     const node = unwrap(value)
+    if (node === value) Seen.delete(value)
     const id = NodeMap.set(node)
     HandleStore && HandleStore(id, node)
-    encoded.type = ValueType.Store
-    encoded.value = { value: encode(node, true), id }
+    encoded[0] = ValueType.Store
+    encoded[1] = { value: encode(node, true), id }
   }
   // Arrays
   else if (Array.isArray(value)) {
-    encoded.type = ValueType.Array
-    encoded.value = value.length
-    if (Deep) encoded.children = value.map(item => encode(item, inStore))
+    encoded[0] = ValueType.Array
+    if (Deep) encoded[1] = value.map(item => encode(item, inStore))
+    else encoded[1] = value.length
   } else {
     const name = Object.prototype.toString.call(value).slice(8, -1)
     // normal objects (records)
     if (name === 'Object') {
-      encoded.type = ValueType.Object
-      encoded.value = Object.keys(value).length
+      encoded[0] = ValueType.Object
       if (Deep) {
-        const children = (encoded.children = {} as { [key: string]: number })
+        const children = (encoded[1] = {} as { [key: string]: number })
         for (const [key, descriptor] of Object.entries(Object.getOwnPropertyDescriptors(value))) {
           children[key] = descriptor.get ? -1 : encode(descriptor.value, inStore)
         }
-      }
+      } else encoded[1] = Object.keys(value).length
     }
     // custom objects
     else {
-      encoded.type = ValueType.Instance
-      encoded.value = name
+      encoded[0] = ValueType.Instance
+      encoded[1] = name
     }
   }
 
@@ -90,17 +136,17 @@ function encode(value: unknown, inStore: boolean): number {
  * @param handleStore handle encountered store nodes
  * @returns encoded value
  */
-export function encodeValue<Deep extends boolean>(
+export function encodeValue(
   value: unknown,
-  deep: Deep,
+  deep: boolean,
   nodeMap: NodeIDMap<HTMLElement | Core.Store.StoreNode>,
   handleStore?: (storeNodeId: NodeID, storeNode: Core.Store.StoreNode) => void,
   inStore = false,
-): EncodedValue<Deep>[] {
+): EncodedValue[] {
   Deep = deep
   NodeMap = nodeMap
   List = []
-  Seen = new WeakMap()
+  Seen = new Map()
   HandleStore = handleStore
 
   encode(value, inStore)
@@ -109,7 +155,7 @@ export function encodeValue<Deep extends boolean>(
   // @ts-expect-error clear global values
   Deep = NodeMap = List = Seen = undefined
 
-  return result
+  return result as any
 }
 
 let LastId = 0

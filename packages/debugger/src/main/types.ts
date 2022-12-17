@@ -1,7 +1,6 @@
-import { LocationAttr } from '@solid-devtools/transform/types'
-import { INFINITY, NAN, NEGATIVE_INFINITY, NodeType, ValueType } from './constants'
-
-export type { LocationAttr } from '@solid-devtools/transform/types'
+import type { LocationAttr } from '@solid-devtools/transform/types'
+import type { EncodedValue } from '../inspector/serialize'
+import { NodeType } from './constants'
 
 export type NodeID = string & {}
 
@@ -15,40 +14,6 @@ export const getValueItemId = <T extends ValueItemType>(
   if (type === 'value') return 'value'
   return `${type}:${id}` as ValueItemID
 }
-
-export type EncodedPreviewPayloadMap = {
-  [ValueType.Array]: number
-  [ValueType.Object]: number
-  [ValueType.Number]: number | typeof INFINITY | typeof NEGATIVE_INFINITY | typeof NAN
-  [ValueType.Boolean]: boolean
-  [ValueType.String]: string
-  [ValueType.Symbol]: string
-  [ValueType.Function]: string
-  [ValueType.Getter]: string
-  [ValueType.Element]: { name: string; id: NodeID }
-  [ValueType.Instance]: string
-  [ValueType.Store]: { value: number; id: NodeID }
-}
-
-export type EncodedPreviewChildrenMap = {
-  [ValueType.Array]: number[]
-  [ValueType.Object]: { [key: string]: number }
-}
-
-export type EncodedValueOf<K extends ValueType, Deep extends boolean = boolean> = {
-  type: K
-} & (K extends keyof EncodedPreviewPayloadMap
-  ? { value: EncodedPreviewPayloadMap[K] }
-  : { value?: undefined }) &
-  (Deep extends true
-    ? K extends keyof EncodedPreviewChildrenMap
-      ? { children: EncodedPreviewChildrenMap[K] }
-      : { children?: undefined }
-    : { children?: undefined })
-
-export type EncodedValue<Deep extends boolean = boolean> = {
-  [K in ValueType]: EncodedValueOf<K, Deep>
-}[ValueType]
 
 export type ValueUpdateListener = (newValue: unknown, oldValue: unknown) => void
 
@@ -183,12 +148,12 @@ export namespace Mapped {
     type: NodeType.Signal | NodeType.Memo | NodeType.Store
     name: string
     id: NodeID
-    value: EncodedValue<false>
+    value: EncodedValue[]
   }
 
   export type Props = {
     proxy: boolean
-    record: Record<string, EncodedValue<boolean>>
+    record: Record<string, EncodedValue[]>
   }
 
   export interface OwnerDetails {
@@ -198,7 +163,7 @@ export namespace Mapped {
     props?: Props
     signals: Signal[]
     /** for computations */
-    value?: EncodedValue
+    value?: EncodedValue[]
     // component with a location
     location?: LocationAttr
   }
