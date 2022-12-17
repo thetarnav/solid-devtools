@@ -7,7 +7,7 @@ import {
   createSignal,
   JSX,
 } from 'solid-js'
-import { NodeType, Solid, ValueType } from '../../types'
+import { Mapped, NodeType, Solid, ValueType } from '../../types'
 import { getOwner } from '../../main/utils'
 
 const getInspectModule = async () => await import('../inspector')
@@ -57,22 +57,22 @@ describe('collectOwnerDetails', () => {
         id: 'ff',
         name: 'focused',
         type: NodeType.Memo,
-        value: { type: ValueType.String, value: 'value' },
+        value: [[ValueType.String, 'value']],
         signals: [
           {
             type: NodeType.Signal,
             id: '0',
             name: 'element',
-            value: { type: ValueType.Element, value: { name: 'DIV', id: '0' } },
+            value: [[ValueType.Element, { name: 'div', id: '0' }]],
           },
           {
             type: NodeType.Memo,
             id: '1',
             name: 'memo',
-            value: { type: ValueType.Number, value: 0 },
+            value: [[ValueType.Number, 0]],
           },
         ],
-      })
+      } satisfies Mapped.OwnerDetails)
 
       expect(valueMap.get('signal:0')).toBeTruthy()
       expect(valueMap.get('signal:1')).toBeTruthy()
@@ -114,16 +114,16 @@ describe('collectOwnerDetails', () => {
         name: 'TestComponent',
         type: NodeType.Component,
         signals: [],
-        value: { type: ValueType.Element, value: { id: '0', name: 'DIV' } },
+        value: [[ValueType.Element, { id: '0', name: 'div' }]],
         props: {
           proxy: false,
           record: {
-            count: { type: ValueType.Number, value: 123 },
-            children: { type: ValueType.Getter, value: 'children' },
-            nested: { type: ValueType.Object, value: 2 },
+            count: [[ValueType.Number, 123]],
+            children: [[ValueType.Getter, 'children']],
+            nested: [[ValueType.Object, 2]],
           },
         },
-      })
+      } satisfies Mapped.OwnerDetails)
 
       expect(nodeIdMap.get('0')).toBeInstanceOf(HTMLDivElement)
     })
@@ -153,15 +153,15 @@ describe('collectOwnerDetails', () => {
         name: 'Button',
         type: NodeType.Component,
         signals: [],
-        value: { type: ValueType.Element, value: { id: '0', name: 'BUTTON' } },
+        value: [[ValueType.Element, { id: '0', name: 'button' }]],
         props: {
           proxy: true,
           record: {
-            onClick: { type: ValueType.Getter, value: 'onClick' },
-            role: { type: ValueType.Getter, value: 'role' },
+            onClick: [[ValueType.Getter, 'onClick']],
+            role: [[ValueType.Getter, 'role']],
           },
         },
-      })
+      } satisfies Mapped.OwnerDetails)
 
       expect(nodeIdMap.get('0')).toBeInstanceOf(HTMLButtonElement)
 
