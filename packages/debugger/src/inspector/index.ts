@@ -1,28 +1,18 @@
 import { Accessor, createEffect, onCleanup, untrack } from 'solid-js'
 import { throttle, scheduleIdle } from '@solid-primitives/scheduled'
 import { warn } from '@solid-devtools/shared/utils'
+import { Core, Mapped, NodeID, Solid, ValueItemID } from '../main/types'
+import { NodeIDMap } from '../main/utils'
 import { DebuggerEventHub } from '../main/plugin'
 import { findOwnerById } from '../main/roots'
-import { Core, Mapped, NodeID, Solid, ValueItemID } from '../main/types'
 import { makeSolidUpdateListener } from '../main/update'
-import { NodeIDMap, encodeValue, EncodedValue } from './serialize'
-import { observeStoreNode, StoreUpdateData } from './store'
-import { clearOwnerObservers, collectOwnerDetails, ValueNode, ValueNodeMap } from './inspector'
+import { encodeValue, EncodedValue } from './serialize'
+import { observeStoreNode, setOnStoreNodeUpdate, StoreNodeProperty, StoreUpdateData } from './store'
+import { clearOwnerObservers, collectOwnerDetails, ValueNodeMap } from './inspector'
 
-export type ValueNodeUpdate = { id: ValueItemID; value: EncodedValue[] }
+export type ValueNodeUpdate = [id: ValueItemID, value: EncodedValue[]]
 
-export type StoreNodeUpdate = {
-  valueNodeId: ValueItemID
-  storeId: NodeID
-  path: readonly (string | number)[]
-  property: string | number
-  /**
-   * `undefined` - property deleted;
-   * `EncodedValue` - property updated;
-   * `number` - array length updated;
-   */
-  value: EncodedValue[] | undefined | number
-}
+export type StoreNodeUpdate = [store: StoreNodeProperty, value: EncodedValue[] | null | number]
 /** List of new keys — all of the values are getters, so they won't change */
 export type ProxyPropsUpdate = { added: string[]; removed: string[] }
 export type InspectorUpdate =
@@ -42,51 +32,46 @@ export function createInspector(
 ) {
   let lastDetails: Mapped.OwnerDetails | undefined
   let inspectedOwner: Solid.Owner | undefined
-  let nodeIdMap = new NodeIDMap<HTMLElement | Core.Store.StoreNode>()
+  let nodeIdMap = new NodeIDMap<Element | Core.Store.StoreNode>()
   let valueMap = new ValueNodeMap()
   let checkProxyProps: (() => { added: string[]; removed: string[] } | undefined) | undefined
 
   // Batch and dedupe inspector updates
   // these will include updates to signals, stores, props, and node value
-  const { pushStoreUpdate, pushValueUpdate, triggerPropsCheck, clearUpdates } = (() => {
+  const { pushValueUpdate, triggerPropsCheck, clearUpdates } = (() => {
     let valueUpdates = new Set<ValueItemID>()
-    let storeUpdates: [valueNodeId: ValueItemID, storeId: NodeID, data: StoreUpdateData][] = []
+    let storeUpdates: [storeProperty: StoreNodeProperty, data: StoreUpdateData][] = []
     let checkProps = false
 
     const flush = scheduleIdle(() => {
       const batchedUpdates: InspectorUpdate[] = []
 
-      // Value Nodes (signals, props, and node value)
+      // Value Nodes (signals, props, and owner value)
       for (const id of valueUpdates) {
         const node = valueMap.get(id)
         if (!node || !node.getValue) continue
+        // TODO shouldn't the previous stores be unsubscribed here? after update, they might no longer be here
         const selected = node.isSelected()
         const encoded = encodeValue(
           node.getValue(),
           selected,
           nodeIdMap,
-          selected ? handleStoreNode.bind(null, id, node) : undefined,
+          selected && (storeNode => node.addStoreObserver(observeStoreNode(storeNode))),
         )
-        batchedUpdates.push(['value', { id, value: encoded }])
+        batchedUpdates.push(['value', [id, encoded]])
       }
       valueUpdates.clear()
 
       // Stores
-      for (const [valueNodeId, storeId, data] of storeUpdates)
+      for (const [storeProperty, data] of storeUpdates)
         batchedUpdates.push([
           'store',
-          {
-            valueNodeId,
-            storeId,
-            value:
-              'length' in data
-                ? data.length
-                : data.value === undefined
-                ? undefined
-                : encodeValue(data.value, true, nodeIdMap, undefined, true),
-            path: data.path,
-            property: data.property,
-          },
+          [
+            storeProperty,
+            typeof data === 'object'
+              ? encodeValue(data.value, true, nodeIdMap, undefined, true)
+              : data ?? null,
+          ],
         ])
       storeUpdates = []
 
@@ -103,13 +88,16 @@ export function createInspector(
 
     const flushPropsCheck = throttle(flush, 200)
 
+    // Subscribe to any store updates
+    // observed stores are managed by the store.ts module (only stores in selected values get observed)
+    setOnStoreNodeUpdate((...payload) => {
+      storeUpdates.push(payload)
+      flush()
+    })
+
     return {
       pushValueUpdate(id: ValueItemID) {
         valueUpdates.add(id)
-        flush()
-      },
-      pushStoreUpdate(valueNodeId: ValueItemID, storeId: NodeID, data: StoreUpdateData) {
-        storeUpdates.push([valueNodeId, storeId, data])
         flush()
       },
       triggerPropsCheck() {
@@ -127,17 +115,6 @@ export function createInspector(
       },
     }
   })()
-
-  function handleStoreNode(
-    valueId: ValueItemID,
-    valueNode: ValueNode,
-    storeNodeId: NodeID,
-    storeNode: Core.Store.StoreNode,
-  ) {
-    valueNode.addStoreObserver(
-      observeStoreNode(storeNode, data => pushStoreUpdate(valueId, storeNodeId, data)),
-    )
-  }
 
   function setInspectedOwner(owner: Solid.Owner | undefined) {
     inspectedOwner && clearOwnerObservers(inspectedOwner)

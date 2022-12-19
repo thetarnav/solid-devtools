@@ -16,20 +16,20 @@ import { createHover, createPingedSignal, defer } from '@solid-devtools/shared/p
 import { CollapseToggle, Highlight } from '@/ui'
 import * as styles from './ValueNode.css'
 import {
-  DeserializedValue,
+  DecodedValue,
   ElementNode,
   FunctionNode,
   GetterNode,
   InstanceNode,
   ObjectPreviewNode,
   StoreNode,
-} from '.'
+} from './decode'
 
 type ToggleElementHover = (elementId: NodeID, hovered?: boolean) => void
 
 const ValueContext = createContext<{ onElementHover?: ToggleElementHover; underStore: boolean }>()
 
-const getIsCollapsable = (value: DeserializedValue): boolean =>
+const getIsCollapsable = (value: DecodedValue): boolean =>
   !!value &&
   typeof value === 'object' &&
   (Array.isArray(value) ||
@@ -37,15 +37,13 @@ const getIsCollapsable = (value: DeserializedValue): boolean =>
     (value instanceof ObjectPreviewNode && value.length > 0) ||
     (value instanceof StoreNode && getIsCollapsable(value.value)))
 
-const getObjectValueLength = (
-  value: DeserializedValue<ValueType.Array | ValueType.Object>,
-): number =>
+const getObjectValueLength = (value: DecodedValue<ValueType.Array | ValueType.Object>): number =>
   value instanceof ObjectPreviewNode || Array.isArray(value)
     ? value.length
     : Object.keys(value).length
 
 const CollapsableObjectPreview: Component<{
-  value: Exclude<DeserializedValue<ValueType.Array | ValueType.Object>, ObjectPreviewNode>
+  value: Exclude<DecodedValue<ValueType.Array | ValueType.Object>, ObjectPreviewNode>
 }> = props => (
   <ul class={styles.collapsable.list}>
     <Entries of={props.value}>
@@ -71,7 +69,7 @@ const CollapsableObjectPreview: Component<{
 )
 
 const ObjectValuePreview: Component<{
-  value: DeserializedValue<ValueType.Array | ValueType.Object>
+  value: DecodedValue<ValueType.Array | ValueType.Object>
   extended?: boolean
 }> = props => {
   return (
@@ -107,7 +105,7 @@ const ObjectValuePreview: Component<{
   )
 }
 
-const ValuePreview: Component<{ value: DeserializedValue; extended?: boolean }> = props => {
+const ValuePreview: Component<{ value: DecodedValue; extended?: boolean }> = props => {
   return createMemo(() => {
     const value = props.value
     if (typeof value === 'string') {
@@ -186,7 +184,7 @@ function createNestedHover() {
 }
 
 export const ValueNode: Component<{
-  value: DeserializedValue
+  value: DecodedValue
   name: JSX.Element
   extended?: boolean
   /** top-level, or inside a store (the value can change) */

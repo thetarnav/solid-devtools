@@ -1,21 +1,26 @@
 import { createMutable, createStore } from 'solid-js/store'
 import { describe, test, expect, vi } from 'vitest'
 import { EncodedValue, INFINITY, NAN, NEGATIVE_INFINITY, UNDEFINED, ValueType } from '../serialize'
+import { encodeValue } from '../serialize'
+import { NodeIDMap } from '../../main/utils'
+import { Truthy } from '@solid-primitives/utils'
 
-const getModule = async () => {
-  vi.resetModules()
-  return await import('../serialize')
-}
+let mockLAST_ID = 0
+vi.mock('../../main/id', () => ({ getNewSdtId: () => mockLAST_ID++ + '' }))
 
 type Expectations = [name: string, data: unknown, encoded: EncodedValue[]][]
 
-describe('encodeValue Preview', async () => {
-  const { encodeValue, NodeIDMap } = await getModule()
+const div1 = document.createElement('div')
+const a1 = document.createElement('a')
+const div2 = document.createElement('div')
 
-  const _testFunction = () => {}
+const _testFunction = () => {}
 
-  const [state] = createStore({ a: 1, b: 2, c: 3 })
-  const mutable = createMutable({ a: 1, b: 2, c: 3 })
+const [state] = createStore({ a: 1, b: 2, c: 3 })
+const mutable = createMutable({ a: 1, b: 2, c: 3 })
+
+describe('encodeValue Preview', () => {
+  mockLAST_ID = 0
 
   const encodePreviewExpectations: Expectations = [
     ['Infinity', Infinity, [[ValueType.Number, INFINITY]]],
@@ -32,8 +37,8 @@ describe('encodeValue Preview', async () => {
     ['Symbol', Symbol(), [[ValueType.Symbol, '']]],
     ['Function', () => {}, [[ValueType.Function, '']]],
     ['Named Function', _testFunction, [[ValueType.Function, '_testFunction']]],
-    ['Element div', document.createElement('div'), [[ValueType.Element, { name: 'div', id: '0' }]]],
-    ['Element a', document.createElement('a'), [[ValueType.Element, { name: 'a', id: '1' }]]],
+    ['Element div', div1, [[ValueType.Element, '0:div']]],
+    ['Element a', a1, [[ValueType.Element, '1:a']]],
     ['Array empty', [], [[ValueType.Array, 0]]],
     ['Array', [1, 2, 3], [[ValueType.Array, 3]]],
     ['Object empty', {}, [[ValueType.Object, 0]]],
@@ -47,7 +52,7 @@ describe('encodeValue Preview', async () => {
       'Store',
       state,
       [
-        [ValueType.Store, { id: '2', value: 1 }],
+        [ValueType.Store, '2:1'],
         [ValueType.Object, 3],
       ],
     ],
@@ -55,7 +60,7 @@ describe('encodeValue Preview', async () => {
       'Mutable',
       mutable,
       [
-        [ValueType.Store, { id: '3', value: 1 }],
+        [ValueType.Store, '3:1'],
         [ValueType.Object, 3],
       ],
     ],
@@ -70,8 +75,8 @@ describe('encodeValue Preview', async () => {
   }
 })
 
-describe('encodeValue Deep', async () => {
-  const { encodeValue, NodeIDMap } = await getModule()
+describe('encodeValue Deep', () => {
+  mockLAST_ID = 0
 
   const encodeDeepExpectations: Expectations = [
     ['Array empty', [], [[ValueType.Array, []]]],
@@ -147,27 +152,23 @@ describe('encodeValue Deep', async () => {
   }
 })
 
-describe('save elements to a map', async () => {
-  const { encodeValue, NodeIDMap } = await getModule()
-
-  const div1 = document.createElement('div')
-  const a1 = document.createElement('a')
-  const div2 = document.createElement('div')
+describe('save elements to a map', () => {
+  mockLAST_ID = 0
 
   const elMapExpectations: Expectations = [
-    ['Element div', div1, [[ValueType.Element, { name: 'div', id: '0' }]]],
-    ['Element a', a1, [[ValueType.Element, { name: 'a', id: '1' }]]],
+    ['Element div', div1, [[ValueType.Element, '0:div']]],
+    ['Element a', a1, [[ValueType.Element, '1:a']]],
     [
       'Element in object',
       { el: div2 },
       [
         [ValueType.Object, { el: 1 }],
-        [ValueType.Element, { name: 'div', id: '2' }],
+        [ValueType.Element, '4:div'],
       ],
     ],
   ]
 
-  const map = new NodeIDMap()
+  const map = new NodeIDMap<Element>()
   for (const [testName, value, expectation] of elMapExpectations) {
     test(testName, () => {
       const s = encodeValue(value, true, map)
@@ -178,12 +179,12 @@ describe('save elements to a map', async () => {
   test('map containing correct values', () => {
     expect(map.get('0')).toBe(div1)
     expect(map.get('1')).toBe(a1)
-    expect(map.get('2')).toBe(div2)
+    expect(map.get('4')).toBe(div2)
   })
 })
 
-describe('encodeValue with repeated references', async () => {
-  const { encodeValue, NodeIDMap } = await getModule()
+describe('encodeValue with repeated references', () => {
+  mockLAST_ID = 0
 
   const one: any = { a: 1 }
   one.b = one
@@ -229,50 +230,66 @@ describe('encodeValue with repeated references', async () => {
   }
 })
 
-describe('finding stores in values', async () => {
-  const { encodeValue, NodeIDMap } = await getModule()
+describe('finding stores in values', () => {
+  mockLAST_ID = 0
 
   const [state] = createStore({ a: 1 })
-  const [state2] = createStore({ nested: state })
+  const [state2] = createStore({ ref: state })
+  const [state3] = createStore({ a: 1, b: ['foo'] })
+  state3.b[0]
 
   const storeExpectations: [
     name: string,
     data: unknown,
     encoded: EncodedValue[],
-    calledWith: Parameters<NonNullable<Parameters<typeof encodeValue>[3]>>[],
+    calledWith: Parameters<Truthy<Parameters<typeof encodeValue>[3]>>[],
   ][] = [
     [
       'Store',
       state,
       [
-        [ValueType.Store, { value: 1, id: '0' }],
+        [ValueType.Store, '5:1'],
         [ValueType.Object, { a: 2 }],
         [ValueType.Number, 1],
       ],
-      [['0', state]],
+      [[state, '5']],
     ],
     [
       'Store in array',
       [state],
       [
         [ValueType.Array, [1]],
-        [ValueType.Store, { value: 2, id: '1' }],
+        [ValueType.Store, '5:2'],
         [ValueType.Object, { a: 3 }],
         [ValueType.Number, 1],
       ],
-      [['1', state]],
+      [[state, '5']],
     ],
     [
-      'nested store',
+      'referenced store',
       { state2 },
       [
         [ValueType.Object, { state2: 1 }],
-        [ValueType.Store, { value: 2, id: '2' }],
-        [ValueType.Object, { nested: 3 }],
-        [ValueType.Object, { a: 4 }],
+        [ValueType.Store, '6:2'],
+        [ValueType.Object, { ref: 3 }],
+        [ValueType.Store, '5:4'],
+        [ValueType.Object, { a: 5 }],
         [ValueType.Number, 1],
       ],
-      [['2', state2]],
+      [[state2, '6']],
+    ],
+    [
+      'nested store',
+      state3,
+      [
+        [ValueType.Store, '7:1'],
+        [ValueType.Object, { a: 2, b: 3 }],
+        [ValueType.Number, 1],
+        [ValueType.Store, '8:4'],
+        [ValueType.Array, [5]],
+        [ValueType.String, 'foo'],
+      ],
+      [[state3, '7']],
     ],
   ]
 

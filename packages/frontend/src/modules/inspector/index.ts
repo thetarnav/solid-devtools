@@ -1,7 +1,7 @@
 import { batch, createEffect, createMemo, createSelector, createSignal } from 'solid-js'
 import { createStore, produce } from 'solid-js/store'
 import { defer, untrackedCallback, WritableDeep } from '@solid-devtools/shared/primitives'
-import { warn } from '@solid-devtools/shared/utils'
+import { splitOnColon, warn } from '@solid-devtools/shared/utils'
 import {
   InspectorUpdate,
   ProxyPropsUpdate,
@@ -10,126 +10,21 @@ import {
   ValueNodeUpdate,
   NodeType,
   NodeID,
-  EncodedValue,
   ValueItemID,
   ValueItemType,
   Mapped,
   ValueType,
   LocationAttr,
-  INFINITY,
-  NAN,
-  NEGATIVE_INFINITY,
-  UNDEFINED,
 } from '@solid-devtools/debugger/types'
 import type { Structure } from '../structure'
 import { Writable } from 'type-fest'
-
-export class StoreNode {
-  constructor(public id: NodeID, public value: DeserializedValue) {
-    return createStore(this)[0]
-  }
-}
-export class InstanceNode {
-  constructor(public name: string) {
-    return createStore(this)[0]
-  }
-}
-export class FunctionNode {
-  constructor(public name: string) {
-    return createStore(this)[0]
-  }
-}
-export class ElementNode {
-  constructor(public id: NodeID, public name: string) {
-    return createStore(this)[0]
-  }
-}
-export class GetterNode {
-  constructor(public name: string) {
-    return createStore(this)[0]
-  }
-}
-export class ObjectPreviewNode {
-  constructor(public type: ValueType.Object | ValueType.Array, public length: number) {
-    return createStore(this)[0]
-  }
-}
-
-export type DeserializedValueMap = {
-  [ValueType.String]: string
-  [ValueType.Number]: number
-  [ValueType.Boolean]: boolean
-  [ValueType.Null]: null | undefined
-  [ValueType.Symbol]: symbol
-  [ValueType.Instance]: InstanceNode
-  [ValueType.Function]: FunctionNode
-  [ValueType.Element]: ElementNode
-  [ValueType.Getter]: GetterNode
-  [ValueType.Array]: ArrayDeserializedValue | ObjectPreviewNode
-  [ValueType.Object]: ObjectDeserializedValue | ObjectPreviewNode
-  [ValueType.Store]: StoreNode
-}
-// used interface instead of type to avoid circular dependency
-interface ArrayDeserializedValue extends Array<DeserializedValue> {}
-interface ObjectDeserializedValue extends Record<string, DeserializedValue> {}
-
-export type DeserializedValue<T extends ValueType = ValueType> = DeserializedValueMap[T]
-
-function deserializeEncodedValue(
-  list: EncodedValue[],
-  index: number = 0,
-): DeserializedValueMap[ValueType] {
-  const encoded = list[index]
-  switch (encoded[0]) {
-    case ValueType.String:
-    case ValueType.Boolean:
-      return encoded[1]
-    case ValueType.Null:
-      return encoded[1] === UNDEFINED ? undefined : null
-    case ValueType.Number: {
-      const [, data] = encoded
-      return data === INFINITY
-        ? Infinity
-        : data === NEGATIVE_INFINITY
-        ? -Infinity
-        : data === NAN
-        ? NaN
-        : data
-    }
-    case ValueType.Instance:
-      return new InstanceNode(encoded[1])
-    case ValueType.Function:
-      return new FunctionNode(encoded[1])
-    case ValueType.Element:
-      return new ElementNode(encoded[1].id, encoded[1].name)
-    case ValueType.Symbol:
-      return Symbol(encoded[1])
-    case ValueType.Getter:
-      return new GetterNode(encoded[1])
-    case ValueType.Array:
-    case ValueType.Object: {
-      const [type, data] = encoded
-      if (typeof data === 'number') {
-        return new ObjectPreviewNode(type, data)
-      }
-      const value = data.constructor() as Record<string, unknown>
-      for (const [key, index] of Object.entries(data)) {
-        value[key] = index === -1 ? new GetterNode(key) : deserializeEncodedValue(list, index)
-      }
-      return value as ArrayDeserializedValue | ObjectDeserializedValue
-    }
-    case ValueType.Store: {
-      const [, data] = encoded
-      return new StoreNode(data.id, deserializeEncodedValue(list, data.value))
-    }
-  }
-}
+import { DecodedValue, decodeValue, StoreNodeMap } from './decode'
 
 export namespace Inspector {
   export interface ValueItem {
     readonly itemId: ValueItemID
     readonly selected: boolean
-    readonly value: DeserializedValue
+    readonly value: DecodedValue
   }
 
   export interface Signal extends ValueItem {
@@ -157,30 +52,27 @@ export namespace Inspector {
   }
 }
 
-const splitValueNodeId = (id: ValueItemID) => {
-  return id.split(':') as [ValueItemType, undefined | NodeID | string]
-}
-
 function updateValueItem(
   details: WritableDeep<Inspector.SignalDetails>,
-  { id: valueId, value }: ValueNodeUpdate,
+  [valueId, value]: ValueNodeUpdate,
+  storeNodeMap: StoreNodeMap,
 ): void {
-  const [type, id] = splitValueNodeId(valueId)
+  const [type, id] = splitOnColon(valueId)
   // Update signal/memo/store top-level value
   if (type === 'signal') {
-    const signal = details.signals[id!]
+    const signal = details.signals[id]
     if (!signal) throw `updateValue: value node (${valueId}) not found`
-    signal.value = deserializeEncodedValue(value)
+    signal.value = decodeValue(value, signal.value, storeNodeMap)
   }
   // Update prop value
   else if (type === 'prop') {
-    const prop = details.props?.record[id!]
+    const prop = details.props?.record[id]
     if (!prop) throw `updateValue: prop (${valueId}) not found`
-    prop.value = deserializeEncodedValue(value)
+    prop.value = decodeValue(value, prop.value, storeNodeMap)
   }
   // Update inspected node value
   else if (details.value) {
-    details.value.value = deserializeEncodedValue(value)
+    details.value.value = decodeValue(value, details.value.value, storeNodeMap)
   }
 }
 
@@ -200,50 +92,26 @@ function updateProps(
   for (const key of removed) delete props.record[key]
 }
 
-function findStoreNode(obj: object, storeId: NodeID): StoreNode | undefined {
-  if (obj instanceof StoreNode && obj.id === storeId) return obj
-  for (const child of Object.values(obj) as unknown[]) {
-    if (typeof child !== 'object' || !child) continue
-    const store = findStoreNode(child, storeId)
-    if (store) return store
-  }
-}
+function updateStore([storeProperty, newValue]: StoreNodeUpdate, storeNodeMap: StoreNodeMap): void {
+  const [storeNodeId, property] = splitOnColon(storeProperty)
+  const store = storeNodeMap.get(storeNodeId)
+  if (!store) throw `updateStore: store node (${storeNodeId}) not found`
 
-function findValueById(details: Inspector.SignalDetails, valueId: ValueItemID): unknown {
-  const [type, id] = splitValueNodeId(valueId)
-  if (type === 'signal') return details.signals[id!]?.value
-  if (type === 'prop') return details.props?.record[id!]?.value
-  return details.value?.value
-}
-
-function updateStore(
-  details: WritableDeep<Inspector.SignalDetails>,
-  { path, property, storeId, value: newValue, valueNodeId }: StoreNodeUpdate,
-): void {
-  const valueNode = findValueById(details, valueNodeId)
-  if (!valueNode || typeof valueNode !== 'object')
-    return warn(`updateStore: value node (${valueNodeId}) not found`)
-  // TODO cache the store node
-  const store = findStoreNode(valueNode, storeId)
-  if (!store) return warn(`updateStore: store node (${storeId}) not found`)
-
-  let value = store.value
-  for (const key of path) {
-    if (!value || typeof value !== 'object')
-      throw new Error(`Invalid path ${[...path, property].join('.')}`)
-    value = value[key as never]
-  }
-  if (!value || typeof value !== 'object')
-    throw new Error(`Invalid path ${[...path, property].join('.')}`)
-
-  if (newValue === undefined) {
-    delete value[property as never]
-  } else if (typeof newValue === 'number') {
-    if (Array.isArray(value)) value.length = newValue
-    else throw new Error(`Invalid path ${[...path, property].join('.')}`)
-  } else {
-    ;(value as any)[property] = deserializeEncodedValue(newValue)
-  }
+  store.setState(
+    'value',
+    produce(value => {
+      if (!value || typeof value !== 'object')
+        throw `updateStore: store node (${storeNodeId}) has no value`
+      if (newValue === null) {
+        delete value[property as never]
+      } else if (typeof newValue === 'number') {
+        if (Array.isArray(value)) value.length = newValue
+        else throw `updateStore: store node (${storeNodeId}) is not an array`
+      } else {
+        ;(value as any)[property] = decodeValue(newValue, value[property as never], storeNodeMap)
+      }
+    }),
+  )
 }
 
 export default function createInspector({
@@ -267,6 +135,8 @@ export default function createInspector({
     value: null,
     props: null,
   })
+
+  const storeNodeMap = new StoreNodeMap()
 
   const details: Inspector.Details = {
     get path() {
@@ -292,6 +162,7 @@ export default function createInspector({
     batch(() => {
       if (data === null) {
         setInspectedNode(null)
+        storeNodeMap.clear()
         return
       }
 
@@ -305,6 +176,7 @@ export default function createInspector({
 
       setInspectedNode(node)
       setLocation(null)
+      storeNodeMap.clear()
       setSignalDetails({ signals: {}, value: null, props: null })
     })
   })
@@ -324,7 +196,6 @@ export default function createInspector({
 
   const setNewDetails = untrackedCallback((raw: Mapped.OwnerDetails) => {
     const node = inspectedNode()
-    // TODO: is mismatches are happening a lot on the owners view now
     if (!node || node.id !== raw.id) return warn('setNewDetails: inspected node mismatch')
 
     batch(() => {
@@ -337,21 +208,21 @@ export default function createInspector({
           name,
           type,
           selected: false,
-          value: deserializeEncodedValue(value),
+          value: decodeValue(value, null, storeNodeMap),
           itemId: `signal:${id}`,
         }
 
       setSignalDetails({
         signals,
         value: raw.value
-          ? { itemId: 'value', selected: false, value: deserializeEncodedValue(raw.value) }
+          ? { itemId: 'value', selected: false, value: decodeValue(raw.value, null, storeNodeMap) }
           : undefined,
         props: raw.props
           ? {
               proxy: raw.props.proxy,
               record: Object.entries(raw.props.record).reduce((props, [propName, value]) => {
                 props[propName] = {
-                  value: deserializeEncodedValue(value),
+                  value: decodeValue(value, null, storeNodeMap),
                   selected: false,
                   itemId: `prop:${propName}`,
                 }
@@ -365,23 +236,25 @@ export default function createInspector({
 
   // Handle Inspector updates comming from the debugger
   function handleUpdate(updates: InspectorUpdate[]) {
-    setSignalDetails(
-      produce(details => {
-        for (const update of updates) {
-          switch (update[0]) {
-            case 'value':
-              updateValueItem(details, update[1])
-              break
-            case 'props':
-              details.props && updateProps(details.props, update[1])
-              break
-            case 'store':
-              updateStore(details, update[1])
-              break
+    batch(() => {
+      setSignalDetails(
+        produce(details => {
+          for (const update of updates) {
+            switch (update[0]) {
+              case 'value':
+                updateValueItem(details, update[1], storeNodeMap)
+                break
+              case 'props':
+                details.props && updateProps(details.props, update[1])
+                break
+              case 'store':
+                updateStore(update[1], storeNodeMap)
+                break
+            }
           }
-        }
-      }),
-    )
+        }),
+      )
+    })
   }
 
   /** variable for a callback in controller.tsx */

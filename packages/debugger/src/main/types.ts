@@ -1,6 +1,6 @@
 import type { LocationAttr } from '@solid-devtools/transform/types'
 import type { EncodedValue } from '../inspector/serialize'
-import { NodeType } from './constants'
+import { NodeType, $SDT_ID } from './constants'
 
 export type NodeID = string & {}
 
@@ -17,12 +17,6 @@ export const getValueItemId = <T extends ValueItemType>(
 
 export type ValueUpdateListener = (newValue: unknown, oldValue: unknown) => void
 
-declare global {
-  interface HTMLElement {
-    sdtId?: NodeID
-  }
-}
-
 export namespace Core {
   export type Owner = import('solid-js/types/reactive/signal').Owner
   export type SignalState = import('solid-js/types/reactive/signal').SignalState<unknown>
@@ -36,24 +30,36 @@ export namespace Core {
   }
 }
 
+declare global {
+  interface Element {
+    [$SDT_ID]?: NodeID
+  }
+}
+
 declare module 'solid-js/types/reactive/signal' {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   interface SignalState<T> {
-    sdtId?: NodeID
+    [$SDT_ID]?: NodeID
     sdtName?: string
   }
   interface Owner {
-    sdtId?: NodeID
+    [$SDT_ID]?: NodeID
     sdtName?: string
     sdtType?: NodeType
     sdtSubRoots?: Solid.Root[] | null
   }
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   interface Computation<Init, Next> {
-    sdtId?: NodeID
+    [$SDT_ID]?: NodeID
     sdtType?: NodeType
     onValueUpdate?: Record<symbol, ValueUpdateListener>
     onComputationUpdate?: VoidFunction
+  }
+}
+
+declare module 'solid-js/store' {
+  interface StoreNode {
+    [$SDT_ID]?: NodeID
   }
 }
 
@@ -80,7 +86,7 @@ export namespace Solid {
 
   export interface Store {
     value: Core.Store.StoreNode
-    sdtId?: NodeID
+    [$SDT_ID]?: NodeID
   }
 
   export interface Root extends Core.Owner {

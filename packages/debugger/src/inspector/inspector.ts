@@ -15,8 +15,9 @@ import {
   markNodeID,
   markOwnerName,
   markOwnerType,
+  NodeIDMap,
 } from '../main/utils'
-import { NodeIDMap, encodeValue } from './serialize'
+import { encodeValue } from './serialize'
 
 export class ValueNode {
   private trackedStores: VoidFunction[] = []
@@ -56,10 +57,10 @@ export class ValueNodeMap {
 }
 
 // Globals set before collecting the owner details
-let $nodeIdMap!: NodeIDMap<HTMLElement | Core.Store.StoreNode>
-let $valueMap!: ValueNodeMap
+let NodeMap!: NodeIDMap<Element | Core.Store.StoreNode>
+let ValueMap!: ValueNodeMap
 
-const INSPECTOR = Symbol('inspector')
+const $INSPECTOR = Symbol('inspector')
 
 function mapSignalNode(
   node: Solid.Signal | Solid.Store,
@@ -68,32 +69,32 @@ function mapSignalNode(
   const { value } = node
   const id = markNodeID(node)
   let name: string
-  $valueMap.add(`signal:${id}`, () => node.value)
+  ValueMap.add(`signal:${id}`, () => node.value)
 
   if (isSolidStore(node)) {
     name = getDisplayName(getStoreNodeName(value as Core.Store.StoreNode))
   } else {
     name = getNodeName(node)
-    observeValueUpdate(node, v => handler(id, v), INSPECTOR)
+    observeValueUpdate(node, v => handler(id, v), $INSPECTOR)
   }
 
   return {
     type: getNodeType(node) as NodeType.Memo | NodeType.Signal | NodeType.Store,
     name,
     id,
-    value: encodeValue(value, false, $nodeIdMap),
+    value: encodeValue(value, false, NodeMap),
   }
 }
 
 export function clearOwnerObservers(owner: Solid.Owner): void {
   if (isSolidComputation(owner)) {
-    removeValueUpdateObserver(owner, INSPECTOR)
+    removeValueUpdateObserver(owner, $INSPECTOR)
   }
   if (owner.sourceMap) {
-    for (const node of Object.values(owner.sourceMap)) removeValueUpdateObserver(node, INSPECTOR)
+    for (const node of Object.values(owner.sourceMap)) removeValueUpdateObserver(node, $INSPECTOR)
   }
   if (owner.owned) {
-    for (const node of owner.owned) removeValueUpdateObserver(node, INSPECTOR)
+    for (const node of owner.owned) removeValueUpdateObserver(node, $INSPECTOR)
   }
 }
 
@@ -107,8 +108,8 @@ export function collectOwnerDetails(
   const { onSignalUpdate, onValueUpdate } = config
 
   // Set globals
-  $nodeIdMap = new NodeIDMap()
-  $valueMap = new ValueNodeMap()
+  NodeMap = new NodeIDMap()
+  ValueMap = new ValueNodeMap()
 
   const id = markNodeID(owner)
   const type = markOwnerType(owner)
@@ -151,9 +152,9 @@ export function collectOwnerDetails(
         if (desc.get) {
           record[key] = [[ValueType.Getter, key]]
         } else {
-          record[key] = encodeValue(desc.value, false, $nodeIdMap)
+          record[key] = encodeValue(desc.value, false, NodeMap)
           // non-object props cannot be inspected (won't ever change and aren't deep)
-          desc.value instanceof Object && $valueMap.add(`prop:${key}`, () => desc.value)
+          desc.value instanceof Object && ValueMap.add(`prop:${key}`, () => desc.value)
         }
       }
       details.props = { proxy, record }
@@ -179,10 +180,10 @@ export function collectOwnerDetails(
         }
       }
     } else {
-      observeValueUpdate(owner, onValueUpdate, INSPECTOR)
+      observeValueUpdate(owner, onValueUpdate, $INSPECTOR)
     }
 
-    details.value = encodeValue(getValue(), false, $nodeIdMap)
+    details.value = encodeValue(getValue(), false, NodeMap)
   }
 
   // map signals
@@ -197,16 +198,16 @@ export function collectOwnerDetails(
   // map memos
   if (owned) {
     for (const node of owned) {
-      if (isSolidMemo(node)) details.signals.push(mapSignalNode(node, onSignalUpdate))
+      isSolidMemo(node) && details.signals.push(mapSignalNode(node, onSignalUpdate))
     }
   }
 
-  $valueMap.add('value', getValue)
+  ValueMap.add('value', getValue)
 
   return {
     details,
-    valueMap: $valueMap,
-    nodeIdMap: $nodeIdMap,
+    valueMap: ValueMap,
+    nodeIdMap: NodeMap,
     checkProxyProps,
   }
 }

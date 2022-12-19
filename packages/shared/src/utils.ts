@@ -118,6 +118,14 @@ export function findItemById<T extends { id: string }>(array: T[], id: string): 
   }
 }
 
+export const splitOnColon = <T extends string>(
+  str: T,
+): T extends `${infer L}:${infer R}` ? [L, R] : [T, null] => {
+  const splitIndex = str.indexOf(':')
+  if (splitIndex === -1) return [str, null] as any
+  return [str.slice(0, splitIndex), str.slice(splitIndex + 1)] as any
+}
+
 export function whileArray<T, U>(
   toCheck: T[],
   callback: (item: T, toCheck: T[]) => U | undefined,
