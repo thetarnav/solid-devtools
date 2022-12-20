@@ -8,25 +8,15 @@ import {
   createSignal,
 } from 'solid-js'
 import { getNodeName, getOwner } from '../utils'
-import { Solid, Mapped, NodeID } from '../types'
-import { NodeType, TreeWalkerMode } from '../constants'
+import { Solid, Mapped } from '../types'
+import { NodeType, TreeWalkerMode, $SDT_ID } from '../constants'
 import { ComputationUpdateHandler, walkSolidTree } from '../walker'
 
 let mockLAST_ID = 0
-
 beforeEach(() => {
   mockLAST_ID = 0
 })
-
-vi.mock('../utils', async () => {
-  const module: any = await vi.importActual('../utils')
-  const getNewSdtId = (): NodeID => (mockLAST_ID++).toString(36)
-  function markNodeID(o: { sdtId?: NodeID }): NodeID {
-    if (o.sdtId !== undefined) return o.sdtId
-    return (o.sdtId = getNewSdtId())
-  }
-  return { ...module, getNewSdtId, markNodeID }
-})
+vi.mock('../../main/id', () => ({ getNewSdtId: () => mockLAST_ID++ + '' }))
 
 const mockTree = () => {
   const [s] = createSignal('foo', { name: 's0' })
@@ -53,7 +43,7 @@ describe('TreeWalkerMode.Owners', () => {
 
       const tree = walkSolidTree(owner, {
         onComputationUpdate: () => {},
-        rootId: (owner.sdtId = 'ff'),
+        rootId: (owner[$SDT_ID] = 'ff'),
         registerComponent: () => {},
         mode: TreeWalkerMode.Owners,
       })
@@ -106,7 +96,7 @@ describe('TreeWalkerMode.Owners', () => {
 
         const rootOwner = getOwner()! as Solid.Root
         const tree = walkSolidTree(rootOwner, {
-          rootId: (rootOwner.sdtId = '0'),
+          rootId: (rootOwner[$SDT_ID] = '0'),
           onComputationUpdate: () => {},
           registerComponent: () => {},
           mode: TreeWalkerMode.Owners,
@@ -154,7 +144,7 @@ describe('TreeWalkerMode.Owners', () => {
       const owner = getOwner()! as Solid.Root
       walkSolidTree(owner, {
         onComputationUpdate: (...a) => capturedComputationUpdates.push(a),
-        rootId: (owner.sdtId = 'ff'),
+        rootId: (owner[$SDT_ID] = 'ff'),
         mode: TreeWalkerMode.Owners,
         registerComponent: () => {},
       })
@@ -196,7 +186,7 @@ describe('TreeWalkerMode.Owners', () => {
 
       walkSolidTree(owner, {
         onComputationUpdate: () => {},
-        rootId: (owner.sdtId = 'ff'),
+        rootId: (owner[$SDT_ID] = 'ff'),
         mode: TreeWalkerMode.Owners,
         registerComponent: c => components.push(c),
       })
@@ -260,7 +250,7 @@ describe('TreeWalkerMode.Components', () => {
 
       const tree = walkSolidTree(owner, {
         onComputationUpdate: (...a) => computationUpdates.push(a),
-        rootId: (owner.sdtId = 'ff'),
+        rootId: (owner[$SDT_ID] = 'ff'),
         mode: TreeWalkerMode.Components,
         registerComponent: () => {},
       })
@@ -366,7 +356,7 @@ describe('TreeWalkerMode.DOM', () => {
 
       const tree = walkSolidTree(owner, {
         onComputationUpdate: (...a) => computationUpdates.push(a),
-        rootId: (owner.sdtId = 'ff'),
+        rootId: (owner[$SDT_ID] = 'ff'),
         mode: TreeWalkerMode.DOM,
         registerComponent: () => {},
       })

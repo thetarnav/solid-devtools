@@ -10,7 +10,8 @@ import { throttle } from '@solid-primitives/scheduled'
 import { trimString } from '@solid-devtools/shared/utils'
 import { DEV as _STORE_DEV } from 'solid-js/store'
 import { Core, NodeID, Solid } from './types'
-import { NodeType } from './constants'
+import { $SDT_ID, NodeType } from './constants'
+import { getNewSdtId } from './id'
 
 const STORE_DEV = _STORE_DEV!
 
@@ -94,9 +95,6 @@ export const getOwnerType = (o: Readonly<Solid.Owner>): NodeType => {
   return NodeType.Computation
 }
 
-let LAST_ID = 0
-export const getNewSdtId = (): NodeID => (LAST_ID++).toString(36)
-
 export function markOwnerName(o: Solid.Owner): string {
   if (o.sdtName !== undefined) return o.sdtName
   return (o.sdtName = getNodeName(o))
@@ -105,9 +103,24 @@ export function markOwnerType(o: Solid.Owner): NodeType {
   if (o.sdtType !== undefined) return o.sdtType
   return (o.sdtType = getOwnerType(o))
 }
-export function markNodeID(o: { sdtId?: NodeID }): NodeID {
-  if (o.sdtId !== undefined) return o.sdtId
-  return (o.sdtId = getNewSdtId())
+
+export function markNodeID(o: { [$SDT_ID]?: NodeID }): NodeID {
+  if (o[$SDT_ID] !== undefined) return o[$SDT_ID]
+  return (o[$SDT_ID] = getNewSdtId())
+}
+
+export class NodeIDMap<T extends { [$SDT_ID]?: NodeID }> {
+  private obj: Record<NodeID, T> = {}
+
+  get(id: NodeID): T | undefined {
+    return this.obj[id]
+  }
+
+  set(o: T): NodeID {
+    const id = markNodeID(o)
+    if (!(id in this.obj)) this.obj[id] = o
+    return id
+  }
 }
 
 export function getComponentRefreshNode(owner: Readonly<Solid.Component>): Solid.Memo | null {
@@ -240,6 +253,7 @@ export function onDispose<T>(
   return fn
 }
 
+// TODO: move createUnownedRoot to solid-primitives
 export function createUnownedRoot<T>(fn: (dispose: VoidFunction) => T): T {
   return runWithOwner(null as any, () => createRoot(fn))
 }

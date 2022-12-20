@@ -1,7 +1,6 @@
-import { LocationAttr } from '@solid-devtools/transform/types'
-import { INFINITY, NAN, NEGATIVE_INFINITY, NodeType, ValueType } from './constants'
-
-export type { LocationAttr } from '@solid-devtools/transform/types'
+import type { LocationAttr } from '@solid-devtools/transform/types'
+import type { EncodedValue } from '../inspector/serialize'
+import { NodeType, $SDT_ID } from './constants'
 
 export type NodeID = string & {}
 
@@ -16,47 +15,7 @@ export const getValueItemId = <T extends ValueItemType>(
   return `${type}:${id}` as ValueItemID
 }
 
-export type EncodedPreviewPayloadMap = {
-  [ValueType.Array]: number
-  [ValueType.Object]: number
-  [ValueType.Number]: number | typeof INFINITY | typeof NEGATIVE_INFINITY | typeof NAN
-  [ValueType.Boolean]: boolean
-  [ValueType.String]: string
-  [ValueType.Symbol]: string
-  [ValueType.Function]: string
-  [ValueType.Getter]: string
-  [ValueType.Element]: { name: string; id: NodeID }
-  [ValueType.Instance]: string
-  [ValueType.Store]: { value: EncodedValue<boolean>; id: NodeID }
-}
-
-export type EncodedPreviewChildrenMap = {
-  [ValueType.Array]: EncodedValue<true>[]
-  [ValueType.Object]: Record<string | number, EncodedValue<true>>
-}
-
-export type EncodedValueOf<K extends ValueType, Deep extends boolean = boolean> = {
-  type: K
-} & (K extends keyof EncodedPreviewPayloadMap
-  ? { value: EncodedPreviewPayloadMap[K] }
-  : { value?: undefined }) &
-  (Deep extends true
-    ? K extends keyof EncodedPreviewChildrenMap
-      ? { children: EncodedPreviewChildrenMap[K] }
-      : { children?: undefined }
-    : { children?: undefined })
-
-export type EncodedValue<Deep extends boolean = boolean> = {
-  [K in ValueType]: EncodedValueOf<K, Deep>
-}[ValueType]
-
 export type ValueUpdateListener = (newValue: unknown, oldValue: unknown) => void
-
-declare global {
-  interface HTMLElement {
-    sdtId?: NodeID
-  }
-}
 
 export namespace Core {
   export type Owner = import('solid-js/types/reactive/signal').Owner
@@ -71,24 +30,36 @@ export namespace Core {
   }
 }
 
+declare global {
+  interface Element {
+    [$SDT_ID]?: NodeID
+  }
+}
+
 declare module 'solid-js/types/reactive/signal' {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   interface SignalState<T> {
-    sdtId?: NodeID
+    [$SDT_ID]?: NodeID
     sdtName?: string
   }
   interface Owner {
-    sdtId?: NodeID
+    [$SDT_ID]?: NodeID
     sdtName?: string
     sdtType?: NodeType
     sdtSubRoots?: Solid.Root[] | null
   }
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   interface Computation<Init, Next> {
-    sdtId?: NodeID
+    [$SDT_ID]?: NodeID
     sdtType?: NodeType
     onValueUpdate?: Record<symbol, ValueUpdateListener>
     onComputationUpdate?: VoidFunction
+  }
+}
+
+declare module 'solid-js/store' {
+  interface StoreNode {
+    [$SDT_ID]?: NodeID
   }
 }
 
@@ -115,7 +86,7 @@ export namespace Solid {
 
   export interface Store {
     value: Core.Store.StoreNode
-    sdtId?: NodeID
+    [$SDT_ID]?: NodeID
   }
 
   export interface Root extends Core.Owner {
@@ -183,12 +154,12 @@ export namespace Mapped {
     type: NodeType.Signal | NodeType.Memo | NodeType.Store
     name: string
     id: NodeID
-    value: EncodedValue<false>
+    value: EncodedValue[]
   }
 
   export type Props = {
     proxy: boolean
-    record: Record<string, EncodedValue<boolean>>
+    record: Record<string, EncodedValue[]>
   }
 
   export interface OwnerDetails {
@@ -198,7 +169,7 @@ export namespace Mapped {
     props?: Props
     signals: Signal[]
     /** for computations */
-    value?: EncodedValue
+    value?: EncodedValue[]
     // component with a location
     location?: LocationAttr
   }

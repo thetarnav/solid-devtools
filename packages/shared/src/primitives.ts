@@ -1,12 +1,4 @@
-import {
-  Accessor,
-  createMemo,
-  createSignal,
-  getOwner,
-  onCleanup,
-  untrack,
-  createComputed,
-} from 'solid-js'
+import { Accessor, createMemo, createSignal, getOwner, onCleanup, untrack } from 'solid-js'
 import type {
   AccessorArray,
   EffectFunction,
@@ -20,11 +12,12 @@ import { makeEventListener } from '@solid-primitives/event-listener'
 import { createSharedRoot } from '@solid-primitives/rootless'
 import { createMediaQuery } from '@solid-primitives/media'
 import { Primitive } from 'type-fest'
-import { Listen } from '@solid-primitives/event-bus'
 
 export type WritableDeep<T> = 0 extends 1 & T
   ? T
   : T extends Primitive
+  ? T
+  : unknown extends T
   ? T
   : { -readonly [K in keyof T]: WritableDeep<T[K]> }
 
@@ -181,27 +174,21 @@ export function atom<T>(value?: T, options?: SignalOptions<T | undefined>): Atom
   return (...args: any[]) => (args.length === 1 ? setState(args[0]) : state())
 }
 
-export function trackFromListen(listen: Listen): VoidFunction {
-  const [track, trigger] = createSignal(undefined, { equals: false })
-  listen(trigger)
-  return track
-}
-
 /**
  * Creates a signal that will be activated for a given amount of time on every "ping" — a call to the listener function.
  */
-export function createPingedSignal(track: VoidFunction, timeout = 400): Accessor<boolean> {
+export function createPingedSignal(
+  timeout = 400,
+): [isUpdated: Accessor<boolean>, ping: VoidFunction] {
   const [isUpdated, setIsUpdated] = createSignal(false)
 
   let timeoutId: ReturnType<typeof setTimeout> | undefined
-  createComputed(
-    defer(track, () => {
-      setIsUpdated(true)
-      clearTimeout(timeoutId)
-      timeoutId = setTimeout(() => setIsUpdated(false), timeout)
-    }),
-  )
+  const ping = () => {
+    setIsUpdated(true)
+    clearTimeout(timeoutId)
+    timeoutId = setTimeout(() => setIsUpdated(false), timeout)
+  }
   onCleanup(() => clearTimeout(timeoutId))
 
-  return isUpdated
+  return [isUpdated, ping]
 }

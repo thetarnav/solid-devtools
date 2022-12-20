@@ -1,7 +1,7 @@
 import { batch, createEffect, createMemo, createSelector, createSignal } from 'solid-js'
-import { createStore, produce } from 'solid-js/store'
+import { createMutable, produce } from 'solid-js/store'
 import { defer, untrackedCallback, WritableDeep } from '@solid-devtools/shared/primitives'
-import { error, warn } from '@solid-devtools/shared/utils'
+import { splitOnColon, warn } from '@solid-devtools/shared/utils'
 import {
   InspectorUpdate,
   ProxyPropsUpdate,
@@ -10,22 +10,21 @@ import {
   ValueNodeUpdate,
   NodeType,
   NodeID,
-  EncodedValue,
   ValueItemID,
   ValueItemType,
   Mapped,
-  EncodedValueOf,
   ValueType,
   LocationAttr,
 } from '@solid-devtools/debugger/types'
 import type { Structure } from '../structure'
 import { Writable } from 'type-fest'
+import { DecodedValue, decodeValue, StoreNodeMap } from './decode'
 
 export namespace Inspector {
   export interface ValueItem {
     readonly itemId: ValueItemID
     readonly selected: boolean
-    readonly value: EncodedValue
+    readonly value: DecodedValue
   }
 
   export interface Signal extends ValueItem {
@@ -53,86 +52,28 @@ export namespace Inspector {
   }
 }
 
-const splitValueNodeId = (id: ValueItemID) => {
-  return id.split(':') as [ValueItemType, undefined | NodeID | string]
-}
-
-function reconcileValueAtPath(
-  value: EncodedValue,
-  path: readonly (string | number)[],
-  property: string | number,
-  newValue: EncodedValue<true> | undefined | number,
-): void {
-  const fullPathString = [...path, property].join('.')
-  for (const key of path) {
-    if (!value.children) return error('Invalid path', fullPathString)
-    value = value.children[key as never]
-  }
-  const children = value?.children
-  if (!children) return error('Invalid path', fullPathString)
-  if (newValue === undefined) delete children[property as never]
-  else children[property as never] = newValue as any
-}
-
-const XOR = (a: unknown, b: unknown) => (a || b) && !(a && b)
-
-function updateValueNode(obj: { value: EncodedValue }, newValue: EncodedValue): void {
-  if (obj.value.type === newValue.type) {
-    if (obj.value.type === ValueType.Store) {
-      obj = obj.value.value
-      newValue = (newValue as EncodedValueOf<ValueType.Store>).value.value
-    }
-    const expanded = XOR('children' in obj.value, 'children' in newValue)
-    if (expanded) {
-      obj.value.children = newValue.children
-      return
-    }
-  }
-  obj.value = newValue
-}
-
-function findStoreNode(
-  value: EncodedValue,
-  storeId: NodeID,
-): EncodedValueOf<ValueType.Store> | undefined {
-  if (value.type === ValueType.Store && value.value.id === storeId) return value
-  if (value.children) {
-    for (const child of Object.values(value.children)) {
-      const store = findStoreNode(child, storeId)
-      if (store) return store
-    }
-  }
-}
-
-function findValueNode(
-  details: Inspector.SignalDetails,
-  valueId: ValueItemID,
-): EncodedValue | undefined {
-  const [type, id] = splitValueNodeId(valueId)
-  if (type === 'signal') return details.signals[id!]?.value
-  if (type === 'prop') return details.props?.record[id!]?.value
-  return details.value?.value
-}
-
 function updateValueItem(
   details: WritableDeep<Inspector.SignalDetails>,
-  { id: valueId, value }: ValueNodeUpdate,
+  [valueId, value]: ValueNodeUpdate,
+  storeNodeMap: StoreNodeMap,
 ): void {
-  const [type, id] = splitValueNodeId(valueId)
+  const [type, id] = splitOnColon(valueId)
   // Update signal/memo/store top-level value
   if (type === 'signal') {
-    const signal = details.signals[id!]
+    const signal = details.signals[id]
     if (!signal) throw `updateValue: value node (${valueId}) not found`
-    updateValueNode(signal, value)
+    signal.value = decodeValue(value, signal.value, storeNodeMap)
   }
   // Update prop value
   else if (type === 'prop') {
-    const prop = details.props?.record[id!]
+    const prop = details.props?.record[id]
     if (!prop) throw `updateValue: prop (${valueId}) not found`
-    updateValueNode(prop, value)
+    prop.value = decodeValue(value, prop.value, storeNodeMap)
   }
   // Update inspected node value
-  else details.value && updateValueNode(details.value, value)
+  else if (details.value) {
+    details.value.value = decodeValue(value, details.value.value, storeNodeMap)
+  }
 }
 
 /**
@@ -151,16 +92,25 @@ function updateProps(
   for (const key of removed) delete props.record[key]
 }
 
-function updateStore(
-  details: WritableDeep<Inspector.SignalDetails>,
-  { path, property, storeId, value, valueNodeId }: StoreNodeUpdate,
-): void {
-  const valueNode = findValueNode(details, valueNodeId)
-  if (!valueNode) return warn(`updateStore: value node (${valueNodeId}) not found`)
-  // TODO cache the store node
-  const store = findStoreNode(valueNode, storeId)
-  if (!store) return warn(`updateStore: store node (${storeId}) not found`)
-  reconcileValueAtPath(store.value.value, path, property, value)
+function updateStore([storeProperty, newValue]: StoreNodeUpdate, storeNodeMap: StoreNodeMap): void {
+  const [storeNodeId, property] = splitOnColon(storeProperty)
+  const store = storeNodeMap.get(storeNodeId)
+  if (!store) throw `updateStore: store node (${storeNodeId}) not found`
+
+  store.setState(
+    produce(value => {
+      if (!value || typeof value !== 'object')
+        throw `updateStore: store node (${storeNodeId}) has no value`
+      if (newValue === null) {
+        delete value[property as never]
+      } else if (typeof newValue === 'number') {
+        if (Array.isArray(value)) value.length = newValue
+        else throw `updateStore: store node (${storeNodeId}) is not an array`
+      } else {
+        ;(value as any)[property] = decodeValue(newValue, value[property as never], storeNodeMap)
+      }
+    }),
+  )
 }
 
 export default function createInspector({
@@ -179,11 +129,13 @@ export default function createInspector({
     return node ? getNodePath(node) : []
   })
   const [location, setLocation] = createSignal<LocationAttr | null>(null)
-  const [signalDetails, setSignalDetails] = createStore<Inspector.SignalDetails>({
+  const signalDetails = createMutable<WritableDeep<Inspector.SignalDetails>>({
     signals: {},
     value: null,
     props: null,
   })
+
+  const storeNodeMap = new StoreNodeMap()
 
   const details: Inspector.Details = {
     get path() {
@@ -209,20 +161,23 @@ export default function createInspector({
     batch(() => {
       if (data === null) {
         setInspectedNode(null)
-        return
+      } else {
+        const prev = inspectedNode()
+        const newId = typeof data === 'string' ? data : data.id
+        if (prev && newId === prev.id) return
+        const node = typeof data === 'string' ? findNode(data) : data
+        if (!node) return warn(`setInspected: node (${newId}) not found`)
+        // html elements are not inspectable
+        if (node.type === NodeType.Element) return
+
+        setInspectedNode(node)
       }
 
-      const prev = inspectedNode()
-      const newId = typeof data === 'string' ? data : data.id
-      if (prev && newId === prev.id) return
-      const node = typeof data === 'string' ? findNode(data) : data
-      if (!node) return warn(`setInspected: node (${newId}) not found`)
-      // html elements are not inspectable
-      if (node.type === NodeType.Element) return
-
-      setInspectedNode(node)
       setLocation(null)
-      setSignalDetails({ signals: {}, value: null, props: null })
+      storeNodeMap.clear()
+      signalDetails.signals = {}
+      signalDetails.value = null
+      signalDetails.props = null
     })
   })
 
@@ -248,43 +203,52 @@ export default function createInspector({
 
       const signals: Writable<Inspector.SignalsRecord> = {}
       for (const { id, name, type, value } of raw.signals)
-        signals[id] = { id, name, type, selected: false, value, itemId: `signal:${id}` }
+        signals[id] = {
+          id,
+          name,
+          type,
+          selected: false,
+          value: decodeValue(value, null, storeNodeMap),
+          itemId: `signal:${id}`,
+        }
 
-      setSignalDetails({
-        signals,
-        value: raw.value ? { itemId: 'value', selected: false, value: raw.value } : undefined,
-        props: raw.props
-          ? {
-              proxy: raw.props.proxy,
-              record: Object.entries(raw.props.record).reduce((props, [propName, value]) => {
-                props[propName] = { value, selected: false, itemId: `prop:${propName}` }
-                return props
-              }, {} as Writable<Inspector.PropsRecord>),
-            }
-          : null,
-      })
+      signalDetails.signals = signals
+      signalDetails.value = raw.value
+        ? { itemId: 'value', selected: false, value: decodeValue(raw.value, null, storeNodeMap) }
+        : null
+      signalDetails.props = raw.props
+        ? {
+            proxy: raw.props.proxy,
+            record: Object.entries(raw.props.record).reduce((props, [propName, value]) => {
+              props[propName] = {
+                value: decodeValue(value, null, storeNodeMap),
+                selected: false,
+                itemId: `prop:${propName}`,
+              }
+              return props
+            }, {} as Writable<Inspector.PropsRecord>),
+          }
+        : null
     })
   })
 
   // Handle Inspector updates comming from the debugger
   function handleUpdate(updates: InspectorUpdate[]) {
-    setSignalDetails(
-      produce(details => {
-        for (const update of updates) {
-          switch (update[0]) {
-            case 'value':
-              updateValueItem(details, update[1])
-              break
-            case 'props':
-              details.props && updateProps(details.props, update[1])
-              break
-            case 'store':
-              updateStore(details, update[1])
-              break
-          }
+    batch(() => {
+      for (const update of updates) {
+        switch (update[0]) {
+          case 'value':
+            updateValueItem(signalDetails, update[1], storeNodeMap)
+            break
+          case 'props':
+            signalDetails.props && updateProps(signalDetails.props, update[1])
+            break
+          case 'store':
+            updateStore(update[1], storeNodeMap)
+            break
         }
-      }),
-    )
+      }
+    })
   }
 
   /** variable for a callback in controller.tsx */
@@ -298,24 +262,25 @@ export default function createInspector({
   /**
    * Toggle the inspection of a value item (signal, prop, or owner value)
    */
-  function inspectValueItem(type: 'value', id?: undefined, selected?: boolean): void
+  function inspectValueItem(type: 'value', id?: undefined, selected?: boolean): boolean
   function inspectValueItem(
     type: Exclude<ValueItemType, 'value'>,
     id: string,
     selected?: boolean,
-  ): void
-  function inspectValueItem(type: ValueItemType, id?: string, selected?: boolean): void {
-    setSignalDetails(
-      produce(details => {
-        let item: Writable<Inspector.ValueItem> | undefined | null
-        if (type === 'value') item = details.value
-        else if (type === 'signal') item = details.signals[id!]
-        else if (type === 'prop') item = details.props?.record[id!]
-        if (!item) return
-        item.selected = selected = selected ?? !item.selected
-        onInspectValue({ id: item.itemId, selected })
-      }),
-    )
+  ): boolean
+  function inspectValueItem(type: ValueItemType, id?: string, selected?: boolean): boolean {
+    let toggledInspection = false
+
+    let item: Writable<Inspector.ValueItem> | undefined | null
+    if (type === 'value') item = signalDetails.value
+    else if (type === 'signal') item = signalDetails.signals[id!]
+    else if (type === 'prop') item = signalDetails.props?.record[id!]
+    if (item) {
+      item.selected = selected = selected ?? !item.selected
+      onInspectValue({ id: item.itemId, selected })
+      toggledInspection = true
+    }
+    return toggledInspection
   }
 
   //

@@ -62,7 +62,7 @@ function forceFlushRootUpdateQueue(): void {
     const updated: StructureUpdates['updated'] = {}
 
     const [owners, getRootId] = UpdateAllRoots
-      ? [RootMap.values(), (owner: Solid.Owner) => owner.sdtId!]
+      ? [RootMap.values(), (owner: Solid.Owner) => markNodeID(owner)]
       : [UpdateQueue, (owner: Solid.Owner) => OwnerRoots.get(owner)!]
     UpdateAllRoots = false
 
@@ -137,7 +137,7 @@ function changeRootAttachment(root: Solid.Root, newParent: Solid.Owner | null): 
   if (root.sdtAttached) {
     root.sdtAttached.sdtSubRoots!.splice(root.sdtAttached.sdtSubRoots!.indexOf(root), 1)
     topRoot = getTopRoot(root.sdtAttached)
-    if (topRoot) updateClosestIncludedOwner(root.sdtAttached, topRoot.sdtId!)
+    if (topRoot) updateClosestIncludedOwner(root.sdtAttached, markNodeID(topRoot))
   }
 
   if (newParent) {
@@ -146,7 +146,7 @@ function changeRootAttachment(root: Solid.Root, newParent: Solid.Owner | null): 
     else newParent.sdtSubRoots = [root]
 
     if (topRoot === undefined) topRoot = getTopRoot(newParent)
-    if (topRoot) updateClosestIncludedOwner(newParent, topRoot.sdtId!)
+    if (topRoot) updateClosestIncludedOwner(newParent, markNodeID(topRoot))
   } else {
     delete root.sdtAttached
   }
@@ -279,7 +279,7 @@ export const findOwnerById = (rootId: NodeID, id: NodeID): Solid.Owner | undefin
   const root = RootMap.get(rootId)
   if (!root) return
   return whileArray([root], (owner: Solid.Owner, toCheck) => {
-    if (owner.sdtId === id) return owner
+    if (markNodeID(owner) === id) return owner
     if (owner.owned) toCheck.push.apply(toCheck, owner.owned)
     if (owner.sdtSubRoots) toCheck.push.apply(toCheck, owner.sdtSubRoots)
   })

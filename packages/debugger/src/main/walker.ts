@@ -122,7 +122,7 @@ function mapElements(els: Element[], parentChildren: Mapped.Owner[] | undefined)
     const mappedEl: Mapped.Owner = {
       id: markNodeID(el),
       type: NodeType.Element,
-      name: el.tagName.toLowerCase(),
+      name: el.localName,
       children: [],
     }
     r.push(mappedEl)

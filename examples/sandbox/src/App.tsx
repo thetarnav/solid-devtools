@@ -73,6 +73,7 @@ const Article: Component = () => {
       body: 'Lorem ipsum dolor sit amet, consectetur adipisicing elit. Dolorem odio culpa vel vitae? Quis deleniti soluta rem velit necessitatibus? ',
     },
   })
+  ;(state as any).circular = state
 
   const [data] = createResource(
     () => state.count,

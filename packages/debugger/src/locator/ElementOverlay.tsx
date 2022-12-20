@@ -88,7 +88,7 @@ export function attachElementOverlay(selected: Accessor<LocatorComponent[]>) {
           return (
             <ElementOverlay
               {...bounds}
-              tag={component().element.tagName.toLocaleLowerCase()}
+              tag={component().element.localName}
               name={component().name}
             />
           )

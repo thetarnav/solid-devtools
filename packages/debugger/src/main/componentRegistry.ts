@@ -1,6 +1,6 @@
 import { whileArray } from '@solid-devtools/shared/utils'
 import { NodeID, Solid } from './types'
-import { onOwnerCleanup } from './utils'
+import { markNodeID, onOwnerCleanup } from './utils'
 
 const $CLEANUP = Symbol('component-registry-cleanup')
 
@@ -70,7 +70,7 @@ export function findComponentElement(
   if (!component) return
 
   return whileArray([...component.elements], (el, toCheck) => {
-    if (el.sdtId === elementId) return { name: component.name, id: nodeId, element: el }
+    if (markNodeID(el) === elementId) return { name: component.name, id: nodeId, element: el }
     for (const child of el.children) child instanceof HTMLElement && toCheck.push(child)
   })
 }
