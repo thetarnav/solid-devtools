@@ -17,11 +17,8 @@ export class StoreNodeMap {
   }
   addRef(id: NodeID, node: StoreNode) {
     const entry = this.map.get(id)
-    if (entry) {
-      entry.refs++
-    } else {
-      this.map.set(id, { node, refs: 1 })
-    }
+    if (entry) entry.refs++
+    else this.map.set(id, { node, refs: 1 })
   }
   removeRef(id: NodeID) {
     const entry = this.map.get(id)
@@ -40,38 +37,31 @@ export class StoreNodeMap {
 // TODO: don't use classes, use plain objects
 
 export class StoreNode {
-  public value: DecodedValue
-  public setState: SetStoreFunction<this>
+  #state: { readonly value: DecodedValue }
+  get value() {
+    return this.#state.value
+  }
+  setState: SetStoreFunction<DecodedValue>
   constructor(public id: NodeID) {
-    const [store, setState] = createStore(this)
-    this.setState = setState
-    return store
+    const [state, setState] = createStore<{ readonly value: DecodedValue }>({ value: null })
+    this.#state = state
+    this.setState = (...a: any[]) => setState('value', ...(a as [any]))
   }
 }
 export class InstanceNode {
-  constructor(public name: string) {
-    return createStore(this)[0]
-  }
+  constructor(public name: string) {}
 }
 export class FunctionNode {
-  constructor(public name: string) {
-    return createStore(this)[0]
-  }
+  constructor(public name: string) {}
 }
 export class ElementNode {
-  constructor(public id: NodeID, public name: string) {
-    return createStore(this)[0]
-  }
+  constructor(public id: NodeID, public name: string) {}
 }
 export class GetterNode {
-  constructor(public name: string) {
-    return createStore(this)[0]
-  }
+  constructor(public name: string) {}
 }
 export class ObjectPreviewNode {
-  constructor(public type: ValueType.Object | ValueType.Array, public length: number) {
-    return createStore(this)[0]
-  }
+  constructor(public type: ValueType.Object | ValueType.Array, public length: number) {}
 }
 
 export type DecodedValueMap = {
@@ -152,9 +142,12 @@ function decode(index: number): DecodedValue {
     }
     case ValueType.Store: {
       const [id, vIndex] = splitOnColon(encoded[1])
-      const store = saveToMap(index, new StoreNode(id))
+      let store = StoreRefMap.get(id)
+      if (!store) {
+        store = saveToMap(index, new StoreNode(id))
+        store.setState(decode(+vIndex))
+      }
       StoreRefMap.addRef(id, store)
-      store.setState('value', decode(+vIndex))
       return store
     }
   }
@@ -164,6 +157,7 @@ export function removeNestedStoreRefs(value: DecodedValue) {
   if (!value) return
   if (value instanceof StoreNode) {
     StoreRefMap.removeRef(value.id)
+    removeNestedStoreRefs(value.value)
   } else if (Array.isArray(value)) {
     value.forEach(removeNestedStoreRefs)
   } else if (Object.getPrototypeOf(value) === Object.prototype) {

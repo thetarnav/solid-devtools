@@ -1,5 +1,5 @@
 import { batch, createEffect, createMemo, createSelector, createSignal } from 'solid-js'
-import { createStore, produce } from 'solid-js/store'
+import { createMutable, produce } from 'solid-js/store'
 import { defer, untrackedCallback, WritableDeep } from '@solid-devtools/shared/primitives'
 import { splitOnColon, warn } from '@solid-devtools/shared/utils'
 import {
@@ -98,7 +98,6 @@ function updateStore([storeProperty, newValue]: StoreNodeUpdate, storeNodeMap: S
   if (!store) throw `updateStore: store node (${storeNodeId}) not found`
 
   store.setState(
-    'value',
     produce(value => {
       if (!value || typeof value !== 'object')
         throw `updateStore: store node (${storeNodeId}) has no value`
@@ -130,7 +129,7 @@ export default function createInspector({
     return node ? getNodePath(node) : []
   })
   const [location, setLocation] = createSignal<LocationAttr | null>(null)
-  const [signalDetails, setSignalDetails] = createStore<Inspector.SignalDetails>({
+  const signalDetails = createMutable<WritableDeep<Inspector.SignalDetails>>({
     signals: {},
     value: null,
     props: null,
@@ -162,22 +161,23 @@ export default function createInspector({
     batch(() => {
       if (data === null) {
         setInspectedNode(null)
-        storeNodeMap.clear()
-        return
+      } else {
+        const prev = inspectedNode()
+        const newId = typeof data === 'string' ? data : data.id
+        if (prev && newId === prev.id) return
+        const node = typeof data === 'string' ? findNode(data) : data
+        if (!node) return warn(`setInspected: node (${newId}) not found`)
+        // html elements are not inspectable
+        if (node.type === NodeType.Element) return
+
+        setInspectedNode(node)
       }
 
-      const prev = inspectedNode()
-      const newId = typeof data === 'string' ? data : data.id
-      if (prev && newId === prev.id) return
-      const node = typeof data === 'string' ? findNode(data) : data
-      if (!node) return warn(`setInspected: node (${newId}) not found`)
-      // html elements are not inspectable
-      if (node.type === NodeType.Element) return
-
-      setInspectedNode(node)
       setLocation(null)
       storeNodeMap.clear()
-      setSignalDetails({ signals: {}, value: null, props: null })
+      signalDetails.signals = {}
+      signalDetails.value = null
+      signalDetails.props = null
     })
   })
 
@@ -212,48 +212,42 @@ export default function createInspector({
           itemId: `signal:${id}`,
         }
 
-      setSignalDetails({
-        signals,
-        value: raw.value
-          ? { itemId: 'value', selected: false, value: decodeValue(raw.value, null, storeNodeMap) }
-          : undefined,
-        props: raw.props
-          ? {
-              proxy: raw.props.proxy,
-              record: Object.entries(raw.props.record).reduce((props, [propName, value]) => {
-                props[propName] = {
-                  value: decodeValue(value, null, storeNodeMap),
-                  selected: false,
-                  itemId: `prop:${propName}`,
-                }
-                return props
-              }, {} as Writable<Inspector.PropsRecord>),
-            }
-          : null,
-      })
+      signalDetails.signals = signals
+      signalDetails.value = raw.value
+        ? { itemId: 'value', selected: false, value: decodeValue(raw.value, null, storeNodeMap) }
+        : null
+      signalDetails.props = raw.props
+        ? {
+            proxy: raw.props.proxy,
+            record: Object.entries(raw.props.record).reduce((props, [propName, value]) => {
+              props[propName] = {
+                value: decodeValue(value, null, storeNodeMap),
+                selected: false,
+                itemId: `prop:${propName}`,
+              }
+              return props
+            }, {} as Writable<Inspector.PropsRecord>),
+          }
+        : null
     })
   })
 
   // Handle Inspector updates comming from the debugger
   function handleUpdate(updates: InspectorUpdate[]) {
     batch(() => {
-      setSignalDetails(
-        produce(details => {
-          for (const update of updates) {
-            switch (update[0]) {
-              case 'value':
-                updateValueItem(details, update[1], storeNodeMap)
-                break
-              case 'props':
-                details.props && updateProps(details.props, update[1])
-                break
-              case 'store':
-                updateStore(update[1], storeNodeMap)
-                break
-            }
-          }
-        }),
-      )
+      for (const update of updates) {
+        switch (update[0]) {
+          case 'value':
+            updateValueItem(signalDetails, update[1], storeNodeMap)
+            break
+          case 'props':
+            signalDetails.props && updateProps(signalDetails.props, update[1])
+            break
+          case 'store':
+            updateStore(update[1], storeNodeMap)
+            break
+        }
+      }
     })
   }
 
@@ -276,18 +270,16 @@ export default function createInspector({
   ): boolean
   function inspectValueItem(type: ValueItemType, id?: string, selected?: boolean): boolean {
     let toggledInspection = false
-    setSignalDetails(
-      produce(details => {
-        let item: Writable<Inspector.ValueItem> | undefined | null
-        if (type === 'value') item = details.value
-        else if (type === 'signal') item = details.signals[id!]
-        else if (type === 'prop') item = details.props?.record[id!]
-        if (!item) return
-        item.selected = selected = selected ?? !item.selected
-        onInspectValue({ id: item.itemId, selected })
-        toggledInspection = true
-      }),
-    )
+
+    let item: Writable<Inspector.ValueItem> | undefined | null
+    if (type === 'value') item = signalDetails.value
+    else if (type === 'signal') item = signalDetails.signals[id!]
+    else if (type === 'prop') item = signalDetails.props?.record[id!]
+    if (item) {
+      item.selected = selected = selected ?? !item.selected
+      onInspectValue({ id: item.itemId, selected })
+      toggledInspection = true
+    }
     return toggledInspection
   }
 
