@@ -1,5 +1,11 @@
 # solid-devtools-shared
 
+## 0.10.3
+
+### Patch Changes
+
+- fd6dcae: Change `createPingedSignal` to return a `ping` function, instead of reacting to provided accessor.
+
 ## 0.10.2
 
 ### Patch Changes
