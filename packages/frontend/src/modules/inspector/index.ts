@@ -129,6 +129,7 @@ export default function createInspector({
     return node ? getNodePath(node) : []
   })
   const [location, setLocation] = createSignal<LocationAttr | null>(null)
+  // TODO: replace store with object and signals (we know which properties could be changed and which are static)
   const signalDetails = createMutable<WritableDeep<Inspector.SignalDetails>>({
     signals: {},
     value: null,

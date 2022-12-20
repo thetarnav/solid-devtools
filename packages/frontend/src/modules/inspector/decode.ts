@@ -153,8 +153,12 @@ function decode(index: number): DecodedValue {
   }
 }
 
+/** to avoid circular references in `removeNestedStoreRefs` */
+let Seen = new Set<DecodedValue>()
+
 export function removeNestedStoreRefs(value: DecodedValue) {
-  if (!value) return
+  if (!value || typeof value !== 'object' || Seen.has(value)) return
+  Seen.add(value)
   if (value instanceof StoreNode) {
     StoreRefMap.removeRef(value.id)
     removeNestedStoreRefs(value.value)
@@ -170,12 +174,17 @@ export function decodeValue(
   prevValue: DecodedValue | null,
   storeRefMap: StoreNodeMap,
 ): DecodedValue {
+  StoreRefMap = storeRefMap
+
+  Seen = new Set()
+  removeNestedStoreRefs(prevValue)
+  Seen = undefined as any
+
   List = list
   DecodedMap = new Map()
-  StoreRefMap = storeRefMap
-  removeNestedStoreRefs(prevValue)
   const decoded = decode(0)
   // @ts-expect-error - we don't want to keep globals around
   List = DecodedMap = StoreRefMap = undefined
+
   return decoded
 }
