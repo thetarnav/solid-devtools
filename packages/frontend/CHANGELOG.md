@@ -1,5 +1,20 @@
 # @solid-devtools/frontend
 
+## 0.4.0
+
+### Minor Changes
+
+- fd6dcae: Change value serialization and deserialization algorithms to support circular references.
+
+### Patch Changes
+
+- 006fc83: Use `el.localName` to get the name of HTML elements instead of using `el.tagName`
+- Updated dependencies [006fc83]
+- Updated dependencies [fd6dcae]
+- Updated dependencies [fd6dcae]
+  - @solid-devtools/debugger@0.17.0
+  - @solid-devtools/shared@0.10.3
+
 ## 0.3.1
 
 ### Patch Changes

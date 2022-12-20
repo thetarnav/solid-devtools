@@ -1,6 +1,6 @@
 {
   "name": "@solid-devtools/logger",
-  "version": "0.5.3",
+  "version": "0.5.4",
   "description": "Solid debugging utilities for logging the state of the reactivity graph to the console.",
   "license": "MIT",
   "author": "Damian Tarnawski <gthetarnav@gmail.com>",
@@ -58,8 +58,8 @@
     "tsup": "^6.5.0"
   },
   "dependencies": {
-    "@solid-devtools/debugger": "workspace:^0.16.0",
-    "@solid-devtools/shared": "workspace:^0.10.2",
+    "@solid-devtools/debugger": "workspace:^0.17.0",
+    "@solid-devtools/shared": "workspace:^0.10.3",
     "@solid-primitives/utils": "^4.0.0"
   },
   "peerDependencies": {
