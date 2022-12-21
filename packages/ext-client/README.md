@@ -17,11 +17,11 @@ The main client library. It reexports the most [important tools](<(https://githu
 ### Installation
 
 ```bash
-npm i solid-devtools
+npm i -D solid-devtools
 # or
-yarn add solid-devtools
+yarn add -D solid-devtools
 # or
-pnpm add solid-devtools
+pnpm add -D solid-devtools
 ```
 
 ### Import the script

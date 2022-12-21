@@ -1,4 +1,3 @@
-import 'solid-devtools'
 import { attachDevtoolsOverlay } from '@solid-devtools/overlay'
 import { useLocator } from '@solid-devtools/debugger'
 

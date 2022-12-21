@@ -19,11 +19,11 @@ It can do very useful things for you: Wrap stores to let the debugger observe th
 ### Installation
 
 ```bash
-npm i @solid-devtools/transform
+npm i -D @solid-devtools/transform
 # or
-yarn add @solid-devtools/transform
+yarn add -D @solid-devtools/transform
 # or
-pnpm i @solid-devtools/transform
+pnpm i -D @solid-devtools/transform
 ```
 
 ### Setup
@@ -32,11 +32,11 @@ pnpm i @solid-devtools/transform
 // vite.config.ts
 
 import { defineConfig } from 'vite'
-import solidPlugin from 'vite-plugin-solid'
-import devtoolsPlugin from '@solid-devtools/transform'
+import solid from 'vite-plugin-solid'
+import devtools from '@solid-devtools/transform'
 
 export default defineConfig({
-  plugins: [devtoolsPlugin(), solidPlugin()],
+  plugins: [devtools(), solid()],
 })
 ```
 
@@ -46,18 +46,28 @@ All of the transforms are disabled by default—you need to pick what you want b
 
 ```ts
 interface DevtoolsPluginOptions {
+  /** Inject debugger script to the page */
+  injectDebugger?: boolean
+  /** Add automatic name when creating signals, memos, stores, or mutables */
   name?: boolean
-  componentLocation?: boolean
+  /** Inject location attributes to jsx templates */
   jsxLocation?: boolean
+  /** Inject location information to component declarations */
+  componentLocation?: boolean
 }
 
 // in vite.config.ts plugins array:
-devtoolsPlugin({
+devtools({
+  injectDebugger: true,
   name: true,
-  componentLocation: true,
   jsxLocation: true,
+  componentLocation: true,
 })
 ```
+
+#### `injectDebugger`
+
+Injects the [debugger](../debugger#readme) and [extension client](../ext-client#readme) script to the page. This is required to use the extension.
 
 #### `name`
 

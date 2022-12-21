@@ -36,37 +36,20 @@ If you think about the Chrome Extension as a **Frontend**, then the [**"solid-de
 Install the following package:
 
 ```bash
-npm i solid-devtools
+npm i -D solid-devtools
 # or
-yarn add solid-devtools
+yarn add -D solid-devtools
 # or
-pnpm add solid-devtools
+pnpm add -D solid-devtools
 ```
 
 _(you can install is as a dev dependency too, but it has a runtime—which is removed in production build)_
 
 As the extension requires both the extension and the library to work, you need to watchout for version mismatches. The extension will warn you if the library version is different than the one expected by the extension.
 
-### 3. Import the script
+### 3. Add devtools vite plugin
 
-Import `"solid-devtools"` package in your app entry file. (It's best if the script runs before any application code is executed)
-
-```ts
-// will automatically find and track all roots in your application
-// also setups the extension adapter
-import 'solid-devtools'
-```
-
-You can also use the Locator pacage here. It now is integrated with the extension. More on that [here](https://github.com/thetarnav/solid-devtools/tree/main/packages/locator#readme).
-
-```ts
-import { useLocator } from 'solid-devtools'
-useLocator()
-```
-
-### 4. Add vite plugin _(Optional)_
-
-The vite plugin is not necessary for the devtools to work, but enabling some of the options, such as `"name"`, will improve the debugging experience or enable additional features.
+The [vite plugin](../transform#readme) is a way to configure the transform options and add debugger script to the page. Enabling transforms are not necessary for the devtools to work, but the debugger script needs to be present to analyse you solid application. Enabling some of the options, such as `"name"`, will improve the debugging experience or enable additional features.
 
 ```ts
 // vite.config.ts
@@ -78,8 +61,12 @@ import devtools from 'solid-devtools/vite'
 export default defineConfig({
   plugins: [
     devtools({
+      // required:
+      injectDebugger: true,
+      // optional options:
       name: true,
       componentLocation: true,
+      jsxLocation: true,
     }),
     solid(),
   ],
@@ -88,7 +75,7 @@ export default defineConfig({
 
 [**>> More about transform options**](https://github.com/thetarnav/solid-devtools/tree/main/packages/transform#options)
 
-### 5. Run the app and play with the devtools!
+### 4. Run the app and play with the devtools!
 
 That's it! A new **"Solid"** panel should appear in your Chrome Devtools.
 
@@ -103,13 +90,6 @@ If you are interested in the extension's development, see the [Plans for Devtool
 This Stackblitz demo is setup to work with the extension.
 
 [**See this Stackblitz demo.**](https://stackblitz.com/edit/solid-devtools-demo?file=src%2Fmain.tsx)
-
-## Acknowledgements
-
-The content and examples of extension docs are inspired by following articles:
-
-- [**Taking SolidJS Dev-Tools for a Spin**](https://dev.to/mbarzeev/taking-solidjs-dev-tools-for-a-spin-44m2)
-- [**Using SolidJS Dev-Tools Locator Feature**](https://dev.to/mbarzeev/using-solidjs-dev-tools-locator-feature-1445)
 
 ## Changelog
 

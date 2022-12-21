@@ -78,11 +78,11 @@ importers:
       '@solid-devtools/logger': link:../../packages/logger
       '@solid-devtools/overlay': link:../../packages/overlay
       '@solid-primitives/timer': 1.3.4_solid-js@1.6.5
-      solid-devtools: link:../../packages/ext-client
       solid-js: 1.6.5
     devDependencies:
       '@babel/plugin-syntax-typescript': 7.20.0_@babel+core@7.20.5
       '@solid-devtools/transform': link:../../packages/transform
+      solid-devtools: link:../../packages/ext-client
       typescript: 4.9.4
       unocss: 0.47.6_vite@3.2.5
       vite: 3.2.5
