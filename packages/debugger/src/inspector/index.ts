@@ -6,9 +6,10 @@ import { NodeIDMap } from '../main/utils'
 import { DebuggerEventHub } from '../main/plugin'
 import { findOwnerById } from '../main/roots'
 import { makeSolidUpdateListener } from '../main/update'
-import { encodeValue, EncodedValue } from './serialize'
+import { encodeValue } from './serialize'
 import { observeStoreNode, setOnStoreNodeUpdate, StoreNodeProperty, StoreUpdateData } from './store'
 import { clearOwnerObservers, collectOwnerDetails, ValueNodeMap } from './inspector'
+import { EncodedValue } from './types'
 
 export type ValueNodeUpdate = [id: ValueItemID, value: EncodedValue[]]
 

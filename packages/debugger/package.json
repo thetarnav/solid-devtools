@@ -31,28 +31,66 @@
   "main": "./dist/server.cjs",
   "module": "./dist/server.js",
   "types": "./dist/index.d.ts",
+  "browser": {
+    "./dist/server.cjs": "./dist/index.cjs",
+    "./dist/server.js": "./dist/index.js"
+  },
   "exports": {
     ".": {
+      "worker": {
+        "import": {
+          "types": "./types/index.d.ts",
+          "default": "./dist/server.js"
+        },
+        "require": "./dist/server.cjs"
+      },
       "browser": {
         "development": {
-          "import": "./dist/index.js",
+          "import": {
+            "types": "./types/index.d.ts",
+            "default": "./dist/index.js"
+          },
           "require": "./dist/index.cjs"
         },
-        "import": "./dist/server.js",
+        "import": {
+          "types": "./types/index.d.ts",
+          "default": "./dist/server.js"
+        },
+        "require": "./dist/server.cjs"
+      },
+      "deno": {
+        "import": {
+          "types": "./types/index.d.ts",
+          "default": "./dist/server.js"
+        },
+        "require": "./dist/server.cjs"
+      },
+      "node": {
+        "import": {
+          "types": "./types/index.d.ts",
+          "default": "./dist/server.js"
+        },
         "require": "./dist/server.cjs"
       },
       "development": {
-        "import": "./dist/index.js",
+        "import": {
+          "types": "./types/index.d.ts",
+          "default": "./dist/server.js"
+        },
         "require": "./dist/index.cjs"
       },
-      "import": "./dist/server.js",
-      "require": "./dist/server.cjs",
-      "types": "./dist/index.d.ts"
+      "import": {
+        "types": "./types/index.d.ts",
+        "default": "./dist/server.js"
+      },
+      "require": "./dist/server.cjs"
     },
     "./types": {
-      "import": "./dist/types.js",
-      "require": "./dist/types.cjs",
-      "types": "./dist/types.d.ts"
+      "import": {
+        "types": "./types/types.d.ts",
+        "default": "./dist/types.js"
+      },
+      "require": "./dist/types.cjs"
     }
   },
   "typesVersions": {
@@ -70,7 +108,6 @@
   },
   "dependencies": {
     "@solid-devtools/shared": "workspace:^0.10.3",
-    "@solid-devtools/transform": "workspace:^0.9.0",
     "@solid-primitives/bounds": "^0.0.105",
     "@solid-primitives/cursor": "^0.0.103",
     "@solid-primitives/event-bus": "^0.1.3",

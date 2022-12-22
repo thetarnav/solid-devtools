@@ -7,11 +7,7 @@
   "contributors": [],
   "scripts": {
     "dev:ext": "pnpm -dir packages/extension run dev",
-    "dev:client": "pnpm -dir packages/ext-client run dev",
-    "dev:shared": "pnpm -dir packages/shared run dev",
-    "dev:debugger": "pnpm -dir packages/debugger run dev",
-    "dev:frontend": "pnpm -dir packages/frontend run dev",
-    "dev:overlay": "pnpm -dir packages/overlay run dev",
+    "dev:transform": "pnpm -dir packages/transform run dev",
     "dev": "pnpm run -r --parallel --filter ./packages/* --filter !./packages/extension --filter !transform dev",
     "sandbox": "pnpm -dir examples/sandbox run dev",
     "sandbox:ext": "pnpm -dir examples/sandbox run dev:ext",

@@ -1,5 +1,5 @@
-import type { LocationAttr } from '@solid-devtools/transform/types'
-import type { EncodedValue } from '../inspector/serialize'
+import type { EncodedValue } from '../inspector/types'
+import type { LocationAttr } from '../locator/findComponent'
 import { NodeType, $SDT_ID } from './constants'
 
 export type NodeID = string & {}

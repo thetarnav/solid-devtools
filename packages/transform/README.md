@@ -19,11 +19,11 @@ It can do very useful things for you: Wrap stores to let the debugger observe th
 ### Installation
 
 ```bash
-npm i @solid-devtools/transform
+npm i -D @solid-devtools/transform
 # or
-yarn add @solid-devtools/transform
+yarn add -D @solid-devtools/transform
 # or
-pnpm i @solid-devtools/transform
+pnpm i -D @solid-devtools/transform
 ```
 
 ### Setup
@@ -32,46 +32,70 @@ pnpm i @solid-devtools/transform
 // vite.config.ts
 
 import { defineConfig } from 'vite'
-import solidPlugin from 'vite-plugin-solid'
-import devtoolsPlugin from '@solid-devtools/transform'
+import solid from 'vite-plugin-solid'
+import devtools from '@solid-devtools/transform'
 
 export default defineConfig({
-  plugins: [devtoolsPlugin(), solidPlugin()],
+  plugins: [devtools(), solid()],
 })
 ```
 
 ### Options
 
-All of the transforms are disabled by default—you need to pick what you want by enabling correlated option.
+By default the plugin will only inject the debugger and extension client script to the page. (If installed)
+
+All of the other transforms are disabled by default—you need to pick what you want by enabling correlated option.
 
 ```ts
 interface DevtoolsPluginOptions {
-  name?: boolean
-  componentLocation?: boolean
-  jsxLocation?: boolean
+  /** Add automatic name when creating signals, memos, stores, or mutables */
+  autoname?: boolean
+  locator?:
+    | boolean
+    | {
+        /** Choose in which IDE the component source code should be revealed. */
+        targetIDE?: Exclude<LocatorOptions['targetIDE'], TargetURLFunction>
+        /**
+         * Holding which key should enable the locator overlay?
+         * @default 'Alt'
+         */
+        key?: LocatorOptions['key']
+        /** Inject location attributes to jsx templates */
+        jsxLocation?: boolean
+        /** Inject location information to component declarations */
+        componentLocation?: boolean
+      }
 }
 
 // in vite.config.ts plugins array:
-devtoolsPlugin({
-  name: true,
-  componentLocation: true,
-  jsxLocation: true,
+devtools({
+  autoname: true,
+  locator: {
+    targetIDE: 'vscode',
+    key: 'Ctrl',
+    jsxLocation: true,
+    componentLocation: true,
+  },
 })
 ```
 
-#### `name`
+#### `autoname`
 
 This option adds automatic name to signals, memos, stores, and mutables. Those names will be visible in the devtools when inspecting.
 
 ![name-transform-example](https://user-images.githubusercontent.com/24491503/202861594-a18f34c0-bc30-4762-957a-9eb76a6b526c.png)
 
-#### `componentLocation`
+#### `locator`
+
+This option enables the [locator](../debugger#Using-component-locator) feature. The `key` and `targetIDE` are going to pe passed to `useLocator` function call.
+
+#### `locator.componentLocation`
 
 Inject location information to component functions. This will add a button in the devtools inspector panel, allowing you to go to the source code of the component.
 
 ![component-location-ui](https://user-images.githubusercontent.com/24491503/202861187-647b5792-fd8b-4fd2-9d26-2e6dee905fa9.png)
 
-#### `jsxLocation`
+#### `locator.jsxLocation`
 
 Inject location attributes to jsx templates. This is required for the debugger's [locator](https://github.com/thetarnav/solid-devtools/tree/main/packages/debugger#Using-component-locator) feature.
 
