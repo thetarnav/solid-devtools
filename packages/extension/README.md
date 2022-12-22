@@ -43,8 +43,6 @@ yarn add -D solid-devtools
 pnpm add -D solid-devtools
 ```
 
-_(you can install is as a dev dependency too, but it has a runtime—which is removed in production build)_
-
 As the extension requires both the extension and the library to work, you need to watchout for version mismatches. The extension will warn you if the library version is different than the one expected by the extension.
 
 ### 3. Add devtools vite plugin
@@ -73,8 +71,6 @@ export default defineConfig({
 
 ### 4. Using component locator (Optional)
 
-_Debugger feature inspired by [LocatorJS](https://www.locatorjs.com)_
-
 Locator let's you locate components on the page, and go to their source code in your IDE.
 
 ```ts
@@ -90,7 +86,7 @@ devtools({
 })
 ```
 
-[**Follow this locator guide to know more**](../debugger#Using-Locator)
+[**Follow this locator guide to know more**](../debugger#using-component-locator)
 
 ### 5. Run the app and play with the devtools!
 

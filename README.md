@@ -30,7 +30,9 @@ and interacting with Solid's reactivity graph.
 
 Chrome Developer Tools extension for debugging SolidJS applications. It allows for visualizing and interacting with Solid's reactivity graph, as well as inspecting component state and hierarchy.
 
-[**See the guide on setting started**](./packages/extension#getting-started)
+Should work in any application using SolidJS, including SolidStart and Astro.
+
+[**>> See the guide on setting started <<**](./packages/extension#getting-started)
 
 ## All devtools packages
 
