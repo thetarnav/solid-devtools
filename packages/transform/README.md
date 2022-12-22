@@ -42,46 +42,60 @@ export default defineConfig({
 
 ### Options
 
-All of the transforms are disabled by default—you need to pick what you want by enabling correlated option.
+By default the plugin will only inject the debugger and extension client script to the page. (If installed)
+
+All of the other transforms are disabled by default—you need to pick what you want by enabling correlated option.
 
 ```ts
 interface DevtoolsPluginOptions {
-  /** Inject debugger script to the page */
-  injectDebugger?: boolean
   /** Add automatic name when creating signals, memos, stores, or mutables */
-  name?: boolean
-  /** Inject location attributes to jsx templates */
-  jsxLocation?: boolean
-  /** Inject location information to component declarations */
-  componentLocation?: boolean
+  autoname?: boolean
+  locator?:
+    | boolean
+    | {
+        /** Choose in which IDE the component source code should be revealed. */
+        targetIDE?: Exclude<LocatorOptions['targetIDE'], TargetURLFunction>
+        /**
+         * Holding which key should enable the locator overlay?
+         * @default 'Alt'
+         */
+        key?: LocatorOptions['key']
+        /** Inject location attributes to jsx templates */
+        jsxLocation?: boolean
+        /** Inject location information to component declarations */
+        componentLocation?: boolean
+      }
 }
 
 // in vite.config.ts plugins array:
 devtools({
-  injectDebugger: true,
-  name: true,
-  jsxLocation: true,
-  componentLocation: true,
+  autoname: true,
+  locator: {
+    targetIDE: 'vscode',
+    key: 'Ctrl',
+    jsxLocation: true,
+    componentLocation: true,
+  },
 })
 ```
 
-#### `injectDebugger`
-
-Injects the [debugger](../debugger#readme) and [extension client](../ext-client#readme) script to the page. This is required to use the extension.
-
-#### `name`
+#### `autoname`
 
 This option adds automatic name to signals, memos, stores, and mutables. Those names will be visible in the devtools when inspecting.
 
 ![name-transform-example](https://user-images.githubusercontent.com/24491503/202861594-a18f34c0-bc30-4762-957a-9eb76a6b526c.png)
 
-#### `componentLocation`
+#### `locator`
+
+This option enables the [locator](../debugger#Using-component-locator) feature. The `key` and `targetIDE` are going to pe passed to `useLocator` function call.
+
+#### `locator.componentLocation`
 
 Inject location information to component functions. This will add a button in the devtools inspector panel, allowing you to go to the source code of the component.
 
 ![component-location-ui](https://user-images.githubusercontent.com/24491503/202861187-647b5792-fd8b-4fd2-9d26-2e6dee905fa9.png)
 
-#### `jsxLocation`
+#### `locator.jsxLocation`
 
 Inject location attributes to jsx templates. This is required for the debugger's [locator](https://github.com/thetarnav/solid-devtools/tree/main/packages/debugger#Using-component-locator) feature.
 

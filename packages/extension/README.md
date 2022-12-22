@@ -49,7 +49,7 @@ As the extension requires both the extension and the library to work, you need t
 
 ### 3. Add devtools vite plugin
 
-The [vite plugin](../transform#readme) is a way to configure the transform options and add debugger script to the page. Enabling transforms are not necessary for the devtools to work, but the debugger script needs to be present to analyse you solid application. Enabling some of the options, such as `"name"`, will improve the debugging experience or enable additional features.
+All you need to do to get the debugger working, is include the vite plugin from `"solid-devtools/vite"` in your vite config. The [vite plugin](../transform#readme) is a way to configure the transform options and add debugger script to the page. Enabling transforms are not necessary for the devtools to work, but the debugger script needs to be present to analyse you solid application. Enabling some of the options, such as `"autoname"`, will improve the debugging experience or enable additional features.
 
 ```ts
 // vite.config.ts
@@ -61,12 +61,8 @@ import devtools from 'solid-devtools/vite'
 export default defineConfig({
   plugins: [
     devtools({
-      // required:
-      injectDebugger: true,
-      // optional options:
-      name: true,
-      componentLocation: true,
-      jsxLocation: true,
+      /* additional options */
+      autoname: true, // e.g. enable autoname
     }),
     solid(),
   ],
@@ -75,7 +71,28 @@ export default defineConfig({
 
 [**>> More about transform options**](https://github.com/thetarnav/solid-devtools/tree/main/packages/transform#options)
 
-### 4. Run the app and play with the devtools!
+### 4. Using component locator (Optional)
+
+_Debugger feature inspired by [LocatorJS](https://www.locatorjs.com)_
+
+Locator let's you locate components on the page, and go to their source code in your IDE.
+
+```ts
+// vite.config.ts
+
+devtools({
+  // pass `true` or an object with options
+  locator: {
+    targetIDE: 'vscode',
+    componentLocation: true,
+    jsxLocation: true,
+  },
+})
+```
+
+[**Follow this locator guide to know more**](../debugger#Using-Locator)
+
+### 5. Run the app and play with the devtools!
 
 That's it! A new **"Solid"** panel should appear in your Chrome Devtools.
 

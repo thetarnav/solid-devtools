@@ -24,54 +24,9 @@ yarn add -D solid-devtools
 pnpm add -D solid-devtools
 ```
 
-### Import the script
+### Usage
 
-All you need to do is import the devtools script in your app entry file, and the debugger will automatically find roots in your app and track them.
-
-```ts
-import 'solid-devtools'
-// and that's it!
-```
-
-### Using the chrome extension
-
-Importing the `solid-devtools` package will connect your Solid application to the [chrome extension](../extension#readme).
-
-[**Follow this guide to use the extension**](../extension#getting-started)
-
-### Using the locator package
-
-The `solid-devtools` package comes with the locator feature included. It's not neccessary to use it, but you can.
-
-```ts
-import { useLocator } from 'solid-devtools'
-
-useLocator({
-  targetIDE: 'vscode',
-})
-```
-
-[**Follow this locator guide to know more**](../debugger#Using-Locator)
-
-### Enabling the Babel plugin
-
-`solid-devtools` reexports the [babel plugin](../transform#readme) as a vite plugin.
-
-To enable it you need to add it to plugins array in your `.vite.config.js` file:
-
-```ts
-// vite.config.ts
-
-import { defineConfig } from 'vite'
-import solid from 'vite-plugin-solid'
-import devtools from 'solid-devtools/vite'
-
-export default defineConfig({
-  plugins: [devtools(), solid()],
-})
-```
-
-[**See transform options**](https://github.com/thetarnav/solid-devtools/tree/main/packages/transform#Options)
+For the usage guide, please refer to the [extension documentation](../extension#Getting-started) as it is the intended way to use the library.
 
 ## Changelog
 

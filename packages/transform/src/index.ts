@@ -3,9 +3,9 @@ import { PluginOption } from 'vite'
 import { createRequire } from 'module'
 import {
   LocatorOptions,
-  TargetIDE,
   MARK_COMPONENT,
   USE_LOCATOR,
+  TargetURLFunction,
 } from '@solid-devtools/debugger/types'
 import jsxLocationPlugin, { MARK_COMPONENT_GLOBAL } from './location'
 import namePlugin from './name'
@@ -20,14 +20,20 @@ export type DevtoolsPluginOptions = {
   /** Add automatic name when creating signals, memos, stores, or mutables */
   autoname?: boolean
   locator?:
-    | false
-    | (LocatorOptions & {
-        targetIDE?: false | TargetIDE
+    | boolean
+    | {
+        /** Choose in which IDE the component source code should be revealed. */
+        targetIDE?: Exclude<LocatorOptions['targetIDE'], TargetURLFunction>
+        /**
+         * Holding which key should enable the locator overlay?
+         * @default 'Alt'
+         */
+        key?: LocatorOptions['key']
         /** Inject location attributes to jsx templates */
         jsxLocation?: boolean
         /** Inject location information to component declarations */
         componentLocation?: boolean
-      })
+      }
 }
 
 function getFileExtension(filename: string): string {
@@ -38,18 +44,19 @@ function getFileExtension(filename: string): string {
 // This export is used for configuration.
 export const devtoolsPlugin = (_options: DevtoolsPluginOptions = {}): PluginOption => {
   const options = {
-    autoname: false,
-    locator: {
-      targetIDE: false,
-      jsxLocation: false,
-      componentLocation: false,
-      ..._options.locator,
-    },
-    ..._options,
-  } satisfies DevtoolsPluginOptions
+    autoname: _options.autoname ?? false,
+    locator: _options.locator
+      ? {
+          targetIDE: false,
+          jsxLocation: false,
+          componentLocation: false,
+          ...(_options.locator === true ? {} : _options.locator),
+        }
+      : undefined,
+  }
 
-  const enabledJsxLocation = !!(options.locator && options.locator.jsxLocation)
-  const enabledComponentLocation = !!(options.locator && options.locator.componentLocation)
+  const enabledJsxLocation = !!options.locator?.jsxLocation
+  const enabledComponentLocation = !!options.locator?.componentLocation
 
   let enablePlugin = false
   let projectRoot = process.cwd()
