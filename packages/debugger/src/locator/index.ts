@@ -8,7 +8,7 @@ import {
   createSignal,
 } from 'solid-js'
 import { makeEventListener } from '@solid-primitives/event-listener'
-import { createKeyHold, KbdKey } from '@solid-primitives/keyboard'
+import { createKeyHold } from '@solid-primitives/keyboard'
 import { onRootCleanup } from '@solid-primitives/utils'
 import { createSimpleEmitter } from '@solid-primitives/event-bus'
 import { atom, defer, makeHoverElementListener } from '@solid-devtools/shared/primitives'
@@ -16,43 +16,18 @@ import { asArray, warn } from '@solid-devtools/shared/utils'
 import {
   getLocationAttr,
   getSourceCodeData,
+  LocationAttr,
   LocatorComponent,
   openSourceCode,
-  SourceCodeData,
   TargetIDE,
   TargetURLFunction,
 } from './findComponent'
 import { enableRootsAutoattach, createInternalRoot } from '../main/roots'
 import { attachElementOverlay } from './ElementOverlay'
-import { LocationAttr, NodeID } from '../types'
+import { NodeID } from '../main/types'
+import { ClickMiddleware, HighlightElementPayload, LocatorOptions } from './types'
 import * as registry from '../main/componentRegistry'
 import { scheduleIdle } from '@solid-primitives/scheduled'
-
-export type { LocatorComponent, TargetIDE, TargetURLFunction } from './findComponent'
-
-export type LocatorOptions = {
-  /** Choose in which IDE the component source code should be revealed. */
-  targetIDE?: false | TargetIDE | TargetURLFunction
-  /** Holding which key should enable the locator overlay? */
-  key?: KbdKey
-}
-
-type HighlightElementPayloads = {
-  elementNode: { componentId: NodeID; elementId: NodeID }
-  componentNode: { componentId: NodeID }
-  element: { elementId: NodeID }
-}
-export type HighlightElementPayload =
-  | {
-      [K in keyof HighlightElementPayloads]: HighlightElementPayloads[K] & { type: K }
-    }[keyof HighlightElementPayloads]
-  | null
-
-export type ClickMiddleware = (
-  event: MouseEvent | CustomEvent,
-  component: LocatorComponent,
-  data: SourceCodeData | undefined,
-) => void
 
 export { markComponentLoc } from './markComponent'
 
@@ -223,8 +198,10 @@ export function createLocator({
       if (locatorUsed) return warn('useLocator can be called only once.')
       locatorUsed = true
       if (options.targetIDE) targetIDE = options.targetIDE
-      const isHoldingKey = createKeyHold(options.key ?? 'Alt', { preventDefault: true })
-      enabledByPressingSignal(() => isHoldingKey)
+      if (options.key !== false) {
+        const isHoldingKey = createKeyHold(options.key ?? 'Alt', { preventDefault: true })
+        enabledByPressingSignal(() => isHoldingKey)
+      }
     })
   }
 

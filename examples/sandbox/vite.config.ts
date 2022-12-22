@@ -1,20 +1,24 @@
 import { defineConfig } from 'vite'
-import solidPlugin from 'vite-plugin-solid'
-import devtoolsPlugin from '@solid-devtools/transform'
+import solid from 'vite-plugin-solid'
+import devtools from '@solid-devtools/transform'
 import Unocss from 'unocss/vite'
 
 export default defineConfig(config => {
   const usingExtension = process.env.EXT === 'true' || process.env.EXT === '1'
 
+  console.log(devtools)
+
   return {
     plugins: [
-      devtoolsPlugin({
-        // wrapStores: true,
-        jsxLocation: true,
-        componentLocation: true,
-        name: true,
+      devtools({
+        autoname: true,
+        locator: {
+          targetIDE: 'vscode',
+          jsxLocation: true,
+          componentLocation: true,
+        },
       }),
-      solidPlugin({ hot: true, dev: true }),
+      solid({ hot: true, dev: true }),
       Unocss(),
     ],
     define: {

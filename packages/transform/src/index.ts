@@ -1,8 +1,14 @@
 import { PluginItem, transformAsync } from '@babel/core'
 import { PluginOption } from 'vite'
-import jsxLocationPlugin from './location'
-import namePlugin from './name'
 import { createRequire } from 'module'
+import {
+  LocatorOptions,
+  TargetIDE,
+  MARK_COMPONENT,
+  USE_LOCATOR,
+} from '@solid-devtools/debugger/types'
+import jsxLocationPlugin, { MARK_COMPONENT_GLOBAL } from './location'
+import namePlugin from './name'
 
 const require = createRequire(import.meta.url)
 
@@ -10,15 +16,18 @@ const MAIN_CLIENT_MODULE = 'solid-devtools'
 const DEBUGGER_MODULE = '@solid-devtools/debugger'
 const INJECT_SCRIPT_ID = '__solid-devtools'
 
-export interface DevtoolsPluginOptions {
-  /** Inject debugger script to the page */
-  injectDebugger?: boolean
+export type DevtoolsPluginOptions = {
   /** Add automatic name when creating signals, memos, stores, or mutables */
-  name?: boolean
-  /** Inject location attributes to jsx templates */
-  jsxLocation?: boolean
-  /** Inject location information to component declarations */
-  componentLocation?: boolean
+  autoname?: boolean
+  locator?:
+    | false
+    | (LocatorOptions & {
+        targetIDE?: false | TargetIDE
+        /** Inject location attributes to jsx templates */
+        jsxLocation?: boolean
+        /** Inject location information to component declarations */
+        componentLocation?: boolean
+      })
 }
 
 function getFileExtension(filename: string): string {
@@ -29,12 +38,18 @@ function getFileExtension(filename: string): string {
 // This export is used for configuration.
 export const devtoolsPlugin = (_options: DevtoolsPluginOptions = {}): PluginOption => {
   const options = {
-    injectDebugger: false,
-    name: false,
-    jsxLocation: false,
-    componentLocation: false,
+    autoname: false,
+    locator: {
+      targetIDE: false,
+      jsxLocation: false,
+      componentLocation: false,
+      ..._options.locator,
+    },
     ..._options,
-  }
+  } satisfies DevtoolsPluginOptions
+
+  const enabledJsxLocation = !!(options.locator && options.locator.jsxLocation)
+  const enabledComponentLocation = !!(options.locator && options.locator.componentLocation)
 
   let enablePlugin = false
   let projectRoot = process.cwd()
@@ -67,7 +82,7 @@ export const devtoolsPlugin = (_options: DevtoolsPluginOptions = {}): PluginOpti
       enablePlugin = config.command === 'serve' && config.mode !== 'production'
     },
     transformIndexHtml() {
-      if (enablePlugin && runtimeInstalled && options.injectDebugger)
+      if (enablePlugin && runtimeInstalled)
         return [
           {
             tag: 'script',
@@ -79,13 +94,21 @@ export const devtoolsPlugin = (_options: DevtoolsPluginOptions = {}): PluginOpti
     load(id) {
       // Inject runtime debugger script
       if (
-        enablePlugin &&
-        runtimeInstalled &&
-        options.injectDebugger &&
-        (id === INJECT_SCRIPT_ID || id === `/${INJECT_SCRIPT_ID}`)
-      ) {
-        return `import '${runtimeInstalled}';`
+        !enablePlugin ||
+        !runtimeInstalled ||
+        (id !== INJECT_SCRIPT_ID && id !== `/${INJECT_SCRIPT_ID}`)
+      )
+        return
+
+      let code = `import "${runtimeInstalled}";`
+
+      if (options.locator) {
+        code += `\nimport { ${USE_LOCATOR}, ${MARK_COMPONENT} } from "${DEBUGGER_MODULE}";
+${USE_LOCATOR}(${JSON.stringify(options.locator)});
+window.${MARK_COMPONENT_GLOBAL} = ${MARK_COMPONENT};`
       }
+
+      return code
     },
     async transform(source, id, transformOptions) {
       // production and server should be disabled
@@ -99,12 +122,15 @@ export const devtoolsPlugin = (_options: DevtoolsPluginOptions = {}): PluginOpti
       const plugins: PluginItem[] = []
 
       // plugins that should only run on .tsx/.jsx files in development
-      if ((options.jsxLocation || options.componentLocation) && isJSX) {
+      if ((enabledJsxLocation || enabledComponentLocation) && isJSX) {
         plugins.push(
-          jsxLocationPlugin({ jsx: options.jsxLocation, components: options.componentLocation }),
+          jsxLocationPlugin({
+            jsx: enabledJsxLocation,
+            components: enabledComponentLocation,
+          }),
         )
       }
-      if (options.name) {
+      if (options.autoname) {
         plugins.push(namePlugin)
       }
 

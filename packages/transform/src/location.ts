@@ -4,9 +4,10 @@ import * as t from '@babel/types'
 import {
   LocationAttr,
   LOCATION_ATTRIBUTE_NAME,
-  MARK_COMPONENT_FN_NAME,
   WINDOW_PROJECTPATH_PROPERTY,
-} from './types'
+} from '@solid-devtools/debugger/types'
+
+export const MARK_COMPONENT_GLOBAL = `_$markComponentLoc`
 
 const cwd = process.cwd()
 
@@ -14,7 +15,7 @@ const projectPathAst = template(`globalThis.${WINDOW_PROJECTPATH_PROPERTY} = %%l
   loc: t.stringLiteral(cwd),
 }) as t.Statement
 
-const buildMarkComponent = template(`globalThis.${MARK_COMPONENT_FN_NAME}(%%loc%%);`) as (
+const buildMarkComponent = template(`globalThis.${MARK_COMPONENT_GLOBAL}(%%loc%%);`) as (
   ...args: Parameters<ReturnType<typeof template>>
 ) => t.Statement
 

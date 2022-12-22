@@ -1,11 +1,10 @@
 import { assertTransform, cwd, file } from './setup'
 import { describe, test } from 'vitest'
-import getPlugin from '../src/location'
+import getPlugin, { MARK_COMPONENT_GLOBAL } from '../src/location'
 import {
   LOCATION_ATTRIBUTE_NAME,
-  MARK_COMPONENT_FN_NAME,
   WINDOW_PROJECTPATH_PROPERTY,
-} from '../src/types'
+} from '@solid-devtools/debugger/types'
 
 describe('location', () => {
   const testData: [
@@ -20,7 +19,7 @@ describe('location', () => {
   return <button>Click me</button>
 }`,
       `function Button(props) {
-  globalThis.${MARK_COMPONENT_FN_NAME}("${file}:1:0");
+  globalThis.${MARK_COMPONENT_GLOBAL}("${file}:1:0");
   return <button>Click me</button>;
 }
 globalThis.${WINDOW_PROJECTPATH_PROPERTY} = "${cwd}";`,
@@ -32,7 +31,7 @@ globalThis.${WINDOW_PROJECTPATH_PROPERTY} = "${cwd}";`,
   return <button>Click me</button>
 }`,
       `const Button = props => {
-  globalThis.${MARK_COMPONENT_FN_NAME}("${file}:1:6");
+  globalThis.${MARK_COMPONENT_GLOBAL}("${file}:1:6");
   return <button>Click me</button>;
 };
 globalThis.${WINDOW_PROJECTPATH_PROPERTY} = "${cwd}";`,

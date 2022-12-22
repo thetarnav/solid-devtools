@@ -1,10 +1,7 @@
-import {
-  LocationAttr,
-  LOCATION_ATTRIBUTE_NAME,
-  WINDOW_PROJECTPATH_PROPERTY,
-} from '@solid-devtools/transform/types'
 import { isWindows } from '@solid-primitives/platform'
-import { NodeID } from '../types'
+import { LOCATION_ATTRIBUTE_NAME, NodeID, WINDOW_PROJECTPATH_PROPERTY } from '../types'
+
+export type LocationAttr = `${string}:${number}:${number}`
 
 export type LocatorComponent = {
   id: NodeID

@@ -1,6 +1,6 @@
 import { createMutable, createStore } from 'solid-js/store'
 import { describe, test, expect, vi } from 'vitest'
-import { EncodedValue, INFINITY, NAN, NEGATIVE_INFINITY, UNDEFINED, ValueType } from '../serialize'
+import { EncodedValue, INFINITY, NAN, NEGATIVE_INFINITY, UNDEFINED, ValueType } from '../types'
 import { encodeValue } from '../serialize'
 import { NodeIDMap } from '../../main/utils'
 import { Truthy } from '@solid-primitives/utils'

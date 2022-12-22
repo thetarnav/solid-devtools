@@ -42,23 +42,6 @@ export {
 
 export { markComponentLoc } from './locator'
 
-export type {
-  LocatorOptions,
-  TargetIDE,
-  TargetURLFunction,
-  HighlightElementPayload,
-} from './locator'
-
-export type {
-  InspectorUpdate,
-  SetInspectedNodeData,
-  ToggleInspectedValueData,
-  ProxyPropsUpdate,
-  StoreNodeUpdate,
-  ValueNodeUpdate,
-} from './inspector'
-
 import plugin from './main/plugin'
 export const useDebugger = plugin.useDebugger
 export const useLocator = plugin.useLocator
-export type { BatchComputationUpdatesHandler } from './main/plugin'
