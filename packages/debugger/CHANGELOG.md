@@ -1,5 +1,11 @@
 # @solid-devtools/debugger
 
+## 0.17.1
+
+### Patch Changes
+
+- ba8bd72: Add ability to inject and configure debugger with vite plugin. (now the default way to setup devtools)
+
 ## 0.17.0
 
 ### Minor Changes
