@@ -23,15 +23,15 @@ Should work in any application using SolidJS, including SolidStart and Astro.
 
 ## Getting started
 
-### 1. Install the extension
+### 1. Install the chrome extension
 
 The extension is now available on the Chrome Web Store. You can install it when using a chromium-based browser by clicking the "Install" button.
 
 [**Solid Devtools Chrome Extension**](https://chrome.google.com/webstore/detail/solid-devtools/kmcfjchnmmaeeagadbhoofajiopoceel)
 
-### 2. Install the npm library
+### 2. Install the debugger library
 
-If you think about the Chrome Extension as a **Frontend**, then the [**"solid-devtools"**](<(https://github.com/thetarnav/solid-devtools/blob/main/packages/ext-client#readme)>) package is its **Backend**. It debugs the Solid's reactivity and communicates the updates to the Chrome Extension.
+If you think about the Chrome Extension as a **Frontend**, then the [**"solid-devtools"**](https://github.com/thetarnav/solid-devtools/blob/main/packages/ext-client#readme) npm package is its **Backend**. It debugs the Solid's reactivity and communicates the updates to the Chrome Extension.
 
 Install the following package:
 
@@ -43,11 +43,13 @@ yarn add -D solid-devtools
 pnpm add -D solid-devtools
 ```
 
-As the extension requires both the extension and the library to work, you need to watchout for version mismatches. The extension will warn you if the library version is different than the one expected by the extension.
+Both the debugger library and the extension change frequently, often breaking backward compatibility with older versions. This is why need to watch out for version mismatches. Any version mismatches will be printed to the console.
 
 ### 3. Add devtools vite plugin
 
-All you need to do to get the debugger working, is include the vite plugin from `"solid-devtools/vite"` in your vite config. The [vite plugin](../transform#readme) is a way to configure the transform options and add debugger script to the page. Enabling transforms are not necessary for the devtools to work, but the debugger script needs to be present to analyse you solid application. Enabling some of the options, such as `"autoname"`, will improve the debugging experience or enable additional features.
+As vite is the default bundler used by solid application and starter, the devtools are currently concerned with supporting only it.
+
+To get the debugger working include the vite plugin from `"solid-devtools/vite"` in your vite config. The [vite plugin](../transform#readme) is a way to configure the transform options and add a debugger script to the page. Enabling transforms is not necessary for the devtools to work, but the debugger script needs to be present to analyze your solid application. Enabling some of the options, such as `"autoname"`, will improve the debugging experience or enable additional features.
 
 ```ts
 // vite.config.ts
@@ -67,7 +69,7 @@ export default defineConfig({
 })
 ```
 
-[**>> More about transform options**](https://github.com/thetarnav/solid-devtools/tree/main/packages/transform#options)
+[**>> More about available transform options**](https://github.com/thetarnav/solid-devtools/tree/main/packages/transform#options)
 
 ### 4. Using component locator (Optional)
 
@@ -90,13 +92,15 @@ devtools({
 
 ### 5. Run the app and play with the devtools!
 
-That's it! A new **"Solid"** panel should appear in your Chrome Devtools.
+A new **"Solid"** panel should appear after you open the Chrome devtools panel.
 
-Thank You for trying out the extension in it's early development stages. We are constantly working on it to make it better, add new features and improve the user experience. We appreciate your feedback and suggestions.
+![visible solid devtools panel](https://user-images.githubusercontent.com/24491503/209223131-1fe8a44f-4044-4a95-b4ed-12d993fb79a0.png)
+
+The extension is in its early development stages. We are constantly working on it to make it better, add new features and improve the user experience. We appreciate your feedback and suggestions.
 
 If you run to any issues, or have any suggestions, please [open an issue](https://github.com/thetarnav/solid-devtools/issues).
 
-If you are interested in the extension's development, see the [Plans for Devtools](https://github.com/thetarnav/solid-devtools/discussions/67) discussion.
+If you are interested in the extension's development, see the [contribution guide](https://github.com/thetarnav/solid-devtools/blob/main/CONTRIBUTING.md).
 
 ## DEMO
 
