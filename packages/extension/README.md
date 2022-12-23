@@ -43,7 +43,7 @@ yarn add -D solid-devtools
 pnpm add -D solid-devtools
 ```
 
-Both the debugger library and the extension change frequently, often breaking backward compatibility with older versions. This is why need to watch out for version mismatches. Any version mismatches will be printed to the console.
+Both the debugger library and the extension change frequently, often breaking backward compatibility with older versions. This is why need to watch out for version mismatches (will be printed to the console).
 
 ### 3. Add devtools vite plugin
 
