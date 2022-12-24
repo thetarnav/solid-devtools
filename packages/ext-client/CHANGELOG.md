@@ -1,5 +1,13 @@
 # solid-devtools
 
+## 0.24.4
+
+### Patch Changes
+
+- 1005f66: Add missing export to client package. Fix vite transform.
+- Updated dependencies [1005f66]
+  - @solid-devtools/transform@0.10.3
+
 ## 0.24.3
 
 ### Patch Changes
