@@ -22,7 +22,6 @@ export {
   onOwnerCleanup,
   onParentCleanup,
   getFunctionSources,
-  createUnownedRoot,
 } from './main/utils'
 
 export {

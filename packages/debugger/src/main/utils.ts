@@ -253,11 +253,6 @@ export function onDispose<T>(
   return fn
 }
 
-// TODO: move createUnownedRoot to solid-primitives
-export function createUnownedRoot<T>(fn: (dispose: VoidFunction) => T): T {
-  return runWithOwner(null as any, () => createRoot(fn))
-}
-
 export function getFunctionSources(fn: () => unknown): Solid.Signal[] {
   let nodes: Solid.Signal[] | undefined
   let init = true

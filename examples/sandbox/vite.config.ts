@@ -6,8 +6,6 @@ import Unocss from 'unocss/vite'
 export default defineConfig(config => {
   const usingExtension = process.env.EXT === 'true' || process.env.EXT === '1'
 
-  console.log(devtools)
-
   return {
     plugins: [
       devtools({

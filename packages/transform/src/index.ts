@@ -68,16 +68,16 @@ export const devtoolsPlugin = (_options: DevtoolsPluginOptions = {}): PluginOpti
     enforce: 'pre',
     config() {
       try {
-        require(MAIN_CLIENT_MODULE)
+        require.resolve(MAIN_CLIENT_MODULE)
         runtimeInstalled = MAIN_CLIENT_MODULE
       } catch (e) {
         try {
-          require(DEBUGGER_MODULE)
+          require.resolve(DEBUGGER_MODULE)
           runtimeInstalled = DEBUGGER_MODULE
         } catch (e) {
-          // runtimeInstalled = false
-          // ! For some reason, this is not working. So will fallback to 'main' for now.
-          runtimeInstalled = MAIN_CLIENT_MODULE
+          runtimeInstalled = false
+          // // ! For some reason, this is not working. So will fallback to 'main' for now.
+          // runtimeInstalled = MAIN_CLIENT_MODULE
           // eslint-disable-next-line no-console
           console.log(
             `[solid-devtools]: Could not find "${MAIN_CLIENT_MODULE}" or "${DEBUGGER_MODULE}" module.`,

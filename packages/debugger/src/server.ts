@@ -5,8 +5,6 @@ import { NodeType } from './main/constants'
 
 export * from './types'
 
-export { createUnownedRoot } from './index'
-
 export const Debugger: typeof API.Debugger = props => props.children
 
 export const attachDebugger: typeof API.attachDebugger = () => void 0

@@ -1,4 +1,13 @@
-import { Accessor, createMemo, createSignal, getOwner, onCleanup, untrack } from 'solid-js'
+import {
+  Accessor,
+  createMemo,
+  createSignal,
+  getOwner,
+  onCleanup,
+  untrack,
+  runWithOwner,
+  createRoot,
+} from 'solid-js'
 import type {
   AccessorArray,
   EffectFunction,
@@ -191,4 +200,9 @@ export function createPingedSignal(
   onCleanup(() => clearTimeout(timeoutId))
 
   return [isUpdated, ping]
+}
+
+// TODO: move createUnownedRoot to solid-primitives
+export function createUnownedRoot<T>(fn: (dispose: VoidFunction) => T): T {
+  return runWithOwner(null as any, () => createRoot(fn))
 }
