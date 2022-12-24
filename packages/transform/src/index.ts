@@ -110,7 +110,7 @@ export const devtoolsPlugin = (_options: DevtoolsPluginOptions = {}): PluginOpti
       let code = `import "${runtimeInstalled}";`
 
       if (options.locator) {
-        code += `\nimport { ${USE_LOCATOR}, ${MARK_COMPONENT} } from "${DEBUGGER_MODULE}";
+        code += `\nimport { ${USE_LOCATOR}, ${MARK_COMPONENT} } from "${runtimeInstalled}";
 ${USE_LOCATOR}(${JSON.stringify(options.locator)});
 window.${MARK_COMPONENT_GLOBAL} = ${MARK_COMPONENT};`
       }
