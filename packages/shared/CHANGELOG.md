@@ -1,5 +1,11 @@
 # solid-devtools-shared
 
+## 0.10.4
+
+### Patch Changes
+
+- 42df66b: Minor improvements.
+
 ## 0.10.3
 
 ### Patch Changes

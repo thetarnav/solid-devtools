@@ -1,5 +1,15 @@
 # solid-devtools
 
+## 0.24.3
+
+### Patch Changes
+
+- 42df66b: Minor improvements.
+- Updated dependencies [42df66b]
+  - @solid-devtools/transform@0.10.1
+  - @solid-devtools/debugger@0.17.2
+  - @solid-devtools/shared@0.10.4
+
 ## 0.24.2
 
 ### Patch Changes
