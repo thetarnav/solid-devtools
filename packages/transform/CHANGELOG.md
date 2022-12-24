@@ -1,5 +1,11 @@
 # @solid-devtools/transform
 
+## 0.10.2
+
+### Patch Changes
+
+- 5306ffa: Fix used runtime package
+
 ## 0.10.1
 
 ### Patch Changes
