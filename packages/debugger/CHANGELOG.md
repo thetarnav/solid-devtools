@@ -1,5 +1,13 @@
 # @solid-devtools/debugger
 
+## 0.17.2
+
+### Patch Changes
+
+- 42df66b: Minor improvements.
+- Updated dependencies [42df66b]
+  - @solid-devtools/shared@0.10.4
+
 ## 0.17.1
 
 ### Patch Changes
