@@ -34,6 +34,8 @@ export type DevtoolsPluginOptions = {
         /** Inject location information to component declarations */
         componentLocation?: boolean
       }
+  /** For debugger development, do not enable! */
+  SDT_DEV?: boolean
 }
 
 function getFileExtension(filename: string): string {
@@ -53,6 +55,7 @@ export const devtoolsPlugin = (_options: DevtoolsPluginOptions = {}): PluginOpti
           ...(_options.locator === true ? {} : _options.locator),
         }
       : undefined,
+    SDT_DEV: _options.SDT_DEV ?? false,
   }
 
   const enabledJsxLocation = !!options.locator?.jsxLocation
@@ -67,6 +70,11 @@ export const devtoolsPlugin = (_options: DevtoolsPluginOptions = {}): PluginOpti
     name: 'solid-devtools',
     enforce: 'pre',
     config() {
+      if (options.SDT_DEV) {
+        runtimeInstalled = MAIN_CLIENT_MODULE
+        return
+      }
+
       try {
         require.resolve(MAIN_CLIENT_MODULE)
         runtimeInstalled = MAIN_CLIENT_MODULE
@@ -75,9 +83,6 @@ export const devtoolsPlugin = (_options: DevtoolsPluginOptions = {}): PluginOpti
           require.resolve(DEBUGGER_MODULE)
           runtimeInstalled = DEBUGGER_MODULE
         } catch (e) {
-          runtimeInstalled = false
-          // // ! For some reason, this is not working. So will fallback to 'main' for now.
-          // runtimeInstalled = MAIN_CLIENT_MODULE
           // eslint-disable-next-line no-console
           console.log(
             `[solid-devtools]: Could not find "${MAIN_CLIENT_MODULE}" or "${DEBUGGER_MODULE}" module.`,

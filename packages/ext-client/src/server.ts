@@ -4,4 +4,5 @@ export {
   useDebugger,
   useLocator,
   makeSolidUpdateListener,
+  markComponentLoc,
 } from '@solid-devtools/debugger'

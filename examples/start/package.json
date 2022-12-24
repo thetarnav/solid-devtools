@@ -9,17 +9,17 @@
   "type": "module",
   "main": "./dist/index.js",
   "devDependencies": {
-    "solid-start-node": "^0.2.5",
+    "solid-start-node": "^0.2.8",
     "typescript": "^4.9.3",
-    "vite": "^3.2.4"
+    "vite": "^4.0.3"
   },
   "dependencies": {
     "@solid-devtools/overlay": "workspace:^0.4.1",
     "@solidjs/meta": "^0.28.2",
-    "@solidjs/router": "^0.5.1",
+    "@solidjs/router": "^0.6.0",
     "solid-devtools": "workspace:^0.24.3",
-    "solid-js": "^1.6.2",
-    "solid-start": "^0.2.5",
+    "solid-js": "^1.6.6",
+    "solid-start": "^0.2.8",
     "undici": "^5.13.0"
   },
   "engines": {

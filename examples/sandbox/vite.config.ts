@@ -1,35 +1,36 @@
 import { defineConfig } from 'vite'
 import solid from 'vite-plugin-solid'
-import devtools from '@solid-devtools/transform'
+import devtools from 'solid-devtools/vite'
 import Unocss from 'unocss/vite'
+import Inspect from 'vite-plugin-inspect'
 
-export default defineConfig(config => {
-  const usingExtension = process.env.EXT === 'true' || process.env.EXT === '1'
+const usingExtension = process.env.EXT === 'true' || process.env.EXT === '1'
 
-  return {
-    plugins: [
-      devtools({
-        autoname: true,
-        locator: {
-          targetIDE: 'vscode',
-          jsxLocation: true,
-          componentLocation: true,
-        },
-      }),
-      solid({ hot: true, dev: true }),
-      Unocss(),
-    ],
-    define: {
-      'process.env.EXT': JSON.stringify(usingExtension),
-    },
-    resolve: {
-      conditions: ['browser', 'development'],
-    },
-    mode: 'development',
-    build: {
-      target: 'esnext',
-      minify: false,
-    },
-    optimizeDeps: {},
-  }
+export default defineConfig({
+  plugins: [
+    devtools({
+      SDT_DEV: true,
+      autoname: true,
+      locator: {
+        targetIDE: 'vscode',
+        jsxLocation: true,
+        componentLocation: true,
+      },
+    }),
+    solid({ hot: true, dev: true }),
+    Unocss(),
+    Inspect(),
+  ],
+  define: {
+    'process.env.EXT': JSON.stringify(usingExtension),
+  },
+  resolve: {
+    conditions: ['browser', 'development'],
+  },
+  mode: 'development',
+  build: {
+    target: 'esnext',
+    minify: false,
+  },
+  optimizeDeps: {},
 })
