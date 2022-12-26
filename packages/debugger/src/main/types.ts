@@ -23,6 +23,9 @@ export namespace Core {
   export type Computation = import('solid-js/types/reactive/signal').Computation<unknown>
   export type RootFunction<T> = import('solid-js/types/reactive/signal').RootFunction<T>
   export type EffectFunction = import('solid-js/types/reactive/signal').EffectFunction<unknown>
+  export type Component = import('solid-js/types/reactive/signal').DevComponent<{
+    [key: string]: unknown
+  }>
   export namespace Store {
     export type StoreNode = import('solid-js/store').StoreNode
     export type NotWrappable = import('solid-js/store/types/store').NotWrappable
@@ -159,7 +162,10 @@ export namespace Mapped {
 
   export type Props = {
     proxy: boolean
-    record: Record<string, EncodedValue[]>
+    /**
+     * Record: `propName` -- `propValue`. If `propValue` is `null`, it means that the prop is a getter
+     */
+    record: { [key: string]: EncodedValue[] | null }
   }
 
   export interface OwnerDetails {

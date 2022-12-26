@@ -65,8 +65,10 @@ const DetailsContent: Component = () => {
           {(name, value) => (
             <ValueNode
               name={name}
-              value={value().value}
-              extended={value().selected}
+              // TODO fix this (proper getter)
+              value={value().value?.value}
+              // TODO fix this (proper getter)
+              extended={value().value?.selected}
               onClick={() => inspector.inspectValueItem('prop', name)}
               onElementHover={inspector.toggleHoveredElement}
               isSignal

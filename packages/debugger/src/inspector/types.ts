@@ -1,4 +1,7 @@
-import type { NodeID } from '../main/types'
+import type { NodeID, ValueItemID } from '../main/types'
+import type { StoreNodeProperty } from './store'
+
+export type { SetInspectedNodeData, ToggleInspectedValueData } from '.'
 
 export const INFINITY = 'Infinity'
 export const NEGATIVE_INFINITY = 'NegativeInfinity'
@@ -40,11 +43,20 @@ export type EncodedValueMap = {
 }
 export type EncodedValue<T extends ValueType = ValueType> = EncodedValueMap[T]
 
-export type {
-  InspectorUpdate,
-  SetInspectedNodeData,
-  ToggleInspectedValueData,
-  ValueNodeUpdate,
-  StoreNodeUpdate,
-  ProxyPropsUpdate,
-} from '.'
+export enum PropGetterState {
+  Stale = 'stale',
+  Live = 'live',
+}
+
+export type InspectorUpdateMap = {
+  value: [id: ValueItemID, value: EncodedValue[]]
+  store: [store: StoreNodeProperty, value: EncodedValue[] | null | number]
+  /** List of new keys — all of the values are getters, so they won't change */
+  propKeys: { added: string[]; removed: string[] }
+  /** state of getter props (STALE | LIVE) */
+  propState: { [key in string]?: PropGetterState }
+}
+
+export type InspectorUpdate = {
+  [T in keyof InspectorUpdateMap]: [type: T, data: InspectorUpdateMap[T]]
+}[keyof InspectorUpdateMap]
