@@ -1,6 +1,6 @@
 import { isRecord } from '@solid-devtools/shared/utils'
 import { $PROXY, getListener, onCleanup } from 'solid-js'
-import { NodeType } from '../main/constants'
+import { NodeType, ValueItemType } from '../main/constants'
 import type { Core, Mapped, NodeID, Solid, ValueItemID } from '../main/types'
 import { observeValueUpdate, removeValueUpdateObserver } from '../main/update'
 import {
@@ -66,6 +66,8 @@ export namespace Inspector {
 
 export type ObservedPropsMap = WeakMap<Solid.Component['props'], ObservedProps>
 
+const $NOT_SET = Symbol('not-set')
+
 /**
  * Manages observing getter properties.
  * This is used to track when a prop is accessed and when it is no longer accessed. (STALE | LIVE)
@@ -86,17 +88,11 @@ export class ObservedProps {
     this.onValueUpdate = undefined
   }
 
-  observeProp(
-    key: string,
-    id: ValueItemID,
-    get: () => unknown,
-  ): { getValue: () => unknown; lastValue: boolean } {
-    if (this.observedGetters[key]) {
-      return { getValue: this.observedGetters[key], lastValue: true }
-    }
+  observeProp(key: string, id: ValueItemID, get: () => unknown): () => unknown {
+    if (this.observedGetters[key]) return this.observedGetters[key]
 
     let observers = 0
-    let lastValue: unknown
+    let lastValue: unknown = $NOT_SET
     const self = this
 
     // monkey patch the getter to track when it is accessed and when it is no longer accessed.
@@ -114,7 +110,7 @@ export class ObservedProps {
       enumerable: true,
     })
 
-    return { getValue: (this.observedGetters[key] = () => lastValue), lastValue: false }
+    return (this.observedGetters[key] = () => lastValue)
   }
 }
 
@@ -172,7 +168,7 @@ function mapSignalNode(
   const { value } = node
   const id = markNodeID(node)
   let name: string
-  ValueMap.add(`signal:${id}`, () => node.value)
+  ValueMap.add(`${ValueItemType.Signal}:${id}`, () => node.value)
 
   if (isSolidStore(node)) {
     name = getDisplayName(getStoreNodeName(value as Core.Store.StoreNode))
@@ -200,7 +196,7 @@ function mapProps(props: Solid.Component['props']) {
   if (isProxy) {
     let propsKeys = Object.keys(props)
 
-    for (const key of propsKeys) record[key] = null
+    for (const key of propsKeys) record[key] = { getter: true, value: null }
 
     checkProxyProps = () => {
       const _oldKeys = propsKeys
@@ -218,13 +214,20 @@ function mapProps(props: Solid.Component['props']) {
       const id: ValueItemID = `prop:${key}`
       // GETTER
       if (desc.get) {
-        const { getValue, lastValue } = observed.observeProp(key, id, desc.get)
+        const getValue = observed.observeProp(key, id, desc.get)
         ValueMap.add(id, getValue)
-        record[key] = lastValue ? encodeValue(getValue(), false, NodeMap) : null
+        const lastValue = getValue()
+        record[key] = {
+          getter: true,
+          value: lastValue !== $NOT_SET ? encodeValue(getValue(), false, NodeMap) : null,
+        }
       }
       // VALUE
       else {
-        record[key] = encodeValue(desc.value, false, NodeMap)
+        record[key] = {
+          getter: false,
+          value: encodeValue(desc.value, false, NodeMap),
+        }
         // non-object props cannot be inspected (won't ever change and aren't deep)
         if (Array.isArray(desc.value) || isRecord(desc.value)) ValueMap.add(id, () => desc.value)
       }
@@ -288,13 +291,13 @@ export function collectOwnerDetails(
       ;({ checkProxyProps, props: details.props } = mapProps(owner.props))
       if (owner.location) details.location = owner.location
     } else {
-      observeValueUpdate(owner, () => onValueUpdate('value'), $INSPECTOR)
+      observeValueUpdate(owner, () => onValueUpdate(ValueItemType.Value), $INSPECTOR)
     }
 
     details.value = encodeValue(getValue(), false, NodeMap)
   }
 
-  const onSignalUpdate = (id: NodeID) => onValueUpdate(`signal:${id}`)
+  const onSignalUpdate = (id: NodeID) => onValueUpdate(`${ValueItemType.Signal}:${id}`)
 
   // map signals
   if (sourceMap) {
@@ -312,7 +315,7 @@ export function collectOwnerDetails(
     }
   }
 
-  ValueMap.add('value', getValue)
+  ValueMap.add(ValueItemType.Value, getValue)
 
   const result = {
     details,

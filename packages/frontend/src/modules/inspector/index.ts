@@ -18,7 +18,7 @@ import { batch, createEffect, createMemo, createSelector, createSignal } from 's
 import { createMutable, produce } from 'solid-js/store'
 import { Writable } from 'type-fest'
 import type { Structure } from '../structure'
-import { DecodedValue, decodeValue, StoreNodeMap } from './decode'
+import { DecodedValue, decodeValue, StoreNodeMap, UnknownNode } from './decode'
 
 export namespace Inspector {
   export interface ValueItem {
@@ -33,15 +33,17 @@ export namespace Inspector {
     readonly id: NodeID
   }
 
+  export interface Prop extends ValueItem {
+    readonly getter: PropGetterState | false
+  }
+
   export interface Props {
     readonly proxy: boolean
     readonly record: {
-      readonly [key: string]: {
-        readonly getter: false | PropGetterState
-        readonly value: ValueItem | null
-      }
+      readonly [key: string]: Prop
     }
   }
+
   export interface SignalDetails {
     readonly signals: {
       readonly [key: NodeID]: Signal
@@ -58,10 +60,14 @@ export namespace Inspector {
 
 function createValueItem(
   itemId: ValueItemID,
-  value: EncodedValue<ValueType>[],
+  value: EncodedValue<ValueType>[] | UnknownNode,
   storeNodeMap: StoreNodeMap,
 ): Inspector.ValueItem {
-  return { itemId, value: decodeValue(value, null, storeNodeMap), selected: false }
+  return {
+    itemId,
+    value: value instanceof UnknownNode ? value : decodeValue(value, null, storeNodeMap),
+    selected: false,
+  }
 }
 
 function updateValueItem(
@@ -71,17 +77,16 @@ function updateValueItem(
 ): void {
   const [type, id] = splitOnColon(valueId)
   // Update signal/memo/store top-level value
-  if (type === 'signal') {
+  if (type === ValueItemType.Signal) {
     const signal = details.signals[id]
     if (!signal) throw `updateValue: value node (${valueId}) not found`
     signal.value = decodeValue(value, signal.value, storeNodeMap)
   }
   // Update prop value
-  else if (type === 'prop') {
+  else if (type === ValueItemType.Prop) {
     const prop = details.props?.record[id]
     if (!prop) throw `updateValue: prop (${valueId}) not found`
-    if (prop.value) prop.value.value = decodeValue(value, prop.value.value, storeNodeMap)
-    else prop.value = createValueItem(valueId, value, storeNodeMap)
+    prop.value = decodeValue(value, prop.value, storeNodeMap)
   }
   // Update inspected node value
   else if (details.value) {
@@ -96,7 +101,13 @@ function updateProps(
   props: WritableDeep<Inspector.Props>,
   { added, removed }: InspectorUpdateMap['propKeys'],
 ): void {
-  for (const key of added) props.record[key] = { getter: PropGetterState.Stale, value: null }
+  for (const key of added)
+    props.record[key] = {
+      getter: PropGetterState.Stale,
+      itemId: `${ValueItemType.Prop}:${key}`,
+      selected: false,
+      value: new UnknownNode(),
+    }
   for (const key of removed) delete props.record[key]
 }
 
@@ -221,19 +232,26 @@ export default function createInspector({
           type,
           selected: false,
           value: decodeValue(value, null, storeNodeMap),
-          itemId: `signal:${id}`,
+          itemId: `${ValueItemType.Signal}:${id}`,
         }
 
       signalDetails.signals = signals
-      signalDetails.value = raw.value ? createValueItem('value', raw.value, storeNodeMap) : null
+      signalDetails.value = raw.value
+        ? createValueItem(ValueItemType.Value, raw.value, storeNodeMap)
+        : null
 
       if (!raw.props) return (signalDetails.props = null)
 
       const propsRecord: WritableDeep<Inspector.Props['record']> = {}
-      for (const [key, value] of Object.entries(raw.props.record))
-        propsRecord[key] = value
-          ? { getter: false, value: createValueItem(`prop:${key}`, value, storeNodeMap) }
-          : { getter: PropGetterState.Stale, value: null }
+      for (const [key, p] of Object.entries(raw.props.record))
+        propsRecord[key] = {
+          getter: p.getter ? PropGetterState.Stale : false,
+          ...createValueItem(
+            `${ValueItemType.Prop}:${key}`,
+            p.value ? p.value : new UnknownNode(),
+            storeNodeMap,
+          ),
+        }
 
       signalDetails.props = {
         proxy: raw.props.proxy,
@@ -280,9 +298,9 @@ export default function createInspector({
   /**
    * Toggle the inspection of a value item (signal, prop, or owner value)
    */
-  function inspectValueItem(type: 'value', id?: undefined, selected?: boolean): boolean
+  function inspectValueItem(type: ValueItemType.Value, id?: undefined, selected?: boolean): boolean
   function inspectValueItem(
-    type: Exclude<ValueItemType, 'value'>,
+    type: Exclude<ValueItemType, ValueItemType.Value>,
     id: string,
     selected?: boolean,
   ): boolean
@@ -290,9 +308,9 @@ export default function createInspector({
     let toggledInspection = false
 
     let item: Writable<Inspector.ValueItem> | undefined | null
-    if (type === 'value') item = signalDetails.value
-    else if (type === 'signal') item = signalDetails.signals[id!]
-    else if (type === 'prop') item = signalDetails.props?.record[id!].value
+    if (type === ValueItemType.Value) item = signalDetails.value
+    else if (type === ValueItemType.Signal) item = signalDetails.signals[id!]
+    else if (type === ValueItemType.Prop) item = signalDetails.props?.record[id!]
     if (item) {
       item.selected = selected = selected ?? !item.selected
       onInspectValue({ id: item.itemId, selected })

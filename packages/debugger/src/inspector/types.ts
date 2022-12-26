@@ -21,6 +21,7 @@ export enum ValueType {
   Element = 'element',
   Instance = 'instance',
   Store = 'store',
+  Unknown = 'unknown',
 }
 
 type EncodedValueDataMap = {
@@ -36,6 +37,7 @@ type EncodedValueDataMap = {
   [ValueType.Element]: `${NodeID}:${string}`
   [ValueType.Instance]: string
   [ValueType.Store]: `${NodeID}:${number}`
+  [ValueType.Unknown]: never
 }
 
 export type EncodedValueMap = {

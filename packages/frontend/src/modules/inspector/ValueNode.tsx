@@ -23,6 +23,7 @@ import {
   InstanceNode,
   ObjectPreviewNode,
   StoreNode,
+  UnknownNode,
 } from './decode'
 
 type ToggleElementHover = (elementId: NodeID, hovered?: boolean) => void
@@ -161,6 +162,9 @@ const ValuePreview: Component<{ value: DecodedValue; extended?: boolean }> = pro
     }
     if (value instanceof StoreNode) {
       return <ValuePreview value={value.value} extended={props.extended} />
+    }
+    if (value instanceof UnknownNode) {
+      return <span class={styles.baseValue}>Unknown</span>
     }
     return <ObjectValuePreview value={value} extended={props.extended} />
   })

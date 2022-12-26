@@ -1,17 +1,19 @@
 import type { EncodedValue } from '../inspector/types'
 import type { LocationAttr } from '../locator/findComponent'
-import { NodeType, $SDT_ID } from './constants'
+import { NodeType, $SDT_ID, ValueItemType } from './constants'
 
 export type NodeID = string & {}
 
-export type ValueItemID = `signal:${NodeID}` | `prop:${string}` | `value`
-export type ValueItemType = 'signal' | 'prop' | 'value'
+export type ValueItemID =
+  | `${ValueItemType.Signal}:${NodeID}`
+  | `${ValueItemType.Prop}:${string}`
+  | ValueItemType.Value
 
 export const getValueItemId = <T extends ValueItemType>(
   type: T,
-  id: T extends 'value' ? undefined : NodeID | string,
+  id: T extends ValueItemType.Value ? undefined : NodeID | string,
 ): ValueItemID => {
-  if (type === 'value') return 'value'
+  if (type === ValueItemType.Value) return ValueItemType.Value
   return `${type}:${id}` as ValueItemID
 }
 
@@ -162,10 +164,11 @@ export namespace Mapped {
 
   export type Props = {
     proxy: boolean
-    /**
-     * Record: `propName` -- `propValue`. If `propValue` is `null`, it means that the prop is a getter
-     */
-    record: { [key: string]: EncodedValue[] | null }
+    record: {
+      [key: string]:
+        | { getter: true; value: EncodedValue[] | null }
+        | { getter: false; value: EncodedValue[] }
+    }
   }
 
   export interface OwnerDetails {
