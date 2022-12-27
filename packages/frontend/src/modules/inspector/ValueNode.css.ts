@@ -16,6 +16,11 @@ export const row = (() => {
     fontFamily: theme.font.mono,
     color: color.gray[800],
     lineHeight: RowHeight,
+    selectors: {
+      '&[data-stale=true]': {
+        opacity: 0.6,
+      },
+    },
   })
 
   const collapseOpacity = createVar()
@@ -63,17 +68,17 @@ export const name = {
     alignItems: 'center',
     height: RowHeight,
   }),
-  icon: style({
-    height: spacing[3],
-    width: spacing[3],
-    color: color.gray[600],
-    marginRight: spacing[1],
-    ...media({
-      [dark]: {
-        color: color.gray[400],
-      },
-    }),
-  }),
+  // icon: style({
+  //   height: spacing[3],
+  //   width: spacing[3],
+  //   color: color.gray[600],
+  //   marginRight: spacing[1],
+  //   ...media({
+  //     [dark]: {
+  //       color: color.gray[400],
+  //     },
+  //   }),
+  // }),
   name: style({
     height: RowHeight,
     minWidth: '5ch',
@@ -84,20 +89,10 @@ export const name = {
       color: vars.disabled.color,
     },
     fontFamily: theme.font.mono,
-    color: color.gray[800],
-    ...media({
-      [dark]: {
-        color: color.gray[200],
-      },
-    }),
+    color: vars.lighterTextColor,
     selectors: {
       '&[data-signal=true]': {
-        color: color.amber[600],
-        ...media({
-          [dark]: {
-            color: color.amber[500],
-          },
-        }),
+        color: vars.domColor,
       },
     },
   }),

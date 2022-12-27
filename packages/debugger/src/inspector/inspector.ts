@@ -77,7 +77,7 @@ export class ObservedProps {
 
   private onPropStateChange?: Inspector.OnPropStateChange
   private onValueUpdate?: Inspector.OnValueUpdate
-  private observedGetters = {} as Record<string, () => unknown>
+  private observedGetters = {} as Record<string, { v: unknown | typeof $NOT_SET; n: number }>
 
   observe(onPropStateChange: Inspector.OnPropStateChange, onValueUpdate: Inspector.OnValueUpdate) {
     this.onPropStateChange = onPropStateChange
@@ -88,12 +88,21 @@ export class ObservedProps {
     this.onValueUpdate = undefined
   }
 
-  observeProp(key: string, id: ValueItemID, get: () => unknown): () => unknown {
-    if (this.observedGetters[key]) return this.observedGetters[key]
+  observeProp(
+    key: string,
+    id: ValueItemID,
+    get: () => unknown,
+  ): { getValue: () => unknown | typeof $NOT_SET; isStale: boolean } {
+    if (this.observedGetters[key]) {
+      const o = this.observedGetters[key]
+      return { getValue: () => o.v, isStale: o.n === 0 }
+    }
 
-    let observers = 0
-    let lastValue: unknown = $NOT_SET
     const self = this
+    const o: typeof this.observedGetters[string] = (this.observedGetters[key] = {
+      v: $NOT_SET,
+      n: 0,
+    })
 
     // monkey patch the getter to track when it is accessed and when it is no longer accessed.
     // and to track when the value changes.
@@ -101,16 +110,16 @@ export class ObservedProps {
       get() {
         const value = get()
         if (getListener()) {
-          onCleanup(() => --observers === 0 && self.onPropStateChange?.(key, PropGetterState.Stale))
+          onCleanup(() => --o.n === 0 && self.onPropStateChange?.(key, PropGetterState.Stale))
         }
-        ++observers === 1 && self.onPropStateChange?.(key, PropGetterState.Live)
-        if (value !== lastValue) self.onValueUpdate?.(id)
-        return (lastValue = value)
+        ++o.n === 1 && self.onPropStateChange?.(key, PropGetterState.Live)
+        if (value !== o.v) self.onValueUpdate?.(id)
+        return (o.v = value)
       },
       enumerable: true,
     })
 
-    return (this.observedGetters[key] = () => lastValue)
+    return { getValue: () => o.v, isStale: true }
   }
 }
 
@@ -196,7 +205,7 @@ function mapProps(props: Solid.Component['props']) {
   if (isProxy) {
     let propsKeys = Object.keys(props)
 
-    for (const key of propsKeys) record[key] = { getter: true, value: null }
+    for (const key of propsKeys) record[key] = { getter: PropGetterState.Stale, value: null }
 
     checkProxyProps = () => {
       const _oldKeys = propsKeys
@@ -214,11 +223,11 @@ function mapProps(props: Solid.Component['props']) {
       const id: ValueItemID = `prop:${key}`
       // GETTER
       if (desc.get) {
-        const getValue = observed.observeProp(key, id, desc.get)
+        const { getValue, isStale } = observed.observeProp(key, id, desc.get)
         ValueMap.add(id, getValue)
         const lastValue = getValue()
         record[key] = {
-          getter: true,
+          getter: isStale ? PropGetterState.Stale : PropGetterState.Live,
           value: lastValue !== $NOT_SET ? encodeValue(getValue(), false, NodeMap) : null,
         }
       }

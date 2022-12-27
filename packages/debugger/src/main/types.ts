@@ -1,4 +1,4 @@
-import type { EncodedValue } from '../inspector/types'
+import type { EncodedValue, PropGetterState } from '../inspector/types'
 import type { LocationAttr } from '../locator/findComponent'
 import { NodeType, $SDT_ID, ValueItemType } from './constants'
 
@@ -165,9 +165,7 @@ export namespace Mapped {
   export type Props = {
     proxy: boolean
     record: {
-      [key: string]:
-        | { getter: true; value: EncodedValue[] | null }
-        | { getter: false; value: EncodedValue[] }
+      [key: string]: { getter: false | PropGetterState; value: EncodedValue[] | null }
     }
   }
 

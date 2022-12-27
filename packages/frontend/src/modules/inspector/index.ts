@@ -245,7 +245,7 @@ export default function createInspector({
       const propsRecord: WritableDeep<Inspector.Props['record']> = {}
       for (const [key, p] of Object.entries(raw.props.record))
         propsRecord[key] = {
-          getter: p.getter ? PropGetterState.Stale : false,
+          getter: p.getter,
           ...createValueItem(
             `${ValueItemType.Prop}:${key}`,
             p.value ? p.value : new UnknownNode(),
@@ -272,10 +272,9 @@ export default function createInspector({
             signalDetails.props && updateProps(signalDetails.props, update[1])
             break
           case 'propState': {
-            for (const [key, isLive] of Object.entries(update[1])) {
+            for (const [key, state] of Object.entries(update[1])) {
               const prop = signalDetails.props?.record[key]
-              if (prop && prop.getter && typeof isLive === 'boolean')
-                prop.getter = PropGetterState[isLive ? 'Live' : 'Stale']
+              if (prop && prop.getter && state) prop.getter = state
             }
             break
           }
