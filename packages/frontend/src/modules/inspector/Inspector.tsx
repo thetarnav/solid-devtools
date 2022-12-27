@@ -1,6 +1,11 @@
 import { Component, createMemo, For, JSX, Show } from 'solid-js'
 import { Entries } from '@solid-primitives/keyed'
-import { NodeType, NODE_TYPE_NAMES } from '@solid-devtools/debugger/types'
+import {
+  NodeType,
+  NODE_TYPE_NAMES,
+  PropGetterState,
+  ValueItemType,
+} from '@solid-devtools/debugger/types'
 import { Scrollable, Badge, Icon } from '@/ui'
 import { ValueNode } from './ValueNode'
 import { useController } from '@/controller'
@@ -67,9 +72,10 @@ const DetailsContent: Component = () => {
               name={name}
               value={value().value}
               extended={value().selected}
-              onClick={() => inspector.inspectValueItem('prop', name)}
+              onClick={() => inspector.inspectValueItem(ValueItemType.Prop, name)}
               onElementHover={inspector.toggleHoveredElement}
-              isSignal
+              isSignal={value().getter !== false}
+              isStale={value().getter === PropGetterState.Stale}
             />
           )}
         </Entries>
@@ -82,7 +88,7 @@ const DetailsContent: Component = () => {
                 name={signal.name}
                 value={signal.value}
                 extended={signal.selected}
-                onClick={() => inspector.inspectValueItem('signal', signal.id)}
+                onClick={() => inspector.inspectValueItem(ValueItemType.Signal, signal.id)}
                 onElementHover={inspector.toggleHoveredElement}
                 isSignal={type !== 'stores'}
               />
@@ -97,7 +103,7 @@ const DetailsContent: Component = () => {
             name="value"
             value={details.value.value}
             extended={details.value.selected}
-            onClick={() => inspector.inspectValueItem('value')}
+            onClick={() => inspector.inspectValueItem(ValueItemType.Value)}
             onElementHover={inspector.toggleHoveredElement}
             isSignal
           />

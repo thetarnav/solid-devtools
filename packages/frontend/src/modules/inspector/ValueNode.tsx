@@ -23,7 +23,9 @@ import {
   InstanceNode,
   ObjectPreviewNode,
   StoreNode,
+  UnknownNode,
 } from './decode'
+import clsx from 'clsx'
 
 type ToggleElementHover = (elementId: NodeID, hovered?: boolean) => void
 
@@ -142,15 +144,9 @@ const ValuePreview: Component<{ value: DecodedValue; extended?: boolean }> = pro
       return <span class={styles.baseValue}>{value.name}</span>
     }
     if (value instanceof ElementNode) {
-      const { onElementHover: onHover } = useContext(ValueContext) ?? {}
+      const { onElementHover: onHover } = useContext(ValueContext)!
 
-      const handleHover =
-        onHover &&
-        ((hovered: boolean) => {
-          if (value.id !== undefined) onHover(value.id, hovered)
-        })
-
-      const hoverProps = handleHover && createHover(handleHover)
+      const hoverProps = onHover && createHover(hovered => onHover(value.id, hovered))
 
       return (
         <span class={styles.ValueElement.container} {...hoverProps}>
@@ -161,6 +157,9 @@ const ValuePreview: Component<{ value: DecodedValue; extended?: boolean }> = pro
     }
     if (value instanceof StoreNode) {
       return <ValuePreview value={value.value} extended={props.extended} />
+    }
+    if (value instanceof UnknownNode) {
+      return <span class={styles.Nullable}>unknown</span>
     }
     return <ObjectValuePreview value={value} extended={props.extended} />
   })
@@ -189,8 +188,10 @@ export const ValueNode: Component<{
   extended?: boolean
   /** top-level, or inside a store (the value can change) */
   isSignal?: boolean
+  isStale?: boolean
   onClick?: () => boolean
   onElementHover?: ToggleElementHover
+  class?: string
 }> = props => {
   const ctx = useContext(ValueContext)
   const value = () => props.value
@@ -249,14 +250,19 @@ export const ValueNode: Component<{
   return (
     <Show
       when={getIsCollapsable(value())}
-      fallback={<li class={styles.row.container.base}>{content()}</li>}
+      fallback={
+        <li class={styles.row.container.base} data-stale={props.isStale}>
+          {content()}
+        </li>
+      }
     >
       {untrack(() => {
         const { isHovered, hoverProps } = createNestedHover()
         return (
           <li
-            class={styles.row.container.collapsable}
+            class={clsx(styles.row.container.collapsable, props.class)}
             data-hovered={isHovered()}
+            data-stale={props.isStale}
             style={assignInlineVars({
               [styles.row.collapseOpacity]: isHovered() || props.extended ? '1' : '0',
             })}

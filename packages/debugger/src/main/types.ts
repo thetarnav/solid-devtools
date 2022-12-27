@@ -1,17 +1,19 @@
-import type { EncodedValue } from '../inspector/types'
+import type { EncodedValue, PropGetterState } from '../inspector/types'
 import type { LocationAttr } from '../locator/findComponent'
-import { NodeType, $SDT_ID } from './constants'
+import { NodeType, $SDT_ID, ValueItemType } from './constants'
 
 export type NodeID = string & {}
 
-export type ValueItemID = `signal:${NodeID}` | `prop:${string}` | `value`
-export type ValueItemType = 'signal' | 'prop' | 'value'
+export type ValueItemID =
+  | `${ValueItemType.Signal}:${NodeID}`
+  | `${ValueItemType.Prop}:${string}`
+  | ValueItemType.Value
 
 export const getValueItemId = <T extends ValueItemType>(
   type: T,
-  id: T extends 'value' ? undefined : NodeID | string,
+  id: T extends ValueItemType.Value ? undefined : NodeID | string,
 ): ValueItemID => {
-  if (type === 'value') return 'value'
+  if (type === ValueItemType.Value) return ValueItemType.Value
   return `${type}:${id}` as ValueItemID
 }
 
@@ -23,6 +25,9 @@ export namespace Core {
   export type Computation = import('solid-js/types/reactive/signal').Computation<unknown>
   export type RootFunction<T> = import('solid-js/types/reactive/signal').RootFunction<T>
   export type EffectFunction = import('solid-js/types/reactive/signal').EffectFunction<unknown>
+  export type Component = import('solid-js/types/reactive/signal').DevComponent<{
+    [key: string]: unknown
+  }>
   export namespace Store {
     export type StoreNode = import('solid-js/store').StoreNode
     export type NotWrappable = import('solid-js/store/types/store').NotWrappable
@@ -159,7 +164,9 @@ export namespace Mapped {
 
   export type Props = {
     proxy: boolean
-    record: Record<string, EncodedValue[]>
+    record: {
+      [key: string]: { getter: false | PropGetterState; value: EncodedValue[] | null }
+    }
   }
 
   export interface OwnerDetails {

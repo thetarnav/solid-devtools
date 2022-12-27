@@ -7,7 +7,7 @@ import {
   createSignal,
   JSX,
 } from 'solid-js'
-import { Mapped, NodeType, Solid, ValueType } from '../../types'
+import { Mapped, NodeType, PropGetterState, Solid, ValueType } from '../../types'
 import { getOwner } from '../../main/utils'
 import { collectOwnerDetails } from '../inspector'
 
@@ -46,7 +46,8 @@ describe('collectOwnerDetails', () => {
       )
 
       const { details, valueMap, nodeIdMap } = collectOwnerDetails(owner, {
-        onSignalUpdate: () => {},
+        observedPropsMap: new WeakMap(),
+        onPropStateChange: () => {},
         onValueUpdate: () => {},
       })
 
@@ -98,7 +99,8 @@ describe('collectOwnerDetails', () => {
       ))
 
       const { details, nodeIdMap } = collectOwnerDetails(owner, {
-        onSignalUpdate: () => {},
+        observedPropsMap: new WeakMap(),
+        onPropStateChange: () => {},
         onValueUpdate: () => {},
       })
 
@@ -113,9 +115,18 @@ describe('collectOwnerDetails', () => {
         props: {
           proxy: false,
           record: {
-            count: [[ValueType.Number, 123]],
-            children: [[ValueType.Getter, 'children']],
-            nested: [[ValueType.Object, 2]],
+            count: {
+              getter: false,
+              value: [[ValueType.Number, 123]],
+            },
+            nested: {
+              getter: false,
+              value: [[ValueType.Object, 2]],
+            },
+            children: {
+              getter: PropGetterState.Stale,
+              value: null,
+            },
           },
         },
       } satisfies Mapped.OwnerDetails)
@@ -137,7 +148,8 @@ describe('collectOwnerDetails', () => {
       })
 
       const { details, nodeIdMap } = collectOwnerDetails(owner, {
-        onSignalUpdate: () => {},
+        observedPropsMap: new WeakMap(),
+        onPropStateChange: () => {},
         onValueUpdate: () => {},
       })
 
@@ -150,8 +162,14 @@ describe('collectOwnerDetails', () => {
         props: {
           proxy: true,
           record: {
-            onClick: [[ValueType.Getter, 'onClick']],
-            role: [[ValueType.Getter, 'role']],
+            onClick: {
+              getter: PropGetterState.Stale,
+              value: null,
+            },
+            role: {
+              getter: PropGetterState.Stale,
+              value: null,
+            },
           },
         },
       } satisfies Mapped.OwnerDetails)
@@ -174,7 +192,8 @@ describe('collectOwnerDetails', () => {
 
       const onValueUpdate = vi.fn()
       collectOwnerDetails(owner, {
-        onSignalUpdate: () => {},
+        observedPropsMap: new WeakMap(),
+        onPropStateChange: () => {},
         onValueUpdate: onValueUpdate,
       })
 
@@ -182,11 +201,11 @@ describe('collectOwnerDetails', () => {
 
       setCount(1)
       expect(onValueUpdate).toBeCalledTimes(1)
-      expect(onValueUpdate).toBeCalledWith(1, 0)
+      expect(onValueUpdate).toHaveBeenLastCalledWith('value')
 
       setCount(2)
       expect(onValueUpdate).toBeCalledTimes(2)
-      expect(onValueUpdate).toBeCalledWith(2, 1)
+      expect(onValueUpdate).toHaveBeenLastCalledWith('value')
 
       setCount(2)
       expect(onValueUpdate).toBeCalledTimes(2)
@@ -201,24 +220,25 @@ describe('collectOwnerDetails', () => {
       const [, setCount] = createSignal(0) // id: "0"
       const [, setCount2] = createSignal(0) // id: "1"
 
-      const onSignalUpdate = vi.fn()
+      const onValueUpdate = vi.fn()
       collectOwnerDetails(owner, {
-        onSignalUpdate: onSignalUpdate,
-        onValueUpdate: () => {},
+        observedPropsMap: new WeakMap(),
+        onPropStateChange: () => {},
+        onValueUpdate: onValueUpdate,
       })
 
-      expect(onSignalUpdate).not.toBeCalled()
+      expect(onValueUpdate).not.toBeCalled()
 
       setCount(1)
-      expect(onSignalUpdate).toBeCalledTimes(1)
-      expect(onSignalUpdate).toBeCalledWith('1', 1)
+      expect(onValueUpdate).toBeCalledTimes(1)
+      expect(onValueUpdate).toHaveBeenLastCalledWith('signal:1')
 
       setCount(1)
-      expect(onSignalUpdate).toBeCalledTimes(1)
+      expect(onValueUpdate).toBeCalledTimes(1)
 
       setCount2(1)
-      expect(onSignalUpdate).toBeCalledTimes(2)
-      expect(onSignalUpdate).toBeCalledWith('2', 1)
+      expect(onValueUpdate).toBeCalledTimes(2)
+      expect(onValueUpdate).toHaveBeenLastCalledWith('signal:2')
 
       dispose()
     })

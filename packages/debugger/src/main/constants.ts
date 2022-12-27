@@ -34,3 +34,9 @@ export enum TreeWalkerMode {
 export const defaultWalkerMode = TreeWalkerMode.Components
 
 export const $SDT_ID = Symbol('sdt-id')
+
+export enum ValueItemType {
+  Signal = 'signal',
+  Prop = 'prop',
+  Value = 'value',
+}

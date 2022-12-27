@@ -33,6 +33,7 @@ export function formatTime(d: Date = new Date()): string {
   )
 }
 
+// TODO fix this in solid-primitives
 export const asArray = <T>(value: T): (T extends any[] ? T[number] : T)[] =>
   Array.isArray(value) ? (value as any) : [value]
 
@@ -138,3 +139,6 @@ export function whileArray<T, U>(
     current = toCheck[index++]
   }
 }
+
+export const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null && Object.getPrototypeOf(value) === Object.prototype

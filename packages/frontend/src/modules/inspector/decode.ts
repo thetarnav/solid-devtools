@@ -63,6 +63,7 @@ export class GetterNode {
 export class ObjectPreviewNode {
   constructor(public type: ValueType.Object | ValueType.Array, public length: number) {}
 }
+export class UnknownNode {}
 
 export type DecodedValueMap = {
   [ValueType.String]: string
@@ -77,6 +78,7 @@ export type DecodedValueMap = {
   [ValueType.Array]: ArrayDecodedValue | ObjectPreviewNode
   [ValueType.Object]: ObjectDecodedValue | ObjectPreviewNode
   [ValueType.Store]: StoreNode
+  [ValueType.Unknown]: UnknownNode
 }
 // used interface instead of type to avoid circular dependency
 interface ArrayDecodedValue extends Array<DecodedValue> {}
