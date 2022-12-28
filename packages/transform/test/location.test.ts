@@ -3,8 +3,9 @@ import {
   WINDOW_PROJECTPATH_PROPERTY,
 } from '@solid-devtools/debugger/types'
 import { describe, test } from 'vitest'
-import getPlugin, { MARK_COMPONENT_GLOBAL } from '../src/location'
+// organize-imports-ignore setup seeds to load before source
 import { assertTransform, cwd, file } from './setup'
+import getPlugin, { MARK_COMPONENT_GLOBAL } from '../src/location'
 
 describe('location', () => {
   const testData: [
