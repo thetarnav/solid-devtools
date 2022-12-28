@@ -1,5 +1,16 @@
 # @solid-devtools/debugger
 
+## 0.18.0
+
+### Minor Changes
+
+- 84435c1: Intercept getter props of inspected component to display their latest values.
+
+### Patch Changes
+
+- Updated dependencies [84435c1]
+  - @solid-devtools/shared@0.10.5
+
 ## 0.17.2
 
 ### Patch Changes
