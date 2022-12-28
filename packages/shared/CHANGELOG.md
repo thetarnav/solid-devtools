@@ -1,5 +1,11 @@
 # solid-devtools-shared
 
+## 0.10.5
+
+### Patch Changes
+
+- 84435c1: Add `isRecord` utility
+
 ## 0.10.4
 
 ### Patch Changes

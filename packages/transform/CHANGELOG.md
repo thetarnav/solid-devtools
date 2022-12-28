@@ -1,5 +1,14 @@
 # @solid-devtools/transform
 
+## 0.10.4
+
+### Patch Changes
+
+- Updated dependencies [84435c1]
+- Updated dependencies [84435c1]
+  - @solid-devtools/debugger@0.18.0
+  - @solid-devtools/shared@0.10.5
+
 ## 0.10.3
 
 ### Patch Changes
