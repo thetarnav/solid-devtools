@@ -381,9 +381,7 @@ export function debugSignals(
 
   if (signals.length === 1) return debugSignal(signals[0], options)
 
-  const { logInitialValue = true } = options
-
-  if (logInitialValue) logSignalsInitialValues(signals)
+  if (options.logInitialValue === false) logSignalsInitialValues(signals)
 
   signals.forEach(signal => {
     debugSignal(signal, {
@@ -441,8 +439,8 @@ export function debugOwnerSignals(owner?: Core.Owner, options: DebugSignalOption
     if (solidOwner.owned) {
       // owned can only be added
       for (i = prevOwnedLength; i < solidOwner.owned.length; i++) {
-        const owner = solidOwner.owned[i]
-        if (isSolidMemo(owner)) signals.push(owner)
+        const childOwner = solidOwner.owned[i]
+        if (isSolidMemo(childOwner)) signals.push(childOwner)
       }
       prevOwnedLength = i
     }

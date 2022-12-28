@@ -97,6 +97,7 @@ export const { reconcileStructure } = (() => {
     return node
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-shadow
   function reconcileStructure(
     prevRoots: Structure.Node[],
     { removed, updated }: StructureUpdates,
@@ -197,11 +198,11 @@ export default function createStructure({
   const [extHovered, setHovered] = createSignal<NodeID | null>(null)
   const hovered = () => extHovered() || clientHoveredNodeId()
 
-  const isHovered = createSelector<NodeID | null, NodeID>(hovered)
+  const isNodeHovered = createSelector<NodeID | null, NodeID>(hovered)
 
-  function toggleHoveredNode(id: NodeID, hovered: boolean): NodeID | null {
+  function toggleHoveredNode(id: NodeID, isHovered: boolean): NodeID | null {
     return setHovered(p => {
-      if (hovered) return id
+      if (isHovered) return id
       return p && p === id ? null : p
     })
   }
@@ -227,7 +228,7 @@ export default function createStructure({
     updateStructure,
     hovered,
     extHovered,
-    isHovered: (node: NodeID) => isHovered(node) || isSearched(node),
+    isHovered: (node: NodeID) => isNodeHovered(node) || isSearched(node),
     listenToComputationUpdate,
     emitComputationUpdate,
     toggleHoveredNode,

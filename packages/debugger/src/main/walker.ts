@@ -166,6 +166,7 @@ function mapOwner(
       markOwnerType((contextNode = owner.owned[0])) === NodeType.Context
     ) {
       // custom mapping for context nodes
+      // eslint-disable-next-line @typescript-eslint/no-shadow
       const mapped = mapOwner(contextNode.owned![0], parent, NodeType.Context)
       if (mapped) mapped.id = markNodeID(contextNode)
       return mapped

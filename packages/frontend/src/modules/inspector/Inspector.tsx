@@ -47,7 +47,7 @@ const DetailsContent: Component = () => {
   const { inspector } = useController()
   const { details, inspectedNode } = inspector
 
-  const signals = createMemo(() => {
+  const allSignals = createMemo(() => {
     const list = Object.values(details.signals)
     const memos: typeof list = []
     const signals: typeof list = []
@@ -81,8 +81,8 @@ const DetailsContent: Component = () => {
         </Entries>
       </ListSignals>
       {(['stores', 'signals', 'memos'] as const).map(type => (
-        <ListSignals when={signals()[type].length} title={type}>
-          <For each={signals()[type]}>
+        <ListSignals when={allSignals()[type].length} title={type}>
+          <For each={allSignals()[type]}>
             {signal => (
               <ValueNode
                 name={signal.name}

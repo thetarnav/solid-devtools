@@ -233,8 +233,8 @@ describe('encodeValue with repeated references', () => {
 describe('finding stores in values', () => {
   mockLAST_ID = 0
 
-  const [state] = createStore({ a: 1 })
-  const [state2] = createStore({ ref: state })
+  const [state1] = createStore({ a: 1 })
+  const [state2] = createStore({ ref: state1 })
   const [state3] = createStore({ a: 1, b: ['foo'] })
   state3.b[0]
 
@@ -246,24 +246,24 @@ describe('finding stores in values', () => {
   ][] = [
     [
       'Store',
-      state,
+      state1,
       [
         [ValueType.Store, '5:1'],
         [ValueType.Object, { a: 2 }],
         [ValueType.Number, 1],
       ],
-      [[state, '5']],
+      [[state1, '5']],
     ],
     [
       'Store in array',
-      [state],
+      [state1],
       [
         [ValueType.Array, [1]],
         [ValueType.Store, '5:2'],
         [ValueType.Object, { a: 3 }],
         [ValueType.Number, 1],
       ],
-      [[state, '5']],
+      [[state1, '5']],
     ],
     [
       'referenced store',

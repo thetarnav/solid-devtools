@@ -78,11 +78,11 @@ export const devtoolsPlugin = (_options: DevtoolsPluginOptions = {}): PluginOpti
       try {
         require.resolve(MAIN_CLIENT_MODULE)
         runtimeInstalled = MAIN_CLIENT_MODULE
-      } catch (e) {
+      } catch (_) {
         try {
           require.resolve(DEBUGGER_MODULE)
           runtimeInstalled = DEBUGGER_MODULE
-        } catch (e) {
+        } catch (_) {
           // eslint-disable-next-line no-console
           console.log(
             `[solid-devtools]: Could not find "${MAIN_CLIENT_MODULE}" or "${DEBUGGER_MODULE}" module.`,

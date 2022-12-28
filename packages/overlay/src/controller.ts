@@ -48,12 +48,12 @@ export function createController() {
   })
 
   debug.listenTo('InspectorUpdate', payload => {
-    separate(payload, payload => controller.updateInspector(payload))
+    separate(payload, cloned => controller.updateInspector(cloned))
   })
 
   // send the focused owner details
   debug.listenTo('InspectedNodeDetails', details => {
-    separate(details, details => controller.setInspectedDetails(details))
+    separate(details, cloned => controller.setInspectedDetails(cloned))
   })
 
   // send the state of the client locator mode

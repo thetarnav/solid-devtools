@@ -43,9 +43,9 @@ const Overlay: Component<{
 }> = ({ defaultOpen, alwaysOpen, noPadding }) => {
   const [isOpen, setOpen] = (() => {
     if (alwaysOpen) return [() => true, () => {}] as const
-    const [isOpen, setOpen] = createSignal(defaultOpen ?? false)
-    onCleanup(() => setOpen(false))
-    return [isOpen, setOpen] as const
+    const [_isOpen, _setOpen] = createSignal(defaultOpen ?? false)
+    onCleanup(() => _setOpen(false))
+    return [_isOpen, _setOpen] as const
   })()
   useDebugger().setUserEnabledSignal(isOpen)
 

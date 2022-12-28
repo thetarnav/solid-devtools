@@ -1,6 +1,7 @@
 export enum NodeType {
   Root = 'root',
   Component = 'component',
+  // eslint-disable-next-line @typescript-eslint/no-shadow
   Element = 'element',
   Effect = 'effect',
   Render = 'render',

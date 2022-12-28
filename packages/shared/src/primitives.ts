@@ -75,7 +75,7 @@ export function createConsumers(
     enabled,
     consumer => {
       setConsumers(p => [...p, consumer])
-      onRootCleanup(() => setConsumers(p => p.filter(p => p !== consumer)))
+      onRootCleanup(() => setConsumers(p => p.filter(c => c !== consumer)))
     },
   ]
 }
@@ -151,15 +151,15 @@ export function defer<S, Next extends Prev, Prev = Next>(
 ): EffectFunction<undefined | NoInfer<Next>> {
   const isArray = Array.isArray(deps)
   let prevInput: S
-  let defer = true
+  let shouldDefer = true
   return prevValue => {
     let input: S
     if (isArray) {
       input = Array(deps.length) as S
       for (let i = 0; i < deps.length; i++) (input as any[])[i] = deps[i]()
     } else input = deps()
-    if (defer) {
-      defer = false
+    if (shouldDefer) {
+      shouldDefer = false
       return initialValue
     }
     const result = untrack(() => fn(input, prevInput, prevValue))

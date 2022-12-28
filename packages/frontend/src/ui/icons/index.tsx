@@ -700,8 +700,8 @@ export const MountIcons: Component = () => {
   return (
     <div style="display:none">
       {(Object.keys(embedIconComponents) as (keyof typeof embedIconComponents)[]).map(name => {
-        const Icon = embedIconComponents[name] as ProxyIconComponent<any>
-        return <Icon id={name} />
+        const IconComp = embedIconComponents[name] as ProxyIconComponent<any>
+        return <IconComp id={name} />
       })}
     </div>
   )

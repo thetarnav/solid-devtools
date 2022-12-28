@@ -202,11 +202,11 @@ export const ValueNode: Component<{
   const isUpdated =
     (props.isSignal || ctx?.underStore) &&
     (() => {
-      const [isUpdated, pingUpdated] = createPingedSignal()
+      const [_isUpdated, pingUpdated] = createPingedSignal()
       createEffect(
         defer(value, () => (toggledCollapse ? (toggledCollapse = false) : pingUpdated())),
       )
-      return isUpdated
+      return _isUpdated
     })()
 
   const handleSelect = () => {

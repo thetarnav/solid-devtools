@@ -9,15 +9,23 @@ export const NAN = 'NaN'
 export const UNDEFINED = 'undefined'
 
 export enum ValueType {
+  // eslint-disable-next-line @typescript-eslint/no-shadow
   Number = 'number',
+  // eslint-disable-next-line @typescript-eslint/no-shadow
   Boolean = 'boolean',
+  // eslint-disable-next-line @typescript-eslint/no-shadow
   String = 'string',
   Null = 'null',
+  // eslint-disable-next-line @typescript-eslint/no-shadow
   Symbol = 'symbol',
+  // eslint-disable-next-line @typescript-eslint/no-shadow
   Array = 'array',
+  // eslint-disable-next-line @typescript-eslint/no-shadow
   Object = 'object',
+  // eslint-disable-next-line @typescript-eslint/no-shadow
   Function = 'function',
   Getter = 'getter',
+  // eslint-disable-next-line @typescript-eslint/no-shadow
   Element = 'element',
   Instance = 'instance',
   Store = 'store',

@@ -14,19 +14,19 @@ export function makeTimeMeter(): () => number {
 export function getDiffMap<T extends object>(
   from: readonly T[],
   to: readonly T[],
-  constructor?: WeakMapConstructor,
+  mapConstructor?: WeakMapConstructor,
 ): [(item: T) => 'added' | 'removed' | null, T[]]
 export function getDiffMap<T>(
   from: readonly T[],
   to: readonly T[],
-  constructor: MapConstructor,
+  mapConstructor: MapConstructor,
 ): [(item: T) => 'added' | 'removed' | null, T[]]
 export function getDiffMap<T extends object>(
   from: readonly T[],
   to: readonly T[],
-  constructor: WeakMapConstructor | MapConstructor = WeakMap,
+  mapConstructor: WeakMapConstructor | MapConstructor = WeakMap,
 ): [(item: T) => 'added' | 'removed' | null, T[]] {
-  const marks: Map<T, 'added' | 'removed'> = new (constructor as any)()
+  const marks: Map<T, 'added' | 'removed'> = new (mapConstructor as any)()
   const allItems: T[] = []
   const toCopy = [...to]
 
@@ -48,19 +48,19 @@ export function getDiffMap<T extends object>(
 export function getStackDiffMap<T extends object>(
   from: readonly T[],
   to: readonly T[],
-  constructor?: WeakMapConstructor,
+  mapConstructor?: WeakMapConstructor,
 ): [(item: T) => 'added' | null, T[]]
 export function getStackDiffMap<T>(
   from: readonly T[],
   to: readonly T[],
-  constructor: MapConstructor,
+  mapConstructor: MapConstructor,
 ): [(item: T) => 'added' | null, T[]]
 export function getStackDiffMap<T>(
   from: readonly T[],
   to: readonly T[],
-  constructor: WeakMapConstructor | MapConstructor = WeakMap,
+  mapConstructor: WeakMapConstructor | MapConstructor = WeakMap,
 ): [(item: T) => 'added' | null, T[]] {
-  const marks: Map<T, 'added'> = new (constructor as any)()
+  const marks: Map<T, 'added'> = new (mapConstructor as any)()
   const allItems: T[] = [...from]
   for (let i = allItems.length; i < to.length; i++) {
     allItems.push(to[i])

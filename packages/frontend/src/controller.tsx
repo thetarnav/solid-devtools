@@ -224,10 +224,10 @@ const [Provider, useControllerCtx] = createContextProvider(
     }
 
     createEffect(
-      defer(hovered, (hovered, _, prev: ReturnType<typeof getHightlightPayload> | void) => {
-        if (!hovered) return client.onHighlightElementChange(null)
+      defer(hovered, (hoveredValue, _, prev: ReturnType<typeof getHightlightPayload> | void) => {
+        if (!hoveredValue) return client.onHighlightElementChange(null)
 
-        const payload = getHightlightPayload(hovered)
+        const payload = getHightlightPayload(hoveredValue)
         if (!payload && !prev) return
 
         client.onHighlightElementChange(payload ?? null)

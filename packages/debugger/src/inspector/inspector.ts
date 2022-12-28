@@ -306,7 +306,7 @@ export function collectOwnerDetails(
     details.value = encodeValue(getValue(), false, NodeMap)
   }
 
-  const onSignalUpdate = (id: NodeID) => onValueUpdate(`${ValueItemType.Signal}:${id}`)
+  const onSignalUpdate = (signalId: NodeID) => onValueUpdate(`${ValueItemType.Signal}:${signalId}`)
 
   // map signals
   if (sourceMap) {

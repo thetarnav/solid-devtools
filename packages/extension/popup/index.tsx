@@ -57,11 +57,11 @@ const App: Component = () => {
                 </>
               }
             >
-              {versions => (
+              {v => (
                 <ul>
-                  <li>Extension: {versions.extension}</li>
-                  <li>Client: {versions.client}</li>
-                  <li>Expected client: {versions.expectedClient}</li>
+                  <li>Extension: {v.extension}</li>
+                  <li>Client: {v.client}</li>
+                  <li>Expected client: {v.expectedClient}</li>
                 </ul>
               )}
             </Show>

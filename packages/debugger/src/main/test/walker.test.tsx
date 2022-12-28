@@ -36,9 +36,9 @@ const mockTree = () => {
 describe('TreeWalkerMode.Owners', () => {
   it('default options', () => {
     {
-      const [dispose, owner] = createRoot(dispose => {
+      const [dispose, owner] = createRoot(_dispose => {
         mockTree()
-        return [dispose, getOwner()! as Solid.Root]
+        return [_dispose, getOwner()! as Solid.Root]
       })
 
       const tree = walkSolidTree(owner, {
@@ -143,7 +143,7 @@ describe('TreeWalkerMode.Owners', () => {
 
       const owner = getOwner()! as Solid.Root
       walkSolidTree(owner, {
-        onComputationUpdate: (...a) => capturedComputationUpdates.push(a),
+        onComputationUpdate: (...args) => capturedComputationUpdates.push(args),
         rootId: (owner[$SDT_ID] = 'ff'),
         mode: TreeWalkerMode.Owners,
         registerComponent: () => {},

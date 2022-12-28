@@ -136,9 +136,9 @@ function decode(index: number): DecodedValue {
         return saveToMap(index, new ObjectPreviewNode(type, data))
       }
       const value = saveToMap(index, data.constructor() as ArrayDecodedValue | ObjectDecodedValue)
-      for (const [key, index] of Object.entries(data)) {
+      for (const [key, child] of Object.entries(data)) {
         ;(value as Record<string, DecodedValue>)[key] =
-          index === -1 ? new GetterNode(key) : decode(index)
+          child === -1 ? new GetterNode(key) : decode(child)
       }
       return value
     }

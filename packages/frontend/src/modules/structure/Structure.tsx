@@ -200,6 +200,7 @@ const DisplayStructureTree: Component = () => {
     )
 
     const nodeList = structureState().nodeList
+    // eslint-disable-next-line @typescript-eslint/no-shadow
     const collapsedList: Structure.Node[] = []
     const set = collapsed()
 
@@ -237,11 +238,11 @@ const DisplayStructureTree: Component = () => {
 
     for (let i = 0; i < length; i++) {
       const node = nodeList[start + i]
-      const prev = prevMap[node.id]
+      const prevDNode = prevMap[node.id]
       minLevel = Math.min(minLevel, node.level)
-      if (prev) {
-        next[i] = prev
-        prev.update(node)
+      if (prevDNode) {
+        next[i] = prevDNode
+        prevDNode.update(node)
       } else {
         const [getNode, update] = createSignal(node, { equals: false, internal: true })
         next[i] = {

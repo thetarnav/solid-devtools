@@ -77,19 +77,19 @@ export const media = (
 ): {
   '@media': Record<string, StyleRule>
 } => {
-  const media: Record<string, StyleRule> = {}
+  const mediaRules: Record<string, StyleRule> = {}
   for (const obj of asArray(rules)) {
     if ('rule' in obj) {
       const { rule, ...styles } = obj
       const calcRule = ['screen', ...asArray(rule)].join(' and ')
-      media[calcRule] = styles
+      mediaRules[calcRule] = styles
     } else {
       for (const [rule, styles] of Object.entries(obj)) {
-        media[`screen and ${rule}`] = styles
+        mediaRules[`screen and ${rule}`] = styles
       }
     }
   }
-  return { '@media': media }
+  return { '@media': mediaRules }
 }
 export const dark = '(prefers-color-scheme: dark)'
 export const light = '(prefers-color-scheme: light)'

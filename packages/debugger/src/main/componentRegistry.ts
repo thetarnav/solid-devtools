@@ -79,23 +79,23 @@ export function findComponentElement(
 export function findComponent(el: HTMLElement): { name: string; id: NodeID } | null {
   const including = new Map<Solid.Owner, ComponentData>()
 
-  let current: HTMLElement | null = el
-  while (current) {
+  let currEl: HTMLElement | null = el
+  while (currEl) {
     for (const component of ComponentMap.values()) {
-      if (component.elements.has(current)) including.set(component.owner, component)
+      if (component.elements.has(currEl)) including.set(component.owner, component)
     }
-    current = including.size === 0 ? current.parentElement : null
+    currEl = including.size === 0 ? currEl.parentElement : null
   }
 
   if (including.size > 1) {
     // find the closest component
     for (const owner of including.keys()) {
       if (!including.has(owner)) continue
-      let current = owner.owner
-      while (current) {
-        const deleted = including.delete(current)
+      let currOwner = owner.owner
+      while (currOwner) {
+        const deleted = including.delete(currOwner)
         if (deleted) break
-        current = current.owner
+        currOwner = currOwner.owner
       }
     }
   }
