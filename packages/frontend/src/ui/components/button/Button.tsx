@@ -1,9 +1,9 @@
-import { ParentComponent, ComponentProps, Component } from 'solid-js'
+import { Component, ComponentProps, ParentComponent } from 'solid-js'
 // import { AriaToggleButtonProps, createToggleButton } from "@solid-aria/button"
-import { combineProps } from '@solid-primitives/props'
 import { Icon } from '@/ui'
-import * as styles from './button.css'
+import { combineProps } from '@solid-primitives/props'
 import clsx from 'clsx'
+import * as styles from './button.css'
 
 export const ToggleButton: ParentComponent<
   ComponentProps<'button'> & { onToggle: (selected: boolean) => void; selected: boolean }

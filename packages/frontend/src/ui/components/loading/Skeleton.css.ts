@@ -1,5 +1,5 @@
-import { style } from '@vanilla-extract/css'
 import { centerChild, color } from '@/ui/theme'
+import { style } from '@vanilla-extract/css'
 
 export const skeleton = style({
   ...centerChild,

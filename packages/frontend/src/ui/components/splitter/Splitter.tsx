@@ -1,11 +1,11 @@
-import { createComputed, children, createSignal, JSX, Show } from 'solid-js'
+import { createBodyCursor } from '@solid-primitives/cursor'
 import { makeEventListener } from '@solid-primitives/event-listener'
+import { createMediaQuery } from '@solid-primitives/media'
+import { getPositionInElement } from '@solid-primitives/mouse'
+import { scheduleIdle } from '@solid-primitives/scheduled'
 import { clamp } from '@solid-primitives/utils'
 import { assignInlineVars } from '@vanilla-extract/dynamic'
-import { createBodyCursor } from '@solid-primitives/cursor'
-import { createMediaQuery } from '@solid-primitives/media'
-import { scheduleIdle } from '@solid-primitives/scheduled'
-import { getPositionInElement } from '@solid-primitives/mouse'
+import { children, createComputed, createSignal, JSX, Show } from 'solid-js'
 import * as styles from './Splitter.css'
 
 export function Splitter(props: {

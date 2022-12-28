@@ -1,6 +1,6 @@
-import { assertTransform } from './setup'
 import { describe, test } from 'vitest'
 import plugin from '../src/name'
+import { assertTransform } from './setup'
 
 // Positive tests
 for (let [create, module, extraArg] of [

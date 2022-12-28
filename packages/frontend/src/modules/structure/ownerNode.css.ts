@@ -1,5 +1,3 @@
-import { createVar, style } from '@vanilla-extract/css'
-import { CSSVarFunction } from '@vanilla-extract/private'
 import {
   color,
   dark,
@@ -13,8 +11,10 @@ import {
   transition,
   vars,
 } from '@/ui/theme'
-import { rowHeight, rowPadding } from './structure.css'
+import { createVar, style } from '@vanilla-extract/css'
+import { CSSVarFunction } from '@vanilla-extract/private'
 import { Property } from 'csstype'
+import { rowHeight, rowPadding } from './structure.css'
 
 export const levelVar: CSSVarFunction = createVar()
 

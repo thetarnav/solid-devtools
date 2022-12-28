@@ -16,6 +16,7 @@ importers:
       eslint-plugin-no-only-tests: ^3.1.0
       jsdom: ^20.0.3
       prettier: ^2.8.1
+      prettier-plugin-organize-imports: ^3.2.1
       solid-js: ^1.6.6
       tsup: ^6.5.0
       turbo: ^1.6.3
@@ -36,6 +37,7 @@ importers:
       eslint-plugin-no-only-tests: 3.1.0
       jsdom: 20.0.3
       prettier: 2.8.1
+      prettier-plugin-organize-imports: 3.2.1_2gbcgqmzq2pxiocqw2qs7hdeqe
       solid-js: 1.6.6
       tsup: 6.5.0_typescript@4.9.4
       turbo: 1.6.3
@@ -2474,7 +2476,6 @@ packages:
 
   /@types/node/18.11.18:
     resolution: {integrity: sha512-DHQpWGjyQKSHj3ebjFI/wRKcqQcdR+MoFBygntYOZytCqNfkd2ZC4ARDJ2DQqhjH5p85Nnd3jhUJIXrszFX/JA==}
-    dev: true
 
   /@types/normalize-package-data/2.4.1:
     resolution: {integrity: sha512-Gj7cI7z+98M282Tqmp2K5EIsoouUEzbBJhQQzDE3jSIRk6r9gsz0oUokqIUR4u1R3dMHo0pDHM7sNOHyhulypw==}
@@ -5963,6 +5964,23 @@ packages:
     engines: {node: '>= 0.8.0'}
     dev: true
 
+  /prettier-plugin-organize-imports/3.2.1_2gbcgqmzq2pxiocqw2qs7hdeqe:
+    resolution: {integrity: sha512-bty7C2Ecard5EOXirtzeCAqj4FU4epeuWrQt/Z+sh8UVEpBlBZ3m3KNPz2kFu7KgRTQx/C9o4/TdquPD1jOqjQ==}
+    peerDependencies:
+      '@volar/vue-language-plugin-pug': ^1.0.4
+      '@volar/vue-typescript': ^1.0.4
+      prettier: '>=2.0'
+      typescript: '>=2.9'
+    peerDependenciesMeta:
+      '@volar/vue-language-plugin-pug':
+        optional: true
+      '@volar/vue-typescript':
+        optional: true
+    dependencies:
+      prettier: 2.8.1
+      typescript: 4.9.4
+    dev: true
+
   /prettier/2.8.1:
     resolution: {integrity: sha512-lqGoSJBQNJidqCHE80vqZJHWHRFoNYsSpP9AjFhlhi9ODCJA541svILes/+/1GM3VaL/abZi7cpFzOpdR9UPKg==}
     engines: {node: '>=10.13.0'}
@@ -7210,7 +7228,7 @@ packages:
       merge-anything: 5.1.4
       solid-js: 1.6.6
       solid-refresh: 0.4.1_solid-js@1.6.6
-      vite: 4.0.3
+      vite: 4.0.3_@types+node@18.11.18
       vitefu: 0.2.4_vite@4.0.3
     transitivePeerDependencies:
       - supports-color
@@ -7279,7 +7297,6 @@ packages:
       rollup: 3.9.0
     optionalDependencies:
       fsevents: 2.3.2
-    dev: true
 
   /vitefu/0.2.4_vite@4.0.3:
     resolution: {integrity: sha512-fanAXjSaf9xXtOOeno8wZXIhgia+CZury481LsDaV++lSvcU2R9Ch2bPh3PYFyoHW+w9LqAeYRISVQjUIew14g==}
@@ -7289,7 +7306,7 @@ packages:
       vite:
         optional: true
     dependencies:
-      vite: 4.0.3
+      vite: 4.0.3_@types+node@18.11.18
 
   /vitest/0.26.2:
     resolution: {integrity: sha512-Jvqxh6SDy9SsuslkDjts0iDewDIdq4rveEt69YgDuAb1tVDGV0lDepVaeAFraoySWqneJmOt4TngFFNhlw7GfA==}

@@ -1,7 +1,6 @@
-import { style, createVar, StyleRule } from '@vanilla-extract/css'
+import { media, mobile, spacing, transition, vars } from '@/ui/theme'
+import { createVar, style, StyleRule } from '@vanilla-extract/css'
 import { CSSVarFunction } from '@vanilla-extract/private'
-import { mobile, spacing, media, transition } from '@/ui/theme'
-import { vars } from '@/ui/theme'
 
 const minSize = spacing[36]
 const splitSize = '1px'

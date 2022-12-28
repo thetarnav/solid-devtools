@@ -1,16 +1,16 @@
-import { createRoot } from 'solid-js'
-import { throttle } from '@solid-primitives/scheduled'
 import { warn, whileArray } from '@solid-devtools/shared/utils'
+import { throttle } from '@solid-primitives/scheduled'
+import { createRoot } from 'solid-js'
+import { clearComponentRegistry, registerComponent } from './componentRegistry'
+import { defaultWalkerMode, NodeType, TreeWalkerMode } from './constants'
+import { Core, NodeID, Solid, StructureUpdates } from './types'
+import { getOwner, isSolidRoot, markNodeID, onOwnerCleanup } from './utils'
 import {
   ComputationUpdateHandler,
   getClosestIncludedOwner,
   getTopRoot,
   walkSolidTree,
 } from './walker'
-import { markNodeID, isSolidRoot, onOwnerCleanup, getOwner } from './utils'
-import { Core, NodeID, Solid, StructureUpdates } from './types'
-import { defaultWalkerMode, NodeType, TreeWalkerMode } from './constants'
-import { clearComponentRegistry, registerComponent } from './componentRegistry'
 
 // TREE WALKER MODE
 let CurrentTreeWalkerMode: TreeWalkerMode = defaultWalkerMode

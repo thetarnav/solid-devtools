@@ -9,9 +9,9 @@ import {
   JSX,
   mergeProps,
   onError,
+  ParentComponent,
   Show,
   untrack,
-  ParentComponent,
 } from 'solid-js'
 
 export type HeadlessErrorOverlayRenderProps = {

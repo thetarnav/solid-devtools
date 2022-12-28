@@ -1,5 +1,5 @@
-import { Component } from 'solid-js'
 import { createPolled } from '@solid-primitives/timer'
+import { Component } from 'solid-js'
 import * as styles from './Skeleton.css'
 
 export const Skeleton: Component<{}> = () => {

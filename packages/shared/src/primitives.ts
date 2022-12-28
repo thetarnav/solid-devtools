@@ -1,12 +1,16 @@
+import { makeEventListener } from '@solid-primitives/event-listener'
+import { createMediaQuery } from '@solid-primitives/media'
+import { createSharedRoot } from '@solid-primitives/rootless'
+import { AnyFunction, onRootCleanup } from '@solid-primitives/utils'
 import {
   Accessor,
   createMemo,
+  createRoot,
   createSignal,
   getOwner,
   onCleanup,
-  untrack,
   runWithOwner,
-  createRoot,
+  untrack,
 } from 'solid-js'
 import type {
   AccessorArray,
@@ -16,10 +20,6 @@ import type {
   OnEffectFunction,
   SignalOptions,
 } from 'solid-js/types/reactive/signal'
-import { AnyFunction, onRootCleanup } from '@solid-primitives/utils'
-import { makeEventListener } from '@solid-primitives/event-listener'
-import { createSharedRoot } from '@solid-primitives/rootless'
-import { createMediaQuery } from '@solid-primitives/media'
 import { Primitive } from 'type-fest'
 
 export type WritableDeep<T> = 0 extends 1 & T

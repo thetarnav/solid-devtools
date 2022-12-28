@@ -1,5 +1,5 @@
-import { ParentComponent } from 'solid-js'
 import { clsx } from 'clsx'
+import { ParentComponent } from 'solid-js'
 import * as styles from './Highlight.css'
 
 export const Highlight: ParentComponent<{

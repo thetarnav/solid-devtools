@@ -1,7 +1,7 @@
 import { render } from 'solid-js/web'
+import { Debugger } from '../../../packages/debugger/src'
 import { Clock } from './Clock'
 import './styles.css'
-import { Debugger } from '../../../packages/debugger/src'
 
 render(
   () => (

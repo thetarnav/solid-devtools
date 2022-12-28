@@ -1,5 +1,5 @@
-import { createSignal } from 'solid-js'
 import { Devtools, MountIcons } from '@solid-devtools/frontend'
+import { createSignal } from 'solid-js'
 import createBridge from './bridge'
 
 export default function App() {

@@ -1,7 +1,7 @@
-import type * as API from './index'
 import { createRoot } from 'solid-js'
-import type { Solid } from './main/types'
+import type * as API from './index'
 import { NodeType } from './main/constants'
+import type { Solid } from './main/types'
 
 export * from './types'
 

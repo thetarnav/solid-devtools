@@ -1,43 +1,43 @@
 /* eslint-disable no-console */
-import { Accessor, onCleanup, $PROXY, untrack, createEffect, on } from 'solid-js'
-import { arrayEquals, asArray, Many } from '@solid-primitives/utils'
 import {
+  Core,
+  getFunctionSources,
+  getOwner,
   getOwnerType,
+  interceptComputationRerun,
   isSolidComputation,
+  isSolidMemo,
+  isSolidStore,
+  lookupOwner,
+  makeSolidUpdateListener,
+  makeValueUpdateListener,
   observeValueUpdate,
   onParentCleanup,
-  getFunctionSources,
-  makeSolidUpdateListener,
-  isSolidMemo,
-  interceptComputationRerun,
-  lookupOwner,
-  makeValueUpdateListener,
   removeValueUpdateObserver,
-  Core,
-  getOwner,
   Solid,
-  isSolidStore,
 } from '@solid-devtools/debugger'
 import { NodeType } from '@solid-devtools/debugger/types'
-import { dedupeArray, arrayRefEquals } from '@solid-devtools/shared/utils'
+import { arrayRefEquals, dedupeArray } from '@solid-devtools/shared/utils'
+import { arrayEquals, asArray, Many } from '@solid-primitives/utils'
+import { $PROXY, Accessor, createEffect, on, onCleanup, untrack } from 'solid-js'
 import {
   getComputationCreatedLabel,
   getComputationRerunLabel,
-  getOwnerDisposedLabel,
   getNodeState,
+  getOwnerDisposedLabel,
+  getPropLabel,
+  getPropsInitLabel,
+  getPropsKeyUpdateLabel,
   logComputation,
   logInitialValue,
   logObservers,
   logOwned,
   logSignalsInitialValues,
+  logSignalValue,
   logSignalValueUpdate,
-  UNUSED,
   NodeStateWithValue,
   paddedForEach,
-  getPropsInitLabel,
-  logSignalValue,
-  getPropsKeyUpdateLabel,
-  getPropLabel,
+  UNUSED,
 } from './log'
 import { getDiffMap, makeTimeMeter } from './utils'
 

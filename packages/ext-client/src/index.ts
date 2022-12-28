@@ -4,12 +4,11 @@ import './client'
 enableRootsAutoattach()
 
 export {
-  Debugger,
   attachDebugger,
-  useDebugger,
-  useLocator,
+  Debugger,
   makeSolidUpdateListener,
   markComponentLoc,
+  useDebugger,
+  useLocator,
 } from '@solid-devtools/debugger'
-
 export type { LocatorOptions, TargetIDE, TargetURLFunction } from '@solid-devtools/debugger'

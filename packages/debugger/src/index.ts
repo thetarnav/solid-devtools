@@ -6,40 +6,36 @@ export const Debugger: ParentComponent = props => {
   return props.children
 }
 
-export * from './types'
-
+export { markComponentLoc } from './locator'
 export {
+  attachDebugger,
+  createInternalRoot,
+  enableRootsAutoattach,
+  unobserveAllRoots,
+} from './main/roots'
+export {
+  interceptComputationRerun,
+  makeSolidUpdateListener,
+  makeValueUpdateListener,
+  observeValueUpdate,
+  removeValueUpdateObserver,
+} from './main/update'
+export {
+  getFunctionSources,
+  getNodeName,
+  getNodeType,
   getOwner,
   getOwnerType,
-  getNodeType,
-  getNodeName,
-  lookupOwner,
   isSolidComputation,
   isSolidMemo,
   isSolidOwner,
   isSolidRoot,
   isSolidStore,
+  lookupOwner,
   onOwnerCleanup,
   onParentCleanup,
-  getFunctionSources,
 } from './main/utils'
-
-export {
-  makeSolidUpdateListener,
-  observeValueUpdate,
-  interceptComputationRerun,
-  makeValueUpdateListener,
-  removeValueUpdateObserver,
-} from './main/update'
-
-export {
-  attachDebugger,
-  enableRootsAutoattach,
-  unobserveAllRoots,
-  createInternalRoot,
-} from './main/roots'
-
-export { markComponentLoc } from './locator'
+export * from './types'
 
 import plugin from './main/plugin'
 export const useDebugger = plugin.useDebugger

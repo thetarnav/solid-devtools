@@ -1,7 +1,7 @@
 import { createMemo, For, JSX, onCleanup, Show } from 'solid-js'
 import { render } from 'solid-js/web'
-import { createLocalStore } from './utils'
 import { Debugger } from '../../../packages/debugger/src'
+import { createLocalStore } from './utils'
 
 const ESCAPE_KEY = 27
 const ENTER_KEY = 13

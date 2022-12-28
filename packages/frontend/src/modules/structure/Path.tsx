@@ -1,12 +1,12 @@
-import { Component } from 'solid-js'
-import { createElementSize } from '@solid-primitives/resize-observer'
-import { useRemSize } from '@solid-primitives/styles'
+import { useController } from '@/controller'
+import { Icon } from '@/ui'
+import { NodeTypeIcon } from '@/ui/components/Owner'
 import { NodeType } from '@solid-devtools/debugger/types'
 import { createHover } from '@solid-devtools/shared/primitives'
-import { Icon } from '@/ui'
-import { useController } from '@/controller'
+import { createElementSize } from '@solid-primitives/resize-observer'
+import { useRemSize } from '@solid-primitives/styles'
+import { Component } from 'solid-js'
 import * as styles from './path.css'
-import { NodeTypeIcon } from '@/ui/components/Owner'
 
 export const OwnerPath: Component = () => {
   const { structure, toggleHoveredNode, setInspectedNode, inspector } = useController()

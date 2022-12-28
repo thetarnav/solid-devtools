@@ -1,7 +1,7 @@
-import { Component, createMemo, Show, Accessor, Index } from 'solid-js'
-import { Portal } from 'solid-js/web'
-import { createElementCursor } from '@solid-primitives/cursor'
 import { createElementBounds } from '@solid-primitives/bounds'
+import { createElementCursor } from '@solid-primitives/cursor'
+import { Accessor, Component, createMemo, Index, Show } from 'solid-js'
+import { Portal } from 'solid-js/web'
 import { LocatorComponent } from './findComponent'
 
 const styles = /*css*/ `

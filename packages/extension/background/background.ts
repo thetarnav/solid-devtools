@@ -15,14 +15,14 @@ import {
   PostMessageFn,
   Versions,
 } from 'solid-devtools/bridge'
+import icons from '../src/icons'
 import {
+  CONTENT_CONNECTION_NAME,
   createPortMessanger,
   DEVTOOLS_CONNECTION_NAME,
-  CONTENT_CONNECTION_NAME,
   PANEL_CONNECTION_NAME,
   POPUP_CONNECTION_NAME,
 } from '../src/messanger'
-import icons from '../src/icons'
 
 log('Background script working.')
 

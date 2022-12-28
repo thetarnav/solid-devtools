@@ -1,16 +1,16 @@
+import { FalsyValue } from '@solid-primitives/utils'
 import { unwrap } from 'solid-js/store'
+import { isStoreNode, NodeIDMap } from '../main/utils'
 import {
-  NodeID,
   Core,
   EncodedValue,
-  ValueType,
   INFINITY,
-  NEGATIVE_INFINITY,
   NAN,
+  NEGATIVE_INFINITY,
+  NodeID,
   UNDEFINED,
+  ValueType,
 } from '../types'
-import { isStoreNode, NodeIDMap } from '../main/utils'
-import { FalsyValue } from '@solid-primitives/utils'
 
 // globals
 let Deep: boolean

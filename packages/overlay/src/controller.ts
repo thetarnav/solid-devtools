@@ -1,7 +1,7 @@
-import { createEffect, onCleanup } from 'solid-js'
 import { enableRootsAutoattach, useDebugger } from '@solid-devtools/debugger'
 import { Controller } from '@solid-devtools/frontend'
 import { defer } from '@solid-devtools/shared/primitives'
+import { createEffect, onCleanup } from 'solid-js'
 
 enableRootsAutoattach()
 

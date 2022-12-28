@@ -7,10 +7,10 @@ It connects to the background script.
 
 */
 
-import { createPortMessanger, DEVTOOLS_CONNECTION_NAME } from '../src/messanger'
-import { once } from 'solid-devtools/bridge'
 import { error, log } from '@solid-devtools/shared/utils'
+import { once } from 'solid-devtools/bridge'
 import icons from '../src/icons'
+import { createPortMessanger, DEVTOOLS_CONNECTION_NAME } from '../src/messanger'
 
 log('Devtools script working.')
 

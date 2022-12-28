@@ -1,12 +1,12 @@
-import { createEffect, createSignal, onCleanup } from 'solid-js'
 import { createInternalRoot, useDebugger } from '@solid-devtools/debugger'
+import { defer } from '@solid-devtools/shared/primitives'
+import { createEffect, createSignal, onCleanup } from 'solid-js'
 import {
   makeMessageListener,
-  Messages,
   makePostMessage,
+  Messages,
   startListeningWindowMessages,
 } from './bridge'
-import { defer } from '@solid-devtools/shared/primitives'
 
 startListeningWindowMessages()
 const _fromContent = makeMessageListener<Messages.Extension>()

@@ -1,7 +1,7 @@
-import { createVar, style } from '@vanilla-extract/css'
-import { spacing, theme, padding, rounded, centerChild, transition, vars, flex } from '@/ui/theme'
-import { panelHeaderHeight, panelHeaderAfterEl } from '../structure/structure.css'
 import { createHoverBackground } from '@/ui/mixins'
+import { centerChild, flex, padding, rounded, spacing, theme, transition, vars } from '@/ui/theme'
+import { createVar, style } from '@vanilla-extract/css'
+import { panelHeaderAfterEl, panelHeaderHeight } from '../structure/structure.css'
 
 export const root = style({
   height: '100%',

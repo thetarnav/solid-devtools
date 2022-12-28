@@ -1,5 +1,8 @@
-import { batch, createEffect, createMemo, createSignal } from 'solid-js'
-import { createContextProvider } from '@solid-primitives/context'
+import type {
+  InspectorUpdate,
+  SetInspectedNodeData,
+  ToggleInspectedValueData,
+} from '@solid-devtools/debugger'
 import {
   ComputationUpdate,
   HighlightElementPayload,
@@ -9,14 +12,11 @@ import {
   StructureUpdates,
   TreeWalkerMode,
 } from '@solid-devtools/debugger/types'
-import type {
-  InspectorUpdate,
-  SetInspectedNodeData,
-  ToggleInspectedValueData,
-} from '@solid-devtools/debugger'
-import createStructure from './modules/structure'
-import createInspector from './modules/inspector'
 import { defer } from '@solid-devtools/shared/primitives'
+import { createContextProvider } from '@solid-primitives/context'
+import { batch, createEffect, createMemo, createSignal } from 'solid-js'
+import createInspector from './modules/inspector'
+import createStructure from './modules/structure'
 
 type ListenersFromPayloads<T extends Record<string, any>> = {
   [K in keyof Pick<

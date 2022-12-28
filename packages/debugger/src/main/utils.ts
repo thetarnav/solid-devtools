@@ -1,17 +1,17 @@
+import { trimString } from '@solid-devtools/shared/utils'
+import { Emit } from '@solid-primitives/event-bus'
+import { throttle } from '@solid-primitives/scheduled'
 import {
   createComputed,
   createRoot,
+  getOwner as _getOwner,
   onCleanup,
   runWithOwner,
-  getOwner as _getOwner,
 } from 'solid-js'
-import { Emit } from '@solid-primitives/event-bus'
-import { throttle } from '@solid-primitives/scheduled'
-import { trimString } from '@solid-devtools/shared/utils'
 import { DEV as _STORE_DEV } from 'solid-js/store'
-import { Core, NodeID, Solid } from './types'
 import { $SDT_ID, NodeType } from './constants'
 import { getNewSdtId } from './id'
+import { Core, NodeID, Solid } from './types'
 
 const STORE_DEV = _STORE_DEV!
 

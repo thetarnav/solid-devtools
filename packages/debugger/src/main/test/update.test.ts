@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest'
 import { createComputed, createRoot, createSignal } from 'solid-js'
+import { describe, expect, it } from 'vitest'
 import {
   interceptComputationRerun,
   makeSolidUpdateListener,

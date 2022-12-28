@@ -1,5 +1,7 @@
-import { Mapped, NodeID, Solid } from './types'
+import type { ComponentRegisterHandler } from './componentRegistry'
 import { NodeType, TreeWalkerMode } from './constants'
+import { Mapped, NodeID, Solid } from './types'
+import { interceptComputationRerun } from './update'
 import {
   getComponentRefreshNode,
   isSolidRoot,
@@ -8,8 +10,6 @@ import {
   markOwnerType,
   resolveElements,
 } from './utils'
-import { interceptComputationRerun } from './update'
-import type { ComponentRegisterHandler } from './componentRegistry'
 
 export type ComputationUpdateHandler = (
   rootId: NodeID,

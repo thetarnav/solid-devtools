@@ -1,7 +1,7 @@
-import { style } from '@vanilla-extract/css'
-import { spacing, color, rounded, theme, flex, borderValue } from '@/ui/theme'
 import { toggleButton } from '@/ui/components/button/button.css'
-import { varsStyle, vars } from './ui/theme/vars.css'
+import { borderValue, color, flex, rounded, spacing, theme } from '@/ui/theme'
+import { style } from '@vanilla-extract/css'
+import { vars, varsStyle } from './ui/theme/vars.css'
 
 export const app = style([
   varsStyle,

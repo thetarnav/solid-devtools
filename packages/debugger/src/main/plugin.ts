@@ -1,19 +1,19 @@
-import { Accessor, batch, createComputed, createMemo } from 'solid-js'
-import { createEventHub, EventBus, EventHub } from '@solid-primitives/event-bus'
 import { atom, defer } from '@solid-devtools/shared/primitives'
-import { createBatchedUpdateEmitter } from './utils'
+import { createEventHub, EventBus, EventHub } from '@solid-primitives/event-bus'
+import { Accessor, batch, createComputed, createMemo } from 'solid-js'
+import { createInspector, InspectorUpdate } from '../inspector'
+import { createLocator } from '../locator'
 import {
   changeTreeWalkerMode,
   createInternalRoot,
   forceUpdateAllRoots,
-  updateAllRoots,
   setComputationUpdateHandler,
   setRootUpdatesHandler,
   StructureUpdateHandler,
+  updateAllRoots,
 } from './roots'
-import { createLocator } from '../locator'
-import { createInspector, InspectorUpdate } from '../inspector'
 import { ComputationUpdate, Mapped, StructureUpdates } from './types'
+import { createBatchedUpdateEmitter } from './utils'
 
 export type BatchComputationUpdatesHandler = (payload: ComputationUpdate[]) => void
 

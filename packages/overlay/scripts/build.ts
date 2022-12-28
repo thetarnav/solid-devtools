@@ -1,13 +1,13 @@
+import chokidar from 'chokidar'
+import CleanCSS from 'clean-css'
+import esbuild from 'esbuild'
+import { solidPlugin } from 'esbuild-plugin-solid'
 import fs from 'fs'
 import { readFile } from 'fs/promises'
 import path from 'path'
-import { Worker } from 'worker_threads'
 import { fileURLToPath } from 'url'
-import esbuild from 'esbuild'
-import { solidPlugin } from 'esbuild-plugin-solid'
-import CleanCSS from 'clean-css'
-import chokidar from 'chokidar'
-import { peerDependencies, dependencies } from '../package.json'
+import { Worker } from 'worker_threads'
+import { dependencies, peerDependencies } from '../package.json'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)

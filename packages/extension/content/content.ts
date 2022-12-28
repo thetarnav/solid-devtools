@@ -1,14 +1,14 @@
+import { error, log, warn } from '@solid-devtools/shared/utils'
 import {
-  makeMessageListener,
-  makePostMessage,
-  startListeningWindowMessages,
-  onAllClientMessages,
+  forwardMessageToWindow,
   ForwardPayload,
   isForwardMessage,
-  forwardMessageToWindow,
+  makeMessageListener,
+  makePostMessage,
+  onAllClientMessages,
+  startListeningWindowMessages,
 } from 'solid-devtools/bridge'
-import { error, log, warn } from '@solid-devtools/shared/utils'
-import { createPortMessanger, CONTENT_CONNECTION_NAME } from '../src/messanger'
+import { CONTENT_CONNECTION_NAME, createPortMessanger } from '../src/messanger'
 
 import.meta.env.DEV && log('Content script working.')
 

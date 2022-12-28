@@ -1,9 +1,9 @@
-import { createMutable, createStore } from 'solid-js/store'
-import { describe, test, expect, vi } from 'vitest'
-import { EncodedValue, INFINITY, NAN, NEGATIVE_INFINITY, UNDEFINED, ValueType } from '../types'
-import { encodeValue } from '../serialize'
-import { NodeIDMap } from '../../main/utils'
 import { Truthy } from '@solid-primitives/utils'
+import { createMutable, createStore } from 'solid-js/store'
+import { describe, expect, test, vi } from 'vitest'
+import { NodeIDMap } from '../../main/utils'
+import { encodeValue } from '../serialize'
+import { EncodedValue, INFINITY, NAN, NEGATIVE_INFINITY, UNDEFINED, ValueType } from '../types'
 
 let mockLAST_ID = 0
 vi.mock('../../main/id', () => ({ getNewSdtId: () => mockLAST_ID++ + '' }))

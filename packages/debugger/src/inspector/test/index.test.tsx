@@ -1,4 +1,3 @@
-import { describe, beforeEach, vi, it, expect } from 'vitest'
 import {
   createComputed,
   createMemo,
@@ -7,8 +6,9 @@ import {
   createSignal,
   JSX,
 } from 'solid-js'
-import { Mapped, NodeType, PropGetterState, Solid, ValueType } from '../../types'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { getOwner } from '../../main/utils'
+import { Mapped, NodeType, PropGetterState, Solid, ValueType } from '../../types'
 import { collectOwnerDetails } from '../inspector'
 
 let mockLAST_ID = 0

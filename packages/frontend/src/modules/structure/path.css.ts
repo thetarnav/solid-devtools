@@ -1,18 +1,18 @@
-import { style, styleVariants } from '@vanilla-extract/css'
 import { createHighlightStyles } from '@/ui/mixins'
 import {
+  borderValue,
   centerChild,
   color,
+  insetX,
+  margin,
+  padding,
+  remValue,
   rounded,
   spacing,
   theme,
-  insetX,
-  padding,
-  margin,
-  remValue,
   vars,
-  borderValue,
 } from '@/ui/theme'
+import { style, styleVariants } from '@vanilla-extract/css'
 import { pathHeight } from './structure.css'
 
 const rowHeight = spacing[3]

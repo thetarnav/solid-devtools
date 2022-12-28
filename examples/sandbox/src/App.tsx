@@ -1,26 +1,26 @@
 /* @refresh reload */
+import { unobserveAllRoots } from '@solid-devtools/debugger'
 import {
   Component,
-  createSignal,
+  createComputed,
   createEffect,
   createMemo,
-  createComputed,
-  Setter,
-  ParentComponent,
-  createRoot,
   createRenderEffect,
-  onCleanup,
-  Show,
   createResource,
-  Suspense,
+  createRoot,
+  createSignal,
   ErrorBoundary,
+  onCleanup,
+  ParentComponent,
+  Setter,
+  Show,
+  Suspense,
 } from 'solid-js'
-import Todos from './Todos'
-import { disposeApp } from '.'
-import { ThemeExample } from './Theme'
 import { createMutable } from 'solid-js/store'
+import { disposeApp } from '.'
 import Recursive from './Recursive'
-import { unobserveAllRoots } from '@solid-devtools/debugger'
+import { ThemeExample } from './Theme'
+import Todos from './Todos'
 
 const doMediumCalc = () => {
   Array.from({ length: 1000000 }, (_, i) => i).sort(() => Math.random() - 5)

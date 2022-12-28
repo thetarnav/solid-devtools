@@ -1,4 +1,4 @@
-import { createVar, style, styleVariants } from '@vanilla-extract/css'
+import { createHoverBackground } from '@/ui/mixins'
 import {
   border,
   borderValue,
@@ -14,7 +14,7 @@ import {
   transition,
   vars,
 } from '@/ui/theme'
-import { createHoverBackground } from '@/ui/mixins'
+import { createVar, style, styleVariants } from '@vanilla-extract/css'
 
 export const pathHeight = spacing[4.5]
 

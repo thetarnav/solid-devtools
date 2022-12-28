@@ -1,5 +1,5 @@
-import { style } from '@vanilla-extract/css'
 import { color, hexToRgbValue, rounded, spacing } from '@/ui/theme'
+import { style } from '@vanilla-extract/css'
 
 const colorValues = hexToRgbValue(color.cyan[600])
 

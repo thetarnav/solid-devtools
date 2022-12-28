@@ -1,6 +1,6 @@
 import { PluginObj, traverse } from '@babel/core'
-import { parse } from '@babel/parser'
 import generate from '@babel/generator'
+import { parse } from '@babel/parser'
 import { expect } from 'vitest'
 
 export const cwd = 'root/src'

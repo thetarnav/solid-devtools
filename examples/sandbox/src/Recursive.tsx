@@ -1,4 +1,4 @@
-import { Component, For, splitProps, mergeProps, createContext, useContext } from 'solid-js'
+import { Component, createContext, For, mergeProps, splitProps, useContext } from 'solid-js'
 import { createStore } from 'solid-js/store'
 
 type NodeType = {

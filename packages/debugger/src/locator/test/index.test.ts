@@ -1,6 +1,6 @@
 let mockIsWindows = true
 
-import { describe, test, expect, vi, beforeEach } from 'vitest'
+import { beforeEach, describe, expect, test, vi } from 'vitest'
 
 vi.mock('@solid-primitives/platform', () => ({
   get isWindows() {

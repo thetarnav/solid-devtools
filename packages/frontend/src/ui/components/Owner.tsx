@@ -1,5 +1,5 @@
-import { Component, JSX } from 'solid-js'
 import { NodeType } from '@solid-devtools/debugger'
+import { Component, JSX } from 'solid-js'
 import { Icon, IconComponent } from '..'
 import * as styles from './Owner.css'
 

@@ -1,12 +1,12 @@
 import { PluginItem, transformAsync } from '@babel/core'
-import { PluginOption } from 'vite'
-import { createRequire } from 'module'
 import {
   LocatorOptions,
   MARK_COMPONENT,
-  USE_LOCATOR,
   TargetURLFunction,
+  USE_LOCATOR,
 } from '@solid-devtools/debugger/types'
+import { createRequire } from 'module'
+import { PluginOption } from 'vite'
 import jsxLocationPlugin, { MARK_COMPONENT_GLOBAL } from './location'
 import namePlugin from './name'
 

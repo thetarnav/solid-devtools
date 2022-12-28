@@ -1,10 +1,10 @@
-import { assertTransform, cwd, file } from './setup'
-import { describe, test } from 'vitest'
-import getPlugin, { MARK_COMPONENT_GLOBAL } from '../src/location'
 import {
   LOCATION_ATTRIBUTE_NAME,
   WINDOW_PROJECTPATH_PROPERTY,
 } from '@solid-devtools/debugger/types'
+import { describe, test } from 'vitest'
+import getPlugin, { MARK_COMPONENT_GLOBAL } from '../src/location'
+import { assertTransform, cwd, file } from './setup'
 
 describe('location', () => {
   const testData: [

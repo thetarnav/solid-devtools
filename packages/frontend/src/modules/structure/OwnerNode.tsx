@@ -1,10 +1,10 @@
-import { Component } from 'solid-js'
-import { assignInlineVars } from '@vanilla-extract/dynamic'
-import { createHover, createPingedSignal } from '@solid-devtools/shared/primitives'
 import { Badge, CollapseToggle, Highlight } from '@/ui'
 import { OwnerName } from '@/ui/components/Owner'
-import * as styles from './ownerNode.css'
+import { createHover, createPingedSignal } from '@solid-devtools/shared/primitives'
+import { assignInlineVars } from '@vanilla-extract/dynamic'
+import { Component } from 'solid-js'
 import type { Structure } from '.'
+import * as styles from './ownerNode.css'
 
 export const OwnerNode: Component<{
   owner: Structure.Node

@@ -1,4 +1,3 @@
-import { describe, beforeEach, vi, it, expect } from 'vitest'
 import {
   createComputed,
   createEffect,
@@ -7,9 +6,10 @@ import {
   createRoot,
   createSignal,
 } from 'solid-js'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { $SDT_ID, NodeType, TreeWalkerMode } from '../constants'
+import { Mapped, Solid } from '../types'
 import { getNodeName, getOwner } from '../utils'
-import { Solid, Mapped } from '../types'
-import { NodeType, TreeWalkerMode, $SDT_ID } from '../constants'
 import { ComputationUpdateHandler, walkSolidTree } from '../walker'
 
 let mockLAST_ID = 0

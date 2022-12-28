@@ -1,16 +1,16 @@
-import { describe, vi, it, expect, beforeEach } from 'vitest'
 import { createRoot } from 'solid-js'
 import {
   createMutable,
   createStore,
+  modifyMutable,
   produce,
   reconcile,
   unwrap,
-  modifyMutable,
 } from 'solid-js/store'
-import { Core, Solid } from '../../types'
-import { observeStoreNode, setOnStoreNodeUpdate, OnNodeUpdate, StoreNodeProperty } from '../store'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { getOwner, isSolidStore, markNodeID } from '../../main/utils'
+import { Core, Solid } from '../../types'
+import { observeStoreNode, OnNodeUpdate, setOnStoreNodeUpdate, StoreNodeProperty } from '../store'
 
 const getOwnerStore = () =>
   (Object.values(getOwner()!.sourceMap!).find(s => isSolidStore(s))! as Solid.Store).value

@@ -1,6 +1,6 @@
-import { style } from '@vanilla-extract/css'
 import { createHighlightStyles } from '@/ui/mixins'
 import { color, dark, light, media } from '@/ui/theme'
+import { style } from '@vanilla-extract/css'
 
 const mixin = createHighlightStyles()
 

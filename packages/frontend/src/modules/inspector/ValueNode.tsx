@@ -1,3 +1,9 @@
+import { CollapseToggle, Highlight } from '@/ui'
+import { NodeID, ValueType } from '@solid-devtools/debugger/types'
+import { createHover, createPingedSignal, defer } from '@solid-devtools/shared/primitives'
+import { Entries } from '@solid-primitives/keyed'
+import { assignInlineVars } from '@vanilla-extract/dynamic'
+import clsx from 'clsx'
 import {
   Component,
   createContext,
@@ -9,12 +15,6 @@ import {
   untrack,
   useContext,
 } from 'solid-js'
-import { Entries } from '@solid-primitives/keyed'
-import { assignInlineVars } from '@vanilla-extract/dynamic'
-import { NodeID, ValueType } from '@solid-devtools/debugger/types'
-import { createHover, createPingedSignal, defer } from '@solid-devtools/shared/primitives'
-import { CollapseToggle, Highlight } from '@/ui'
-import * as styles from './ValueNode.css'
 import {
   DecodedValue,
   ElementNode,
@@ -25,7 +25,7 @@ import {
   StoreNode,
   UnknownNode,
 } from './decode'
-import clsx from 'clsx'
+import * as styles from './ValueNode.css'
 
 type ToggleElementHover = (elementId: NodeID, hovered?: boolean) => void
 

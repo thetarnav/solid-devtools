@@ -1,12 +1,12 @@
 import type {
+  ComputationUpdate,
+  HighlightElementPayload,
   InspectorUpdate,
-  SetInspectedNodeData,
-  ToggleInspectedValueData,
   Mapped,
   NodeID,
-  ComputationUpdate,
+  SetInspectedNodeData,
   StructureUpdates,
-  HighlightElementPayload,
+  ToggleInspectedValueData,
   TreeWalkerMode,
 } from '@solid-devtools/debugger/types'
 

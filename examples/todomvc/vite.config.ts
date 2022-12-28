@@ -1,6 +1,6 @@
+import path from 'path'
 import { defineConfig } from 'vite'
 import solidPlugin from 'vite-plugin-solid'
-import path from 'path'
 
 const pathToPackages = path.resolve(__dirname, '..', '..', 'packages')
 

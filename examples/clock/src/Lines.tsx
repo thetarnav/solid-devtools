@@ -1,5 +1,5 @@
-import { Hand } from './Hand'
 import type { Component } from 'solid-js'
+import { Hand } from './Hand'
 
 type LinesProps = { numberOfLines: number; class: string; length: number; width: number }
 

@@ -1,4 +1,3 @@
-import { Accessor, createSelector, createSignal, untrack } from 'solid-js'
 import {
   defaultWalkerMode,
   Mapped,
@@ -8,6 +7,7 @@ import {
   type TreeWalkerMode,
 } from '@solid-devtools/debugger/types'
 import { createSimpleEmitter } from '@solid-primitives/event-bus'
+import { Accessor, createSelector, createSignal, untrack } from 'solid-js'
 
 export namespace Structure {
   export interface Node {

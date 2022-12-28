@@ -1,4 +1,3 @@
-import p from 'path'
 import { PluginObj, template } from '@babel/core'
 import * as t from '@babel/types'
 import {
@@ -6,6 +5,7 @@ import {
   LOCATION_ATTRIBUTE_NAME,
   WINDOW_PROJECTPATH_PROPERTY,
 } from '@solid-devtools/debugger/types'
+import p from 'path'
 
 export const MARK_COMPONENT_GLOBAL = `_$markComponentLoc`
 

@@ -1,10 +1,10 @@
-import { Component, JSX, Show } from 'solid-js'
+import { Icon, Splitter } from '@/ui'
 import { Menu, MenuItem, Popover, PopoverButton, PopoverPanel } from 'solid-headless'
-import { Splitter, Icon } from '@/ui'
+import { Component, JSX, Show } from 'solid-js'
+import * as styles from './App.css'
+import { useController } from './controller'
 import Inspector from './modules/inspector/Inspector'
 import Structure from './modules/structure/Structure'
-import { useController } from './controller'
-import * as styles from './App.css'
 
 const Options: Component = () => {
   return (

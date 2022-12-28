@@ -1,7 +1,7 @@
-import defineConfig from '../../configs/tsup.config'
 import { vanillaExtractPlugin } from '@vanilla-extract/esbuild-plugin'
-import postcss from 'postcss'
 import autoprefixer from 'autoprefixer'
+import postcss from 'postcss'
+import defineConfig from '../../configs/tsup.config'
 
 async function processCss(css: string) {
   return await postcss([autoprefixer]).process(css, {

@@ -1,10 +1,10 @@
 /** @refresh reload */
 
-import { render } from 'solid-js/web'
 import { batch, Component, createSignal, Show } from 'solid-js'
+import { render } from 'solid-js/web'
 
-import { createPortMessanger, POPUP_CONNECTION_NAME } from '../src/messanger'
 import { once } from 'solid-devtools/bridge'
+import { createPortMessanger, POPUP_CONNECTION_NAME } from '../src/messanger'
 
 import './popup.css'
 

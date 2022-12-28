@@ -1,5 +1,5 @@
-import { OnMessageFn, PostMessageFn, ForwardPayload } from 'solid-devtools/bridge'
 import { log } from '@solid-devtools/shared/utils'
+import { ForwardPayload, OnMessageFn, PostMessageFn } from 'solid-devtools/bridge'
 
 export const CONTENT_CONNECTION_NAME = '[solid-devtools]: Content Script'
 export const DEVTOOLS_CONNECTION_NAME = '[solid-devtools]: Devtools Script'

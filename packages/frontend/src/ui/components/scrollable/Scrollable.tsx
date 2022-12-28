@@ -63,9 +63,9 @@
 //   )
 // }
 
+import { combineProps } from '@solid-primitives/props'
 import { ComponentProps, ParentComponent } from 'solid-js'
 import * as styles from './Scrollable.css'
-import { combineProps } from '@solid-primitives/props'
 
 export const Scrollable: ParentComponent<ComponentProps<'div'>> = props => {
   const containerProps = combineProps(props, {

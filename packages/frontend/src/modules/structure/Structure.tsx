@@ -1,3 +1,11 @@
+import { useController } from '@/controller'
+import { Icon, Scrollable, ToggleButton } from '@/ui'
+import { NodeID, NodeType, TreeWalkerMode } from '@solid-devtools/debugger/types'
+import { defer } from '@solid-devtools/shared/primitives'
+import { createShortcut } from '@solid-primitives/keyboard'
+import { createResizeObserver } from '@solid-primitives/resize-observer'
+import { useRemSize } from '@solid-primitives/styles'
+import { assignInlineVars } from '@vanilla-extract/dynamic'
 import {
   Component,
   createEffect,
@@ -7,19 +15,11 @@ import {
   For,
   Setter,
 } from 'solid-js'
-import { assignInlineVars } from '@vanilla-extract/dynamic'
-import { useRemSize } from '@solid-primitives/styles'
-import { createResizeObserver } from '@solid-primitives/resize-observer'
-import { createShortcut } from '@solid-primitives/keyboard'
-import { defer } from '@solid-devtools/shared/primitives'
-import { NodeID, TreeWalkerMode, NodeType } from '@solid-devtools/debugger/types'
-import { useController } from '@/controller'
-import { Scrollable, ToggleButton, Icon } from '@/ui'
 import type { Structure } from '.'
 import { OwnerNode } from './OwnerNode'
 import { OwnerPath } from './Path'
-import { getVirtualVars } from './virtual'
 import * as styles from './structure.css'
+import { getVirtualVars } from './virtual'
 
 export default function StructureView() {
   return (

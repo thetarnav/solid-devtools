@@ -1,5 +1,3 @@
-import { createStore, SetStoreFunction } from 'solid-js/store'
-import { splitOnColon } from '@solid-devtools/shared/utils'
 import {
   EncodedValue,
   INFINITY,
@@ -9,6 +7,8 @@ import {
   UNDEFINED,
   ValueType,
 } from '@solid-devtools/debugger/types'
+import { splitOnColon } from '@solid-devtools/shared/utils'
+import { createStore, SetStoreFunction } from 'solid-js/store'
 
 export class StoreNodeMap {
   map = new Map<NodeID, { node: StoreNode; refs: number }>()

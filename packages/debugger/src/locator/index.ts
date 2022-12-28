@@ -1,18 +1,23 @@
-import {
-  createEffect,
-  createMemo,
-  onCleanup,
-  Accessor,
-  getOwner,
-  runWithOwner,
-  createSignal,
-} from 'solid-js'
-import { makeEventListener } from '@solid-primitives/event-listener'
-import { createKeyHold } from '@solid-primitives/keyboard'
-import { onRootCleanup } from '@solid-primitives/utils'
-import { createSimpleEmitter } from '@solid-primitives/event-bus'
 import { atom, defer, makeHoverElementListener } from '@solid-devtools/shared/primitives'
 import { asArray, warn } from '@solid-devtools/shared/utils'
+import { createSimpleEmitter } from '@solid-primitives/event-bus'
+import { makeEventListener } from '@solid-primitives/event-listener'
+import { createKeyHold } from '@solid-primitives/keyboard'
+import { scheduleIdle } from '@solid-primitives/scheduled'
+import { onRootCleanup } from '@solid-primitives/utils'
+import {
+  Accessor,
+  createEffect,
+  createMemo,
+  createSignal,
+  getOwner,
+  onCleanup,
+  runWithOwner,
+} from 'solid-js'
+import * as registry from '../main/componentRegistry'
+import { createInternalRoot, enableRootsAutoattach } from '../main/roots'
+import { NodeID } from '../main/types'
+import { attachElementOverlay } from './ElementOverlay'
 import {
   getLocationAttr,
   getSourceCodeData,
@@ -22,12 +27,7 @@ import {
   TargetIDE,
   TargetURLFunction,
 } from './findComponent'
-import { enableRootsAutoattach, createInternalRoot } from '../main/roots'
-import { attachElementOverlay } from './ElementOverlay'
-import { NodeID } from '../main/types'
 import { ClickMiddleware, HighlightElementPayload, LocatorOptions } from './types'
-import * as registry from '../main/componentRegistry'
-import { scheduleIdle } from '@solid-primitives/scheduled'
 
 export { markComponentLoc } from './markComponent'
 

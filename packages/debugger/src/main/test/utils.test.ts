@@ -1,4 +1,3 @@
-import { describe, it, expect } from 'vitest'
 import {
   createComponent,
   createComputed,
@@ -8,9 +7,10 @@ import {
   createRoot,
   createSignal,
 } from 'solid-js'
-import { getFunctionSources, getOwner, getOwnerType, onDispose } from '../utils'
-import { Solid } from '../types'
+import { describe, expect, it } from 'vitest'
 import { NodeType } from '../constants'
+import { Solid } from '../types'
+import { getFunctionSources, getOwner, getOwnerType, onDispose } from '../utils'
 
 describe('getOwnerType', () => {
   it('identifies Component', () => {

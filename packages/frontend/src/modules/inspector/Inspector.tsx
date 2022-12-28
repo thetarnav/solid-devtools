@@ -1,16 +1,16 @@
-import { Component, createMemo, For, JSX, Show } from 'solid-js'
-import { Entries } from '@solid-primitives/keyed'
+import { useController } from '@/controller'
+import { Badge, Icon, Scrollable } from '@/ui'
+import { OwnerName } from '@/ui/components/Owner'
 import {
   NodeType,
   NODE_TYPE_NAMES,
   PropGetterState,
   ValueItemType,
 } from '@solid-devtools/debugger/types'
-import { Scrollable, Badge, Icon } from '@/ui'
-import { ValueNode } from './ValueNode'
-import { useController } from '@/controller'
+import { Entries } from '@solid-primitives/keyed'
+import { Component, createMemo, For, JSX, Show } from 'solid-js'
 import * as styles from './inspector.css'
-import { OwnerName } from '@/ui/components/Owner'
+import { ValueNode } from './ValueNode'
 
 export default function Details() {
   const { inspector } = useController()

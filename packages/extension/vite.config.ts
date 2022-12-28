@@ -1,6 +1,6 @@
-import { defineConfig } from 'vitest/config'
-import solidPlugin from 'vite-plugin-solid'
 import { crx } from '@crxjs/vite-plugin'
+import solidPlugin from 'vite-plugin-solid'
+import { defineConfig } from 'vitest/config'
 
 import { testConfig } from '../../configs/vitest.config'
 import manifest from './manifest'

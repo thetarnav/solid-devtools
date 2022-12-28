@@ -1,5 +1,5 @@
-import { describe, expect, test } from 'vitest'
 import { NodeID, NodeType, StructureUpdates } from '@solid-devtools/debugger/types'
+import { describe, expect, test } from 'vitest'
 import { reconcileStructure, Structure } from '..'
 
 describe('reconcileStructure', () => {

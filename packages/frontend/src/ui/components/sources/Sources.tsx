@@ -1,5 +1,5 @@
-import { Component, Show } from 'solid-js'
 import { Repeat } from '@solid-primitives/range'
+import { Component, Show } from 'solid-js'
 import * as styles from './sources.css'
 
 export const Sources: Component<{ length: number }> = props => {

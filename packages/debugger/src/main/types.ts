@@ -1,6 +1,6 @@
 import type { EncodedValue, PropGetterState } from '../inspector/types'
 import type { LocationAttr } from '../locator/findComponent'
-import { NodeType, $SDT_ID, ValueItemType } from './constants'
+import { $SDT_ID, NodeType, ValueItemType } from './constants'
 
 export type NodeID = string & {}
 
