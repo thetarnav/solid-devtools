@@ -8,7 +8,11 @@ The following document is a _(work in progress)_ guide for contributing to Solid
 
 [`pnpm`](https://pnpm.io/), [`prettier`](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode) and [`eslint`](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint) — that's it.
 
-This project uses [pnpm](https://pnpm.io/) for package management. If you don't have it installed, you can install it with `npm install -g pnpm` and then run `pnpm install` to install all the dependencies.
+This project uses [pnpm](https://pnpm.io/) for package management. If you don't have it installed, you can install it with `npm install -g pnpm`.
+
+If this is your first time pulling the repository onto a local branch, then run `pnpm install` to install all the dependencies and `pnpm build` to build all the packages — this is important because all of the packages are linked together, using the `pnpm` workspace feature. If you don't do this, you will get errors when trying to run the project.
+
+You should reinstall the dependencies and rebuild the packages whenever you pull from the main branch. This is because the dependencies and packages may have changed. If you experience any issues, try removing the `node_modules` folder (`rm -Force -Recurse .\node_modules\` or `rm -rf node_modules/`) and repeating the steps above.
 
 The code if formatted with prettier. You can use it if you want, or not, it's up to you because the code get's formatted automatically by a github action. If you want to use it, you can run `pnpm format` to format the code.
 
