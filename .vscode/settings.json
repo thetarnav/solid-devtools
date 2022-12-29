@@ -1,0 +1,17 @@
+{
+  "cSpell.words": [
+    "Carniato",
+    "codeql",
+    "crxjs",
+    "Demaine",
+    "otonashixav",
+    "outin",
+    "sarif",
+    "stefanzweifel",
+    "taze",
+    "todomvc",
+    "twind",
+    "undici"
+  ],
+  "typescript.tsdk": "node_modules/typescript/lib"
+}
