@@ -63,7 +63,7 @@ export function getNodeName(o: Readonly<Solid.Signal | Solid.Owner | Solid.Store
 }
 
 export function getDisplayName(name: string): string {
-  return trimString(name, 16)
+  return trimString(name, 20)
 }
 
 export function getNodeType(o: Readonly<Solid.Signal | Solid.Owner | Solid.Store>): NodeType {

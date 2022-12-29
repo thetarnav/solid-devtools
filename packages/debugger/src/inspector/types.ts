@@ -64,7 +64,7 @@ export type InspectorUpdateMap = {
   /** List of new keys — all of the values are getters, so they won't change */
   propKeys: { added: string[]; removed: string[] }
   /** state of getter props (STALE | LIVE) */
-  propState: { [key in string]?: PropGetterState }
+  propState: { [key in string]: PropGetterState }
 }
 
 export type InspectorUpdate = {
