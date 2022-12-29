@@ -23,9 +23,6 @@ lerna-debug.log
 # tsup
 tsup.config.bundled*.*
 
-# VSC Settings
-.vscode/settings.json
-
 /.idea
 .project
 .classpath
