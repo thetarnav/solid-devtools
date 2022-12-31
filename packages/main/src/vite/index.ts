@@ -62,7 +62,7 @@ export const devtoolsPlugin = (_options: DevtoolsPluginOptions = {}): PluginOpti
 
   let enablePlugin = false
   let projectRoot = process.cwd()
-  let solidStartClientEntry: string | undefined
+  let solidStartRootEntry: string | undefined
 
   return {
     name: 'solid-devtools',
@@ -72,7 +72,7 @@ export const devtoolsPlugin = (_options: DevtoolsPluginOptions = {}): PluginOpti
 
       if ('solidOptions' in config && typeof config.solidOptions === 'object') {
         const solidOptions = config.solidOptions as SolidStartOptions
-        solidStartClientEntry = solidOptions.rootEntry
+        solidStartRootEntry = path.normalize(solidOptions.rootEntry)
       }
     },
     transformIndexHtml() {
@@ -128,7 +128,8 @@ export const devtoolsPlugin = (_options: DevtoolsPluginOptions = {}): PluginOpti
         plugins.push(namePlugin)
       }
 
-      if (solidStartClientEntry && path.normalize(id) === path.normalize(solidStartClientEntry)) {
+      // For solid-start, inject the debugger script before the root entry point
+      if (solidStartRootEntry && path.normalize(id) === solidStartRootEntry) {
         source = `import ${JSON.stringify(INJECT_SCRIPT_ID)}\n${source}`
       }
 
