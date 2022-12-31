@@ -48,7 +48,7 @@ const App: Component = () => {
                 <>
                   Devtools extension requires a runtime client to be installed. Please follow the{' '}
                   <a
-                    href="https://github.com/thetarnav/solid-devtools/tree/main/packages/ext-client#getting-started"
+                    href="https://github.com/thetarnav/solid-devtools/tree/main/packages/extension#getting-started"
                     target="_blank"
                   >
                     installation instructions

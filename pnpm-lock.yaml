@@ -48,13 +48,13 @@ importers:
 
   examples/clock:
     specifiers:
-      solid-devtools: workspace:^0.24.5
+      solid-devtools: workspace:^0.24.6
       solid-js: ^1.6.6
       typescript: ^4.9.3
       vite: ^4.0.3
       vite-plugin-solid: ^2.3.10
     dependencies:
-      solid-devtools: link:../../packages/ext-client
+      solid-devtools: link:../../packages/main
       solid-js: 1.6.6
     devDependencies:
       typescript: 4.9.4
@@ -64,12 +64,11 @@ importers:
   examples/sandbox:
     specifiers:
       '@babel/plugin-syntax-typescript': ^7.18.6
-      '@solid-devtools/debugger': workspace:^0.18.0
+      '@solid-devtools/debugger': workspace:^0.18.1
       '@solid-devtools/logger': workspace:^0.5.5
       '@solid-devtools/overlay': workspace:^0.4.2
-      '@solid-devtools/transform': workspace:^0.10.4
       '@solid-primitives/timer': ^1.3.4
-      solid-devtools: workspace:^0.24.5
+      solid-devtools: workspace:^0.24.6
       solid-js: ^1.6.6
       typescript: ^4.9.3
       unocss: ^0.48.0
@@ -84,8 +83,7 @@ importers:
       solid-js: 1.6.6
     devDependencies:
       '@babel/plugin-syntax-typescript': 7.20.0_@babel+core@7.20.7
-      '@solid-devtools/transform': link:../../packages/transform
-      solid-devtools: link:../../packages/ext-client
+      solid-devtools: link:../../packages/main
       typescript: 4.9.4
       unocss: 0.48.0_vite@4.0.3
       vite: 4.0.3
@@ -97,18 +95,18 @@ importers:
       '@solid-devtools/overlay': workspace:^0.4.2
       '@solidjs/meta': ^0.28.2
       '@solidjs/router': ^0.6.0
-      solid-devtools: workspace:^0.24.5
+      solid-devtools: workspace:^0.24.6
       solid-js: ^1.6.6
-      solid-start: ^0.2.8
-      solid-start-node: ^0.2.8
+      solid-start: ^0.2.9
+      solid-start-node: ^0.2.9
       typescript: ^4.9.3
-      undici: ^5.13.0
+      undici: ^5.14.0
       vite: ^4.0.3
     dependencies:
       '@solid-devtools/overlay': link:../../packages/overlay
       '@solidjs/meta': 0.28.2_solid-js@1.6.6
       '@solidjs/router': 0.6.0_solid-js@1.6.6
-      solid-devtools: link:../../packages/ext-client
+      solid-devtools: link:../../packages/main
       solid-js: 1.6.6
       solid-start: 0.2.9_kao6przsv5ql3q4f4c3i67jucm
       undici: 5.14.0
@@ -160,32 +158,16 @@ importers:
       solid-js: 1.6.6
       type-fest: 3.5.0
 
-  packages/ext-client:
-    specifiers:
-      '@solid-devtools/debugger': workspace:^0.18.0
-      '@solid-devtools/shared': workspace:^0.10.5
-      '@solid-devtools/transform': workspace:^0.10.4
-      '@solid-primitives/utils': ^4.0.0
-      solid-js: ^1.6.2
-      type-fest: ^3.2.0
-    dependencies:
-      '@solid-devtools/debugger': link:../debugger
-      '@solid-devtools/shared': link:../shared
-      '@solid-devtools/transform': link:../transform
-      '@solid-primitives/utils': 4.0.0_solid-js@1.6.6
-      solid-js: 1.6.6
-      type-fest: 3.5.0
-
   packages/extension:
     specifiers:
       '@crxjs/vite-plugin': ^1.0.14
-      '@solid-devtools/frontend': workspace:^0.5.0
+      '@solid-devtools/frontend': workspace:^0.5.1
       '@solid-devtools/shared': workspace:^0.10.5
       '@solid-primitives/utils': ^4.0.0
       '@types/chrome': ^0.0.206
       jsdom: ^20.0.3
       rimraf: ^3.0.2
-      solid-devtools: workspace:^0.24.5
+      solid-devtools: workspace:^0.24.6
       solid-js: ^1.6.6
       vite: ^4.0.3
       vitest: ^0.26.2
@@ -195,7 +177,7 @@ importers:
       '@solid-devtools/frontend': link:../frontend
       '@solid-devtools/shared': link:../shared
       '@solid-primitives/utils': 4.0.0_solid-js@1.6.6
-      solid-devtools: link:../ext-client
+      solid-devtools: link:../main
       solid-js: 1.6.6
     devDependencies:
       '@crxjs/vite-plugin': 1.0.14_vite@4.0.3
@@ -209,7 +191,7 @@ importers:
 
   packages/frontend:
     specifiers:
-      '@solid-devtools/debugger': workspace:^0.18.0
+      '@solid-devtools/debugger': workspace:^0.18.1
       '@solid-devtools/shared': workspace:^0.10.5
       '@solid-primitives/context': ^0.1.2
       '@solid-primitives/cursor': ^0.0.103
@@ -283,6 +265,52 @@ importers:
     devDependencies:
       tsup: 6.5.0
 
+  packages/main:
+    specifiers:
+      '@babel/core': ^7.20.7
+      '@babel/generator': ^7.20.7
+      '@babel/parser': ^7.20.7
+      '@babel/plugin-syntax-jsx': ^7.18.6
+      '@babel/plugin-syntax-typescript': ^7.18.6
+      '@babel/traverse': ^7.20.10
+      '@babel/types': ^7.20.7
+      '@solid-devtools/debugger': workspace:^0.18.1
+      '@solid-devtools/shared': workspace:^0.10.5
+      '@solid-primitives/utils': ^4.0.0
+      '@types/babel__core': ^7.1.19
+      '@types/babel__generator': ^7.6.4
+      '@types/babel__traverse': ^7.18.2
+      solid-js: ^1.6.2
+      solid-start: ^0.2.9
+      tsup: ^6.5.0
+      type-fest: ^3.2.0
+      typescript: ^4.9.3
+      vite: ^4.0.3
+      vitest: ^0.26.2
+    dependencies:
+      '@babel/core': 7.20.7
+      '@babel/plugin-syntax-typescript': 7.20.0_@babel+core@7.20.7
+      '@babel/types': 7.20.7
+      '@solid-devtools/debugger': link:../debugger
+      '@solid-devtools/shared': link:../shared
+      '@solid-primitives/utils': 4.0.0_solid-js@1.6.6
+      solid-js: 1.6.6
+      type-fest: 3.5.0
+    optionalDependencies:
+      solid-start: 0.2.9_kao6przsv5ql3q4f4c3i67jucm
+    devDependencies:
+      '@babel/generator': 7.20.7
+      '@babel/parser': 7.20.7
+      '@babel/plugin-syntax-jsx': 7.18.6_@babel+core@7.20.7
+      '@babel/traverse': 7.20.10
+      '@types/babel__core': 7.1.20
+      '@types/babel__generator': 7.6.4
+      '@types/babel__traverse': 7.18.3
+      tsup: 6.5.0_typescript@4.9.4
+      typescript: 4.9.4
+      vite: 4.0.3
+      vitest: 0.26.2
+
   packages/overlay:
     specifiers:
       '@solid-devtools/debugger': workspace:^0.18.0
@@ -335,45 +363,6 @@ importers:
       '@solid-primitives/utils': 4.0.0_solid-js@1.6.6
       solid-js: 1.6.6
       type-fest: 3.5.0
-
-  packages/transform:
-    specifiers:
-      '@babel/core': ^7.20.7
-      '@babel/generator': ^7.20.7
-      '@babel/parser': ^7.20.7
-      '@babel/plugin-syntax-jsx': ^7.18.6
-      '@babel/plugin-syntax-typescript': ^7.18.6
-      '@babel/traverse': ^7.20.10
-      '@babel/types': ^7.20.7
-      '@solid-devtools/debugger': workspace:^0.18.0
-      '@solid-devtools/shared': workspace:^0.10.5
-      '@types/babel__core': ^7.1.19
-      '@types/babel__generator': ^7.6.4
-      '@types/babel__traverse': ^7.18.2
-      solid-js: ^1.6.2
-      tsup: ^6.5.0
-      typescript: ^4.9.3
-      vite: ^4.0.3
-      vitest: ^0.26.2
-    dependencies:
-      '@babel/core': 7.20.7
-      '@babel/plugin-syntax-typescript': 7.20.0_@babel+core@7.20.7
-      '@babel/types': 7.20.7
-      '@solid-devtools/debugger': link:../debugger
-      '@solid-devtools/shared': link:../shared
-      solid-js: 1.6.6
-    devDependencies:
-      '@babel/generator': 7.20.7
-      '@babel/parser': 7.20.7
-      '@babel/plugin-syntax-jsx': 7.18.6_@babel+core@7.20.7
-      '@babel/traverse': 7.20.10
-      '@types/babel__core': 7.1.20
-      '@types/babel__generator': 7.6.4
-      '@types/babel__traverse': 7.18.3
-      tsup: 6.5.0_typescript@4.9.4
-      typescript: 4.9.4
-      vite: 4.0.3
-      vitest: 0.26.2
 
 packages:
 
@@ -1441,7 +1430,7 @@ packages:
       babel-plugin-polyfill-corejs2: 0.3.3_@babel+core@7.20.7
       babel-plugin-polyfill-corejs3: 0.6.0_@babel+core@7.20.7
       babel-plugin-polyfill-regenerator: 0.4.1_@babel+core@7.20.7
-      core-js-compat: 3.27.0
+      core-js-compat: 3.27.1
       semver: 6.3.0
     transitivePeerDependencies:
       - supports-color
@@ -2476,6 +2465,7 @@ packages:
 
   /@types/node/18.11.18:
     resolution: {integrity: sha512-DHQpWGjyQKSHj3ebjFI/wRKcqQcdR+MoFBygntYOZytCqNfkd2ZC4ARDJ2DQqhjH5p85Nnd3jhUJIXrszFX/JA==}
+    dev: true
 
   /@types/normalize-package-data/2.4.1:
     resolution: {integrity: sha512-Gj7cI7z+98M282Tqmp2K5EIsoouUEzbBJhQQzDE3jSIRk6r9gsz0oUokqIUR4u1R3dMHo0pDHM7sNOHyhulypw==}
@@ -3078,8 +3068,8 @@ packages:
     transitivePeerDependencies:
       - debug
 
-  /babel-plugin-jsx-dom-expressions/0.35.8_@babel+core@7.20.7:
-    resolution: {integrity: sha512-IzObXlDFA80wyEW/IUtCxaUAoJnq4CTpvcvC1xBZBlMpJDwmK6mIYnTZ9xgFyGCrAjC0LxVcqeDQx31gJJ4UJQ==}
+  /babel-plugin-jsx-dom-expressions/0.35.9_@babel+core@7.20.7:
+    resolution: {integrity: sha512-YXb+I4dej5E94bzPzPBECUT5Q5vuSQJzsq1NgW8fe4gsgg6vcy6c6VqixgtY0UU8udKTc1Ls5CmgaFDj2fO9lA==}
     peerDependencies:
       '@babel/core': ^7.0.0
     dependencies:
@@ -3108,7 +3098,7 @@ packages:
     dependencies:
       '@babel/core': 7.20.7
       '@babel/helper-define-polyfill-provider': 0.3.3_@babel+core@7.20.7
-      core-js-compat: 3.27.0
+      core-js-compat: 3.27.1
     transitivePeerDependencies:
       - supports-color
 
@@ -3128,7 +3118,7 @@ packages:
       '@babel/core': ^7.0.0
     dependencies:
       '@babel/core': 7.20.7
-      babel-plugin-jsx-dom-expressions: 0.35.8_@babel+core@7.20.7
+      babel-plugin-jsx-dom-expressions: 0.35.9_@babel+core@7.20.7
 
   /balanced-match/1.0.2:
     resolution: {integrity: sha512-3oSeUO0TMV67hN1AmbXsK4yaqU7tjiHlbxRDZOpH0KW9+CeX4bRAaX0Anxt0tx2MrpRpWwQaPwIlISEJhYU5Pw==}
@@ -3485,8 +3475,8 @@ packages:
   /convert-source-map/1.9.0:
     resolution: {integrity: sha512-ASFBup0Mz1uyiIjANan1jzLQami9z1PoYSZCiiYW2FczPbenXc45FZdBZLzOT+r6+iciuEModtmCti+hjaAk0A==}
 
-  /core-js-compat/3.27.0:
-    resolution: {integrity: sha512-spN2H4E/wocMML7XtbKuqttHHM+zbF3bAdl9mT4/iyFaF33bowQGjxiWNWyvUJGH9F+hTgnhWziiLtwu3oC/Qg==}
+  /core-js-compat/3.27.1:
+    resolution: {integrity: sha512-Dg91JFeCDA17FKnneN7oCMz4BkQ4TcffkgHP4OWwp9yx3pi7ubqMDXXSacfNak1PQqjc95skyt+YBLHQJnkJwA==}
     dependencies:
       browserslist: 4.21.4
 
@@ -6207,8 +6197,8 @@ packages:
       glob: 7.2.3
     dev: true
 
-  /rollup-plugin-visualizer/5.8.3_rollup@2.79.1:
-    resolution: {integrity: sha512-QGJk4Bqe4AOat5AjipOh8esZH1nck5X2KFpf4VytUdSUuuuSwvIQZjMGgjcxe/zXexltqaXp5Vx1V3LmnQH15Q==}
+  /rollup-plugin-visualizer/5.9.0_rollup@2.79.1:
+    resolution: {integrity: sha512-bbDOv47+Bw4C/cgs0czZqfm8L82xOZssk4ayZjG40y9zbXclNk7YikrZTDao6p7+HDiGxrN0b65SgZiVm9k1Cg==}
     engines: {node: '>=14'}
     hasBin: true
     peerDependencies:
@@ -6218,6 +6208,7 @@ packages:
         optional: true
     dependencies:
       open: 8.4.0
+      picomatch: 2.3.1
       rollup: 2.79.1
       source-map: 0.7.4
       yargs: 17.6.2
@@ -6454,7 +6445,7 @@ packages:
       parse-multipart-data: 1.5.0
       picocolors: 1.0.0
       rollup: 2.79.1
-      rollup-plugin-visualizer: 5.8.3_rollup@2.79.1
+      rollup-plugin-visualizer: 5.9.0_rollup@2.79.1
       rollup-route-manifest: 1.0.0_rollup@2.79.1
       sade: 1.8.1
       sirv: 2.0.2
@@ -7228,7 +7219,7 @@ packages:
       merge-anything: 5.1.4
       solid-js: 1.6.6
       solid-refresh: 0.4.1_solid-js@1.6.6
-      vite: 4.0.3_@types+node@18.11.18
+      vite: 4.0.3
       vitefu: 0.2.4_vite@4.0.3
     transitivePeerDependencies:
       - supports-color
@@ -7297,6 +7288,7 @@ packages:
       rollup: 3.9.0
     optionalDependencies:
       fsevents: 2.3.2
+    dev: true
 
   /vitefu/0.2.4_vite@4.0.3:
     resolution: {integrity: sha512-fanAXjSaf9xXtOOeno8wZXIhgia+CZury481LsDaV++lSvcU2R9Ch2bPh3PYFyoHW+w9LqAeYRISVQjUIew14g==}
@@ -7306,7 +7298,7 @@ packages:
       vite:
         optional: true
     dependencies:
-      vite: 4.0.3_@types+node@18.11.18
+      vite: 4.0.3
 
   /vitest/0.26.2:
     resolution: {integrity: sha512-Jvqxh6SDy9SsuslkDjts0iDewDIdq4rveEt69YgDuAb1tVDGV0lDepVaeAFraoySWqneJmOt4TngFFNhlw7GfA==}

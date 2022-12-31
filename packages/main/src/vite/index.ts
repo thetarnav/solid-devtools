@@ -1,3 +1,4 @@
+import path from 'path'
 import { PluginItem, transformAsync } from '@babel/core'
 import {
   LocatorOptions,
@@ -5,16 +6,14 @@ import {
   TargetURLFunction,
   USE_LOCATOR,
 } from '@solid-devtools/debugger/types'
-import { createRequire } from 'module'
+// organize-imports-ignore vite import needs to happen before solid-start
 import { PluginOption } from 'vite'
+import type { Options as SolidStartOptions } from 'solid-start/vite/plugin'
 import jsxLocationPlugin, { MARK_COMPONENT_GLOBAL } from './location'
 import namePlugin from './name'
 
-const require = createRequire(import.meta.url)
-
-const MAIN_CLIENT_MODULE = 'solid-devtools'
-const DEBUGGER_MODULE = '@solid-devtools/debugger'
-const INJECT_SCRIPT_ID = '__solid-devtools'
+const CLIENT_MODULE = 'solid-devtools'
+const INJECT_SCRIPT_ID = '/__solid-devtools'
 
 export type DevtoolsPluginOptions = {
   /** Add automatic name when creating signals, memos, stores, or mutables */
@@ -34,8 +33,8 @@ export type DevtoolsPluginOptions = {
         /** Inject location information to component declarations */
         componentLocation?: boolean
       }
-  /** For debugger development, do not enable! */
-  SDT_DEV?: boolean
+  // /** For debugger development, do not enable! */
+  // SDT_DEV?: boolean
 }
 
 function getFileExtension(filename: string): string {
@@ -55,46 +54,29 @@ export const devtoolsPlugin = (_options: DevtoolsPluginOptions = {}): PluginOpti
           ...(_options.locator === true ? {} : _options.locator),
         }
       : undefined,
-    SDT_DEV: _options.SDT_DEV ?? false,
-  }
+    // SDT_DEV: _options.SDT_DEV ?? false,
+  } satisfies DevtoolsPluginOptions
 
   const enabledJsxLocation = !!options.locator?.jsxLocation
   const enabledComponentLocation = !!options.locator?.componentLocation
 
   let enablePlugin = false
   let projectRoot = process.cwd()
-
-  let runtimeInstalled: false | typeof MAIN_CLIENT_MODULE | typeof DEBUGGER_MODULE = false
+  let solidStartRootEntry: string | undefined
 
   return {
     name: 'solid-devtools',
     enforce: 'pre',
-    config() {
-      if (options.SDT_DEV) {
-        runtimeInstalled = MAIN_CLIENT_MODULE
-        return
-      }
-
-      try {
-        require.resolve(MAIN_CLIENT_MODULE)
-        runtimeInstalled = MAIN_CLIENT_MODULE
-      } catch (_) {
-        try {
-          require.resolve(DEBUGGER_MODULE)
-          runtimeInstalled = DEBUGGER_MODULE
-        } catch (_) {
-          // eslint-disable-next-line no-console
-          console.log(
-            `[solid-devtools]: Could not find "${MAIN_CLIENT_MODULE}" or "${DEBUGGER_MODULE}" module.`,
-          )
-        }
-      }
-    },
     configResolved(config) {
       enablePlugin = config.command === 'serve' && config.mode !== 'production'
+
+      if ('solidOptions' in config && typeof config.solidOptions === 'object') {
+        const solidOptions = config.solidOptions as SolidStartOptions
+        solidStartRootEntry = path.normalize(solidOptions.rootEntry)
+      }
     },
     transformIndexHtml() {
-      if (enablePlugin && runtimeInstalled)
+      if (enablePlugin)
         return [
           {
             tag: 'script',
@@ -103,21 +85,21 @@ export const devtoolsPlugin = (_options: DevtoolsPluginOptions = {}): PluginOpti
           },
         ]
     },
+    resolveId(id) {
+      if (id === INJECT_SCRIPT_ID) return INJECT_SCRIPT_ID
+    },
     load(id) {
       // Inject runtime debugger script
-      if (
-        !enablePlugin ||
-        !runtimeInstalled ||
-        (id !== INJECT_SCRIPT_ID && id !== `/${INJECT_SCRIPT_ID}`)
-      )
-        return
+      if (!enablePlugin || id !== INJECT_SCRIPT_ID) return
 
-      let code = `import "${runtimeInstalled}";`
+      const importPath = JSON.stringify(CLIENT_MODULE)
+
+      let code = `import ${importPath};`
 
       if (options.locator) {
-        code += `\nimport { ${USE_LOCATOR}, ${MARK_COMPONENT} } from "${runtimeInstalled}";
-${USE_LOCATOR}(${JSON.stringify(options.locator)});
-window.${MARK_COMPONENT_GLOBAL} = ${MARK_COMPONENT};`
+        code += `\nimport { ${USE_LOCATOR}, ${MARK_COMPONENT} } from ${importPath};
+    ${USE_LOCATOR}(${JSON.stringify(options.locator)});
+    window.${MARK_COMPONENT_GLOBAL} = ${MARK_COMPONENT};`
       }
 
       return code
@@ -146,7 +128,12 @@ window.${MARK_COMPONENT_GLOBAL} = ${MARK_COMPONENT};`
         plugins.push(namePlugin)
       }
 
-      if (plugins.length === 0) return
+      // For solid-start, inject the debugger script before the root entry point
+      if (solidStartRootEntry && path.normalize(id) === solidStartRootEntry) {
+        source = `import ${JSON.stringify(INJECT_SCRIPT_ID)}\n${source}`
+      }
+
+      if (plugins.length === 0) return { code: source }
 
       // babel doesn't work with typescript by default
       plugins.splice(0, 0, ['@babel/plugin-syntax-typescript', { isTSX: isJSX }])
@@ -160,12 +147,7 @@ window.${MARK_COMPONENT_GLOBAL} = ${MARK_COMPONENT};`
         plugins,
       })
 
-      if (!result) return null
-      const { code } = result
-      if (!code) return null
-      return { code }
+      return { code: result?.code ?? source }
     },
   }
 }
-
-export default devtoolsPlugin

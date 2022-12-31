@@ -9,7 +9,6 @@ const usingExtension = process.env.EXT === 'true' || process.env.EXT === '1'
 export default defineConfig({
   plugins: [
     devtools({
-      SDT_DEV: true,
       autoname: true,
       locator: {
         targetIDE: 'vscode',

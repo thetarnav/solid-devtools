@@ -1,6 +1,6 @@
 {
   "name": "solid-devtools",
-  "version": "0.24.5",
+  "version": "0.24.6",
   "description": "Runtime library for hooking up SolidJS application with Solid Devtools Extension",
   "license": "MIT",
   "author": "Damian Tarnawski <gthetarnav@gmail.com>",
@@ -117,15 +117,36 @@
     "test": "vitest",
     "typecheck": "tsc --noEmit --paths null"
   },
+  "devDependencies": {
+    "@babel/core": "^7.18.13",
+    "@babel/generator": "^7.20.7",
+    "@babel/parser": "^7.20.7",
+    "@babel/plugin-syntax-jsx": "^7.18.6",
+    "@babel/traverse": "^7.20.10",
+    "@types/babel__core": "^7.1.19",
+    "@types/babel__generator": "^7.6.4",
+    "@types/babel__traverse": "^7.18.2",
+    "tsup": "^6.5.0",
+    "typescript": "^4.9.3",
+    "vite": "^4.0.3",
+    "vitest": "^0.26.2",
+    "solid-start": "^0.2.9"
+  },
   "dependencies": {
-    "@solid-devtools/debugger": "workspace:^0.18.0",
+    "@babel/core": "^7.20.7",
+    "@babel/plugin-syntax-typescript": "^7.18.6",
+    "@babel/types": "^7.20.7",
+    "@solid-devtools/debugger": "workspace:^0.18.1",
     "@solid-devtools/shared": "workspace:^0.10.5",
-    "@solid-devtools/transform": "workspace:^0.10.4",
     "@solid-primitives/utils": "^4.0.0",
     "type-fest": "^3.2.0"
   },
   "peerDependencies": {
-    "solid-js": "^1.6.2"
+    "solid-js": "^1.6.2",
+    "vite": "^2.2.3 || ^3.0.0 || ^4.0.0"
+  },
+  "optionalDependencies": {
+    "solid-start": "^0.2.9"
   },
   "packageManager": "pnpm@7.18.1"
 }

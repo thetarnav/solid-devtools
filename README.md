@@ -39,13 +39,13 @@ Should work in any application using SolidJS, including SolidStart and Astro.
 Most of the present packages are not much more then just ideas and experiments. Some in progress, and some very much in progress.
 But few of them can help you in your work already, and a man can dream, so this is what's out there waiting:
 
-### [Extension Client](./packages/ext-client#readme)
+### [Extension Client](./packages/main#readme)
 
 ###### `solid-devtools`
 
 The main client library. It reexports the most important tools and connects the client application to the chrome extension.
 
-[**See README for more information.**](./packages/ext-client#readme)
+[**See README for more information.**](./packages/main#readme)
 
 ### [Devtools Overlay](./packages/overlay#readme)
 
@@ -54,16 +54,6 @@ The main client library. It reexports the most important tools and connects the 
 An on-page devtools overlay for debugging SolidJS Applications without a chrome extension.
 
 [**See guide on setting up**](./packages/overlay#getting-started)
-
-### [Transform](./packages/transform/)
-
-###### `@solid-devtools/transform`
-
-A babel transform plugin for vite for transforming Solid code. For development — debugging purposes only.
-
-Using babel isn't required for the debugger to function, but it can provide a better debugging experience.
-
-[**See README for more information.**](./packages/transform/#readme)
 
 ### [Logger](./packages/logger#readme)
 

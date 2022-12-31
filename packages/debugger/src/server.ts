@@ -1,4 +1,3 @@
-import { createRoot } from 'solid-js'
 import type * as API from './index'
 import { NodeType } from './main/constants'
 import type { Solid } from './main/types'
@@ -63,5 +62,5 @@ export const isSolidStore: typeof API.isSolidStore = (o): o is Solid.Store => fa
 export const onOwnerCleanup: typeof API.onOwnerCleanup = () => () => void 0
 export const onParentCleanup: typeof API.onParentCleanup = () => () => void 0
 export const getFunctionSources: typeof API.getFunctionSources = () => []
-export const createInternalRoot: typeof API.createInternalRoot = createRoot
+export const createInternalRoot: typeof API.createInternalRoot = fn => fn(() => {})
 export const lookupOwner: typeof API.lookupOwner = () => null

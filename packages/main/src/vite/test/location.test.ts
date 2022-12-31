@@ -5,7 +5,7 @@ import {
 import { describe, test } from 'vitest'
 // organize-imports-ignore setup seeds to load before source
 import { assertTransform, cwd, file } from './setup'
-import getPlugin, { MARK_COMPONENT_GLOBAL } from '../src/location'
+import getPlugin, { MARK_COMPONENT_GLOBAL } from '../location'
 
 describe('location', () => {
   const testData: [

@@ -1,5 +1,5 @@
 import { describe, test } from 'vitest'
-import plugin from '../src/name'
+import plugin from '../name'
 import { assertTransform } from './setup'
 
 // Positive tests
