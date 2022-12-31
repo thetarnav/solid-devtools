@@ -15,7 +15,7 @@ export type Versions = { client: string; expectedClient: string; extension: stri
 export namespace Messages {
   export interface General {
     // client -> content -> devtools.html
-    // the `string` payload is the ext-client version
+    // the `string` payload is the main version
     SolidOnPage: {}
     ClientConnected: string
     Versions: Versions

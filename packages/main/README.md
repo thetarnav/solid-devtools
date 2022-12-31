@@ -1,30 +1,36 @@
-<a href="https://github.com/thetarnav/solid-devtools/tree/main/packages/transform#readme" target="_blank">
+<a href="https://github.com/thetarnav/solid-devtools/tree/main/packages/main#readme" target="_blank">
   <p>
-    <img width="100%" src="https://assets.solidjs.com/banner?type=Devtools&background=tiles&project=Transform" alt="Solid Devtools Transform">
+    <img width="100%" src="https://assets.solidjs.com/banner?type=Devtools&background=tiles&project=Library" alt="Solid Devtools">
   </p>
 </a>
 
-# @solid-devtools/transform
+# solid-devtools
 
 [![pnpm](https://img.shields.io/badge/maintained%20with-pnpm-cc00ff.svg?style=for-the-badge&logo=pnpm)](https://pnpm.io/)
-[![version](https://img.shields.io/npm/v/@solid-devtools/transform?style=for-the-badge)](https://www.npmjs.com/package/@solid-devtools/transform)
-[![npm](https://img.shields.io/npm/dw/@solid-devtools/transform?style=for-the-badge)](https://www.npmjs.com/package/@solid-devtools/transform)
+[![version](https://img.shields.io/npm/v/solid-devtools?style=for-the-badge)](https://www.npmjs.com/package/solid-devtools)
+[![npm](https://img.shields.io/npm/dw/solid-devtools?style=for-the-badge)](https://www.npmjs.com/package/solid-devtools)
 
-A babel transform plugin for vite for transforming Solid code. For development — debugging purposes only.
+The main client library. It reexports the most [important tools](<(https://github.com/thetarnav/solid-devtools#available-devtools)>) and connects the client application to the [chrome extension](https://github.com/thetarnav/solid-devtools/tree/main/packages/extension#readme).
 
-It can do very useful things for you: Wrap stores to let the debugger observe them. Automatically name signals, memos and stroes. It's also required by the [Locator](https://github.com/thetarnav/solid-devtools/tree/main/packages/locator#readme) package to allow for going to the source code of the components.
-
-## Getting Started
-
-### Installation
+## Installation
 
 ```bash
-npm i -D @solid-devtools/transform
+npm i -D solid-devtools
 # or
-yarn add -D @solid-devtools/transform
+yarn add -D solid-devtools
 # or
-pnpm i -D @solid-devtools/transform
+pnpm add -D solid-devtools
 ```
+
+## Using the browser extension
+
+For the usage guide of the Solid Devtools chrome extension, please refer to the [extension documentation](../extension#Getting-started).
+
+## Vite plugin
+
+The vite plugin is the easiest way to get started with the devtools. It will automatically inject the extension client script to the page and connect the application to the extension.
+
+It will also transform the code to make it easier to debug. For development — debugging purposes only.
 
 ### Setup
 
@@ -32,11 +38,17 @@ pnpm i -D @solid-devtools/transform
 // vite.config.ts
 
 import { defineConfig } from 'vite'
-import solid from 'vite-plugin-solid'
-import devtools from '@solid-devtools/transform'
+import solid from 'vite-plugin-solid' // or solid-start/vite
+import devtools from 'solid-devtools/vite'
 
 export default defineConfig({
-  plugins: [devtools(), solid()],
+  plugins: [
+    devtools({
+      /* additional options */
+      autoname: true, // e.g. enable autoname
+    }),
+    solid(),
+  ],
 })
 ```
 

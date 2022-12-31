@@ -31,7 +31,7 @@ The extension is now available on the Chrome Web Store. You can install it when 
 
 ### 2. Install the debugger library
 
-If you think about the Chrome Extension as a **Frontend**, then the [**"solid-devtools"**](https://github.com/thetarnav/solid-devtools/blob/main/packages/ext-client#readme) npm package is its **Backend**. It debugs the Solid's reactivity and communicates the updates to the Chrome Extension.
+If you think about the Chrome Extension as a **Frontend**, then the [**"solid-devtools"**](https://github.com/thetarnav/solid-devtools/blob/main/packages/main#readme) npm package is its **Backend**. It debugs the Solid's reactivity and communicates the updates to the Chrome Extension.
 
 Install the following package:
 
@@ -49,13 +49,13 @@ Both the debugger library and the extension change frequently, often breaking ba
 
 As vite is the default bundler used by solid application and starter, the devtools are currently concerned with supporting only it.
 
-To get the debugger working include the vite plugin from `"solid-devtools/vite"` in your vite config. The [vite plugin](../transform#readme) is a way to configure the transform options and add a debugger script to the page. Enabling transforms is not necessary for the devtools to work, but the debugger script needs to be present to analyze your solid application. Enabling some of the options, such as `"autoname"`, will improve the debugging experience or enable additional features.
+To get the debugger working include the vite plugin from `"solid-devtools/vite"` in your vite config. The [vite plugin](../main#vite-plugin) is a way to configure the transform options and add a debugger script to the page. Enabling transforms is not necessary for the devtools to work, but the debugger script needs to be present to analyze your solid application. Enabling some of the options, such as `"autoname"`, will improve the debugging experience or enable additional features.
 
 ```ts
 // vite.config.ts
 
 import { defineConfig } from 'vite'
-import solid from 'vite-plugin-solid'
+import solid from 'vite-plugin-solid' // or solid-start/vite
 import devtools from 'solid-devtools/vite'
 
 export default defineConfig({
@@ -69,7 +69,7 @@ export default defineConfig({
 })
 ```
 
-[**>> More about available transform options**](https://github.com/thetarnav/solid-devtools/tree/main/packages/transform#options)
+[**>> More about available transform options**](https://github.com/thetarnav/solid-devtools/tree/main/packages/main#options)
 
 ### 4. Using component locator (Optional)
 
