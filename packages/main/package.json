@@ -1,6 +1,6 @@
 {
   "name": "solid-devtools",
-  "version": "0.24.5",
+  "version": "0.24.6",
   "description": "Runtime library for hooking up SolidJS application with Solid Devtools Extension",
   "license": "MIT",
   "author": "Damian Tarnawski <gthetarnav@gmail.com>",
@@ -136,7 +136,7 @@
     "@babel/core": "^7.20.7",
     "@babel/plugin-syntax-typescript": "^7.18.6",
     "@babel/types": "^7.20.7",
-    "@solid-devtools/debugger": "workspace:^0.18.0",
+    "@solid-devtools/debugger": "workspace:^0.18.1",
     "@solid-devtools/shared": "workspace:^0.10.5",
     "@solid-primitives/utils": "^4.0.0",
     "type-fest": "^3.2.0"
