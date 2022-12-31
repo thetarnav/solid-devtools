@@ -1,5 +1,11 @@
 # @solid-devtools/debugger
 
+## 0.18.1
+
+### Patch Changes
+
+- 41ab0c1: Move transform pacakge to `solid-devtools` lib. Fix vite plugin for solid-start.
+
 ## 0.18.0
 
 ### Minor Changes

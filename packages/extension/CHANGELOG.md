@@ -1,5 +1,14 @@
 # solid-devtools-extension
 
+## 0.20.3
+
+### Patch Changes
+
+- 41ab0c1: Move transform pacakge to `solid-devtools` lib. Fix vite plugin for solid-start.
+- Updated dependencies [41ab0c1]
+  - @solid-devtools/frontend@0.5.1
+  - solid-devtools@0.24.6
+
 ## 0.20.2
 
 ### Patch Changes
