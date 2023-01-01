@@ -61,7 +61,7 @@ export const devtoolsPlugin = (_options: DevtoolsPluginOptions = {}): PluginOpti
   const enabledComponentLocation = !!options.locator?.componentLocation
 
   let enablePlugin = false
-  let projectRoot = process.cwd()
+  const projectRoot = process.cwd()
   let solidStartRootEntry: string | undefined
 
   return {

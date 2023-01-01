@@ -64,7 +64,7 @@ const namePlugin: PluginObj<any> = {
         switch (s.type) {
           // import * as local from "solid-js"
           case 'ImportNamespaceSpecifier':
-            for (let target of targets) {
+            for (const target of targets) {
               sources[target].push(t.memberExpression(s.local, t.identifier(target)))
             }
             break
@@ -93,13 +93,16 @@ const namePlugin: PluginObj<any> = {
 
     VariableDeclaration(path) {
       const declarations = path.node.declarations
-      for (let declaration of declarations) {
+      for (const declaration of declarations) {
         // Check initializer is a call to createSignal/createMemo/createStore/createMutable
         const init = declaration.init
         if (!init) continue
         if (init.type !== 'CallExpression') continue
         let target: Source | undefined
-        for (let [someTarget, someSources] of Object.entries(sources) as [Source, Comparable[]][]) {
+        for (const [someTarget, someSources] of Object.entries(sources) as [
+          Source,
+          Comparable[],
+        ][]) {
           if (someSources.some(source => equal(init.callee, source))) {
             target = someTarget
             break

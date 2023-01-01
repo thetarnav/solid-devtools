@@ -678,7 +678,7 @@ const iconComponents = {
   SolidWhite,
 } as const
 
-export let Icon: {
+export const Icon: {
   [key in keyof typeof embedIconComponents | keyof typeof iconComponents]: IconComponent
 } = {} as any
 
