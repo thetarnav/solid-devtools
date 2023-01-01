@@ -54,12 +54,18 @@ export type EncodedValueMap = {
 export type EncodedValue<T extends ValueType = ValueType> = EncodedValueMap[T]
 
 export enum PropGetterState {
-  Stale = 'stale',
+  /** getter is being observed, so it's value is up-to-date */
   Live = 'live',
+  /** getter is not observed, so it's value may be outdated */
+  Stale = 'stale',
 }
 
 export type InspectorUpdateMap = {
+  /** the value of a valueItem was updated */
   value: [id: ValueItemID, value: EncodedValue[]]
+  /** a valueItem was expanded or collapsed, sends it's appropriable value */
+  inspectToggle: [id: ValueItemID, value: EncodedValue[]]
+  /** update to a store-node */
   store: [store: StoreNodeProperty, value: EncodedValue[] | null | number]
   /** List of new keys — all of the values are getters, so they won't change */
   propKeys: { added: string[]; removed: string[] }

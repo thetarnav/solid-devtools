@@ -303,3 +303,20 @@ export function createShallowStore<T extends Readonly<AnyStatic>>(
 
   return [store, setter]
 }
+
+export function handleTupleUpdate<
+  T extends readonly [PropertyKey, any],
+  O = { readonly [K in T as K[0]]: (value: K[1]) => void },
+>(handlers: O): (update: T) => void {
+  return update => (handlers as any)[update[0]](update[1])
+}
+
+export function handleTupleUpdates<
+  T extends readonly [PropertyKey, any],
+  O = { readonly [K in T as K[0]]: (value: K[1]) => void },
+>(handlers: O): (updates: T[]) => void {
+  function runUpdates(updates: T[]) {
+    for (const [key, value] of updates) (handlers as any)[key](value)
+  }
+  return updates => batch(runUpdates.bind(void 0, updates))
+}

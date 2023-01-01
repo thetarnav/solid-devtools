@@ -27,23 +27,26 @@ const CollapsableObjectPreview: Component<{
 }> = props => (
   <ul class={styles.collapsable.list}>
     <Entries of={props.value}>
-      {(key, value) => (
-        <Show
-          when={isValueNested(value())}
-          children={untrack(() => {
-            const [extended, setExtended] = createSignal(false)
-            return (
-              <ValueNode
-                name={key}
-                value={value()}
-                onClick={() => setExtended(p => !p)}
-                extended={extended()}
-              />
-            )
-          })}
-          fallback={<ValueNode name={key} value={value()} />}
-        />
-      )}
+      {(key, _value) => {
+        const value = createMemo(_value)
+        return (
+          <Show
+            when={isValueNested(value())}
+            children={untrack(() => {
+              const [extended, setExtended] = createSignal(false)
+              return (
+                <ValueNode
+                  name={key}
+                  value={value()}
+                  onClick={() => setExtended(p => !p)}
+                  extended={extended()}
+                />
+              )
+            })}
+            fallback={<ValueNode name={key} value={value()} />}
+          />
+        )
+      }}
     </Entries>
   </ul>
 )
@@ -152,32 +155,22 @@ export const ValueNode: Component<{
   /** top-level, or inside a store (the value can change) */
   isSignal?: boolean
   isStale?: boolean
-  onClick?: () => boolean
+  onClick?: VoidFunction
   onElementHover?: ToggleElementHover
   class?: string
 }> = props => {
   const ctx = useContext(ValueContext)
 
-  // this is to prevent the value from being considered updated when the collapse is toggled
-  let toggledCollapse = false
-
   const isUpdated =
     (props.isSignal || ctx?.underStore) &&
     (() => {
       const [_isUpdated, pingUpdated] = createPingedSignal()
-      createEffect(
-        defer(
-          () => props.value,
-          () => (toggledCollapse ? (toggledCollapse = false) : pingUpdated()),
-        ),
-      )
+      createEffect(defer(() => props.value, pingUpdated))
       return _isUpdated
     })()
 
   const handleSelect = () => {
-    if (props.onClick && isValueNested(props.value)) {
-      toggledCollapse = props.onClick()
-    }
+    if (props.onClick && isValueNested(props.value)) props.onClick()
   }
 
   const ValueContent = () => <ValuePreview value={props.value} extended={props.extended} />

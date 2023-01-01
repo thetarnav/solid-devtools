@@ -9,6 +9,7 @@
     "sourceType": "module"
   },
   "rules": {
+    "prefer-const": "warn",
     "no-console": "warn",
     "no-debugger": "warn",
     "@typescript-eslint/no-unused-vars": ["warn", { "argsIgnorePattern": "^_" }],

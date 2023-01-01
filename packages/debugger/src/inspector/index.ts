@@ -38,94 +38,102 @@ export function createInspector(
 
   // Batch and dedupe inspector updates
   // these will include updates to signals, stores, props, and node value
-  const { pushPropState, pushValueUpdate, triggerPropsCheck, clearUpdates } = (() => {
-    let valueUpdates = new Set<ValueItemID>()
-    let storeUpdates: [storeProperty: StoreNodeProperty, data: StoreUpdateData][] = []
-    let checkProps = false
-    let propStates: InspectorUpdateMap['propState'] = {}
+  const { pushPropState, pushValueUpdate, pushInspectToggle, triggerPropsCheck, clearUpdates } =
+    (() => {
+      const valueUpdates = new Map<ValueItemID, boolean | null>()
+      let storeUpdates: [storeProperty: StoreNodeProperty, data: StoreUpdateData][] = []
+      let checkProps = false
+      let propStates: InspectorUpdateMap['propState'] = {}
 
-    const flush = scheduleIdle(() => {
-      const batchedUpdates: InspectorUpdate[] = []
+      const flush = scheduleIdle(() => {
+        const batchedUpdates: InspectorUpdate[] = []
 
-      // Value Nodes (signals, props, and owner value)
-      for (const id of valueUpdates) {
-        const node = valueMap.get(id)
-        if (!node || !node.getValue) continue
-        // TODO shouldn't the previous stores be unsubscribed here? after update, they might no longer be here
-        const selected = node.isSelected()
-        const encoded = encodeValue(
-          node.getValue(),
-          selected,
-          nodeIdMap,
-          selected && (storeNode => node.addStoreObserver(observeStoreNode(storeNode))),
-        )
-        batchedUpdates.push(['value', [id, encoded]])
-      }
-      valueUpdates.clear()
-
-      // Stores
-      for (const [storeProperty, data] of storeUpdates)
-        batchedUpdates.push([
-          'store',
-          [
-            storeProperty,
-            typeof data === 'object'
-              ? encodeValue(data.value, true, nodeIdMap, undefined, true)
-              : data ?? null,
-          ],
-        ])
-      storeUpdates = []
-
-      // Props (top-level key check of proxy props object)
-      if (checkProps && checkProxyProps) {
-        const keys = checkProxyProps()
-        if (keys) batchedUpdates.push(['propKeys', keys])
-        checkProps = false
-      }
-
-      // Prop states (stale or not)
-      if (Object.keys(propStates).length) {
-        batchedUpdates.push(['propState', propStates])
-        propStates = {}
-      }
-
-      // Emit updates
-      batchedUpdates.length && eventHub.emit('InspectorUpdate', batchedUpdates)
-    })
-
-    const flushPropsCheck = throttle(flush, 200)
-
-    // Subscribe to any store updates
-    // observed stores are managed by the store.ts module (only stores in selected values get observed)
-    setOnStoreNodeUpdate((...payload) => {
-      storeUpdates.push(payload)
-      flush()
-    })
-
-    return {
-      pushValueUpdate(id: ValueItemID) {
-        valueUpdates.add(id)
-        flush()
-      },
-      triggerPropsCheck() {
-        checkProps = true
-        flushPropsCheck()
-      },
-      pushPropState(key: string, state: PropGetterState) {
-        propStates[key] = state
-        flush()
-      },
-      // since the updates are emitten on timeout, we need to make sure that
-      // switching off the debugger or unselecting the owner will clear the updates
-      clearUpdates() {
+        // Value Nodes (signals, props, and owner value)
+        for (const [id, toggleChange] of valueUpdates) {
+          const node = valueMap.get(id)
+          if (!node || !node.getValue) continue
+          // TODO shouldn't the previous stores be unsubscribed here? after update, they might no longer be here
+          const selected = node.isSelected()
+          const encoded = encodeValue(
+            node.getValue(),
+            selected,
+            nodeIdMap,
+            selected && (storeNode => node.addStoreObserver(observeStoreNode(storeNode))),
+          )
+          batchedUpdates.push([toggleChange === null ? 'value' : 'inspectToggle', [id, encoded]])
+        }
         valueUpdates.clear()
+
+        // Stores
+        for (const [storeProperty, data] of storeUpdates)
+          batchedUpdates.push([
+            'store',
+            [
+              storeProperty,
+              typeof data === 'object'
+                ? encodeValue(data.value, true, nodeIdMap, undefined, true)
+                : data ?? null,
+            ],
+          ])
         storeUpdates = []
-        checkProps = false
-        flush.clear()
-        flushPropsCheck.clear()
-      },
-    }
-  })()
+
+        // Props (top-level key check of proxy props object)
+        if (checkProps && checkProxyProps) {
+          const keys = checkProxyProps()
+          if (keys) batchedUpdates.push(['propKeys', keys])
+          checkProps = false
+        }
+
+        // Prop states (stale or not)
+        if (Object.keys(propStates).length) {
+          batchedUpdates.push(['propState', propStates])
+          propStates = {}
+        }
+
+        // Emit updates
+        batchedUpdates.length && eventHub.emit('InspectorUpdate', batchedUpdates)
+      })
+
+      const flushPropsCheck = throttle(flush, 200)
+
+      // Subscribe to any store updates
+      // observed stores are managed by the store.ts module (only stores in selected values get observed)
+      setOnStoreNodeUpdate((...payload) => {
+        storeUpdates.push(payload)
+        flush()
+      })
+
+      return {
+        pushValueUpdate(id: ValueItemID) {
+          valueUpdates.set(id, null)
+          flush()
+        },
+        pushInspectToggle(id: ValueItemID, selected: boolean) {
+          const current = valueUpdates.get(id)
+          if (current === selected || current === null) return
+          else if (current === !selected) valueUpdates.delete(id)
+          else valueUpdates.set(id, selected)
+          flush()
+        },
+        triggerPropsCheck() {
+          checkProps = true
+          flushPropsCheck()
+        },
+        pushPropState(key: string, state: PropGetterState) {
+          propStates[key] = state
+          flush()
+        },
+        // since the updates are emitten on timeout, we need to make sure that
+        // switching off the debugger or unselecting the owner will clear the updates
+        clearUpdates() {
+          valueUpdates.clear()
+          storeUpdates = []
+          checkProps = false
+          flush.clear()
+          flushPropsCheck.clear()
+        },
+      }
+    })()
 
   function setInspectedOwner(owner: Solid.Owner | undefined) {
     inspectedOwner && clearOwnerObservers(inspectedOwner, propsMap)
@@ -170,7 +178,7 @@ export function createInspector(
       const node = valueMap.get(id)
       if (!node) return warn('Could not find value node:', id)
       node.setSelected(selected)
-      pushValueUpdate(id)
+      pushInspectToggle(id, selected)
     },
     getElementById(id: NodeID): HTMLElement | undefined {
       const el = nodeIdMap.get(id)

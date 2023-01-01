@@ -9,6 +9,7 @@ import {
 } from '@solid-devtools/debugger/types'
 import { splitOnColon } from '@solid-devtools/shared/utils'
 import { batch, createSignal } from 'solid-js'
+import { Writable } from 'type-fest'
 
 export class StoreNodeMap {
   map = new Map<NodeID, { node: DecodedValue<ValueType.Store>; refs: number }>()
@@ -35,31 +36,31 @@ export class StoreNodeMap {
 }
 
 export type ObjectValueData = {
-  value: Record<string, DecodedValue> | null
-  length: number
-  setValue: (newValue: number | Record<string, DecodedValue> | DecodedValue[]) => void
+  readonly value: Readonly<Record<string | number, DecodedValue>> | null
+  readonly length: number
+  readonly setValue: (newValue: number | Readonly<Record<string | number, DecodedValue>>) => void
 }
 
-export type DecodedDataMap = {
-  [ValueType.String]: { value: string }
-  [ValueType.Number]: { value: number }
-  [ValueType.Boolean]: { value: boolean }
-  [ValueType.Null]: { value: null | undefined }
-  [ValueType.Symbol]: { name: string }
-  [ValueType.Instance]: { name: string }
-  [ValueType.Function]: { name: string }
-  [ValueType.Element]: { name: string; id: NodeID }
-  [ValueType.Getter]: { name: string }
+type DecodedDataMap = {
+  [ValueType.String]: { readonly value: string }
+  [ValueType.Number]: { readonly value: number }
+  [ValueType.Boolean]: { readonly value: boolean }
+  [ValueType.Null]: { readonly value: null | undefined }
+  [ValueType.Symbol]: { readonly name: string }
+  [ValueType.Instance]: { readonly name: string }
+  [ValueType.Function]: { readonly name: string }
+  [ValueType.Element]: { readonly name: string; readonly id: NodeID }
+  [ValueType.Getter]: { readonly name: string }
   [ValueType.Array]: ObjectValueData
   [ValueType.Object]: ObjectValueData
   [ValueType.Store]: ObjectValueData & {
-    id: NodeID
-    valueType: ValueType.Array | ValueType.Object
+    readonly id: NodeID
+    readonly valueType: ValueType.Array | ValueType.Object
   }
   [ValueType.Unknown]: {}
 }
-export type DecodedValueMap = {
-  [K in ValueType]: DecodedDataMap[K] & { type: K }
+type DecodedValueMap = {
+  [K in ValueType]: DecodedDataMap[K] & { readonly type: K }
 }
 
 export type DecodedValue<T extends ValueType = ValueType> = DecodedValueMap[T]
@@ -118,7 +119,7 @@ function decode(index: number): DecodedValue {
           ? data.length
           : Object.keys(data).length,
       )
-      const initValue: ObjectValueData['value'] =
+      const initValue: Writable<ObjectValueData['value']> =
         typeof data === 'number' ? null : data.constructor()
       const [value, setActualValue] = createSignal<ObjectValueData['value']>(initValue)
 
@@ -155,13 +156,14 @@ function decode(index: number): DecodedValue {
       const [id, vIndex] = splitOnColon(encoded[1])
       let store = StoreRefMap.get(id)
       if (!store) {
-        store = saveToMap(index, { id } as DecodedValue<ValueType.Store>)
+        store = saveToMap(index, { id, type: ValueType.Store } as DecodedValue<ValueType.Store>)
         const value = decode(+vIndex) as DecodedValue<ValueType.Object | ValueType.Array>
-        store.valueType = value.type
-        store.setValue = value.setValue
+        const desc = Object.getOwnPropertyDescriptors(value)
         Object.defineProperties(store, {
-          value: { get: () => value.value },
-          length: { get: () => value.length },
+          valueType: desc.type,
+          setValue: desc.setValue,
+          value: desc.value,
+          length: desc.length,
         })
       }
       StoreRefMap.addRef(id, store)
@@ -175,21 +177,23 @@ function decode(index: number): DecodedValue {
 /** to avoid circular references in `removeNestedStoreRefs` */
 let Seen = new Set<DecodedValue>()
 
+export const isObjectType = (
+  value: DecodedValue,
+): value is DecodedValue<ValueType.Array | ValueType.Object | ValueType.Store> => {
+  const { type } = value
+  return type === ValueType.Array || type === ValueType.Object || type === ValueType.Store
+}
+
 export const isValueNested = (
   value: DecodedValue,
-): value is DecodedValue<ValueType.Array | ValueType.Object | ValueType.Store> & {
-  value: NonNullable<ObjectValueData['value']>
-} =>
-  (value.type === ValueType.Array ||
-    value.type === ValueType.Object ||
-    value.type === ValueType.Store) &&
-  !!value.value &&
-  value.length > 0
+): value is DecodedValue<ValueType.Array | ValueType.Object | ValueType.Store> =>
+  isObjectType(value) && value.length > 0
 
 export function removeNestedStoreRefs(value: DecodedValue) {
   if (Seen.has(value)) return
   Seen.add(value)
-  if (isValueNested(value)) Object.values(value.value).forEach(removeNestedStoreRefs)
+  value.type === ValueType.Store && StoreRefMap.removeRef(value.id)
+  isValueNested(value) && value.value && Object.values(value.value).forEach(removeNestedStoreRefs)
 }
 
 export function decodeValue(
@@ -198,16 +202,49 @@ export function decodeValue(
   storeRefMap: StoreNodeMap,
 ): DecodedValue {
   StoreRefMap = storeRefMap
-
   Seen = new Set()
-  prevValue && removeNestedStoreRefs(prevValue)
-  Seen = undefined as any
-
   List = list
   DecodedMap = new Map()
+
+  prevValue && removeNestedStoreRefs(prevValue)
+
   const decoded = decode(0)
-  // @ts-expect-error - we don't want to keep globals around
-  List = DecodedMap = StoreRefMap = undefined
+
+  // we don't want to keep globals around
+  List = DecodedMap = StoreRefMap = Seen = undefined!
 
   return decoded
+}
+
+export function updateCollapsedValue(
+  data: DecodedValue<ValueType.Object | ValueType.Array | ValueType.Store>,
+  list: EncodedValue[],
+  storeRefMap: StoreNodeMap,
+) {
+  if (data.type !== list[0][0]) throw new Error('Type mismatch')
+
+  List = list
+  StoreRefMap = storeRefMap
+  Seen = new Set()
+  DecodedMap = new Map()
+
+  const head = (
+    list[data.type === ValueType.Store ? 1 : 0] as EncodedValue<ValueType.Object | ValueType.Array>
+  )[1]
+
+  // collapse object value
+  if (data.value && typeof head === 'number') {
+    Object.values(data.value).forEach(removeNestedStoreRefs)
+    data.setValue(head)
+  }
+  // expand object value
+  else if (!data.value && typeof head !== 'number') {
+    const newValue: Record<string | number, DecodedValue> = head.constructor()
+    for (const [key, value] of Object.entries(head)) {
+      newValue[key] = value === -1 ? { type: ValueType.Getter, name: key } : decode(value)
+    }
+    data.setValue(newValue)
+  }
+
+  StoreRefMap = List = Seen = DecodedMap = undefined!
 }
