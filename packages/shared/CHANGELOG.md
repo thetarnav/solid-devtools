@@ -1,5 +1,11 @@
 # solid-devtools-shared
 
+## 0.10.6
+
+### Patch Changes
+
+- c4e9af3: Add more utils
+
 ## 0.10.5
 
 ### Patch Changes
