@@ -1,5 +1,16 @@
 # @solid-devtools/debugger
 
+## 0.19.0
+
+### Minor Changes
+
+- c4e9af3: Improve value encoding, decoding and tracking store references.
+
+### Patch Changes
+
+- Updated dependencies [c4e9af3]
+  - @solid-devtools/shared@0.10.6
+
 ## 0.18.1
 
 ### Patch Changes
