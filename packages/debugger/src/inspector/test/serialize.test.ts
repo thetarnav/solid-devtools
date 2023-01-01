@@ -238,6 +238,9 @@ describe('finding stores in values', () => {
   const [state3] = createStore({ a: 1, b: ['foo'] })
   state3.b[0]
 
+  const [circ, setCirc] = createStore<any>({ a: 1 })
+  setCirc({ b: circ })
+
   const storeExpectations: [
     name: string,
     data: unknown,
@@ -290,6 +293,16 @@ describe('finding stores in values', () => {
         [ValueType.String, 'foo'],
       ],
       [[state3, '7']],
+    ],
+    [
+      'circular store',
+      circ,
+      [
+        [ValueType.Store, '9:1'],
+        [ValueType.Object, { a: 2, b: 0 }],
+        [ValueType.Number, 1],
+      ],
+      [[circ, '9']],
     ],
   ]
 

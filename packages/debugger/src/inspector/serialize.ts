@@ -60,7 +60,7 @@ function encode(value: unknown): number {
 
   const encoded: EncodedValue = [] as any
   const index = List.push(encoded) - 1
-  Seen.set(value, index)
+  ignoreNextStore || Seen.set(value, index)
 
   // HTML Elements
   if (value instanceof Element) {
@@ -71,6 +71,8 @@ function encode(value: unknown): number {
   else if (!ignoreNextStore && isStoreNode(value)) {
     // might still pass in a proxy
     const node = unwrap(value)
+    // set unwrapped as seen as well
+    if (node !== value) Seen.set(node, index)
     const id = NodeMap.set(node)
     !InStore && HandleStore && HandleStore(node, id)
     const wasInStore = InStore

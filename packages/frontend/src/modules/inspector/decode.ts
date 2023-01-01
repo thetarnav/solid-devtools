@@ -177,6 +177,9 @@ function decode(index: number): DecodedValue {
 /** to avoid circular references in `removeNestedStoreRefs` */
 let Seen = new Set<DecodedValue>()
 
+/**
+ * Check if a value is an object type (array, object, or store).
+ */
 export const isObjectType = (
   value: DecodedValue,
 ): value is DecodedValue<ValueType.Array | ValueType.Object | ValueType.Store> => {
@@ -184,18 +187,26 @@ export const isObjectType = (
   return type === ValueType.Array || type === ValueType.Object || type === ValueType.Store
 }
 
+/**
+ * Check if a value is an object type (array, object, or store).
+ * And that it has children. (isn't empty)
+ */
 export const isValueNested = (
   value: DecodedValue,
 ): value is DecodedValue<ValueType.Array | ValueType.Object | ValueType.Store> =>
   isObjectType(value) && value.length > 0
 
-export function removeNestedStoreRefs(value: DecodedValue) {
+function removeNestedStoreRefs(value: DecodedValue) {
   if (Seen.has(value)) return
   Seen.add(value)
   value.type === ValueType.Store && StoreRefMap.removeRef(value.id)
   isValueNested(value) && value.value && Object.values(value.value).forEach(removeNestedStoreRefs)
 }
 
+/**
+ * Decode a list of encoded values into a tree of decoded values.
+ * The previous value is important for removing store references that are no longer in the tree.
+ */
 export function decodeValue(
   list: EncodedValue[],
   prevValue: DecodedValue | null,
@@ -216,11 +227,15 @@ export function decodeValue(
   return decoded
 }
 
+/**
+ * Collapse or extend the value of an object/array/store.
+ * The previous value is important for removing store references that are no longer in the tree.
+ */
 export function updateCollapsedValue(
   data: DecodedValue<ValueType.Object | ValueType.Array | ValueType.Store>,
   list: EncodedValue[],
   storeRefMap: StoreNodeMap,
-) {
+): void {
   if (data.type !== list[0][0]) throw new Error('Type mismatch')
 
   List = list
@@ -228,6 +243,7 @@ export function updateCollapsedValue(
   Seen = new Set()
   DecodedMap = new Map()
 
+  // the relevant value for the store is the second item in the list
   const head = (
     list[data.type === ValueType.Store ? 1 : 0] as EncodedValue<ValueType.Object | ValueType.Array>
   )[1]
@@ -240,8 +256,8 @@ export function updateCollapsedValue(
   // expand object value
   else if (!data.value && typeof head !== 'number') {
     const newValue: Record<string | number, DecodedValue> = head.constructor()
-    for (const [key, value] of Object.entries(head)) {
-      newValue[key] = value === -1 ? { type: ValueType.Getter, name: key } : decode(value)
+    for (const [key, index] of Object.entries(head)) {
+      newValue[key] = index === -1 ? { type: ValueType.Getter, name: key } : decode(index)
     }
     data.setValue(newValue)
   }
