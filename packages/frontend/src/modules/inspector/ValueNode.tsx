@@ -23,7 +23,7 @@ type ToggleElementHover = (elementId: NodeID, hovered?: boolean) => void
 const ValueContext = createContext<{ onElementHover?: ToggleElementHover; underStore: boolean }>()
 
 const CollapsableObjectPreview: Component<{
-  value: Record<string, DecodedValue>
+  value: NonNullable<ObjectValueData['value']>
 }> = props => (
   <ul class={styles.collapsable.list}>
     <Entries of={props.value}>
