@@ -1,15 +1,28 @@
 import { makeEventListener } from '@solid-primitives/event-listener'
 import { createMediaQuery } from '@solid-primitives/media'
 import { createSharedRoot } from '@solid-primitives/rootless'
-import { AnyFunction, onRootCleanup } from '@solid-primitives/utils'
 import {
+  accessWith,
+  AnyFunction,
+  AnyStatic,
+  entries,
+  onRootCleanup,
+  SetterValue,
+  StaticStoreSetter,
+} from '@solid-primitives/utils'
+import {
+  $TRACK,
   Accessor,
+  batch,
   createMemo,
   createRoot,
   createSignal,
+  getListener,
   getOwner,
   onCleanup,
   runWithOwner,
+  Signal,
+  SignalOptions,
   untrack,
 } from 'solid-js'
 import type {
@@ -18,7 +31,6 @@ import type {
   MemoOptions,
   NoInfer,
   OnEffectFunction,
-  SignalOptions,
 } from 'solid-js/types/reactive/signal'
 import { Primitive } from 'type-fest'
 
@@ -205,4 +217,106 @@ export function createPingedSignal(
 // TODO: move createUnownedRoot to solid-primitives
 export function createUnownedRoot<T>(fn: (dispose: VoidFunction) => T): T {
   return runWithOwner(null as any, () => createRoot(fn))
+}
+
+// ! unfinished
+export function createShallowStore<T extends Readonly<AnyStatic>>(
+  storeValue: T,
+): [T, StaticStoreSetter<T>] {
+  const signals: Record<PropertyKey, Signal<any>> = {}
+
+  const [keys, setKeys] = createSignal(Object.keys(storeValue), { internal: true })
+  let hasKeysChanged = false
+
+  // TODO handle arrays
+
+  const setValue = <K extends keyof T>(key: K, setterParam: SetterValue<any>): void => {
+    const saved = signals[key]
+    const newValue = saved ? saved[1](setterParam) : accessWith(setterParam, storeValue[key])
+    if (newValue === void 0) {
+      delete storeValue[key]
+      hasKeysChanged = true
+    } else {
+      storeValue[key] = newValue
+    }
+  }
+
+  const setter = (a: ((prev: T) => Partial<T>) | Partial<T> | keyof T, b?: SetterValue<any>) => {
+    batch(() => {
+      if (a !== null && (typeof a === 'object' || typeof a === 'function'))
+        untrack(() => {
+          for (const [key, newValue] of entries(accessWith(a, store) as Partial<T>))
+            setValue(key, () => newValue)
+        })
+      else setValue(a, b)
+      if (hasKeysChanged) {
+        hasKeysChanged = false
+        setKeys(Object.keys(storeValue))
+      }
+    })
+    return store
+  }
+
+  const store = new Proxy(storeValue, {
+    get(target, key) {
+      if (key === $TRACK) {
+        keys()
+        return true
+      }
+      let signal = signals[key]
+      if (!signal) {
+        if (!getListener()) {
+          return storeValue[key as keyof T]
+        }
+        signal = createSignal<any>(storeValue[key as keyof T], { internal: true })
+        signals[key] = signal
+      }
+      return signal[0]()
+    },
+
+    has(target, key) {
+      if (key === $TRACK) return true
+      this.get!(target, key, target)
+      return key in target
+    },
+
+    set() {
+      // eslint-disable-next-line no-console
+      console.warn('Cannot mutate a Store directly')
+      return true
+    },
+
+    deleteProperty() {
+      // eslint-disable-next-line no-console
+      console.warn('Cannot mutate a Store directly')
+      return true
+    },
+
+    ownKeys: () => keys().slice(),
+
+    getOwnPropertyDescriptor() {
+      // eslint-disable-next-line no-console
+      console.warn('getOwnPropertyDescriptor is not yet implemented for shallow stores')
+      return undefined
+    },
+  })
+
+  return [store, setter]
+}
+
+export function handleTupleUpdate<
+  T extends readonly [PropertyKey, any],
+  O = { readonly [K in T as K[0]]: (value: K[1]) => void },
+>(handlers: O): (update: T) => void {
+  return update => (handlers as any)[update[0]](update[1])
+}
+
+export function handleTupleUpdates<
+  T extends readonly [PropertyKey, any],
+  O = { readonly [K in T as K[0]]: (value: K[1]) => void },
+>(handlers: O): (updates: T[]) => void {
+  function runUpdates(updates: T[]) {
+    for (const [key, value] of updates) (handlers as any)[key](value)
+  }
+  return updates => batch(runUpdates.bind(void 0, updates))
 }

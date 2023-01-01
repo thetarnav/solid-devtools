@@ -87,7 +87,7 @@ export function observeValueUpdate(
   Object.defineProperty(node, 'value', {
     get: () => value,
     set: newValue => {
-      for (let sym of Object.getOwnPropertySymbols(map)) map[sym](newValue, value)
+      for (const sym of Object.getOwnPropertySymbols(map)) map[sym](newValue, value)
       value = newValue
     },
   })

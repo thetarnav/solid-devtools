@@ -3,15 +3,15 @@ import plugin from '../name'
 import { assertTransform } from './setup'
 
 // Positive tests
-for (let [create, module, extraArg] of [
+for (const [create, module, addExtraArg] of [
   ['createSignal', 'solid-js'],
   ['createMemo', 'solid-js', '1'],
   ['createStore', 'solid-js/store'],
   ['createMutable', 'solid-js/store'],
 ]) {
-  extraArg = extraArg ? 'undefined, ' : ''
+  const extraArg = addExtraArg ? 'undefined, ' : ''
   describe(create, () => {
-    for (let [type, importStatement, creator] of [
+    for (const [type, importStatement, creator] of [
       ['named import', `import { ${create} } from "${module}";`, create],
       ['renamed import', `import { ${create} as foo } from "${module}";`, 'foo'],
       ['namespace import', `import * as foo from "${module}";`, `foo.${create}`],
@@ -116,7 +116,7 @@ const [signal, setSignal] = ${creator}(5, ${extraArg}{
 }
 
 // Negative tests
-for (let [create, module] of [
+for (const [create, module] of [
   ['createSignal', 'solid-js/store'],
   ['createMemo', 'solid-js/store'],
   ['createStore', 'solid-js'],

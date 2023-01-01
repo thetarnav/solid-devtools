@@ -31,7 +31,7 @@ function observeComputation(owner: Solid.Computation, attachedData: Solid.Owner)
   // This is because DOM can change without the owner structure changing
   let isLeaf = !owner.owned || owner.owned.length === 0
   const boundHandler = $_on_computation_update.bind(void 0, $_root_id, attachedData)
-  let handler =
+  const handler =
     isLeaf && $_mode !== TreeWalkerMode.DOM
       ? () => {
           if (isLeaf && (!owner.owned || owner.owned.length === 0)) {
@@ -182,7 +182,7 @@ function mapOwner(
 
     // Refresh
     // omitting refresh memo — map it's children instead
-    let refresh = getComponentRefreshNode(owner as Solid.Component)
+    const refresh = getComponentRefreshNode(owner as Solid.Component)
     if (refresh) {
       mapped.hmr = true
       owner = refresh

@@ -9,18 +9,21 @@ export function info<T>(data: T): T {
   return data
 }
 
-export function log(...args: any[]): void {
+export function log(...args: any[]): undefined {
   // eslint-disable-next-line no-console
   console.log(...getLogLabel(), ...args)
+  return
 }
-export function warn(...args: any[]): void {
+export function warn(...args: any[]): undefined {
   // eslint-disable-next-line no-console
   console.warn(...getLogLabel(), ...args)
+  return
 }
 
-export function error(...args: any[]): void {
+export function error(...args: any[]): undefined {
   // eslint-disable-next-line no-console
   console.error(...getLogLabel(), ...args)
+  return
 }
 
 export function formatTime(d: Date = new Date()): string {
@@ -142,3 +145,5 @@ export function whileArray<T, U>(
 
 export const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && Object.getPrototypeOf(value) === Object.prototype
+
+export const XOR = (a: unknown, b: unknown) => (a || b) && !(a && b)

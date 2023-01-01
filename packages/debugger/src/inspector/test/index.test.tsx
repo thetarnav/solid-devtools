@@ -216,7 +216,7 @@ describe('collectOwnerDetails', () => {
 
   it('listens to signal updates', () => {
     createRoot(dispose => {
-      let owner = getOwner()!
+      const owner = getOwner()!
       const [, setCount] = createSignal(0) // id: "0"
       const [, setCount2] = createSignal(0) // id: "1"
 

@@ -8,14 +8,15 @@ import {
   ValueType,
 } from '@solid-devtools/debugger/types'
 import { splitOnColon } from '@solid-devtools/shared/utils'
-import { createStore, SetStoreFunction } from 'solid-js/store'
+import { batch, createSignal } from 'solid-js'
+import { Writable } from 'type-fest'
 
 export class StoreNodeMap {
-  map = new Map<NodeID, { node: StoreNode; refs: number }>()
-  get(id: NodeID): StoreNode | null {
+  map = new Map<NodeID, { node: DecodedValue<ValueType.Store>; refs: number }>()
+  get(id: NodeID): DecodedValue<ValueType.Store> | null {
     return this.map.get(id)?.node || null
   }
-  addRef(id: NodeID, node: StoreNode) {
+  addRef(id: NodeID, node: DecodedValue<ValueType.Store>) {
     const entry = this.map.get(id)
     if (entry) entry.refs++
     else this.map.set(id, { node, refs: 1 })
@@ -34,55 +35,35 @@ export class StoreNodeMap {
   }
 }
 
-// TODO: don't use classes, use plain objects
+export type ObjectValueData = {
+  readonly value: Readonly<Record<string | number, DecodedValue>> | DecodedValue[] | null
+  readonly length: number
+  readonly setValue: (
+    newValue: number | Readonly<Record<string | number, DecodedValue>> | DecodedValue[],
+  ) => void
+}
 
-export class StoreNode {
-  #state: { readonly value: DecodedValue }
-  get value() {
-    return this.#state.value
+type DecodedDataMap = {
+  [ValueType.String]: { readonly value: string }
+  [ValueType.Number]: { readonly value: number }
+  [ValueType.Boolean]: { readonly value: boolean }
+  [ValueType.Null]: { readonly value: null | undefined }
+  [ValueType.Symbol]: { readonly name: string }
+  [ValueType.Instance]: { readonly name: string }
+  [ValueType.Function]: { readonly name: string }
+  [ValueType.Element]: { readonly name: string; readonly id: NodeID }
+  [ValueType.Getter]: { readonly name: string }
+  [ValueType.Array]: ObjectValueData
+  [ValueType.Object]: ObjectValueData
+  [ValueType.Store]: ObjectValueData & {
+    readonly id: NodeID
+    readonly valueType: ValueType.Array | ValueType.Object
   }
-  setState: SetStoreFunction<DecodedValue>
-  constructor(public id: NodeID) {
-    const [state, setState] = createStore<{ readonly value: DecodedValue }>({ value: null })
-    this.#state = state
-    this.setState = (...a: any[]) => setState('value', ...(a as [any]))
-  }
+  [ValueType.Unknown]: {}
 }
-export class InstanceNode {
-  constructor(public name: string) {}
+type DecodedValueMap = {
+  [K in ValueType]: DecodedDataMap[K] & { readonly type: K }
 }
-export class FunctionNode {
-  constructor(public name: string) {}
-}
-export class ElementNode {
-  constructor(public id: NodeID, public name: string) {}
-}
-export class GetterNode {
-  constructor(public name: string) {}
-}
-export class ObjectPreviewNode {
-  constructor(public type: ValueType.Object | ValueType.Array, public length: number) {}
-}
-export class UnknownNode {}
-
-export type DecodedValueMap = {
-  [ValueType.String]: string
-  [ValueType.Number]: number
-  [ValueType.Boolean]: boolean
-  [ValueType.Null]: null | undefined
-  [ValueType.Symbol]: symbol
-  [ValueType.Instance]: InstanceNode
-  [ValueType.Function]: FunctionNode
-  [ValueType.Element]: ElementNode
-  [ValueType.Getter]: GetterNode
-  [ValueType.Array]: ArrayDecodedValue | ObjectPreviewNode
-  [ValueType.Object]: ObjectDecodedValue | ObjectPreviewNode
-  [ValueType.Store]: StoreNode
-  [ValueType.Unknown]: UnknownNode
-}
-// used interface instead of type to avoid circular dependency
-interface ArrayDecodedValue extends Array<DecodedValue> {}
-interface ObjectDecodedValue extends Record<string, DecodedValue> {}
 
 export type DecodedValue<T extends ValueType = ValueType> = DecodedValueMap[T]
 
@@ -97,96 +78,192 @@ const saveToMap = <T extends DecodedValue>(index: number, value: T): T => {
 
 function decode(index: number): DecodedValue {
   if (DecodedMap.has(index)) {
-    return DecodedMap.get(index)
+    return DecodedMap.get(index)!
   }
 
   const encoded = List[index]
   switch (encoded[0]) {
     case ValueType.String:
     case ValueType.Boolean:
-      return encoded[1]
+      return { type: encoded[0], value: encoded[1] as any }
     case ValueType.Null:
-      return encoded[1] === UNDEFINED ? undefined : null
+      return { type: ValueType.Null, value: encoded[1] === UNDEFINED ? undefined : null }
     case ValueType.Number: {
       const [, data] = encoded
-      return data === INFINITY
-        ? Infinity
-        : data === NEGATIVE_INFINITY
-        ? -Infinity
-        : data === NAN
-        ? NaN
-        : data
+      const value =
+        data === INFINITY
+          ? Infinity
+          : data === NEGATIVE_INFINITY
+          ? -Infinity
+          : data === NAN
+          ? NaN
+          : data
+      return { type: ValueType.Number, value }
     }
     case ValueType.Symbol:
-      return Symbol(encoded[1])
+      return { type: ValueType.Symbol, name: encoded[1] }
     case ValueType.Instance:
-      return saveToMap(index, new InstanceNode(encoded[1]))
     case ValueType.Function:
-      return saveToMap(index, new FunctionNode(encoded[1]))
+    case ValueType.Getter:
+      return saveToMap(index, { type: encoded[0], name: encoded[1] })
     case ValueType.Element: {
       const [id, name] = splitOnColon(encoded[1])
-      return saveToMap(index, new ElementNode(id, name))
+      return saveToMap(index, { type: ValueType.Element, id, name })
     }
-    case ValueType.Getter:
-      return saveToMap(index, new GetterNode(encoded[1]))
     case ValueType.Array:
     case ValueType.Object: {
       const [type, data] = encoded
-      if (typeof data === 'number') {
-        return saveToMap(index, new ObjectPreviewNode(type, data))
+
+      const [length, setLength] = createSignal(
+        typeof data === 'number'
+          ? data
+          : Array.isArray(data)
+          ? data.length
+          : Object.keys(data).length,
+      )
+      const initValue: Writable<ObjectValueData['value']> =
+        typeof data === 'number' ? null : data.constructor()
+      const [value, setActualValue] = createSignal<ObjectValueData['value']>(initValue)
+
+      const valueObject: ObjectValueData = saveToMap(index, {
+        type,
+        get value() {
+          return value()
+        },
+        get length() {
+          return length()
+        },
+        setValue(newValue) {
+          batch(() => {
+            if (typeof newValue === 'number') {
+              setLength(newValue)
+              setActualValue(null)
+            } else {
+              setLength(Array.isArray(newValue) ? newValue.length : Object.keys(newValue).length)
+              setActualValue(newValue as any)
+            }
+          })
+        },
+      })
+
+      if (initValue) {
+        for (const [key, child] of Object.entries(data)) {
+          initValue[key as any] =
+            child === -1 ? { type: ValueType.Getter, name: key } : decode(child)
+        }
       }
-      const value = saveToMap(index, data.constructor() as ArrayDecodedValue | ObjectDecodedValue)
-      for (const [key, child] of Object.entries(data)) {
-        ;(value as Record<string, DecodedValue>)[key] =
-          child === -1 ? new GetterNode(key) : decode(child)
-      }
-      return value
+
+      return valueObject as DecodedValue
     }
     case ValueType.Store: {
       const [id, vIndex] = splitOnColon(encoded[1])
       let store = StoreRefMap.get(id)
       if (!store) {
-        store = saveToMap(index, new StoreNode(id))
-        store.setState(decode(+vIndex))
+        store = saveToMap(index, { id, type: ValueType.Store } as DecodedValue<ValueType.Store>)
+        const value = decode(+vIndex) as DecodedValue<ValueType.Object | ValueType.Array>
+        const desc = Object.getOwnPropertyDescriptors(value)
+        Object.defineProperties(store, {
+          valueType: desc.type,
+          setValue: desc.setValue,
+          value: desc.value,
+          length: desc.length,
+        })
       }
       StoreRefMap.addRef(id, store)
       return store
     }
+    case ValueType.Unknown:
+      return { type: ValueType.Unknown }
   }
 }
 
 /** to avoid circular references in `removeNestedStoreRefs` */
 let Seen = new Set<DecodedValue>()
 
-export function removeNestedStoreRefs(value: DecodedValue) {
-  if (!value || typeof value !== 'object' || Seen.has(value)) return
-  Seen.add(value)
-  if (value instanceof StoreNode) {
-    StoreRefMap.removeRef(value.id)
-    removeNestedStoreRefs(value.value)
-  } else if (Array.isArray(value)) {
-    value.forEach(removeNestedStoreRefs)
-  } else if (Object.getPrototypeOf(value) === Object.prototype) {
-    Object.values(value).forEach(removeNestedStoreRefs)
-  }
+/**
+ * Check if a value is an object type (array, object, or store).
+ */
+export const isObjectType = (
+  value: DecodedValue,
+): value is DecodedValue<ValueType.Array | ValueType.Object | ValueType.Store> => {
+  const { type } = value
+  return type === ValueType.Array || type === ValueType.Object || type === ValueType.Store
 }
 
+/**
+ * Check if a value is an object type (array, object, or store).
+ * And that it has children. (isn't empty)
+ */
+export const isValueNested = (
+  value: DecodedValue,
+): value is DecodedValue<ValueType.Array | ValueType.Object | ValueType.Store> =>
+  isObjectType(value) && value.length > 0
+
+function removeNestedStoreRefs(value: DecodedValue) {
+  if (Seen.has(value)) return
+  Seen.add(value)
+  value.type === ValueType.Store && StoreRefMap.removeRef(value.id)
+  isValueNested(value) && value.value && Object.values(value.value).forEach(removeNestedStoreRefs)
+}
+
+/**
+ * Decode a list of encoded values into a tree of decoded values.
+ * The previous value is important for removing store references that are no longer in the tree.
+ */
 export function decodeValue(
   list: EncodedValue[],
   prevValue: DecodedValue | null,
   storeRefMap: StoreNodeMap,
 ): DecodedValue {
   StoreRefMap = storeRefMap
-
   Seen = new Set()
-  removeNestedStoreRefs(prevValue)
-  Seen = undefined as any
-
   List = list
   DecodedMap = new Map()
+
+  prevValue && removeNestedStoreRefs(prevValue)
+
   const decoded = decode(0)
-  // @ts-expect-error - we don't want to keep globals around
-  List = DecodedMap = StoreRefMap = undefined
+
+  // we don't want to keep globals around
+  List = DecodedMap = StoreRefMap = Seen = undefined!
 
   return decoded
+}
+
+/**
+ * Collapse or extend the value of an object/array/store.
+ * The previous value is important for removing store references that are no longer in the tree.
+ */
+export function updateCollapsedValue(
+  data: DecodedValue<ValueType.Object | ValueType.Array | ValueType.Store>,
+  list: EncodedValue[],
+  storeRefMap: StoreNodeMap,
+): void {
+  if (data.type !== list[0][0]) throw new Error('Type mismatch')
+
+  List = list
+  StoreRefMap = storeRefMap
+  Seen = new Set()
+  DecodedMap = new Map()
+
+  // the relevant value for the store is the second item in the list
+  const head = (
+    list[data.type === ValueType.Store ? 1 : 0] as EncodedValue<ValueType.Object | ValueType.Array>
+  )[1]
+
+  // collapse object value
+  if (data.value && typeof head === 'number') {
+    Object.values(data.value).forEach(removeNestedStoreRefs)
+    data.setValue(head)
+  }
+  // expand object value
+  else if (!data.value && typeof head !== 'number') {
+    const newValue: Record<string | number, DecodedValue> = head.constructor()
+    for (const [key, index] of Object.entries(head)) {
+      newValue[key] = index === -1 ? { type: ValueType.Getter, name: key } : decode(index)
+    }
+    data.setValue(newValue)
+  }
+
+  StoreRefMap = List = Seen = DecodedMap = undefined!
 }

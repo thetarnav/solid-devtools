@@ -290,11 +290,11 @@ export function collectOwnerDetails(
     // handle Component (props and location)
     if (isSolidComponent(owner)) {
       // marge component with refresh memo
-      let refresh = getComponentRefreshNode(owner)
+      const refresh = getComponentRefreshNode(owner)
       if (refresh) {
         sourceMap = refresh.sourceMap
         owned = refresh.owned
-        getValue = () => refresh!.value
+        getValue = () => refresh.value
       }
 
       ;({ checkProxyProps, props: details.props } = mapProps(owner.props))

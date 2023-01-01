@@ -1,12 +1,7 @@
 import { useController } from '@/controller'
 import { Badge, Icon, Scrollable } from '@/ui'
 import { OwnerName } from '@/ui/components/Owner'
-import {
-  NodeType,
-  NODE_TYPE_NAMES,
-  PropGetterState,
-  ValueItemType,
-} from '@solid-devtools/debugger/types'
+import { NodeType, NODE_TYPE_NAMES, PropGetterState } from '@solid-devtools/debugger/types'
 import { Entries } from '@solid-primitives/keyed'
 import { Component, createMemo, For, JSX, Show } from 'solid-js'
 import * as styles from './inspector.css'
@@ -72,7 +67,7 @@ const DetailsContent: Component = () => {
               name={name}
               value={value().value}
               extended={value().selected}
-              onClick={() => inspector.inspectValueItem(ValueItemType.Prop, name)}
+              onClick={() => inspector.inspectValueItem(value())}
               onElementHover={inspector.toggleHoveredElement}
               isSignal={value().getter !== false}
               isStale={value().getter === PropGetterState.Stale}
@@ -88,7 +83,7 @@ const DetailsContent: Component = () => {
                 name={signal.name}
                 value={signal.value}
                 extended={signal.selected}
-                onClick={() => inspector.inspectValueItem(ValueItemType.Signal, signal.id)}
+                onClick={() => inspector.inspectValueItem(signal)}
                 onElementHover={inspector.toggleHoveredElement}
                 isSignal={type !== 'stores'}
               />
@@ -96,19 +91,21 @@ const DetailsContent: Component = () => {
           </For>
         </ListSignals>
       ))}
-      {details.value && (
-        <div>
-          <h2 class={styles.h2}>{NODE_TYPE_NAMES[inspectedNode()!.type]}</h2>
-          <ValueNode
-            name="value"
-            value={details.value.value}
-            extended={details.value.selected}
-            onClick={() => inspector.inspectValueItem(ValueItemType.Value)}
-            onElementHover={inspector.toggleHoveredElement}
-            isSignal
-          />
-        </div>
-      )}
+      <Show when={details.value} keyed>
+        {valueItem => (
+          <div>
+            <h2 class={styles.h2}>{NODE_TYPE_NAMES[inspectedNode()!.type]}</h2>
+            <ValueNode
+              name="value"
+              value={valueItem.value}
+              extended={valueItem.selected}
+              onClick={() => inspector.inspectValueItem(valueItem)}
+              onElementHover={inspector.toggleHoveredElement}
+              isSignal
+            />
+          </div>
+        )}
+      </Show>
       {details.location && (
         <div>
           <h2 class={styles.h2}>Location</h2>
