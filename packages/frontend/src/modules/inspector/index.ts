@@ -139,7 +139,7 @@ function updateStore(
   const value = store.value
   if (!value) throw `updateStore: store node (${storeNodeId}) has no value`
 
-  const newValue: Writable<NonNullable<typeof value>> = shallowCopy(value)
+  const newValue = shallowCopy(value) as Record<string | number, DecodedValue>
 
   if (newRawValue === null) {
     delete newValue[property]
@@ -147,7 +147,7 @@ function updateStore(
     if (Array.isArray(value)) value.length = newRawValue
     else throw `updateStore: store node (${storeNodeId}) is not an array`
   } else {
-    newValue[property] = decodeValue(newRawValue, value[property], storeNodeMap)
+    newValue[property] = decodeValue(newRawValue, newValue[property], storeNodeMap)
   }
   store.setValue(newValue)
 }

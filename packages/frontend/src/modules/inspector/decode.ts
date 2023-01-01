@@ -36,9 +36,11 @@ export class StoreNodeMap {
 }
 
 export type ObjectValueData = {
-  readonly value: Readonly<Record<string | number, DecodedValue>> | null
+  readonly value: Readonly<Record<string | number, DecodedValue>> | DecodedValue[] | null
   readonly length: number
-  readonly setValue: (newValue: number | Readonly<Record<string | number, DecodedValue>>) => void
+  readonly setValue: (
+    newValue: number | Readonly<Record<string | number, DecodedValue>> | DecodedValue[],
+  ) => void
 }
 
 type DecodedDataMap = {
@@ -146,7 +148,8 @@ function decode(index: number): DecodedValue {
 
       if (initValue) {
         for (const [key, child] of Object.entries(data)) {
-          initValue[key] = child === -1 ? { type: ValueType.Getter, name: key } : decode(child)
+          initValue[key as any] =
+            child === -1 ? { type: ValueType.Getter, name: key } : decode(child)
         }
       }
 
