@@ -15,12 +15,10 @@ import {
   Accessor,
   batch,
   createMemo,
-  createRoot,
   createSignal,
   getListener,
   getOwner,
   onCleanup,
-  runWithOwner,
   Signal,
   SignalOptions,
   untrack,
@@ -215,9 +213,9 @@ export function createPingedSignal(
 }
 
 // TODO: move createUnownedRoot to solid-primitives
-export function createUnownedRoot<T>(fn: (dispose: VoidFunction) => T): T {
-  return runWithOwner(null as any, () => createRoot(fn))
-}
+// export function createUnownedRoot<T>(fn: (dispose: VoidFunction) => T): T {
+//   return runWithOwner(null as any, () => createRoot(fn))
+// }
 
 // ! unfinished
 export function createShallowStore<T extends Readonly<AnyStatic>>(
