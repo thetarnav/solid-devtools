@@ -116,10 +116,10 @@
     "@solid-primitives/platform": "^0.0.102",
     "@solid-primitives/scheduled": "^1.2.0",
     "@solid-primitives/utils": "^4.0.0",
-    "type-fest": "^3.2.0"
+    "type-fest": "^3.5.1"
   },
   "peerDependencies": {
     "solid-js": "^1.6.2"
   },
-  "packageManager": "pnpm@7.18.1"
+  "packageManager": "pnpm@7.20.0"
 }

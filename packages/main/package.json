@@ -122,31 +122,31 @@
     "@babel/generator": "^7.20.7",
     "@babel/parser": "^7.20.7",
     "@babel/plugin-syntax-jsx": "^7.18.6",
-    "@babel/traverse": "^7.20.10",
+    "@babel/traverse": "^7.20.12",
     "@types/babel__core": "^7.1.19",
     "@types/babel__generator": "^7.6.4",
     "@types/babel__traverse": "^7.18.2",
+    "solid-start": "^0.2.9",
     "tsup": "^6.5.0",
     "typescript": "^4.9.3",
-    "vite": "^4.0.3",
-    "vitest": "^0.26.2",
-    "solid-start": "^0.2.9"
+    "vite": "^4.0.4",
+    "vitest": "^0.26.3"
   },
   "dependencies": {
-    "@babel/core": "^7.20.7",
+    "@babel/core": "^7.20.12",
     "@babel/plugin-syntax-typescript": "^7.18.6",
     "@babel/types": "^7.20.7",
     "@solid-devtools/debugger": "workspace:^0.19.0",
     "@solid-devtools/shared": "workspace:^0.10.6",
     "@solid-primitives/utils": "^4.0.0",
-    "type-fest": "^3.2.0"
+    "type-fest": "^3.5.1"
   },
   "peerDependencies": {
     "solid-js": "^1.6.2",
     "vite": "^2.2.3 || ^3.0.0 || ^4.0.0"
   },
   "optionalDependencies": {
-    "solid-start": "^0.2.9"
+    "solid-start": "^0.2.11"
   },
-  "packageManager": "pnpm@7.18.1"
+  "packageManager": "pnpm@7.20.0"
 }

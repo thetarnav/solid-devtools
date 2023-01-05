@@ -65,5 +65,5 @@
   "peerDependencies": {
     "solid-js": "^1.6.2"
   },
-  "packageManager": "pnpm@7.18.1"
+  "packageManager": "pnpm@7.20.0"
 }

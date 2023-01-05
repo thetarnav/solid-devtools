@@ -67,6 +67,6 @@
     "@solid-primitives/scheduled": "^1.1.0",
     "@solid-primitives/styles": "^0.0.101",
     "@solid-primitives/utils": "^4.0.0",
-    "type-fest": "^3.2.0"
+    "type-fest": "^3.5.1"
   }
 }

@@ -18,8 +18,8 @@
     "@types/chrome": "^0.0.206",
     "jsdom": "^20.0.3",
     "rimraf": "^3.0.2",
-    "vite": "^4.0.3",
-    "vitest": "^0.26.2",
+    "vite": "^4.0.4",
+    "vitest": "^0.26.3",
     "webextension-polyfill": "^0.10.0",
     "zip-a-folder": "^1.1.5"
   },
@@ -28,12 +28,12 @@
     "@solid-devtools/shared": "workspace:^0.10.6",
     "@solid-primitives/utils": "^4.0.0",
     "solid-devtools": "workspace:^0.24.7",
-    "solid-js": "^1.6.6"
+    "solid-js": "^1.6.8"
   },
   "overrides": {
     "@crxjs/vite-plugin": {
       "vite": "^3"
     }
   },
-  "packageManager": "pnpm@7.18.1"
+  "packageManager": "pnpm@7.20.0"
 }

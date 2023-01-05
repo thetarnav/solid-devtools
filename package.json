@@ -26,27 +26,27 @@
   "devDependencies": {
     "@changesets/cli": "^2.25.0",
     "@types/node": "^18.11.3",
-    "@typescript-eslint/eslint-plugin": "^5.47.0",
-    "@typescript-eslint/parser": "^5.47.0",
-    "babel-preset-solid": "^1.6.6",
+    "@typescript-eslint/eslint-plugin": "^5.48.0",
+    "@typescript-eslint/parser": "^5.48.0",
+    "babel-preset-solid": "^1.6.7",
     "cross-env": "^7.0.3",
-    "esbuild": "^0.16.10",
+    "esbuild": "^0.16.14",
     "esbuild-plugin-solid": "^0.4.2",
-    "eslint": "^8.28.0",
+    "eslint": "^8.31.0",
     "eslint-plugin-no-only-tests": "^3.1.0",
     "jsdom": "^20.0.3",
     "prettier": "^2.8.1",
     "prettier-plugin-organize-imports": "^3.2.1",
-    "solid-js": "^1.6.6",
+    "solid-js": "^1.6.8",
     "tsup": "^6.5.0",
     "turbo": "^1.6.3",
     "typescript": "^4.9.3",
-    "vite": "^4.0.3",
+    "vite": "^4.0.4",
     "vite-plugin-solid": "^2.3.10",
-    "vitest": "^0.26.2"
+    "vitest": "^0.26.3"
   },
-  "packageManager": "pnpm@7.17.1",
+  "packageManager": "pnpm@7.20.0",
   "engines": {
-    "node": ">=16"
+    "node": ">=18"
   }
 }
