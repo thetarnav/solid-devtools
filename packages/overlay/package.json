@@ -52,7 +52,7 @@
     "@solid-primitives/utils": "^4.0.0"
   },
   "peerDependencies": {
-    "solid-js": "^1.6.2"
+    "solid-js": "^1.6.8"
   },
   "packageManager": "pnpm@7.20.0",
   "devDependencies": {
