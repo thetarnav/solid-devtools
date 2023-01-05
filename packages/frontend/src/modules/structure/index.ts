@@ -115,7 +115,7 @@ export const { reconcileStructure } = (() => {
     }
 
     for (const [rootId, updatedNodes] of Object.entries($_updated)) {
-      const root = updatedNodes![rootId]
+      const root = updatedNodes![rootId]!
       if (!root || upatedTopLevelRoots.has(rootId)) continue
       nextRoots.push(createNode(root, null, 0))
     }

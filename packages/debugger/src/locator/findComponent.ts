@@ -59,6 +59,7 @@ export function getSourceCodeData(
   const match = location.match(LOC_ATTR_REGEX)
   if (!match) return
   const [, filePath, line, column] = match
+  if (!filePath || !line || !column) return
   return { filePath, line: +line, column: +column, projectPath, element }
 }
 
@@ -66,6 +67,7 @@ export function getLocationFromAttribute(location: LocationAttr): SourceLocation
   const match = location.match(LOC_ATTR_REGEX)
   if (!match) return
   const [, filePath, line, column] = match
+  if (!filePath || !line || !column) return
   return { filePath, line: +line, column: +column }
 }
 

@@ -139,7 +139,7 @@ const namePlugin: PluginObj<any> = {
           init.arguments.push(t.objectExpression([nameProperty]))
         } else {
           // existing options argument
-          const options = init.arguments[argIndex]
+          const options = init.arguments[argIndex]!
           if (options.type !== 'ObjectExpression') continue
           // Check there isn't already a "name" property
           if (

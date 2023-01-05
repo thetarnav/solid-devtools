@@ -33,10 +33,11 @@ export function createPortMessanger<
   function onMessage(event: unknown) {
     if (!event || typeof event !== 'object') return
     const e = event as Record<PropertyKey, unknown>
-    if (typeof e.id !== 'string') return
-    const arr = listeners[e.id]
-    if (arr) arr.forEach(fn => fn(e.payload))
-    else if (forwardHandler) forwardHandler({ id: e.id, payload: e.payload, forwarding: true })
+    if (typeof e['id'] !== 'string') return
+    const arr = listeners[e['id']]
+    if (arr) arr.forEach(fn => fn(e['payload']))
+    else if (forwardHandler)
+      forwardHandler({ id: e['id'], payload: e['payload'], forwarding: true })
   }
   port.onMessage.addListener(onMessage)
 

@@ -75,8 +75,8 @@ const $NOT_SET = Symbol('not-set')
 export class ObservedProps {
   constructor(readonly props: Solid.Component['props']) {}
 
-  private onPropStateChange?: Inspector.OnPropStateChange
-  private onValueUpdate?: Inspector.OnValueUpdate
+  private onPropStateChange?: Inspector.OnPropStateChange | undefined
+  private onValueUpdate?: Inspector.OnValueUpdate | undefined
   private observedGetters = {} as Record<string, { v: unknown | typeof $NOT_SET; n: number }>
 
   observe(onPropStateChange: Inspector.OnPropStateChange, onValueUpdate: Inspector.OnValueUpdate) {
@@ -94,7 +94,7 @@ export class ObservedProps {
     get: () => unknown,
   ): { getValue: () => unknown | typeof $NOT_SET; isStale: boolean } {
     if (this.observedGetters[key]) {
-      const o = this.observedGetters[key]
+      const o = this.observedGetters[key]!
       return { getValue: () => o.v, isStale: o.n === 0 }
     }
 
@@ -279,7 +279,7 @@ export function collectOwnerDetails(
     if (symbols.length !== 1) {
       throw new Error('Context field has more than one symbol. This is not expected.')
     } else {
-      const contextValue = owner.context[symbols[0]]
+      const contextValue = owner.context[symbols[0]!]
       getValue = () => contextValue
     }
   }
@@ -313,7 +313,7 @@ export function collectOwnerDetails(
     const signalNodes = Object.values(sourceMap)
     details.signals = Array(signalNodes.length)
     for (let i = 0; i < signalNodes.length; i++) {
-      details.signals[i] = mapSignalNode(signalNodes[i], onSignalUpdate)
+      details.signals[i] = mapSignalNode(signalNodes[i]!, onSignalUpdate)
     }
   } else details.signals = []
 

@@ -152,7 +152,7 @@ export const logComputationDetails = ({
   // Caused By
   if (causedBy && causedBy.length) {
     if (causedBy.length === 1) {
-      const cause = causedBy[0]
+      const cause = causedBy[0]!
       console.log(
         `%c${inGray('Caused By:')} %c${cause.name}%c ${inGray('=')}`,
         '',

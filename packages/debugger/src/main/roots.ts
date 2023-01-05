@@ -187,7 +187,7 @@ export function attachDebugger(_owner: Core.Owner = getOwner()!): void {
 
   // attach roots in reverse order (from top to bottom)
   for (let i = roots.length - 1; i >= 0; i--) {
-    const root = roots[i]
+    const root = roots[i]!
     root.sdtType = NodeType.Root
 
     onOwnerCleanup(root, () => cleanupRoot(root), true)

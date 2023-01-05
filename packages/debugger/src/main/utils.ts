@@ -126,7 +126,7 @@ export class NodeIDMap<T extends { [$SDT_ID]?: NodeID }> {
 export function getComponentRefreshNode(owner: Readonly<Solid.Component>): Solid.Memo | null {
   const { owned } = owner
   let refresh: Solid.Owner
-  if (owned && owned.length === 1 && markOwnerType((refresh = owned[0])) === NodeType.Refresh) {
+  if (owned && owned.length === 1 && markOwnerType((refresh = owned[0]!)) === NodeType.Refresh) {
     return refresh as Solid.Memo
   }
   return null
@@ -275,7 +275,7 @@ export function dedupeArrayById<T extends { id: NodeID }>(input: T[]): T[] {
   const ids = new Set<NodeID>()
   const deduped: T[] = []
   for (let i = input.length - 1; i >= 0; i--) {
-    const update = input[i]
+    const update = input[i]!
     if (ids.has(update.id)) continue
     ids.add(update.id)
     deduped.push(update)

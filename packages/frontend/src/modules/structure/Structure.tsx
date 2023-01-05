@@ -237,7 +237,7 @@ const DisplayStructureTree: Component = () => {
     let minLevel = length ? Infinity : 0
 
     for (let i = 0; i < length; i++) {
-      const node = nodeList[start + i]
+      const node = nodeList[start + i]!
       const prevDNode = prevMap[node.id]
       minLevel = Math.min(minLevel, node.level)
       if (prevDNode) {
@@ -264,7 +264,7 @@ const DisplayStructureTree: Component = () => {
   // calculate node index in the collapsed list
   const getNodeIndexById = (id: NodeID) => {
     const nodeList = collapsedList()
-    for (let i = 0; i < nodeList.length; i++) if (nodeList[i].id === id) return i
+    for (let i = 0; i < nodeList.length; i++) if (nodeList[i]!.id === id) return i
     return -1
   }
 

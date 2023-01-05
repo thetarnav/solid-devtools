@@ -244,7 +244,7 @@ export function debugOwnerComputations(_owner?: Core.Owner): void {
     let i = prevOwned.length
     // owned can only be added
     for (; i < owned.length; i++) {
-      const computation = owned[i]
+      const computation = owned[i]!
       debugComputation(computation, {
         initialRun: false,
       })
@@ -290,7 +290,7 @@ export function debugSignal(
     if (sources.length === 0) return console.warn('No signal was passed to debugSignal')
     else if (sources.length > 1)
       return console.warn('More then one signal was passed to debugSignal')
-    signal = sources[0]
+    signal = sources[0]!
   } else {
     signal = source as Solid.Signal
   }
@@ -379,7 +379,7 @@ export function debugSignals(
   // filter out already debugged signals
   signals = signals.filter(s => !s.$debugSignal)
 
-  if (signals.length === 1) return debugSignal(signals[0], options)
+  if (signals.length === 1) return debugSignal(signals[0]!, options)
 
   if (options.logInitialValue === false) logSignalsInitialValues(signals)
 
@@ -430,7 +430,7 @@ export function debugOwnerSignals(owner?: Core.Owner, options: DebugSignalOption
       const sourceList = Object.values(solidOwner.sourceMap)
       // signals can only be added
       for (i = prevSourceListLength; i < sourceList.length; i++) {
-        const signal = sourceList[i]
+        const signal = sourceList[i]!
         if (!isSolidStore(signal)) signals.push(signal)
       }
       prevSourceListLength = i
@@ -439,7 +439,7 @@ export function debugOwnerSignals(owner?: Core.Owner, options: DebugSignalOption
     if (solidOwner.owned) {
       // owned can only be added
       for (i = prevOwnedLength; i < solidOwner.owned.length; i++) {
-        const childOwner = solidOwner.owned[i]
+        const childOwner = solidOwner.owned[i]!
         if (isSolidMemo(childOwner)) signals.push(childOwner)
       }
       prevOwnedLength = i
@@ -517,7 +517,7 @@ export function debugProps(props: Record<string, unknown>): void {
               if (mark === 'removed')
                 return console.log(...getPropLabel('Getter', key, null, 'removed'))
 
-              const desc = descriptors[key]
+              const desc = descriptors[key]!
               const value = getPropValue(props, desc)
               const label = getPropLabel('Getter', key, value, mark)
               const signals = getFunctionSources(() => props[key])

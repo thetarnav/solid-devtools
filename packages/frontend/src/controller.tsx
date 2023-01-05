@@ -254,13 +254,13 @@ const [Provider, useControllerCtx] = createContextProvider(
       if (query === lastSearch) {
         if (lastSearchResults) {
           lastSearchIndex = (lastSearchIndex + 1) % lastSearchResults.length
-          inspector.setInspectedNode(lastSearchResults[lastSearchIndex])
+          inspector.setInspectedNode(lastSearchResults[lastSearchIndex]!)
         }
         return
       } else {
         lastSearch = query
         const result = structure.search(query)
-        if (result) inspector.setInspectedNode(result[(lastSearchIndex = 0)])
+        if (result) inspector.setInspectedNode(result[(lastSearchIndex = 0)]!)
         lastSearchResults = result
       }
     }

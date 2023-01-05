@@ -164,8 +164,8 @@ describe('reconcileStructure', () => {
     ])
 
     expect(roots).toHaveLength(2)
-    expect(roots[0].id).toBe('1')
-    expect(roots[1].id).toBe('8')
+    expect(roots[0]!.id).toBe('1')
+    expect(roots[1]!.id).toBe('8')
   })
 
   test('remove attachment', () => {
@@ -228,8 +228,8 @@ describe('reconcileStructure', () => {
     ])
 
     expect(roots).toHaveLength(2)
-    expect(roots[0].id).toBe('8')
-    expect(roots[1].id).toBe('5')
+    expect(roots[0]!.id).toBe('8')
+    expect(roots[1]!.id).toBe('5')
   })
 
   test('remove attached node', () => {
@@ -261,7 +261,7 @@ describe('reconcileStructure', () => {
     ])
 
     expect(roots).toHaveLength(2)
-    expect(roots[0].id).toBe('8')
-    expect(roots[1].id).toBe('5')
+    expect(roots[0]!.id).toBe('8')
+    expect(roots[1]!.id).toBe('5')
   })
 })

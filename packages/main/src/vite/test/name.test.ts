@@ -8,14 +8,14 @@ for (const [create, module, addExtraArg] of [
   ['createMemo', 'solid-js', '1'],
   ['createStore', 'solid-js/store'],
   ['createMutable', 'solid-js/store'],
-]) {
+] as const) {
   const extraArg = addExtraArg ? 'undefined, ' : ''
   describe(create, () => {
     for (const [type, importStatement, creator] of [
       ['named import', `import { ${create} } from "${module}";`, create],
       ['renamed import', `import { ${create} as foo } from "${module}";`, 'foo'],
       ['namespace import', `import * as foo from "${module}";`, `foo.${create}`],
-    ]) {
+    ] as const) {
       describe(type, () => {
         test('no default value', () => {
           const src = `${importStatement}
@@ -121,7 +121,7 @@ for (const [create, module] of [
   ['createMemo', 'solid-js/store'],
   ['createStore', 'solid-js'],
   ['createMutable', 'solid-js'],
-]) {
+] as const) {
   describe(create, () => {
     test(`no import`, () => {
       const src = `const signal = ${create}();`

@@ -111,13 +111,13 @@ export function trimString(str: string, maxLength: number): string {
 }
 
 export function findIndexById<T extends { id: string }>(array: T[], id: string): number {
-  for (let i = 0; i < array.length; i++) if (array[i].id === id) return i
+  for (let i = 0; i < array.length; i++) if (array[i]!.id === id) return i
   return -1
 }
 
 export function findItemById<T extends { id: string }>(array: T[], id: string): T | undefined {
   for (let i = 0; i < array.length; i++) {
-    const item = array[i]
+    const item = array[i]!
     if (item.id === id) return item
   }
 }
@@ -135,11 +135,11 @@ export function whileArray<T, U>(
   callback: (item: T, toCheck: T[]) => U | undefined,
 ): U | undefined {
   let index = 0
-  let current: T = toCheck[index++]
+  let current: T = toCheck[index++]!
   while (current) {
     const result = callback(current, toCheck)
     if (result !== undefined) return result
-    current = toCheck[index++]
+    current = toCheck[index++]!
   }
 }
 

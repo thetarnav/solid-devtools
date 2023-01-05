@@ -103,11 +103,11 @@ function mapElements(els: Element[], parentChildren: Mapped.Owner[] | undefined)
       let elNodes = toCheck[index++]
       while (elNodes) {
         for (let i = 0; i < elNodes.length; i++) {
-          const elNode = elNodes[i]
+          const elNode = elNodes[i]!
           if ($_elements_map.get(elNode) === el) {
             const mappedEl = $_added_to_parent_elements
-              ? elNodes.splice(i, 1)[0]
-              : elNodes.splice(i, 1, $_mapped_owner_node)[0]
+              ? elNodes.splice(i, 1)[0]!
+              : elNodes.splice(i, 1, $_mapped_owner_node)[0]!
             $_added_to_parent_elements = true
             r.push(mappedEl)
             $_elements_map.set(mappedEl, el)
@@ -163,11 +163,11 @@ function mapOwner(
       name === 'provider' &&
       owner.owned &&
       owner.owned.length === 1 &&
-      markOwnerType((contextNode = owner.owned[0])) === NodeType.Context
+      markOwnerType((contextNode = owner.owned[0]!)) === NodeType.Context
     ) {
       // custom mapping for context nodes
       // eslint-disable-next-line @typescript-eslint/no-shadow
-      const mapped = mapOwner(contextNode.owned![0], parent, NodeType.Context)
+      const mapped = mapOwner(contextNode.owned![0]!, parent, NodeType.Context)
       if (mapped) mapped.id = markNodeID(contextNode)
       return mapped
     }

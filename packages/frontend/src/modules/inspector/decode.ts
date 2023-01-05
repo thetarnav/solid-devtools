@@ -81,7 +81,7 @@ function decode(index: number): DecodedValue {
     return DecodedMap.get(index)!
   }
 
-  const encoded = List[index]
+  const encoded = List[index]!
   switch (encoded[0]) {
     case ValueType.String:
     case ValueType.Boolean:
@@ -239,7 +239,7 @@ export function updateCollapsedValue(
   list: EncodedValue[],
   storeRefMap: StoreNodeMap,
 ): void {
-  if (data.type !== list[0][0]) throw new Error('Type mismatch')
+  if (data.type !== list[0]![0]) throw new Error('Type mismatch')
 
   List = list
   StoreRefMap = storeRefMap

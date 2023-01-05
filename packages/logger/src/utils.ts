@@ -63,8 +63,8 @@ export function getStackDiffMap<T>(
   const marks: Map<T, 'added'> = new (mapConstructor as any)()
   const allItems: T[] = [...from]
   for (let i = allItems.length; i < to.length; i++) {
-    allItems.push(to[i])
-    marks.set(to[i], 'added')
+    allItems.push(to[i]!)
+    marks.set(to[i]!, 'added')
   }
   return [item => marks.get(item) || null, allItems]
 }
