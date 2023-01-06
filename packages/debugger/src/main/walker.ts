@@ -1,7 +1,7 @@
 import type { ComponentRegisterHandler } from './componentRegistry'
 import { NodeType, TreeWalkerMode } from './constants'
 import { Mapped, NodeID, Solid } from './types'
-import { interceptComputationRerun } from './update'
+import { observeComputationUpdate } from './update'
 import {
   getComponentRefreshNode,
   isSolidRoot,
@@ -18,21 +18,23 @@ export type ComputationUpdateHandler = (
 ) => void
 
 // Globals set before each walker cycle
-let $_mode: TreeWalkerMode
-let $_root_id: NodeID
-let $_on_computation_update: ComputationUpdateHandler
-let $_register_component: ComponentRegisterHandler
+let Mode: TreeWalkerMode
+let RootId: NodeID
+let OnComputationUpdate: ComputationUpdateHandler
+let RegisterComponent: ComponentRegisterHandler
 
-const $_elements_map = new Map<Mapped.Owner, HTMLElement>()
+const ElementsMap = new Map<Mapped.Owner, HTMLElement>()
+
+const $WALKER = Symbol('tree-walker')
 
 function observeComputation(owner: Solid.Computation, attachedData: Solid.Owner): void {
   // leaf nodes (ones that don't have children) don't have to cause a structure update
   // Unless the walker is in DOM mode, then we need to observe all computations
   // This is because DOM can change without the owner structure changing
   let isLeaf = !owner.owned || owner.owned.length === 0
-  const boundHandler = $_on_computation_update.bind(void 0, $_root_id, attachedData)
+  const boundHandler = OnComputationUpdate.bind(void 0, RootId, attachedData)
   const handler =
-    isLeaf && $_mode !== TreeWalkerMode.DOM
+    isLeaf && Mode !== TreeWalkerMode.DOM
       ? () => {
           if (isLeaf && (!owner.owned || owner.owned.length === 0)) {
             boundHandler(false)
@@ -43,14 +45,7 @@ function observeComputation(owner: Solid.Computation, attachedData: Solid.Owner)
         }
       : boundHandler.bind(void 0, true)
 
-  // owner already patched
-  if (owner.onComputationUpdate) return void (owner.onComputationUpdate = handler)
-  // patch owner
-  owner.onComputationUpdate = handler
-  interceptComputationRerun(owner, fn => {
-    fn()
-    owner.onComputationUpdate!()
-  })
+  observeComputationUpdate(owner, handler, $WALKER)
 }
 
 function mapChildren(owner: Solid.Owner, mappedOwner: Mapped.Owner | null): Mapped.Owner[] {
@@ -59,7 +54,7 @@ function mapChildren(owner: Solid.Owner, mappedOwner: Mapped.Owner | null): Mapp
   const rawChildren: Solid.Owner[] = owner.owned ? owner.owned.slice() : []
   if (owner.sdtSubRoots) rawChildren.push.apply(rawChildren, owner.sdtSubRoots)
 
-  if ($_mode === TreeWalkerMode.Owners) {
+  if (Mode === TreeWalkerMode.Owners) {
     for (const child of rawChildren) {
       const mappedChild = mapOwner(child, mappedOwner)
       if (mappedChild) children.push(mappedChild)
@@ -81,8 +76,8 @@ function mapChildren(owner: Solid.Owner, mappedOwner: Mapped.Owner | null): Mapp
   return children
 }
 
-let $_mapped_owner_node: Mapped.Owner
-let $_added_to_parent_elements = false
+let MappedOwnerNode: Mapped.Owner
+let AddedToParentElements = false
 
 /**
  * @param els elements to map
@@ -104,13 +99,13 @@ function mapElements(els: Element[], parentChildren: Mapped.Owner[] | undefined)
       while (elNodes) {
         for (let i = 0; i < elNodes.length; i++) {
           const elNode = elNodes[i]!
-          if ($_elements_map.get(elNode) === el) {
-            const mappedEl = $_added_to_parent_elements
+          if (ElementsMap.get(elNode) === el) {
+            const mappedEl = AddedToParentElements
               ? elNodes.splice(i, 1)[0]!
-              : elNodes.splice(i, 1, $_mapped_owner_node)[0]!
-            $_added_to_parent_elements = true
+              : elNodes.splice(i, 1, MappedOwnerNode)[0]!
+            AddedToParentElements = true
             r.push(mappedEl)
-            $_elements_map.set(mappedEl, el)
+            ElementsMap.set(mappedEl, el)
             continue els
           }
           if (elNode.children && elNode.children.length) toCheck.push(elNode.children)
@@ -126,7 +121,7 @@ function mapElements(els: Element[], parentChildren: Mapped.Owner[] | undefined)
       children: [],
     }
     r.push(mappedEl)
-    $_elements_map.set(mappedEl, el)
+    ElementsMap.set(mappedEl, el)
 
     if (el.children.length) mappedEl.children = mapElements(Array.from(el.children), parentChildren)
   }
@@ -173,7 +168,7 @@ function mapOwner(
     }
 
     // Register component to global map
-    $_register_component(
+    RegisterComponent(
       owner as Solid.Component,
       id,
       name!,
@@ -197,13 +192,13 @@ function mapOwner(
   const children: Mapped.Owner[] = []
   mapped.children = children
 
-  $_added_to_parent_elements = false
-  $_mapped_owner_node = mapped
+  AddedToParentElements = false
+  MappedOwnerNode = mapped
 
   // Map html elements in DOM mode
   // elements might already be resolved when mapping components
   if (
-    $_mode === TreeWalkerMode.DOM &&
+    Mode === TreeWalkerMode.DOM &&
     (resolvedElements =
       resolvedElements === undefined ? resolveElements(owner.value) : resolvedElements)
   ) {
@@ -217,7 +212,7 @@ function mapOwner(
   }
 
   // global $_added_to_parent_elements will be changed in mapChildren
-  const addedToParent = $_added_to_parent_elements
+  const addedToParent = AddedToParentElements
 
   children.push.apply(children, mapChildren(owner, mapped))
 
@@ -234,11 +229,11 @@ export function walkSolidTree(
   },
 ): Mapped.Owner {
   // set the globals to be available for this walk cycle
-  $_elements_map.clear()
-  $_mode = config.mode
-  $_root_id = config.rootId
-  $_on_computation_update = config.onComputationUpdate
-  $_register_component = config.registerComponent
+  ElementsMap.clear()
+  Mode = config.mode
+  RootId = config.rootId
+  OnComputationUpdate = config.onComputationUpdate
+  RegisterComponent = config.registerComponent
 
   return mapOwner(owner, null)!
 }

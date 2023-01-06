@@ -64,7 +64,6 @@ declare module 'solid-js/types/reactive/signal' {
     [$SDT_ID]?: NodeID
     sdtType?: NodeType
     onValueUpdate?: Record<symbol, ValueUpdateListener>
-    onComputationUpdate?: VoidFunction
   }
 }
 

@@ -1,9 +1,10 @@
 import { NodeID, Solid } from '../main/types'
-import { getNodeName, getNodeType, markNodeID } from '../main/utils'
+import { observeComputationUpdate, observeValueUpdate } from '../main/update'
+import { getNodeName, getNodeType, isSolidOwner, markNodeID } from '../main/utils'
 import { ComputationNodeType, NodeType } from '../types'
 
 export namespace DGraph {
-  export type Depth = `${NodeID | '_'}:${number}`
+  export type Depth = `${NodeID}:${number}` | undefined
 
   export type NodeBase = {
     name: string
@@ -31,14 +32,24 @@ export namespace DGraph {
   export type Graph = Record<NodeID, Node>
 }
 
+const $DGRAPH = Symbol('dependency-graph')
+
 let Graph: DGraph.Graph
 let VisitedSources: WeakSet<Solid.Signal>
 let VisitedObservers: WeakSet<Solid.Computation>
-let DepthMap: Record<NodeID, DGraph.Depth | null>
+let DepthMap: Record<NodeID, DGraph.Depth>
+let OnNodeUpdate: (node: Solid.Computation | Solid.Memo | Solid.Signal) => void
 
 function addNodeToGraph(node: Solid.Signal | Solid.Memo | Solid.Computation) {
   const id = markNodeID(node)
   if (Graph[id]) return Graph[id]!
+
+  // observe each mapped node, to update the graph when it changes
+  const onNodeUpdate = OnNodeUpdate
+  const handler = () => onNodeUpdate(node)
+  if (isSolidOwner(node)) observeComputationUpdate(node, handler, $DGRAPH)
+  else observeValueUpdate(node, handler, $DGRAPH)
+
   return (Graph[id] = {
     name: getNodeName(node),
     type: getNodeType(node) as Exclude<ComputationNodeType, NodeType.Memo>,
@@ -73,18 +84,24 @@ function lookupDepth(node: Solid.Owner | Solid.Signal, i = 0): DGraph.Depth {
   // signal
   if (!('owned' in node)) owner = node.graph
   // root
-  else if (!('fn' in node)) return `${id}:${i}`
+  else if (!('fn' in node) && !node.owner) return `${id}:${i}`
   // computation
   else owner = node.owner
 
-  return DepthMap[id] ?? (DepthMap[id] = owner ? lookupDepth(owner, i + 1) : `_:${i}`)
+  return id in DepthMap
+    ? DepthMap[id]
+    : (DepthMap[id] = owner ? lookupDepth(owner, i + 1) : undefined)
 }
 
-export function collectDependencyGraph(node: Solid.Computation | Solid.Memo | Solid.Signal) {
+export function collectDependencyGraph(
+  node: Solid.Computation | Solid.Memo | Solid.Signal,
+  config: { onNodeUpdate: typeof OnNodeUpdate },
+) {
   Graph = {}
   VisitedSources = new WeakSet()
   VisitedObservers = new WeakSet()
   DepthMap = {}
+  OnNodeUpdate = config.onNodeUpdate
 
   addNodeToGraph(node)
   if ('sources' in node && node.sources) node.sources.forEach(visitSource)
@@ -92,7 +109,7 @@ export function collectDependencyGraph(node: Solid.Computation | Solid.Memo | So
 
   const result = Graph
 
-  Graph = VisitedObservers = VisitedSources = DepthMap = undefined!
+  Graph = VisitedObservers = VisitedSources = DepthMap = OnNodeUpdate = undefined!
 
   return result
 }
