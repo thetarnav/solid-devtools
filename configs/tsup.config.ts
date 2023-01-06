@@ -1,6 +1,6 @@
-import { defineConfig, Options } from 'tsup'
 import { Plugin } from 'esbuild'
 import { solidPlugin } from 'esbuild-plugin-solid'
+import { defineConfig, Options } from 'tsup'
 
 export default ({
   extension = 'ts',
@@ -21,9 +21,9 @@ export default ({
 } = {}) => {
   const entry = `src/index.${extension}`
   const baseEntries = server ? [entry, `src/server.${extension}`] : [entry]
-  const mappedAdditionalEntries = additionalEntries.map(entry => {
-    if (entry.includes('.')) return `src/${entry}`
-    return `src/${entry}.${extension}`
+  const mappedAdditionalEntries = additionalEntries.map(addEntry => {
+    if (addEntry.includes('.')) return `src/${addEntry}`
+    return `src/${addEntry}.${extension}`
   })
   return defineConfig(config => {
     const options: Options = {

@@ -4,6 +4,11 @@ import { $SDT_ID, NodeType, ValueItemType } from './constants'
 
 export type NodeID = string & {}
 
+export type ComputationNodeType = Exclude<
+  NodeType,
+  NodeType.Signal | NodeType.Root | NodeType.Component
+>
+
 export type ValueItemID =
   | `${ValueItemType.Signal}:${NodeID}`
   | `${ValueItemType.Prop}:${string}`
@@ -23,6 +28,7 @@ export namespace Core {
   export type Owner = import('solid-js/types/reactive/signal').Owner
   export type SignalState = import('solid-js/types/reactive/signal').SignalState<unknown>
   export type Computation = import('solid-js/types/reactive/signal').Computation<unknown>
+  export type Memo = import('solid-js/types/reactive/signal').Memo<unknown>
   export type RootFunction<T> = import('solid-js/types/reactive/signal').RootFunction<T>
   export type EffectFunction = import('solid-js/types/reactive/signal').EffectFunction<unknown>
   export type Component = import('solid-js/types/reactive/signal').DevComponent<{
@@ -74,12 +80,14 @@ declare module 'solid-js/store' {
 
 export namespace Solid {
   export interface SignalState {
+    graph?: Owner
     value: unknown
     observers?: Computation[] | null
     onValueUpdate?: Record<symbol, ValueUpdateListener>
   }
 
   export interface Signal extends Core.SignalState, SignalState {
+    graph?: Owner
     value: unknown
     observers: Computation[] | null
   }
@@ -116,7 +124,6 @@ export namespace Solid {
   export interface Computation extends Core.Computation {
     name: string
     value: unknown
-    observers?: Computation[] | null
     owned: Computation[] | null
     owner: Owner | null
     sourceMap?: Record<string, Signal>
@@ -125,8 +132,6 @@ export namespace Solid {
 
   export interface Memo extends Signal, Computation {
     name: string
-    value: unknown
-    observers: Computation[] | null
   }
 
   export interface Component extends Memo {
