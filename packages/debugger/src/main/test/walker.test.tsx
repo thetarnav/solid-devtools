@@ -7,10 +7,10 @@ import {
   createSignal,
 } from 'solid-js'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { ComputationUpdateHandler, walkSolidTree } from '../../structure/walker'
 import { $SDT_ID, NodeType, TreeWalkerMode } from '../constants'
 import { Mapped, Solid } from '../types'
 import { getNodeName, getOwner } from '../utils'
-import { ComputationUpdateHandler, walkSolidTree } from '../walker'
 
 let mockLAST_ID = 0
 beforeEach(() => {

@@ -1,5 +1,5 @@
 import {
-  defaultWalkerMode,
+  DEFAULT_WALKER_MODE,
   Mapped,
   NodeID,
   NodeType,
@@ -80,7 +80,7 @@ export const { reconcileStructure } = (() => {
         for (const child of children) prevChildrenMap[child.id] = child
 
         for (const childRaw of rawChildren) {
-          const childNode = prevChildrenMap[childRaw.id] as Structure.Node | undefined
+          const childNode = prevChildrenMap[childRaw.id]
           newChildren.push(
             childNode
               ? updateNode(childNode, rootId, childRaw, level + 1)
@@ -174,7 +174,7 @@ export default function createStructure({
 }: {
   clientHoveredNodeId: Accessor<NodeID | null>
 }) {
-  const [mode, setMode] = createSignal<TreeWalkerMode>(defaultWalkerMode)
+  const [mode, setMode] = createSignal<TreeWalkerMode>(DEFAULT_WALKER_MODE)
 
   const [state, setState] = createSignal<Structure.State>(
     { nodeList: [], roots: [] },

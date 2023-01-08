@@ -32,7 +32,7 @@ export enum TreeWalkerMode {
   Components = 'components',
   DOM = 'dom',
 }
-export const defaultWalkerMode = TreeWalkerMode.Components
+export const DEFAULT_WALKER_MODE = TreeWalkerMode.Components
 
 export const $SDT_ID = Symbol('sdt-id')
 

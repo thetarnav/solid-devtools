@@ -21,6 +21,15 @@ export const useDebugger: typeof API.useDebugger = () => ({
   setUserEnabledSignal: () => void 0,
   openInspectedNodeLocation: () => void 0,
   changeTreeWalkerMode: () => void 0,
+  enabled: () => false,
+  toggleEnabled: () => void 0,
+  structure: {
+    enabled: () => false,
+    forceTriggerUpdate: () => void 0,
+    setTreeWalkerMode: () => void 0,
+    toggleEnabled: () => void 0,
+    triggerUpdate: () => void 0,
+  },
   inspector: {
     setInspectedNode: () => void 0,
     toggleValueNode: () => void 0,

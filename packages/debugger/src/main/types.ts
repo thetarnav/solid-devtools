@@ -187,9 +187,3 @@ export namespace Mapped {
 }
 
 export type ComputationUpdate = { rootId: NodeID; id: NodeID }
-
-export type StructureUpdates = {
-  removed: NodeID[]
-  /** Record: `rootId` -- Record of updated nodes by `nodeId` */
-  updated: Partial<Record<NodeID, Partial<Record<NodeID, Mapped.Owner>>>>
-}

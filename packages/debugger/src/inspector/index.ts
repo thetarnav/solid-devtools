@@ -1,7 +1,7 @@
 import { warn } from '@solid-devtools/shared/utils'
 import { scheduleIdle, throttle } from '@solid-primitives/scheduled'
 import { Accessor, createEffect, onCleanup, untrack } from 'solid-js'
-import { DebuggerEventHub } from '../main/plugin'
+import { DebuggerEventHub } from '../main'
 import { findOwnerById } from '../main/roots'
 import { Core, Mapped, NodeID, Solid, ValueItemID } from '../main/types'
 import { makeSolidUpdateListener } from '../main/update'

@@ -1,6 +1,6 @@
 import { createInternalRoot, useDebugger } from '@solid-devtools/debugger'
 import { defer } from '@solid-devtools/shared/primitives'
-import { createEffect, createSignal, onCleanup } from 'solid-js'
+import { createEffect, onCleanup } from 'solid-js'
 import {
   makeMessageListener,
   makePostMessage,
@@ -22,19 +22,23 @@ let loadedBefore = false
 
 createInternalRoot(() => {
   const debug = useDebugger()
-  const [enabled, setEnabled] = createSignal(false)
-  debug.setUserEnabledSignal(enabled)
 
-  fromContent('DevtoolsOpened', () => setEnabled(true))
-  fromContent('DevtoolsClosed', () => setEnabled(false))
+  fromContent('DevtoolsOpened', () => {
+    debug.toggleEnabled(true)
+    debug.structure.toggleEnabled(true)
+  })
+  fromContent('DevtoolsClosed', () => {
+    debug.toggleEnabled(false)
+    debug.structure.toggleEnabled(false)
+  })
 
   createEffect(() => {
-    if (!enabled()) return
+    if (!debug.enabled()) return
 
-    if (loadedBefore) debug.forceTriggerUpdate()
+    if (loadedBefore) debug.structure.forceTriggerUpdate()
     else loadedBefore = true
 
-    fromContent('ForceUpdate', () => debug.forceTriggerUpdate())
+    fromContent('ForceUpdate', () => debug.structure.forceTriggerUpdate())
 
     fromContent('InspectValue', debug.inspector.toggleValueNode)
     fromContent('InspectNode', debug.inspector.setInspectedNode)
@@ -68,6 +72,6 @@ createInternalRoot(() => {
 
     fromContent('OpenLocation', debug.openInspectedNodeLocation)
 
-    fromContent('TreeViewMode', debug.changeTreeWalkerMode)
+    fromContent('TreeViewMode', debug.structure.setTreeWalkerMode)
   })
 })

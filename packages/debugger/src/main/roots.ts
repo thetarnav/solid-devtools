@@ -1,118 +1,31 @@
 import { warn, whileArray } from '@solid-devtools/shared/utils'
-import { throttle } from '@solid-primitives/scheduled'
 import { createRoot } from 'solid-js'
-import { clearComponentRegistry, registerComponent } from './componentRegistry'
-import { defaultWalkerMode, NodeType, TreeWalkerMode } from './constants'
-import { Core, NodeID, Solid, StructureUpdates } from './types'
+import { getTopRoot } from '../structure/walker'
+import { clearComponentRegistry } from './componentRegistry'
+import { NodeType } from './constants'
+import { Core, NodeID, Solid } from './types'
 import { getOwner, isSolidRoot, markNodeID, onOwnerCleanup } from './utils'
-import {
-  ComputationUpdateHandler,
-  getClosestIncludedOwner,
-  getTopRoot,
-  walkSolidTree,
-} from './walker'
-
-// TREE WALKER MODE
-let CurrentTreeWalkerMode: TreeWalkerMode = defaultWalkerMode
-
-export function changeTreeWalkerMode(newMode: TreeWalkerMode): void {
-  CurrentTreeWalkerMode = newMode
-  updateAllRoots()
-  clearComponentRegistry()
-}
 
 // ROOTS
 // map of all top-roots
 const RootMap = new Map<NodeID, Solid.Root>()
+export const getCurrentRoots = (): Iterable<Solid.Root> => RootMap.values()
 
-const UpdateQueue = new Set<Solid.Owner>()
-const OwnerRoots = new Map<Solid.Owner, NodeID>()
-const RemovedRoots = new Set<NodeID>()
-let UpdateAllRoots = false
-
-export type StructureUpdateHandler = (
-  structureUpdates: StructureUpdates['updated'],
-  removedIds: ReadonlySet<NodeID>,
-) => void
-
-let OnRootUpdates: StructureUpdateHandler | null = null
-export function setRootUpdatesHandler(handler: StructureUpdateHandler | null): void {
-  OnRootUpdates = handler
-  if (handler) updateAllRoots()
+let OnOwnerNeedsUpdate: ((owner: Solid.Owner, rootId: NodeID) => void) | undefined
+/** Listens to owners that have their structure changed, because of roots */
+export function setOnOwnerNeedsUpdate(fn: typeof OnOwnerNeedsUpdate) {
+  OnOwnerNeedsUpdate = fn
 }
-
-// will be set in `plugin.ts`
-let OnComputationUpdates!: (rootId: NodeID, nodeId: NodeID) => void
-export function setComputationUpdateHandler(handler: typeof OnComputationUpdates): void {
-  OnComputationUpdates = handler
-}
-const onComputationUpdate: ComputationUpdateHandler = (rootId, node, changedStructure) => {
-  // only if debugger is enabled
-  if (!OnRootUpdates) return
-  changedStructure && updateOwner(node, rootId)
-  queueMicrotask(() => {
-    if (!OnRootUpdates) return
-    OnComputationUpdates(rootId, markNodeID(node))
-  })
-}
-
-function forceFlushRootUpdateQueue(): void {
-  // $_on_root_updates being null means debugger is disabled
-  if (OnRootUpdates) {
-    const updated: StructureUpdates['updated'] = {}
-
-    const [owners, getRootId] = UpdateAllRoots
-      ? [RootMap.values(), (owner: Solid.Owner) => markNodeID(owner)]
-      : [UpdateQueue, (owner: Solid.Owner) => OwnerRoots.get(owner)!]
-    UpdateAllRoots = false
-
-    for (const owner of owners) {
-      const rootId = getRootId(owner)
-      const tree = walkSolidTree(owner, {
-        rootId,
-        mode: CurrentTreeWalkerMode,
-        onComputationUpdate,
-        registerComponent,
-      })
-      const map = updated[rootId]
-      if (map) map[tree.id] = tree
-      else updated[rootId] = { [tree.id]: tree }
-    }
-
-    OnRootUpdates(updated, RemovedRoots)
-  }
-  UpdateQueue.clear()
-  flushRootUpdateQueue.clear()
-  RemovedRoots.clear()
-  OwnerRoots.clear()
-}
-const flushRootUpdateQueue = throttle(forceFlushRootUpdateQueue, 250)
-
-function updateOwner(node: Solid.Owner, topRootId: NodeID): void {
-  UpdateQueue.add(node)
-  OwnerRoots.set(node, topRootId)
-  flushRootUpdateQueue()
-}
-
-function updateClosestIncludedOwner(node: Solid.Owner, topRootId: NodeID): void {
-  const closestIncludedOwner = getClosestIncludedOwner(node, CurrentTreeWalkerMode)
-  closestIncludedOwner && updateOwner(closestIncludedOwner, topRootId)
-}
-
-export function updateAllRoots(): void {
-  UpdateAllRoots = true
-  flushRootUpdateQueue()
-}
-
-export function forceUpdateAllRoots(): void {
-  UpdateAllRoots = true
-  queueMicrotask(forceFlushRootUpdateQueue)
+let OnRootRemoved: ((rootId: NodeID) => void) | undefined
+/** Listens to roots that were removed */
+export function setOnRootRemoved(fn: typeof OnRootRemoved) {
+  OnRootRemoved = fn
 }
 
 export function createTopRoot(owner: Solid.Root): void {
   const rootId = markNodeID(owner)
   RootMap.set(rootId, owner)
-  updateOwner(owner, rootId)
+  OnOwnerNeedsUpdate?.(owner, rootId)
 }
 
 function cleanupRoot(root: Solid.Root): void {
@@ -121,10 +34,7 @@ function cleanupRoot(root: Solid.Root): void {
   changeRootAttachment(root, null)
 
   const wasTarcked = RootMap.delete(rootId)
-  if (wasTarcked) {
-    RemovedRoots.add(rootId)
-    flushRootUpdateQueue()
-  }
+  if (wasTarcked) OnRootRemoved?.(rootId)
 }
 
 /**
@@ -137,7 +47,7 @@ function changeRootAttachment(root: Solid.Root, newParent: Solid.Owner | null): 
   if (root.sdtAttached) {
     root.sdtAttached.sdtSubRoots!.splice(root.sdtAttached.sdtSubRoots!.indexOf(root), 1)
     topRoot = getTopRoot(root.sdtAttached)
-    if (topRoot) updateClosestIncludedOwner(root.sdtAttached, markNodeID(topRoot))
+    if (topRoot) OnOwnerNeedsUpdate?.(root.sdtAttached, markNodeID(topRoot))
   }
 
   if (newParent) {
@@ -146,7 +56,7 @@ function changeRootAttachment(root: Solid.Root, newParent: Solid.Owner | null): 
     else newParent.sdtSubRoots = [root]
 
     if (topRoot === undefined) topRoot = getTopRoot(newParent)
-    if (topRoot) updateClosestIncludedOwner(newParent, markNodeID(topRoot))
+    if (topRoot) OnOwnerNeedsUpdate?.(newParent, markNodeID(topRoot))
   } else {
     delete root.sdtAttached
   }

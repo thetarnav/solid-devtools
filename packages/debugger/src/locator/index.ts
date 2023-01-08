@@ -1,4 +1,4 @@
-import { atom, defer, makeHoverElementListener } from '@solid-devtools/shared/primitives'
+import { defer, makeHoverElementListener } from '@solid-devtools/shared/primitives'
 import { asArray, warn } from '@solid-devtools/shared/utils'
 import { createSimpleEmitter } from '@solid-primitives/event-bus'
 import { makeEventListener } from '@solid-primitives/event-listener'
@@ -7,6 +7,7 @@ import { scheduleIdle } from '@solid-primitives/scheduled'
 import { onRootCleanup } from '@solid-primitives/utils'
 import {
   Accessor,
+  createComputed,
   createEffect,
   createMemo,
   createSignal,
@@ -41,8 +42,8 @@ export function createLocator({
   setLocatorEnabledSignal(signal: Accessor<boolean>): void
 }) {
   // enables capturing hovered elements
-  const enabledByPlugin = atom(false)
-  const enabledByPressingSignal = atom<Accessor<boolean>>()
+  const [enabledByPlugin, setEnabledByPlugin] = createSignal(false)
+  const [enabledByPressingSignal, setEnabledByPressingSignal] = createSignal<Accessor<boolean>>()
   const enabledByPressing = createMemo(() => !!enabledByPressingSignal()?.())
   setLocatorEnabledSignal(enabledByPressing)
   // locator is enabled if debugger is enabled, and user pressed the key to activate it, or the plugin activated it
@@ -51,11 +52,19 @@ export function createLocator({
   )
 
   function togglePluginLocatorMode(state?: boolean) {
-    enabledByPlugin(p => state ?? !p)
+    setEnabledByPlugin(p => state ?? !p)
   }
 
-  const hoverTarget = atom<HTMLElement | null>(null)
-  const devtoolsTarget = atom<HighlightElementPayload>(null)
+  createComputed(
+    defer(debuggerEnabled, enabled => {
+      if (!enabled) return
+      setEnabledByPlugin(false)
+      setDevtoolsTarget(null)
+    }),
+  )
+
+  const [hoverTarget, setHoverTarget] = createSignal<HTMLElement | null>(null)
+  const [devtoolsTarget, setDevtoolsTarget] = createSignal<HighlightElementPayload>(null)
 
   const [highlightedComponents, setHighlightedComponents] = createSignal<LocatorComponent[]>([])
 
@@ -136,10 +145,6 @@ export function createLocator({
     }
   })
 
-  function setDevtoolsHighlightTarget(data: HighlightElementPayload) {
-    devtoolsTarget(data)
-  }
-
   // functions to be called when user clicks on a component
   const clickInterceptors = new Set<ClickMiddleware>()
   function runClickInterceptors(...[e, c, l]: Parameters<ClickMiddleware>): true | undefined {
@@ -159,8 +164,8 @@ export function createLocator({
     if (!locatorEnabled()) return
 
     // set hovered element as target
-    makeHoverElementListener(el => hoverTarget(el))
-    onCleanup(() => hoverTarget(null))
+    makeHoverElementListener(el => setHoverTarget(el))
+    onCleanup(() => setHoverTarget(null))
 
     // go to selected component source code on click
     makeEventListener(
@@ -200,7 +205,7 @@ export function createLocator({
       if (options.targetIDE) targetIDE = options.targetIDE
       if (options.key !== false) {
         const isHoldingKey = createKeyHold(options.key ?? 'Alt', { preventDefault: true })
-        enabledByPressingSignal(() => isHoldingKey)
+        setEnabledByPressingSignal(() => isHoldingKey)
       }
     })
   }
@@ -216,7 +221,7 @@ export function createLocator({
     togglePluginLocatorMode,
     enabledByDebugger: enabledByPressing,
     addClickInterceptor,
-    setPluginHighlightTarget: setDevtoolsHighlightTarget,
+    setDevtoolsHighlightTarget: (target: HighlightElementPayload) => void setDevtoolsTarget(target),
     onDebuggerHoveredComponentChange,
     openElementSourceCode,
   }
