@@ -40,7 +40,7 @@
     ".": {
       "worker": {
         "import": {
-          "types": "./types/index.d.ts",
+          "types": "./dist/index.d.ts",
           "default": "./dist/server.js"
         },
         "require": "./dist/server.cjs"
@@ -48,40 +48,40 @@
       "browser": {
         "development": {
           "import": {
-            "types": "./types/index.d.ts",
+            "types": "./dist/index.d.ts",
             "default": "./dist/index.js"
           },
           "require": "./dist/index.cjs"
         },
         "import": {
-          "types": "./types/index.d.ts",
+          "types": "./dist/index.d.ts",
           "default": "./dist/server.js"
         },
         "require": "./dist/server.cjs"
       },
       "deno": {
         "import": {
-          "types": "./types/index.d.ts",
+          "types": "./dist/index.d.ts",
           "default": "./dist/server.js"
         },
         "require": "./dist/server.cjs"
       },
       "node": {
         "import": {
-          "types": "./types/index.d.ts",
+          "types": "./dist/index.d.ts",
           "default": "./dist/server.js"
         },
         "require": "./dist/server.cjs"
       },
       "development": {
         "import": {
-          "types": "./types/index.d.ts",
+          "types": "./dist/index.d.ts",
           "default": "./dist/server.js"
         },
         "require": "./dist/index.cjs"
       },
       "import": {
-        "types": "./types/index.d.ts",
+        "types": "./dist/index.d.ts",
         "default": "./dist/server.js"
       },
       "require": "./dist/server.cjs"
