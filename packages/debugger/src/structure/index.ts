@@ -100,6 +100,8 @@ export function createStructure(config: {
 
   function setTreeWalkerMode(mode: TreeWalkerMode): void {
     treeWalkerMode = mode
+    updateAllRoots()
+    registry.clearComponentRegistry()
   }
 
   return { updateAllRoots, forceUpdateAllRoots, setTreeWalkerMode }

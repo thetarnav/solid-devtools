@@ -16,7 +16,7 @@ const separate = <T>(obj: T, callback: (value: T) => void): void => {
 export function createController() {
   const debug = useDebugger()
 
-  onCleanup(() => debug.inspector.setInspectedNode(null))
+  onCleanup(() => debug.setInspectedNode(null))
 
   const controller = new Controller({
     onDevtoolsLocatorStateChange(enabled) {
@@ -26,7 +26,7 @@ export function createController() {
       queueMicrotask(() => debug.locator.setHighlightTarget(data))
     },
     onInspectNode(node) {
-      queueMicrotask(() => debug.inspector.setInspectedNode(node))
+      queueMicrotask(() => debug.setInspectedNode(node))
     },
     onInspectValue(node) {
       queueMicrotask(() => debug.inspector.toggleValueNode(node))
@@ -35,7 +35,7 @@ export function createController() {
       queueMicrotask(() => debug.openInspectedNodeLocation())
     },
     onTreeViewModeChange(mode) {
-      queueMicrotask(() => debug.changeTreeWalkerMode(mode))
+      queueMicrotask(() => debug.structure.setTreeWalkerMode(mode))
     },
   })
 

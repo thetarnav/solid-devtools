@@ -5,7 +5,7 @@ import { warn } from '@solid-devtools/shared/utils'
 import { createBodyCursor } from '@solid-primitives/cursor'
 import { makeEventListener } from '@solid-primitives/event-listener'
 import { clamp, onRootCleanup } from '@solid-primitives/utils'
-import { Component, ComponentProps, createComputed, createSignal, onCleanup, Show } from 'solid-js'
+import { Component, ComponentProps, createComputed, createSignal, Show } from 'solid-js'
 import { Dynamic, Portal } from 'solid-js/web'
 import { createController } from './controller'
 
@@ -41,13 +41,18 @@ const Overlay: Component<{
   alwaysOpen?: boolean
   noPadding?: boolean
 }> = ({ defaultOpen, alwaysOpen, noPadding }) => {
-  const [isOpen, setOpen] = (() => {
-    if (alwaysOpen) return [() => true, () => {}] as const
-    const [_isOpen, _setOpen] = createSignal(defaultOpen ?? false)
-    onCleanup(() => _setOpen(false))
-    return [_isOpen, _setOpen] as const
-  })()
-  useDebugger().setUserEnabledSignal(isOpen)
+  const debug = useDebugger()
+  if (defaultOpen || alwaysOpen) {
+    debug.toggleEnabled(true)
+    debug.structure.toggleEnabled(true)
+  }
+  const isOpen = debug.enabled
+  const setOpen = alwaysOpen
+    ? () => {}
+    : (enabled: boolean) => {
+        debug.toggleEnabled(enabled)
+        debug.structure.toggleEnabled(enabled)
+      }
 
   const isMobile = useIsMobile()
   const isTouch = useIsTouch()
@@ -75,7 +80,7 @@ const Overlay: Component<{
       >
         <div class="overlay__container__fixed">
           {!alwaysOpen && (
-            <button class="overlay__toggle-button" onClick={() => setOpen(p => !p)}>
+            <button class="overlay__toggle-button" onClick={() => setOpen(!isOpen())}>
               Devtools
               <Dynamic
                 component={isOpen() ? Icon.EyeSlash : Icon.Eye}
