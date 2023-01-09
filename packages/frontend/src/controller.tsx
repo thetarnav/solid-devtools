@@ -107,7 +107,6 @@ const [Provider, useControllerCtx] = createContextProvider(
     const inspector = createInspector({
       findNode: structure.findNode,
       findClosestInspectableNode: structure.findClosestInspectableNode,
-      getNodePath: structure.getNodePath,
     })
 
     controller.connectDevtools({

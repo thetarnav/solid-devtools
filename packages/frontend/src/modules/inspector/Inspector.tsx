@@ -9,7 +9,7 @@ import { ValueNode } from './ValueNode'
 
 export default function Details() {
   const { inspector } = useController()
-  const { details, inspectedNode, openComponentLocation, setInspectedNode } = inspector
+  const { state, inspectedNode, openComponentLocation, setInspectedNode } = inspector
 
   return (
     <Show when={inspectedNode()}>
@@ -20,7 +20,7 @@ export default function Details() {
             {/* <button class={styles.actions.button}>
               <Icon.Eye class={styles.actions.icon} />
             </button> */}
-            {details.location && (
+            {state.location && (
               <button class={styles.actions.button} onClick={openComponentLocation}>
                 <Icon.Code class={styles.actions.icon} />
               </button>
@@ -40,10 +40,10 @@ export default function Details() {
 
 const DetailsContent: Component = () => {
   const { inspector } = useController()
-  const { details, inspectedNode } = inspector
+  const { state, inspectedNode } = inspector
 
   const allSignals = createMemo(() => {
-    const list = Object.values(details.signals)
+    const list = Object.values(state.signals)
     const memos: typeof list = []
     const signals: typeof list = []
     const stores: typeof list = []
@@ -58,10 +58,10 @@ const DetailsContent: Component = () => {
   return (
     <div class={styles.content}>
       <ListSignals
-        when={details.props && Object.keys(details.props.record).length}
-        title={<>Props {details.props!.proxy && <Badge>PROXY</Badge>}</>}
+        when={state.props && Object.keys(state.props.record).length}
+        title={<>Props {state.props!.proxy && <Badge>PROXY</Badge>}</>}
       >
-        <Entries of={details.props!.record}>
+        <Entries of={state.props!.record}>
           {(name, value) => (
             <ValueNode
               name={name}
@@ -91,7 +91,7 @@ const DetailsContent: Component = () => {
           </For>
         </ListSignals>
       ))}
-      <Show when={details.value} keyed>
+      <Show when={state.value} keyed>
         {valueItem => (
           <div>
             <h2 class={styles.h2}>{NODE_TYPE_NAMES[inspectedNode()!.type]}</h2>
@@ -106,10 +106,10 @@ const DetailsContent: Component = () => {
           </div>
         )}
       </Show>
-      {details.location && (
+      {state.location && (
         <div>
           <h2 class={styles.h2}>Location</h2>
-          <p class={styles.location}>{details.location}</p>
+          <p class={styles.location}>{state.location}</p>
         </div>
       )}
     </div>

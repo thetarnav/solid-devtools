@@ -59,12 +59,11 @@ export namespace Inspector {
     readonly record: { readonly [key: string]: Prop }
   }
 
-  export type Details = {
+  export type State = {
     readonly signals: { readonly [key: NodeID]: Signal }
     readonly value: ValueItem | null
     readonly props: Props | null
     readonly location: LocationAttr | null
-    readonly path: readonly Structure.Node[]
   }
 }
 
@@ -115,7 +114,7 @@ function createPropItem(
 function updateProxyProps({
   added,
   removed,
-}: InspectorUpdateMap['propKeys']): Parameters<Setter<Inspector.Details['props']>>[0] {
+}: InspectorUpdateMap['propKeys']): Parameters<Setter<Inspector.State['props']>>[0] {
   return previous => {
     if (!previous) return null
 
@@ -153,31 +152,20 @@ function updateStore(
 }
 
 export default function createInspector({
-  getNodePath,
   findNode,
   findClosestInspectableNode,
 }: {
-  getNodePath(node: Structure.Node): Structure.Node[]
   findNode(id: NodeID): Structure.Node | undefined
   findClosestInspectableNode(node: Structure.Node): Structure.Node | undefined
 }) {
   const [inspectedNode, setInspectedNode] = createSignal<Structure.Node | null>(null)
   const inspectedId = createMemo(() => inspectedNode()?.id ?? null)
-  const path = createMemo(() => {
-    const node = inspectedNode()
-    return node ? getNodePath(node) : []
-  })
 
-  const [state, setState] = createStaticStore<Omit<Inspector.Details, 'path'>>({
+  const [state, setState] = createStaticStore<Inspector.State>({
     location: null,
     props: null,
     signals: {},
     value: null,
-  })
-  const details: Inspector.Details = mergeProps(state, {
-    get path() {
-      return path()
-    },
   })
 
   const storeNodeMap = new StoreNodeMap()
@@ -232,7 +220,7 @@ export default function createInspector({
       signals: raw.signals.reduce((signals, { id, name, type, value }) => {
         signals[id] = createSignalItem(id, type, name, decodeValue(value, null, storeNodeMap))
         return signals
-      }, {} as Writable<Inspector.Details['signals']>),
+      }, {} as Writable<Inspector.State['signals']>),
       value: raw.value
         ? createValueItem(ValueItemType.Value, decodeValue(raw.value, null, storeNodeMap))
         : null,
@@ -257,9 +245,9 @@ export default function createInspector({
 
     let valueItem: Inspector.ValueItem | undefined | null
 
-    if (valueItemType === ValueItemType.Signal) valueItem = details.signals[id]
-    else if (valueItemType === ValueItemType.Prop) valueItem = details.props?.record[id]
-    else valueItem = details.value
+    if (valueItemType === ValueItemType.Signal) valueItem = state.signals[id]
+    else if (valueItemType === ValueItemType.Prop) valueItem = state.props?.record[id]
+    else valueItem = state.value
 
     return valueItem ?? warn(`ValueItem (${valueId}) not found`)
   }
@@ -331,7 +319,7 @@ export default function createInspector({
   return {
     inspectedId,
     inspectedNode,
-    details,
+    state,
     setInspectedNode: setInspected,
     isNodeInspected,
     setDetails: setNewDetails,
