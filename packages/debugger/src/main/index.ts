@@ -10,9 +10,9 @@ import { createDependencyGraph } from '../dependency'
 import { createInspector, InspectorUpdate } from '../inspector'
 import { createLocator } from '../locator'
 import { createStructure, StructureUpdates } from '../structure'
-import { createInternalRoot, findOwnerById } from './roots'
+import { createInternalRoot, findOwnerById, getTopRoot } from './roots'
 import { ComputationUpdate, Mapped, NodeID, Solid } from './types'
-import { createBatchedUpdateEmitter } from './utils'
+import { createBatchedUpdateEmitter, markNodeID } from './utils'
 
 export type BatchComputationUpdatesHandler = (payload: ComputationUpdate[]) => void
 
@@ -59,23 +59,6 @@ const plugin = createInternalRoot(() => {
 
   const dgraphEnabled = createMemo(() => _dgraphEnabled() && debuggerEnabled())
 
-  //
-  // Structure & Computation updates:
-  //
-  const pushComputationUpdate = createBatchedUpdateEmitter<ComputationUpdate>(updates => {
-    eventHub.emit('ComputationUpdates', updates)
-  })
-
-  const structure = createStructure({
-    onStructureUpdate(updated, removedIds) {
-      eventHub.emit('StructureUpdates', { updated, removed: [...removedIds] })
-    },
-    onComputationUpdates(rootId, id) {
-      pushComputationUpdate({ rootId, id })
-    },
-    structureEnabled,
-  })
-
   // Current inspected node is shared between modules
   let inspectedNode: InspectedNode = null
   const [listenToInspectedNodeChange, emitNodeChange] = createSimpleEmitter<InspectedNode>()
@@ -90,11 +73,41 @@ const plugin = createInternalRoot(() => {
     emitNodeChange(inspectedNode)
   }
 
+  /** Check if the inspected node doesn't need to change (treeview mode changed or sth) */
+  function updateInspectedNode() {
+    if (!inspectedNode || !inspectedNode.owner) return
+    const closest = structure.getClosestIncludedOwner(inspectedNode.owner)
+    if (closest && closest === inspectedNode.owner) return
+
+    const root = closest && getTopRoot(closest)
+    inspectedNode =
+      !closest || !root ? null : { rootId: markNodeID(root), owner: closest, signal: null }
+    emitNodeChange(inspectedNode)
+  }
+
   createEffect(
     defer(debuggerEnabled, enabled => {
       if (!enabled) setInspectedNode(null)
     }),
   )
+
+  //
+  // Structure & Computation updates:
+  //
+  const pushComputationUpdate = createBatchedUpdateEmitter<ComputationUpdate>(updates => {
+    eventHub.emit('ComputationUpdates', updates)
+  })
+
+  const structure = createStructure({
+    onStructureUpdate(updated, removedIds) {
+      eventHub.emit('StructureUpdates', { updated, removed: [...removedIds] })
+      updateInspectedNode()
+    },
+    onComputationUpdates(rootId, id) {
+      pushComputationUpdate({ rootId, id })
+    },
+    structureEnabled,
+  })
 
   //
   // Inspected Owner details:

@@ -1,7 +1,6 @@
 import { useController } from '@/controller'
 import { Badge, Icon, Scrollable } from '@/ui'
-import { OwnerName } from '@/ui/components/Owner'
-import { NodeType, NODE_TYPE_NAMES, PropGetterState } from '@solid-devtools/debugger/types'
+import { NodeType, PropGetterState } from '@solid-devtools/debugger/types'
 import { Entries } from '@solid-primitives/keyed'
 import { Component, createMemo, For, JSX, Show } from 'solid-js'
 import * as styles from './inspector.css'
@@ -9,13 +8,14 @@ import { ValueNode } from './ValueNode'
 
 export default function Details() {
   const { inspector } = useController()
-  const { state, inspectedNode, openComponentLocation, setInspectedNode } = inspector
+  const { state, inspectedId, openComponentLocation, setInspectedNode } = inspector
 
   return (
-    <Show when={inspectedNode()}>
+    <Show when={inspectedId()}>
       <div class={styles.root}>
         <header class={styles.header}>
-          <OwnerName name={inspectedNode()!.name} type={inspectedNode()!.type} isTitle />
+          {/* TODO: */}
+          {/* <OwnerName name={inspectedNode()!.name} type={inspectedNode()!.type} isTitle /> */}
           <div class={styles.actions.container}>
             {/* <button class={styles.actions.button}>
               <Icon.Eye class={styles.actions.icon} />
@@ -40,7 +40,7 @@ export default function Details() {
 
 const DetailsContent: Component = () => {
   const { inspector } = useController()
-  const { state, inspectedNode } = inspector
+  const { state } = inspector
 
   const allSignals = createMemo(() => {
     const list = Object.values(state.signals)
@@ -94,7 +94,8 @@ const DetailsContent: Component = () => {
       <Show when={state.value} keyed>
         {valueItem => (
           <div>
-            <h2 class={styles.h2}>{NODE_TYPE_NAMES[inspectedNode()!.type]}</h2>
+            {/* TODO */}
+            {/* <h2 class={styles.h2}>{NODE_TYPE_NAMES[inspectedNode()!.type]}</h2> */}
             <ValueNode
               name="value"
               value={valueItem.value}

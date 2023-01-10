@@ -1,6 +1,5 @@
 import { warn, whileArray } from '@solid-devtools/shared/utils'
 import { createRoot } from 'solid-js'
-import { getTopRoot } from '../structure/walker'
 import { clearComponentRegistry } from './componentRegistry'
 import { NodeType } from './constants'
 import { Core, NodeID, Solid } from './types'
@@ -183,6 +182,18 @@ export const createInternalRoot: typeof createRoot = (fn, detachedOwner) => {
 }
 
 /**
+ * Finds the top-level root owner of a given owner.
+ */
+export function getTopRoot(owner: Solid.Owner): Solid.Root | null {
+  let root: Solid.Root | null = null
+  do {
+    if (isSolidRoot(owner) && !owner.isInternal && !owner.isDisposed) root = owner
+    owner = owner.owner!
+  } while (owner)
+  return root
+}
+
+/**
  * Looks though the children and subroots of the given root to find owner of given {@link id}.
  */
 export const findOwnerById = (rootId: NodeID, id: NodeID): Solid.Owner | undefined => {
@@ -201,7 +212,7 @@ export const findOwnerById = (rootId: NodeID, id: NodeID): Solid.Owner | undefin
  * @param owner
  * @returns `{ owner: SolidOwner; root: SolidRoot }`
  */
-function findClosestAliveParent(
+export function findClosestAliveParent(
   owner: Solid.Owner,
 ): { owner: Solid.Owner; root: Solid.Root } | { owner: null; root: null } {
   let disposed: Solid.Root | null = null
@@ -215,5 +226,5 @@ function findClosestAliveParent(
     }
   }
   if (!closestAliveRoot) return { owner: null, root: null }
-  return { owner: disposed?.owner ?? owner.owner!, root: closestAliveRoot }
+  return { owner: (disposed ?? owner).owner!, root: closestAliveRoot }
 }

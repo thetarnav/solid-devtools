@@ -9,15 +9,17 @@ import { Component, createMemo } from 'solid-js'
 import * as styles from './path.css'
 
 export const OwnerPath: Component = () => {
-  const { structure, toggleHoveredNode, setInspectedNode, inspector } = useController()
+  const { structure, setInspectedNode, inspector } = useController()
 
   const rem = useRemSize()
   const containerSize = createElementSize(() => container)
   const expandable = () => (containerSize.height ?? 0) > rem() * styles.MIN_PATH_HEIGHT_IN_REM
 
   const path = createMemo(() => {
-    const node = inspector.inspectedNode()
-    return node ? structure.getNodePath(node) : []
+    return [] as any[]
+    // TODO
+    // const node = inspector.inspectedNode()
+    // return node ? structure.getNodePath(node) : []
   })
 
   let container!: HTMLDivElement
@@ -31,7 +33,9 @@ export const OwnerPath: Component = () => {
         )}
         <div class={styles.container} ref={container}>
           {path().map(node => {
-            const hoverProps = createHover(hovering => toggleHoveredNode(node.id, hovering))
+            const hoverProps = createHover(hovering =>
+              structure.toggleHoveredNode(node.id, hovering),
+            )
             return (
               <>
                 <div class={styles.divider}>
@@ -41,7 +45,7 @@ export const OwnerPath: Component = () => {
                   class={styles.item}
                   data-hovered={structure.isHovered(node.id)}
                   {...hoverProps}
-                  onClick={() => setInspectedNode(node)}
+                  onClick={() => setInspectedNode(node.id)}
                 >
                   <div class={styles.highlight} />
                   {node.type === NodeType.Component || node.type === NodeType.Element ? (

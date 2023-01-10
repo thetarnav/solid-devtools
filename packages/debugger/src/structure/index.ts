@@ -1,10 +1,10 @@
 import { throttle } from '@solid-primitives/scheduled'
 import * as registry from '../main/componentRegistry'
-import { DEFAULT_WALKER_MODE, TreeWalkerMode } from '../main/constants'
+import { DEFAULT_WALKER_MODE, NodeType, TreeWalkerMode } from '../main/constants'
 import * as roots from '../main/roots'
 import { Mapped, NodeID, Solid } from '../main/types'
-import { markNodeID } from '../main/utils'
-import { ComputationUpdateHandler, getClosestIncludedOwner, walkSolidTree } from './walker'
+import { isShallowDisposed, markNodeID, markOwnerType } from '../main/utils'
+import { ComputationUpdateHandler, walkSolidTree } from './walker'
 
 export type StructureUpdates = {
   removed: NodeID[]
@@ -18,6 +18,33 @@ export type Structure = {
     removedIds: ReadonlySet<NodeID>,
   ) => void
   onComputationUpdate: (rootId: NodeID, nodeId: NodeID) => void
+}
+
+/**
+ * Finds the closest owner of a given owner that is included in the tree walker.
+ */
+// TODO unit test this
+function getClosestIncludedOwner(owner: Solid.Owner, mode: TreeWalkerMode): Solid.Owner | null {
+  // 1. make sure the tree is not disposed
+  // if it is, find the non-disposed owner and use as the owner
+  let closest: Solid.Owner | null = null
+  let current: Solid.Owner | null = owner
+  do {
+    if (isShallowDisposed(current)) closest = current.owner
+    current = current.owner
+  } while (current)
+  owner = closest ?? owner
+
+  // 2. find the closest owner that is included in the tree walker
+  if (mode === TreeWalkerMode.Owners) return owner
+  let root: Solid.Owner | null = null
+  do {
+    const type = markOwnerType(owner)
+    if (type === NodeType.Component || type === NodeType.Context) return owner
+    if (type === NodeType.Root) root = owner
+    owner = owner.owner!
+  } while (owner)
+  return root
 }
 
 export function createStructure(config: {
@@ -104,5 +131,12 @@ export function createStructure(config: {
     registry.clearComponentRegistry()
   }
 
-  return { updateAllRoots, forceUpdateAllRoots, setTreeWalkerMode }
+  return {
+    updateAllRoots,
+    forceUpdateAllRoots,
+    setTreeWalkerMode,
+    getClosestIncludedOwner(owner: Solid.Owner) {
+      return getClosestIncludedOwner(owner, treeWalkerMode)
+    },
+  }
 }

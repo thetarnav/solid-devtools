@@ -104,10 +104,7 @@ const [Provider, useControllerCtx] = createContextProvider(
       clientHoveredNodeId,
     })
 
-    const inspector = createInspector({
-      findNode: structure.findNode,
-      findClosestInspectableNode: structure.findClosestInspectableNode,
-    })
+    const inspector = createInspector({ findNode: structure.findNode })
 
     controller.connectDevtools({
       onResetPanel() {
@@ -140,10 +137,7 @@ const [Provider, useControllerCtx] = createContextProvider(
         updated.forEach(({ id }) => structure.emitComputationUpdate(id))
       },
       onStructureUpdate(update) {
-        batch(() => {
-          structure.updateStructure(update)
-          inspector.handleStructureChange()
-        })
+        structure.updateStructure(update)
       },
       onInspectorUpdate(payload) {
         inspector.update(payload)
@@ -158,11 +152,15 @@ const [Provider, useControllerCtx] = createContextProvider(
     )
 
     // set inspected node
-    inspector.setOnInspectNode(node => {
-      client.onInspectNode(
-        node ? { nodeId: node.id, rootId: structure.getRootNode(node).id } : null,
-      )
-    })
+    // TODO: don't use structure here
+    createEffect(
+      defer(inspector.inspectedId, id => {
+        if (!id) return client.onInspectNode(null)
+        const node = structure.findNode(id)
+        if (!node) return client.onInspectNode(null)
+        client.onInspectNode({ nodeId: id, rootId: structure.getRootNode(node).id })
+      }),
+    )
     // toggle inspected value/prop/signal
     inspector.setOnInspectValue(client.onInspectValue)
 
@@ -267,11 +265,10 @@ const [Provider, useControllerCtx] = createContextProvider(
     return {
       locatorEnabled,
       structureState: structure.state,
-      inspectedNode: inspector.inspectedNode,
+      inspectedNodeId: inspector.inspectedId,
       isNodeInspected: inspector.isNodeInspected,
       setLocatorState: setDevtoolsLocatorState,
       setInspectedNode: inspector.setInspectedNode,
-      toggleHoveredNode: structure.toggleHoveredNode,
       listenToComputationUpdate: structure.listenToComputationUpdate,
       changeTreeViewMode,
       inspector,

@@ -11,19 +11,11 @@ import {
   ValueItemType,
   ValueType,
 } from '@solid-devtools/debugger/types'
-import { defer, handleTupleUpdates, untrackedCallback } from '@solid-devtools/shared/primitives'
+import { handleTupleUpdates, untrackedCallback } from '@solid-devtools/shared/primitives'
 import { splitOnColon, warn } from '@solid-devtools/shared/utils'
 import { shallowCopy } from '@solid-primitives/immutable'
 import { createStaticStore } from '@solid-primitives/utils'
-import {
-  batch,
-  createEffect,
-  createMemo,
-  createSelector,
-  createSignal,
-  mergeProps,
-  Setter,
-} from 'solid-js'
+import { batch, createSelector, createSignal, mergeProps, Setter } from 'solid-js'
 import { Writable } from 'type-fest'
 import type { Structure } from '../structure'
 import {
@@ -153,13 +145,11 @@ function updateStore(
 
 export default function createInspector({
   findNode,
-  findClosestInspectableNode,
 }: {
   findNode(id: NodeID): Structure.Node | undefined
-  findClosestInspectableNode(node: Structure.Node): Structure.Node | undefined
 }) {
-  const [inspectedNode, setInspectedNode] = createSignal<Structure.Node | null>(null)
-  const inspectedId = createMemo(() => inspectedNode()?.id ?? null)
+  const [inspectedId, setInspectedId] = createSignal<NodeID | null>(null)
+  const isNodeInspected = createSelector<NodeID | null, NodeID>(inspectedId)
 
   const [state, setState] = createStaticStore<Inspector.State>({
     location: null,
@@ -170,22 +160,19 @@ export default function createInspector({
 
   const storeNodeMap = new StoreNodeMap()
 
-  const isNodeInspected = createSelector<NodeID | null, NodeID>(() => inspectedNode()?.id ?? null)
-
-  const setInspected: (data: Structure.Node | NodeID | null) => void = untrackedCallback(data => {
+  const setInspected = untrackedCallback((id: NodeID | null) => {
     batch(() => {
-      if (data === null) {
-        setInspectedNode(null)
+      if (id === null) {
+        setInspectedId(null)
       } else {
-        const prev = inspectedNode()
-        const newId = typeof data === 'string' ? data : data.id
-        if (prev && newId === prev.id) return
-        const node = typeof data === 'string' ? findNode(data) : data
-        if (!node) return warn(`setInspected: node (${newId}) not found`)
+        const prev = inspectedId()
+        if (prev && id === prev) return
+        const node = findNode(id)
+        if (!node) return warn(`setInspected: node (${id}) not found`)
         // html elements are not inspectable
         if (node.type === NodeType.Element) return
 
-        setInspectedNode(node)
+        setInspectedId(id)
       }
 
       storeNodeMap.clear()
@@ -198,47 +185,43 @@ export default function createInspector({
     })
   })
 
-  // clear the inspector when the inspected node is removed
-  const handleStructureChange = untrackedCallback(() => {
-    const prevNode = inspectedNode()
-    if (!prevNode) return
-    let node = findNode(prevNode.id)
-    // if the previous inspected node is not found, try to find the closest component, context ot top-level root
-    if (!node) {
-      node = findClosestInspectableNode(prevNode)
-      node &&= findNode(node.id)
-    }
-    setInspected(node ?? null)
-  })
+  function setNewDetails(raw: Mapped.OwnerDetails): void {
+    const id = inspectedId()
+    batch(() => {
+      // The current inspected node is not the same as the one that sent the details
+      // (replace it with the new one)
+      if (!id || id !== raw.id) setInspected(raw.id)
 
-  const setNewDetails = untrackedCallback((raw: Mapped.OwnerDetails) => {
-    const node = inspectedNode()
-    if (!node || node.id !== raw.id) return warn('setNewDetails: inspected node mismatch')
-
-    setState({
-      location: raw.location ?? null,
-      signals: raw.signals.reduce((signals, { id, name, type, value }) => {
-        signals[id] = createSignalItem(id, type, name, decodeValue(value, null, storeNodeMap))
-        return signals
-      }, {} as Writable<Inspector.State['signals']>),
-      value: raw.value
-        ? createValueItem(ValueItemType.Value, decodeValue(raw.value, null, storeNodeMap))
-        : null,
-      props: raw.props
-        ? {
-            proxy: raw.props.proxy,
-            record: Object.entries(raw.props.record).reduce((record, [key, p]) => {
-              record[key] = createPropItem(
-                key,
-                p.value ? decodeValue(p.value, null, storeNodeMap) : { type: ValueType.Unknown },
-                p.getter,
-              )
-              return record
-            }, {} as Writable<Inspector.Props['record']>),
-          }
-        : null,
+      setState({
+        location: raw.location ?? null,
+        signals: raw.signals.reduce((signals, s) => {
+          signals[s.id] = createSignalItem(
+            s.id,
+            s.type,
+            s.name,
+            decodeValue(s.value, null, storeNodeMap),
+          )
+          return signals
+        }, {} as Writable<Inspector.State['signals']>),
+        value: raw.value
+          ? createValueItem(ValueItemType.Value, decodeValue(raw.value, null, storeNodeMap))
+          : null,
+        props: raw.props
+          ? {
+              proxy: raw.props.proxy,
+              record: Object.entries(raw.props.record).reduce((record, [key, p]) => {
+                record[key] = createPropItem(
+                  key,
+                  p.value ? decodeValue(p.value, null, storeNodeMap) : { type: ValueType.Unknown },
+                  p.getter,
+                )
+                return record
+              }, {} as Writable<Inspector.Props['record']>),
+            }
+          : null,
+      })
     })
-  })
+  }
 
   function getValueItem(valueId: ValueItemID): Inspector.ValueItem | undefined {
     const [valueItemType, id] = splitOnColon(valueId)
@@ -282,12 +265,8 @@ export default function createInspector({
   })
 
   /** variable for a callback in controller.tsx */
-  let onInspectNode: (node: Structure.Node | null) => void = () => {}
   let onInspectValue: (data: ToggleInspectedValueData) => void = () => {}
   const setOnInspectValue = (fn: typeof onInspectValue) => (onInspectValue = fn)
-  const setOnInspectNode = (fn: typeof onInspectNode) => (onInspectNode = fn)
-
-  createEffect(defer(inspectedNode, node => onInspectNode(node)))
 
   /**
    * Toggle the inspection of a value item (signal, prop, or owner value)
@@ -318,7 +297,6 @@ export default function createInspector({
 
   return {
     inspectedId,
-    inspectedNode,
     state,
     setInspectedNode: setInspected,
     isNodeInspected,
@@ -328,9 +306,7 @@ export default function createInspector({
     onInspectedHandler: onInspectValue,
     hoveredElement,
     toggleHoveredElement,
-    handleStructureChange,
     setOnInspectValue,
-    setOnInspectNode,
     openComponentLocation,
     setOnOpenLocation,
   }

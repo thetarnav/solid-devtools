@@ -123,6 +123,24 @@ export class NodeIDMap<T extends { [$SDT_ID]?: NodeID }> {
   }
 }
 
+/**
+ * Checks if the passed owner is disposed.
+ * The check is performed shallowly — it doesn't traverse the parent chain.
+ */
+export function isShallowDisposed(o: Readonly<Solid.Owner>): boolean {
+  return !!(isSolidRoot(o)
+    ? o.isDisposed
+    : o.owner && (!o.owner.owned || !o.owner.owned.includes(o)))
+}
+
+/**
+ * Checks if the passed owner is disposed.
+ * The check is performed recursively — it traverses the parent chain.
+ */
+export function isDisposed(o: Readonly<Solid.Owner>): boolean {
+  return isShallowDisposed(o) || !!(o.owner && isDisposed(o.owner))
+}
+
 export function getComponentRefreshNode(owner: Readonly<Solid.Component>): Solid.Memo | null {
   const { owned } = owner
   let refresh: Solid.Owner
