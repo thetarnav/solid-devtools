@@ -17,7 +17,6 @@ import { shallowCopy } from '@solid-primitives/immutable'
 import { createStaticStore } from '@solid-primitives/utils'
 import { batch, createSelector, createSignal, mergeProps, Setter } from 'solid-js'
 import { Writable } from 'type-fest'
-import type { Structure } from '../structure'
 import {
   DecodedValue,
   decodeValue,
@@ -52,6 +51,8 @@ export namespace Inspector {
   }
 
   export type State = {
+    readonly name: string | null
+    readonly type: NodeType | null
     readonly signals: { readonly [key: NodeID]: Signal }
     readonly value: ValueItem | null
     readonly props: Props | null
@@ -143,20 +144,20 @@ function updateStore(
   store.setValue(newValue)
 }
 
-export default function createInspector({
-  findNode,
-}: {
-  findNode(id: NodeID): Structure.Node | undefined
-}) {
+const NULL_STATE = {
+  name: null,
+  type: null,
+  location: null,
+  props: null,
+  signals: {},
+  value: null,
+} as const
+
+export default function createInspector() {
   const [inspectedId, setInspectedId] = createSignal<NodeID | null>(null)
   const isNodeInspected = createSelector<NodeID | null, NodeID>(inspectedId)
 
-  const [state, setState] = createStaticStore<Inspector.State>({
-    location: null,
-    props: null,
-    signals: {},
-    value: null,
-  })
+  const [state, setState] = createStaticStore<Inspector.State>({ ...NULL_STATE })
 
   const storeNodeMap = new StoreNodeMap()
 
@@ -167,21 +168,11 @@ export default function createInspector({
       } else {
         const prev = inspectedId()
         if (prev && id === prev) return
-        const node = findNode(id)
-        if (!node) return warn(`setInspected: node (${id}) not found`)
-        // html elements are not inspectable
-        if (node.type === NodeType.Element) return
-
         setInspectedId(id)
       }
 
       storeNodeMap.clear()
-      setState({
-        location: null,
-        props: null,
-        signals: {},
-        value: null,
-      })
+      setState({ ...NULL_STATE })
     })
   })
 
@@ -193,6 +184,8 @@ export default function createInspector({
       if (!id || id !== raw.id) setInspected(raw.id)
 
       setState({
+        name: raw.name,
+        type: raw.type,
         location: raw.location ?? null,
         signals: raw.signals.reduce((signals, s) => {
           signals[s.id] = createSignalItem(

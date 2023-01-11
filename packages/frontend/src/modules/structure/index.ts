@@ -7,7 +7,7 @@ import {
   type TreeWalkerMode,
 } from '@solid-devtools/debugger/types'
 import { createSimpleEmitter } from '@solid-primitives/event-bus'
-import { Accessor, createSelector, createSignal, untrack } from 'solid-js'
+import { Accessor, createMemo, createSelector, createSignal, untrack } from 'solid-js'
 
 export namespace Structure {
   export interface Node {
@@ -160,8 +160,10 @@ export function getNodePath(node: Structure.Node): Structure.Node[] {
 
 export default function createStructure({
   clientHoveredNodeId,
+  inspectedNodeId,
 }: {
   clientHoveredNodeId: Accessor<NodeID | null>
+  inspectedNodeId: Accessor<NodeID | null>
 }) {
   const [mode, setMode] = createSignal<TreeWalkerMode>(DEFAULT_WALKER_MODE)
 
@@ -169,6 +171,11 @@ export default function createStructure({
     { nodeList: [], roots: [] },
     { internal: true },
   )
+
+  const inspectedNode = createMemo(() => {
+    const id = inspectedNodeId()
+    return id ? findNode(id) : null
+  })
 
   function updateStructure(update: StructureUpdates | null): void {
     setState(prev =>
@@ -214,6 +221,7 @@ export default function createStructure({
 
   return {
     state,
+    inspectedNode,
     updateStructure,
     hovered,
     extHovered,

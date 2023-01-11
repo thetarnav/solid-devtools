@@ -291,35 +291,34 @@ const DisplayStructureTree: Component = () => {
     if (!inspector.inspectedId()) return
     // Run in next tick to ensure the scroll data is updated and virtual list recalculated
     // inspect node -> open inspector -> container changes height -> scroll data changes -> virtual list changes -> scroll to node
-    // TODO
-    // setTimeout(() => {
-    //   let index = inspectedIndex()
-    //   if (index === -1) {
-    //     const node = inspector.inspectedNode()
-    //     if (!node) return
-    //     // Un-collapse parents if needed
-    //     const set = collapsed()
-    //     let parent = node.parent
-    //     let wasCollapsed = false
-    //     while (parent) {
-    //       wasCollapsed ||= set.delete(parent)
-    //       parent = parent.parent
-    //     }
-    //     if (wasCollapsed) {
-    //       setCollapsed(set)
-    //       index = inspectedIndex()
-    //     } else return
-    //   }
+    setTimeout(() => {
+      let index = inspectedIndex()
+      if (index === -1) {
+        const node = structure.inspectedNode()
+        if (!node) return
+        // Un-collapse parents if needed
+        const set = collapsed()
+        let parent = node.parent
+        let wasCollapsed = false
+        while (parent) {
+          wasCollapsed ||= set.delete(parent)
+          parent = parent.parent
+        }
+        if (wasCollapsed) {
+          setCollapsed(set)
+          index = inspectedIndex()
+        } else return
+      }
 
-    //   const { start, end } = virtual()
-    //   const rowHeight = getRowHeight()
-    //   let top: number
-    //   if (index <= start) top = (index - 1) * rowHeight
-    //   else if (index >= end - 2) top = (index + 2) * rowHeight - containerScroll().height
-    //   else return
+      const { start, end } = virtual()
+      const rowHeight = getRowHeight()
+      let top: number
+      if (index <= start) top = (index - 1) * rowHeight
+      else if (index >= end - 2) top = (index + 2) * rowHeight - containerScroll().height
+      else return
 
-    //   container.scrollTop = top + getContainerTopMargin()
-    // })
+      container.scrollTop = top + getContainerTopMargin()
+    })
   })
 
   let container: HTMLElement

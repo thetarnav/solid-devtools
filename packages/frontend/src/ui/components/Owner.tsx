@@ -29,8 +29,8 @@ export const NodeTypeIcon: Component<{ type: NodeType; class?: string }> = props
 }
 
 export const OwnerName: Component<{
-  name: string | undefined
-  type: NodeType
+  name: string | undefined | null
+  type: NodeType | undefined | null
   isTitle?: boolean
   isFrozen?: boolean
 }> = props => {
@@ -40,7 +40,7 @@ export const OwnerName: Component<{
       classList={{ [styles.title]: props.isTitle }}
       data-frozen={props.isFrozen}
     >
-      <NodeTypeIcon type={props.type} class={styles.typeIcon} />
+      {props.type && <NodeTypeIcon type={props.type} class={styles.typeIcon} />}
       {() => {
         switch (props.type) {
           case NodeType.Root:

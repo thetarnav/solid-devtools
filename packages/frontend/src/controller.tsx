@@ -100,11 +100,12 @@ const [Provider, useControllerCtx] = createContextProvider(
       })
     }
 
+    const inspector = createInspector()
+
     const structure = createStructure({
       clientHoveredNodeId,
+      inspectedNodeId: inspector.inspectedId,
     })
-
-    const inspector = createInspector({ findNode: structure.findNode })
 
     controller.connectDevtools({
       onResetPanel() {

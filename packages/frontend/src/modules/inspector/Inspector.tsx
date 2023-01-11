@@ -1,6 +1,7 @@
 import { useController } from '@/controller'
 import { Badge, Icon, Scrollable } from '@/ui'
-import { NodeType, PropGetterState } from '@solid-devtools/debugger/types'
+import { OwnerName } from '@/ui/components/Owner'
+import { NodeType, NODE_TYPE_NAMES, PropGetterState } from '@solid-devtools/debugger/types'
 import { Entries } from '@solid-primitives/keyed'
 import { Component, createMemo, For, JSX, Show } from 'solid-js'
 import * as styles from './inspector.css'
@@ -14,8 +15,7 @@ export default function Details() {
     <Show when={inspectedId()}>
       <div class={styles.root}>
         <header class={styles.header}>
-          {/* TODO: */}
-          {/* <OwnerName name={inspectedNode()!.name} type={inspectedNode()!.type} isTitle /> */}
+          <OwnerName name={state.name} type={state.type} isTitle />
           <div class={styles.actions.container}>
             {/* <button class={styles.actions.button}>
               <Icon.Eye class={styles.actions.icon} />
@@ -94,8 +94,7 @@ const DetailsContent: Component = () => {
       <Show when={state.value} keyed>
         {valueItem => (
           <div>
-            {/* TODO */}
-            {/* <h2 class={styles.h2}>{NODE_TYPE_NAMES[inspectedNode()!.type]}</h2> */}
+            <h2 class={styles.h2}>{state.type ? NODE_TYPE_NAMES[state.type] : 'Owner'}</h2>
             <ValueNode
               name="value"
               value={valueItem.value}
