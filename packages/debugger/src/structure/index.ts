@@ -1,9 +1,10 @@
 import { throttle } from '@solid-primitives/scheduled'
 import * as registry from '../main/componentRegistry'
 import { DEFAULT_WALKER_MODE, NodeType, TreeWalkerMode } from '../main/constants'
+import { getSdtId } from '../main/id'
 import * as roots from '../main/roots'
 import { Mapped, NodeID, Solid } from '../main/types'
-import { isShallowDisposed, markNodeID, markOwnerType } from '../main/utils'
+import { isShallowDisposed, markOwnerType } from '../main/utils'
 import { ComputationUpdateHandler, walkSolidTree } from './walker'
 
 export type StructureUpdates = {
@@ -61,11 +62,12 @@ export function createStructure(config: {
   let shouldUpdateAllRoots = false
 
   const onComputationUpdate: ComputationUpdateHandler = (rootId, owner, changedStructure) => {
-    if (!config.structureEnabled()) return
-    changedStructure && updateOwner(owner, rootId)
-    queueMicrotask(
-      () => config.structureEnabled() && config.onComputationUpdates(rootId, markNodeID(owner)),
-    )
+    // separate the callback from the computation
+    queueMicrotask(() => {
+      if (!config.structureEnabled()) return
+      changedStructure && updateOwner(owner, rootId)
+      config.onComputationUpdates(rootId, getSdtId(owner))
+    })
   }
 
   function forceFlushRootUpdateQueue(): void {
@@ -73,7 +75,7 @@ export function createStructure(config: {
       const updated: StructureUpdates['updated'] = {}
 
       const [owners, getRootId] = shouldUpdateAllRoots
-        ? [roots.getCurrentRoots(), (owner: Solid.Owner) => markNodeID(owner)]
+        ? [roots.getCurrentRoots(), (owner: Solid.Owner) => getSdtId(owner)]
         : [updateQueue, (owner: Solid.Owner) => ownerRoots.get(owner)!]
       shouldUpdateAllRoots = false
 

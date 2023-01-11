@@ -9,8 +9,7 @@ import {
   runWithOwner,
 } from 'solid-js'
 import { DEV as _STORE_DEV } from 'solid-js/store'
-import { $SDT_ID, NodeType } from './constants'
-import { getNewSdtId } from './id'
+import { NodeType } from './constants'
 import { Core, NodeID, Solid } from './types'
 
 const STORE_DEV = _STORE_DEV!
@@ -104,25 +103,6 @@ export function markOwnerType(o: Solid.Owner): NodeType {
   return (o.sdtType = getOwnerType(o))
 }
 
-export function markNodeID(o: { [$SDT_ID]?: NodeID }): NodeID {
-  if (o[$SDT_ID] !== undefined) return o[$SDT_ID]
-  return (o[$SDT_ID] = getNewSdtId())
-}
-
-export class NodeIDMap<T extends { [$SDT_ID]?: NodeID }> {
-  private obj: Record<NodeID, T> = {}
-
-  get(id: NodeID): T | undefined {
-    return this.obj[id]
-  }
-
-  set(o: T): NodeID {
-    const id = markNodeID(o)
-    if (!(id in this.obj)) this.obj[id] = o
-    return id
-  }
-}
-
 /**
  * Checks if the passed owner is disposed.
  * The check is performed shallowly — it doesn't traverse the parent chain.
@@ -137,8 +117,13 @@ export function isShallowDisposed(o: Readonly<Solid.Owner>): boolean {
  * Checks if the passed owner is disposed.
  * The check is performed recursively — it traverses the parent chain.
  */
-export function isDisposed(o: Readonly<Solid.Owner>): boolean {
-  return isShallowDisposed(o) || !!(o.owner && isDisposed(o.owner))
+export function isDisposed(o: Readonly<Solid.Owner> | null): boolean {
+  while (o) {
+    if (isSolidRoot(o)) return !!o.isDisposed
+    if (o.owner && (!o.owner.owned || !o.owner.owned.includes(o))) return true
+    o = o.owner
+  }
+  return false
 }
 
 export function getComponentRefreshNode(owner: Readonly<Solid.Component>): Solid.Memo | null {
@@ -244,6 +229,14 @@ export function onParentCleanup(
   return () => {
     /* noop */
   }
+}
+
+/**
+ * Listen to when the owner is disposed. (not on cleanup)
+ */
+export function onOwnerDispose(owner: Solid.Owner, fn: VoidFunction): void {
+  if (isSolidRoot(owner)) onOwnerCleanup(owner, fn)
+  if (owner.owner) onOwnerCleanup(owner.owner, fn)
 }
 
 // TODO: move onDispose to solid-primitives

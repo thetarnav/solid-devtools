@@ -1,9 +1,10 @@
-import { warn, whileArray } from '@solid-devtools/shared/utils'
+import { warn } from '@solid-devtools/shared/utils'
 import { createRoot } from 'solid-js'
 import { clearComponentRegistry } from './componentRegistry'
 import { NodeType } from './constants'
+import { getSdtId } from './id'
 import { Core, NodeID, Solid } from './types'
-import { getOwner, isSolidRoot, markNodeID, onOwnerCleanup } from './utils'
+import { getOwner, isSolidRoot, onOwnerCleanup } from './utils'
 
 // ROOTS
 // map of all top-roots
@@ -22,13 +23,13 @@ export function setOnRootRemoved(fn: typeof OnRootRemoved) {
 }
 
 export function createTopRoot(owner: Solid.Root): void {
-  const rootId = markNodeID(owner)
+  const rootId = getSdtId(owner)
   RootMap.set(rootId, owner)
   OnOwnerNeedsUpdate?.(owner, rootId)
 }
 
 function cleanupRoot(root: Solid.Root): void {
-  const rootId = markNodeID(root)
+  const rootId = getSdtId(root)
   root.isDisposed = true
   changeRootAttachment(root, null)
 
@@ -46,7 +47,7 @@ function changeRootAttachment(root: Solid.Root, newParent: Solid.Owner | null): 
   if (root.sdtAttached) {
     root.sdtAttached.sdtSubRoots!.splice(root.sdtAttached.sdtSubRoots!.indexOf(root), 1)
     topRoot = getTopRoot(root.sdtAttached)
-    if (topRoot) OnOwnerNeedsUpdate?.(root.sdtAttached, markNodeID(topRoot))
+    if (topRoot) OnOwnerNeedsUpdate?.(root.sdtAttached, getSdtId(topRoot))
   }
 
   if (newParent) {
@@ -55,7 +56,7 @@ function changeRootAttachment(root: Solid.Root, newParent: Solid.Owner | null): 
     else newParent.sdtSubRoots = [root]
 
     if (topRoot === undefined) topRoot = getTopRoot(newParent)
-    if (topRoot) OnOwnerNeedsUpdate?.(newParent, markNodeID(topRoot))
+    if (topRoot) OnOwnerNeedsUpdate?.(newParent, getSdtId(topRoot))
   } else {
     delete root.sdtAttached
   }
@@ -85,7 +86,7 @@ export function attachDebugger(_owner: Core.Owner = getOwner()!): void {
       // INTERNAL | disposed
       if (owner.isInternal || owner.isDisposed) return
       // already attached
-      if (RootMap.has(markNodeID(owner))) {
+      if (RootMap.has(getSdtId(owner))) {
         isFirstTopLevel = false
         break
       }
@@ -191,19 +192,6 @@ export function getTopRoot(owner: Solid.Owner): Solid.Root | null {
     owner = owner.owner!
   } while (owner)
   return root
-}
-
-/**
- * Looks though the children and subroots of the given root to find owner of given {@link id}.
- */
-export const findOwnerById = (rootId: NodeID, id: NodeID): Solid.Owner | undefined => {
-  const root = RootMap.get(rootId)
-  if (!root) return
-  return whileArray([root], (owner: Solid.Owner, toCheck) => {
-    if (markNodeID(owner) === id) return owner
-    if (owner.owned) toCheck.push.apply(toCheck, owner.owned)
-    if (owner.sdtSubRoots) toCheck.push.apply(toCheck, owner.sdtSubRoots)
-  })
 }
 
 /**

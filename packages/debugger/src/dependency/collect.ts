@@ -1,6 +1,7 @@
+import { getSdtId } from '../main/id'
 import { NodeID, Solid } from '../main/types'
 import { observeComputationUpdate, observeValueUpdate } from '../main/update'
-import { getNodeName, getNodeType, isSolidOwner, markNodeID } from '../main/utils'
+import { getNodeName, getNodeType, isSolidOwner } from '../main/utils'
 import { ComputationNodeType, NodeType } from '../types'
 
 export namespace DGraph {
@@ -41,7 +42,7 @@ let DepthMap: Record<NodeID, DGraph.Depth>
 let OnNodeUpdate: (node: Solid.Computation | Solid.Memo | Solid.Signal) => void
 
 function addNodeToGraph(node: Solid.Signal | Solid.Memo | Solid.Computation) {
-  const id = markNodeID(node)
+  const id = getSdtId(node)
   if (Graph[id]) return Graph[id]!
 
   // observe each mapped node, to update the graph when it changes
@@ -54,11 +55,9 @@ function addNodeToGraph(node: Solid.Signal | Solid.Memo | Solid.Computation) {
     name: getNodeName(node),
     type: getNodeType(node) as Exclude<ComputationNodeType, NodeType.Memo>,
     depth: lookupDepth(node),
-    sources: (node as Solid.Memo).sources
-      ? (node as Solid.Memo).sources!.map(markNodeID)
-      : undefined,
+    sources: (node as Solid.Memo).sources ? (node as Solid.Memo).sources!.map(getSdtId) : undefined,
     observers: (node as Solid.Memo).observers
-      ? (node as Solid.Memo).observers!.map(markNodeID)
+      ? (node as Solid.Memo).observers!.map(getSdtId)
       : undefined,
   } as DGraph.Node)
 }
@@ -78,7 +77,7 @@ function visitObserver(node: Solid.Computation | Solid.Memo) {
 }
 
 function lookupDepth(node: Solid.Owner | Solid.Signal, i = 0): DGraph.Depth {
-  const id = markNodeID(node)
+  const id = getSdtId(node)
 
   let owner: Solid.Owner | undefined | null
   // signal

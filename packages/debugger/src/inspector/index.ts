@@ -3,9 +3,9 @@ import { Listen } from '@solid-primitives/event-bus'
 import { scheduleIdle, throttle } from '@solid-primitives/scheduled'
 import { Accessor, createEffect, untrack } from 'solid-js'
 import { DebuggerEventHub, InspectedNode } from '../main'
+import { NodeIDMap } from '../main/id'
 import { Core, Mapped, NodeID, Solid, ValueItemID } from '../main/types'
 import { makeSolidUpdateListener } from '../main/update'
-import { NodeIDMap } from '../main/utils'
 import {
   clearOwnerObservers,
   collectOwnerDetails,

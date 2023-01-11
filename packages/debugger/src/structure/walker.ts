@@ -1,10 +1,10 @@
 import type { ComponentRegisterHandler } from '../main/componentRegistry'
 import { NodeType, TreeWalkerMode } from '../main/constants'
+import { getOwnerId, getSdtId } from '../main/id'
 import { Mapped, NodeID, Solid } from '../main/types'
 import { observeComputationUpdate } from '../main/update'
 import {
   getComponentRefreshNode,
-  markNodeID,
   markOwnerName,
   markOwnerType,
   resolveElements,
@@ -114,7 +114,7 @@ function mapElements(els: Element[], parentChildren: Mapped.Owner[] | undefined)
     }
 
     const mappedEl: Mapped.Owner = {
-      id: markNodeID(el),
+      id: getSdtId(el),
       type: NodeType.Element,
       name: el.localName,
       children: [],
@@ -133,7 +133,7 @@ function mapOwner(
   parent: Mapped.Owner | null,
   overwriteType?: NodeType,
 ): Mapped.Owner | undefined {
-  const id = markNodeID(owner)
+  const id = getOwnerId(owner, true)
   const type = overwriteType ?? markOwnerType(owner)
   const name =
     type === NodeType.Component ||
@@ -162,7 +162,7 @@ function mapOwner(
       // custom mapping for context nodes
       // eslint-disable-next-line @typescript-eslint/no-shadow
       const mapped = mapOwner(contextNode.owned![0]!, parent, NodeType.Context)
-      if (mapped) mapped.id = markNodeID(contextNode)
+      if (mapped) mapped.id = getOwnerId(contextNode, true)
       return mapped
     }
 

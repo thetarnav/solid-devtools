@@ -1,6 +1,7 @@
 import { FalsyValue } from '@solid-primitives/utils'
 import { unwrap } from 'solid-js/store'
-import { isStoreNode, NodeIDMap } from '../main/utils'
+import { NodeIDMap } from '../main/id'
+import { isStoreNode } from '../main/utils'
 import {
   Core,
   EncodedValue,

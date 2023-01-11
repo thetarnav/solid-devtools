@@ -10,9 +10,10 @@ import { createDependencyGraph } from '../dependency'
 import { createInspector, InspectorUpdate } from '../inspector'
 import { createLocator } from '../locator'
 import { createStructure, StructureUpdates } from '../structure'
-import { createInternalRoot, findOwnerById, getTopRoot } from './roots'
+import { getOwnerById, getSdtId } from './id'
+import { createInternalRoot, getTopRoot } from './roots'
 import { ComputationUpdate, Mapped, NodeID, Solid } from './types'
-import { createBatchedUpdateEmitter, markNodeID } from './utils'
+import { createBatchedUpdateEmitter } from './utils'
 
 export type BatchComputationUpdatesHandler = (payload: ComputationUpdate[]) => void
 
@@ -31,8 +32,6 @@ export type InspectedNode = {
   readonly owner: Solid.Owner | null
   readonly signal: Solid.Signal | null
 } | null
-
-export type SetInspectedNodeData = null | { rootId: NodeID; nodeId: NodeID }
 
 const plugin = createInternalRoot(() => {
   const eventHub: DebuggerEventHub = createEventHub(bus => ({
@@ -63,14 +62,17 @@ const plugin = createInternalRoot(() => {
   let inspectedNode: InspectedNode = null
   const [listenToInspectedNodeChange, emitNodeChange] = createSimpleEmitter<InspectedNode>()
 
-  function setInspectedNode(data: SetInspectedNodeData): void {
-    if (!data) inspectedNode = null
-    else {
-      const owner = findOwnerById(data.rootId, data.nodeId)
-      if (!owner) inspectedNode = null
-      else inspectedNode = { rootId: data.rootId, owner, signal: null }
-    }
-    emitNodeChange(inspectedNode)
+  const getInspecredNodeById = (id: null | NodeID): InspectedNode => {
+    if (!id) return null
+    const owner = getOwnerById(id)
+    if (!owner) return null
+    const root = getTopRoot(owner)
+    if (!root) return null
+    return { rootId: getSdtId(root), owner, signal: null }
+  }
+
+  function setInspectedNode(id: null | NodeID): void {
+    emitNodeChange((inspectedNode = getInspecredNodeById(id)))
   }
 
   /** Check if the inspected node doesn't need to change (treeview mode changed or sth) */
@@ -81,7 +83,7 @@ const plugin = createInternalRoot(() => {
 
     const root = closest && getTopRoot(closest)
     inspectedNode =
-      !closest || !root ? null : { rootId: markNodeID(root), owner: closest, signal: null }
+      !closest || !root ? null : { rootId: getSdtId(root), owner: closest, signal: null }
     emitNodeChange(inspectedNode)
   }
 

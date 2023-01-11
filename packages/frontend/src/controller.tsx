@@ -1,8 +1,4 @@
-import type {
-  InspectorUpdate,
-  SetInspectedNodeData,
-  ToggleInspectedValueData,
-} from '@solid-devtools/debugger'
+import type { InspectorUpdate, ToggleInspectedValueData } from '@solid-devtools/debugger'
 import {
   ComputationUpdate,
   HighlightElementPayload,
@@ -26,7 +22,7 @@ type ListenersFromPayloads<T extends Record<string, any>> = {
 }
 
 interface ClientListenerPayloads {
-  InspectNode: SetInspectedNodeData
+  InspectNode: NodeID | null
   InspectValue: ToggleInspectedValueData
   DevtoolsLocatorStateChange: boolean
   HighlightElementChange: HighlightElementPayload
@@ -148,20 +144,11 @@ const [Provider, useControllerCtx] = createContextProvider(
     const client = controller.clientListeners
 
     // send devtools locator state
-    createEffect(
-      defer(devtoolsLocatorEnabled, enabled => client.onDevtoolsLocatorStateChange(enabled)),
-    )
+    createEffect(defer(devtoolsLocatorEnabled, client.onDevtoolsLocatorStateChange))
 
     // set inspected node
-    // TODO: don't use structure here
-    createEffect(
-      defer(inspector.inspectedId, id => {
-        if (!id) return client.onInspectNode(null)
-        const node = structure.findNode(id)
-        if (!node) return client.onInspectNode(null)
-        client.onInspectNode({ nodeId: id, rootId: structure.getRootNode(node).id })
-      }),
-    )
+    createEffect(defer(inspector.inspectedId, client.onInspectNode))
+
     // toggle inspected value/prop/signal
     inspector.setOnInspectValue(client.onInspectValue)
 

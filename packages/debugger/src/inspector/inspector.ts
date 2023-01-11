@@ -1,6 +1,7 @@
 import { isRecord } from '@solid-devtools/shared/utils'
 import { $PROXY, getListener, onCleanup } from 'solid-js'
 import { NodeType, ValueItemType } from '../main/constants'
+import { getSdtId, NodeIDMap } from '../main/id'
 import type { Core, Mapped, NodeID, Solid, ValueItemID } from '../main/types'
 import { observeValueUpdate, removeValueUpdateObserver } from '../main/update'
 import {
@@ -13,10 +14,8 @@ import {
   isSolidComputation,
   isSolidMemo,
   isSolidStore,
-  markNodeID,
   markOwnerName,
   markOwnerType,
-  NodeIDMap,
 } from '../main/utils'
 import { encodeValue } from './serialize'
 import { InspectorUpdateMap, PropGetterState } from './types'
@@ -175,7 +174,7 @@ function mapSignalNode(
   handler: (nodeId: NodeID, value: unknown) => void,
 ): Mapped.Signal {
   const { value } = node
-  const id = markNodeID(node)
+  const id = getSdtId(node)
   let name: string
   ValueMap.add(`${ValueItemType.Signal}:${id}`, () => node.value)
 
@@ -263,7 +262,7 @@ export function collectOwnerDetails(
   OnPropStateChange = config.onPropStateChange
   PropsMap = config.observedPropsMap
 
-  const id = markNodeID(owner)
+  const id = getSdtId(owner)
   const type = markOwnerType(owner)
   const name = markOwnerName(owner)
   let { sourceMap, owned } = owner
