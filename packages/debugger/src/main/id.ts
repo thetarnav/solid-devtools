@@ -36,9 +36,9 @@ const OwnerIdMap = new Map<NodeID, Readonly<Solid.Owner>>()
  * @param o owner
  * @param notDisposed if true, it won't check if the owner is disposed
  */
-export function getOwnerId(o: Readonly<Solid.Owner>, notDisposed?: true): NodeID {
+export function getOwnerId(o: Readonly<Solid.Owner>): NodeID {
   const id = getSdtId(o)
-  if (notDisposed === undefined && isDisposed(o)) {
+  if (isDisposed(o)) {
     warn('getOwnerId called on disposed owner', o)
     return id
   }

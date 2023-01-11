@@ -133,7 +133,7 @@ function mapOwner(
   parent: Mapped.Owner | null,
   overwriteType?: NodeType,
 ): Mapped.Owner | undefined {
-  const id = getOwnerId(owner, true)
+  const id = getOwnerId(owner)
   const type = overwriteType ?? markOwnerType(owner)
   const name =
     type === NodeType.Component ||
@@ -162,7 +162,7 @@ function mapOwner(
       // custom mapping for context nodes
       // eslint-disable-next-line @typescript-eslint/no-shadow
       const mapped = mapOwner(contextNode.owned![0]!, parent, NodeType.Context)
-      if (mapped) mapped.id = getOwnerId(contextNode, true)
+      if (mapped) mapped.id = getOwnerId(contextNode)
       return mapped
     }
 

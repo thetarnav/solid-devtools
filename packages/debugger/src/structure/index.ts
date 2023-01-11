@@ -4,7 +4,7 @@ import { DEFAULT_WALKER_MODE, NodeType, TreeWalkerMode } from '../main/constants
 import { getSdtId } from '../main/id'
 import * as roots from '../main/roots'
 import { Mapped, NodeID, Solid } from '../main/types'
-import { isShallowDisposed, markOwnerType } from '../main/utils'
+import { isDisposed, markOwnerType } from '../main/utils'
 import { ComputationUpdateHandler, walkSolidTree } from './walker'
 
 export type StructureUpdates = {
@@ -31,7 +31,7 @@ function getClosestIncludedOwner(owner: Solid.Owner, mode: TreeWalkerMode): Soli
   let closest: Solid.Owner | null = null
   let current: Solid.Owner | null = owner
   do {
-    if (isShallowDisposed(current)) closest = current.owner
+    if (isDisposed(current)) closest = current.owner
     current = current.owner
   } while (current)
   owner = closest ?? owner

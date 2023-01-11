@@ -105,25 +105,11 @@ export function markOwnerType(o: Solid.Owner): NodeType {
 
 /**
  * Checks if the passed owner is disposed.
- * The check is performed shallowly — it doesn't traverse the parent chain.
  */
-export function isShallowDisposed(o: Readonly<Solid.Owner>): boolean {
+export function isDisposed(o: Readonly<Solid.Owner>): boolean {
   return !!(isSolidRoot(o)
     ? o.isDisposed
     : o.owner && (!o.owner.owned || !o.owner.owned.includes(o)))
-}
-
-/**
- * Checks if the passed owner is disposed.
- * The check is performed recursively — it traverses the parent chain.
- */
-export function isDisposed(o: Readonly<Solid.Owner> | null): boolean {
-  while (o) {
-    if (isSolidRoot(o)) return !!o.isDisposed
-    if (o.owner && (!o.owner.owned || !o.owner.owned.includes(o))) return true
-    o = o.owner
-  }
-  return false
 }
 
 export function getComponentRefreshNode(owner: Readonly<Solid.Component>): Solid.Memo | null {
