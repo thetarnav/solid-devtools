@@ -8,7 +8,8 @@ import {
   unwrap,
 } from 'solid-js/store'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { getOwner, isSolidStore, markNodeID } from '../../main/utils'
+import { getSdtId } from '../../main/id'
+import { getOwner, isSolidStore } from '../../main/utils'
 import { Core, Solid } from '../../types'
 import { observeStoreNode, OnNodeUpdate, setOnStoreNodeUpdate, StoreNodeProperty } from '../store'
 
@@ -16,13 +17,13 @@ const getOwnerStore = () =>
   (Object.values(getOwner()!.sourceMap!).find(s => isSolidStore(s))! as Solid.Store).value
 
 const getNodeProp = (node: Core.Store.StoreNode, prop: string): StoreNodeProperty =>
-  `${markNodeID(node)}:${prop}`
+  `${getSdtId(unwrap(node))}:${prop}`
 
 let mockLAST_ID = 0
 beforeEach(() => {
   mockLAST_ID = 0
 })
-vi.mock('../../main/id', () => ({ getNewSdtId: () => mockLAST_ID++ + '' }))
+vi.mock('../../main/getId', () => ({ getNewSdtId: () => '#' + mockLAST_ID++ }))
 
 type UpdateParams = Parameters<OnNodeUpdate>
 

@@ -15,7 +15,7 @@ let mockLAST_ID = 0
 beforeEach(() => {
   mockLAST_ID = 0
 })
-vi.mock('../../main/id', () => ({ getNewSdtId: () => mockLAST_ID++ + '' }))
+vi.mock('../../main/getId', () => ({ getNewSdtId: () => '#' + mockLAST_ID++ }))
 
 describe('collectOwnerDetails', () => {
   it('collects focused owner details', () => {
@@ -52,30 +52,30 @@ describe('collectOwnerDetails', () => {
       })
 
       expect(details).toEqual({
-        id: '0',
+        id: '#0',
         name: 'focused',
         type: NodeType.Memo,
         value: [[ValueType.String, 'value']],
         signals: [
           {
             type: NodeType.Signal,
-            id: '1',
+            id: '#1',
             name: 'element',
-            value: [[ValueType.Element, '2:div']],
+            value: [[ValueType.Element, '#2:div']],
           },
           {
             type: NodeType.Memo,
-            id: '3',
+            id: '#3',
             name: 'memo',
             value: [[ValueType.Number, 0]],
           },
         ],
       } satisfies Mapped.OwnerDetails)
 
-      expect(valueMap.get('signal:1')).toBeTruthy()
-      expect(valueMap.get('signal:3')).toBeTruthy()
+      expect(valueMap.get('signal:#1')).toBeTruthy()
+      expect(valueMap.get('signal:#3')).toBeTruthy()
 
-      expect(nodeIdMap.get('2')).toBe(div)
+      expect(nodeIdMap.get('#2')).toBe(div)
 
       dispose()
     })
@@ -107,11 +107,11 @@ describe('collectOwnerDetails', () => {
       dispose()
 
       expect(details).toEqual({
-        id: '0',
+        id: '#0',
         name: 'TestComponent',
         type: NodeType.Component,
         signals: [],
-        value: [[ValueType.Element, '1:div']],
+        value: [[ValueType.Element, '#1:div']],
         props: {
           proxy: false,
           record: {
@@ -131,7 +131,7 @@ describe('collectOwnerDetails', () => {
         },
       } satisfies Mapped.OwnerDetails)
 
-      expect(nodeIdMap.get('1')).toBeInstanceOf(HTMLDivElement)
+      expect(nodeIdMap.get('#1')).toBeInstanceOf(HTMLDivElement)
     })
   })
 
@@ -154,11 +154,11 @@ describe('collectOwnerDetails', () => {
       })
 
       expect(details).toEqual({
-        id: '0',
+        id: '#0',
         name: 'Button',
         type: NodeType.Component,
         signals: [],
-        value: [[ValueType.Element, '1:button']],
+        value: [[ValueType.Element, '#1:button']],
         props: {
           proxy: true,
           record: {
@@ -174,7 +174,7 @@ describe('collectOwnerDetails', () => {
         },
       } satisfies Mapped.OwnerDetails)
 
-      expect(nodeIdMap.get('1')).toBeInstanceOf(HTMLButtonElement)
+      expect(nodeIdMap.get('#1')).toBeInstanceOf(HTMLButtonElement)
 
       dispose()
     })
@@ -231,14 +231,14 @@ describe('collectOwnerDetails', () => {
 
       setCount(1)
       expect(onValueUpdate).toBeCalledTimes(1)
-      expect(onValueUpdate).toHaveBeenLastCalledWith('signal:1')
+      expect(onValueUpdate).toHaveBeenLastCalledWith('signal:#1')
 
       setCount(1)
       expect(onValueUpdate).toBeCalledTimes(1)
 
       setCount2(1)
       expect(onValueUpdate).toBeCalledTimes(2)
-      expect(onValueUpdate).toHaveBeenLastCalledWith('signal:2')
+      expect(onValueUpdate).toHaveBeenLastCalledWith('signal:#2')
 
       dispose()
     })

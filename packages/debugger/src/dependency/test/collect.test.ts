@@ -1,15 +1,16 @@
 import { batch, createComputed, createMemo, createRoot, createSignal } from 'solid-js'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { $SDT_ID, NodeType } from '../../main/constants'
+import { NodeType } from '../../main/constants'
+import { $setSdtId, getSdtId } from '../../main/id'
 import { Solid } from '../../main/types'
-import { getOwner, markNodeID } from '../../main/utils'
+import { getOwner } from '../../main/utils'
 import { collectDependencyGraph, DGraph } from '../collect'
 
 let mockLAST_ID = 0
 beforeEach(() => {
   mockLAST_ID = 0
 })
-vi.mock('../../main/id', () => ({ getNewSdtId: () => mockLAST_ID++ + '' }))
+vi.mock('../../main/getId', () => ({ getNewSdtId: () => '#' + mockLAST_ID++ }))
 
 describe('collectDependencyGraph', () => {
   it('should collect dependency graph', () => {
@@ -19,7 +20,7 @@ describe('collectDependencyGraph', () => {
     const [e] = createSignal(0)
 
     createRoot(() => {
-      getOwner()![$SDT_ID] = 'ff'
+      $setSdtId(getOwner()!, '#ff')
 
       const [a] = createSignal(0)
       const [b] = createSignal(0)
@@ -47,61 +48,55 @@ describe('collectDependencyGraph', () => {
     let result = collectDependencyGraph(computedOwner, { onNodeUpdate: () => {} })
 
     expect(result).toEqual({
-      0: {
+      '#0': {
         name: expect.any(String),
         type: NodeType.Computation,
-        depth: 'ff:2',
-        sources: ['2', '3', '4', '5'],
-        observers: undefined,
+        depth: '#ff:2',
+        sources: ['#2', '#3', '#4', '#5'],
       },
-      2: {
+      '#2': {
         name: expect.any(String),
         type: NodeType.Memo,
-        depth: 'ff:1',
-        sources: ['6', '7'],
-        observers: ['0'],
+        depth: '#ff:1',
+        sources: ['#6', '#7'],
+        observers: ['#0'],
       },
-      3: {
+      '#3': {
         name: expect.any(String),
         type: NodeType.Memo,
-        depth: 'ff:2',
-        sources: ['8', '4'],
-        observers: ['0'],
+        depth: '#ff:2',
+        sources: ['#8', '#4'],
+        observers: ['#0'],
       },
-      4: {
+      '#4': {
         name: expect.any(String),
         type: NodeType.Signal,
-        depth: 'ff:1',
-        sources: undefined,
-        observers: ['3', '0'],
+        depth: '#ff:1',
+        observers: ['#3', '#0'],
       },
-      5: {
+      '#5': {
         name: expect.any(String),
         type: NodeType.Signal,
-        depth: 'ff:2',
-        sources: undefined,
-        observers: ['0'],
+        depth: '#ff:2',
+        observers: ['#0'],
       },
-      6: {
+      '#6': {
         name: expect.any(String),
         type: NodeType.Signal,
-        depth: 'ff:1',
-        sources: undefined,
-        observers: ['2'],
+        depth: '#ff:1',
+        observers: ['#2'],
       },
-      7: {
+      '#7': {
         name: expect.any(String),
         type: NodeType.Signal,
         depth: undefined,
-        sources: undefined,
-        observers: ['2'],
+        observers: ['#2'],
       },
-      8: {
+      '#8': {
         name: expect.any(String),
         type: NodeType.Signal,
-        depth: 'ff:1',
-        sources: undefined,
-        observers: ['3'],
+        depth: '#ff:1',
+        observers: ['#3'],
       },
     } satisfies DGraph.Graph)
 
@@ -110,32 +105,30 @@ describe('collectDependencyGraph', () => {
     result = collectDependencyGraph(memoAOwner, { onNodeUpdate: () => {} })
 
     expect(result).toEqual({
-      0: {
+      '#0': {
         name: expect.any(String),
         type: NodeType.Computation,
-        depth: 'ff:2',
-        sources: ['2', '3', '4', '5'],
+        depth: '#ff:2',
+        sources: ['#2', '#3', '#4', '#5'],
       },
-      2: {
+      '#2': {
         name: expect.any(String),
         type: NodeType.Memo,
-        depth: 'ff:1',
-        sources: ['6', '7'],
-        observers: ['0'],
+        depth: '#ff:1',
+        sources: ['#6', '#7'],
+        observers: ['#0'],
       },
-      6: {
+      '#6': {
         name: expect.any(String),
         type: NodeType.Signal,
-        depth: 'ff:1',
-        sources: undefined,
-        observers: ['2'],
+        depth: '#ff:1',
+        observers: ['#2'],
       },
-      7: {
+      '#7': {
         name: expect.any(String),
         type: NodeType.Signal,
         depth: undefined,
-        sources: undefined,
-        observers: ['2'],
+        observers: ['#2'],
       },
     } satisfies DGraph.Graph)
 
@@ -148,7 +141,7 @@ describe('collectDependencyGraph', () => {
     const cb = vi.fn(a => captured.push(a))
 
     createRoot(() => {
-      getOwner()![$SDT_ID] = 'ff'
+      $setSdtId(getOwner()!, '#ff')
       const [a, setA] = createSignal(0)
       const [b, setB] = createSignal(0)
       const [c, setC] = createSignal(0)
@@ -170,40 +163,36 @@ describe('collectDependencyGraph', () => {
       const result = collectDependencyGraph(owner, { onNodeUpdate: cb })
 
       expect(result).toEqual({
-        0: {
+        '#0': {
           name: expect.any(String),
           type: NodeType.Computation,
-          depth: 'ff:1',
-          sources: ['1', '2'],
-          observers: undefined,
+          depth: '#ff:1',
+          sources: ['#1', '#2'],
         },
-        1: {
+        '#1': {
           name: expect.any(String),
           type: NodeType.Memo,
-          depth: 'ff:1',
-          sources: ['3', '4'],
-          observers: ['0'],
+          depth: '#ff:1',
+          sources: ['#3', '#4'],
+          observers: ['#0'],
         },
-        2: {
+        '#2': {
           name: expect.any(String),
           type: NodeType.Signal,
-          depth: 'ff:1',
-          sources: undefined,
-          observers: ['5', '0'],
+          depth: '#ff:1',
+          observers: ['#5', '#0'],
         },
-        3: {
+        '#3': {
           name: expect.any(String),
           type: NodeType.Signal,
-          depth: 'ff:1',
-          sources: undefined,
-          observers: ['1'],
+          depth: '#ff:1',
+          observers: ['#1'],
         },
-        4: {
+        '#4': {
           name: expect.any(String),
           type: NodeType.Signal,
-          depth: 'ff:1',
-          sources: undefined,
-          observers: ['1'],
+          depth: '#ff:1',
+          observers: ['#1'],
         },
       } satisfies DGraph.Graph)
 
@@ -212,24 +201,24 @@ describe('collectDependencyGraph', () => {
       setA(1)
 
       expect(captured).toHaveLength(3)
-      expect(markNodeID(captured[0])).toEqual('3')
-      expect(markNodeID(captured[1])).toEqual('1')
-      expect(markNodeID(captured[2])).toEqual('0')
+      expect(getSdtId(captured[0])).toEqual('#3')
+      expect(getSdtId(captured[1])).toEqual('#1')
+      expect(getSdtId(captured[2])).toEqual('#0')
 
       captured.length = 0
       setB(1)
 
       expect(captured).toHaveLength(3)
-      expect(markNodeID(captured[0])).toEqual('4')
-      expect(markNodeID(captured[1])).toEqual('1')
-      expect(markNodeID(captured[2])).toEqual('0')
+      expect(getSdtId(captured[0])).toEqual('#4')
+      expect(getSdtId(captured[1])).toEqual('#1')
+      expect(getSdtId(captured[2])).toEqual('#0')
 
       captured.length = 0
       setC(1)
 
       expect(captured).toHaveLength(2)
-      expect(markNodeID(captured[0])).toEqual('2')
-      expect(markNodeID(captured[1])).toEqual('0')
+      expect(getSdtId(captured[0])).toEqual('#2')
+      expect(getSdtId(captured[1])).toEqual('#0')
 
       captured.length = 0
       setD(1)
@@ -243,11 +232,11 @@ describe('collectDependencyGraph', () => {
       })
 
       expect(captured).toHaveLength(5)
-      expect(markNodeID(captured[0])).toEqual('3')
-      expect(markNodeID(captured[1])).toEqual('4')
-      expect(markNodeID(captured[2])).toEqual('2')
-      expect(markNodeID(captured[3])).toEqual('1')
-      expect(markNodeID(captured[4])).toEqual('0')
+      expect(getSdtId(captured[0])).toEqual('#3')
+      expect(getSdtId(captured[1])).toEqual('#4')
+      expect(getSdtId(captured[2])).toEqual('#2')
+      expect(getSdtId(captured[3])).toEqual('#1')
+      expect(getSdtId(captured[4])).toEqual('#0')
     })
   })
 })

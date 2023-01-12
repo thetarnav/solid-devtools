@@ -17,7 +17,7 @@ let mockLAST_ID = 0
 beforeEach(() => {
   mockLAST_ID = 0
 })
-vi.mock('../../main/id', () => ({ getNewSdtId: () => mockLAST_ID++ + '' }))
+vi.mock('../../main/getId', () => ({ getNewSdtId: () => '#' + mockLAST_ID++ }))
 
 const mockTree = () => {
   const [s] = createSignal('foo', { name: 's0' })
@@ -97,28 +97,28 @@ describe('TreeWalkerMode.Owners', () => {
 
         const rootOwner = getOwner()! as Solid.Root
         const tree = walkSolidTree(rootOwner, {
-          rootId: (rootOwner[$SDT_ID] = '0'),
+          rootId: $setSdtId(rootOwner, '#0'),
           onComputationUpdate: () => {},
           registerComponent: () => {},
           mode: TreeWalkerMode.Owners,
         })
 
         expect(tree).toEqual({
-          id: '0',
+          id: '#0',
           type: NodeType.Root,
           children: [
             {
-              id: '3',
+              id: '#3',
               name: 'WRAPPER',
               type: NodeType.Computation,
               children: [
                 {
-                  id: '4',
+                  id: '#4',
                   name: 'focused',
                   type: NodeType.Memo,
                   children: [
-                    { id: '5', name: 'memo', type: NodeType.Memo, frozen: true, children: [] },
-                    { id: '6', type: NodeType.Render, children: [] },
+                    { id: '#5', name: 'memo', type: NodeType.Memo, frozen: true, children: [] },
+                    { id: '#6', type: NodeType.Render, children: [] },
                   ],
                 },
               ],
@@ -145,7 +145,7 @@ describe('TreeWalkerMode.Owners', () => {
       const owner = getOwner()! as Solid.Root
       walkSolidTree(owner, {
         onComputationUpdate: (...args) => capturedComputationUpdates.push(args),
-        rootId: (owner[$SDT_ID] = 'ff'),
+        rootId: $setSdtId(owner, '#ff'),
         mode: TreeWalkerMode.Owners,
         registerComponent: () => {},
       })
@@ -155,7 +155,7 @@ describe('TreeWalkerMode.Owners', () => {
       setA(1)
 
       expect(capturedComputationUpdates.length).toBe(1)
-      expect(capturedComputationUpdates[0]).toEqual(['ff', computedOwner, false])
+      expect(capturedComputationUpdates[0]).toEqual(['#ff', computedOwner, false])
 
       dispose()
     })
@@ -183,22 +183,22 @@ describe('TreeWalkerMode.Owners', () => {
 
       const owner = getOwner()! as Solid.Root
 
-      const components: Solid.Component[] = []
+      const components: string[] = []
 
       walkSolidTree(owner, {
         onComputationUpdate: () => {},
-        rootId: (owner[$SDT_ID] = 'ff'),
+        rootId: $setSdtId(owner, '#ff'),
         mode: TreeWalkerMode.Owners,
-        registerComponent: c => components.push(c),
+        registerComponent: c => 'owner' in c && components.push(getNodeName(c.owner)),
       })
 
       expect(components.length).toBe(7)
 
       let testCompsLength = 0
-      let btn!: Solid.Component
+      let btn!: string
       components.forEach(c => {
-        if (getNodeName(c) === 'TestComponent') testCompsLength++
-        else if (getNodeName(c) === 'Button') btn = c
+        if (c === 'TestComponent') testCompsLength++
+        else if (c === 'Button') btn = c
       })
       expect(testCompsLength).toBe(6)
       expect(btn).toBeTruthy()
@@ -251,7 +251,7 @@ describe('TreeWalkerMode.Components', () => {
 
       const tree = walkSolidTree(owner, {
         onComputationUpdate: (...a) => computationUpdates.push(a),
-        rootId: (owner[$SDT_ID] = 'ff'),
+        rootId: $setSdtId(owner, '#ff'),
         mode: TreeWalkerMode.Components,
         registerComponent: () => {},
       })
@@ -303,7 +303,7 @@ describe('TreeWalkerMode.Components', () => {
       expect(computationUpdates.length).toBe(4)
 
       for (let i = 0; i < 4; i++) {
-        expect(computationUpdates[i]).toEqual(['ff', testComponents[i], false])
+        expect(computationUpdates[i]).toEqual(['#ff', testComponents[i], false])
       }
 
       dispose()
@@ -357,7 +357,7 @@ describe('TreeWalkerMode.DOM', () => {
 
       const tree = walkSolidTree(owner, {
         onComputationUpdate: (...a) => computationUpdates.push(a),
-        rootId: (owner[$SDT_ID] = 'ff'),
+        rootId: $setSdtId(owner, '#ff'),
         mode: TreeWalkerMode.DOM,
         registerComponent: () => {},
       })
@@ -448,7 +448,7 @@ describe('TreeWalkerMode.DOM', () => {
       toTrigger.forEach(t => t())
 
       for (let i = 0; i < 3; i++) {
-        expect(computationUpdates[i]).toEqual(['ff', testComponents[i], true])
+        expect(computationUpdates[i]).toEqual(['#ff', testComponents[i], true])
       }
 
       dispose()
