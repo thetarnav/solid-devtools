@@ -147,3 +147,7 @@ export const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && Object.getPrototypeOf(value) === Object.prototype
 
 export const XOR = (a: unknown, b: unknown) => (a || b) && !(a && b)
+
+export type ToDyscriminatedUnion<T extends {}, DK extends PropertyKey = 'type'> = {
+  [K in keyof T]: T[K] & { [k in DK]: K }
+}[keyof T]

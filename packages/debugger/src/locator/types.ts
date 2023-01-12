@@ -1,3 +1,4 @@
+import type { ToDyscriminatedUnion } from '@solid-devtools/shared/utils'
 import type { KbdKey } from '@solid-primitives/keyboard'
 import type { NodeID } from '../main/types'
 import type {
@@ -19,16 +20,10 @@ export type LocatorOptions = {
   key?: false | KbdKey
 }
 
-type HighlightElementPayloads = {
-  elementNode: { componentId: NodeID; elementId: NodeID }
-  componentNode: { componentId: NodeID }
-  element: { elementId: NodeID }
-}
-export type HighlightElementPayload =
-  | {
-      [K in keyof HighlightElementPayloads]: HighlightElementPayloads[K] & { type: K }
-    }[keyof HighlightElementPayloads]
-  | null
+export type HighlightElementPayload = ToDyscriminatedUnion<{
+  node: { id: NodeID }
+  element: { id: NodeID }
+}> | null
 
 export type ClickMiddleware = (
   event: MouseEvent | CustomEvent,

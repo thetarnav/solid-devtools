@@ -22,7 +22,7 @@ let RootId: NodeID
 let OnComputationUpdate: ComputationUpdateHandler
 let RegisterComponent: ComponentRegisterHandler
 
-const ElementsMap = new Map<Mapped.Owner, HTMLElement>()
+const ElementsMap = new Map<Mapped.Owner, { el: HTMLElement; component: Mapped.Owner }>()
 
 const $WALKER = Symbol('tree-walker')
 
@@ -81,10 +81,13 @@ let AddedToParentElements = false
 /**
  * @param els elements to map
  * @param parentChildren parent owner children.
- * Will be checked for existing elements, and if found, `$_mapped_owner_node` will be injected in the place of the element.
+ * Will be checked for existing elements, and if found, `MappedOwnerNode` will be injected in the place of the element.
  * Passing `undefined` will skip this check.
  */
-function mapElements(els: Element[], parentChildren: Mapped.Owner[] | undefined): Mapped.Owner[] {
+function mapElements(
+  els: Iterable<Element>,
+  parentChildren: Mapped.Owner[] | undefined,
+): Mapped.Owner[] {
   const r = [] as Mapped.Owner[]
 
   els: for (const el of els) {
@@ -98,13 +101,18 @@ function mapElements(els: Element[], parentChildren: Mapped.Owner[] | undefined)
       while (elNodes) {
         for (let i = 0; i < elNodes.length; i++) {
           const elNode = elNodes[i]!
-          if (ElementsMap.get(elNode) === el) {
-            const mappedEl = AddedToParentElements
-              ? elNodes.splice(i, 1)[0]!
-              : elNodes.splice(i, 1, MappedOwnerNode)[0]!
-            AddedToParentElements = true
-            r.push(mappedEl)
-            ElementsMap.set(mappedEl, el)
+          const elNodeData = ElementsMap.get(elNode)!
+          if (elNodeData && elNodeData.el === el) {
+            if (AddedToParentElements) {
+              // if the element is already added to the parent, just remove the element
+              elNodes.splice(i, 1)
+            } else {
+              // otherwise, we can just replace it with the component
+              elNodes[i] = MappedOwnerNode
+              AddedToParentElements = true
+            }
+            r.push(elNode)
+            elNodeData.component = MappedOwnerNode
             continue els
           }
           if (elNode.children && elNode.children.length) toCheck.push(elNode.children)
@@ -120,9 +128,9 @@ function mapElements(els: Element[], parentChildren: Mapped.Owner[] | undefined)
       children: [],
     }
     r.push(mappedEl)
-    ElementsMap.set(mappedEl, el)
+    ElementsMap.set(mappedEl, { el, component: MappedOwnerNode })
 
-    if (el.children.length) mappedEl.children = mapElements(Array.from(el.children), parentChildren)
+    if (el.children.length) mappedEl.children = mapElements(el.children, parentChildren)
   }
 
   return r
@@ -167,12 +175,12 @@ function mapOwner(
     }
 
     // Register component to global map
-    RegisterComponent(
-      owner as Solid.Component,
+    RegisterComponent({
+      owner: owner as Solid.Component,
       id,
-      name!,
-      (resolvedElements = resolveElements(owner.value)),
-    )
+      name: name!,
+      elements: (resolvedElements = resolveElements(owner.value)),
+    })
 
     // Refresh
     // omitting refresh memo — map it's children instead
@@ -210,7 +218,7 @@ function mapOwner(
     )
   }
 
-  // global $_added_to_parent_elements will be changed in mapChildren
+  // global `AddedToParentElements` will be changed in mapChildren
   const addedToParent = AddedToParentElements
 
   children.push.apply(children, mapChildren(owner, mapped))
@@ -228,11 +236,28 @@ export function walkSolidTree(
   },
 ): Mapped.Owner {
   // set the globals to be available for this walk cycle
-  ElementsMap.clear()
   Mode = config.mode
   RootId = config.rootId
   OnComputationUpdate = config.onComputationUpdate
   RegisterComponent = config.registerComponent
 
-  return mapOwner(owner, null)!
+  const r = mapOwner(owner, null)!
+
+  if (Mode === TreeWalkerMode.DOM) {
+    // Register all mapped element nodes to their components
+    for (const [elNode, { el, component }] of ElementsMap) {
+      RegisterComponent({
+        element: el,
+        componentId: component.id,
+        elementId: elNode.id,
+      })
+    }
+
+    ElementsMap.clear()
+  }
+
+  // clear the globals
+  Mode = RootId = OnComputationUpdate = RegisterComponent = undefined!
+
+  return r
 }

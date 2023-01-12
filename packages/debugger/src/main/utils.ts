@@ -210,8 +210,9 @@ export function onParentCleanup(
   owner: Solid.Owner,
   fn: VoidFunction,
   prepend = false,
+  symbol?: symbol,
 ): VoidFunction {
-  if (owner.owner) return onOwnerCleanup(owner.owner, fn, prepend)
+  if (owner.owner) return onOwnerCleanup(owner.owner, fn, prepend, symbol)
   return () => {
     /* noop */
   }
@@ -220,9 +221,14 @@ export function onParentCleanup(
 /**
  * Listen to when the owner is disposed. (not on cleanup)
  */
-export function onOwnerDispose(owner: Solid.Owner, fn: VoidFunction): void {
-  if (isSolidRoot(owner)) onOwnerCleanup(owner, fn)
-  if (owner.owner) onOwnerCleanup(owner.owner, fn)
+export function onOwnerDispose(
+  owner: Solid.Owner,
+  fn: VoidFunction,
+  prepend = false,
+  symbol?: symbol,
+): VoidFunction {
+  if (isSolidRoot(owner)) return onOwnerCleanup(owner, fn, prepend, symbol)
+  return onParentCleanup(owner, fn, prepend, symbol)
 }
 
 // TODO: move onDispose to solid-primitives

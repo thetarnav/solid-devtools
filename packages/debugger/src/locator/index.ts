@@ -1,5 +1,5 @@
 import { defer, makeHoverElementListener } from '@solid-devtools/shared/primitives'
-import { asArray, warn } from '@solid-devtools/shared/utils'
+import { warn } from '@solid-devtools/shared/utils'
 import { createSimpleEmitter } from '@solid-primitives/event-bus'
 import { makeEventListener } from '@solid-primitives/event-listener'
 import { createKeyHold } from '@solid-primitives/keyboard'
@@ -75,7 +75,7 @@ export function createLocator({
 
     // target is an elementId
     if ('type' in target && target.type === 'element') {
-      const element = getElementById(target.elementId)
+      const element = getElementById(target.id)
       if (!element) return []
       target = element
     }
@@ -94,21 +94,14 @@ export function createLocator({
       ]
     }
 
-    // target is a component
-    if (target.type === 'componentNode') {
-      const { componentId } = target
-      const comp = registry.getComponent(componentId)
-      if (!comp) return []
-      return asArray(comp.elements).map(element => ({
-        element,
-        id: componentId,
-        name: comp.name,
-      }))
-    }
-
-    // target is an element of a component (in DOM walker mode)
-    const comp = registry.findComponentElement(target.componentId, target.elementId)
-    return comp ? [comp] : []
+    // target is a component or an element of a component (in DOM walker mode)
+    const comp = registry.getComponent(target.id)
+    if (!comp) return []
+    return comp.elements.map(element => ({
+      element,
+      id: comp.id,
+      name: comp.name,
+    }))
   }
 
   createEffect(
