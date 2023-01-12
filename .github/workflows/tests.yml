@@ -31,6 +31,8 @@ jobs:
         run: pnpm lint
 
       - name: Run Build and Tests
+        # Will run the step even if lint step failed
+        if: success() || failure()
         run: pnpm run build-test
         env:
           CI: true
