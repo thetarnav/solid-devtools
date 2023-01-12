@@ -7,6 +7,7 @@ import {
   type TreeWalkerMode,
 } from '@solid-devtools/debugger/types'
 import { createSimpleEmitter } from '@solid-primitives/event-bus'
+import { entries } from '@solid-primitives/utils'
 import { Accessor, createMemo, createSelector, createSignal, untrack } from 'solid-js'
 
 export namespace Structure {
@@ -114,7 +115,7 @@ export const { reconcileStructure } = (() => {
       nextRoots.push(updateNode(root, id, $_updated[id]?.[id], 0))
     }
 
-    for (const [rootId, updatedNodes] of Object.entries($_updated)) {
+    for (const [rootId, updatedNodes] of entries($_updated)) {
       const root = updatedNodes![rootId]!
       if (!root || upatedTopLevelRoots.has(rootId)) continue
       nextRoots.push(createNode(root, null, 0))

@@ -23,6 +23,10 @@ export const useDebugger: typeof API.useDebugger = () => ({
   changeTreeWalkerMode: () => void 0,
   enabled: () => false,
   toggleEnabled: () => void 0,
+  dgraph: {
+    enabled: () => false,
+    toggleEnabled: () => void 0,
+  },
   structure: {
     enabled: () => false,
     forceTriggerUpdate: () => void 0,

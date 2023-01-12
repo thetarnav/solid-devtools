@@ -158,8 +158,8 @@ const [Provider, useControllerCtx] = createContextProvider(
 
     // highlight hovered element
 
-    const hovered = createMemo<{ elementId: NodeID } | { nodeId: NodeID } | undefined>(
-      () => {
+    const hovered = createMemo(
+      (): { elementId: NodeID } | { nodeId: NodeID } | undefined => {
         const elementId = inspector.hoveredElement()
         if (elementId) return { elementId }
         const nodeId = structure.extHovered()

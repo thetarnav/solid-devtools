@@ -2,7 +2,7 @@ import type { EncodedValue, PropGetterState } from '../inspector/types'
 import type { LocationAttr } from '../locator/findComponent'
 import { NodeType, ValueItemType } from './constants'
 
-export type NodeID = string & {}
+export type NodeID = `#${string}`
 
 export type ComputationNodeType = Exclude<
   NodeType,

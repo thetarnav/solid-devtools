@@ -7,7 +7,8 @@ import {
   createSignal,
 } from 'solid-js'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { $SDT_ID, NodeType, TreeWalkerMode } from '../../main/constants'
+import { NodeType, TreeWalkerMode } from '../../main/constants'
+import { $setSdtId } from '../../main/id'
 import { Mapped, Solid } from '../../main/types'
 import { getNodeName, getOwner } from '../../main/utils'
 import { ComputationUpdateHandler, walkSolidTree } from '../walker'
@@ -43,7 +44,7 @@ describe('TreeWalkerMode.Owners', () => {
 
       const tree = walkSolidTree(owner, {
         onComputationUpdate: () => {},
-        rootId: (owner[$SDT_ID] = 'ff'),
+        rootId: $setSdtId(owner, '#ff'),
         registerComponent: () => {},
         mode: TreeWalkerMode.Owners,
       })
@@ -51,17 +52,17 @@ describe('TreeWalkerMode.Owners', () => {
       dispose()
 
       expect(tree).toEqual({
-        id: 'ff',
+        id: '#ff',
         type: NodeType.Root,
         children: [
           {
-            id: '0',
+            id: '#0',
             name: 'e0',
             type: NodeType.Effect,
             frozen: true,
             children: [
-              { id: '1', name: 'c0', type: NodeType.Computation, children: [] },
-              { id: '2', name: 'c1', type: NodeType.Computation, frozen: true, children: [] },
+              { id: '#1', name: 'c0', type: NodeType.Computation, children: [] },
+              { id: '#2', name: 'c1', type: NodeType.Computation, frozen: true, children: [] },
             ],
           },
         ],

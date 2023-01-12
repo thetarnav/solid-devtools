@@ -11,6 +11,12 @@ export function getSdtId(o: object): NodeID {
   return id
 }
 
+/** Used for testing */
+export function $setSdtId(o: object, id: NodeID): NodeID {
+  IdMap.set(o, id)
+  return id
+}
+
 export class NodeIDMap<T extends object> {
   private obj: Record<NodeID, T> = {}
 

@@ -273,7 +273,7 @@ export default function createInspector() {
   //
   // HOVERED ELEMENT
   //
-  const [hoveredElement, setHoveredElement] = createSignal<string | null>(null)
+  const [hoveredElement, setHoveredElement] = createSignal<NodeID | null>(null)
 
   function toggleHoveredElement(id: NodeID, selected?: boolean) {
     setHoveredElement(p => (p === id ? (selected ? id : null) : selected ? id : p))
