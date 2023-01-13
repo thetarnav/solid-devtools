@@ -2,7 +2,8 @@ import type { EncodedValue, PropGetterState } from '../inspector/types'
 import type { LocationAttr } from '../locator/findComponent'
 import { NodeType, ValueItemType } from './constants'
 
-export type NodeID = `#${string}`
+// Additional "#" character and unique symbol is added to distinguish NodeID from string
+export type NodeID = `#${string}` & { readonly __node_id?: unique symbol }
 
 export type ComputationNodeType = Exclude<
   NodeType,
