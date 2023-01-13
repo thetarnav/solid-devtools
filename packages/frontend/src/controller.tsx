@@ -1,15 +1,23 @@
-import type { InspectorUpdate, ToggleInspectedValueData } from '@solid-devtools/debugger'
 import {
   ComputationUpdate,
   HighlightElementPayload,
+  InspectorUpdate,
   Mapped,
   NodeID,
   StructureUpdates,
+  ToggleInspectedValueData,
   TreeWalkerMode,
 } from '@solid-devtools/debugger/types'
 import { defer } from '@solid-devtools/shared/primitives'
 import { createContextProvider } from '@solid-primitives/context'
-import { batch, createEffect, createMemo, createSignal } from 'solid-js'
+import {
+  batch,
+  createEffect,
+  createMemo,
+  createSelector,
+  createSignal,
+  SignalOptions,
+} from 'solid-js'
 import createInspector from './modules/inspector'
 import createStructure from './modules/structure'
 
@@ -80,25 +88,62 @@ export class Controller {
   }
 }
 
+export type HoveredNode = {
+  type: 'element' | 'node'
+  id: NodeID
+}
+const HOVER_NODE_OPTIONS: SignalOptions<HoveredNode | null> = {
+  equals: (a, b) => a?.id === b?.id,
+}
+
 const [Provider, useControllerCtx] = createContextProvider(
   ({ controller, options }: { controller: Controller; options: { useShortcuts: boolean } }) => {
     const [devtoolsLocatorEnabled, setDevtoolsLocatorState] = createSignal(false)
     const [clientLocatorEnabled, setClientLocator] = createSignal(false)
-    const [clientHoveredNodeId, setClientHoveredId] = createSignal<NodeID | null>(null)
 
     const locatorEnabled = () => devtoolsLocatorEnabled() || clientLocatorEnabled()
+
+    //
+    // HOVERED NODE
+    //
+    const [clientHoveredNode, setClientHoveredNode] = createSignal<NodeID | null>(null)
+    const [extHoveredNode, setExtHoveredNode] = createSignal<HoveredNode | null>(
+      null,
+      HOVER_NODE_OPTIONS,
+    )
+    const hovered = createMemo(
+      (): HoveredNode | null => {
+        const client = clientHoveredNode()
+        return extHoveredNode() || (client ? { id: client, type: 'node' } : null)
+      },
+      undefined,
+      HOVER_NODE_OPTIONS,
+    )
+
+    const isNodeHovered = createSelector(
+      hovered,
+      (id: NodeID, hoveredId) => !!hoveredId && id === hoveredId.id,
+    )
+
+    function toggleHoveredNode(id: NodeID, type: 'element' | 'node' = 'node', isHovered?: boolean) {
+      return setExtHoveredNode(p =>
+        p && p.id === id ? (isHovered ? p : null) : isHovered ? { id, type } : p,
+      )
+    }
+    function toggleHoveredElement(id: NodeID, isHovered?: boolean) {
+      return toggleHoveredNode(id, 'element', isHovered)
+    }
 
     function setClientLocatorState(enabled: boolean) {
       batch(() => {
         setClientLocator(enabled)
-        if (!enabled) setClientHoveredId(null)
+        if (!enabled) setClientHoveredNode(null)
       })
     }
 
     const inspector = createInspector()
 
     const structure = createStructure({
-      clientHoveredNodeId,
       inspectedNodeId: inspector.inspectedId,
     })
 
@@ -115,7 +160,7 @@ const [Provider, useControllerCtx] = createContextProvider(
         inspector.setDetails(ownerDetails)
       },
       onClientHoveredComponent({ nodeId, state }) {
-        setClientHoveredId(p => {
+        setClientHoveredNode(p => {
           if (state) return nodeId ?? p
           return p && p === nodeId ? null : p
         })
@@ -156,18 +201,7 @@ const [Provider, useControllerCtx] = createContextProvider(
     inspector.setOnOpenLocation(client.onOpenLocation)
 
     // highlight hovered element
-    const hovered = createMemo(
-      (): HighlightElementPayload => {
-        const elementId = inspector.hoveredElement()
-        if (elementId) return { id: elementId, type: 'element' }
-        const nodeId = structure.extHovered()
-        if (nodeId) return { id: nodeId, type: 'node' }
-        return null
-      },
-      undefined,
-      { equals: (a, b) => !!(a === b || (a && b && a.id === b.id)) },
-    )
-    createEffect(defer(hovered, client.onHighlightElementChange))
+    createEffect(defer(extHoveredNode, client.onHighlightElementChange))
 
     // TREE VIEW MODE
     createEffect(defer(structure.mode, client.onTreeViewModeChange))
@@ -201,6 +235,9 @@ const [Provider, useControllerCtx] = createContextProvider(
 
     return {
       locatorEnabled,
+      isNodeHovered,
+      toggleHoveredNode,
+      toggleHoveredElement,
       structureState: structure.state,
       inspectedNodeId: inspector.inspectedId,
       isNodeInspected: inspector.isNodeInspected,

@@ -172,6 +172,8 @@ const DisplayStructureTree: Component = () => {
     inspector,
     structure,
     isNodeInspected,
+    isNodeHovered,
+    toggleHoveredNode,
     listenToComputationUpdate,
     setInspectedNode,
   } = useController()
@@ -347,12 +349,12 @@ const DisplayStructureTree: Component = () => {
                 return (
                   <OwnerNode
                     owner={data.node}
-                    isHovered={structure.isHovered(id)}
+                    isHovered={isNodeHovered(id) || structure.isSearched(id)}
                     isSelected={isNodeInspected(id)}
                     listenToUpdate={listener =>
                       listenToComputationUpdate(updatedId => updatedId === id && listener())
                     }
-                    onHoverChange={hovered => structure.toggleHoveredNode(id, hovered)}
+                    onHoverChange={hovered => toggleHoveredNode(id, 'node', hovered)}
                     onInspectChange={inspected => setInspectedNode(inspected ? id : null)}
                     toggleCollapsed={toggleCollapsed}
                     isCollapsed={collapsed().has(data.node)}

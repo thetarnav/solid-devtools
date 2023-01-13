@@ -159,13 +159,7 @@ export function getNodePath(node: Structure.Node): Structure.Node[] {
   return path
 }
 
-export default function createStructure({
-  clientHoveredNodeId,
-  inspectedNodeId,
-}: {
-  clientHoveredNodeId: Accessor<NodeID | null>
-  inspectedNodeId: Accessor<NodeID | null>
-}) {
+export default function createStructure(props: { inspectedNodeId: Accessor<NodeID | null> }) {
   const [mode, setMode] = createSignal<TreeWalkerMode>(DEFAULT_WALKER_MODE)
 
   const [state, setState] = createSignal<Structure.State>(
@@ -174,7 +168,7 @@ export default function createStructure({
   )
 
   const inspectedNode = createMemo(() => {
-    const id = inspectedNodeId()
+    const id = props.inspectedNodeId()
     return id ? findNode(id) : null
   })
 
@@ -191,18 +185,6 @@ export default function createStructure({
   }
 
   const [listenToComputationUpdate, emitComputationUpdate] = createSimpleEmitter<NodeID>()
-
-  const [extHovered, setHovered] = createSignal<NodeID | null>(null)
-  const hovered = () => extHovered() || clientHoveredNodeId()
-
-  const isNodeHovered = createSelector<NodeID | null, NodeID>(hovered)
-
-  function toggleHoveredNode(id: NodeID, isHovered: boolean): NodeID | null {
-    return setHovered(p => {
-      if (isHovered) return id
-      return p && p === id ? null : p
-    })
-  }
 
   const [searchResult, setSearchResult] = createSignal<NodeID[]>()
   const isSearched = createSelector(searchResult, (node: NodeID, o) => !!o && o.includes(node))
@@ -224,12 +206,9 @@ export default function createStructure({
     state,
     inspectedNode,
     updateStructure,
-    hovered,
-    extHovered,
-    isHovered: (node: NodeID) => isNodeHovered(node) || isSearched(node),
+    isSearched,
     listenToComputationUpdate,
     emitComputationUpdate,
-    toggleHoveredNode,
     findNode,
     getRootNode,
     getClosestComponentNode,

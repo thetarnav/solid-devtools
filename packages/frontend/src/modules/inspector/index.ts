@@ -271,15 +271,6 @@ export default function createInspector() {
   }
 
   //
-  // HOVERED ELEMENT
-  //
-  const [hoveredElement, setHoveredElement] = createSignal<NodeID | null>(null)
-
-  function toggleHoveredElement(id: NodeID, selected?: boolean) {
-    setHoveredElement(p => (p === id ? (selected ? id : null) : selected ? id : p))
-  }
-
-  //
   // LOCATION
   //
   let onOpenLocation: VoidFunction
@@ -297,8 +288,6 @@ export default function createInspector() {
     update: handleUpdates,
     inspectValueItem,
     onInspectedHandler: onInspectValue,
-    hoveredElement,
-    toggleHoveredElement,
     setOnInspectValue,
     openComponentLocation,
     setOnOpenLocation,

@@ -9,7 +9,7 @@ import { Component, createMemo } from 'solid-js'
 import * as styles from './path.css'
 
 export const OwnerPath: Component = () => {
-  const { structure, setInspectedNode } = useController()
+  const { structure, setInspectedNode, isNodeHovered, toggleHoveredNode } = useController()
 
   const rem = useRemSize()
   const containerSize = createElementSize(() => container)
@@ -31,9 +31,7 @@ export const OwnerPath: Component = () => {
         )}
         <div class={styles.container} ref={container}>
           {path().map(node => {
-            const hoverProps = createHover(hovering =>
-              structure.toggleHoveredNode(node.id, hovering),
-            )
+            const hoverProps = createHover(hovering => toggleHoveredNode(node.id, 'node', hovering))
             return (
               <>
                 <div class={styles.divider}>
@@ -41,7 +39,7 @@ export const OwnerPath: Component = () => {
                 </div>
                 <div
                   class={styles.item}
-                  data-hovered={structure.isHovered(node.id)}
+                  data-hovered={isNodeHovered(node.id)}
                   {...hoverProps}
                   onClick={() => setInspectedNode(node.id)}
                 >

@@ -39,7 +39,7 @@ export default function Details() {
 }
 
 const DetailsContent: Component = () => {
-  const { inspector } = useController()
+  const { inspector, toggleHoveredElement } = useController()
   const { state } = inspector
 
   const allSignals = createMemo(() => {
@@ -68,7 +68,7 @@ const DetailsContent: Component = () => {
               value={value().value}
               extended={value().selected}
               onClick={() => inspector.inspectValueItem(value())}
-              onElementHover={inspector.toggleHoveredElement}
+              onElementHover={toggleHoveredElement}
               isSignal={value().getter !== false}
               isStale={value().getter === PropGetterState.Stale}
             />
@@ -84,7 +84,7 @@ const DetailsContent: Component = () => {
                 value={signal.value}
                 extended={signal.selected}
                 onClick={() => inspector.inspectValueItem(signal)}
-                onElementHover={inspector.toggleHoveredElement}
+                onElementHover={toggleHoveredElement}
                 isSignal={type !== 'stores'}
               />
             )}
@@ -100,7 +100,7 @@ const DetailsContent: Component = () => {
               value={valueItem.value}
               extended={valueItem.selected}
               onClick={() => inspector.inspectValueItem(valueItem)}
-              onElementHover={inspector.toggleHoveredElement}
+              onElementHover={toggleHoveredElement}
               isSignal
             />
           </div>
