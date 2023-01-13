@@ -1,3 +1,18 @@
+/**
+ * Main modules and views of the devtools. Used for "routing".
+ */
+export enum DevtoolsMainView {
+  Structure = 'structure',
+  Dgraph = 'dgraph',
+}
+
+export enum TreeWalkerMode {
+  Owners = 'owners',
+  Components = 'components',
+  DOM = 'dom',
+}
+export const DEFAULT_WALKER_MODE = TreeWalkerMode.Components
+
 export enum NodeType {
   Root = 'root',
   Component = 'component',
@@ -26,13 +41,6 @@ export const NODE_TYPE_NAMES: Readonly<Record<NodeType, string>> = {
   [NodeType.Signal]: 'Signal',
   [NodeType.Store]: 'Store',
 }
-
-export enum TreeWalkerMode {
-  Owners = 'owners',
-  Components = 'components',
-  DOM = 'dom',
-}
-export const DEFAULT_WALKER_MODE = TreeWalkerMode.Components
 
 export enum ValueItemType {
   Signal = 'signal',

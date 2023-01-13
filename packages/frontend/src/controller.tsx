@@ -1,5 +1,6 @@
 import {
   ComputationUpdate,
+  DevtoolsMainView,
   HighlightElementPayload,
   InspectorUpdate,
   Mapped,
@@ -11,14 +12,7 @@ import {
 import { defer } from '@solid-devtools/shared/primitives'
 import { createContextProvider } from '@solid-primitives/context'
 import { createEventBus, createEventHub } from '@solid-primitives/event-bus'
-import {
-  batch,
-  createEffect,
-  createMemo,
-  createSelector,
-  createSignal,
-  SignalOptions,
-} from 'solid-js'
+import { batch, createEffect, createMemo, createSelector, createSignal } from 'solid-js'
 import createInspector from './modules/inspector'
 
 export function createController() {
@@ -53,14 +47,6 @@ export function createController() {
 
 export type Controller = ReturnType<typeof createController>
 
-export type HoveredNode = {
-  type: 'element' | 'node'
-  id: NodeID
-}
-const HOVER_NODE_OPTIONS: SignalOptions<HoveredNode | null> = {
-  equals: (a, b) => a?.id === b?.id,
-}
-
 const [Provider, useControllerCtx] = createContextProvider(
   ({ controller, options }: { controller: Controller; options: { useShortcuts: boolean } }) => {
     const { client, devtools } = controller
@@ -84,22 +70,16 @@ const [Provider, useControllerCtx] = createContextProvider(
     // HOVERED NODE
     //
     const [clientHoveredNode, setClientHoveredNode] = createSignal<NodeID | null>(null)
-    const [extHoveredNode, setExtHoveredNode] = createSignal<HoveredNode | null>(
-      null,
-      HOVER_NODE_OPTIONS,
-    )
-    const hovered = createMemo(
-      (): HoveredNode | null => {
-        const clientNode = clientHoveredNode()
-        return extHoveredNode() || (clientNode ? { id: clientNode, type: 'node' } : null)
-      },
-      undefined,
-      HOVER_NODE_OPTIONS,
-    )
+    const [extHoveredNode, setExtHoveredNode] = createSignal<{
+      type: 'element' | 'node'
+      id: NodeID
+    } | null>(null, { equals: (a, b) => a?.id === b?.id })
 
-    const isNodeHovered = createSelector(
-      hovered,
-      (id: NodeID, hoveredId) => !!hoveredId && id === hoveredId.id,
+    const isNodeHovered = createSelector<NodeID | null, NodeID>(
+      createMemo(() => {
+        const extNode = extHoveredNode()
+        return extNode ? extNode.id : clientHoveredNode()
+      }),
     )
 
     function toggleHoveredNode(id: NodeID, type: 'element' | 'node' = 'node', isHovered?: boolean) {
@@ -110,6 +90,11 @@ const [Provider, useControllerCtx] = createContextProvider(
     function toggleHoveredElement(id: NodeID, isHovered?: boolean) {
       return toggleHoveredNode(id, 'element', isHovered)
     }
+
+    //
+    // OPENED MAIN VIEW
+    //
+    const [openedView, setOpenedView] = createSignal<DevtoolsMainView>(DevtoolsMainView.Structure)
 
     //
     // INSPECTOR
@@ -160,6 +145,8 @@ const [Provider, useControllerCtx] = createContextProvider(
       isNodeHovered,
       toggleHoveredNode,
       toggleHoveredElement,
+      openedView,
+      setOpenedView,
       inspectedNodeId: inspector.inspectedId,
       isNodeInspected: inspector.isNodeInspected,
       setLocatorState: setDevtoolsLocatorState,
