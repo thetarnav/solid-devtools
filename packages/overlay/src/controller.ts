@@ -1,5 +1,5 @@
 import { enableRootsAutoattach, useDebugger } from '@solid-devtools/debugger'
-import { Controller } from '@solid-devtools/frontend'
+import { Controller, createController } from '@solid-devtools/frontend'
 import { defer } from '@solid-devtools/shared/primitives'
 import { createEffect, onCleanup } from 'solid-js'
 
@@ -13,53 +13,54 @@ const separate = <T>(obj: T, callback: (value: T) => void): void => {
   })
 }
 
-export function createController() {
+export function createOverlayController(): Controller {
   const debug = useDebugger()
 
   onCleanup(() => debug.setInspectedNode(null))
 
-  const controller = new Controller({
-    onDevtoolsLocatorStateChange(enabled) {
-      queueMicrotask(() => debug.locator.toggleEnabled(enabled))
-    },
-    onHighlightElementChange(data) {
-      queueMicrotask(() => debug.locator.setHighlightTarget(data))
-    },
-    onInspectNode(node) {
-      queueMicrotask(() => debug.setInspectedNode(node))
-    },
-    onInspectValue(node) {
-      queueMicrotask(() => debug.inspector.toggleValueNode(node))
-    },
-    onOpenLocation() {
-      queueMicrotask(() => debug.openInspectedNodeLocation())
-    },
-    onTreeViewModeChange(mode) {
-      queueMicrotask(() => debug.structure.setTreeWalkerMode(mode))
-    },
+  const controller = createController()
+  const { devtools, client } = controller
+
+  devtools.on('devtoolsLocatorStateChange', enabled => {
+    queueMicrotask(() => debug.locator.toggleEnabled(enabled))
+  })
+  devtools.on('highlightElementChange', data => {
+    queueMicrotask(() => debug.locator.setHighlightTarget(data))
+  })
+  devtools.on('inspectNode', node => {
+    queueMicrotask(() => debug.setInspectedNode(node))
+  })
+  devtools.on('inspectValue', node => {
+    queueMicrotask(() => debug.inspector.toggleValueNode(node))
+  })
+  devtools.on('openLocation', () => {
+    queueMicrotask(() => debug.openInspectedNodeLocation())
+  })
+  devtools.on('treeViewModeChange', mode => {
+    queueMicrotask(() => debug.structure.setTreeWalkerMode(mode))
   })
 
   debug.listenTo('StructureUpdates', updates => {
-    queueMicrotask(() => controller.updateStructure(updates))
+    queueMicrotask(() => client.structureUpdate.emit(updates))
   })
 
   debug.listenTo('ComputationUpdates', updates => {
-    queueMicrotask(() => controller.updateComputation(updates))
+    queueMicrotask(() => client.computationUpdates.emit(updates))
   })
 
   debug.listenTo('InspectorUpdate', payload => {
-    separate(payload, cloned => controller.updateInspector(cloned))
+    separate(payload, client.inspectorUpdate.emit)
   })
 
   // send the focused owner details
   debug.listenTo('InspectedNodeDetails', details => {
-    separate(details, cloned => controller.setInspectedDetails(cloned))
+    separate(details, client.setInspectedDetails.emit)
   })
 
   // send the state of the client locator mode
   createEffect(
     defer(debug.locator.enabledByDebugger, state => {
-      queueMicrotask(() => controller.setLocatorState(state))
+      queueMicrotask(() => client.clientLocatorModeChange.emit(state))
     }),
   )
 
@@ -67,12 +68,12 @@ export function createController() {
   debug.locator.addClickInterceptor((e, component) => {
     e.preventDefault()
     e.stopPropagation()
-    queueMicrotask(() => controller.setInspectedNode(component.id))
+    queueMicrotask(() => client.clientInspectedNode.emit(component.id))
     return false
   })
 
   debug.locator.onHoveredComponent(data => {
-    queueMicrotask(() => controller.setHoveredNode(data))
+    queueMicrotask(() => client.clientHoveredComponent.emit(data))
   })
 
   return controller

@@ -7,7 +7,7 @@ import { makeEventListener } from '@solid-primitives/event-listener'
 import { clamp, onRootCleanup } from '@solid-primitives/utils'
 import { Component, ComponentProps, createComputed, createSignal, Show } from 'solid-js'
 import { Dynamic, Portal } from 'solid-js/web'
-import { createController } from './controller'
+import { createOverlayController } from './controller'
 
 import frontendStyles from '@solid-devtools/frontend/dist/index.css'
 import overlayStyles from './styles.css'
@@ -100,7 +100,7 @@ const Overlay: Component<{
           <div class="overlay__container__inner">
             <Show when={isOpen()}>
               {() => {
-                const controller = createController()
+                const controller = createOverlayController()
                 return <Devtools controller={controller} headerSubtitle="overlay" />
               }}
             </Show>

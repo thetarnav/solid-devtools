@@ -1,3 +1,4 @@
+import { useController } from '@/controller'
 import {
   DEFAULT_WALKER_MODE,
   Mapped,
@@ -6,10 +7,10 @@ import {
   StructureUpdates,
   type TreeWalkerMode,
 } from '@solid-devtools/debugger/types'
+import { defer } from '@solid-devtools/shared/primitives'
 import { createSimpleEmitter } from '@solid-primitives/event-bus'
 import { entries } from '@solid-primitives/utils'
-import { batch, createMemo, createSelector, createSignal, untrack } from 'solid-js'
-import type { Inspector } from '../inspector'
+import { batch, createEffect, createMemo, createSelector, createSignal, untrack } from 'solid-js'
 
 export namespace Structure {
   export interface Node {
@@ -30,6 +31,8 @@ export namespace Structure {
   }
 
   export type State = { roots: Node[]; nodeList: Node[] }
+
+  export type Module = ReturnType<typeof createStructure>
 }
 
 export const { reconcileStructure } = (() => {
@@ -160,10 +163,10 @@ export function getNodePath(node: Structure.Node): Structure.Node[] {
   return path
 }
 
-export default function createStructure(props: {
-  inspectedNodeId: Inspector.Module['inspectedId']
-  setInspected: Inspector.Module['setInspectedNode']
-}) {
+export default function createStructure() {
+  const ctx = useController()
+  const { client, devtools } = ctx.controller
+
   const [mode, setMode] = createSignal<TreeWalkerMode>(DEFAULT_WALKER_MODE)
 
   function changeTreeViewMode(newMode: TreeWalkerMode): void {
@@ -180,7 +183,7 @@ export default function createStructure(props: {
   )
 
   const inspectedNode = createMemo(() => {
-    const id = props.inspectedNodeId()
+    const id = ctx.inspectedNodeId()
     return id ? findNode(id) : null
   })
 
@@ -222,16 +225,32 @@ export default function createStructure(props: {
     if (query === lastSearch) {
       if (lastSearchResults) {
         lastSearchIndex = (lastSearchIndex + 1) % lastSearchResults.length
-        props.setInspected(lastSearchResults[lastSearchIndex]!)
+        ctx.setInspectedNode(lastSearchResults[lastSearchIndex]!)
       }
       return
     } else {
       lastSearch = query
       const result = searchNodeList(query)
-      if (result) props.setInspected(result[(lastSearchIndex = 0)]!)
+      if (result) ctx.setInspectedNode(result[(lastSearchIndex = 0)]!)
       lastSearchResults = result
     }
   }
+
+  //
+  // Listen to Client Events
+  //
+  client.on('resetPanel', () => {
+    updateStructure(null)
+  })
+
+  client.on('computationUpdates', updated => {
+    updated.forEach(({ id }) => emitComputationUpdate(id))
+  })
+
+  client.on('structureUpdate', updateStructure)
+
+  // TREE VIEW MODE
+  createEffect(defer(mode, devtools.treeViewModeChange.emit))
 
   return {
     state,

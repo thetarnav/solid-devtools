@@ -7,9 +7,11 @@ import { createElementSize } from '@solid-primitives/resize-observer'
 import { useRemSize } from '@solid-primitives/styles'
 import { Component, createMemo } from 'solid-js'
 import * as styles from './path.css'
+import { useStructure } from './Structure'
 
 export const OwnerPath: Component = () => {
-  const { structure, setInspectedNode, isNodeHovered, toggleHoveredNode } = useController()
+  const { setInspectedNode, isNodeHovered, toggleHoveredNode } = useController()
+  const structure = useStructure()
 
   const rem = useRemSize()
   const containerSize = createElementSize(() => container)

@@ -10,6 +10,7 @@ import {
 } from '@solid-devtools/debugger/types'
 import { defer } from '@solid-devtools/shared/primitives'
 import { createContextProvider } from '@solid-primitives/context'
+import { createEventBus, createEventHub } from '@solid-primitives/event-bus'
 import {
   batch,
   createEffect,
@@ -19,74 +20,38 @@ import {
   SignalOptions,
 } from 'solid-js'
 import createInspector from './modules/inspector'
-import createStructure from './modules/structure'
 
-type ListenersFromPayloads<T extends Record<string, any>> = {
-  [K in keyof Pick<
-    T,
-    keyof T extends infer R ? (R extends keyof T ? (R extends string ? R : never) : never) : never
-  > as `on${K}`]: T[K] extends [void] ? () => void : (payload: T[K]) => void
+export function createController() {
+  // Listener of the client events (from the debugger) will be called synchronously under `batch`
+  // to make sure that the state is updated before the effect queue is flushed.
+  function batchedBus<T>() {
+    return createEventBus<T>({ emitGuard: batch })
+  }
+
+  const devtools = createEventHub($ => ({
+    inspectNode: $<NodeID | null>(),
+    inspectValue: $<ToggleInspectedValueData>(),
+    devtoolsLocatorStateChange: $<boolean>(),
+    highlightElementChange: $<HighlightElementPayload>(),
+    openLocation: $<void>(),
+    treeViewModeChange: $<TreeWalkerMode>(),
+  }))
+
+  const client = createEventHub({
+    resetPanel: batchedBus<void>(),
+    setInspectedDetails: batchedBus<Mapped.OwnerDetails>(),
+    structureUpdate: batchedBus<StructureUpdates>(),
+    computationUpdates: batchedBus<ComputationUpdate[]>(),
+    inspectorUpdate: batchedBus<InspectorUpdate[]>(),
+    clientLocatorModeChange: batchedBus<boolean>(),
+    clientHoveredComponent: batchedBus<{ nodeId: NodeID; state: boolean }>(),
+    clientInspectedNode: batchedBus<NodeID>(),
+  })
+
+  return { client, devtools }
 }
 
-interface ClientListenerPayloads {
-  InspectNode: NodeID | null
-  InspectValue: ToggleInspectedValueData
-  DevtoolsLocatorStateChange: boolean
-  HighlightElementChange: HighlightElementPayload
-  OpenLocation: void
-  TreeViewModeChange: TreeWalkerMode
-}
-export type ClientListeners = ListenersFromPayloads<ClientListenerPayloads>
-
-interface DevtoolsListenerPayloads {
-  ResetPanel: void
-  SetInspectedDetails: Mapped.OwnerDetails
-  StructureUpdate: StructureUpdates
-  ComputationUpdates: ComputationUpdate[]
-  InspectorUpdate: InspectorUpdate[]
-  ClientLocatorModeChange: boolean
-  ClientHoveredComponent: { nodeId: NodeID; state: boolean }
-  ClientInspectedNode: NodeID
-}
-export type DevtoolsListeners = ListenersFromPayloads<DevtoolsListenerPayloads>
-
-export class Controller {
-  private listeners!: DevtoolsListeners
-
-  constructor(public clientListeners: ClientListeners) {}
-
-  connectDevtools(devtoolsListeners: DevtoolsListeners) {
-    if (this.listeners) {
-      throw new Error('Devtools already connected!')
-    }
-    this.listeners = devtoolsListeners
-  }
-
-  updateStructure(update: StructureUpdates) {
-    this.listeners.onStructureUpdate(update)
-  }
-  updateComputation(computationUpdate: DevtoolsListenerPayloads['ComputationUpdates']) {
-    this.listeners.onComputationUpdates(computationUpdate)
-  }
-  updateInspector(inspectorUpdate: DevtoolsListenerPayloads['InspectorUpdate']) {
-    this.listeners.onInspectorUpdate(inspectorUpdate)
-  }
-  setInspectedDetails(ownerDetails: DevtoolsListenerPayloads['SetInspectedDetails']) {
-    this.listeners.onSetInspectedDetails(ownerDetails)
-  }
-  resetPanel() {
-    this.listeners.onResetPanel()
-  }
-  setLocatorState(active: boolean) {
-    this.listeners.onClientLocatorModeChange(active)
-  }
-  setHoveredNode(node: DevtoolsListenerPayloads['ClientHoveredComponent']) {
-    this.listeners.onClientHoveredComponent(node)
-  }
-  setInspectedNode(node: DevtoolsListenerPayloads['ClientInspectedNode']) {
-    this.listeners.onClientInspectedNode(node)
-  }
-}
+export type Controller = ReturnType<typeof createController>
 
 export type HoveredNode = {
   type: 'element' | 'node'
@@ -98,10 +63,22 @@ const HOVER_NODE_OPTIONS: SignalOptions<HoveredNode | null> = {
 
 const [Provider, useControllerCtx] = createContextProvider(
   ({ controller, options }: { controller: Controller; options: { useShortcuts: boolean } }) => {
+    const { client, devtools } = controller
+
+    //
+    // LOCATOR
+    //
     const [devtoolsLocatorEnabled, setDevtoolsLocatorState] = createSignal(false)
     const [clientLocatorEnabled, setClientLocator] = createSignal(false)
 
     const locatorEnabled = () => devtoolsLocatorEnabled() || clientLocatorEnabled()
+
+    function setClientLocatorState(enabled: boolean) {
+      batch(() => {
+        setClientLocator(enabled)
+        if (!enabled) setClientHoveredNode(null)
+      })
+    }
 
     //
     // HOVERED NODE
@@ -113,8 +90,8 @@ const [Provider, useControllerCtx] = createContextProvider(
     )
     const hovered = createMemo(
       (): HoveredNode | null => {
-        const client = clientHoveredNode()
-        return extHoveredNode() || (client ? { id: client, type: 'node' } : null)
+        const clientNode = clientHoveredNode()
+        return extHoveredNode() || (clientNode ? { id: clientNode, type: 'node' } : null)
       },
       undefined,
       HOVER_NODE_OPTIONS,
@@ -134,93 +111,62 @@ const [Provider, useControllerCtx] = createContextProvider(
       return toggleHoveredNode(id, 'element', isHovered)
     }
 
-    function setClientLocatorState(enabled: boolean) {
-      batch(() => {
-        setClientLocator(enabled)
-        if (!enabled) setClientHoveredNode(null)
-      })
-    }
-
+    //
+    // INSPECTOR
+    //
     const inspector = createInspector()
 
-    const structure = createStructure({
-      inspectedNodeId: inspector.inspectedId,
-      setInspected: inspector.setInspectedNode,
+    client.on('resetPanel', () => {
+      setClientLocatorState(false)
+      setDevtoolsLocatorState(false)
+      inspector.setInspectedNode(null)
     })
 
-    controller.connectDevtools({
-      onResetPanel() {
-        batch(() => {
-          structure.updateStructure(null)
-          setClientLocatorState(false)
-          setDevtoolsLocatorState(false)
-          inspector.setInspectedNode(null)
-        })
-      },
-      onSetInspectedDetails(ownerDetails) {
-        inspector.setDetails(ownerDetails)
-      },
-      onClientHoveredComponent({ nodeId, state }) {
-        setClientHoveredNode(p => {
-          if (state) return nodeId ?? p
-          return p && p === nodeId ? null : p
-        })
-      },
-      onClientInspectedNode(node) {
-        batch(() => {
-          inspector.setInspectedNode(node)
-          setDevtoolsLocatorState(false)
-        })
-      },
-      onClientLocatorModeChange(active) {
-        setClientLocatorState(active)
-      },
-      onComputationUpdates(updated) {
-        updated.forEach(({ id }) => structure.emitComputationUpdate(id))
-      },
-      onStructureUpdate(update) {
-        structure.updateStructure(update)
-      },
-      onInspectorUpdate(payload) {
-        inspector.update(payload)
-      },
+    client.on('setInspectedDetails', inspector.setDetails)
+    client.on('inspectorUpdate', inspector.update)
+
+    client.on('clientHoveredComponent', ({ nodeId, state }) => {
+      setClientHoveredNode(p => {
+        if (state) return nodeId ?? p
+        return p && p === nodeId ? null : p
+      })
     })
 
-    const client = controller.clientListeners
+    client.on('clientInspectedNode', node => {
+      inspector.setInspectedNode(node)
+      setDevtoolsLocatorState(false)
+    })
+
+    client.on('clientLocatorModeChange', setClientLocatorState)
 
     // send devtools locator state
-    createEffect(defer(devtoolsLocatorEnabled, client.onDevtoolsLocatorStateChange))
+    createEffect(defer(devtoolsLocatorEnabled, devtools.devtoolsLocatorStateChange.emit))
 
     // set inspected node
-    createEffect(defer(inspector.inspectedId, client.onInspectNode))
+    createEffect(defer(inspector.inspectedId, devtools.inspectNode.emit))
 
     // toggle inspected value/prop/signal
-    inspector.setOnInspectValue(client.onInspectValue)
+    inspector.setOnInspectValue(devtools.inspectValue.emit)
 
     // LOCATION
     // open component location
-    inspector.setOnOpenLocation(client.onOpenLocation)
+    inspector.setOnOpenLocation(devtools.openLocation.emit)
 
     // highlight hovered element
-    createEffect(defer(extHoveredNode, client.onHighlightElementChange))
-
-    // TREE VIEW MODE
-    createEffect(defer(structure.mode, client.onTreeViewModeChange))
+    createEffect(defer(extHoveredNode, devtools.highlightElementChange.emit))
 
     return {
       locatorEnabled,
       isNodeHovered,
       toggleHoveredNode,
       toggleHoveredElement,
-      structureState: structure.state,
       inspectedNodeId: inspector.inspectedId,
       isNodeInspected: inspector.isNodeInspected,
       setLocatorState: setDevtoolsLocatorState,
       setInspectedNode: inspector.setInspectedNode,
-      listenToComputationUpdate: structure.listenToComputationUpdate,
       inspector,
-      structure,
       options,
+      controller,
     }
   },
 )

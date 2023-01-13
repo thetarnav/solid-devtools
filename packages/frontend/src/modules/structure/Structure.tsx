@@ -8,30 +8,45 @@ import { useRemSize } from '@solid-primitives/styles'
 import { assignInlineVars } from '@vanilla-extract/dynamic'
 import {
   Component,
+  createContext,
   createEffect,
   createMemo,
   createSelector,
   createSignal,
   For,
   Setter,
+  useContext,
 } from 'solid-js'
 import type { Structure } from '.'
+import createStructure from '.'
 import { OwnerNode } from './OwnerNode'
 import { OwnerPath } from './Path'
 import * as styles from './structure.css'
 import { getVirtualVars } from './virtual'
 
+const StructureContext = createContext<Structure.Module>()
+
+export const useStructure = () => {
+  const ctx = useContext(StructureContext)
+  if (!ctx) throw new Error('Structure context not found')
+  return ctx
+}
+
 export default function StructureView() {
+  const structure = createStructure()
+
   return (
-    <div class={styles.panelWrapper}>
-      <div class={styles.header}>
-        <LocatorButton />
-        <Search />
-        <ToggleMode />
+    <StructureContext.Provider value={structure}>
+      <div class={styles.panelWrapper}>
+        <div class={styles.header}>
+          <LocatorButton />
+          <Search />
+          <ToggleMode />
+        </div>
+        <DisplayStructureTree />
+        <OwnerPath />
       </div>
-      <DisplayStructureTree />
-      <OwnerPath />
-    </div>
+    </StructureContext.Provider>
   )
 }
 
@@ -49,7 +64,8 @@ const LocatorButton: Component = () => {
 }
 
 const Search: Component = () => {
-  const { structure, options } = useController()
+  const { options } = useController()
+  const structure = useStructure()
 
   const [value, setValue] = createSignal('')
 
@@ -96,7 +112,7 @@ const Search: Component = () => {
 }
 
 const ToggleMode: Component = () => {
-  const { structure } = useController()
+  const structure = useStructure()
 
   const tabsContentMap: Readonly<Record<TreeWalkerMode, string>> = {
     [TreeWalkerMode.Owners]: 'Owners',
@@ -167,16 +183,9 @@ const DisplayStructureTree: Component = () => {
       return set
     })
 
-  const {
-    structureState,
-    inspector,
-    structure,
-    isNodeInspected,
-    isNodeHovered,
-    toggleHoveredNode,
-    listenToComputationUpdate,
-    setInspectedNode,
-  } = useController()
+  const { inspector, isNodeInspected, isNodeHovered, toggleHoveredNode, setInspectedNode } =
+    useController()
+  const structure = useStructure()
 
   let lastVirtualStart = 0
   let lastVirtualEnd = 0
@@ -200,7 +209,7 @@ const DisplayStructureTree: Component = () => {
       lastInspectedIndex,
     )
 
-    const nodeList = structureState().nodeList
+    const nodeList = structure.state().nodeList
     // eslint-disable-next-line @typescript-eslint/no-shadow
     const collapsedList: Structure.Node[] = []
     const set = collapsed()
@@ -352,7 +361,9 @@ const DisplayStructureTree: Component = () => {
                     isHovered={isNodeHovered(id) || structure.isSearched(id)}
                     isSelected={isNodeInspected(id)}
                     listenToUpdate={listener =>
-                      listenToComputationUpdate(updatedId => updatedId === id && listener())
+                      structure.listenToComputationUpdate(
+                        updatedId => updatedId === id && listener(),
+                      )
                     }
                     onHoverChange={hovered => toggleHoveredNode(id, 'node', hovered)}
                     onInspectChange={inspected => setInspectedNode(inspected ? id : null)}
