@@ -49,13 +49,13 @@ const LocatorButton: Component = () => {
 }
 
 const Search: Component = () => {
-  const ctx = useController()
+  const { structure, options } = useController()
 
   const [value, setValue] = createSignal('')
 
   const handleChange = (v: string) => {
     setValue(v)
-    ctx.searchStructure('')
+    structure.search('')
   }
 
   return (
@@ -63,13 +63,13 @@ const Search: Component = () => {
       class={styles.search.form}
       onSubmit={e => {
         e.preventDefault()
-        ctx.searchStructure(value())
+        structure.search(value())
       }}
       onReset={() => handleChange('')}
     >
       <input
         ref={input => {
-          if (ctx.options.useShortcuts) {
+          if (options.useShortcuts) {
             createShortcut(['/'], () => input.focus())
             createShortcut(['Escape'], () => {
               if (document.activeElement === input) input.blur()
@@ -96,7 +96,7 @@ const Search: Component = () => {
 }
 
 const ToggleMode: Component = () => {
-  const ctx = useController()
+  const { structure } = useController()
 
   const tabsContentMap: Readonly<Record<TreeWalkerMode, string>> = {
     [TreeWalkerMode.Owners]: 'Owners',
@@ -104,7 +104,7 @@ const ToggleMode: Component = () => {
     [TreeWalkerMode.DOM]: 'DOM',
   }
 
-  const isSelected = createSelector<TreeWalkerMode, TreeWalkerMode>(ctx.structure.mode)
+  const isSelected = createSelector<TreeWalkerMode, TreeWalkerMode>(structure.mode)
 
   return (
     <div class={styles.toggleMode.group}>
@@ -113,7 +113,7 @@ const ToggleMode: Component = () => {
           <button
             aria-selected={isSelected(mode)}
             class={styles.toggleMode.tab[mode]}
-            onClick={() => ctx.changeTreeViewMode(mode)}
+            onClick={() => structure.changeTreeViewMode(mode)}
           >
             {tabsContentMap[mode]}
           </button>

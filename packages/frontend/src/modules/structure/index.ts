@@ -8,7 +8,8 @@ import {
 } from '@solid-devtools/debugger/types'
 import { createSimpleEmitter } from '@solid-primitives/event-bus'
 import { entries } from '@solid-primitives/utils'
-import { Accessor, createMemo, createSelector, createSignal, untrack } from 'solid-js'
+import { batch, createMemo, createSelector, createSignal, untrack } from 'solid-js'
+import type { Inspector } from '../inspector'
 
 export namespace Structure {
   export interface Node {
@@ -159,8 +160,19 @@ export function getNodePath(node: Structure.Node): Structure.Node[] {
   return path
 }
 
-export default function createStructure(props: { inspectedNodeId: Accessor<NodeID | null> }) {
+export default function createStructure(props: {
+  inspectedNodeId: Inspector.Module['inspectedId']
+  setInspected: Inspector.Module['setInspectedNode']
+}) {
   const [mode, setMode] = createSignal<TreeWalkerMode>(DEFAULT_WALKER_MODE)
+
+  function changeTreeViewMode(newMode: TreeWalkerMode): void {
+    if (newMode === mode()) return
+    batch(() => {
+      setMode(newMode)
+      search('')
+    })
+  }
 
   const [state, setState] = createSignal<Structure.State>(
     { nodeList: [], roots: [] },
@@ -189,7 +201,7 @@ export default function createStructure(props: { inspectedNodeId: Accessor<NodeI
   const [searchResult, setSearchResult] = createSignal<NodeID[]>()
   const isSearched = createSelector(searchResult, (node: NodeID, o) => !!o && o.includes(node))
 
-  function search(query: string): NodeID[] | undefined {
+  function searchNodeList(query: string): NodeID[] | undefined {
     if (!query) return setSearchResult()
     return untrack(() => {
       const result: NodeID[] = []
@@ -200,6 +212,25 @@ export default function createStructure(props: { inspectedNodeId: Accessor<NodeI
       }
       return setSearchResult(result.length ? result : undefined)
     })
+  }
+
+  // SEARCH NODES
+  let lastSearch: string = ''
+  let lastSearchResults: NodeID[] | undefined
+  let lastSearchIndex = 0
+  function search(query: string): void {
+    if (query === lastSearch) {
+      if (lastSearchResults) {
+        lastSearchIndex = (lastSearchIndex + 1) % lastSearchResults.length
+        props.setInspected(lastSearchResults[lastSearchIndex]!)
+      }
+      return
+    } else {
+      lastSearch = query
+      const result = searchNodeList(query)
+      if (result) props.setInspected(result[(lastSearchIndex = 0)]!)
+      lastSearchResults = result
+    }
   }
 
   return {
@@ -214,6 +245,7 @@ export default function createStructure(props: { inspectedNodeId: Accessor<NodeI
     getClosestComponentNode,
     getNodePath,
     search,
+    changeTreeViewMode,
     mode,
     setMode,
   }

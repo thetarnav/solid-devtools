@@ -145,6 +145,7 @@ const [Provider, useControllerCtx] = createContextProvider(
 
     const structure = createStructure({
       inspectedNodeId: inspector.inspectedId,
+      setInspected: inspector.setInspectedNode,
     })
 
     controller.connectDevtools({
@@ -206,33 +207,6 @@ const [Provider, useControllerCtx] = createContextProvider(
     // TREE VIEW MODE
     createEffect(defer(structure.mode, client.onTreeViewModeChange))
 
-    function changeTreeViewMode(newMode: TreeWalkerMode): void {
-      if (newMode === structure.mode()) return
-      batch(() => {
-        structure.setMode(newMode)
-        searchStructure('')
-      })
-    }
-
-    // SEARCH NODES
-    let lastSearch: string = ''
-    let lastSearchResults: NodeID[] | undefined
-    let lastSearchIndex = 0
-    function searchStructure(query: string): void {
-      if (query === lastSearch) {
-        if (lastSearchResults) {
-          lastSearchIndex = (lastSearchIndex + 1) % lastSearchResults.length
-          inspector.setInspectedNode(lastSearchResults[lastSearchIndex]!)
-        }
-        return
-      } else {
-        lastSearch = query
-        const result = structure.search(query)
-        if (result) inspector.setInspectedNode(result[(lastSearchIndex = 0)]!)
-        lastSearchResults = result
-      }
-    }
-
     return {
       locatorEnabled,
       isNodeHovered,
@@ -244,10 +218,8 @@ const [Provider, useControllerCtx] = createContextProvider(
       setLocatorState: setDevtoolsLocatorState,
       setInspectedNode: inspector.setInspectedNode,
       listenToComputationUpdate: structure.listenToComputationUpdate,
-      changeTreeViewMode,
       inspector,
       structure,
-      searchStructure,
       options,
     }
   },

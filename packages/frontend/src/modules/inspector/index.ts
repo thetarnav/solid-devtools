@@ -58,6 +58,8 @@ export namespace Inspector {
     readonly props: Props | null
     readonly location: LocationAttr | null
   }
+
+  export type Module = ReturnType<typeof createInspector>
 }
 
 function createValueItem(itemId: ValueItemID, initValue: DecodedValue): Inspector.ValueItem {
