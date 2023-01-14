@@ -148,6 +148,10 @@ export const isRecord = (value: unknown): value is Record<string, unknown> =>
 
 export const XOR = (a: unknown, b: unknown) => (a || b) && !(a && b)
 
-export type ToDyscriminatedUnion<T extends {}, DK extends PropertyKey = 'type'> = {
-  [K in keyof T]: T[K] & { [k in DK]: K }
+export type ToDyscriminatedUnion<
+  T extends {},
+  TK extends PropertyKey = 'type',
+  DK extends void | PropertyKey = void,
+> = {
+  [K in keyof T]: { [k in TK]: K } & (DK extends PropertyKey ? { [k in DK]: T[K] } : T[K])
 }[keyof T]

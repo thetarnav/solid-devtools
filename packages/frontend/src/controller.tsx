@@ -11,9 +11,13 @@ import {
 } from '@solid-devtools/debugger/types'
 import { defer } from '@solid-devtools/shared/primitives'
 import { createContextProvider } from '@solid-primitives/context'
+import { SECOND } from '@solid-primitives/date'
 import { createEventBus, createEventHub } from '@solid-primitives/event-bus'
-import { batch, createEffect, createMemo, createSelector, createSignal } from 'solid-js'
+import { debounce } from '@solid-primitives/scheduled'
+import { batch, createEffect, createMemo, createSelector, createSignal, onCleanup } from 'solid-js'
+import type { Dgraph } from './modules/dependency/dgraph'
 import createInspector from './modules/inspector'
+import type { Structure } from './modules/structure'
 
 export function createController() {
   // Listener of the client events (from the debugger) will be called synchronously under `batch`
@@ -46,6 +50,45 @@ export function createController() {
 }
 
 export type Controller = ReturnType<typeof createController>
+
+// Views when disposed can cache their state to be restored when opened again.
+// The short cache is cleared after 3 seconds of inactivity.
+// The long cache is cleared when the view is opened again.
+function createViewCache() {
+  type CacheDataMap = {
+    [DevtoolsMainView.Structure]: Structure.Cache
+    [DevtoolsMainView.Dgraph]: Dgraph.Cache
+  }
+  let shortCache: null | any = null
+  let nextShortCache: typeof shortCache = null
+  const longCache = new Map<keyof CacheDataMap, any>()
+
+  const clearShortCache = debounce(() => {
+    shortCache = null
+    nextShortCache = null
+  }, 3 * SECOND)
+
+  function setCacheGetter<T extends DevtoolsMainView>(view: T, getter: () => CacheDataMap[T]) {
+    onCleanup(() => {
+      const data = getter()
+      nextShortCache = { view: view as any, data: data.short }
+      longCache.set(view, data.long)
+      clearShortCache()
+    })
+  }
+  function getCache<T extends DevtoolsMainView>(
+    view: T,
+  ): { [K in 'short' | 'long']: CacheDataMap[T][K] | null } {
+    const short = shortCache && shortCache.view === view ? shortCache.data : null
+    shortCache = nextShortCache
+    nextShortCache = null
+    const long = longCache.get(view)
+    longCache.delete(view)
+    return { short, long }
+  }
+
+  return { set: setCacheGetter, get: getCache }
+}
 
 const [Provider, useControllerCtx] = createContextProvider(
   ({ controller, options }: { controller: Controller; options: { useShortcuts: boolean } }) => {
@@ -95,6 +138,8 @@ const [Provider, useControllerCtx] = createContextProvider(
     // OPENED MAIN VIEW
     //
     const [openedView, setOpenedView] = createSignal<DevtoolsMainView>(DevtoolsMainView.Structure)
+
+    const viewCache = createViewCache()
 
     //
     // INSPECTOR
@@ -154,6 +199,7 @@ const [Provider, useControllerCtx] = createContextProvider(
       inspector,
       options,
       controller,
+      viewCache,
     }
   },
 )

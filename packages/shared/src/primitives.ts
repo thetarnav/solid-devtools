@@ -13,23 +13,20 @@ import {
 import {
   $TRACK,
   Accessor,
+  AccessorArray,
   batch,
   createMemo,
   createSignal,
+  EffectFunction,
   getListener,
   getOwner,
+  MemoOptions,
+  NoInfer,
   onCleanup,
   Signal,
   SignalOptions,
   untrack,
 } from 'solid-js'
-import type {
-  AccessorArray,
-  EffectFunction,
-  MemoOptions,
-  NoInfer,
-  OnEffectFunction,
-} from 'solid-js/types/reactive/signal'
 import { Primitive } from 'type-fest'
 
 export type WritableDeep<T> = 0 extends 1 & T
@@ -146,17 +143,17 @@ export function makeHoverElementListener(onHover: (el: HTMLElement | null) => vo
  */
 export function defer<S, Next extends Prev, Prev = Next>(
   deps: AccessorArray<S> | Accessor<S>,
-  fn: OnEffectFunction<S, undefined | NoInfer<Prev>, Next>,
+  fn: (input: S, prevInput: S, prev: undefined | NoInfer<Prev>) => Next,
   initialValue: Next,
 ): EffectFunction<undefined | NoInfer<Next>, NoInfer<Next>>
 export function defer<S, Next extends Prev, Prev = Next>(
   deps: AccessorArray<S> | Accessor<S>,
-  fn: OnEffectFunction<S, undefined | NoInfer<Prev>, Next>,
+  fn: (input: S, prevInput: S, prev: undefined | NoInfer<Prev>) => Next,
   initialValue?: undefined,
 ): EffectFunction<undefined | NoInfer<Next>>
 export function defer<S, Next extends Prev, Prev = Next>(
   deps: AccessorArray<S> | Accessor<S>,
-  fn: OnEffectFunction<S, undefined | NoInfer<Prev>, Next>,
+  fn: (input: S, prevInput: S, prev: undefined | NoInfer<Prev>) => Next,
   initialValue?: Next,
 ): EffectFunction<undefined | NoInfer<Next>> {
   const isArray = Array.isArray(deps)
@@ -170,6 +167,7 @@ export function defer<S, Next extends Prev, Prev = Next>(
     } else input = deps()
     if (shouldDefer) {
       shouldDefer = false
+      prevInput = input
       return initialValue
     }
     const result = untrack(() => fn(input, prevInput, prevValue))

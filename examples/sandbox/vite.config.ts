@@ -4,7 +4,7 @@ import { defineConfig } from 'vite'
 import Inspect from 'vite-plugin-inspect'
 import solid from 'vite-plugin-solid'
 
-const usingExtension = process.env.EXT === 'true' || process.env.EXT === '1'
+const usingExtension = process.env['EXT'] === 'true' || process.env['EXT'] === '1'
 
 export default defineConfig({
   plugins: [

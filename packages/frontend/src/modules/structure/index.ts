@@ -1,6 +1,7 @@
 import { useController } from '@/controller'
 import {
   DEFAULT_WALKER_MODE,
+  DevtoolsMainView,
   Mapped,
   NodeID,
   NodeType,
@@ -32,12 +33,15 @@ export namespace Structure {
 
   export type State = { roots: Node[]; nodeList: Node[] }
 
+  // State to be stored in the controller cache
+  export type Cache = { short: State; long: { mode: TreeWalkerMode } }
+
   export type Module = ReturnType<typeof createStructure>
 }
 
 export const { reconcileStructure } = (() => {
-  let $_updated: StructureUpdates['updated']
-  let $_node_list: Structure.Node[]
+  let Updated: StructureUpdates['updated']
+  let NewNodeList: Structure.Node[]
 
   function createNode(
     raw: Mapped.Owner,
@@ -53,7 +57,7 @@ export const { reconcileStructure } = (() => {
     if (type === NodeType.Component && raw.hmr) node.hmr = raw.hmr
     else if (type !== NodeType.Root && raw.frozen) node.frozen = true
 
-    $_node_list.push(node)
+    NewNodeList.push(node)
 
     // map children
     for (const child of rawChildren) children.push(createNode(child, node, level + 1))
@@ -68,10 +72,10 @@ export const { reconcileStructure } = (() => {
     level: number,
   ): Structure.Node {
     const { id, children } = node
-    $_node_list.push(node)
+    NewNodeList.push(node)
     node.level = level
 
-    if (!raw) raw = $_updated[rootId]?.[id]
+    if (!raw) raw = Updated[rootId]?.[id]
 
     if (raw) {
       // update frozen computations
@@ -95,7 +99,7 @@ export const { reconcileStructure } = (() => {
       }
     } else {
       for (const child of children) {
-        updateNode(child, rootId, $_updated[rootId]?.[child.id], level + 1)
+        updateNode(child, rootId, Updated[rootId]?.[child.id], level + 1)
       }
     }
 
@@ -107,8 +111,8 @@ export const { reconcileStructure } = (() => {
     prevRoots: Structure.Node[],
     { removed, updated }: StructureUpdates,
   ): Structure.State {
-    $_updated = updated
-    $_node_list = []
+    Updated = updated
+    NewNodeList = []
     const nextRoots: Structure.Node[] = []
 
     const upatedTopLevelRoots = new Set<NodeID>()
@@ -116,16 +120,16 @@ export const { reconcileStructure } = (() => {
       const { id } = root
       if (removed.includes(id)) continue
       upatedTopLevelRoots.add(id)
-      nextRoots.push(updateNode(root, id, $_updated[id]?.[id], 0))
+      nextRoots.push(updateNode(root, id, Updated[id]?.[id], 0))
     }
 
-    for (const [rootId, updatedNodes] of entries($_updated)) {
+    for (const [rootId, updatedNodes] of entries(Updated)) {
       const root = updatedNodes![rootId]!
       if (!root || upatedTopLevelRoots.has(rootId)) continue
       nextRoots.push(createNode(root, null, 0))
     }
 
-    return { roots: nextRoots, nodeList: $_node_list }
+    return { roots: nextRoots, nodeList: NewNodeList }
   }
 
   return { reconcileStructure }
@@ -166,8 +170,11 @@ export function getNodePath(node: Structure.Node): Structure.Node[] {
 export default function createStructure() {
   const ctx = useController()
   const { client, devtools } = ctx.controller
+  const cachedInitialState = ctx.viewCache.get(DevtoolsMainView.Structure)
 
-  const [mode, setMode] = createSignal<TreeWalkerMode>(DEFAULT_WALKER_MODE)
+  const [mode, setMode] = createSignal<TreeWalkerMode>(
+    cachedInitialState.long?.mode ?? DEFAULT_WALKER_MODE,
+  )
 
   function changeTreeViewMode(newMode: TreeWalkerMode): void {
     if (newMode === mode()) return
@@ -178,9 +185,12 @@ export default function createStructure() {
   }
 
   const [state, setState] = createSignal<Structure.State>(
-    { nodeList: [], roots: [] },
-    { internal: true },
+    cachedInitialState.short || { nodeList: [], roots: [] },
   )
+  ctx.viewCache.set(DevtoolsMainView.Structure, () => ({
+    short: state(),
+    long: { mode: mode() },
+  }))
 
   const inspectedNode = createMemo(() => {
     const id = ctx.inspectedNodeId()
