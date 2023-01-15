@@ -109,7 +109,7 @@ export const { reconcileStructure } = (() => {
   // eslint-disable-next-line @typescript-eslint/no-shadow
   function reconcileStructure(
     prevRoots: Structure.Node[],
-    { removed, updated }: StructureUpdates,
+    { removed, updated, partial }: StructureUpdates,
   ): Structure.State {
     Updated = updated
     NewNodeList = []
@@ -118,7 +118,9 @@ export const { reconcileStructure } = (() => {
     const upatedTopLevelRoots = new Set<NodeID>()
     for (const root of prevRoots) {
       const { id } = root
-      if (removed.includes(id)) continue
+      // skip removed roots for partial updates
+      // and for full updates skip roots that were not sent
+      if (partial ? removed.includes(id) : !(id in Updated)) continue
       upatedTopLevelRoots.add(id)
       nextRoots.push(updateNode(root, id, Updated[id]?.[id], 0))
     }

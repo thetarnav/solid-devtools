@@ -33,6 +33,7 @@ export function createController() {
     highlightElementChange: $<HighlightElementPayload>(),
     openLocation: $<void>(),
     treeViewModeChange: $<TreeWalkerMode>(),
+    viewChange: $<DevtoolsMainView>(),
   }))
 
   const client = createEventHub({
@@ -51,9 +52,11 @@ export function createController() {
 
 export type Controller = ReturnType<typeof createController>
 
-// Views when disposed can cache their state to be restored when opened again.
-// The short cache is cleared after 3 seconds of inactivity.
-// The long cache is cleared when the view is opened again.
+/**
+ * Views when disposed can cache their state to be restored when opened again.
+ * The short cache is cleared after 3 seconds of inactivity.
+ * The long cache is cleared when the view is opened again.
+ */
 function createViewCache() {
   type CacheDataMap = {
     [DevtoolsMainView.Structure]: Structure.Cache
@@ -99,8 +102,10 @@ const [Provider, useControllerCtx] = createContextProvider(
     //
     const [devtoolsLocatorEnabled, setDevtoolsLocatorState] = createSignal(false)
     const [clientLocatorEnabled, setClientLocator] = createSignal(false)
-
     const locatorEnabled = () => devtoolsLocatorEnabled() || clientLocatorEnabled()
+
+    // send devtools locator state
+    createEffect(defer(devtoolsLocatorEnabled, devtools.devtoolsLocatorStateChange.emit))
 
     function setClientLocatorState(enabled: boolean) {
       batch(() => {
@@ -117,6 +122,9 @@ const [Provider, useControllerCtx] = createContextProvider(
       type: 'element' | 'node'
       id: NodeID
     } | null>(null, { equals: (a, b) => a?.id === b?.id })
+
+    // highlight hovered element
+    createEffect(defer(extHoveredNode, devtools.highlightElementChange.emit))
 
     const isNodeHovered = createSelector<NodeID | null, NodeID>(
       createMemo(() => {
@@ -139,6 +147,8 @@ const [Provider, useControllerCtx] = createContextProvider(
     //
     const [openedView, setOpenedView] = createSignal<DevtoolsMainView>(DevtoolsMainView.Structure)
 
+    createEffect(defer(openedView, devtools.viewChange.emit))
+
     const viewCache = createViewCache()
 
     //
@@ -146,6 +156,18 @@ const [Provider, useControllerCtx] = createContextProvider(
     //
     const inspector = createInspector()
 
+    // set inspected node
+    createEffect(defer(inspector.inspectedId, devtools.inspectNode.emit))
+
+    // toggle inspected value/prop/signal
+    inspector.setOnInspectValue(devtools.inspectValue.emit)
+
+    // open component location
+    inspector.setOnOpenLocation(devtools.openLocation.emit)
+
+    //
+    // Client events
+    //
     client.on('resetPanel', () => {
       setClientLocatorState(false)
       setDevtoolsLocatorState(false)
@@ -168,22 +190,6 @@ const [Provider, useControllerCtx] = createContextProvider(
     })
 
     client.on('clientLocatorModeChange', setClientLocatorState)
-
-    // send devtools locator state
-    createEffect(defer(devtoolsLocatorEnabled, devtools.devtoolsLocatorStateChange.emit))
-
-    // set inspected node
-    createEffect(defer(inspector.inspectedId, devtools.inspectNode.emit))
-
-    // toggle inspected value/prop/signal
-    inspector.setOnInspectValue(devtools.inspectValue.emit)
-
-    // LOCATION
-    // open component location
-    inspector.setOnOpenLocation(devtools.openLocation.emit)
-
-    // highlight hovered element
-    createEffect(defer(extHoveredNode, devtools.highlightElementChange.emit))
 
     return {
       locatorEnabled,

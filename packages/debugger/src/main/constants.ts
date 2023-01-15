@@ -5,6 +5,7 @@ export enum DevtoolsMainView {
   Structure = 'structure',
   Dgraph = 'dgraph',
 }
+export const DEFAULT_MAIN_VIEW = DevtoolsMainView.Structure
 
 export enum TreeWalkerMode {
   Owners = 'owners',

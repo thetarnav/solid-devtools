@@ -39,6 +39,7 @@ export function createOverlayController(): Controller {
   devtools.on('treeViewModeChange', mode => {
     queueMicrotask(() => debug.structure.setTreeWalkerMode(mode))
   })
+  devtools.on('viewChange', view => queueMicrotask(() => debug.setView(view)))
 
   debug.listenTo('StructureUpdates', updates => {
     queueMicrotask(() => client.structureUpdate.emit(updates))

@@ -8,44 +8,15 @@ export const Debugger: typeof API.Debugger = props => props.children
 
 export const attachDebugger: typeof API.attachDebugger = () => void 0
 
-export const useDebugger: typeof API.useDebugger = () => ({
-  triggerUpdate: () => void 0,
-  forceTriggerUpdate: () => void 0,
-  listenTo: () => () => void 0,
-  setInspectedNode: () => void 0,
-  handlePropsUpdate: () => () => void 0,
-  setInspectedSignal: () => null,
-  setInspectedProp: () => void 0,
-  inspectedDetails: () => null,
-  setInspectedValue: () => null,
-  setUserEnabledSignal: () => void 0,
-  openInspectedNodeLocation: () => void 0,
-  changeTreeWalkerMode: () => void 0,
-  enabled: () => false,
-  toggleEnabled: () => void 0,
-  dgraph: {
-    enabled: () => false,
-    toggleEnabled: () => void 0,
-  },
-  structure: {
-    enabled: () => false,
-    forceTriggerUpdate: () => void 0,
-    setTreeWalkerMode: () => void 0,
-    toggleEnabled: () => void 0,
-    triggerUpdate: () => void 0,
-  },
-  inspector: {
-    setInspectedNode: () => void 0,
-    toggleValueNode: () => void 0,
-  },
-  locator: {
-    toggleEnabled: () => void 0,
-    addClickInterceptor: () => void 0,
-    enabledByDebugger: () => false,
-    setHighlightTarget: () => void 0,
-    onHoveredComponent: () => () => void 0,
-  },
-})
+export const useDebugger: typeof API.useDebugger = () =>
+  new Proxy(
+    {},
+    {
+      get() {
+        throw new Error('Debugger is not available in production/server environment.')
+      },
+    },
+  ) as any
 
 export const enableRootsAutoattach: typeof API.enableRootsAutoattach = () => void 0
 export const useLocator: typeof API.useLocator = () => void 0

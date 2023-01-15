@@ -1,15 +1,11 @@
 import { defer } from '@solid-devtools/shared/primitives'
-import {
-  createEventHub,
-  createSimpleEmitter,
-  EventBus,
-  EventHub,
-} from '@solid-primitives/event-bus'
-import { Accessor, createEffect, createMemo, createSignal } from 'solid-js'
+import { createEventHub, createSimpleEmitter } from '@solid-primitives/event-bus'
+import { Accessor, batch, createEffect, createMemo, createSignal } from 'solid-js'
 import { createDependencyGraph } from '../dependency'
 import { createInspector, InspectorUpdate } from '../inspector'
 import { createLocator } from '../locator'
 import { createStructure, StructureUpdates } from '../structure'
+import { DEFAULT_MAIN_VIEW, DevtoolsMainView } from './constants'
 import { getOwnerById, getSdtId } from './id'
 import { createInternalRoot, getTopRoot } from './roots'
 import { ComputationUpdate, Mapped, NodeID, Solid } from './types'
@@ -17,29 +13,24 @@ import { createBatchedUpdateEmitter } from './utils'
 
 export type BatchComputationUpdatesHandler = (payload: ComputationUpdate[]) => void
 
-type DebuggerEventHubMessages = {
-  ComputationUpdates: ComputationUpdate[]
-  StructureUpdates: StructureUpdates
-  InspectorUpdate: InspectorUpdate[]
-  InspectedNodeDetails: Mapped.OwnerDetails
-}
-export type DebuggerEventHub = EventHub<{
-  [K in keyof DebuggerEventHubMessages]: EventBus<DebuggerEventHubMessages[K]>
-}>
-
 export type InspectedNode = {
   readonly rootId: NodeID
   readonly owner: Solid.Owner | null
   readonly signal: Solid.Signal | null
 } | null
 
-const plugin = createInternalRoot(() => {
-  const eventHub: DebuggerEventHub = createEventHub(bus => ({
-    ComputationUpdates: bus(),
-    StructureUpdates: bus(),
-    InspectorUpdate: bus(),
-    InspectedNodeDetails: bus(),
+function createDebuggerEventHub() {
+  return createEventHub($ => ({
+    ComputationUpdates: $<ComputationUpdate[]>(),
+    StructureUpdates: $<StructureUpdates>(),
+    InspectorUpdate: $<InspectorUpdate[]>(),
+    InspectedNodeDetails: $<Mapped.OwnerDetails>(),
   }))
+}
+export type DebuggerEventHub = ReturnType<typeof createDebuggerEventHub>
+
+const plugin = createInternalRoot(() => {
+  const eventHub = createDebuggerEventHub()
 
   //
   // Debugger Enabled
@@ -57,6 +48,24 @@ const plugin = createInternalRoot(() => {
   )
 
   const dgraphEnabled = createMemo(() => _dgraphEnabled() && debuggerEnabled())
+
+  //
+  // Current Open VIEW
+  //
+  let currentView: DevtoolsMainView = DEFAULT_MAIN_VIEW
+  const [listenToViewChange, emitViewChange] = createSimpleEmitter<DevtoolsMainView>()
+
+  function setView(view: DevtoolsMainView) {
+    batch(() => {
+      setStructureEnabled(view === DevtoolsMainView.Structure)
+      setDgraphEnabled(view === DevtoolsMainView.Dgraph)
+      emitViewChange((currentView = view))
+    })
+  }
+
+  //
+  // Inspected Node
+  //
 
   // Current inspected node is shared between modules
   let inspectedNode: InspectedNode = null
@@ -101,14 +110,15 @@ const plugin = createInternalRoot(() => {
   })
 
   const structure = createStructure({
-    onStructureUpdate(updated, removedIds) {
-      eventHub.emit('StructureUpdates', { updated, removed: [...removedIds] })
+    onStructureUpdate(updates) {
+      eventHub.emit('StructureUpdates', updates)
       updateInspectedNode()
     },
     onComputationUpdates(rootId, id) {
       pushComputationUpdate({ rootId, id })
     },
     structureEnabled,
+    listenToViewChange,
   })
 
   //
@@ -146,6 +156,7 @@ const plugin = createInternalRoot(() => {
       enabled: debuggerEnabled,
       toggleEnabled: (enabled: boolean) => void setDebuggerEnabled(enabled),
       listenTo: eventHub.on,
+      setView,
       openInspectedNodeLocation,
       setInspectedNode,
       structure: {

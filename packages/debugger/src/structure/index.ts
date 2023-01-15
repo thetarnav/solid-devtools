@@ -1,6 +1,7 @@
+import { Listen } from '@solid-primitives/event-bus'
 import { throttle } from '@solid-primitives/scheduled'
 import * as registry from '../main/componentRegistry'
-import { DEFAULT_WALKER_MODE, NodeType, TreeWalkerMode } from '../main/constants'
+import { DEFAULT_WALKER_MODE, DevtoolsMainView, NodeType, TreeWalkerMode } from '../main/constants'
 import { getSdtId } from '../main/id'
 import * as roots from '../main/roots'
 import { Mapped, NodeID, Solid } from '../main/types'
@@ -8,16 +9,16 @@ import { isDisposed, markOwnerType } from '../main/utils'
 import { ComputationUpdateHandler, walkSolidTree } from './walker'
 
 export type StructureUpdates = {
+  /** Partial means that the updates are based on the previous structure state */
+  partial: boolean
+  /** Removed roots */
   removed: NodeID[]
   /** Record: `rootId` -- Record of updated nodes by `nodeId` */
   updated: Partial<Record<NodeID, Partial<Record<NodeID, Mapped.Owner>>>>
 }
 
 export type Structure = {
-  onStructureUpdate: (
-    structureUpdates: StructureUpdates['updated'],
-    removedIds: ReadonlySet<NodeID>,
-  ) => void
+  onStructureUpdate: (updates: StructureUpdates) => void
   onComputationUpdate: (rootId: NodeID, nodeId: NodeID) => void
 }
 
@@ -52,6 +53,7 @@ export function createStructure(config: {
   onStructureUpdate: Structure['onStructureUpdate']
   onComputationUpdates: Structure['onComputationUpdate']
   structureEnabled: () => boolean
+  listenToViewChange: Listen<DevtoolsMainView>
 }) {
   let treeWalkerMode: TreeWalkerMode = DEFAULT_WALKER_MODE
 
@@ -74,10 +76,11 @@ export function createStructure(config: {
     if (config.structureEnabled()) {
       const updated: StructureUpdates['updated'] = {}
 
-      const [owners, getRootId] = shouldUpdateAllRoots
-        ? [roots.getCurrentRoots(), (owner: Solid.Owner) => getSdtId(owner)]
-        : [updateQueue, (owner: Solid.Owner) => ownerRoots.get(owner)!]
+      const partial = !shouldUpdateAllRoots
       shouldUpdateAllRoots = false
+      const [owners, getRootId] = partial
+        ? [updateQueue, (owner: Solid.Owner) => ownerRoots.get(owner)!]
+        : [roots.getCurrentRoots(), (owner: Solid.Owner) => getSdtId(owner)]
 
       for (const owner of owners) {
         const rootId = getRootId(owner)
@@ -92,7 +95,7 @@ export function createStructure(config: {
         else updated[rootId] = { [tree.id]: tree }
       }
 
-      config.onStructureUpdate(updated, removedRoots)
+      config.onStructureUpdate({ partial, updated, removed: [...removedRoots] })
     }
     updateQueue.clear()
     flushRootUpdateQueue.clear()
@@ -115,6 +118,12 @@ export function createStructure(config: {
   roots.setOnRootRemoved((rootId: NodeID) => {
     removedRoots.add(rootId)
     flushRootUpdateQueue()
+  })
+
+  config.listenToViewChange(view => {
+    if (view === DevtoolsMainView.Structure) {
+      updateAllRoots()
+    }
   })
 
   function updateAllRoots(): void {
