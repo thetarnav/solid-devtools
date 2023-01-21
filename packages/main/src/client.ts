@@ -45,7 +45,7 @@ createInternalRoot(() => {
 
     debug.listenTo('StructureUpdates', updates => toContent('StructureUpdate', updates))
 
-    debug.listenTo('ComputationUpdates', updates => {
+    debug.listenTo('NodeUpdates', updates => {
       toContent('ComputationUpdates', updates)
     })
 

@@ -27,10 +27,10 @@ const App: Component<{ headerSubtitle?: JSX.Element }> = props => {
       <div class={styles.content}>
         <Splitter onToggle={() => ctx.setInspectedNode(null)} side={<Inspector />}>
           <Switch>
-            <Match when={ctx.openedView() == DevtoolsMainView.Structure}>
+            <Match when={ctx.view.get() === DevtoolsMainView.Structure}>
               <StructureView />
             </Match>
-            <Match when={ctx.openedView() == DevtoolsMainView.Dgraph}>
+            <Match when={ctx.view.get() === DevtoolsMainView.Dgraph}>
               <DgraphView />
             </Match>
           </Switch>
@@ -41,7 +41,7 @@ const App: Component<{ headerSubtitle?: JSX.Element }> = props => {
 }
 
 const MainViewTabs: Component = () => {
-  const ctx = useController()
+  const { view } = useController()
 
   return (
     <button
@@ -53,12 +53,14 @@ const MainViewTabs: Component = () => {
         cursor: 'pointer',
       }}
       onClick={() => {
-        ctx.setOpenedView(p =>
-          p === DevtoolsMainView.Structure ? DevtoolsMainView.Dgraph : DevtoolsMainView.Structure,
+        view.set(
+          view.get() === DevtoolsMainView.Structure
+            ? DevtoolsMainView.Dgraph
+            : DevtoolsMainView.Structure,
         )
       }}
     >
-      View: {ctx.openedView().toUpperCase()}
+      View: {view.get().toUpperCase()}
     </button>
   )
 }

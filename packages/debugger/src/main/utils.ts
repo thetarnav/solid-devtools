@@ -10,7 +10,7 @@ import {
 } from 'solid-js'
 import { DEV as _STORE_DEV } from 'solid-js/store'
 import { NodeType } from './constants'
-import { Core, NodeID, Solid } from './types'
+import { Core, Solid } from './types'
 
 const STORE_DEV = _STORE_DEV!
 
@@ -274,36 +274,18 @@ export function getFunctionSources(fn: () => unknown): Solid.Signal[] {
   return nodes ?? []
 }
 
-export function dedupeArrayById<T extends { id: NodeID }>(input: T[]): T[] {
-  const ids = new Set<NodeID>()
-  const deduped: T[] = []
-  for (let i = input.length - 1; i >= 0; i--) {
-    const update = input[i]!
-    if (ids.has(update.id)) continue
-    ids.add(update.id)
-    deduped.push(update)
-  }
-  return deduped
-}
-
 /**
  * Batches series of updates to a single array of updates.
  *
  * The updates are deduped by `id` property
  */
-export function createBatchedUpdateEmitter<T extends { id: NodeID }>(
-  emit: Emit<T[]>,
-): (update: T) => void {
-  const updates: T[] = []
+export function createBatchedUpdateEmitter<T>(emit: Emit<T[]>): (update: T) => void {
+  const updates = new Set<T>()
 
-  const triggerUpdateEmit = throttle(() => {
-    const deduped = dedupeArrayById(updates)
-    updates.length = 0
-    emit(deduped)
-  })
+  const triggerUpdateEmit = throttle(() => emit([...updates]))
 
   return update => {
-    updates.push(update)
+    updates.add(update)
     triggerUpdateEmit()
   }
 }

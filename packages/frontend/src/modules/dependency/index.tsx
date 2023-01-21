@@ -1,3 +1,4 @@
+import { Scrollable } from '@/ui'
 import { Component, createContext, useContext } from 'solid-js'
 import { createDependencyGraph, Dgraph } from './dgraph'
 
@@ -13,9 +14,11 @@ const DgraphView: Component = () => {
   const dgraph = createDependencyGraph()
 
   return (
-    <DgraphContext.Provider value={dgraph}>
-      <div>Dgraph</div>
-    </DgraphContext.Provider>
+    <Scrollable>
+      <DgraphContext.Provider value={dgraph}>
+        <pre>{JSON.stringify(dgraph.dGraph(), null, 2)}</pre>
+      </DgraphContext.Provider>
+    </Scrollable>
   )
 }
 

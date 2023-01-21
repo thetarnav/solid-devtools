@@ -40,6 +40,7 @@ let VisitedSources: WeakSet<Solid.Signal>
 let VisitedObservers: WeakSet<Solid.Computation>
 let DepthMap: Record<NodeID, DGraph.Depth>
 let OnNodeUpdate: (node: Solid.Computation | Solid.Memo | Solid.Signal) => void
+export type OnNodeUpdate = typeof OnNodeUpdate
 
 function addNodeToGraph(node: Solid.Signal | Solid.Memo | Solid.Computation) {
   const id = getSdtId(node)
@@ -94,7 +95,7 @@ function lookupDepth(node: Solid.Owner | Solid.Signal, i = 0): DGraph.Depth {
 
 export function collectDependencyGraph(
   node: Solid.Computation | Solid.Memo | Solid.Signal,
-  config: { onNodeUpdate: typeof OnNodeUpdate },
+  config: { onNodeUpdate: OnNodeUpdate },
 ) {
   Graph = {}
   VisitedSources = new WeakSet()

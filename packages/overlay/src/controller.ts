@@ -45,8 +45,8 @@ export function createOverlayController(): Controller {
     queueMicrotask(() => client.structureUpdate.emit(updates))
   })
 
-  debug.listenTo('ComputationUpdates', updates => {
-    queueMicrotask(() => client.computationUpdates.emit(updates))
+  debug.listenTo('NodeUpdates', updates => {
+    queueMicrotask(() => client.nodeUpdates.emit(updates))
   })
 
   debug.listenTo('InspectorUpdate', payload => {
@@ -58,10 +58,14 @@ export function createOverlayController(): Controller {
     separate(details, client.setInspectedDetails.emit)
   })
 
+  debug.listenTo('DgraphUpdate', update => {
+    separate(update, client.dgraphUpdate.emit)
+  })
+
   // send the state of the client locator mode
   createEffect(
     defer(debug.locator.enabledByDebugger, state => {
-      queueMicrotask(() => client.clientLocatorModeChange.emit(state))
+      queueMicrotask(() => client.locatorModeChange.emit(state))
     }),
   )
 
@@ -69,12 +73,12 @@ export function createOverlayController(): Controller {
   debug.locator.addClickInterceptor((e, component) => {
     e.preventDefault()
     e.stopPropagation()
-    queueMicrotask(() => client.clientInspectedNode.emit(component.id))
+    queueMicrotask(() => client.inspectedNode.emit(component.id))
     return false
   })
 
   debug.locator.onHoveredComponent(data => {
-    queueMicrotask(() => client.clientHoveredComponent.emit(data))
+    queueMicrotask(() => client.hoveredComponent.emit(data))
   })
 
   return controller

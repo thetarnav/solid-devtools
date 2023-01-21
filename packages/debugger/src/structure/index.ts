@@ -17,11 +17,6 @@ export type StructureUpdates = {
   updated: Partial<Record<NodeID, Partial<Record<NodeID, Mapped.Owner>>>>
 }
 
-export type Structure = {
-  onStructureUpdate: (updates: StructureUpdates) => void
-  onComputationUpdate: (rootId: NodeID, nodeId: NodeID) => void
-}
-
 /**
  * Finds the closest owner of a given owner that is included in the tree walker.
  */
@@ -49,9 +44,9 @@ function getClosestIncludedOwner(owner: Solid.Owner, mode: TreeWalkerMode): Soli
   return root
 }
 
-export function createStructure(config: {
-  onStructureUpdate: Structure['onStructureUpdate']
-  onComputationUpdates: Structure['onComputationUpdate']
+export function createStructure(props: {
+  onStructureUpdate: (updates: StructureUpdates) => void
+  onNodeUpdate: (nodeId: NodeID) => void
   structureEnabled: () => boolean
   listenToViewChange: Listen<DevtoolsMainView>
 }) {
@@ -66,14 +61,14 @@ export function createStructure(config: {
   const onComputationUpdate: ComputationUpdateHandler = (rootId, owner, changedStructure) => {
     // separate the callback from the computation
     queueMicrotask(() => {
-      if (!config.structureEnabled()) return
+      if (!props.structureEnabled()) return
       changedStructure && updateOwner(owner, rootId)
-      config.onComputationUpdates(rootId, getSdtId(owner))
+      props.onNodeUpdate(getSdtId(owner))
     })
   }
 
   function forceFlushRootUpdateQueue(): void {
-    if (config.structureEnabled()) {
+    if (props.structureEnabled()) {
       const updated: StructureUpdates['updated'] = {}
 
       const partial = !shouldUpdateAllRoots
@@ -95,7 +90,7 @@ export function createStructure(config: {
         else updated[rootId] = { [tree.id]: tree }
       }
 
-      config.onStructureUpdate({ partial, updated, removed: [...removedRoots] })
+      props.onStructureUpdate({ partial, updated, removed: [...removedRoots] })
     }
     updateQueue.clear()
     flushRootUpdateQueue.clear()
@@ -120,7 +115,7 @@ export function createStructure(config: {
     flushRootUpdateQueue()
   })
 
-  config.listenToViewChange(view => {
+  props.listenToViewChange(view => {
     if (view === DevtoolsMainView.Structure) {
       updateAllRoots()
     }

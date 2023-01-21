@@ -2,7 +2,7 @@ import { warn } from '@solid-devtools/shared/utils'
 import { Listen } from '@solid-primitives/event-bus'
 import { scheduleIdle, throttle } from '@solid-primitives/scheduled'
 import { Accessor, createEffect, untrack } from 'solid-js'
-import { DebuggerEventHub, InspectedNode } from '../main'
+import { DebuggerEventHub, InspectedState } from '../main'
 import { NodeIDMap } from '../main/id'
 import { Core, Mapped, NodeID, Solid, ValueItemID } from '../main/types'
 import { makeSolidUpdateListener } from '../main/update'
@@ -26,7 +26,7 @@ export type ToggleInspectedValueData = { id: ValueItemID; selected: boolean }
 export function createInspector(props: {
   eventHub: DebuggerEventHub
   enabled: Accessor<boolean>
-  listenToInspectedNodeChange: Listen<InspectedNode>
+  listenToInspectedNodeChange: Listen<InspectedState>
 }) {
   let lastDetails: Mapped.OwnerDetails | undefined
   let inspectedOwner: Solid.Owner | null

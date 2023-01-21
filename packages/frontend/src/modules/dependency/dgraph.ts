@@ -1,5 +1,6 @@
 import { useController } from '@/controller'
-import { DevtoolsMainView } from '@solid-devtools/debugger/types'
+import { DevtoolsMainView, DGraphUpdate } from '@solid-devtools/debugger/types'
+import { createSignal } from 'solid-js'
 
 export namespace Dgraph {
   export type Module = ReturnType<typeof createDependencyGraph>
@@ -9,11 +10,18 @@ export namespace Dgraph {
 
 export function createDependencyGraph() {
   const ctx = useController()
+  const { client } = ctx.controller
 
-  const state = {}
+  const [dGraph, setDGraph] = createSignal<DGraphUpdate>(null)
+
   ctx.viewCache.get(DevtoolsMainView.Dgraph)
+  ctx.viewCache.set(DevtoolsMainView.Dgraph, () => ({ short: {}, long: {} }))
 
-  ctx.viewCache.set(DevtoolsMainView.Dgraph, () => ({ short: state, long: {} }))
+  client.dgraphUpdate.listen(update => {
+    setDGraph(update)
+  })
 
-  return {}
+  return {
+    dGraph,
+  }
 }

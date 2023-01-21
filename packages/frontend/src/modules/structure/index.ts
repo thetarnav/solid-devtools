@@ -213,6 +213,10 @@ export default function createStructure() {
 
   const [listenToComputationUpdate, emitComputationUpdate] = createSimpleEmitter<NodeID>()
 
+  client.nodeUpdates.listen(updated => {
+    updated.forEach(id => emitComputationUpdate(id))
+  })
+
   const [searchResult, setSearchResult] = createSignal<NodeID[]>()
   const isSearched = createSelector(searchResult, (node: NodeID, o) => !!o && o.includes(node))
 
@@ -255,10 +259,6 @@ export default function createStructure() {
     updateStructure(null)
   })
 
-  client.on('computationUpdates', updated => {
-    updated.forEach(({ id }) => emitComputationUpdate(id))
-  })
-
   client.on('structureUpdate', updateStructure)
 
   // TREE VIEW MODE
@@ -270,7 +270,6 @@ export default function createStructure() {
     updateStructure,
     isSearched,
     listenToComputationUpdate,
-    emitComputationUpdate,
     findNode,
     getRootNode,
     getClosestComponentNode,

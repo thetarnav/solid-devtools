@@ -170,5 +170,3 @@ export namespace Mapped {
     location?: LocationAttr
   }
 }
-
-export type ComputationUpdate = { rootId: NodeID; id: NodeID }

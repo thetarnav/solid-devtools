@@ -1,19 +1,17 @@
 import { defer } from '@solid-devtools/shared/primitives'
 import { createEventHub, createSimpleEmitter } from '@solid-primitives/event-bus'
 import { Accessor, batch, createEffect, createMemo, createSignal } from 'solid-js'
-import { createDependencyGraph } from '../dependency'
+import { createDependencyGraph, DGraphUpdate } from '../dependency'
 import { createInspector, InspectorUpdate } from '../inspector'
 import { createLocator } from '../locator'
 import { createStructure, StructureUpdates } from '../structure'
 import { DEFAULT_MAIN_VIEW, DevtoolsMainView } from './constants'
 import { getOwnerById, getSdtId } from './id'
 import { createInternalRoot, getTopRoot } from './roots'
-import { ComputationUpdate, Mapped, NodeID, Solid } from './types'
+import { Mapped, NodeID, Solid } from './types'
 import { createBatchedUpdateEmitter } from './utils'
 
-export type BatchComputationUpdatesHandler = (payload: ComputationUpdate[]) => void
-
-export type InspectedNode = {
+export type InspectedState = {
   readonly rootId: NodeID
   readonly owner: Solid.Owner | null
   readonly signal: Solid.Signal | null
@@ -21,10 +19,11 @@ export type InspectedNode = {
 
 function createDebuggerEventHub() {
   return createEventHub($ => ({
-    ComputationUpdates: $<ComputationUpdate[]>(),
+    NodeUpdates: $<NodeID[]>(),
     StructureUpdates: $<StructureUpdates>(),
     InspectorUpdate: $<InspectorUpdate[]>(),
     InspectedNodeDetails: $<Mapped.OwnerDetails>(),
+    DgraphUpdate: $<DGraphUpdate>(),
   }))
 }
 export type DebuggerEventHub = ReturnType<typeof createDebuggerEventHub>
@@ -68,10 +67,10 @@ const plugin = createInternalRoot(() => {
   //
 
   // Current inspected node is shared between modules
-  let inspectedNode: InspectedNode = null
-  const [listenToInspectedNodeChange, emitNodeChange] = createSimpleEmitter<InspectedNode>()
+  let inspectedState: InspectedState = null
+  const [listenToInspectedState, emitInspectedStateChange] = createSimpleEmitter<InspectedState>()
 
-  const getInspecredNodeById = (id: null | NodeID): InspectedNode => {
+  const getInspecredNodeById = (id: null | NodeID): InspectedState => {
     if (!id) return null
     const owner = getOwnerById(id)
     if (!owner) return null
@@ -81,19 +80,19 @@ const plugin = createInternalRoot(() => {
   }
 
   function setInspectedNode(id: null | NodeID): void {
-    emitNodeChange((inspectedNode = getInspecredNodeById(id)))
+    emitInspectedStateChange((inspectedState = getInspecredNodeById(id)))
   }
 
   /** Check if the inspected node doesn't need to change (treeview mode changed or sth) */
   function updateInspectedNode() {
-    if (!inspectedNode || !inspectedNode.owner) return
-    const closest = structure.getClosestIncludedOwner(inspectedNode.owner)
-    if (closest && closest === inspectedNode.owner) return
+    if (!inspectedState || !inspectedState.owner) return
+    const closest = structure.getClosestIncludedOwner(inspectedState.owner)
+    if (closest && closest === inspectedState.owner) return
 
     const root = closest && getTopRoot(closest)
-    inspectedNode =
+    inspectedState =
       !closest || !root ? null : { rootId: getSdtId(root), owner: closest, signal: null }
-    emitNodeChange(inspectedNode)
+    emitInspectedStateChange(inspectedState)
   }
 
   createEffect(
@@ -105,8 +104,8 @@ const plugin = createInternalRoot(() => {
   //
   // Structure & Computation updates:
   //
-  const pushComputationUpdate = createBatchedUpdateEmitter<ComputationUpdate>(updates => {
-    eventHub.emit('ComputationUpdates', updates)
+  const pushNodeUpdate = createBatchedUpdateEmitter<NodeID>(updates => {
+    eventHub.emit('NodeUpdates', updates)
   })
 
   const structure = createStructure({
@@ -114,9 +113,7 @@ const plugin = createInternalRoot(() => {
       eventHub.emit('StructureUpdates', updates)
       updateInspectedNode()
     },
-    onComputationUpdates(rootId, id) {
-      pushComputationUpdate({ rootId, id })
-    },
+    onNodeUpdate: pushNodeUpdate,
     structureEnabled,
     listenToViewChange,
   })
@@ -127,10 +124,16 @@ const plugin = createInternalRoot(() => {
   const inspector = createInspector({
     eventHub,
     enabled: debuggerEnabled,
-    listenToInspectedNodeChange,
+    listenToInspectedNodeChange: listenToInspectedState,
   })
 
-  const dgraph = createDependencyGraph({ enabled: dgraphEnabled, listenToInspectedNodeChange })
+  const dgraph = createDependencyGraph({
+    enabled: dgraphEnabled,
+    listenToInspectedStateChange: listenToInspectedState,
+    listenToViewChange,
+    emitDependencyGraph: graph => eventHub.emit('DgraphUpdate', graph),
+    onNodeUpdate: pushNodeUpdate,
+  })
 
   //
   // Locator

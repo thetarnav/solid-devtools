@@ -1,6 +1,6 @@
 import {
-  ComputationUpdate,
   DevtoolsMainView,
+  DGraphUpdate,
   HighlightElementPayload,
   InspectorUpdate,
   Mapped,
@@ -40,11 +40,12 @@ export function createController() {
     resetPanel: batchedBus<void>(),
     setInspectedDetails: batchedBus<Mapped.OwnerDetails>(),
     structureUpdate: batchedBus<StructureUpdates>(),
-    computationUpdates: batchedBus<ComputationUpdate[]>(),
+    nodeUpdates: batchedBus<NodeID[]>(),
     inspectorUpdate: batchedBus<InspectorUpdate[]>(),
-    clientLocatorModeChange: batchedBus<boolean>(),
-    clientHoveredComponent: batchedBus<{ nodeId: NodeID; state: boolean }>(),
-    clientInspectedNode: batchedBus<NodeID>(),
+    locatorModeChange: batchedBus<boolean>(),
+    hoveredComponent: batchedBus<{ nodeId: NodeID; state: boolean }>(),
+    inspectedNode: batchedBus<NodeID>(),
+    dgraphUpdate: batchedBus<DGraphUpdate>(),
   })
 
   return { client, devtools }
@@ -143,18 +144,27 @@ const [Provider, useControllerCtx] = createContextProvider(
     }
 
     //
-    // OPENED MAIN VIEW
-    //
-    const [openedView, setOpenedView] = createSignal<DevtoolsMainView>(DevtoolsMainView.Structure)
-
-    createEffect(defer(openedView, devtools.viewChange.emit))
-
-    const viewCache = createViewCache()
-
-    //
     // INSPECTOR
     //
     const inspector = createInspector()
+
+    //
+    // OPENED MAIN VIEW
+    //
+    const [openedView, setOpenedView] = createSignal<DevtoolsMainView>(DevtoolsMainView.Structure)
+    const viewCache = createViewCache()
+
+    // Graph view is only available when there is an inspected node
+    const canOpenGraphView = () =>
+      openedView() !== DevtoolsMainView.Dgraph && !!inspector.inspectedId()
+
+    function openView(view: DevtoolsMainView) {
+      if (view === DevtoolsMainView.Dgraph && !canOpenGraphView()) return
+
+      setOpenedView(view)
+    }
+
+    createEffect(defer(openedView, devtools.viewChange.emit))
 
     // set inspected node
     createEffect(defer(inspector.inspectedId, devtools.inspectNode.emit))
@@ -177,27 +187,29 @@ const [Provider, useControllerCtx] = createContextProvider(
     client.on('setInspectedDetails', inspector.setDetails)
     client.on('inspectorUpdate', inspector.update)
 
-    client.on('clientHoveredComponent', ({ nodeId, state }) => {
+    client.on('hoveredComponent', ({ nodeId, state }) => {
       setClientHoveredNode(p => {
         if (state) return nodeId ?? p
         return p && p === nodeId ? null : p
       })
     })
 
-    client.on('clientInspectedNode', node => {
+    client.on('inspectedNode', node => {
       inspector.setInspectedNode(node)
       setDevtoolsLocatorState(false)
     })
 
-    client.on('clientLocatorModeChange', setClientLocatorState)
+    client.on('locatorModeChange', setClientLocatorState)
 
     return {
       locatorEnabled,
       isNodeHovered,
       toggleHoveredNode,
       toggleHoveredElement,
-      openedView,
-      setOpenedView,
+      view: {
+        get: openedView,
+        set: openView,
+      },
       inspectedNodeId: inspector.inspectedId,
       isNodeInspected: inspector.isNodeInspected,
       setLocatorState: setDevtoolsLocatorState,
