@@ -1,6 +1,11 @@
 import { getSdtId } from '../main/id'
 import { NodeID, Solid } from '../main/types'
-import { observeComputationUpdate, observeValueUpdate } from '../main/update'
+import {
+  observeComputationUpdate,
+  observeValueUpdate,
+  removeComputationUpdateObserver,
+  removeValueUpdateObserver,
+} from '../main/update'
 import { getNodeName, getNodeType, isSolidOwner } from '../main/utils'
 import { ComputationNodeType, NodeType } from '../types'
 
@@ -36,11 +41,23 @@ export namespace DGraph {
 const $DGRAPH = Symbol('dependency-graph')
 
 let Graph: DGraph.Graph
-let VisitedSources: WeakSet<Solid.Signal>
-let VisitedObservers: WeakSet<Solid.Computation>
+let VisitedSources: Set<Solid.Signal>
+let VisitedObservers: Set<Solid.Computation>
 let DepthMap: Record<NodeID, DGraph.Depth>
 let OnNodeUpdate: (node: Solid.Computation | Solid.Memo | Solid.Signal) => void
 export type OnNodeUpdate = typeof OnNodeUpdate
+
+function observeNodeUpdate(
+  node: Solid.Computation | Solid.Memo | Solid.Signal,
+  handler: VoidFunction,
+) {
+  if (isSolidOwner(node)) observeComputationUpdate(node, handler, $DGRAPH)
+  else observeValueUpdate(node, handler, $DGRAPH)
+}
+function unobserveNodeUpdate(node: Solid.Computation | Solid.Memo | Solid.Signal) {
+  if (isSolidOwner(node)) removeComputationUpdateObserver(node, $DGRAPH)
+  else removeValueUpdateObserver(node, $DGRAPH)
+}
 
 function addNodeToGraph(node: Solid.Signal | Solid.Memo | Solid.Computation) {
   const id = getSdtId(node)
@@ -48,9 +65,7 @@ function addNodeToGraph(node: Solid.Signal | Solid.Memo | Solid.Computation) {
 
   // observe each mapped node, to update the graph when it changes
   const onNodeUpdate = OnNodeUpdate
-  const handler = () => onNodeUpdate(node)
-  if (isSolidOwner(node)) observeComputationUpdate(node, handler, $DGRAPH)
-  else observeValueUpdate(node, handler, $DGRAPH)
+  observeNodeUpdate(node, () => onNodeUpdate(node))
 
   return (Graph[id] = {
     name: getNodeName(node),
@@ -98,8 +113,8 @@ export function collectDependencyGraph(
   config: { onNodeUpdate: OnNodeUpdate },
 ) {
   Graph = {}
-  VisitedSources = new WeakSet()
-  VisitedObservers = new WeakSet()
+  const visitedSources = (VisitedSources = new Set())
+  const visitedObservers = (VisitedObservers = new Set())
   DepthMap = {}
   OnNodeUpdate = config.onNodeUpdate
 
@@ -109,7 +124,14 @@ export function collectDependencyGraph(
 
   const result = Graph
 
+  // clear all listeners
+  const clearListeners = () => {
+    visitedSources.forEach(unobserveNodeUpdate)
+    visitedObservers.forEach(unobserveNodeUpdate)
+    unobserveNodeUpdate(node)
+  }
+
   Graph = VisitedObservers = VisitedSources = DepthMap = OnNodeUpdate = undefined!
 
-  return result
+  return { graph: result, clearListeners }
 }

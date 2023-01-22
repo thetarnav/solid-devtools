@@ -12,7 +12,7 @@ export enum TreeWalkerMode {
   Components = 'components',
   DOM = 'dom',
 }
-export const DEFAULT_WALKER_MODE = TreeWalkerMode.Components
+export const DEFAULT_WALKER_MODE = TreeWalkerMode.Owners
 
 export enum NodeType {
   Root = 'root',

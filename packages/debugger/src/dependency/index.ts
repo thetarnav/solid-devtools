@@ -20,6 +20,7 @@ export function createDependencyGraph(props: {
   onNodeUpdate: (nodeId: NodeID) => void
 }) {
   let inspectedState: InspectedState = null
+  let clearListeners: VoidFunction | null = null
 
   const onNodeUpdate: OnNodeUpdate = node => {
     // separate the callback from the computation
@@ -33,26 +34,31 @@ export function createDependencyGraph(props: {
   function inspectDGraph() {
     const inspectedNode = inspectedState?.signal ?? inspectedState?.owner
     if (
+      !props.enabled() ||
       !inspectedNode ||
       (isSolidOwner(inspectedNode) &&
         (!isSolidComputation(inspectedNode) || isSolidComponent(inspectedNode)))
     ) {
+      clearListeners?.()
+      clearListeners = null
       return
     }
 
+    // listeners need to be cleared each time, because each update will cause the graph to be mapped again
+    clearListeners?.()
     const dgraph = collectDependencyGraph(inspectedNode, { onNodeUpdate })
-
-    props.emitDependencyGraph(dgraph)
+    clearListeners = dgraph.clearListeners
+    props.emitDependencyGraph(dgraph.graph)
   }
   const triggerInspect = throttle(inspectDGraph, 200)
 
   props.listenToInspectedStateChange(newInspected => {
     inspectedState = newInspected
-    if (props.enabled()) inspectDGraph()
+    inspectDGraph()
   })
 
-  props.listenToViewChange(view => {
-    if (view === DevtoolsMainView.Dgraph && props.enabled()) inspectDGraph()
+  props.listenToViewChange(() => {
+    inspectDGraph()
   })
 
   return {}
