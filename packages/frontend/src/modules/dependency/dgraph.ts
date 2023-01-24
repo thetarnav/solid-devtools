@@ -12,16 +12,16 @@ export function createDependencyGraph() {
   const ctx = useController()
   const { client } = ctx.controller
 
-  const [dGraph, setDGraph] = createSignal<DGraphUpdate>(null)
+  const [graph, setGraph] = createSignal<DGraphUpdate>(null)
 
   ctx.viewCache.get(DevtoolsMainView.Dgraph)
   ctx.viewCache.set(DevtoolsMainView.Dgraph, () => ({ short: {}, long: {} }))
 
   client.dgraphUpdate.listen(update => {
-    setDGraph(update)
+    setGraph(update)
   })
 
   return {
-    dGraph,
+    graph,
   }
 }

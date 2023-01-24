@@ -19,18 +19,20 @@ export namespace DGraph {
 
   export type Signal = NodeBase & {
     type: NodeType.Signal
-    observers: NodeID[] | undefined
+    observers: readonly NodeID[] | undefined
+    sources?: undefined
   }
 
   export type Computation = NodeBase & {
     type: Exclude<ComputationNodeType, NodeType.Memo>
-    sources: NodeID[] | undefined
+    sources: readonly NodeID[] | undefined
+    observers?: undefined
   }
 
   export type Memo = NodeBase & {
     type: NodeType.Memo
-    sources: NodeID[] | undefined
-    observers: NodeID[] | undefined
+    sources: readonly NodeID[] | undefined
+    observers: readonly NodeID[] | undefined
   }
 
   export type Node = Signal | Computation | Memo
