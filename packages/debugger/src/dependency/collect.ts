@@ -40,12 +40,14 @@ export namespace DGraph {
   export type Graph = Record<NodeID, Node>
 }
 
+type DepthObject = { root: NodeID; level: number } | null
+
 const $DGRAPH = Symbol('dependency-graph')
 
 let Graph: DGraph.Graph
 let VisitedSources: Set<Solid.Signal>
 let VisitedObservers: Set<Solid.Computation>
-let DepthMap: Record<NodeID, DGraph.Depth>
+let DepthMap: Record<NodeID, DepthObject>
 let OnNodeUpdate: (node: Solid.Computation | Solid.Memo | Solid.Signal) => void
 export type OnNodeUpdate = typeof OnNodeUpdate
 
@@ -63,21 +65,22 @@ function unobserveNodeUpdate(node: Solid.Computation | Solid.Memo | Solid.Signal
 
 function addNodeToGraph(node: Solid.Signal | Solid.Memo | Solid.Computation) {
   const id = getSdtId(node)
-  if (Graph[id]) return Graph[id]!
+  if (Graph[id]) return
 
   // observe each mapped node, to update the graph when it changes
   const onNodeUpdate = OnNodeUpdate
   observeNodeUpdate(node, () => onNodeUpdate(node))
 
-  return (Graph[id] = {
+  const depthObj = lookupDepth(node)
+  Graph[id] = {
     name: getNodeName(node),
     type: getNodeType(node) as Exclude<ComputationNodeType, NodeType.Memo>,
-    depth: lookupDepth(node),
+    depth: depthObj ? `${depthObj.root}:${depthObj.level}` : undefined,
     sources: (node as Solid.Memo).sources ? (node as Solid.Memo).sources!.map(getSdtId) : undefined,
     observers: (node as Solid.Memo).observers
       ? (node as Solid.Memo).observers!.map(getSdtId)
       : undefined,
-  } as DGraph.Node)
+  } as DGraph.Node
 }
 
 function visitSource(node: Solid.Signal | Solid.Memo) {
@@ -94,20 +97,23 @@ function visitObserver(node: Solid.Computation | Solid.Memo) {
   if ('observers' in node && node.observers) node.observers.forEach(visitObserver)
 }
 
-function lookupDepth(node: Solid.Owner | Solid.Signal, i = 0): DGraph.Depth {
+function lookupDepth(node: Solid.Owner | Solid.Signal): DepthObject | null {
   const id = getSdtId(node)
+
+  if (id in DepthMap) return DepthMap[id]!
 
   let owner: Solid.Owner | undefined | null
   // signal
   if (!('owned' in node)) owner = node.graph
   // root
-  else if (!('fn' in node) && !node.owner) return `${id}:${i}`
+  else if (!('fn' in node) && !node.owner) return { root: id, level: 0 }
   // computation
   else owner = node.owner
 
-  return id in DepthMap
-    ? DepthMap[id]
-    : (DepthMap[id] = owner ? lookupDepth(owner, i + 1) : undefined)
+  if (!owner) return (DepthMap[id] = null)
+
+  const depth = lookupDepth(owner)
+  return (DepthMap[id] = depth ? { root: depth.root, level: depth.level + 1 } : null)
 }
 
 export function collectDependencyGraph(

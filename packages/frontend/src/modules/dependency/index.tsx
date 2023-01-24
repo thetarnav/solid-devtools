@@ -1,6 +1,7 @@
 import { useController } from '@/controller'
 import { Scrollable } from '@/ui'
-import { DGraph, NodeID, NODE_TYPE_NAMES } from '@solid-devtools/debugger/types'
+import { NodeID, NodeType, NODE_TYPE_NAMES } from '@solid-devtools/debugger/types'
+import { splitOnColon } from '@solid-devtools/shared/utils'
 import { Key } from '@solid-primitives/keyed'
 import { Component, createContext, createMemo, useContext } from 'solid-js'
 import { createDependencyGraph, Dgraph } from './dgraph'
@@ -17,7 +18,7 @@ const DgraphView: Component = () => {
   const ctx = useController()
   const dgraph = createDependencyGraph()
 
-  type DisplayGraphNode = DGraph.Node & { id: NodeID }
+  type DisplayGraphNode = { id: NodeID; type: NodeType; name: string; level: number | null }
 
   const list = createMemo<DisplayGraphNode[]>((p = []) => {
     const graph = dgraph.graph()
@@ -31,7 +32,17 @@ const DgraphView: Component = () => {
 
     if (!inspectedNode.observers && !inspectedNode.sources) return []
 
-    const newList: DisplayGraphNode[] = [{ ...inspectedNode, id: inspectedId }]
+    const [inspectedRootId, inspectedLevel] = inspectedNode.depth
+      ? splitOnColon(inspectedNode.depth)
+      : [null, null]
+    const newList: DisplayGraphNode[] = [
+      {
+        id: inspectedId,
+        type: inspectedNode.type,
+        level: inspectedLevel && +inspectedLevel,
+        name: inspectedNode.name,
+      },
+    ]
 
     const checkedObservers = new Set<NodeID>([inspectedId])
     const checkedSources = new Set<NodeID>([inspectedId])
@@ -67,7 +78,15 @@ const DgraphView: Component = () => {
         !inSources && node.sources && node.sources.length && toCheck[0].push(node.sources)
         !inObservers && node.observers && node.observers.length && toCheck[1].push(node.observers)
 
-        inSources || inObservers || newList[checkingObservers ? 'push' : 'unshift']({ ...node, id })
+        if (!inSources && !inObservers) {
+          const [rootId, level] = node.depth ? splitOnColon(node.depth) : [null, null]
+          newList[checkingObservers ? 'push' : 'unshift']({
+            id,
+            name: node.name,
+            type: node.type,
+            level: level && +level,
+          })
+        }
 
         checkingObservers
           ? inObservers || checkedObservers.add(id)
@@ -94,11 +113,12 @@ const DgraphView: Component = () => {
             <div
               style={{
                 padding: '0.5rem',
+                'margin-left': `${(node().level ?? 0) * 0.5}rem`,
                 color: ctx.isNodeInspected(node().id) ? 'red' : 'inherit',
               }}
             >
               {NODE_TYPE_NAMES[node().type]}: {node().name}
-              <i>{node().id}</i>
+              {node().id}_{node().level ?? 'X'}
             </div>
           )}
         </Key>
