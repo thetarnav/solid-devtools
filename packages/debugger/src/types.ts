@@ -1,4 +1,4 @@
-export type { DGraph, DGraphUpdate } from './dependency'
+export type { DGraphUpdate, SerializedDGraph } from './dependency'
 export * from './inspector/types'
 export * from './locator/types'
 export * from './main/constants'

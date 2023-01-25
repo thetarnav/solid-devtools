@@ -6,11 +6,11 @@ import { DevtoolsMainView } from '../main/constants'
 import { getSdtId } from '../main/id'
 import { NodeID } from '../main/types'
 import { isSolidComponent, isSolidComputation, isSolidOwner } from '../main/utils'
-import { collectDependencyGraph, DGraph, OnNodeUpdate } from './collect'
+import { collectDependencyGraph, OnNodeUpdate, SerializedDGraph } from './collect'
 
-export { DGraph } from './collect'
+export { SerializedDGraph } from './collect'
 
-export type DGraphUpdate = DGraph.Graph | null
+export type DGraphUpdate = SerializedDGraph.Graph | null
 
 export function createDependencyGraph(props: {
   enabled: Accessor<boolean>

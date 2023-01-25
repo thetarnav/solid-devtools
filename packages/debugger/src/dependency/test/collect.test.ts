@@ -4,7 +4,7 @@ import { NodeType } from '../../main/constants'
 import { $setSdtId, getSdtId } from '../../main/id'
 import { Solid } from '../../main/types'
 import { getOwner } from '../../main/utils'
-import { collectDependencyGraph, DGraph } from '../collect'
+import { collectDependencyGraph, SerializedDGraph } from '../collect'
 
 let mockLAST_ID = 0
 beforeEach(() => {
@@ -98,7 +98,7 @@ describe('collectDependencyGraph', () => {
         depth: '#ff:1',
         observers: ['#3'],
       },
-    } satisfies DGraph.Graph)
+    } satisfies SerializedDGraph.Graph)
 
     expect(JSON.parse(JSON.stringify(result)), 'is JSON-serializable').toEqual(result)
 
@@ -130,7 +130,7 @@ describe('collectDependencyGraph', () => {
         depth: undefined,
         observers: ['#2'],
       },
-    } satisfies DGraph.Graph)
+    } satisfies SerializedDGraph.Graph)
 
     expect(JSON.parse(JSON.stringify(result)), 'is JSON-serializable').toEqual(result)
   })
@@ -194,7 +194,7 @@ describe('collectDependencyGraph', () => {
           depth: '#ff:1',
           observers: ['#1'],
         },
-      } satisfies DGraph.Graph)
+      } satisfies SerializedDGraph.Graph)
 
       expect(cb).toHaveBeenCalledTimes(0)
 
