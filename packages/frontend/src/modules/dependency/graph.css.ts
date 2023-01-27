@@ -1,7 +1,7 @@
 import { color, flex, hexToRgb, padding, rounded, spacing } from '@/ui/theme'
 import { createVar, style } from '@vanilla-extract/css'
 
-const gridSize = spacing[9]
+const gridSize = spacing[10]
 
 export const container = (() => {
   const patternSize = `1px`
@@ -11,8 +11,9 @@ export const container = (() => {
   transparent ${gridSize}`
 
   return style({
-    padding: gridSize,
+    padding: `calc(${gridSize} - ${patternSize})`,
     position: 'relative',
+    ...flex('column', 'items-start'),
     background: `repeating-linear-gradient(${pattern}), repeating-linear-gradient(90deg, ${pattern})`,
     backgroundPosition: `-${patternSize} -${patternSize}`,
     ':before': {
@@ -25,38 +26,31 @@ export const container = (() => {
   })
 })()
 
-export const nodes = (() => {
-  const shadowColor = color.gray[900]
-  const shadowBlur = '36px'
-  const shadowSpread = '16px'
+const _node = (() => {
+  const depthVar = createVar('depth')
 
-  return style({
-    ...flex('column', 'items-start'),
-    // filter: (
-    //   [
-    //     ['-', ''],
-    //     ['', '-'],
-    //     ['-', '-'],
-    //     ['', ''],
-    //   ] as const
-    // ).reduce(
-    //   (acc: string, [x, y]) =>
-    //     `${acc} drop-shadow(${x}${shadowSpread} ${y}${shadowSpread} ${shadowBlur} ${shadowColor})`,
-    //   '',
-    // ),
-  })
+  const bg = hexToRgb(color.gray[900], 0.8)
+  const margin = spacing[2]
+
+  return {
+    node: style({
+      height: `calc(${gridSize} - ${margin} * 2)`,
+      minWidth: `calc(${gridSize} * 2)`,
+      transform: `translateX(calc(${depthVar} * ${gridSize}))`,
+      margin: margin,
+      ...padding(0, 2),
+      ...rounded('md'),
+      background: bg,
+      ...flex('items-center'),
+      boxShadow: `0 0 ${margin} ${spacing[1]} ${bg}`,
+      border: `2px solid transparent`,
+      selectors: {
+        '&[data-inspected=true]': {
+          borderColor: color.gray[100],
+        },
+      },
+    }),
+    depthVar,
+  }
 })()
-
-export const depthVar = createVar('depth')
-
-export const node = style({
-  height: `calc(${gridSize} - ${spacing[1]} * 2)`,
-  minWidth: `calc(${gridSize} * 2)`,
-  transform: `translateX(calc(${depthVar} * ${gridSize}))`,
-  margin: spacing[1],
-  ...padding(1, 2),
-  ...rounded('md'),
-  background: hexToRgb(color.gray[900], 0.8),
-  ...flex('items-center'),
-  boxShadow: `0 0 ${spacing[1]} ${spacing[0.5]} ${hexToRgb(color.gray[900], 0.8)}`,
-})
+export const { node, depthVar } = _node

@@ -98,11 +98,13 @@ const GraphNode: Component<{
   node: SerializedDGraph.Node
   isInspected: boolean
 }> = props => {
-  const { id } = props
+  // const { id } = props
   return (
-    <div class={styles.node} style={assignInlineVars({ [depthVar]: props.depth + '' })}>
-      {/* {NODE_TYPE_NAMES[props.node.type]}: {props.node.name}
-      {id} */}
+    <div
+      class={styles.node}
+      data-inspected={props.isInspected}
+      style={assignInlineVars({ [depthVar]: props.depth + '' })}
+    >
       <OwnerName name={props.node.name} type={props.node.type} />
     </div>
   )
@@ -131,18 +133,16 @@ const DgraphView: Component = () => {
       <DgraphContext.Provider value={dgraph}>
         <Show when={dgraph.graph()} fallback="NO DEPENDENCY GRAPH">
           <div class={styles.container}>
-            <div class={styles.nodes}>
-              <For each={order()?.flowOrder}>
-                {id => (
-                  <GraphNode
-                    id={id}
-                    depth={order()!.depthMap[id]!}
-                    node={dgraph.graph()![id]!}
-                    isInspected={ctx.isNodeInspected(id)}
-                  />
-                )}
-              </For>
-            </div>
+            <For each={order()?.flowOrder}>
+              {id => (
+                <GraphNode
+                  id={id}
+                  depth={order()!.depthMap[id]!}
+                  node={dgraph.graph()![id]!}
+                  isInspected={ctx.isNodeInspected(id)}
+                />
+              )}
+            </For>
           </div>
           <h3>Dependency Graph</h3>
           <pre>{JSON.stringify(dgraph.graph(), null, 2)}</pre>
