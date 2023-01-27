@@ -4,7 +4,7 @@ import { Menu, MenuItem, Popover, PopoverButton, PopoverPanel } from 'solid-head
 import { Component, JSX, Match, Show, Switch } from 'solid-js'
 import * as styles from './App.css'
 import { useController } from './controller'
-import DgraphView from './modules/dependency'
+import DgraphView from './modules/dependency/DgraphView'
 import Inspector from './modules/inspector/Inspector'
 import StructureView from './modules/structure/Structure'
 

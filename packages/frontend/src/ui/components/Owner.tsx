@@ -1,9 +1,12 @@
 import { NodeType } from '@solid-devtools/debugger'
-import { Component, JSX } from 'solid-js'
+import { Component, createMemo, JSX } from 'solid-js'
 import { Icon, IconComponent } from '..'
 import * as styles from './Owner.css'
 
-export const NodeTypeIcon: Component<{ type: NodeType; class?: string }> = props => {
+export const NodeTypeIcon: Component<{
+  type: NodeType | undefined | null
+  class?: string
+}> = props => {
   let prevIcon: IconComponent | undefined
   let prevRendered: JSX.Element | undefined
   return () => {
@@ -28,6 +31,28 @@ export const NodeTypeIcon: Component<{ type: NodeType; class?: string }> = props
   }
 }
 
+export const NodeName: Component<{
+  name: string | undefined | null
+  type: NodeType | undefined | null
+}> = props => {
+  return createMemo(() => {
+    switch (props.type) {
+      case NodeType.Root:
+        return <span class={styles.type}>Root</span>
+      case NodeType.Context:
+        return <span class={styles.type}>Context</span>
+      case NodeType.Render:
+        return <span class={styles.type}>Render Effect</span>
+      case NodeType.Component:
+        return <span class={styles.componentName}>{props.name}</span>
+      case NodeType.Element:
+        return <span class={styles.elementName}>{props.name}</span>
+      default:
+        return <span class={styles.name}>{props.name}</span>
+    }
+  })
+}
+
 export const OwnerName: Component<{
   name: string | undefined | null
   type: NodeType | undefined | null
@@ -40,23 +65,8 @@ export const OwnerName: Component<{
       classList={{ [styles.title]: props.isTitle }}
       data-frozen={props.isFrozen}
     >
-      {props.type && <NodeTypeIcon type={props.type} class={styles.typeIcon} />}
-      {() => {
-        switch (props.type) {
-          case NodeType.Root:
-            return <span class={styles.type}>Root</span>
-          case NodeType.Context:
-            return <span class={styles.type}>Context</span>
-          case NodeType.Render:
-            return <span class={styles.type}>Render Effect</span>
-          case NodeType.Component:
-            return <span class={styles.componentName}>{props.name}</span>
-          case NodeType.Element:
-            return <span class={styles.elementName}>{props.name}</span>
-          default:
-            return <span class={styles.name}>{props.name}</span>
-        }
-      }}
+      <NodeTypeIcon type={props.type} class={styles.typeIcon} />
+      <NodeName name={props.name} type={props.type} />
     </span>
   )
 }
