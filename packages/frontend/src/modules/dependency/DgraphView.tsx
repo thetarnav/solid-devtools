@@ -135,72 +135,80 @@ const DgraphView: Component = () => {
             const flowOrder = () => order()!.flowOrder
             const depthMap = () => order()!.depthMap
             const length = () => flowOrder().length
+            const nodeMargin = () => 0.75 / length()
             return (
-              <>
-                <div class={styles.container}>
+              <div class={styles.container}>
+                <For each={flowOrder()}>
+                  {id => (
+                    <GraphNode
+                      id={id}
+                      depth={depthMap()[id]!}
+                      node={dgraph.graph()![id]!}
+                      isInspected={ctx.isNodeInspected(id)}
+                    />
+                  )}
+                </For>
+                <svg
+                  style={{
+                    position: 'absolute',
+                    top: '3.75rem',
+                    left: '3.75rem',
+                    width: `calc(2.5rem * ${length()})`,
+                    height: `calc(2.5rem * ${length()})`,
+                    overflow: 'visible',
+                  }}
+                  viewBox="0 0 1 1"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <defs>
+                    <marker
+                      id="head"
+                      orient="auto"
+                      refX="10"
+                      refY="2"
+                      style={{ overflow: 'visible' }}
+                    >
+                      <path d="M0,0 L2.5,2 0,4" stroke="orange" fill="none" />
+                    </marker>
+                  </defs>
                   <For each={flowOrder()}>
-                    {id => (
-                      <GraphNode
-                        id={id}
-                        depth={depthMap()[id]!}
-                        node={dgraph.graph()![id]!}
-                        isInspected={ctx.isNodeInspected(id)}
-                      />
-                    )}
-                  </For>
-                  <svg
-                    style={{
-                      position: 'absolute',
-                      inset: 0,
-                      top: '3.75rem',
-                      left: '3.75rem',
-                      width: `calc(2.5rem * ${length()})`,
-                      height: `calc(2.5rem * ${length()})`,
-                    }}
-                    viewBox="0 0 1 1"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <defs>
-                      <marker
-                        id="head"
-                        orient="auto"
-                        refX="3"
-                        refY="2"
-                        style={{ overflow: 'visible' }}
-                      >
-                        <path d="M0,0 L2.5,2 0,4" stroke="orange" fill="none" />
-                      </marker>
-                    </defs>
-                    <For each={flowOrder()}>
-                      {(id, flowIndex) => {
-                        const node = () => dgraph.graph()![id]!
-                        const depth = () => depthMap()[id]!
-                        return (
-                          <For each={node().sources}>
-                            {sourceId => (
-                              <Show when={dgraph.graph()![sourceId]}>
+                    {(id, flowIndex) => (
+                      <For each={dgraph.graph()![id]!.sources}>
+                        {sourceId => (
+                          <Show when={dgraph.graph()![sourceId]}>
+                            {() => {
+                              const math = createMemo(() => {
+                                const l = length()
+                                const x1 = depthMap()[id]! / l
+                                const x2 = depthMap()[sourceId]! / l
+                                const y1 = flowIndex() / l
+                                const y2 = flowOrder().indexOf(sourceId) / l
+                                const d = Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
+                                return { x1, x2, y1, y2, d }
+                              })
+
+                              return (
                                 <line
-                                  x1={depth() / length()}
-                                  x2={depthMap()[sourceId]! / length()}
-                                  y1={flowIndex() / length()}
-                                  y2={flowOrder().indexOf(sourceId) / length()}
-                                  stroke="red"
+                                  x1={math().x1}
+                                  x2={math().x2}
+                                  y1={math().y1}
+                                  y2={math().y2}
+                                  stroke="orange"
                                   stroke-width={0.05 / length()}
                                   stroke-linecap="round"
-                                  stroke-dasharray="0.05, 0.05"
+                                  stroke-dasharray={`${math().d - nodeMargin()} 1`}
+                                  stroke-dashoffset={nodeMargin() / -2}
                                   marker-end="url(#head)"
                                 />
-                              </Show>
-                            )}
-                          </For>
-                        )
-                      }}
-                    </For>
-                  </svg>
-                </div>
-                <h3>Dependency Graph</h3>
-                <pre>{JSON.stringify(dgraph.graph(), null, 2)}</pre>
-              </>
+                              )
+                            }}
+                          </Show>
+                        )}
+                      </For>
+                    )}
+                  </For>
+                </svg>
+              </div>
             )
           }}
         </Show>

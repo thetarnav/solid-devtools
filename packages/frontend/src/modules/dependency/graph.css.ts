@@ -12,6 +12,7 @@ export const container = (() => {
 
   return style({
     padding: `calc(${gridSize} - ${patternSize})`,
+    paddingBottom: '100%',
     position: 'relative',
     ...flex('column', 'items-start'),
     background: `repeating-linear-gradient(${pattern}), repeating-linear-gradient(90deg, ${pattern})`,
@@ -38,7 +39,7 @@ const _node = (() => {
       minWidth: `calc(${gridSize} * 2)`,
       transform: `translateX(calc(${depthVar} * ${gridSize}))`,
       margin: margin,
-      ...padding(0, 2),
+      ...padding(0, 1.5),
       ...rounded('md'),
       background: bg,
       ...flex('items-center'),
@@ -46,7 +47,7 @@ const _node = (() => {
       border: `2px solid transparent`,
       selectors: {
         '&[data-inspected=true]': {
-          borderColor: color.gray[100],
+          borderColor: color.gray[300],
         },
       },
     }),
