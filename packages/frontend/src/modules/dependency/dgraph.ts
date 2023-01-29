@@ -1,5 +1,5 @@
 import { useController } from '@/controller'
-import { DevtoolsMainView, DGraphUpdate } from '@solid-devtools/debugger/types'
+import { DevtoolsMainView, DGraphUpdate, NodeID, NodeType } from '@solid-devtools/debugger/types'
 import { createSignal } from 'solid-js'
 
 export namespace Dgraph {
@@ -21,7 +21,19 @@ export function createDependencyGraph() {
     setGraph(update)
   })
 
+  function inspectNode(id: NodeID) {
+    const node = graph()?.[id]
+    // eslint-disable-next-line no-console
+    if (!node) return console.warn('inspectNode: node not found', id)
+
+    // TODO - handle signals
+    if (node.type === NodeType.Signal) return
+
+    ctx.setInspectedNode(id)
+  }
+
   return {
     graph,
+    inspectNode,
   }
 }

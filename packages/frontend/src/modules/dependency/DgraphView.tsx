@@ -3,7 +3,7 @@ import { Scrollable } from '@/ui'
 import { OwnerName } from '@/ui/components/Owner'
 import { NodeID, SerializedDGraph } from '@solid-devtools/debugger/types'
 import { assignInlineVars } from '@vanilla-extract/dynamic'
-import { Component, createContext, createMemo, For, Show, useContext } from 'solid-js'
+import { Component, createContext, createMemo, For, Show, untrack, useContext } from 'solid-js'
 import { ReadonlyDeep } from 'type-fest'
 import { createDependencyGraph, Dgraph } from './dgraph'
 import * as styles from './graph.css'
@@ -97,14 +97,17 @@ const GraphNode: Component<{
   depth: number
   node: SerializedDGraph.Node
   isInspected: boolean
+  onInspect: VoidFunction
 }> = props => {
+  const { name, type } = props.node
   return (
     <div
       class={styles.node}
       data-inspected={props.isInspected}
       style={assignInlineVars({ [depthVar]: props.depth + '' })}
+      onClick={props.onInspect}
     >
-      <OwnerName name={props.node.name} type={props.node.type} />
+      <OwnerName name={name} type={type} />
     </div>
   )
 }
@@ -145,18 +148,13 @@ const DgraphView: Component = () => {
                       depth={depthMap()[id]!}
                       node={dgraph.graph()![id]!}
                       isInspected={ctx.isNodeInspected(id)}
+                      onInspect={() => dgraph.inspectNode(id)}
                     />
                   )}
                 </For>
                 <svg
-                  style={{
-                    position: 'absolute',
-                    top: '3.75rem',
-                    left: '3.75rem',
-                    width: `calc(2.5rem * ${length()})`,
-                    height: `calc(2.5rem * ${length()})`,
-                    overflow: 'visible',
-                  }}
+                  style={assignInlineVars({ [styles.lengthVar]: length() + '' })}
+                  class={styles.svg}
                   viewBox="0 0 1 1"
                   xmlns="http://www.w3.org/2000/svg"
                 >
@@ -168,7 +166,7 @@ const DgraphView: Component = () => {
                       refY="2"
                       style={{ overflow: 'visible' }}
                     >
-                      <path d="M0,0 L2.5,2 0,4" stroke="orange" fill="none" />
+                      <path d="M0,0 L2.5,2 0,4" class={styles.arrowHead} />
                     </marker>
                   </defs>
                   <For each={flowOrder()}>
@@ -176,7 +174,7 @@ const DgraphView: Component = () => {
                       <For each={dgraph.graph()![id]!.sources}>
                         {sourceId => (
                           <Show when={dgraph.graph()![sourceId]}>
-                            {() => {
+                            {untrack(() => {
                               const math = createMemo(() => {
                                 const l = length()
                                 const x1 = depthMap()[id]! / l
@@ -193,15 +191,17 @@ const DgraphView: Component = () => {
                                   x2={math().x2}
                                   y1={math().y1}
                                   y2={math().y2}
-                                  stroke="orange"
                                   stroke-width={0.05 / length()}
-                                  stroke-linecap="round"
                                   stroke-dasharray={`${math().d - nodeMargin()} 1`}
                                   stroke-dashoffset={nodeMargin() / -2}
                                   marker-end="url(#head)"
+                                  data-inspected={
+                                    ctx.isNodeInspected(id) || ctx.isNodeInspected(sourceId)
+                                  }
+                                  class={styles.line}
                                 />
                               )
-                            }}
+                            })}
                           </Show>
                         )}
                       </For>

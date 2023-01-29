@@ -1,12 +1,13 @@
-import { color, flex, hexToRgb, padding, rounded, spacing } from '@/ui/theme'
+import { color, flex, hexToRgb, padding, rounded, spacing, transition, vars } from '@/ui/theme'
 import { createVar, style } from '@vanilla-extract/css'
 
 const gridSize = spacing[10]
 
 export const container = (() => {
   const patternSize = `1px`
-  const pattern = `${color.gray[800]} 0,
-  ${color.gray[800]} ${patternSize},
+  const patternColor = hexToRgb(color.gray[800], 0.7)
+  const pattern = `${patternColor} 0,
+  ${patternColor} ${patternSize},
   transparent ${patternSize},
   transparent ${gridSize}`
 
@@ -41,13 +42,25 @@ const _node = (() => {
       margin: margin,
       ...padding(0, 1.5),
       ...rounded('md'),
-      background: bg,
+      backgroundColor: bg,
       ...flex('items-center'),
       boxShadow: `0 0 ${margin} ${spacing[1]} ${bg}`,
       border: `2px solid transparent`,
+      ...transition(['background-color', 'border-color']),
       selectors: {
+        // inspected
         '&[data-inspected=true]': {
           borderColor: color.gray[300],
+        },
+        // not inspected
+        '&:not([data-inspected=true])': {
+          cursor: 'pointer',
+        },
+        '&:not([data-inspected=true]):hover': {
+          backgroundColor: color.gray[800],
+        },
+        '&:not([data-inspected=true]):active': {
+          borderColor: color.gray[500],
         },
       },
     }),
@@ -55,3 +68,32 @@ const _node = (() => {
   }
 })()
 export const { node, depthVar } = _node
+
+export const lengthVar = createVar('length')
+
+export const svg = style({
+  position: 'absolute',
+  overflow: 'visible',
+  top: `calc(${gridSize} * 1.5)`,
+  left: `calc(${gridSize} * 1.5)`,
+  width: `calc(${gridSize} * ${lengthVar})`,
+  height: `calc(${gridSize} * ${lengthVar})`,
+  pointerEvents: 'none',
+})
+
+export const arrowHead = style({
+  fill: 'none',
+  stroke: vars.domColor,
+})
+
+export const line = style({
+  stroke: vars.domColor,
+  strokeLinecap: 'round',
+  opacity: 0.6,
+  ...transition('opacity'),
+  selectors: {
+    '&[data-inspected=true]': {
+      opacity: 1,
+    },
+  },
+})
