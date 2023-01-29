@@ -48,7 +48,7 @@ function calculateNodeOrder(
   ]
   let index = 0
   let checkingObservers: 0 | 1 = 0
-  let ids = toCheck[checkingObservers][0]
+  let ids = toCheck[checkingObservers][0] ?? toCheck[(checkingObservers = 1)][index]
   while (ids) {
     for (const id of ids) {
       const node = graph[id]
@@ -113,7 +113,7 @@ const GraphNode: Component<{
 }
 
 const DgraphView: Component = () => {
-  const ctx = useController()
+  const { inspector } = useController()
   const dgraph = createDependencyGraph()
 
   const order = createMemo<ReadonlyDeep<ReturnType<typeof calculateNodeOrder>> | null>(
@@ -121,12 +121,15 @@ const DgraphView: Component = () => {
       const graph = dgraph.graph()
       if (!graph) return null
 
-      const inspectedId = ctx.inspectedNodeId()!
-      const inspectedNode = graph[inspectedId]
-      if (!inspectedNode) return p
-      if (!inspectedNode.observers && !inspectedNode.sources) return null
+      return untrack(() => {
+        const inspected = inspector.inspected()
+        const inspectedId = inspected.signal ?? inspected.owner!
+        const inspectedNode = graph[inspectedId]
+        if (!inspectedNode) return p
+        if (!inspectedNode.observers && !inspectedNode.sources) return null
 
-      return calculateNodeOrder(graph, inspectedId, inspectedNode)
+        return calculateNodeOrder(graph, inspectedId, inspectedNode)
+      })
     },
   )
 
@@ -147,7 +150,7 @@ const DgraphView: Component = () => {
                       id={id}
                       depth={depthMap()[id]!}
                       node={dgraph.graph()![id]!}
-                      isInspected={ctx.isNodeInspected(id)}
+                      isInspected={inspector.isInspected(id)}
                       onInspect={() => dgraph.inspectNode(id)}
                     />
                   )}
@@ -196,7 +199,7 @@ const DgraphView: Component = () => {
                                   stroke-dashoffset={nodeMargin() / -2}
                                   marker-end="url(#head)"
                                   data-inspected={
-                                    ctx.isNodeInspected(id) || ctx.isNodeInspected(sourceId)
+                                    inspector.isInspected(id) || inspector.isInspected(sourceId)
                                   }
                                   class={styles.line}
                                 />

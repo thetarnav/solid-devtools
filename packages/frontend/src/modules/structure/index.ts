@@ -171,6 +171,7 @@ export function getNodePath(node: Structure.Node): Structure.Node[] {
 
 export default function createStructure() {
   const ctx = useController()
+  const { inspector } = ctx
   const { client, devtools } = ctx.controller
   const cachedInitialState = ctx.viewCache.get(DevtoolsMainView.Structure)
 
@@ -195,7 +196,7 @@ export default function createStructure() {
   }))
 
   const inspectedNode = createMemo(() => {
-    const id = ctx.inspectedNodeId()
+    const id = inspector.inspectedOwnerId()
     return id ? findNode(id) : null
   })
 
@@ -241,13 +242,13 @@ export default function createStructure() {
     if (query === lastSearch) {
       if (lastSearchResults) {
         lastSearchIndex = (lastSearchIndex + 1) % lastSearchResults.length
-        ctx.setInspectedNode(lastSearchResults[lastSearchIndex]!)
+        inspector.setInspectedOwner(lastSearchResults[lastSearchIndex]!)
       }
       return
     } else {
       lastSearch = query
       const result = searchNodeList(query)
-      if (result) ctx.setInspectedNode(result[(lastSearchIndex = 0)]!)
+      if (result) inspector.setInspectedOwner(result[(lastSearchIndex = 0)]!)
       lastSearchResults = result
     }
   }

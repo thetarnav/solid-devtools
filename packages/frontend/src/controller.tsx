@@ -5,6 +5,7 @@ import {
   InspectorUpdate,
   Mapped,
   NodeID,
+  SetInspectedNodeData,
   StructureUpdates,
   ToggleInspectedValueData,
   TreeWalkerMode,
@@ -27,7 +28,7 @@ export function createController() {
   }
 
   const devtools = createEventHub($ => ({
-    inspectNode: $<NodeID | null>(),
+    inspectNode: $<SetInspectedNodeData>(),
     inspectValue: $<ToggleInspectedValueData>(),
     devtoolsLocatorStateChange: $<boolean>(),
     highlightElementChange: $<HighlightElementPayload>(),
@@ -44,7 +45,7 @@ export function createController() {
     inspectorUpdate: batchedBus<InspectorUpdate[]>(),
     locatorModeChange: batchedBus<boolean>(),
     hoveredComponent: batchedBus<{ nodeId: NodeID; state: boolean }>(),
-    inspectedNode: batchedBus<NodeID>(),
+    inspectedComponent: batchedBus<NodeID>(),
     dgraphUpdate: batchedBus<DGraphUpdate>(),
   })
 
@@ -155,8 +156,8 @@ const [Provider, useControllerCtx] = createContextProvider(
     const viewCache = createViewCache()
 
     // Graph view is only available when there is an inspected node
-    const canOpenGraphView = () =>
-      openedView() !== DevtoolsMainView.Dgraph && !!inspector.inspectedId()
+    // TODO
+    const canOpenGraphView = () => true
 
     function openView(view: DevtoolsMainView) {
       if (view === DevtoolsMainView.Dgraph && !canOpenGraphView()) return
@@ -167,7 +168,11 @@ const [Provider, useControllerCtx] = createContextProvider(
     createEffect(defer(openedView, devtools.viewChange.emit))
 
     // set inspected node
-    createEffect(defer(inspector.inspectedId, devtools.inspectNode.emit))
+    createEffect(
+      defer(inspector.inspected, ({ owner, signal }) => {
+        devtools.inspectNode.emit({ ownerId: owner, signalId: signal })
+      }),
+    )
 
     // toggle inspected value/prop/signal
     inspector.setOnInspectValue(devtools.inspectValue.emit)
@@ -181,7 +186,7 @@ const [Provider, useControllerCtx] = createContextProvider(
     client.on('resetPanel', () => {
       setClientLocatorState(false)
       setDevtoolsLocatorState(false)
-      inspector.setInspectedNode(null)
+      inspector.setInspectedOwner(null)
     })
 
     client.on('setInspectedDetails', inspector.setDetails)
@@ -194,8 +199,8 @@ const [Provider, useControllerCtx] = createContextProvider(
       })
     })
 
-    client.on('inspectedNode', node => {
-      inspector.setInspectedNode(node)
+    client.on('inspectedComponent', node => {
+      inspector.setInspectedOwner(node)
       setDevtoolsLocatorState(false)
     })
 
@@ -210,10 +215,7 @@ const [Provider, useControllerCtx] = createContextProvider(
         get: openedView,
         set: openView,
       },
-      inspectedNodeId: inspector.inspectedId,
-      isNodeInspected: inspector.isNodeInspected,
       setLocatorState: setDevtoolsLocatorState,
-      setInspectedNode: inspector.setInspectedNode,
       inspector,
       options,
       controller,

@@ -1,20 +1,24 @@
 import { defer } from '@solid-devtools/shared/primitives'
 import { createEventHub, createSimpleEmitter } from '@solid-primitives/event-bus'
-import { Accessor, batch, createEffect, createMemo, createSignal } from 'solid-js'
+import { Accessor, batch, createComputed, createMemo, createSignal } from 'solid-js'
 import { createDependencyGraph, DGraphUpdate } from '../dependency'
 import { createInspector, InspectorUpdate } from '../inspector'
 import { createLocator } from '../locator'
 import { createStructure, StructureUpdates } from '../structure'
 import { DEFAULT_MAIN_VIEW, DevtoolsMainView } from './constants'
-import { getOwnerById, getSdtId } from './id'
-import { createInternalRoot, getTopRoot } from './roots'
+import { getOwnerById } from './id'
+import { createInternalRoot } from './roots'
 import { Mapped, NodeID, Solid } from './types'
-import { createBatchedUpdateEmitter } from './utils'
+import { createBatchedUpdateEmitter, getSignalById } from './utils'
 
 export type InspectedState = {
-  readonly rootId: NodeID
   readonly owner: Solid.Owner | null
   readonly signal: Solid.Signal | null
+}
+
+export type SetInspectedNodeData = {
+  ownerId: NodeID | null
+  signalId: NodeID | null
 } | null
 
 function createDebuggerEventHub() {
@@ -67,21 +71,14 @@ const plugin = createInternalRoot(() => {
   //
 
   // Current inspected node is shared between modules
-  let inspectedState: InspectedState = null
+  let inspectedState: InspectedState = { owner: null, signal: null }
   const [listenToInspectedState, emitInspectedStateChange] = createSimpleEmitter<InspectedState>()
 
-  const getInspecredNodeById = (id: null | NodeID): InspectedState => {
-    if (!id) return null
-    const owner = getOwnerById(id)
-    if (!owner) return null
-    const root = getTopRoot(owner)
-    if (!root) return null
-    return { rootId: getSdtId(root), owner, signal: null }
-  }
-
-  function setInspectedNode(id: null | NodeID): void {
-    emitInspectedStateChange((inspectedState = getInspecredNodeById(id)))
-  }
+  createComputed(
+    defer(debuggerEnabled, enabled => {
+      if (!enabled) emitInspectedStateChange((inspectedState = { owner: null, signal: null }))
+    }),
+  )
 
   /** Check if the inspected node doesn't need to change (treeview mode changed or sth) */
   function updateInspectedNode() {
@@ -89,17 +86,16 @@ const plugin = createInternalRoot(() => {
     const closest = structure.getClosestIncludedOwner(inspectedState.owner)
     if (closest && closest === inspectedState.owner) return
 
-    const root = closest && getTopRoot(closest)
-    inspectedState =
-      !closest || !root ? null : { rootId: getSdtId(root), owner: closest, signal: null }
-    emitInspectedStateChange(inspectedState)
+    emitInspectedStateChange((inspectedState = { owner: closest, signal: null }))
   }
 
-  createEffect(
-    defer(debuggerEnabled, enabled => {
-      if (!enabled) setInspectedNode(null)
-    }),
-  )
+  function setInspectedNode(data: SetInspectedNodeData): void {
+    const { ownerId, signalId } = data ?? {}
+    const owner = (ownerId && getOwnerById(ownerId)) ?? null
+    // TODO signals that do not have graph parent should also be supported
+    const signal = (owner && signalId && getSignalById(owner, signalId)) ?? null
+    emitInspectedStateChange((inspectedState = { owner, signal }))
+  }
 
   //
   // Structure & Computation updates:
@@ -127,7 +123,7 @@ const plugin = createInternalRoot(() => {
     listenToInspectedNodeChange: listenToInspectedState,
   })
 
-  const dgraph = createDependencyGraph({
+  createDependencyGraph({
     enabled: dgraphEnabled,
     listenToInspectedStateChange: listenToInspectedState,
     listenToViewChange,

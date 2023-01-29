@@ -19,7 +19,7 @@ export function createDependencyGraph(props: {
   emitDependencyGraph: (update: DGraphUpdate) => void
   onNodeUpdate: (nodeId: NodeID) => void
 }) {
-  let inspectedState: InspectedState = null
+  let inspectedState: InspectedState = { signal: null, owner: null }
   let clearListeners: VoidFunction | null = null
 
   const onNodeUpdate: OnNodeUpdate = node => {

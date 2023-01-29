@@ -183,8 +183,7 @@ const DisplayStructureTree: Component = () => {
       return set
     })
 
-  const { inspector, isNodeInspected, isNodeHovered, toggleHoveredNode, setInspectedNode } =
-    useController()
+  const { inspector, isNodeHovered, toggleHoveredNode } = useController()
   const structure = useStructure()
 
   let lastVirtualStart = 0
@@ -280,7 +279,7 @@ const DisplayStructureTree: Component = () => {
 
   // Index of the inspected node in the collapsed list
   const inspectedIndex = createMemo(() => {
-    const id = inspector.inspectedId()
+    const id = inspector.inspectedOwnerId()
     return id ? getNodeIndexById(id) : -1
   })
 
@@ -299,7 +298,7 @@ const DisplayStructureTree: Component = () => {
   // Scroll to selected node when it changes
   // listen to inspected ID, instead of node, because node reference can change
   createEffect(() => {
-    if (!inspector.inspectedId()) return
+    if (!inspector.inspected()) return
     // Run in next tick to ensure the scroll data is updated and virtual list recalculated
     // inspect node -> open inspector -> container changes height -> scroll data changes -> virtual list changes -> scroll to node
     setTimeout(() => {
@@ -359,14 +358,16 @@ const DisplayStructureTree: Component = () => {
                   <OwnerNode
                     owner={data.node}
                     isHovered={isNodeHovered(id) || structure.isSearched(id)}
-                    isSelected={isNodeInspected(id)}
+                    isSelected={inspector.isInspected(id)}
                     listenToUpdate={listener =>
                       structure.listenToComputationUpdate(
                         updatedId => updatedId === id && listener(),
                       )
                     }
                     onHoverChange={hovered => toggleHoveredNode(id, 'node', hovered)}
-                    onInspectChange={inspected => setInspectedNode(inspected ? id : null)}
+                    onInspectChange={inspected =>
+                      inspector.setInspectedOwner(inspected ? id : null)
+                    }
                     toggleCollapsed={toggleCollapsed}
                     isCollapsed={collapsed().has(data.node)}
                   />

@@ -73,7 +73,7 @@ export function createOverlayController(): Controller {
   debug.locator.addClickInterceptor((e, component) => {
     e.preventDefault()
     e.stopPropagation()
-    queueMicrotask(() => client.inspectedNode.emit(component.id))
+    queueMicrotask(() => client.inspectedComponent.emit(component.id))
     return false
   })
 

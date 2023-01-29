@@ -9,10 +9,15 @@ import { ValueNode } from './ValueNode'
 
 export default function Details() {
   const { inspector } = useController()
-  const { state, inspectedId, openComponentLocation, setInspectedNode } = inspector
+  const {
+    state,
+    inspectedOwnerId: inspectedOwner,
+    openComponentLocation,
+    setInspectedOwner,
+  } = inspector
 
   return (
-    <Show when={inspectedId()}>
+    <Show when={inspectedOwner()}>
       <div class={styles.root}>
         <header class={styles.header}>
           <OwnerName name={state.name} type={state.type} isTitle />
@@ -25,7 +30,7 @@ export default function Details() {
                 <Icon.Code class={styles.actions.icon} />
               </button>
             )}
-            <button class={styles.actions.button} onClick={() => setInspectedNode(null)}>
+            <button class={styles.actions.button} onClick={() => setInspectedOwner(null)}>
               <Icon.Close class={styles.actions.icon} />
             </button>
           </div>

@@ -26,10 +26,11 @@ export function createDependencyGraph() {
     // eslint-disable-next-line no-console
     if (!node) return console.warn('inspectNode: node not found', id)
 
-    // TODO - handle signals
-    if (node.type === NodeType.Signal) return
-
-    ctx.setInspectedNode(id)
+    if (node.type === NodeType.Signal) {
+      node.graph && ctx.inspector.setInspectedNode(node.graph, id)
+    } else {
+      ctx.inspector.setInspectedOwner(id)
+    }
   }
 
   return {

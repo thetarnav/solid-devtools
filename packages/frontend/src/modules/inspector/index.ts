@@ -11,11 +11,11 @@ import {
   ValueItemType,
   ValueType,
 } from '@solid-devtools/debugger/types'
-import { handleTupleUpdates, untrackedCallback } from '@solid-devtools/shared/primitives'
+import { handleTupleUpdates } from '@solid-devtools/shared/primitives'
 import { splitOnColon, warn } from '@solid-devtools/shared/utils'
 import { shallowCopy } from '@solid-primitives/immutable'
 import { createStaticStore } from '@solid-primitives/utils'
-import { batch, createSelector, createSignal, mergeProps, Setter } from 'solid-js'
+import { batch, createMemo, createSelector, createSignal, mergeProps, Setter } from 'solid-js'
 import { Writable } from 'type-fest'
 import {
   DecodedValue,
@@ -153,37 +153,51 @@ const NULL_STATE = {
   props: null,
   signals: {},
   value: null,
-} as const
+} as const satisfies Inspector.State
+
+export type InspectorNodeId = {
+  readonly owner: NodeID | null
+  readonly signal: NodeID | null
+}
+const NULL_INSPECTED_NODE = { owner: null, signal: null } as const satisfies InspectorNodeId
 
 export default function createInspector() {
-  const [inspectedId, setInspectedId] = createSignal<NodeID | null>(null)
-  const isNodeInspected = createSelector<NodeID | null, NodeID>(inspectedId)
+  const [inspected, _setInspectedNode] = createSignal<InspectorNodeId>(NULL_INSPECTED_NODE, {
+    equals: (a, b) => a.owner === b.owner && a.signal === b.signal,
+  })
+  const inspectedOwnerId = createMemo(() => inspected().owner)
+  const isInspected = createSelector<InspectorNodeId, NodeID>(
+    inspected,
+    (id, node) => node.owner === id || node.signal === id,
+  )
 
   const [state, setState] = createStaticStore<Inspector.State>({ ...NULL_STATE })
 
   const storeNodeMap = new StoreNodeMap()
 
-  const setInspected = untrackedCallback((id: NodeID | null) => {
+  function setInspectedNode(ownerId: NodeID | null, signalId: NodeID | null) {
     batch(() => {
-      if (id === null) {
-        setInspectedId(null)
-      } else {
-        const prev = inspectedId()
-        if (prev && id === prev) return
-        setInspectedId(id)
+      const prev = inspectedOwnerId()
+      _setInspectedNode({ owner: ownerId, signal: signalId })
+      if (!prev || ownerId !== prev) {
+        storeNodeMap.clear()
+        setState({ ...NULL_STATE })
       }
-
-      storeNodeMap.clear()
-      setState({ ...NULL_STATE })
     })
-  })
+  }
+  function setInspectedOwner(id: NodeID | null) {
+    setInspectedNode(id, null)
+  }
+  function setInspectedSignal(id: NodeID | null) {
+    _setInspectedNode(prev => ({ owner: prev.owner, signal: id }))
+  }
 
   function setNewDetails(raw: Mapped.OwnerDetails): void {
-    const id = inspectedId()
+    const id = inspectedOwnerId()
     batch(() => {
       // The current inspected node is not the same as the one that sent the details
       // (replace it with the new one)
-      if (!id || id !== raw.id) setInspected(raw.id)
+      if (!id || id !== raw.id) setInspectedOwner(raw.id)
 
       setState({
         name: raw.name,
@@ -282,10 +296,13 @@ export default function createInspector() {
   }
 
   return {
-    inspectedId,
+    inspected,
+    inspectedOwnerId,
     state,
-    setInspectedNode: setInspected,
-    isNodeInspected,
+    setInspectedNode,
+    setInspectedOwner,
+    setInspectedSignal,
+    isInspected,
     setDetails: setNewDetails,
     update: handleUpdates,
     inspectValueItem,

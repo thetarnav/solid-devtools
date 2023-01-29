@@ -10,30 +10,15 @@ import { getNodeName, getNodeType, isSolidOwner } from '../main/utils'
 import { ComputationNodeType, NodeType } from '../types'
 
 export namespace SerializedDGraph {
-  export type NodeBase = {
+  export type Node = {
     name: string
     depth: number
-  }
-
-  export type Signal = NodeBase & {
-    type: NodeType.Signal
-    observers: readonly NodeID[] | undefined
-    sources?: undefined
-  }
-
-  export type Computation = NodeBase & {
-    type: Exclude<ComputationNodeType, NodeType.Memo>
-    sources: readonly NodeID[] | undefined
-    observers?: undefined
-  }
-
-  export type Memo = NodeBase & {
-    type: NodeType.Memo
+    type: Exclude<NodeType, NodeType.Root | NodeType.Component>
     sources: readonly NodeID[] | undefined
     observers: readonly NodeID[] | undefined
+    // signals parent owner
+    graph: NodeID | undefined
   }
-
-  export type Node = Signal | Computation | Memo
 
   export type Graph = Record<NodeID, Node>
 }
@@ -75,6 +60,7 @@ function addNodeToGraph(node: Solid.Signal | Solid.Memo | Solid.Computation) {
     observers: (node as Solid.Memo).observers
       ? (node as Solid.Memo).observers!.map(getSdtId)
       : undefined,
+    graph: !isSolidOwner(node) && node.graph ? getSdtId(node.graph) : undefined,
   } as SerializedDGraph.Node
 }
 
