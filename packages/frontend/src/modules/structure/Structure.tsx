@@ -51,12 +51,12 @@ export default function StructureView() {
 }
 
 const LocatorButton: Component = () => {
-  const ctx = useController()
+  const { locator } = useController()
   return (
     <ToggleButton
       class={styles.locatorButton}
-      onToggle={ctx.setLocatorState}
-      selected={ctx.locatorEnabled()}
+      onToggle={locator.setLocatorState}
+      selected={locator.locatorEnabled()}
     >
       <Icon.Select class={styles.locatorIcon} />
     </ToggleButton>
@@ -183,7 +183,7 @@ const DisplayStructureTree: Component = () => {
       return set
     })
 
-  const { inspector, isNodeHovered, toggleHoveredNode } = useController()
+  const { inspector, hovered } = useController()
   const structure = useStructure()
 
   let lastVirtualStart = 0
@@ -357,14 +357,14 @@ const DisplayStructureTree: Component = () => {
                 return (
                   <OwnerNode
                     owner={data.node}
-                    isHovered={isNodeHovered(id) || structure.isSearched(id)}
+                    isHovered={hovered.isNodeHovered(id) || structure.isSearched(id)}
                     isSelected={inspector.isInspected(id)}
                     listenToUpdate={listener =>
                       structure.listenToComputationUpdate(
                         updatedId => updatedId === id && listener(),
                       )
                     }
-                    onHoverChange={hovered => toggleHoveredNode(id, 'node', hovered)}
+                    onHoverChange={state => hovered.toggleHoveredNode(id, 'node', state)}
                     onInspectChange={inspected =>
                       inspector.setInspectedOwner(inspected ? id : null)
                     }

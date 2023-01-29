@@ -2,6 +2,7 @@ import { useController } from '@/controller'
 import { Scrollable } from '@/ui'
 import { OwnerName } from '@/ui/components/Owner'
 import { NodeID, SerializedDGraph } from '@solid-devtools/debugger/types'
+import { createHover } from '@solid-devtools/shared/primitives'
 import { assignInlineVars } from '@vanilla-extract/dynamic'
 import { Component, createContext, createMemo, For, Show, untrack, useContext } from 'solid-js'
 import { ReadonlyDeep } from 'type-fest'
@@ -98,14 +99,18 @@ const GraphNode: Component<{
   node: SerializedDGraph.Node
   isInspected: boolean
   onInspect: VoidFunction
+  onHoverChange: (hovered: boolean) => void
 }> = props => {
   const { name, type } = props.node
+  const hoverProps = createHover(props.onHoverChange)
+
   return (
     <div
       class={styles.node}
       data-inspected={props.isInspected}
       style={assignInlineVars({ [depthVar]: props.depth + '' })}
       onClick={props.onInspect}
+      {...hoverProps}
     >
       <OwnerName name={name} type={type} />
     </div>
@@ -113,7 +118,7 @@ const GraphNode: Component<{
 }
 
 const DgraphView: Component = () => {
-  const { inspector } = useController()
+  const { inspector, hovered } = useController()
   const dgraph = createDependencyGraph()
 
   const order = createMemo<ReadonlyDeep<ReturnType<typeof calculateNodeOrder>> | null>(
@@ -132,6 +137,8 @@ const DgraphView: Component = () => {
       })
     },
   )
+
+  const thereIsAHoveredNode = createMemo(() => !!hovered.hoveredId())
 
   return (
     <Scrollable>
@@ -152,6 +159,7 @@ const DgraphView: Component = () => {
                       node={dgraph.graph()![id]!}
                       isInspected={inspector.isInspected(id)}
                       onInspect={() => dgraph.inspectNode(id)}
+                      onHoverChange={state => hovered.toggleHoveredNode(id, 'node', state)}
                     />
                   )}
                 </For>
@@ -198,8 +206,11 @@ const DgraphView: Component = () => {
                                   stroke-dasharray={`${math().d - nodeMargin()} 1`}
                                   stroke-dashoffset={nodeMargin() / -2}
                                   marker-end="url(#head)"
-                                  data-inspected={
-                                    inspector.isInspected(id) || inspector.isInspected(sourceId)
+                                  data-highlighted={
+                                    // hovered node should take precedence over inspected node
+                                    thereIsAHoveredNode()
+                                      ? hovered.isNodeHovered(id) || hovered.isNodeHovered(sourceId)
+                                      : inspector.isInspected(id) || inspector.isInspected(sourceId)
                                   }
                                   class={styles.line}
                                 />

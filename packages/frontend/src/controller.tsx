@@ -128,12 +128,11 @@ const [Provider, useControllerCtx] = createContextProvider(
     // highlight hovered element
     createEffect(defer(extHoveredNode, devtools.highlightElementChange.emit))
 
-    const isNodeHovered = createSelector<NodeID | null, NodeID>(
-      createMemo(() => {
-        const extNode = extHoveredNode()
-        return extNode ? extNode.id : clientHoveredNode()
-      }),
-    )
+    const hoveredId = createMemo(() => {
+      const extNode = extHoveredNode()
+      return extNode ? extNode.id : clientHoveredNode()
+    })
+    const isNodeHovered = createSelector<NodeID | null, NodeID>(hoveredId)
 
     function toggleHoveredNode(id: NodeID, type: 'element' | 'node' = 'node', isHovered?: boolean) {
       return setExtHoveredNode(p =>
@@ -207,15 +206,20 @@ const [Provider, useControllerCtx] = createContextProvider(
     client.on('locatorModeChange', setClientLocatorState)
 
     return {
-      locatorEnabled,
-      isNodeHovered,
-      toggleHoveredNode,
-      toggleHoveredElement,
+      locator: {
+        locatorEnabled,
+        setLocatorState: setDevtoolsLocatorState,
+      },
+      hovered: {
+        isNodeHovered,
+        hoveredId,
+        toggleHoveredNode,
+        toggleHoveredElement,
+      },
       view: {
         get: openedView,
         set: openView,
       },
-      setLocatorState: setDevtoolsLocatorState,
       inspector,
       options,
       controller,

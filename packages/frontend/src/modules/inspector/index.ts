@@ -162,6 +162,10 @@ export type InspectorNodeId = {
 const NULL_INSPECTED_NODE = { owner: null, signal: null } as const satisfies InspectorNodeId
 
 export default function createInspector() {
+  //
+  // Inspected owner/signal
+  //
+
   const [inspected, _setInspectedNode] = createSignal<InspectorNodeId>(NULL_INSPECTED_NODE, {
     equals: (a, b) => a.owner === b.owner && a.signal === b.signal,
   })
@@ -170,10 +174,6 @@ export default function createInspector() {
     inspected,
     (id, node) => node.owner === id || node.signal === id,
   )
-
-  const [state, setState] = createStaticStore<Inspector.State>({ ...NULL_STATE })
-
-  const storeNodeMap = new StoreNodeMap()
 
   function setInspectedNode(ownerId: NodeID | null, signalId: NodeID | null) {
     batch(() => {
@@ -191,6 +191,14 @@ export default function createInspector() {
   function setInspectedSignal(id: NodeID | null) {
     _setInspectedNode(prev => ({ owner: prev.owner, signal: id }))
   }
+
+  //
+  // Inspector state
+  //
+
+  const [state, setState] = createStaticStore<Inspector.State>({ ...NULL_STATE })
+
+  const storeNodeMap = new StoreNodeMap()
 
   function setNewDetails(raw: Mapped.OwnerDetails): void {
     const id = inspectedOwnerId()

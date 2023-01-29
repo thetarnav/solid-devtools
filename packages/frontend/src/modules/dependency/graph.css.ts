@@ -1,4 +1,14 @@
-import { color, flex, hexToRgb, padding, rounded, spacing, transition, vars } from '@/ui/theme'
+import {
+  color,
+  flex,
+  hexToRgb,
+  padding,
+  rounded,
+  spacing,
+  theme,
+  transition,
+  vars,
+} from '@/ui/theme'
 import { createVar, style } from '@vanilla-extract/css'
 
 const gridSize = spacing[10]
@@ -47,15 +57,14 @@ const _node = (() => {
       boxShadow: `0 0 ${margin} ${spacing[1]} ${bg}`,
       border: `2px solid transparent`,
       ...transition(['background-color', 'border-color']),
+      cursor: 'pointer',
       selectors: {
         // inspected
         '&[data-inspected=true]': {
           borderColor: color.gray[300],
+          cursor: 'default',
         },
         // not inspected
-        '&:not([data-inspected=true])': {
-          cursor: 'pointer',
-        },
         '&:not([data-inspected=true]):hover': {
           backgroundColor: color.gray[800],
         },
@@ -89,10 +98,10 @@ export const arrowHead = style({
 export const line = style({
   stroke: vars.domColor,
   strokeLinecap: 'round',
-  opacity: 0.6,
-  ...transition('opacity'),
+  opacity: 0.5,
+  ...transition('opacity', theme.duration[300], theme.duration[75]),
   selectors: {
-    '&[data-inspected=true]': {
+    '&[data-highlighted=true]': {
       opacity: 1,
     },
   },

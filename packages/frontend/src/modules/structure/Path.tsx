@@ -10,7 +10,7 @@ import * as styles from './path.css'
 import { useStructure } from './Structure'
 
 export const OwnerPath: Component = () => {
-  const { inspector, isNodeHovered, toggleHoveredNode } = useController()
+  const { inspector, hovered } = useController()
   const structure = useStructure()
 
   const rem = useRemSize()
@@ -33,7 +33,9 @@ export const OwnerPath: Component = () => {
         )}
         <div class={styles.container} ref={container}>
           {path().map(node => {
-            const hoverProps = createHover(hovering => toggleHoveredNode(node.id, 'node', hovering))
+            const hoverProps = createHover(hovering =>
+              hovered.toggleHoveredNode(node.id, 'node', hovering),
+            )
             return (
               <>
                 <div class={styles.divider}>
@@ -41,7 +43,7 @@ export const OwnerPath: Component = () => {
                 </div>
                 <div
                   class={styles.item}
-                  data-hovered={isNodeHovered(node.id)}
+                  data-hovered={hovered.isNodeHovered(node.id)}
                   {...hoverProps}
                   onClick={() => inspector.setInspectedOwner(node.id)}
                 >
