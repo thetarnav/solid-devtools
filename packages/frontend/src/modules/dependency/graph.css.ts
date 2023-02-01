@@ -13,7 +13,13 @@ import { createVar, style } from '@vanilla-extract/css'
 
 const gridSize = spacing[10]
 
-export const container = (() => {
+export const container = style({
+  width: '100%',
+  height: '100%',
+  background: color.gray[900],
+})
+
+export const graph = (() => {
   const patternSize = `1px`
   const patternColor = hexToRgb(color.gray[800], 0.7)
   const pattern = `${patternColor} 0,
@@ -28,13 +34,6 @@ export const container = (() => {
     ...flex('column', 'items-start'),
     background: `repeating-linear-gradient(${pattern}), repeating-linear-gradient(90deg, ${pattern})`,
     backgroundPosition: `-${patternSize} -${patternSize}`,
-    ':before': {
-      content: '',
-      position: 'absolute',
-      zIndex: -1,
-      background: color.gray[900],
-      inset: 0,
-    },
   })
 })()
 

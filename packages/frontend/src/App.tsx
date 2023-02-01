@@ -1,7 +1,7 @@
 import { Icon, Splitter } from '@/ui'
 import { DevtoolsMainView } from '@solid-devtools/debugger/types'
 import { Menu, MenuItem, Popover, PopoverButton, PopoverPanel } from 'solid-headless'
-import { Component, JSX, Match, Show, Switch } from 'solid-js'
+import { Component, JSX, Show } from 'solid-js'
 import * as styles from './App.css'
 import { useController } from './controller'
 import DgraphView from './modules/dependency/DgraphView'
@@ -9,8 +9,6 @@ import Inspector from './modules/inspector/Inspector'
 import StructureView from './modules/structure/Structure'
 
 const App: Component<{ headerSubtitle?: JSX.Element }> = props => {
-  const ctx = useController()
-
   return (
     <div class={styles.app}>
       <header class={styles.header.header}>
@@ -25,16 +23,17 @@ const App: Component<{ headerSubtitle?: JSX.Element }> = props => {
         <Options />
       </header>
       <div class={styles.content}>
-        <Splitter onToggle={() => ctx.setInspectedNode(null)} side={<Inspector />}>
-          <Switch>
-            <Match when={ctx.view.get() === DevtoolsMainView.Structure}>
-              <StructureView />
-            </Match>
-            <Match when={ctx.view.get() === DevtoolsMainView.Dgraph}>
-              <DgraphView />
-            </Match>
-          </Switch>
-        </Splitter>
+        <Splitter.Root>
+          <Splitter.Panel>
+            <StructureView />
+          </Splitter.Panel>
+          <Splitter.Panel>
+            <DgraphView />
+          </Splitter.Panel>
+          <Splitter.Panel>
+            <Inspector />
+          </Splitter.Panel>
+        </Splitter.Root>
       </div>
     </div>
   )

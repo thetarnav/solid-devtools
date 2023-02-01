@@ -193,12 +193,13 @@ importers:
     specifiers:
       '@solid-devtools/debugger': workspace:^0.19.0
       '@solid-devtools/shared': workspace:^0.10.6
-      '@solid-primitives/context': ^0.1.2
+      '@solid-primitives/context': ^0.1.3
       '@solid-primitives/cursor': ^0.0.103
       '@solid-primitives/date': ^2.0.5
       '@solid-primitives/event-bus': ^0.1.3
       '@solid-primitives/event-listener': ^2.2.3
       '@solid-primitives/immutable': ^0.1.4
+      '@solid-primitives/jsx-parser': ^0.0.2
       '@solid-primitives/keyboard': ^1.0.3
       '@solid-primitives/keyed': ^1.1.4
       '@solid-primitives/media': ^2.0.3
@@ -224,12 +225,13 @@ importers:
     dependencies:
       '@solid-devtools/debugger': link:../debugger
       '@solid-devtools/shared': link:../shared
-      '@solid-primitives/context': 0.1.2_solid-js@1.6.9
+      '@solid-primitives/context': 0.1.3_solid-js@1.6.9
       '@solid-primitives/cursor': 0.0.103_solid-js@1.6.9
       '@solid-primitives/date': 2.0.5_solid-js@1.6.9
       '@solid-primitives/event-bus': 0.1.4_solid-js@1.6.9
       '@solid-primitives/event-listener': 2.2.4_solid-js@1.6.9
       '@solid-primitives/immutable': 0.1.4_solid-js@1.6.9
+      '@solid-primitives/jsx-parser': 0.0.2_solid-js@1.6.9
       '@solid-primitives/keyboard': 1.0.5_solid-js@1.6.9
       '@solid-primitives/keyed': 1.1.4_solid-js@1.6.9
       '@solid-primitives/media': 2.0.4_solid-js@1.6.9
@@ -2189,10 +2191,10 @@ packages:
       solid-js: 1.6.9
     dev: false
 
-  /@solid-primitives/context/0.1.2_solid-js@1.6.9:
-    resolution: {integrity: sha512-kYnP08rKHgZA7O9azK8Bqo7yzN+2Fh8PHsftsghSAN6MVbH0soTSaBz+Cwx7jsVOJ7X3FRNjTEGIlvq97vfGyw==}
+  /@solid-primitives/context/0.1.3_solid-js@1.6.9:
+    resolution: {integrity: sha512-OxEbKbs4ZtXbRE9inkPzeRv9mOkSLwP+VErwYEpHxtsCJuZgmHEkNt4L47t8RQUCPdbUL2cNJYZZzQvZzgTcdA==}
     peerDependencies:
-      solid-js: ^1.5.0
+      solid-js: ^1.6.0
     dependencies:
       solid-js: 1.6.9
     dev: false
@@ -2242,6 +2244,14 @@ packages:
       solid-js: ^1.6.0
     dependencies:
       '@solid-primitives/utils': 4.0.0_solid-js@1.6.9
+      solid-js: 1.6.9
+    dev: false
+
+  /@solid-primitives/jsx-parser/0.0.2_solid-js@1.6.9:
+    resolution: {integrity: sha512-YsOANnDcGX0d3eKIbgQlBHA5PrdsYx/u3HdAkQJs3iDTOIQtOpaYIUrelYHHrJF3bk/UyEMFE34WUdV89fQSIw==}
+    peerDependencies:
+      solid-js: ^1.6.0
+    dependencies:
       solid-js: 1.6.9
     dev: false
 

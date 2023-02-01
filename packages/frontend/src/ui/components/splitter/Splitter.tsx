@@ -1,66 +1,110 @@
 import { createBodyCursor } from '@solid-primitives/cursor'
 import { makeEventListener } from '@solid-primitives/event-listener'
+import { createJSXParser } from '@solid-primitives/jsx-parser'
 import { createMediaQuery } from '@solid-primitives/media'
 import { getPositionInElement } from '@solid-primitives/mouse'
 import { scheduleIdle } from '@solid-primitives/scheduled'
+import { useRemSize } from '@solid-primitives/styles'
 import { clamp } from '@solid-primitives/utils'
-import { assignInlineVars } from '@vanilla-extract/dynamic'
-import { children, createComputed, createSignal, JSX, Show } from 'solid-js'
+import { batch, createComputed, createMemo, createSignal, Index, JSX } from 'solid-js'
 import * as styles from './Splitter.css'
 
-export function Splitter(props: {
-  children: JSX.Element
-  side?: JSX.Element
-  onToggle: (newState: boolean) => void
-}): JSX.Element {
-  const sideResolved = children(() => props.side)
+export type PanelProps = { children: JSX.Element }
 
-  const [progress, setProgress] = createSignal(0.6)
-  const [dragging, setDragging] = createSignal(false)
+const parser = createJSXParser<{ props: PanelProps }>()
+
+function SplitterRoot(props: { children: JSX.Element }) {
+  const resolved = parser.childrenTokens(() => props.children)
 
   const isMobile = createMediaQuery('(max-width: 640px)')
   const isTouch = createMediaQuery('(hover: none)')
-  createComputed(() => setProgress(isTouch() ? 0.5 : 0.6))
 
-  const onPointerDown = (e: PointerEvent) => {
-    e.preventDefault()
-    setDragging(!isTouch())
-  }
+  const [progress, setProgress] = createSignal<number[]>([])
+  const [dragging, setDragging] = createSignal<false | number>(false)
+
+  createComputed((p: ReturnType<typeof resolved> = []) => {
+    const panels = resolved()
+    // stop dragging if the number of panels changes
+    if (panels.length !== p.length) {
+      batch(() => {
+        setProgress(Array.from({ length: panels.length - 1 }, () => 1 / panels.length))
+        setDragging(false)
+      })
+    }
+    return panels
+  })
+
+  const rem = useRemSize()
 
   makeEventListener(
     window,
     'pointermove',
     scheduleIdle((e: PointerEvent) => {
-      if (!dragging()) return
+      const i = dragging()
+      if (i === false) return
       const toEl = getPositionInElement(e.pageX, e.pageY, container)
-      setProgress(clamp(isMobile() ? toEl.y / toEl.height : toEl.x / toEl.width, 0, 1))
+      const minP = (styles.MIN_SIZE_IN_REM * rem()) / container.clientWidth
+
+      setProgress(prev => {
+        let p = clamp(isMobile() ? toEl.y / toEl.height : toEl.x / toEl.width, minP, 1 - minP)
+        for (let j = 0; j < i; j++) p -= prev[j]!
+        if (p < minP) return prev
+        const newList = prev.slice()
+        if (newList[i + 1]) {
+          newList[i + 1] = newList[i]! + newList[i + 1]! - p
+          if (newList[i + 1]! < minP) return prev
+        }
+        newList[i] = p
+        return newList
+      })
     }),
   )
   makeEventListener(window, 'pointerup', setDragging.bind(void 0, false))
 
   createBodyCursor(() => dragging() && (isMobile() ? 'row-resize' : 'col-resize'))
 
+  const template = createMemo(() => {
+    const p = progress()
+
+    let t = ''
+    for (let i = 0; i < p.length; i++)
+      t += ` minmax(${styles.MIN_SIZE}, ${p[i]! * 100}%) ${styles.SPLIT_SIZE}`
+    t += ` minmax(${styles.MIN_SIZE}, 1fr)`
+
+    return t
+  })
+
   let container!: HTMLDivElement
   return (
     <div
       class={styles.container}
-      data-open={!!sideResolved()}
-      style={assignInlineVars({
-        [styles.progress]: progress() * 100 + '%',
-      })}
+      style={{ [isMobile() ? 'grid-template-rows' : 'grid-template-columns']: template() }}
       ref={container}
     >
-      <div class={styles.content}>{props.children}</div>
-      <Show when={sideResolved()}>
-        <div class={styles.split}>
-          <div
-            class={styles.splitHandle}
-            data-dragging={dragging()}
-            onPointerDown={onPointerDown}
-          ></div>
-        </div>
-        <div class={styles.content}>{sideResolved()}</div>
-      </Show>
+      <Index each={resolved()}>
+        {(panel, i) => (
+          <>
+            <div class={styles.content}>{panel().props.children}</div>
+            {i < resolved().length - 1 && (
+              <div class={styles.split}>
+                <div
+                  class={styles.splitHandle}
+                  data-dragging={dragging()}
+                  onPointerDown={e => {
+                    if (isTouch()) return
+                    e.preventDefault()
+                    setDragging(i)
+                  }}
+                ></div>
+              </div>
+            )}
+          </>
+        )}
+      </Index>
     </div>
   )
 }
+
+const SplitterPanel = parser.createToken((props: PanelProps) => ({ props }))
+
+export { SplitterRoot as Root, SplitterPanel as Panel }

@@ -141,93 +141,97 @@ const DgraphView: Component = () => {
   const thereIsAHoveredNode = createMemo(() => !!hovered.hoveredId())
 
   return (
-    <Scrollable>
-      <DgraphContext.Provider value={dgraph}>
-        <Show when={dgraph.graph() && order()} fallback="NO DEPENDENCY GRAPH">
-          {() => {
-            const flowOrder = () => order()!.flowOrder
-            const depthMap = () => order()!.depthMap
-            const length = () => flowOrder().length
-            const nodeMargin = () => 0.75 / length()
-            return (
-              <div class={styles.container}>
-                <For each={flowOrder()}>
-                  {id => (
-                    <GraphNode
-                      id={id}
-                      depth={depthMap()[id]!}
-                      node={dgraph.graph()![id]!}
-                      isInspected={inspector.isInspected(id)}
-                      onInspect={() => dgraph.inspectNode(id)}
-                      onHoverChange={state => hovered.toggleHoveredNode(id, 'node', state)}
-                    />
-                  )}
-                </For>
-                <svg
-                  style={assignInlineVars({ [styles.lengthVar]: length() + '' })}
-                  class={styles.svg}
-                  viewBox="0 0 1 1"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <defs>
-                    <marker
-                      id="head"
-                      orient="auto"
-                      refX="10"
-                      refY="2"
-                      style={{ overflow: 'visible' }}
-                    >
-                      <path d="M0,0 L2.5,2 0,4" class={styles.arrowHead} />
-                    </marker>
-                  </defs>
+    <div class={styles.container}>
+      <Scrollable>
+        <DgraphContext.Provider value={dgraph}>
+          <Show when={dgraph.graph() && order()}>
+            {() => {
+              const flowOrder = () => order()!.flowOrder
+              const depthMap = () => order()!.depthMap
+              const length = () => flowOrder().length
+              const nodeMargin = () => 0.75 / length()
+              return (
+                <div class={styles.graph}>
                   <For each={flowOrder()}>
-                    {(id, flowIndex) => (
-                      <For each={dgraph.graph()![id]!.sources}>
-                        {sourceId => (
-                          <Show when={dgraph.graph()![sourceId]}>
-                            {untrack(() => {
-                              const math = createMemo(() => {
-                                const l = length()
-                                const x1 = depthMap()[id]! / l
-                                const x2 = depthMap()[sourceId]! / l
-                                const y1 = flowIndex() / l
-                                const y2 = flowOrder().indexOf(sourceId) / l
-                                const d = Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
-                                return { x1, x2, y1, y2, d }
-                              })
-
-                              return (
-                                <line
-                                  x1={math().x1}
-                                  x2={math().x2}
-                                  y1={math().y1}
-                                  y2={math().y2}
-                                  stroke-width={0.05 / length()}
-                                  stroke-dasharray={`${math().d - nodeMargin()} 1`}
-                                  stroke-dashoffset={nodeMargin() / -2}
-                                  marker-end="url(#head)"
-                                  data-highlighted={
-                                    // hovered node should take precedence over inspected node
-                                    thereIsAHoveredNode()
-                                      ? hovered.isNodeHovered(id) || hovered.isNodeHovered(sourceId)
-                                      : inspector.isInspected(id) || inspector.isInspected(sourceId)
-                                  }
-                                  class={styles.line}
-                                />
-                              )
-                            })}
-                          </Show>
-                        )}
-                      </For>
+                    {id => (
+                      <GraphNode
+                        id={id}
+                        depth={depthMap()[id]!}
+                        node={dgraph.graph()![id]!}
+                        isInspected={inspector.isInspected(id)}
+                        onInspect={() => dgraph.inspectNode(id)}
+                        onHoverChange={state => hovered.toggleHoveredNode(id, 'node', state)}
+                      />
                     )}
                   </For>
-                </svg>
-              </div>
-            )
-          }}
-        </Show>
-      </DgraphContext.Provider>
-    </Scrollable>
+                  <svg
+                    style={assignInlineVars({ [styles.lengthVar]: length() + '' })}
+                    class={styles.svg}
+                    viewBox="0 0 1 1"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <defs>
+                      <marker
+                        id="head"
+                        orient="auto"
+                        refX="10"
+                        refY="2"
+                        style={{ overflow: 'visible' }}
+                      >
+                        <path d="M0,0 L2.5,2 0,4" class={styles.arrowHead} />
+                      </marker>
+                    </defs>
+                    <For each={flowOrder()}>
+                      {(id, flowIndex) => (
+                        <For each={dgraph.graph()![id]!.sources}>
+                          {sourceId => (
+                            <Show when={dgraph.graph()![sourceId]}>
+                              {untrack(() => {
+                                const math = createMemo(() => {
+                                  const l = length()
+                                  const x1 = depthMap()[id]! / l
+                                  const x2 = depthMap()[sourceId]! / l
+                                  const y1 = flowIndex() / l
+                                  const y2 = flowOrder().indexOf(sourceId) / l
+                                  const d = Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
+                                  return { x1, x2, y1, y2, d }
+                                })
+
+                                return (
+                                  <line
+                                    x1={math().x1}
+                                    x2={math().x2}
+                                    y1={math().y1}
+                                    y2={math().y2}
+                                    stroke-width={0.05 / length()}
+                                    stroke-dasharray={`${math().d - nodeMargin()} 1`}
+                                    stroke-dashoffset={nodeMargin() / -2}
+                                    marker-end="url(#head)"
+                                    data-highlighted={
+                                      // hovered node should take precedence over inspected node
+                                      thereIsAHoveredNode()
+                                        ? hovered.isNodeHovered(id) ||
+                                          hovered.isNodeHovered(sourceId)
+                                        : inspector.isInspected(id) ||
+                                          inspector.isInspected(sourceId)
+                                    }
+                                    class={styles.line}
+                                  />
+                                )
+                              })}
+                            </Show>
+                          )}
+                        </For>
+                      )}
+                    </For>
+                  </svg>
+                </div>
+              )
+            }}
+          </Show>
+        </DgraphContext.Provider>
+      </Scrollable>
+    </div>
   )
 }
 
