@@ -1,6 +1,6 @@
 import { createBodyCursor } from '@solid-primitives/cursor'
 import { makeEventListener } from '@solid-primitives/event-listener'
-import { createJSXParser } from '@solid-primitives/jsx-parser'
+import { createJSXParser, createToken, resolveTokens } from '@solid-primitives/jsx-parser'
 import { createMediaQuery } from '@solid-primitives/media'
 import { getPositionInElement } from '@solid-primitives/mouse'
 import { scheduleIdle } from '@solid-primitives/scheduled'
@@ -11,10 +11,10 @@ import * as styles from './Splitter.css'
 
 export type PanelProps = { children: JSX.Element }
 
-const parser = createJSXParser<{ props: PanelProps }>()
+const Parser = createJSXParser<PanelProps>()
 
 function SplitterRoot(props: { children: JSX.Element }) {
-  const resolved = parser.childrenTokens(() => props.children)
+  const tokens = resolveTokens(Parser, () => props.children)
 
   const isMobile = createMediaQuery('(max-width: 640px)')
   const isTouch = createMediaQuery('(hover: none)')
@@ -22,8 +22,8 @@ function SplitterRoot(props: { children: JSX.Element }) {
   const [progress, setProgress] = createSignal<number[]>([])
   const [dragging, setDragging] = createSignal<false | number>(false)
 
-  createComputed((p: ReturnType<typeof resolved> = []) => {
-    const panels = resolved()
+  createComputed((p: ReturnType<typeof tokens> = []) => {
+    const panels = tokens()
     // stop dragging if the number of panels changes
     if (panels.length !== p.length) {
       batch(() => {
@@ -61,7 +61,7 @@ function SplitterRoot(props: { children: JSX.Element }) {
   )
   makeEventListener(window, 'pointerup', setDragging.bind(void 0, false))
 
-  createBodyCursor(() => dragging() && (isMobile() ? 'row-resize' : 'col-resize'))
+  createBodyCursor(() => dragging() !== false && (isMobile() ? 'row-resize' : 'col-resize'))
 
   const template = createMemo(() => {
     const p = progress()
@@ -81,11 +81,11 @@ function SplitterRoot(props: { children: JSX.Element }) {
       style={{ [isMobile() ? 'grid-template-rows' : 'grid-template-columns']: template() }}
       ref={container}
     >
-      <Index each={resolved()}>
+      <Index each={tokens()}>
         {(panel, i) => (
           <>
-            <div class={styles.content}>{panel().props.children}</div>
-            {i < resolved().length - 1 && (
+            <div class={styles.content}>{panel().data.children}</div>
+            {i < tokens().length - 1 && (
               <div class={styles.split}>
                 <div
                   class={styles.splitHandle}
@@ -105,6 +105,6 @@ function SplitterRoot(props: { children: JSX.Element }) {
   )
 }
 
-const SplitterPanel = parser.createToken((props: PanelProps) => ({ props }))
+const SplitterPanel = createToken(Parser)
 
 export { SplitterRoot as Root, SplitterPanel as Panel }

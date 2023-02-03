@@ -1,7 +1,7 @@
+import { tabColor } from '@/ui/components/toggle-tabs/toggle-tabs.css'
 import { createHoverBackground } from '@/ui/mixins'
 import {
   border,
-  borderValue,
   centerChild,
   flex,
   insetX,
@@ -22,8 +22,6 @@ export const rowHeight = spacing[4.5]
 export const rowPadding = spacing[3.5]
 export const vMargin = spacing[3]
 
-export const panelHeaderHeight = spacing[7]
-
 export const ROW_HEIGHT_IN_REM = remValue(rowHeight)
 export const V_MARGIN_IN_REM = remValue(vMargin)
 
@@ -33,7 +31,7 @@ export const panelWrapper = style({
   width: '100%',
   overflow: 'hidden',
   display: 'grid',
-  gridTemplateRows: `${panelHeaderHeight} 1fr ${pathHeight}`,
+  gridTemplateRows: `${vars.panel.headerHeight} 1fr ${pathHeight}`,
   gridTemplateColumns: '100%',
 })
 
@@ -67,8 +65,6 @@ export const locatorIcon = style({
 })
 
 export const search = (() => {
-  const height = panelHeaderHeight
-
   const { hoverBgStyle } = createHoverBackground()
 
   const form = style([
@@ -82,7 +78,7 @@ export const search = (() => {
   ])
 
   const input = style({
-    height,
+    height: vars.panel.headerHeight,
     width: '100%',
     outline: 'unset',
     background: 'unset',
@@ -146,20 +142,7 @@ export const search = (() => {
 })()
 
 export const toggleMode = (() => {
-  const tabColor = createVar()
-
   const tabBase = style({
-    borderRight: borderValue(vars.panel.lightBorder),
-    ':last-child': {
-      borderRight: 'unset',
-    },
-    ...padding(0, 2.5),
-    ...centerChild,
-    columnGap: spacing[1.5],
-    color: vars.disabled.color,
-    ...transition('color'),
-    position: 'relative',
-    outline: 'unset',
     ':before': {
       content: '',
       width: spacing[2],
@@ -169,24 +152,9 @@ export const toggleMode = (() => {
       opacity: 0.6,
       ...transition('opacity'),
     },
-    ':after': {
-      content: '',
-      position: 'absolute',
-      inset: 0,
-      opacity: 0,
-      background: `radial-gradient(circle at 50% 130%, ${tabColor}, transparent 70%);`,
-      zIndex: -1,
-      ...transition('opacity'),
-    },
     selectors: {
       '&:is(:hover, :focus, [aria-selected=true]):before': {
         opacity: 1,
-      },
-      '&:is(:hover, :focus):after': {
-        opacity: 0.2,
-      },
-      '&[aria-selected=true]': {
-        color: vars.defaultTextColor,
       },
     },
   })
@@ -198,7 +166,6 @@ export const toggleMode = (() => {
     }),
     list: style({
       height: '100%',
-      ...flex('items-stretch'),
     }),
     tab: styleVariants({
       components: [
@@ -207,12 +174,7 @@ export const toggleMode = (() => {
           vars: { [tabColor]: vars.componentNameColor },
         }),
       ],
-      owners: [
-        tabBase,
-        style({
-          vars: { [tabColor]: vars.defaultTextColor },
-        }),
-      ],
+      owners: [tabBase],
       dom: [
         tabBase,
         style({

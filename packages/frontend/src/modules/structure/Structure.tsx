@@ -1,5 +1,5 @@
 import { useController } from '@/controller'
-import { Icon, Scrollable, ToggleButton } from '@/ui'
+import { Icon, Scrollable, ToggleButton, ToggleTabs } from '@/ui'
 import { NodeID, NodeType, TreeWalkerMode } from '@solid-devtools/debugger/types'
 import { defer } from '@solid-devtools/shared/primitives'
 import { createShortcut } from '@solid-primitives/keyboard'
@@ -11,7 +11,6 @@ import {
   createContext,
   createEffect,
   createMemo,
-  createSelector,
   createSignal,
   For,
   Setter,
@@ -120,21 +119,21 @@ const ToggleMode: Component = () => {
     [TreeWalkerMode.DOM]: 'DOM',
   }
 
-  const isSelected = createSelector<TreeWalkerMode, TreeWalkerMode>(structure.mode)
-
   return (
     <div class={styles.toggleMode.group}>
-      <div class={styles.toggleMode.list} role="group">
-        {[TreeWalkerMode.Components, TreeWalkerMode.Owners, TreeWalkerMode.DOM].map(mode => (
-          <button
-            aria-selected={isSelected(mode)}
-            class={styles.toggleMode.tab[mode]}
-            onClick={() => structure.changeTreeViewMode(mode)}
-          >
-            {tabsContentMap[mode]}
-          </button>
-        ))}
-      </div>
+      <ToggleTabs
+        class={styles.toggleMode.list}
+        active={structure.mode()}
+        onSelect={structure.changeTreeViewMode}
+      >
+        {Option =>
+          [TreeWalkerMode.Components, TreeWalkerMode.Owners, TreeWalkerMode.DOM].map(mode => (
+            <Option for={mode} class={styles.toggleMode.tab[mode]}>
+              {tabsContentMap[mode]}
+            </Option>
+          ))
+        }
+      </ToggleTabs>
     </div>
   )
 }

@@ -1,68 +1,35 @@
 import { Icon, Splitter } from '@/ui'
-import { DevtoolsMainView } from '@solid-devtools/debugger/types'
 import { Menu, MenuItem, Popover, PopoverButton, PopoverPanel } from 'solid-headless'
 import { Component, JSX, Show } from 'solid-js'
 import * as styles from './App.css'
 import { useController } from './controller'
-import DgraphView from './modules/dependency/DgraphView'
-import Inspector from './modules/inspector/Inspector'
 import StructureView from './modules/structure/Structure'
+import { SidePanel } from './SidePanel'
 
-const App: Component<{ headerSubtitle?: JSX.Element }> = props => {
-  return (
-    <div class={styles.app}>
-      <header class={styles.header.header}>
-        <div class={styles.header.identity}>
-          <Icon.SolidWhite class={styles.header.logo} />
-          <div>
-            <h3>Solid Developer Tools</h3>
-            {props.headerSubtitle && <p class={styles.header.subtitle}>{props.headerSubtitle}</p>}
-          </div>
-        </div>
-        <MainViewTabs />
-        <Options />
-      </header>
-      <div class={styles.content}>
-        <Splitter.Root>
-          <Splitter.Panel>
-            <StructureView />
-          </Splitter.Panel>
-          <Splitter.Panel>
-            <DgraphView />
-          </Splitter.Panel>
-          <Splitter.Panel>
-            <Inspector />
-          </Splitter.Panel>
-        </Splitter.Root>
-      </div>
-    </div>
-  )
-}
+// const MainViewTabs: Component = () => {
+//   const { view } = useController()
 
-const MainViewTabs: Component = () => {
-  const { view } = useController()
-
-  return (
-    <button
-      style={{
-        margin: '0 10px',
-        padding: '5px 10px',
-        border: '1px solid #fff',
-        'border-radius': '5px',
-        cursor: 'pointer',
-      }}
-      onClick={() => {
-        view.set(
-          view.get() === DevtoolsMainView.Structure
-            ? DevtoolsMainView.Dgraph
-            : DevtoolsMainView.Structure,
-        )
-      }}
-    >
-      View: {view.get().toUpperCase()}
-    </button>
-  )
-}
+//   return (
+//     <button
+//       style={{
+//         margin: '0 10px',
+//         padding: '5px 10px',
+//         border: '1px solid #fff',
+//         'border-radius': '5px',
+//         cursor: 'pointer',
+//       }}
+//       onClick={() => {
+//         view.set(
+//           view.get() === DevtoolsMainView.Structure
+//             ? DevtoolsMainView.Dgraph
+//             : DevtoolsMainView.Structure,
+//         )
+//       }}
+//     >
+//       View: {view.get().toUpperCase()}
+//     </button>
+//   )
+// }
 
 const Options: Component = () => {
   return (
@@ -94,6 +61,38 @@ const Options: Component = () => {
         </>
       )}
     </Popover>
+  )
+}
+
+const App: Component<{ headerSubtitle?: JSX.Element }> = props => {
+  const ctx = useController()
+
+  return (
+    <div class={styles.app}>
+      <header class={styles.header.header}>
+        <div class={styles.header.identity}>
+          <Icon.SolidWhite class={styles.header.logo} />
+          <div>
+            <h3>Solid Developer Tools</h3>
+            {props.headerSubtitle && <p class={styles.header.subtitle}>{props.headerSubtitle}</p>}
+          </div>
+        </div>
+        {/* <MainViewTabs /> */}
+        <Options />
+      </header>
+      <div class={styles.content}>
+        <Splitter.Root>
+          <Splitter.Panel>
+            <StructureView />
+          </Splitter.Panel>
+          {ctx.inspector.inspectedOwnerId() && (
+            <Splitter.Panel>
+              <SidePanel />
+            </Splitter.Panel>
+          )}
+        </Splitter.Root>
+      </div>
+    </div>
   )
 }
 
