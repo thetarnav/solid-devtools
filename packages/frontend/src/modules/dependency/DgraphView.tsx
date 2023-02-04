@@ -99,6 +99,7 @@ const GraphNode: Component<{
   node: SerializedDGraph.Node
   isInspected: boolean
   onInspect: VoidFunction
+  isHovered: boolean
   onHoverChange: (hovered: boolean) => void
 }> = props => {
   const { name, type } = props.node
@@ -107,6 +108,7 @@ const GraphNode: Component<{
   return (
     <div
       class={styles.node}
+      data-hovered={props.isHovered}
       data-inspected={props.isInspected}
       style={assignInlineVars({ [depthVar]: props.depth + '' })}
       onClick={props.onInspect}
@@ -160,6 +162,7 @@ const DgraphView: Component = () => {
                         node={dgraph.graph()![id]!}
                         isInspected={inspector.isInspected(id)}
                         onInspect={() => dgraph.inspectNode(id)}
+                        isHovered={hovered.isNodeHovered(id)}
                         onHoverChange={state => hovered.toggleHoveredNode(id, 'node', state)}
                       />
                     )}

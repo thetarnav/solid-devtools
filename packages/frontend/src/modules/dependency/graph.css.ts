@@ -58,15 +58,16 @@ const _node = (() => {
       ...transition(['background-color', 'border-color']),
       cursor: 'pointer',
       selectors: {
+        // hovered
+        '&:is(:hover, [data-hovered=true])': {
+          backgroundColor: color.gray[800],
+        },
         // inspected
         '&[data-inspected=true]': {
           borderColor: color.gray[300],
           cursor: 'default',
         },
         // not inspected
-        '&:not([data-inspected=true]):hover': {
-          backgroundColor: color.gray[800],
-        },
         '&:not([data-inspected=true]):active': {
           borderColor: color.gray[500],
         },
