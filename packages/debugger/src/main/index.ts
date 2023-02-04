@@ -1,11 +1,12 @@
 import { defer } from '@solid-devtools/shared/primitives'
 import { createEventHub, createSimpleEmitter } from '@solid-primitives/event-bus'
-import { Accessor, batch, createComputed, createMemo, createSignal } from 'solid-js'
+import { createStaticStore } from '@solid-primitives/utils'
+import { batch, createComputed, createEffect, createMemo } from 'solid-js'
 import { createDependencyGraph, DGraphUpdate } from '../dependency'
 import { createInspector, InspectorUpdate } from '../inspector'
 import { createLocator } from '../locator'
 import { createStructure, StructureUpdates } from '../structure'
-import { DEFAULT_MAIN_VIEW, DevtoolsMainView } from './constants'
+import { DebuggerModule, DEFAULT_MAIN_VIEW, DevtoolsMainView } from './constants'
 import { getOwnerById } from './id'
 import { createInternalRoot } from './roots'
 import { Mapped, NodeID, Solid } from './types'
@@ -16,11 +17,6 @@ export type InspectedState = {
   readonly signal: Solid.Signal | null
 }
 
-export type SetInspectedNodeData = {
-  ownerId: NodeID | null
-  signalId: NodeID | null
-} | null
-
 function createDebuggerEventHub() {
   return createEventHub($ => ({
     NodeUpdates: $<NodeID[]>(),
@@ -28,6 +24,7 @@ function createDebuggerEventHub() {
     InspectorUpdate: $<InspectorUpdate[]>(),
     InspectedNodeDetails: $<Mapped.OwnerDetails>(),
     DgraphUpdate: $<DGraphUpdate>(),
+    DebuggerDisabled: $<void>(),
   }))
 }
 export type DebuggerEventHub = ReturnType<typeof createDebuggerEventHub>
@@ -38,32 +35,55 @@ const plugin = createInternalRoot(() => {
   //
   // Debugger Enabled
   //
-  const [_structureEnabled, setStructureEnabled] = createSignal(false)
-  const [_debuggerEnabled, setDebuggerEnabled] = createSignal(false)
-  const [locatorEnabledSignal, setLocatorEnabledSignal] = createSignal<Accessor<boolean>>()
-  const [_dgraphEnabled, setDgraphEnabled] = createSignal(false)
+  const [modules, toggleModules] = createStaticStore({
+    debugger: false,
+    locator: false,
+    dgraph: false,
+    locatorKeyPressSignal: (): boolean => false,
+  })
 
   // The debugger can be enabled by devtools or by the locator
-  const debuggerEnabled = createMemo(() => _debuggerEnabled() || !!locatorEnabledSignal()?.())
-
-  const structureEnabled = createMemo(
-    () => (_structureEnabled() || !!locatorEnabledSignal()?.()) && debuggerEnabled(),
+  const debuggerEnabled = createMemo(() => modules.debugger || modules.locatorKeyPressSignal())
+  const dgraphEnabled = createMemo(() => modules.dgraph && debuggerEnabled())
+  // locator is enabled if debugger is enabled, and user pressed the key to activate it, or the plugin activated it
+  const locatorEnabled = createMemo(
+    () => (modules.locatorKeyPressSignal() || modules.locator) && debuggerEnabled(),
   )
 
-  const dgraphEnabled = createMemo(() => _dgraphEnabled() && debuggerEnabled())
+  createEffect(() => {
+    if (!debuggerEnabled()) eventHub.DebuggerDisabled.emit()
+  })
 
   //
-  // Current Open VIEW
+  // Current Open VIEW (currently not used)
   //
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   let currentView: DevtoolsMainView = DEFAULT_MAIN_VIEW
   const [listenToViewChange, emitViewChange] = createSimpleEmitter<DevtoolsMainView>()
 
   function setView(view: DevtoolsMainView) {
     batch(() => {
-      setStructureEnabled(view === DevtoolsMainView.Structure)
-      setDgraphEnabled(view === DevtoolsMainView.Dgraph)
+      // setStructureEnabled(view === DevtoolsMainView.Structure)
+      // setDgraphEnabled(view === DevtoolsMainView.Dgraph)
       emitViewChange((currentView = view))
     })
+  }
+
+  //
+  // Enabled Modules
+  //
+  function toggleModule(data: { module: DebuggerModule; enabled: boolean }): void {
+    switch (data.module) {
+      case DebuggerModule.Structure:
+        // * Structure is always enabled
+        break
+      case DebuggerModule.Dgraph:
+        toggleModules('dgraph', data.enabled)
+        break
+      case DebuggerModule.Locator:
+        toggleModules('locator', data.enabled)
+        break
+    }
   }
 
   //
@@ -89,7 +109,12 @@ const plugin = createInternalRoot(() => {
     emitInspectedStateChange((inspectedState = { owner: closest, signal: null }))
   }
 
-  function setInspectedNode(data: SetInspectedNodeData): void {
+  function setInspectedNode(
+    data: {
+      ownerId: NodeID | null
+      signalId: NodeID | null
+    } | null,
+  ): void {
     const { ownerId, signalId } = data ?? {}
     const owner = (ownerId && getOwnerById(ownerId)) ?? null
     // TODO signals that do not have graph parent should also be supported
@@ -110,7 +135,7 @@ const plugin = createInternalRoot(() => {
       updateInspectedNode()
     },
     onNodeUpdate: pushNodeUpdate,
-    structureEnabled,
+    enabled: debuggerEnabled,
     listenToViewChange,
   })
 
@@ -122,6 +147,10 @@ const plugin = createInternalRoot(() => {
     enabled: debuggerEnabled,
     listenToInspectedNodeChange: listenToInspectedState,
   })
+
+  //
+  // Dependency Graph
+  //
 
   createDependencyGraph({
     enabled: dgraphEnabled,
@@ -135,9 +164,10 @@ const plugin = createInternalRoot(() => {
   // Locator
   //
   const locator = createLocator({
-    debuggerEnabled,
+    eventHub,
     getElementById: inspector.getElementById,
-    setLocatorEnabledSignal: signal => setLocatorEnabledSignal(() => signal),
+    locatorEnabled,
+    setLocatorEnabledSignal: signal => toggleModules('locatorKeyPressSignal', () => signal),
   })
 
   // Opens the source code of the inspected component
@@ -153,14 +183,13 @@ const plugin = createInternalRoot(() => {
   function useDebugger() {
     return {
       enabled: debuggerEnabled,
-      toggleEnabled: (enabled: boolean) => void setDebuggerEnabled(enabled),
+      toggleEnabled: (enabled: boolean) => void toggleModules('debugger', enabled),
       listenTo: eventHub.on,
-      setView,
       openInspectedNodeLocation,
       setInspectedNode,
+      setView,
+      toggleModule,
       structure: {
-        enabled: structureEnabled,
-        toggleEnabled: (enabled: boolean) => void setStructureEnabled(enabled),
         setTreeWalkerMode: structure.setTreeWalkerMode,
         triggerUpdate: structure.updateAllRoots,
         forceTriggerUpdate: structure.forceUpdateAllRoots,
@@ -169,15 +198,10 @@ const plugin = createInternalRoot(() => {
         toggleValueNode: inspector.toggleValueNode,
       },
       locator: {
-        toggleEnabled: locator.togglePluginLocatorMode,
-        enabledByDebugger: locator.enabledByDebugger,
+        enabledByDebugger: modules.locatorKeyPressSignal,
         addClickInterceptor: locator.addClickInterceptor,
         setHighlightTarget: locator.setDevtoolsHighlightTarget,
         onHoveredComponent: locator.onDebuggerHoveredComponentChange,
-      },
-      dgraph: {
-        enabled: dgraphEnabled,
-        toggleEnabled: (enabled: boolean) => void setDgraphEnabled(enabled),
       },
     }
   }
@@ -187,5 +211,11 @@ const plugin = createInternalRoot(() => {
     useLocator: locator.useLocator,
   }
 })
+
+export type ToggleModuleData = Parameters<ReturnType<typeof plugin.useDebugger>['toggleModule']>[0]
+
+export type SetInspectedNodeData = Parameters<
+  ReturnType<typeof plugin.useDebugger>['setInspectedNode']
+>[0]
 
 export const { useDebugger, useLocator } = plugin

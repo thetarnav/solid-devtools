@@ -1,4 +1,5 @@
 import {
+  DebuggerModule,
   DevtoolsMainView,
   DGraphUpdate,
   HighlightElementPayload,
@@ -8,6 +9,7 @@ import {
   SetInspectedNodeData,
   StructureUpdates,
   ToggleInspectedValueData,
+  ToggleModuleData,
   TreeWalkerMode,
 } from '@solid-devtools/debugger/types'
 import { defer } from '@solid-devtools/shared/primitives'
@@ -16,7 +18,6 @@ import { SECOND } from '@solid-primitives/date'
 import { createEventBus, createEventHub } from '@solid-primitives/event-bus'
 import { debounce } from '@solid-primitives/scheduled'
 import { batch, createEffect, createMemo, createSelector, createSignal, onCleanup } from 'solid-js'
-import type { Dgraph } from './modules/dependency/dgraph'
 import createInspector from './modules/inspector'
 import type { Structure } from './modules/structure'
 
@@ -30,11 +31,11 @@ export function createController() {
   const devtools = createEventHub($ => ({
     inspectNode: $<SetInspectedNodeData>(),
     inspectValue: $<ToggleInspectedValueData>(),
-    devtoolsLocatorStateChange: $<boolean>(),
     highlightElementChange: $<HighlightElementPayload>(),
     openLocation: $<void>(),
     treeViewModeChange: $<TreeWalkerMode>(),
     viewChange: $<DevtoolsMainView>(),
+    toggleModule: $<ToggleModuleData>(),
   }))
 
   const client = createEventHub({
@@ -62,7 +63,6 @@ export type Controller = ReturnType<typeof createController>
 function createViewCache() {
   type CacheDataMap = {
     [DevtoolsMainView.Structure]: Structure.Cache
-    [DevtoolsMainView.Dgraph]: Dgraph.Cache
   }
   let shortCache: null | any = null
   let nextShortCache: typeof shortCache = null
@@ -107,7 +107,11 @@ const [Provider, useControllerCtx] = createContextProvider(
     const locatorEnabled = () => devtoolsLocatorEnabled() || clientLocatorEnabled()
 
     // send devtools locator state
-    createEffect(defer(devtoolsLocatorEnabled, devtools.devtoolsLocatorStateChange.emit))
+    createEffect(
+      defer(devtoolsLocatorEnabled, enabled =>
+        devtools.toggleModule.emit({ module: DebuggerModule.Locator, enabled }),
+      ),
+    )
 
     function setClientLocatorState(enabled: boolean) {
       batch(() => {
@@ -144,27 +148,23 @@ const [Provider, useControllerCtx] = createContextProvider(
     }
 
     //
-    // INSPECTOR
-    //
-    const inspector = createInspector()
-
-    //
     // OPENED MAIN VIEW
     //
+    // * there is no need for different views now
+
     const [openedView, setOpenedView] = createSignal<DevtoolsMainView>(DevtoolsMainView.Structure)
     const viewCache = createViewCache()
 
-    // Graph view is only available when there is an inspected node
-    // TODO
-    const canOpenGraphView = () => true
-
     function openView(view: DevtoolsMainView) {
-      if (view === DevtoolsMainView.Dgraph && !canOpenGraphView()) return
-
       setOpenedView(view)
     }
 
     createEffect(defer(openedView, devtools.viewChange.emit))
+
+    //
+    // INSPECTOR
+    //
+    const inspector = createInspector()
 
     // set inspected node
     createEffect(

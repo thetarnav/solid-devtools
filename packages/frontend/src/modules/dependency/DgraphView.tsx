@@ -141,17 +141,17 @@ const DgraphView: Component = () => {
   const thereIsAHoveredNode = createMemo(() => !!hovered.hoveredId())
 
   return (
-    <div class={styles.container}>
-      <Scrollable>
-        <DgraphContext.Provider value={dgraph}>
+    <Scrollable>
+      <div class={styles.container}>
+        <div class={styles.graph}>
           <Show when={dgraph.graph() && order()}>
-            {() => {
+            {untrack(() => {
               const flowOrder = () => order()!.flowOrder
               const depthMap = () => order()!.depthMap
               const length = () => flowOrder().length
               const nodeMargin = () => 0.75 / length()
               return (
-                <div class={styles.graph}>
+                <>
                   <For each={flowOrder()}>
                     {id => (
                       <GraphNode
@@ -225,13 +225,13 @@ const DgraphView: Component = () => {
                       )}
                     </For>
                   </svg>
-                </div>
+                </>
               )
-            }}
+            })}
           </Show>
-        </DgraphContext.Provider>
-      </Scrollable>
-    </div>
+        </div>
+      </div>
+    </Scrollable>
   )
 }
 

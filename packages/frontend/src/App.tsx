@@ -4,7 +4,7 @@ import { Component, JSX, Show } from 'solid-js'
 import * as styles from './App.css'
 import { useController } from './controller'
 import StructureView from './modules/structure/Structure'
-import { SidePanel } from './SidePanel'
+import { createSidePanel } from './SidePanel'
 
 // const MainViewTabs: Component = () => {
 //   const { view } = useController()
@@ -66,6 +66,9 @@ const Options: Component = () => {
 
 const App: Component<{ headerSubtitle?: JSX.Element }> = props => {
   const ctx = useController()
+
+  // side panel is created here to keep the state between renders
+  const SidePanel = createSidePanel()
 
   return (
     <div class={styles.app}>

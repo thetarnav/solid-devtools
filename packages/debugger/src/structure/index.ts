@@ -47,7 +47,7 @@ function getClosestIncludedOwner(owner: Solid.Owner, mode: TreeWalkerMode): Soli
 export function createStructure(props: {
   onStructureUpdate: (updates: StructureUpdates) => void
   onNodeUpdate: (nodeId: NodeID) => void
-  structureEnabled: () => boolean
+  enabled: () => boolean
   listenToViewChange: Listen<DevtoolsMainView>
 }) {
   let treeWalkerMode: TreeWalkerMode = DEFAULT_WALKER_MODE
@@ -61,14 +61,14 @@ export function createStructure(props: {
   const onComputationUpdate: ComputationUpdateHandler = (rootId, owner, changedStructure) => {
     // separate the callback from the computation
     queueMicrotask(() => {
-      if (!props.structureEnabled()) return
+      if (!props.enabled()) return
       changedStructure && updateOwner(owner, rootId)
       props.onNodeUpdate(getSdtId(owner))
     })
   }
 
   function forceFlushRootUpdateQueue(): void {
-    if (props.structureEnabled()) {
+    if (props.enabled()) {
       const updated: StructureUpdates['updated'] = {}
 
       const partial = !shouldUpdateAllRoots

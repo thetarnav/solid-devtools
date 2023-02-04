@@ -21,9 +21,6 @@ export function createOverlayController(): Controller {
   const controller = createController()
   const { devtools, client } = controller
 
-  devtools.on('devtoolsLocatorStateChange', enabled => {
-    queueMicrotask(() => debug.locator.toggleEnabled(enabled))
-  })
   devtools.on('highlightElementChange', data => {
     queueMicrotask(() => debug.locator.setHighlightTarget(data))
   })
@@ -40,6 +37,7 @@ export function createOverlayController(): Controller {
     queueMicrotask(() => debug.structure.setTreeWalkerMode(mode))
   })
   devtools.on('viewChange', view => queueMicrotask(() => debug.setView(view)))
+  devtools.on('toggleModule', data => queueMicrotask(() => debug.toggleModule(data)))
 
   debug.listenTo('StructureUpdates', updates => {
     queueMicrotask(() => client.structureUpdate.emit(updates))

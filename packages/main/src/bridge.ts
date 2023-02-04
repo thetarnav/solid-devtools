@@ -1,5 +1,4 @@
 import type {
-  ComputationUpdate,
   HighlightElementPayload,
   InspectorUpdate,
   Mapped,
@@ -29,7 +28,6 @@ export namespace Messages {
 
   export interface Client {
     StructureUpdate: StructureUpdates
-    ComputationUpdates: ComputationUpdate[]
     InspectorUpdate: InspectorUpdate[]
     /** send component clicked with the locator to the extension */
     ClientInspectedNode: NodeID

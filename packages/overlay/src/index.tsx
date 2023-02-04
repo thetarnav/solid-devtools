@@ -42,17 +42,9 @@ const Overlay: Component<{
   noPadding?: boolean
 }> = ({ defaultOpen, alwaysOpen, noPadding }) => {
   const debug = useDebugger()
-  if (defaultOpen || alwaysOpen) {
-    debug.toggleEnabled(true)
-    debug.structure.toggleEnabled(true)
-  }
+  if (defaultOpen || alwaysOpen) debug.toggleEnabled(true)
   const isOpen = debug.enabled
-  const setOpen = alwaysOpen
-    ? () => {}
-    : (enabled: boolean) => {
-        debug.toggleEnabled(enabled)
-        debug.structure.toggleEnabled(enabled)
-      }
+  const setOpen = alwaysOpen ? () => {} : (enabled: boolean) => debug.toggleEnabled(enabled)
 
   const isMobile = useIsMobile()
   const isTouch = useIsTouch()

@@ -1,6 +1,6 @@
 import { Listen } from '@solid-primitives/event-bus'
 import { throttle } from '@solid-primitives/scheduled'
-import { Accessor } from 'solid-js'
+import { Accessor, createEffect } from 'solid-js'
 import { InspectedState } from '../main'
 import { DevtoolsMainView } from '../main/constants'
 import { getSdtId } from '../main/id'
@@ -41,6 +41,7 @@ export function createDependencyGraph(props: {
     ) {
       clearListeners?.()
       clearListeners = null
+      props.emitDependencyGraph(null)
       return
     }
 
@@ -58,6 +59,11 @@ export function createDependencyGraph(props: {
   })
 
   props.listenToViewChange(() => {
+    inspectDGraph()
+  })
+
+  createEffect(() => {
+    props.enabled()
     inspectDGraph()
   })
 

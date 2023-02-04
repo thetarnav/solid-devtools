@@ -1,6 +1,6 @@
 import { useController } from '@/controller'
-import { DevtoolsMainView, DGraphUpdate, NodeID, NodeType } from '@solid-devtools/debugger/types'
-import { createSignal } from 'solid-js'
+import { DebuggerModule, DGraphUpdate, NodeID, NodeType } from '@solid-devtools/debugger/types'
+import { createSignal, onCleanup } from 'solid-js'
 
 export namespace Dgraph {
   export type Module = ReturnType<typeof createDependencyGraph>
@@ -10,16 +10,13 @@ export namespace Dgraph {
 
 export function createDependencyGraph() {
   const ctx = useController()
-  const { client } = ctx.controller
+  const { client, devtools } = ctx.controller
 
   const [graph, setGraph] = createSignal<DGraphUpdate>(null)
+  client.dgraphUpdate.listen(setGraph)
 
-  ctx.viewCache.get(DevtoolsMainView.Dgraph)
-  ctx.viewCache.set(DevtoolsMainView.Dgraph, () => ({ short: {}, long: {} }))
-
-  client.dgraphUpdate.listen(update => {
-    setGraph(update)
-  })
+  devtools.emit('toggleModule', { module: DebuggerModule.Dgraph, enabled: true })
+  onCleanup(() => devtools.emit('toggleModule', { module: DebuggerModule.Dgraph, enabled: false }))
 
   function inspectNode(id: NodeID) {
     const node = graph()?.[id]

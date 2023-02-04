@@ -40,6 +40,7 @@ export const panelHeaderAfterEl = style({
   ':after': {
     content: '',
     position: 'absolute',
+    zIndex: 1,
     ...insetX(0),
     top: '100%',
     height: '0.6px',

@@ -3,9 +3,14 @@
  */
 export enum DevtoolsMainView {
   Structure = 'structure',
-  Dgraph = 'dgraph',
 }
 export const DEFAULT_MAIN_VIEW = DevtoolsMainView.Structure
+
+export enum DebuggerModule {
+  Locator = 'locator',
+  Structure = 'structure',
+  Dgraph = 'dgraph',
+}
 
 export enum TreeWalkerMode {
   Owners = 'owners',
