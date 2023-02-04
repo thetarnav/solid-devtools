@@ -14,8 +14,7 @@ import { createVar, style } from '@vanilla-extract/css'
 const gridSize = spacing[10]
 
 export const container = style({
-  width: '100%',
-  height: '100%',
+  display: 'flex',
   background: color.gray[900],
 })
 
@@ -28,8 +27,9 @@ export const graph = (() => {
   transparent ${gridSize}`
 
   return style({
+    minHeight: '100%',
+    minWidth: '100%',
     padding: `calc(${gridSize} - ${patternSize})`,
-    paddingBottom: '100%',
     position: 'relative',
     ...flex('column', 'items-start'),
     background: `repeating-linear-gradient(${pattern}), repeating-linear-gradient(90deg, ${pattern})`,
