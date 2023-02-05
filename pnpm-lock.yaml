@@ -204,7 +204,7 @@ importers:
       '@solid-primitives/keyed': ^1.1.4
       '@solid-primitives/media': ^2.0.3
       '@solid-primitives/mouse': ^2.0.4
-      '@solid-primitives/props': ^3.0.1
+      '@solid-primitives/props': ^3.0.5
       '@solid-primitives/range': ^0.1.3
       '@solid-primitives/resize-observer': ^2.0.7
       '@solid-primitives/scheduled': ^1.2.0
@@ -236,7 +236,7 @@ importers:
       '@solid-primitives/keyed': 1.1.4_solid-js@1.6.9
       '@solid-primitives/media': 2.0.4_solid-js@1.6.9
       '@solid-primitives/mouse': 2.0.4_solid-js@1.6.9
-      '@solid-primitives/props': 3.0.1_solid-js@1.6.9
+      '@solid-primitives/props': 3.0.5_solid-js@1.6.9
       '@solid-primitives/range': 0.1.4_solid-js@1.6.9
       '@solid-primitives/resize-observer': 2.0.7_solid-js@1.6.9
       '@solid-primitives/scheduled': 1.2.0_solid-js@1.6.9
@@ -2315,12 +2315,12 @@ packages:
       solid-js: 1.6.9
     dev: false
 
-  /@solid-primitives/props/3.0.1_solid-js@1.6.9:
-    resolution: {integrity: sha512-5v27ex4KxxnIbgze1lXPEXHO/ebbtEjL6idkhezH/7jHpjunl8PYabpDgoGO16tb8DawcZWOAXa7waWqWPAe/A==}
+  /@solid-primitives/props/3.0.5_solid-js@1.6.9:
+    resolution: {integrity: sha512-PRfHSY8b+CxSAgGUcGf08xh+uPSRoqotTaQDiUrshS50TC/TQBDL1VFfVcaeHKiQQgPhFlBuoBWNZHlHW2aNiA==}
     peerDependencies:
       solid-js: ^1.6.0
     dependencies:
-      '@solid-primitives/utils': 4.0.0_solid-js@1.6.9
+      '@solid-primitives/utils': 5.1.0_solid-js@1.6.9
       solid-js: 1.6.9
     dev: false
 

@@ -157,7 +157,7 @@ const App: Component = () => {
       return count()
     },
     undefined,
-    { name: 'c-12-3-1-2-3-2-1-1-1-1-1-1-1-0-1-2-1-1-0' },
+    { name: 'very-long-name-that-will-definitely-not-have-enough-space-to-render' },
   )
 
   createComputed(() => {}, undefined, { name: 'frozen' })
@@ -167,7 +167,7 @@ const App: Component = () => {
 
   const [showBroken, setShowBroken] = createSignal(false)
 
-  return (
+  return () => (
     <>
       {header()}
       {objmemo().subheader}

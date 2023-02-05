@@ -159,7 +159,14 @@ function mapOwner(
   // Component
   if (type === NodeType.Component) {
     // Context
-    // combine context provide component with it' render-effect
+    //
+    // context nodes have following structure:
+    // | <provider> - Component
+    // | | RenderEffect - node with context key (contextNode)
+    // | | | children memo - memoizing children fn param
+    // | | | children memo - resolving nested children
+    //
+    // The provider component will be omitted
     let contextNode: Solid.Computation | undefined
     if (
       name === 'provider' &&
@@ -167,11 +174,7 @@ function mapOwner(
       owner.owned.length === 1 &&
       markOwnerType((contextNode = owner.owned[0]!)) === NodeType.Context
     ) {
-      // custom mapping for context nodes
-      // eslint-disable-next-line @typescript-eslint/no-shadow
-      const mapped = mapOwner(contextNode.owned![0]!, parent, NodeType.Context)
-      if (mapped) mapped.id = getOwnerId(contextNode)
-      return mapped
+      return mapOwner(contextNode, parent, NodeType.Context)
     }
 
     // Register component to global map

@@ -1,4 +1,4 @@
-import { getSdtId } from '../main/id'
+import { getOwnerId, getSdtId } from '../main/id'
 import { NodeID, Solid } from '../main/types'
 import {
   observeComputationUpdate,
@@ -45,7 +45,8 @@ function unobserveNodeUpdate(node: Solid.Computation | Solid.Memo | Solid.Signal
 }
 
 function addNodeToGraph(node: Solid.Signal | Solid.Memo | Solid.Computation) {
-  const id = getSdtId(node)
+  const isOwner = isSolidOwner(node)
+  const id = isOwner ? getOwnerId(node as Exclude<typeof node, Solid.Signal>) : getSdtId(node)
   if (Graph[id]) return
 
   // observe each mapped node, to update the graph when it changes
@@ -60,7 +61,7 @@ function addNodeToGraph(node: Solid.Signal | Solid.Memo | Solid.Computation) {
     observers: (node as Solid.Memo).observers
       ? (node as Solid.Memo).observers!.map(getSdtId)
       : undefined,
-    graph: !isSolidOwner(node) && node.graph ? getSdtId(node.graph) : undefined,
+    graph: !isOwner && node.graph ? getSdtId(node.graph) : undefined,
   } as SerializedDGraph.Node
 }
 
