@@ -167,11 +167,7 @@ const [Provider, useControllerCtx] = createContextProvider(
     const inspector = createInspector()
 
     // set inspected node
-    createEffect(
-      defer(inspector.inspected, ({ owner, signal }) => {
-        devtools.inspectNode.emit({ ownerId: owner, signalId: signal })
-      }),
-    )
+    createEffect(defer(inspector.inspectedNode, devtools.inspectNode.emit))
 
     // toggle inspected value/prop/signal
     inspector.setOnInspectValue(devtools.inspectValue.emit)

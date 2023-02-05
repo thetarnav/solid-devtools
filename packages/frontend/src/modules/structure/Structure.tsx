@@ -278,7 +278,7 @@ const DisplayStructureTree: Component = () => {
 
   // Index of the inspected node in the collapsed list
   const inspectedIndex = createMemo(() => {
-    const id = inspector.inspectedOwnerId()
+    const id = inspector.inspected.ownerId
     return id ? getNodeIndexById(id) : -1
   })
 
@@ -297,7 +297,7 @@ const DisplayStructureTree: Component = () => {
   // Scroll to selected node when it changes
   // listen to inspected ID, instead of node, because node reference can change
   createEffect(() => {
-    if (!inspector.inspected()) return
+    if (!inspector.inspected.ownerId) return
     // Run in next tick to ensure the scroll data is updated and virtual list recalculated
     // inspect node -> open inspector -> container changes height -> scroll data changes -> virtual list changes -> scroll to node
     setTimeout(() => {

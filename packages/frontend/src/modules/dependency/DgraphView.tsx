@@ -128,8 +128,8 @@ const DgraphView: Component = () => {
       if (!graph) return null
 
       return untrack(() => {
-        const inspected = inspector.inspected()
-        const inspectedId = inspected.signal ?? inspected.owner!
+        const inspectedId = inspector.inspected.signalId ?? inspector.inspected.ownerId
+        if (!inspectedId) return p
         const inspectedNode = graph[inspectedId]
         if (!inspectedNode) return p
         if (!inspectedNode.observers && !inspectedNode.sources) return null

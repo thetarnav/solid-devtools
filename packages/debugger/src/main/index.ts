@@ -116,10 +116,10 @@ const plugin = createInternalRoot(() => {
     } | null,
   ): void {
     const { ownerId, signalId } = data ?? {}
-    const owner = (ownerId && getOwnerById(ownerId)) ?? null
-    // TODO signals that do not have graph parent should also be supported
-    const signal = (owner && signalId && getSignalById(owner, signalId)) ?? null
-    emitInspectedStateChange((inspectedState = { owner, signal }))
+    const owner = ownerId && getOwnerById(ownerId)
+    const signal =
+      signalId && ((owner && getSignalById(owner, signalId)) || dgraph.getCachedSignal(signalId))
+    emitInspectedStateChange((inspectedState = { owner: owner ?? null, signal: signal ?? null }))
   }
 
   //
@@ -152,7 +152,7 @@ const plugin = createInternalRoot(() => {
   // Dependency Graph
   //
 
-  createDependencyGraph({
+  const dgraph = createDependencyGraph({
     enabled: dgraphEnabled,
     listenToInspectedStateChange: listenToInspectedState,
     listenToViewChange,

@@ -17,7 +17,7 @@ export function createSidePanel() {
 
   const [openPanel, setOpenPanel] = createSignal<keyof typeof tabsTitleMap>('inspector')
 
-  return function SidePanel() {
+  function SidePanel() {
     return (
       <div class={styles.root}>
         <header class={styles.header}>
@@ -53,5 +53,10 @@ export function createSidePanel() {
         </Switch>
       </div>
     )
+  }
+
+  return {
+    SidePanel,
+    isOpen: inspector.isSomeNodeInspected,
   }
 }

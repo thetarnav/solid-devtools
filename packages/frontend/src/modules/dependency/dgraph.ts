@@ -24,7 +24,7 @@ export function createDependencyGraph() {
     if (!node) return console.warn('inspectNode: node not found', id)
 
     if (node.type === NodeType.Signal) {
-      node.graph && ctx.inspector.setInspectedNode(node.graph, id)
+      ctx.inspector.setInspectedNode(node.graph ?? null, id)
     } else {
       ctx.inspector.setInspectedOwner(id)
     }

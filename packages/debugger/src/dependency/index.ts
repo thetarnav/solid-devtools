@@ -4,9 +4,9 @@ import { Accessor, createEffect } from 'solid-js'
 import { InspectedState } from '../main'
 import { DevtoolsMainView } from '../main/constants'
 import { getSdtId } from '../main/id'
-import { NodeID } from '../main/types'
+import { NodeID, Solid } from '../main/types'
 import { isSolidComponent, isSolidComputation, isSolidOwner } from '../main/utils'
-import { collectDependencyGraph, OnNodeUpdate, SerializedDGraph } from './collect'
+import { collectDependencyGraph, OnNodeUpdate, SerializedDGraph, SignalIdCache } from './collect'
 
 export { SerializedDGraph } from './collect'
 
@@ -21,6 +21,7 @@ export function createDependencyGraph(props: {
 }) {
   let inspectedState: InspectedState = { signal: null, owner: null }
   let clearListeners: VoidFunction | null = null
+  let signalIdCache: SignalIdCache | null = null
 
   const onNodeUpdate: OnNodeUpdate = node => {
     // separate the callback from the computation
@@ -32,6 +33,10 @@ export function createDependencyGraph(props: {
   }
 
   function inspectDGraph() {
+    // listeners need to be cleared each time, because each update will cause the graph to be mapped again
+    signalIdCache = null
+    clearListeners?.()
+
     const inspectedNode = inspectedState?.signal ?? inspectedState?.owner
     if (
       !props.enabled() ||
@@ -39,16 +44,14 @@ export function createDependencyGraph(props: {
       (isSolidOwner(inspectedNode) &&
         (!isSolidComputation(inspectedNode) || isSolidComponent(inspectedNode)))
     ) {
-      clearListeners?.()
       clearListeners = null
       props.emitDependencyGraph(null)
       return
     }
 
-    // listeners need to be cleared each time, because each update will cause the graph to be mapped again
-    clearListeners?.()
     const dgraph = collectDependencyGraph(inspectedNode, { onNodeUpdate })
     clearListeners = dgraph.clearListeners
+    signalIdCache = dgraph.signalIdCache
     props.emitDependencyGraph(dgraph.graph)
   }
   const triggerInspect = throttle(inspectDGraph, 200)
@@ -67,5 +70,11 @@ export function createDependencyGraph(props: {
     inspectDGraph()
   })
 
-  return {}
+  function getCachedSignal(id: NodeID): Solid.Signal | undefined {
+    return signalIdCache?.get(id)
+  }
+
+  return {
+    getCachedSignal,
+  }
 }

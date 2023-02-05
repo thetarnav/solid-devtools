@@ -2,7 +2,6 @@ import { Icon, Splitter } from '@/ui'
 import { Menu, MenuItem, Popover, PopoverButton, PopoverPanel } from 'solid-headless'
 import { Component, JSX, Show } from 'solid-js'
 import * as styles from './App.css'
-import { useController } from './controller'
 import StructureView from './modules/structure/Structure'
 import { createSidePanel } from './SidePanel'
 
@@ -65,10 +64,8 @@ const Options: Component = () => {
 }
 
 const App: Component<{ headerSubtitle?: JSX.Element }> = props => {
-  const ctx = useController()
-
   // side panel is created here to keep the state between renders
-  const SidePanel = createSidePanel()
+  const sidePanel = createSidePanel()
 
   return (
     <div class={styles.app}>
@@ -88,9 +85,9 @@ const App: Component<{ headerSubtitle?: JSX.Element }> = props => {
           <Splitter.Panel>
             <StructureView />
           </Splitter.Panel>
-          {ctx.inspector.inspectedOwnerId() && (
+          {sidePanel.isOpen() && (
             <Splitter.Panel>
-              <SidePanel />
+              <sidePanel.SidePanel />
             </Splitter.Panel>
           )}
         </Splitter.Root>

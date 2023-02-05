@@ -196,7 +196,7 @@ export default function createStructure() {
   }))
 
   const inspectedNode = createMemo(() => {
-    const id = inspector.inspectedOwnerId()
+    const id = inspector.inspected.ownerId
     return id ? findNode(id) : null
   })
 
