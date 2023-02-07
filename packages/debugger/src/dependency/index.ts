@@ -35,7 +35,7 @@ export function createDependencyGraph(props: {
     // listeners need to be cleared each time, because each update will cause the graph to be mapped again
     clearListeners?.()
 
-    const inspectedNode = inspectedState?.signal ?? inspectedState?.owner
+    const inspectedNode = inspectedState.signal ?? inspectedState.owner
     if (
       !props.enabled() ||
       !inspectedNode ||

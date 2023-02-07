@@ -133,7 +133,7 @@ export function createInspector(props: {
     })()
 
   props.listenToInspectedNodeChange(inspectedState => {
-    const owner = inspectedState?.owner ?? null
+    const owner = inspectedState.owner ?? null
     inspectedOwner && clearOwnerObservers(inspectedOwner, propsMap)
     inspectedOwner = owner
     checkProxyProps = null

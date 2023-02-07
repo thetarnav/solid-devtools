@@ -276,7 +276,7 @@ export default function createInspector() {
       if (!state.props) return
 
       for (const [key, getterState] of Object.entries(update)) {
-        state.props.record[key]?.setGetter(p => (p ? getterState : p))
+        state.props.record[key]?.setGetter(getterState)
       }
     },
     store(update) {

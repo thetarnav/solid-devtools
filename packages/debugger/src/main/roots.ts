@@ -75,7 +75,7 @@ function changeRootAttachment(root: Solid.Root, newParent: Solid.Owner | null): 
  * });
  */
 export function attachDebugger(_owner: Core.Owner = getOwner()!): void {
-  let owner = _owner as Solid.Owner
+  let owner = _owner as Solid.Owner | undefined | null
   if (!owner) return warn('reatachOwner helper should be called synchronously in a reactive owner.')
 
   // find all the roots in the owner tree (walking up the tree)
@@ -92,7 +92,7 @@ export function attachDebugger(_owner: Core.Owner = getOwner()!): void {
       }
       roots.push(owner)
     }
-    owner = owner.owner!
+    owner = owner.owner
   }
 
   // attach roots in reverse order (from top to bottom)
@@ -190,6 +190,7 @@ export function getTopRoot(owner: Solid.Owner): Solid.Root | null {
   do {
     if (isSolidRoot(owner) && !owner.isInternal && !owner.isDisposed) root = owner
     owner = owner.owner!
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
   } while (owner)
   return root
 }

@@ -84,7 +84,6 @@ const jsxLocationPlugin: (config: {
         const { init, id } = path.node
         if (
           !transformCurrentFile ||
-          !id ||
           !('name' in id) ||
           !isUpperCase(id.name) ||
           !init ||

@@ -188,10 +188,7 @@ const [Provider, useControllerCtx] = createContextProvider(
     client.on('inspectorUpdate', inspector.update)
 
     client.on('hoveredComponent', ({ nodeId, state }) => {
-      setClientHoveredNode(p => {
-        if (state) return nodeId ?? p
-        return p && p === nodeId ? null : p
-      })
+      setClientHoveredNode(p => (state ? nodeId : p && p === nodeId ? null : p))
     })
 
     client.on('inspectedComponent', node => {

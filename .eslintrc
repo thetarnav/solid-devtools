@@ -14,6 +14,7 @@
     "no-debugger": "warn",
     "@typescript-eslint/no-unused-vars": ["warn", { "argsIgnorePattern": "^_" }],
     "@typescript-eslint/no-unnecessary-type-assertion": "warn",
+    "@typescript-eslint/no-unnecessary-condition": "warn",
     "@typescript-eslint/no-shadow": ["warn", { "builtinGlobals": true, "allow": ["_", "Plugin"] }],
     "@typescript-eslint/no-useless-empty-export": "warn",
     "@typescript-eslint/prefer-enum-initializers": "warn",

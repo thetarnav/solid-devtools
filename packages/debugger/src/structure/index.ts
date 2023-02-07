@@ -40,6 +40,7 @@ function getClosestIncludedOwner(owner: Solid.Owner, mode: TreeWalkerMode): Soli
     if (type === NodeType.Component || type === NodeType.Context) return owner
     if (type === NodeType.Root) root = owner
     owner = owner.owner!
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
   } while (owner)
   return root
 }
@@ -116,6 +117,7 @@ export function createStructure(props: {
   })
 
   props.listenToViewChange(view => {
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     if (view === DevtoolsMainView.Structure) {
       updateAllRoots()
     }

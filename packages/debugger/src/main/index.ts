@@ -102,7 +102,7 @@ const plugin = createInternalRoot(() => {
 
   /** Check if the inspected node doesn't need to change (treeview mode changed or sth) */
   function updateInspectedNode() {
-    if (!inspectedState || !inspectedState.owner) return
+    if (!inspectedState.owner) return
     const closest = structure.getClosestIncludedOwner(inspectedState.owner)
     if (closest && closest === inspectedState.owner) return
 

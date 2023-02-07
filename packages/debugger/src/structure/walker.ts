@@ -101,7 +101,7 @@ function mapElements(
       while (elNodes) {
         for (let i = 0; i < elNodes.length; i++) {
           const elNode = elNodes[i]!
-          const elNodeData = ElementsMap.get(elNode)!
+          const elNodeData = ElementsMap.get(elNode)
           if (elNodeData && elNodeData.el === el) {
             if (AddedToParentElements) {
               // if the element is already added to the parent, just remove the element
@@ -115,7 +115,7 @@ function mapElements(
             elNodeData.component = MappedOwnerNode
             continue els
           }
-          if (elNode.children && elNode.children.length) toCheck.push(elNode.children)
+          if (elNode.children.length) toCheck.push(elNode.children)
         }
         elNodes = toCheck[index++]
       }
@@ -202,7 +202,7 @@ function mapOwner(
   const children: Mapped.Owner[] = []
   mapped.children = children
 
-  AddedToParentElements = false
+  AddedToParentElements = false as boolean
   MappedOwnerNode = mapped
 
   // Map html elements in DOM mode

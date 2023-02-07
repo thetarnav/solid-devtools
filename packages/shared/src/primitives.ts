@@ -226,8 +226,8 @@ export function createShallowStore<T extends Readonly<AnyStatic>>(
 
   // TODO handle arrays
 
-  const setValue = <K extends keyof T>(key: K, setterParam: SetterValue<any>): void => {
-    const saved = signals[key]
+  const setValue = (key: keyof T, setterParam: SetterValue<any>): void => {
+    const saved = signals[key] as Signal<any> | undefined
     const newValue = saved ? saved[1](setterParam) : accessWith(setterParam, storeValue[key])
     if (newValue === void 0) {
       delete storeValue[key]
@@ -239,7 +239,7 @@ export function createShallowStore<T extends Readonly<AnyStatic>>(
 
   const setter = (a: ((prev: T) => Partial<T>) | Partial<T> | keyof T, b?: SetterValue<any>) => {
     batch(() => {
-      if (a !== null && (typeof a === 'object' || typeof a === 'function'))
+      if (typeof a === 'object' || typeof a === 'function')
         untrack(() => {
           for (const [key, newValue] of entries(accessWith(a, store) as Partial<T>))
             setValue(key, () => newValue)
