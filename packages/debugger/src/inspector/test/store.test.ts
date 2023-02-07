@@ -8,7 +8,7 @@ import {
   unwrap,
 } from 'solid-js/store'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { getSdtId } from '../../main/id'
+import { getSdtId, ObjectType } from '../../main/id'
 import { getOwner, isSolidStore } from '../../main/utils'
 import { Core, Solid } from '../../types'
 import { observeStoreNode, OnNodeUpdate, setOnStoreNodeUpdate, StoreNodeProperty } from '../store'
@@ -17,7 +17,7 @@ const getOwnerStore = () =>
   (Object.values(getOwner()!.sourceMap!).find(s => isSolidStore(s))! as Solid.Store).value
 
 const getNodeProp = (node: Core.Store.StoreNode, prop: string): StoreNodeProperty =>
-  `${getSdtId(unwrap(node))}:${prop}`
+  `${getSdtId(unwrap(node), ObjectType.StoreNode)}:${prop}`
 
 let mockLAST_ID = 0
 beforeEach(() => {

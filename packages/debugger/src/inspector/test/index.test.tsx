@@ -7,6 +7,7 @@ import {
   JSX,
 } from 'solid-js'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { getObjectById, ObjectType } from '../../main/id'
 import { getOwner } from '../../main/utils'
 import { Mapped, NodeType, PropGetterState, Solid, ValueType } from '../../types'
 import { collectOwnerDetails } from '../inspector'
@@ -45,7 +46,7 @@ describe('collectOwnerDetails', () => {
         { name: 'WRAPPER' },
       )
 
-      const { details, valueMap, nodeIdMap } = collectOwnerDetails(owner, {
+      const { details, valueMap } = collectOwnerDetails(owner, {
         observedPropsMap: new WeakMap(),
         onPropStateChange: () => {},
         onValueUpdate: () => {},
@@ -75,7 +76,7 @@ describe('collectOwnerDetails', () => {
       expect(valueMap.get('signal:#1')).toBeTruthy()
       expect(valueMap.get('signal:#3')).toBeTruthy()
 
-      expect(nodeIdMap.get('#2')).toBe(div)
+      expect(getObjectById('#2', ObjectType.Element)).toBe(div)
 
       dispose()
     })
@@ -98,7 +99,7 @@ describe('collectOwnerDetails', () => {
         </TestComponent>
       ))
 
-      const { details, nodeIdMap } = collectOwnerDetails(owner, {
+      const { details } = collectOwnerDetails(owner, {
         observedPropsMap: new WeakMap(),
         onPropStateChange: () => {},
         onValueUpdate: () => {},
@@ -131,7 +132,7 @@ describe('collectOwnerDetails', () => {
         },
       } satisfies Mapped.OwnerDetails)
 
-      expect(nodeIdMap.get('#1')).toBeInstanceOf(HTMLDivElement)
+      expect(getObjectById('#1', ObjectType.Element)).toBeInstanceOf(HTMLDivElement)
     })
   })
 
@@ -147,7 +148,7 @@ describe('collectOwnerDetails', () => {
         return <Button {...props()} />
       })
 
-      const { details, nodeIdMap } = collectOwnerDetails(owner, {
+      const { details } = collectOwnerDetails(owner, {
         observedPropsMap: new WeakMap(),
         onPropStateChange: () => {},
         onValueUpdate: () => {},
@@ -174,7 +175,7 @@ describe('collectOwnerDetails', () => {
         },
       } satisfies Mapped.OwnerDetails)
 
-      expect(nodeIdMap.get('#1')).toBeInstanceOf(HTMLButtonElement)
+      expect(getObjectById('#1', ObjectType.Element)).toBeInstanceOf(HTMLButtonElement)
 
       dispose()
     })

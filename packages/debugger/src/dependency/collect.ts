@@ -76,7 +76,7 @@ function visitSources(node: Solid.Computation | Solid.Memo | Solid.Signal) {
         VisitedSources.has(source) ||
         (isSolidOwner(source) && getOwnerType(source) === NodeType.Refresh)
       ) {
-        return
+        continue
       }
       VisitedSources.add(source)
       addNodeToGraph(source)
@@ -89,7 +89,7 @@ function visitObservers(node: Solid.Computation | Solid.Memo | Solid.Signal) {
   if ('observers' in node && node.observers) {
     for (const observer of node.observers) {
       if (VisitedObservers.has(observer) || getOwnerType(observer) === NodeType.Refresh) {
-        return
+        continue
       }
       VisitedObservers.add(observer)
       addNodeToGraph(observer)

@@ -1,7 +1,7 @@
 import { Truthy } from '@solid-primitives/utils'
 import { createMutable, createStore } from 'solid-js/store'
 import { describe, expect, test, vi } from 'vitest'
-import { NodeIDMap } from '../../main/id'
+import { getObjectById, ObjectType } from '../../main/id'
 import { encodeValue } from '../serialize'
 import { EncodedValue, INFINITY, NAN, NEGATIVE_INFINITY, UNDEFINED, ValueType } from '../types'
 
@@ -68,7 +68,7 @@ describe('encodeValue Preview', () => {
 
   for (const [testName, value, expectation] of encodePreviewExpectations) {
     test(testName, () => {
-      const s = encodeValue(value, false, new NodeIDMap())
+      const s = encodeValue(value, false)
       expect(s).toEqual(expectation)
       expect(JSON.parse(JSON.stringify(s))).toEqual(s)
     })
@@ -145,7 +145,7 @@ describe('encodeValue Deep', () => {
 
   for (const [testName, value, expectation] of encodeDeepExpectations) {
     test(testName, () => {
-      const s = encodeValue(value, true, new NodeIDMap())
+      const s = encodeValue(value, true)
       expect(s).toEqual(expectation)
       expect(JSON.parse(JSON.stringify(s))).toEqual(s)
     })
@@ -168,18 +168,17 @@ describe('save elements to a map', () => {
     ],
   ]
 
-  const map = new NodeIDMap<Element>()
   for (const [testName, value, expectation] of elMapExpectations) {
     test(testName, () => {
-      const s = encodeValue(value, true, map)
+      const s = encodeValue(value, true)
       expect(s).toEqual(expectation)
       expect(JSON.parse(JSON.stringify(s))).toEqual(s)
     })
   }
   test('map containing correct values', () => {
-    expect(map.get('#0')).toBe(div1)
-    expect(map.get('#1')).toBe(a1)
-    expect(map.get('#4')).toBe(div2)
+    expect(getObjectById('#0', ObjectType.Element)).toBe(div1)
+    expect(getObjectById('#1', ObjectType.Element)).toBe(a1)
+    expect(getObjectById('#4', ObjectType.Element)).toBe(div2)
   })
 })
 
@@ -223,7 +222,7 @@ describe('encodeValue with repeated references', () => {
 
   for (const [testName, value, expectation] of circularExpectations) {
     test(testName, () => {
-      const s = encodeValue(value, true, new NodeIDMap())
+      const s = encodeValue(value, true)
       expect(s).toEqual(expectation)
       expect(JSON.parse(JSON.stringify(s))).toEqual(s)
     })
@@ -245,7 +244,7 @@ describe('finding stores in values', () => {
     name: string,
     data: unknown,
     encoded: EncodedValue[],
-    calledWith: Parameters<Truthy<Parameters<typeof encodeValue>[3]>>[],
+    calledWith: Parameters<Truthy<Parameters<typeof encodeValue>[2]>>[],
   ][] = [
     [
       'Store',
@@ -309,7 +308,7 @@ describe('finding stores in values', () => {
   for (const [testName, value, expectation, calledWith] of storeExpectations) {
     test(testName, () => {
       const onStore = vi.fn()
-      const s = encodeValue(value, true, new NodeIDMap(), onStore)
+      const s = encodeValue(value, true, onStore)
       expect(s).toEqual(expectation)
       expect(JSON.parse(JSON.stringify(s))).toEqual(s)
       expect(onStore).toBeCalledTimes(calledWith.length)

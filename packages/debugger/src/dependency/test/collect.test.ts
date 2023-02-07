@@ -13,7 +13,7 @@ beforeEach(() => {
 vi.mock('../../main/getId', () => ({ getNewSdtId: () => '#' + mockLAST_ID++ }))
 
 describe('collectDependencyGraph', () => {
-  it.only('should collect dependency graph', () => {
+  it('should collect dependency graph', () => {
     let computedOwner!: Solid.Computation
     let memoAOwner!: Solid.Computation
 
@@ -47,7 +47,7 @@ describe('collectDependencyGraph', () => {
 
     let result = collectDependencyGraph(computedOwner, { onNodeUpdate: () => {} })
 
-    expect(result.graph).toEqual({
+    expect(result.graph, 'graph of computedOwner').toEqual({
       '#0': {
         name: expect.any(String),
         type: NodeType.Computation,
@@ -85,7 +85,7 @@ describe('collectDependencyGraph', () => {
         type: NodeType.Signal,
         depth: 2,
         observers: ['#0'],
-        graph: '#ff',
+        graph: '#1',
         sources: undefined,
       },
       '#6': {
@@ -114,7 +114,9 @@ describe('collectDependencyGraph', () => {
       },
     } satisfies SerializedDGraph.Graph)
 
-    expect(result, 'is JSON-serializable').toMatchObject(JSON.parse(JSON.stringify(result)))
+    expect(result.graph, 'is JSON-serializable').toMatchObject(
+      JSON.parse(JSON.stringify(result.graph)),
+    )
 
     result = collectDependencyGraph(memoAOwner, { onNodeUpdate: () => {} })
 
@@ -125,7 +127,7 @@ describe('collectDependencyGraph', () => {
         depth: 2,
         sources: ['#2', '#3', '#4', '#5'],
         observers: undefined,
-        graph: '#ff',
+        graph: undefined,
       },
       '#2': {
         name: expect.any(String),
@@ -133,7 +135,7 @@ describe('collectDependencyGraph', () => {
         depth: 1,
         sources: ['#6', '#7'],
         observers: ['#0'],
-        graph: '#ff',
+        graph: undefined,
       },
       '#6': {
         name: expect.any(String),
@@ -148,12 +150,14 @@ describe('collectDependencyGraph', () => {
         type: NodeType.Signal,
         depth: 0,
         observers: ['#2'],
-        graph: '#ff',
+        graph: undefined,
         sources: undefined,
       },
     } satisfies SerializedDGraph.Graph)
 
-    expect(JSON.parse(JSON.stringify(result)), 'is JSON-serializable').toEqual(result)
+    expect(result.graph, 'is JSON-serializable').toMatchObject(
+      JSON.parse(JSON.stringify(result.graph)),
+    )
   })
 
   it('listens to visited nodes', () => {
@@ -231,24 +235,24 @@ describe('collectDependencyGraph', () => {
       setA(1)
 
       expect(captured).toHaveLength(3)
-      expect(getSdtId(captured[0])).toEqual('#3')
-      expect(getSdtId(captured[1])).toEqual('#1')
-      expect(getSdtId(captured[2])).toEqual('#0')
+      expect(getSdtId(captured[0], {} as any)).toEqual('#3')
+      expect(getSdtId(captured[1], {} as any)).toEqual('#1')
+      expect(getSdtId(captured[2], {} as any)).toEqual('#0')
 
       captured.length = 0
       setB(1)
 
       expect(captured).toHaveLength(3)
-      expect(getSdtId(captured[0])).toEqual('#4')
-      expect(getSdtId(captured[1])).toEqual('#1')
-      expect(getSdtId(captured[2])).toEqual('#0')
+      expect(getSdtId(captured[0], {} as any)).toEqual('#4')
+      expect(getSdtId(captured[1], {} as any)).toEqual('#1')
+      expect(getSdtId(captured[2], {} as any)).toEqual('#0')
 
       captured.length = 0
       setC(1)
 
       expect(captured).toHaveLength(2)
-      expect(getSdtId(captured[0])).toEqual('#2')
-      expect(getSdtId(captured[1])).toEqual('#0')
+      expect(getSdtId(captured[0], {} as any)).toEqual('#2')
+      expect(getSdtId(captured[1], {} as any)).toEqual('#0')
 
       captured.length = 0
       setD(1)
@@ -262,11 +266,11 @@ describe('collectDependencyGraph', () => {
       })
 
       expect(captured).toHaveLength(5)
-      expect(getSdtId(captured[0])).toEqual('#3')
-      expect(getSdtId(captured[1])).toEqual('#4')
-      expect(getSdtId(captured[2])).toEqual('#2')
-      expect(getSdtId(captured[3])).toEqual('#1')
-      expect(getSdtId(captured[4])).toEqual('#0')
+      expect(getSdtId(captured[0], {} as any)).toEqual('#3')
+      expect(getSdtId(captured[1], {} as any)).toEqual('#4')
+      expect(getSdtId(captured[2], {} as any)).toEqual('#2')
+      expect(getSdtId(captured[3], {} as any)).toEqual('#1')
+      expect(getSdtId(captured[4], {} as any)).toEqual('#0')
     })
   })
 })
