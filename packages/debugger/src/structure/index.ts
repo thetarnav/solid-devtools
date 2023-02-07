@@ -2,7 +2,7 @@ import { Listen } from '@solid-primitives/event-bus'
 import { throttle } from '@solid-primitives/scheduled'
 import * as registry from '../main/componentRegistry'
 import { DEFAULT_WALKER_MODE, DevtoolsMainView, NodeType, TreeWalkerMode } from '../main/constants'
-import { getSdtId } from '../main/id'
+import { getSdtId, ObjectType } from '../main/id'
 import * as roots from '../main/roots'
 import { Mapped, NodeID, Solid } from '../main/types'
 import { isDisposed, markOwnerType } from '../main/utils'
@@ -63,7 +63,7 @@ export function createStructure(props: {
     queueMicrotask(() => {
       if (!props.enabled()) return
       changedStructure && updateOwner(owner, rootId)
-      props.onNodeUpdate(getSdtId(owner))
+      props.onNodeUpdate(getSdtId(owner, ObjectType.Owner))
     })
   }
 
@@ -75,7 +75,7 @@ export function createStructure(props: {
       shouldUpdateAllRoots = false
       const [owners, getRootId] = partial
         ? [updateQueue, (owner: Solid.Owner) => ownerRoots.get(owner)!]
-        : [roots.getCurrentRoots(), (owner: Solid.Owner) => getSdtId(owner)]
+        : [roots.getCurrentRoots(), (owner: Solid.Owner) => getSdtId(owner, ObjectType.Owner)]
 
       for (const owner of owners) {
         const rootId = getRootId(owner)

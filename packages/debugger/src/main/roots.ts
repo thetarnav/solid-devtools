@@ -2,7 +2,7 @@ import { warn } from '@solid-devtools/shared/utils'
 import { createRoot } from 'solid-js'
 import { clearComponentRegistry } from './componentRegistry'
 import { NodeType } from './constants'
-import { getSdtId } from './id'
+import { getSdtId, ObjectType } from './id'
 import { Core, NodeID, Solid } from './types'
 import { getOwner, isSolidRoot, onOwnerCleanup } from './utils'
 
@@ -23,13 +23,13 @@ export function setOnRootRemoved(fn: typeof OnRootRemoved) {
 }
 
 export function createTopRoot(owner: Solid.Root): void {
-  const rootId = getSdtId(owner)
+  const rootId = getSdtId(owner, ObjectType.Owner)
   RootMap.set(rootId, owner)
   OnOwnerNeedsUpdate?.(owner, rootId)
 }
 
 function cleanupRoot(root: Solid.Root): void {
-  const rootId = getSdtId(root)
+  const rootId = getSdtId(root, ObjectType.Owner)
   root.isDisposed = true
   changeRootAttachment(root, null)
 
@@ -47,7 +47,7 @@ function changeRootAttachment(root: Solid.Root, newParent: Solid.Owner | null): 
   if (root.sdtAttached) {
     root.sdtAttached.sdtSubRoots!.splice(root.sdtAttached.sdtSubRoots!.indexOf(root), 1)
     topRoot = getTopRoot(root.sdtAttached)
-    if (topRoot) OnOwnerNeedsUpdate?.(root.sdtAttached, getSdtId(topRoot))
+    if (topRoot) OnOwnerNeedsUpdate?.(root.sdtAttached, getSdtId(topRoot, ObjectType.Owner))
   }
 
   if (newParent) {
@@ -56,7 +56,7 @@ function changeRootAttachment(root: Solid.Root, newParent: Solid.Owner | null): 
     else newParent.sdtSubRoots = [root]
 
     if (topRoot === undefined) topRoot = getTopRoot(newParent)
-    if (topRoot) OnOwnerNeedsUpdate?.(newParent, getSdtId(topRoot))
+    if (topRoot) OnOwnerNeedsUpdate?.(newParent, getSdtId(topRoot, ObjectType.Owner))
   } else {
     delete root.sdtAttached
   }
@@ -86,7 +86,7 @@ export function attachDebugger(_owner: Core.Owner = getOwner()!): void {
       // INTERNAL | disposed
       if (owner.isInternal || owner.isDisposed) return
       // already attached
-      if (RootMap.has(getSdtId(owner))) {
+      if (RootMap.has(getSdtId(owner, ObjectType.Owner))) {
         isFirstTopLevel = false
         break
       }

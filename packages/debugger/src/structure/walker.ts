@@ -1,6 +1,6 @@
 import type { ComponentRegisterHandler } from '../main/componentRegistry'
 import { NodeType, TreeWalkerMode } from '../main/constants'
-import { getOwnerId, getSdtId } from '../main/id'
+import { getSdtId, ObjectType } from '../main/id'
 import { Mapped, NodeID, Solid } from '../main/types'
 import { observeComputationUpdate } from '../main/update'
 import {
@@ -122,7 +122,7 @@ function mapElements(
     }
 
     const mappedEl: Mapped.Owner = {
-      id: getSdtId(el),
+      id: getSdtId(el, ObjectType.Element),
       type: NodeType.Element,
       name: el.localName,
       children: [],
@@ -141,7 +141,7 @@ function mapOwner(
   parent: Mapped.Owner | null,
   overwriteType?: NodeType,
 ): Mapped.Owner | undefined {
-  const id = getOwnerId(owner)
+  const id = getSdtId(owner, ObjectType.Owner)
   const type = overwriteType ?? markOwnerType(owner)
   const name =
     type === NodeType.Component ||

@@ -7,10 +7,10 @@ import { createInspector, InspectorUpdate } from '../inspector'
 import { createLocator } from '../locator'
 import { createStructure, StructureUpdates } from '../structure'
 import { DebuggerModule, DEFAULT_MAIN_VIEW, DevtoolsMainView } from './constants'
-import { getOwnerById } from './id'
+import { getObjectById, ObjectType } from './id'
 import { createInternalRoot } from './roots'
 import { Mapped, NodeID, Solid } from './types'
-import { createBatchedUpdateEmitter, getSignalById } from './utils'
+import { createBatchedUpdateEmitter } from './utils'
 
 export type InspectedState = {
   readonly owner: Solid.Owner | null
@@ -116,9 +116,8 @@ const plugin = createInternalRoot(() => {
     } | null,
   ): void {
     const { ownerId, signalId } = data ?? {}
-    const owner = ownerId && getOwnerById(ownerId)
-    const signal =
-      signalId && ((owner && getSignalById(owner, signalId)) || dgraph.getCachedSignal(signalId))
+    const owner = ownerId && getObjectById(ownerId, ObjectType.Owner)
+    const signal = signalId && getObjectById(signalId, ObjectType.Signal)
     emitInspectedStateChange((inspectedState = { owner: owner ?? null, signal: signal ?? null }))
   }
 
@@ -152,7 +151,7 @@ const plugin = createInternalRoot(() => {
   // Dependency Graph
   //
 
-  const dgraph = createDependencyGraph({
+  createDependencyGraph({
     enabled: dgraphEnabled,
     listenToInspectedStateChange: listenToInspectedState,
     listenToViewChange,
@@ -165,7 +164,6 @@ const plugin = createInternalRoot(() => {
   //
   const locator = createLocator({
     eventHub,
-    getElementById: inspector.getElementById,
     locatorEnabled,
     setLocatorEnabledSignal: signal => toggleModules('locatorKeyPressSignal', () => signal),
   })

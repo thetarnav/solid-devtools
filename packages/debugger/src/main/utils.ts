@@ -10,8 +10,7 @@ import {
 } from 'solid-js'
 import { DEV as _STORE_DEV } from 'solid-js/store'
 import { NodeType } from './constants'
-import { getSdtId } from './id'
-import { Core, NodeID, Solid } from './types'
+import { Core, Solid } from './types'
 
 const STORE_DEV = _STORE_DEV!
 
@@ -48,14 +47,6 @@ export function getOwnerName(owner: Readonly<Solid.Owner>): string {
 }
 export function getSignalName(signal: Readonly<Solid.Signal>): string {
   return signal.name || '(unnamed)'
-}
-
-export function getSignalById(owner: Readonly<Solid.Owner>, id: NodeID): Solid.Signal | undefined {
-  if (owner.sourceMap) {
-    for (const source of Object.values(owner.sourceMap)) {
-      if (getSdtId(source) === id && !isSolidStore(source)) return source
-    }
-  }
 }
 
 export const getStoreNodeName = (node: Core.Store.StoreNode): string =>

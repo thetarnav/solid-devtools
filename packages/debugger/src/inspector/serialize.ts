@@ -1,6 +1,6 @@
 import { FalsyValue } from '@solid-primitives/utils'
 import { unwrap } from 'solid-js/store'
-import { NodeIDMap } from '../main/id'
+import { getSdtId, ObjectType } from '../main/id'
 import { isStoreNode } from '../main/utils'
 import {
   Core,
@@ -15,7 +15,6 @@ import {
 
 // globals
 let Deep: boolean
-let NodeMap: NodeIDMap<Element | Core.Store.StoreNode>
 let List: EncodedValue[]
 let Seen: Map<unknown, number>
 let InStore: boolean
@@ -66,7 +65,9 @@ function encode(value: unknown): number {
   // HTML Elements
   if (value instanceof Element) {
     ;(encoded as EncodedValue<ValueType.Element>)[0] = ValueType.Element
-    ;(encoded as EncodedValue<ValueType.Element>)[1] = `${NodeMap.set(value)}:${value.localName}`
+    ;(encoded as EncodedValue<ValueType.Element>)[1] = `${getSdtId(value, ObjectType.Element)}:${
+      value.localName
+    }`
   }
   // Store Nodes
   else if (!ignoreNextStore && isStoreNode(value)) {
@@ -74,7 +75,7 @@ function encode(value: unknown): number {
     const node = unwrap(value)
     // set unwrapped as seen as well
     if (node !== value) Seen.set(node, index)
-    const id = NodeMap.set(node)
+    const id = getSdtId(node, ObjectType.StoreNode)
     !InStore && HandleStore && HandleStore(node, id)
     const wasInStore = InStore
     InStore = IgnoreNextSeen = true
@@ -121,12 +122,10 @@ function encode(value: unknown): number {
 export function encodeValue(
   value: unknown,
   deep: boolean,
-  nodeMap: NodeIDMap<Element | Core.Store.StoreNode>,
   handleStore?: typeof HandleStore,
   inStore = false,
 ): EncodedValue[] {
   Deep = deep
-  NodeMap = nodeMap
   List = []
   Seen = new Map()
   InStore = inStore
@@ -135,8 +134,7 @@ export function encodeValue(
   encode(value)
   const result = List
 
-  // @ts-expect-error clear global values
-  Deep = NodeMap = List = Seen = HandleStore = InStore = undefined
+  Deep = List = Seen = HandleStore = InStore = undefined!
 
   return result as any
 }

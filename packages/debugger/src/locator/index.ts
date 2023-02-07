@@ -16,6 +16,7 @@ import {
 } from 'solid-js'
 import { DebuggerEventHub } from '../main'
 import * as registry from '../main/componentRegistry'
+import { getObjectById, ObjectType } from '../main/id'
 import { createInternalRoot, enableRootsAutoattach } from '../main/roots'
 import { NodeID } from '../main/types'
 import { attachElementOverlay } from './ElementOverlay'
@@ -35,7 +36,6 @@ export { markComponentLoc } from './markComponent'
 export function createLocator(props: {
   eventHub: DebuggerEventHub
   locatorEnabled: Accessor<boolean>
-  getElementById(id: string): HTMLElement | undefined
   setLocatorEnabledSignal(signal: Accessor<boolean>): void
 }) {
   const [enabledByPressingSignal, setEnabledByPressingSignal] = createSignal((): boolean => false)
@@ -57,8 +57,8 @@ export function createLocator(props: {
 
     // target is an elementId
     if ('type' in target && target.type === 'element') {
-      const element = props.getElementById(target.id)
-      if (!element) return []
+      const element = getObjectById(target.id, ObjectType.Element)
+      if (!(element instanceof HTMLElement)) return []
       target = element
     }
 

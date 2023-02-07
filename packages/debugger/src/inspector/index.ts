@@ -3,8 +3,7 @@ import { Listen } from '@solid-primitives/event-bus'
 import { scheduleIdle, throttle } from '@solid-primitives/scheduled'
 import { Accessor, createEffect, untrack } from 'solid-js'
 import { DebuggerEventHub, InspectedState } from '../main'
-import { NodeIDMap } from '../main/id'
-import { Core, Mapped, NodeID, Solid, ValueItemID } from '../main/types'
+import { Mapped, Solid, ValueItemID } from '../main/types'
 import { makeSolidUpdateListener } from '../main/update'
 import {
   clearOwnerObservers,
@@ -30,7 +29,6 @@ export function createInspector(props: {
 }) {
   let lastDetails: Mapped.OwnerDetails | undefined
   let inspectedOwner: Solid.Owner | null
-  let nodeIdMap = new NodeIDMap<Element | Core.Store.StoreNode>()
   let valueMap = new ValueNodeMap()
   const propsMap: ObservedPropsMap = new WeakMap()
   /** compare props object with the previous one to see whats changed */
@@ -57,7 +55,6 @@ export function createInspector(props: {
           const encoded = encodeValue(
             node.getValue(),
             selected,
-            nodeIdMap,
             selected && (storeNode => node.addStoreObserver(observeStoreNode(storeNode))),
           )
           batchedUpdates.push([toggleChange === null ? 'value' : 'inspectToggle', [id, encoded]])
@@ -71,7 +68,7 @@ export function createInspector(props: {
             [
               storeProperty,
               typeof data === 'object'
-                ? encodeValue(data.value, true, nodeIdMap, undefined, true)
+                ? encodeValue(data.value, true, undefined, true)
                 : data ?? null,
             ],
           ])
@@ -153,7 +150,6 @@ export function createInspector(props: {
       })
       props.eventHub.emit('InspectedNodeDetails', result.details)
       valueMap = result.valueMap
-      nodeIdMap = result.nodeIdMap
       lastDetails = result.details
       checkProxyProps = result.checkProxyProps || null
     })
@@ -173,10 +169,6 @@ export function createInspector(props: {
       if (!node) return warn('Could not find value node:', id)
       node.setSelected(selected)
       pushInspectToggle(id, selected)
-    },
-    getElementById(id: NodeID): HTMLElement | undefined {
-      const el = nodeIdMap.get(id)
-      if (el instanceof HTMLElement) return el
     },
   }
 }

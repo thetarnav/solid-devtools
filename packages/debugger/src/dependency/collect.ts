@@ -1,4 +1,4 @@
-import { getOwnerId, getSdtId } from '../main/id'
+import { getSdtId, ObjectType } from '../main/id'
 import { NodeID, Solid } from '../main/types'
 import {
   observeComputationUpdate,
@@ -28,8 +28,6 @@ const $DGRAPH = Symbol('dependency-graph')
 let Graph: SerializedDGraph.Graph
 let VisitedSources: Set<Solid.Signal>
 let VisitedObservers: Set<Solid.Computation>
-let SignalIdCache: Map<NodeID, Solid.Signal>
-export type SignalIdCache = typeof SignalIdCache
 let DepthMap: Record<NodeID, number | undefined>
 let OnNodeUpdate: (node: Solid.Computation | Solid.Memo | Solid.Signal) => void
 export type OnNodeUpdate = typeof OnNodeUpdate
@@ -48,10 +46,8 @@ function unobserveNodeUpdate(node: Solid.Computation | Solid.Memo | Solid.Signal
 
 function addNodeToGraph(node: Solid.Signal | Solid.Memo | Solid.Computation) {
   const isOwner = isSolidOwner(node)
-  const id = isOwner ? getOwnerId(node) : getSdtId(node)
+  const id = getSdtId(node, isOwner ? ObjectType.Owner : ObjectType.Signal)
   if (Graph[id]) return
-
-  if (!isOwner) SignalIdCache.set(id, node)
 
   // observe each mapped node, to update the graph when it changes
   const onNodeUpdate = OnNodeUpdate
@@ -61,11 +57,15 @@ function addNodeToGraph(node: Solid.Signal | Solid.Memo | Solid.Computation) {
     name: getNodeName(node),
     type: getNodeType(node) as Exclude<ComputationNodeType, NodeType.Memo>,
     depth: lookupDepth(node),
-    sources: (node as Solid.Memo).sources ? (node as Solid.Memo).sources!.map(getSdtId) : undefined,
-    observers: (node as Solid.Memo).observers
-      ? (node as Solid.Memo).observers!.map(getSdtId)
-      : undefined,
-    graph: !isOwner && node.graph ? getSdtId(node.graph) : undefined,
+    sources:
+      'sources' in node && node.sources
+        ? node.sources.map(n => getSdtId(n, isSolidOwner(n) ? ObjectType.Owner : ObjectType.Signal))
+        : undefined,
+    observers:
+      'observers' in node && node.observers
+        ? node.observers.map(n => getSdtId(n, ObjectType.Owner))
+        : undefined,
+    graph: !isOwner && node.graph ? getSdtId(node.graph, ObjectType.Owner) : undefined,
   } as SerializedDGraph.Node
 }
 
@@ -99,7 +99,7 @@ function visitObservers(node: Solid.Computation | Solid.Memo | Solid.Signal) {
 }
 
 function lookupDepth(node: Solid.Owner | Solid.Signal): number {
-  const id = getSdtId(node)
+  const id = getSdtId(node, isSolidOwner(node) ? ObjectType.Owner : ObjectType.Signal)
 
   if (id in DepthMap) return DepthMap[id]!
 
@@ -119,13 +119,11 @@ export function collectDependencyGraph(
   config: { onNodeUpdate: OnNodeUpdate },
 ): {
   graph: SerializedDGraph.Graph
-  signalIdCache: SignalIdCache
   clearListeners: VoidFunction
 } {
   const graph: SerializedDGraph.Graph = (Graph = {})
   const visitedSources = (VisitedSources = new Set())
   const visitedObservers = (VisitedObservers = new Set())
-  const signalIdCache: SignalIdCache = (SignalIdCache = new Map())
   DepthMap = {}
   OnNodeUpdate = config.onNodeUpdate
 
@@ -140,7 +138,7 @@ export function collectDependencyGraph(
     unobserveNodeUpdate(node)
   }
 
-  Graph = VisitedObservers = SignalIdCache = VisitedSources = DepthMap = OnNodeUpdate = undefined!
+  Graph = VisitedObservers = VisitedSources = DepthMap = OnNodeUpdate = undefined!
 
-  return { graph, signalIdCache, clearListeners }
+  return { graph, clearListeners }
 }
