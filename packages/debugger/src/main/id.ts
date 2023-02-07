@@ -49,3 +49,9 @@ export function getObjectById<T extends ObjectType>(id: NodeID, objType: T): Val
   const ref = RefMapMap[objType].get(id)
   return ref?.deref() ?? null
 }
+
+/** Used for testing */
+export function $setSdtId(o: object, id: NodeID): NodeID {
+  WeakIdMap.set(o, id)
+  return id
+}

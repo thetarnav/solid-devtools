@@ -7,7 +7,7 @@ import {
   removeValueUpdateObserver,
 } from '../main/update'
 import { getNodeName, getNodeType, getOwnerType, isSolidOwner } from '../main/utils'
-import { ComputationNodeType, NodeType } from '../types'
+import { NodeType } from '../types'
 
 export namespace SerializedDGraph {
   export type Node = {
@@ -55,7 +55,7 @@ function addNodeToGraph(node: Solid.Signal | Solid.Memo | Solid.Computation) {
 
   Graph[id] = {
     name: getNodeName(node),
-    type: getNodeType(node) as Exclude<ComputationNodeType, NodeType.Memo>,
+    type: getNodeType(node),
     depth: lookupDepth(node),
     sources:
       'sources' in node && node.sources

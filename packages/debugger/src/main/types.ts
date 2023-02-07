@@ -5,11 +5,6 @@ import { NodeType, ValueItemType } from './constants'
 // Additional "#" character is added to distinguish NodeID from string
 export type NodeID = `#${string}`
 
-export type ComputationNodeType = Exclude<
-  NodeType,
-  NodeType.Signal | NodeType.Root | NodeType.Component
->
-
 export type ValueItemID =
   | `${ValueItemType.Signal}:${NodeID}`
   | `${ValueItemType.Prop}:${string}`

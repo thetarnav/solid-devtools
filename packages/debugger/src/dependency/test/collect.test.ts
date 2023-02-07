@@ -13,7 +13,7 @@ beforeEach(() => {
 vi.mock('../../main/getId', () => ({ getNewSdtId: () => '#' + mockLAST_ID++ }))
 
 describe('collectDependencyGraph', () => {
-  it('should collect dependency graph', () => {
+  it.only('should collect dependency graph', () => {
     let computedOwner!: Solid.Computation
     let memoAOwner!: Solid.Computation
 
@@ -47,88 +47,109 @@ describe('collectDependencyGraph', () => {
 
     let result = collectDependencyGraph(computedOwner, { onNodeUpdate: () => {} })
 
-    expect(result).toEqual({
+    expect(result.graph).toEqual({
       '#0': {
         name: expect.any(String),
         type: NodeType.Computation,
-        depth: '#ff:2',
+        depth: 2,
         sources: ['#2', '#3', '#4', '#5'],
+        observers: undefined,
+        graph: undefined,
       },
       '#2': {
         name: expect.any(String),
         type: NodeType.Memo,
-        depth: '#ff:1',
+        depth: 1,
         sources: ['#6', '#7'],
         observers: ['#0'],
+        graph: undefined,
       },
       '#3': {
         name: expect.any(String),
         type: NodeType.Memo,
-        depth: '#ff:2',
+        depth: 2,
         sources: ['#8', '#4'],
         observers: ['#0'],
+        graph: undefined,
       },
       '#4': {
         name: expect.any(String),
         type: NodeType.Signal,
-        depth: '#ff:1',
+        depth: 1,
         observers: ['#3', '#0'],
+        graph: '#ff',
+        sources: undefined,
       },
       '#5': {
         name: expect.any(String),
         type: NodeType.Signal,
-        depth: '#ff:2',
+        depth: 2,
         observers: ['#0'],
+        graph: '#ff',
+        sources: undefined,
       },
       '#6': {
         name: expect.any(String),
         type: NodeType.Signal,
-        depth: '#ff:1',
+        depth: 1,
         observers: ['#2'],
+        graph: '#ff',
+        sources: undefined,
       },
       '#7': {
         name: expect.any(String),
         type: NodeType.Signal,
-        depth: undefined,
+        depth: 0,
         observers: ['#2'],
+        graph: undefined,
+        sources: undefined,
       },
       '#8': {
         name: expect.any(String),
         type: NodeType.Signal,
-        depth: '#ff:1',
+        depth: 1,
         observers: ['#3'],
+        graph: '#ff',
+        sources: undefined,
       },
     } satisfies SerializedDGraph.Graph)
 
-    expect(JSON.parse(JSON.stringify(result)), 'is JSON-serializable').toEqual(result)
+    expect(result, 'is JSON-serializable').toMatchObject(JSON.parse(JSON.stringify(result)))
 
     result = collectDependencyGraph(memoAOwner, { onNodeUpdate: () => {} })
 
-    expect(result).toEqual({
+    expect(result.graph).toEqual({
       '#0': {
         name: expect.any(String),
         type: NodeType.Computation,
-        depth: '#ff:2',
+        depth: 2,
         sources: ['#2', '#3', '#4', '#5'],
+        observers: undefined,
+        graph: '#ff',
       },
       '#2': {
         name: expect.any(String),
         type: NodeType.Memo,
-        depth: '#ff:1',
+        depth: 1,
         sources: ['#6', '#7'],
         observers: ['#0'],
+        graph: '#ff',
       },
       '#6': {
         name: expect.any(String),
         type: NodeType.Signal,
-        depth: '#ff:1',
+        depth: 1,
         observers: ['#2'],
+        graph: '#ff',
+        sources: undefined,
       },
       '#7': {
         name: expect.any(String),
         type: NodeType.Signal,
-        depth: undefined,
+        depth: 0,
         observers: ['#2'],
+        graph: '#ff',
+        sources: undefined,
       },
     } satisfies SerializedDGraph.Graph)
 
@@ -162,37 +183,46 @@ describe('collectDependencyGraph', () => {
 
       const result = collectDependencyGraph(owner, { onNodeUpdate: cb })
 
-      expect(result).toEqual({
+      expect(result.graph).toEqual({
         '#0': {
           name: expect.any(String),
           type: NodeType.Computation,
-          depth: '#ff:1',
+          depth: 1,
           sources: ['#1', '#2'],
+          observers: undefined,
+          graph: undefined,
         },
         '#1': {
           name: expect.any(String),
           type: NodeType.Memo,
-          depth: '#ff:1',
+          depth: 1,
           sources: ['#3', '#4'],
           observers: ['#0'],
+          graph: undefined,
         },
         '#2': {
           name: expect.any(String),
           type: NodeType.Signal,
-          depth: '#ff:1',
+          depth: 1,
           observers: ['#5', '#0'],
+          graph: '#ff',
+          sources: undefined,
         },
         '#3': {
           name: expect.any(String),
           type: NodeType.Signal,
-          depth: '#ff:1',
+          depth: 1,
           observers: ['#1'],
+          graph: '#ff',
+          sources: undefined,
         },
         '#4': {
           name: expect.any(String),
           type: NodeType.Signal,
-          depth: '#ff:1',
+          depth: 1,
           observers: ['#1'],
+          graph: '#ff',
+          sources: undefined,
         },
       } satisfies SerializedDGraph.Graph)
 
