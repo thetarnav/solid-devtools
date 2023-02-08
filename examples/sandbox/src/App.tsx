@@ -153,7 +153,7 @@ const App: Component = () => {
   createComputed(
     _ => {
       const hello = createSignal('hello')
-      setShowEven(count() % 2 === 0)
+      setShowEven(count() % 3 === 0)
       return count()
     },
     undefined,
@@ -177,7 +177,7 @@ const App: Component = () => {
           <Button onClick={() => setCount(p => ++p)} text={`Count: ${count()}`} />
         </header>
         <div style={{ height: '1rem', 'margin-top': '1rem' }}>
-          <Show when={count() % 3 === 0}>
+          <Show when={showEven()}>
             <Bold>{count()} is even!</Bold>
           </Show>
         </div>

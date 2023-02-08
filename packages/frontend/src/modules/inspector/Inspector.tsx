@@ -1,8 +1,9 @@
 import { useController } from '@/controller'
+import { SidePanelCtx } from '@/SidePanel'
 import { Badge, Scrollable } from '@/ui'
 import { NodeType, NODE_TYPE_NAMES, PropGetterState } from '@solid-devtools/debugger/types'
 import { Entries } from '@solid-primitives/keyed'
-import { Component, createMemo, For, JSX, Show } from 'solid-js'
+import { batch, Component, createMemo, For, JSX, Show, useContext } from 'solid-js'
 import * as styles from './inspector.css'
 import { ValueNode } from './ValueNode'
 
@@ -21,7 +22,9 @@ const InspectorView: Component = () => {
   const { inspector, hovered } = useController()
   const { state } = inspector
 
-  const allSignals = createMemo(() => {
+  const { setOpenPanel } = useContext(SidePanelCtx)!
+
+  const valueItems = createMemo(() => {
     const list = Object.values(state.signals)
     const memos: typeof list = []
     const signals: typeof list = []
@@ -46,7 +49,7 @@ const InspectorView: Component = () => {
               <ValueNode
                 name={name}
                 value={value().value}
-                extended={value().selected}
+                extended={value().extended}
                 onClick={() => inspector.inspectValueItem(value())}
                 onElementHover={hovered.toggleHoveredElement}
                 isSignal={value().getter !== false}
@@ -55,22 +58,71 @@ const InspectorView: Component = () => {
             )}
           </Entries>
         </ListSignals>
-        {(['stores', 'signals', 'memos'] as const).map(type => (
-          <ListSignals when={allSignals()[type].length} title={type}>
-            <For each={allSignals()[type]}>
-              {signal => (
+        <ListSignals when={valueItems().stores.length} title="Stores">
+          <For each={valueItems().stores}>
+            {store => (
+              <ValueNode
+                name={store.name}
+                value={store.value}
+                extended={store.extended}
+                onClick={() => inspector.inspectValueItem(store)}
+                onElementHover={hovered.toggleHoveredElement}
+              />
+            )}
+          </For>
+        </ListSignals>
+        <ListSignals when={valueItems().signals.length} title="Signals">
+          <For each={valueItems().signals}>
+            {signal => (
+              <div
+                style={{
+                  outline:
+                    inspector.inspectedNode().signalId === signal.id ? '1px dashed orange' : 'none',
+                  'border-radius': '4px',
+                  position: 'relative',
+                }}
+              >
+                <button
+                  onClick={() => {
+                    batch(() => {
+                      inspector.setInspectedSignal(signal.id)
+                      setOpenPanel('dgraph')
+                    })
+                  }}
+                  style={{
+                    position: 'absolute',
+                    top: '0',
+                    right: '0',
+                  }}
+                >
+                  inspect
+                </button>
                 <ValueNode
                   name={signal.name}
                   value={signal.value}
-                  extended={signal.selected}
+                  extended={signal.extended}
                   onClick={() => inspector.inspectValueItem(signal)}
                   onElementHover={hovered.toggleHoveredElement}
-                  isSignal={type !== 'stores'}
+                  isSignal
                 />
-              )}
-            </For>
-          </ListSignals>
-        ))}
+              </div>
+            )}
+          </For>
+        </ListSignals>
+        <ListSignals when={valueItems().memos.length} title="Memos">
+          <For each={valueItems().memos}>
+            {memo => (
+              <ValueNode
+                name={memo.name}
+                value={memo.value}
+                extended={memo.extended}
+                onClick={() => inspector.inspectValueItem(memo)}
+                onElementHover={hovered.toggleHoveredElement}
+                isSignal
+              />
+            )}
+          </For>
+        </ListSignals>
         <Show when={state.value} keyed>
           {valueItem => (
             <div>
@@ -78,7 +130,7 @@ const InspectorView: Component = () => {
               <ValueNode
                 name="value"
                 value={valueItem.value}
-                extended={valueItem.selected}
+                extended={valueItem.extended}
                 onClick={() => inspector.inspectValueItem(valueItem)}
                 onElementHover={hovered.toggleHoveredElement}
                 isSignal

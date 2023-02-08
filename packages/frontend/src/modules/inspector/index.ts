@@ -28,8 +28,8 @@ import {
 export namespace Inspector {
   export type ValueItem = {
     readonly itemId: ValueItemID
-    readonly selected: boolean
-    readonly setSelected: Setter<boolean>
+    readonly extended: boolean
+    readonly setExtended: Setter<boolean>
     readonly value: DecodedValue
     readonly setValue: Setter<DecodedValue>
   }
@@ -67,10 +67,10 @@ function createValueItem(itemId: ValueItemID, initValue: DecodedValue): Inspecto
   const [value, setValue] = createSignal<DecodedValue>(initValue)
   return {
     itemId,
-    get selected() {
+    get extended() {
       return selected()
     },
-    setSelected,
+    setExtended: setSelected,
     get value() {
       return value()
     },
@@ -292,8 +292,8 @@ export default function createInspector() {
    * Toggle the inspection of a value item (signal, prop, or owner value)
    */
   function inspectValueItem(item: Inspector.ValueItem, selected?: boolean): void {
-    if (selected !== undefined && item.selected === selected) return
-    selected = item.setSelected(p => selected ?? !p)
+    if (selected !== undefined && item.extended === selected) return
+    selected = item.setExtended(p => selected ?? !p)
     onInspectValue({ id: item.itemId, selected })
   }
 

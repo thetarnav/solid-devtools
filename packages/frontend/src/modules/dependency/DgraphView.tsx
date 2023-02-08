@@ -132,8 +132,6 @@ const DgraphView: Component = () => {
         if (!inspectedId) return p
         const inspectedNode = graph[inspectedId]
         if (!inspectedNode) return p
-        if (!inspectedNode.observers && !inspectedNode.sources) return null
-
         return calculateNodeOrder(graph, inspectedId, inspectedNode)
       })
     },
