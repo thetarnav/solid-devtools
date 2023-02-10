@@ -74,29 +74,7 @@ const InspectorView: Component = () => {
         <ListSignals when={valueItems().signals.length} title="Signals">
           <For each={valueItems().signals}>
             {signal => (
-              <div
-                style={{
-                  outline:
-                    inspector.inspectedNode().signalId === signal.id ? '1px dashed orange' : 'none',
-                  'border-radius': '4px',
-                  position: 'relative',
-                }}
-              >
-                <button
-                  onClick={() => {
-                    batch(() => {
-                      inspector.setInspectedSignal(signal.id)
-                      setOpenPanel('dgraph')
-                    })
-                  }}
-                  style={{
-                    position: 'absolute',
-                    top: '0',
-                    right: '0',
-                  }}
-                >
-                  inspect
-                </button>
+              <div aria-current={inspector.isInspected(signal.id)} class={styles.signal}>
                 <ValueNode
                   name={signal.name}
                   value={signal.value}
@@ -104,6 +82,18 @@ const InspectorView: Component = () => {
                   onClick={() => inspector.inspectValueItem(signal)}
                   onElementHover={hovered.toggleHoveredElement}
                   isSignal
+                  actions={[
+                    {
+                      icon: 'Graph',
+                      title: 'Open in Graph panel',
+                      onClick() {
+                        batch(() => {
+                          inspector.setInspectedSignal(signal.id)
+                          setOpenPanel('dgraph')
+                        })
+                      },
+                    },
+                  ]}
                 />
               </div>
             )}

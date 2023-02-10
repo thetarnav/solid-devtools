@@ -469,38 +469,123 @@ const Context: ProxyIconComponent<'Context'> = ({ id }) => (
 
 const Code: ProxyIconComponent<'Code'> = ({ id }) => (
   <svg id={`sdt_icon_${id}`} fill="none" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
-    <g fill="none">
-      <path d="M0 0h256v256H0z" />
-      <path opacity=".2" d="M152 32v56h56l-56-56z" />
-      <path
-        stroke="currentColor"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        stroke-width="16"
-        d="M152 32v56h56"
-      />
-      <path
-        stroke="currentColor"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        stroke-width="16"
-        d="M148 128l24 24-24 24"
-      />
-      <path
-        stroke="currentColor"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        stroke-width="16"
-        d="M108 128l-24 24 24 24"
-      />
-      <path
-        d="M200 224a8 8 0 0 0 8-8V88l-56-56H56a8 8 0 0 0-8 8v176a8 8 0 0 0 8 8z"
-        stroke="currentColor"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        stroke-width="16"
-      />
-    </g>
+    <path opacity=".2" d="M152 32v56h56l-56-56z" />
+    <path
+      stroke="currentColor"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      stroke-width="16"
+      d="M152 32v56h56"
+    />
+    <path
+      stroke="currentColor"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      stroke-width="16"
+      d="M148 128l24 24-24 24"
+    />
+    <path
+      stroke="currentColor"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      stroke-width="16"
+      d="M108 128l-24 24 24 24"
+    />
+    <path
+      d="M200 224a8 8 0 0 0 8-8V88l-56-56H56a8 8 0 0 0-8 8v176a8 8 0 0 0 8 8z"
+      stroke="currentColor"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      stroke-width="16"
+    />
+  </svg>
+)
+
+const Graph: ProxyIconComponent<'Graph'> = ({ id }) => (
+  <svg id={`sdt_icon_${id}`} fill="none" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="128" cy="128" r="24" opacity=".2" />
+    <circle
+      cx="128"
+      cy="128"
+      r="24"
+      fill="none"
+      stroke="currentColor"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      stroke-width="16"
+    />
+    <circle
+      cx="96"
+      cy="56"
+      r="24"
+      fill="none"
+      stroke="currentColor"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      stroke-width="16"
+    />
+    <circle
+      cx="200"
+      cy="104"
+      r="24"
+      fill="none"
+      stroke="currentColor"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      stroke-width="16"
+    />
+    <circle
+      cx="200"
+      cy="184"
+      r="24"
+      fill="none"
+      stroke="currentColor"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      stroke-width="16"
+    />
+    <circle
+      cx="56"
+      cy="192"
+      r="24"
+      fill="none"
+      stroke="currentColor"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      stroke-width="16"
+    />
+    <path
+      fill="none"
+      stroke="currentColor"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      stroke-width="16"
+      d="M118.3 106.1l-12.6-28.2"
+    />
+    <path
+      fill="none"
+      stroke="currentColor"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      stroke-width="16"
+      d="M177.2 111.6l-26.4 8.8"
+    />
+    <path
+      fill="none"
+      stroke="currentColor"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      stroke-width="16"
+      d="M181.1 169.3l-34.2-26.6"
+    />
+    <path
+      fill="none"
+      stroke="currentColor"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      stroke-width="16"
+      d="M110.1 143.9l-36.2 32.2"
+    />
   </svg>
 )
 
@@ -672,6 +757,7 @@ const embedIconComponents = {
   Context,
   Code,
   Search,
+  Graph,
 } as const
 
 const iconComponents = {

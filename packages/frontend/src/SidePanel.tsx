@@ -33,11 +33,19 @@ export function createSidePanel() {
                   <Icon.Eye class={styles.actions.icon} />
                 </button> */}
               {state.location && (
-                <button class={styles.actions.button} onClick={openComponentLocation}>
+                <button
+                  title="Open component location"
+                  class={styles.actions.button}
+                  onClick={openComponentLocation}
+                >
                   <Icon.Code class={styles.actions.icon} />
                 </button>
               )}
-              <button class={styles.actions.button} onClick={() => setInspectedOwner(null)}>
+              <button
+                title="Close inspector"
+                class={styles.actions.button}
+                onClick={() => setInspectedOwner(null)}
+              >
                 <Icon.Close class={styles.actions.icon} />
               </button>
             </div>

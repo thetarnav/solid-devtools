@@ -3,7 +3,9 @@ import clsx from 'clsx'
 import { Component, createSelector, For, JSX } from 'solid-js'
 import * as styles from './toggle-tabs.css'
 
-export type ToggleTabsOptionProps<T> = { for: T; class?: string; children: JSX.Element }
+export type ToggleTabsOptionProps<T> = (T extends string
+  ? { title?: string }
+  : { title: string }) & { for: T; class?: string; children: JSX.Element }
 
 export function ToggleTabs<T>(props: {
   children: (Option: Component<ToggleTabsOptionProps<T>>) => JSX.Element
@@ -23,6 +25,7 @@ export function ToggleTabs<T>(props: {
       <For each={tokens()}>
         {({ data }) => (
           <button
+            title={data.title ?? (data.for as string)}
             aria-selected={isSelected(data.for)}
             class={clsx(data.class, styles.item)}
             onClick={() => props.onSelect(data.for)}

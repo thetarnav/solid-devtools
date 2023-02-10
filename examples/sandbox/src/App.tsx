@@ -129,7 +129,9 @@ const Broken: Component = () => {
 const App: Component = () => {
   const [count, setCount] = createSignal(0)
   const [showEven, setShowEven] = createSignal(false)
-  const fnSig = createSignal(() => {})
+  const fnSig = createSignal({
+    fn: () => {},
+  })
   const nullSig = createSignal(null)
   const symbolSig = createSignal(Symbol('hello-symbol'))
   const [header, setHeader] = createSignal(

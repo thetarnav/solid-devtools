@@ -35,9 +35,44 @@ export const insetY = (n: SpacingValue) => {
   const nn = resolveSpacing(n)
   return { top: nn, bottom: nn }
 }
-export const inset = (n: SpacingValue) => {
-  const nn = resolveSpacing(n)
-  return { top: nn, bottom: nn, left: nn, right: nn }
+
+export function inset(allEdges: SpacingValue): StyleRule
+export function inset(v: SpacingValue, h: SpacingValue): StyleRule
+export function inset(t: SpacingValue, h: SpacingValue, b: SpacingValue): StyleRule
+export function inset(t: SpacingValue, r: SpacingValue, b: SpacingValue, l: SpacingValue): StyleRule
+export function inset(
+  a: SpacingValue,
+  b?: SpacingValue,
+  c?: SpacingValue,
+  d?: SpacingValue,
+): StyleRule {
+  if (b === undefined)
+    return {
+      top: resolveSpacing(a),
+      bottom: resolveSpacing(a),
+      left: resolveSpacing(a),
+      right: resolveSpacing(a),
+    }
+  if (c === undefined)
+    return {
+      top: resolveSpacing(a),
+      bottom: resolveSpacing(a),
+      left: resolveSpacing(b),
+      right: resolveSpacing(b),
+    }
+  if (d === undefined)
+    return {
+      top: resolveSpacing(a),
+      bottom: resolveSpacing(c),
+      left: resolveSpacing(b),
+      right: resolveSpacing(b),
+    }
+  return {
+    top: resolveSpacing(a),
+    bottom: resolveSpacing(c),
+    left: resolveSpacing(b),
+    right: resolveSpacing(d),
+  }
 }
 
 export const centerChild = {
@@ -202,4 +237,43 @@ export function flex(
     }
   }
   return styles
+}
+
+type SelectorMapValue = NonNullable<StyleRule['selectors']>[string]
+
+type NestedSelectorValue = SelectorMapValue & {
+  [nestedSelector: `#${string}`]: NestedSelectorValue
+}
+
+type NestedSelectorMap = {
+  [selector: string]: NestedSelectorValue
+}
+
+function resolveNestedSelectors(
+  parent: string,
+  mapValue: NestedSelectorValue,
+): StyleRule['selectors'] {
+  const properties: Record<string, any> = {}
+  const resolved: StyleRule['selectors'] = {}
+  let added = false
+  for (const [selector, value] of Object.entries(mapValue)) {
+    if (selector[0] === '#') {
+      Object.assign(resolved, resolveNestedSelectors(`${parent}${selector.slice(1)}`, value))
+    } else {
+      if (!added) {
+        added = true
+        resolved[parent] = properties
+      }
+      properties[selector] = value
+    }
+  }
+  return resolved
+}
+
+export function selectors(map: NestedSelectorMap): StyleRule {
+  const resolved: StyleRule['selectors'] = {}
+  for (const [selector, value] of Object.entries(map)) {
+    Object.assign(resolved, resolveNestedSelectors(selector, value))
+  }
+  return { selectors: resolved }
 }

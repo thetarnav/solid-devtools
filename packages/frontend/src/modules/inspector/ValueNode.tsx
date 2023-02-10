@@ -1,8 +1,7 @@
-import { CollapseToggle, Highlight } from '@/ui'
+import { CollapseToggle, Highlight, Icon } from '@/ui'
 import { NodeID, ValueType } from '@solid-devtools/debugger/types'
 import { createHover, createPingedSignal, defer } from '@solid-devtools/shared/primitives'
 import { Entries } from '@solid-primitives/keyed'
-import { assignInlineVars } from '@vanilla-extract/dynamic'
 import clsx from 'clsx'
 import {
   Component,
@@ -10,6 +9,7 @@ import {
   createEffect,
   createMemo,
   createSignal,
+  For,
   JSX,
   Show,
   untrack,
@@ -157,6 +157,7 @@ export const ValueNode: Component<{
   isStale?: boolean
   onClick?: VoidFunction
   onElementHover?: ToggleElementHover
+  actions?: { icon: keyof typeof Icon; title?: string; onClick: VoidFunction }[]
   class?: string
 }> = props => {
   const ctx = useContext(ValueContext)
@@ -173,10 +174,45 @@ export const ValueNode: Component<{
     if (props.onClick && isValueNested(props.value)) props.onClick()
   }
 
-  const ValueContent = () => <ValuePreview value={props.value} extended={props.extended} />
+  const { isHovered, hoverProps } = createNestedHover()
+  const isExtendable = createMemo(() => isValueNested(props.value))
 
-  const content = createMemo(() => (
-    <>
+  return (
+    <li
+      class={clsx(styles.row.container, props.class)}
+      data-hovered={isHovered()}
+      data-extended={isExtendable() ? props.extended : undefined}
+      data-stale={props.isStale}
+      {...hoverProps}
+    >
+      <div class={styles.row.highlight} />
+
+      {isExtendable() && (
+        <div class={styles.row.toggle.container}>
+          <CollapseToggle
+            onToggle={handleSelect}
+            class={styles.row.toggle.button}
+            isCollapsed={!props.extended}
+            defaultCollapsed
+          />
+        </div>
+      )}
+
+      {props.actions && (
+        <div class={styles.actions.container}>
+          <For each={props.actions}>
+            {action => {
+              const IconComponent = Icon[action.icon]
+              return (
+                <button onClick={action.onClick} class={styles.actions.button} title={action.title}>
+                  <IconComponent class={styles.actions.icon} />
+                </button>
+              )
+            }}
+          </For>
+        </div>
+      )}
+
       <div class={styles.name.container} onClick={handleSelect}>
         <div class={styles.name.name} data-signal={props.isSignal || ctx?.underStore}>
           <Highlight highlight={isUpdated && isUpdated()} isSignal class={styles.name.highlight}>
@@ -184,11 +220,12 @@ export const ValueNode: Component<{
           </Highlight>
         </div>
       </div>
+
       {/* provide context if one isn't already provided or if the value is a store
       (so that the ctx.underStore could be overwritten) */}
       <Show
         when={ctx && props.value.type !== ValueType.Store}
-        children={<ValueContent />}
+        children={<ValuePreview value={props.value} extended={props.extended} />}
         fallback={
           <ValueContext.Provider
             value={{
@@ -198,47 +235,10 @@ export const ValueNode: Component<{
               },
             }}
           >
-            <ValueContent />
+            <ValuePreview value={props.value} extended={props.extended} />
           </ValueContext.Provider>
         }
       />
-    </>
-  ))
-
-  return (
-    <Show
-      when={isValueNested(props.value)}
-      fallback={
-        <li class={styles.row.container.base} data-stale={props.isStale}>
-          {content()}
-        </li>
-      }
-    >
-      {untrack(() => {
-        const { isHovered, hoverProps } = createNestedHover()
-        return (
-          <li
-            class={clsx(styles.row.container.collapsable, props.class)}
-            data-hovered={isHovered()}
-            data-stale={props.isStale}
-            style={assignInlineVars({
-              [styles.row.collapseOpacity]: isHovered() || props.extended ? '1' : '0',
-            })}
-            {...hoverProps}
-          >
-            <div class={styles.row.highlight} />
-            <div class={styles.row.toggle.container}>
-              <CollapseToggle
-                onToggle={handleSelect}
-                class={styles.row.toggle.button}
-                isCollapsed={!props.extended}
-                defaultCollapsed
-              />
-            </div>
-            {content()}
-          </li>
-        )
-      })}
-    </Show>
+    </li>
   )
 }

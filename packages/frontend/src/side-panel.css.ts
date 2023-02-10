@@ -38,15 +38,13 @@ export const actions = (() => {
         ...rounded(),
         ...centerChild,
         color: `rgb(${vars.disabled.colorValue} / ${textOpacity})`,
+        ...transition(['background-color', 'color']),
         vars: {
           [textOpacity]: '0.85',
         },
-        ...transition(['background-color', 'color']),
-        selectors: {
-          '&:hover': {
-            vars: {
-              [textOpacity]: '1',
-            },
+        ':hover': {
+          vars: {
+            [textOpacity]: '1',
           },
         },
       },
