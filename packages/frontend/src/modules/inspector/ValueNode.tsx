@@ -39,7 +39,7 @@ const CollapsableObjectPreview: Component<{
                   name={key}
                   value={value()}
                   onClick={() => setExtended(p => !p)}
-                  extended={extended()}
+                  isExtended={extended()}
                 />
               )
             })}
@@ -151,9 +151,13 @@ function createNestedHover() {
 export const ValueNode: Component<{
   value: DecodedValue
   name: JSX.Element
-  extended?: boolean
+  /** signals can be inspected to be viewed in the dependency graph */
+  isInspected?: boolean
+  /** for nested values - is it collapsed or extended */
+  isExtended?: boolean
   /** top-level, or inside a store (the value can change) */
   isSignal?: boolean
+  /** for stale prop getters - their value is probably outdated */
   isStale?: boolean
   onClick?: VoidFunction
   onElementHover?: ToggleElementHover
@@ -180,8 +184,9 @@ export const ValueNode: Component<{
   return (
     <li
       class={clsx(styles.row.container, props.class)}
+      aria-current={props.isInspected}
       data-hovered={isHovered()}
-      data-extended={isExtendable() ? props.extended : undefined}
+      data-extended={isExtendable() ? props.isExtended : undefined}
       data-stale={props.isStale}
       {...hoverProps}
     >
@@ -192,7 +197,7 @@ export const ValueNode: Component<{
           <CollapseToggle
             onToggle={handleSelect}
             class={styles.row.toggle.button}
-            isCollapsed={!props.extended}
+            isCollapsed={!props.isExtended}
             defaultCollapsed
           />
         </div>
@@ -225,7 +230,7 @@ export const ValueNode: Component<{
       (so that the ctx.underStore could be overwritten) */}
       <Show
         when={ctx && props.value.type !== ValueType.Store}
-        children={<ValuePreview value={props.value} extended={props.extended} />}
+        children={<ValuePreview value={props.value} extended={props.isExtended} />}
         fallback={
           <ValueContext.Provider
             value={{
@@ -235,7 +240,7 @@ export const ValueNode: Component<{
               },
             }}
           >
-            <ValuePreview value={props.value} extended={props.extended} />
+            <ValuePreview value={props.value} extended={props.isExtended} />
           </ValueContext.Provider>
         }
       />

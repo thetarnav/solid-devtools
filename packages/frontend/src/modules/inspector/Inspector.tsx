@@ -49,7 +49,7 @@ const InspectorView: Component = () => {
               <ValueNode
                 name={name}
                 value={value().value}
-                extended={value().extended}
+                isExtended={value().extended}
                 onClick={() => inspector.inspectValueItem(value())}
                 onElementHover={hovered.toggleHoveredElement}
                 isSignal={value().getter !== false}
@@ -64,7 +64,7 @@ const InspectorView: Component = () => {
               <ValueNode
                 name={store.name}
                 value={store.value}
-                extended={store.extended}
+                isExtended={store.extended}
                 onClick={() => inspector.inspectValueItem(store)}
                 onElementHover={hovered.toggleHoveredElement}
               />
@@ -74,28 +74,27 @@ const InspectorView: Component = () => {
         <ListSignals when={valueItems().signals.length} title="Signals">
           <For each={valueItems().signals}>
             {signal => (
-              <div aria-current={inspector.isInspected(signal.id)} class={styles.signal}>
-                <ValueNode
-                  name={signal.name}
-                  value={signal.value}
-                  extended={signal.extended}
-                  onClick={() => inspector.inspectValueItem(signal)}
-                  onElementHover={hovered.toggleHoveredElement}
-                  isSignal
-                  actions={[
-                    {
-                      icon: 'Graph',
-                      title: 'Open in Graph panel',
-                      onClick() {
-                        batch(() => {
-                          inspector.setInspectedSignal(signal.id)
-                          setOpenPanel('dgraph')
-                        })
-                      },
+              <ValueNode
+                name={signal.name}
+                value={signal.value}
+                onClick={() => inspector.inspectValueItem(signal)}
+                onElementHover={hovered.toggleHoveredElement}
+                isExtended={signal.extended}
+                isInspected={inspector.isInspected(signal.id)}
+                isSignal
+                actions={[
+                  {
+                    icon: 'Graph',
+                    title: 'Open in Graph panel',
+                    onClick() {
+                      batch(() => {
+                        inspector.setInspectedSignal(signal.id)
+                        setOpenPanel('dgraph')
+                      })
                     },
-                  ]}
-                />
-              </div>
+                  },
+                ]}
+              />
             )}
           </For>
         </ListSignals>
@@ -105,10 +104,22 @@ const InspectorView: Component = () => {
               <ValueNode
                 name={memo.name}
                 value={memo.value}
-                extended={memo.extended}
+                isExtended={memo.extended}
                 onClick={() => inspector.inspectValueItem(memo)}
                 onElementHover={hovered.toggleHoveredElement}
                 isSignal
+                actions={[
+                  {
+                    icon: 'Graph',
+                    title: 'Open in Graph panel',
+                    onClick() {
+                      batch(() => {
+                        inspector.setInspectedOwner(memo.id)
+                        setOpenPanel('dgraph')
+                      })
+                    },
+                  },
+                ]}
               />
             )}
           </For>
@@ -120,7 +131,7 @@ const InspectorView: Component = () => {
               <ValueNode
                 name="value"
                 value={valueItem.value}
-                extended={valueItem.extended}
+                isExtended={valueItem.extended}
                 onClick={() => inspector.inspectValueItem(valueItem)}
                 onElementHover={hovered.toggleHoveredElement}
                 isSignal

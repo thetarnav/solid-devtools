@@ -1,10 +1,13 @@
 import { createHighlightStyles } from '@/ui/mixins'
 import {
+  border,
   centerChild,
   color,
   dark,
   flex,
+  inset,
   media,
+  rounded,
   selectors,
   spacing,
   theme,
@@ -35,6 +38,16 @@ export const row = (() => {
           [valueRowHighlight.bgOpacityVar]: '0',
           [collapseOpacity]: '0',
         },
+        ':before': {
+          content: '',
+          position: 'absolute',
+          opacity: 0,
+          marginTop: spacing[0.25],
+          ...inset(spacing[-0.25], spacing[-1]),
+          ...border(vars.domColor),
+          ...rounded(),
+          maskImage: 'linear-gradient(90deg, black, transparent)',
+        },
         selectors: {
           '&[data-stale=true]': {
             opacity: 0.6,
@@ -49,6 +62,9 @@ export const row = (() => {
               [valueRowHighlight.bgOpacityVar]: '0.3',
               [collapseOpacity]: '1',
             },
+          },
+          [`&[aria-current=true]:before`]: {
+            opacity: 0.5,
           },
         },
       },
