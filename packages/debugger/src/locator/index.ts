@@ -1,10 +1,10 @@
 import { defer, makeHoverElementListener } from '@solid-devtools/shared/primitives'
 import { warn } from '@solid-devtools/shared/utils'
-import { createSimpleEmitter } from '@solid-primitives/event-bus'
+import { createEventBus, Listen } from '@solid-primitives/event-bus'
 import { makeEventListener } from '@solid-primitives/event-listener'
 import { createKeyHold } from '@solid-primitives/keyboard'
 import { scheduleIdle } from '@solid-primitives/scheduled'
-import { onRootCleanup } from '@solid-primitives/utils'
+import { tryOnCleanup } from '@solid-primitives/utils'
 import {
   Accessor,
   createEffect,
@@ -14,7 +14,6 @@ import {
   onCleanup,
   runWithOwner,
 } from 'solid-js'
-import { DebuggerEventHub } from '../main'
 import * as registry from '../main/componentRegistry'
 import { getObjectById, ObjectType } from '../main/id'
 import { createInternalRoot, enableRootsAutoattach } from '../main/roots'
@@ -34,15 +33,15 @@ import { ClickMiddleware, HighlightElementPayload, LocatorOptions } from './type
 export { markComponentLoc } from './markComponent'
 
 export function createLocator(props: {
-  eventHub: DebuggerEventHub
+  listenToDebuggerEenable: Listen<boolean>
   locatorEnabled: Accessor<boolean>
   setLocatorEnabledSignal(signal: Accessor<boolean>): void
 }) {
   const [enabledByPressingSignal, setEnabledByPressingSignal] = createSignal((): boolean => false)
   props.setLocatorEnabledSignal(createMemo(() => enabledByPressingSignal()()))
 
-  props.eventHub.DebuggerDisabled.listen(() => {
-    setDevtoolsTarget(null)
+  props.listenToDebuggerEenable(enabled => {
+    if (!enabled) setDevtoolsTarget(null)
   })
 
   const [hoverTarget, setHoverTarget] = createSignal<HTMLElement | null>(null)
@@ -104,18 +103,17 @@ export function createLocator(props: {
     createInternalRoot(() => attachElementOverlay(highlightedComponents))
   }, 1000)
 
-  const [onDebuggerHoveredComponentChange, emitDebuggerHoveredComponentChange] =
-    createSimpleEmitter<{ nodeId: NodeID; state: boolean }>()
+  const debuggerHoveredComponentBus = createEventBus<{ nodeId: NodeID; state: boolean }>()
 
   // notify of component hovered by using the debugger
   createEffect((prev: NodeID | undefined) => {
     const target = hoverTarget()
     if (!target) return
     const comp = registry.findComponent(target)
-    if (prev) emitDebuggerHoveredComponentChange({ nodeId: prev, state: false })
+    if (prev) debuggerHoveredComponentBus.emit({ nodeId: prev, state: false })
     if (comp) {
       const { id } = comp
-      emitDebuggerHoveredComponentChange({ nodeId: id, state: true })
+      debuggerHoveredComponentBus.emit({ nodeId: id, state: true })
       return id
     }
   })
@@ -130,7 +128,7 @@ export function createLocator(props: {
   }
   function addClickInterceptor(interceptor: ClickMiddleware) {
     clickInterceptors.add(interceptor)
-    onRootCleanup(() => clickInterceptors.delete(interceptor))
+    tryOnCleanup(() => clickInterceptors.delete(interceptor))
   }
 
   let targetIDE: TargetIDE | TargetURLFunction | undefined
@@ -195,7 +193,7 @@ export function createLocator(props: {
     useLocator,
     addClickInterceptor,
     setDevtoolsHighlightTarget: (target: HighlightElementPayload) => void setDevtoolsTarget(target),
-    onDebuggerHoveredComponentChange,
+    onDebuggerHoveredComponentChange: debuggerHoveredComponentBus.listen,
     openElementSourceCode,
   }
 }

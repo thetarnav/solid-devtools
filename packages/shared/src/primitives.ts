@@ -6,9 +6,9 @@ import {
   AnyFunction,
   AnyStatic,
   entries,
-  onRootCleanup,
-  SetterValue,
+  SetterParam,
   StaticStoreSetter,
+  tryOnCleanup,
 } from '@solid-primitives/utils'
 import {
   $TRACK,
@@ -82,7 +82,7 @@ export function createConsumers(
     enabled,
     consumer => {
       setConsumers(p => [...p, consumer])
-      onRootCleanup(() => setConsumers(p => p.filter(c => c !== consumer)))
+      tryOnCleanup(() => setConsumers(p => p.filter(c => c !== consumer)))
     },
   ]
 }
@@ -226,7 +226,7 @@ export function createShallowStore<T extends Readonly<AnyStatic>>(
 
   // TODO handle arrays
 
-  const setValue = (key: keyof T, setterParam: SetterValue<any>): void => {
+  const setValue = (key: keyof T, setterParam: SetterParam<any>): void => {
     const saved = signals[key] as Signal<any> | undefined
     const newValue = saved ? saved[1](setterParam) : accessWith(setterParam, storeValue[key])
     if (newValue === void 0) {
@@ -237,7 +237,7 @@ export function createShallowStore<T extends Readonly<AnyStatic>>(
     }
   }
 
-  const setter = (a: ((prev: T) => Partial<T>) | Partial<T> | keyof T, b?: SetterValue<any>) => {
+  const setter = (a: ((prev: T) => Partial<T>) | Partial<T> | keyof T, b?: SetterParam<any>) => {
     batch(() => {
       if (typeof a === 'object' || typeof a === 'function')
         untrack(() => {

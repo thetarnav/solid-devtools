@@ -1,54 +1,43 @@
-import {
-  DebuggerModule,
-  DevtoolsMainView,
-  DGraphUpdate,
-  HighlightElementPayload,
-  InspectorUpdate,
-  Mapped,
-  NodeID,
-  SetInspectedNodeData,
-  StructureUpdates,
-  ToggleInspectedValueData,
-  ToggleModuleData,
-  TreeWalkerMode,
-} from '@solid-devtools/debugger/types'
+import { Debugger, DebuggerModule, DevtoolsMainView, NodeID } from '@solid-devtools/debugger/types'
 import { defer } from '@solid-devtools/shared/primitives'
 import { createContextProvider } from '@solid-primitives/context'
 import { SECOND } from '@solid-primitives/date'
-import { createEventBus, createEventHub } from '@solid-primitives/event-bus'
+import { batchEmits, createEventHub, EventBus } from '@solid-primitives/event-bus'
 import { debounce } from '@solid-primitives/scheduled'
 import { batch, createEffect, createMemo, createSelector, createSignal, onCleanup } from 'solid-js'
 import createInspector from './modules/inspector'
 import type { Structure } from './modules/structure'
 
-export function createController() {
-  // Listener of the client events (from the debugger) will be called synchronously under `batch`
-  // to make sure that the state is updated before the effect queue is flushed.
-  function batchedBus<T>() {
-    return createEventBus<T>({ emitGuard: batch })
-  }
+// TODO: add to solid-primitives/event-bus
+type ToEventBusChannels<T extends Record<string, any>> = {
+  [K in keyof T]: EventBus<T[K]>
+}
 
-  const devtools = createEventHub($ => ({
-    inspectNode: $<SetInspectedNodeData>(),
-    inspectValue: $<ToggleInspectedValueData>(),
-    highlightElementChange: $<HighlightElementPayload>(),
-    openLocation: $<void>(),
-    treeViewModeChange: $<TreeWalkerMode>(),
-    viewChange: $<DevtoolsMainView>(),
-    toggleModule: $<ToggleModuleData>(),
+export function createController() {
+  const devtools = createEventHub<ToEventBusChannels<Debugger.InputChannels>>($ => ({
+    ForceUpdate: $(),
+    InspectNode: $(),
+    InspectValue: $(),
+    HighlightElementChange: $(),
+    OpenLocation: $(),
+    TreeViewModeChange: $(),
+    ViewChange: $(),
+    ToggleModule: $(),
   }))
 
-  const client = createEventHub({
-    resetPanel: batchedBus<void>(),
-    setInspectedDetails: batchedBus<Mapped.OwnerDetails>(),
-    structureUpdate: batchedBus<StructureUpdates>(),
-    nodeUpdates: batchedBus<NodeID[]>(),
-    inspectorUpdate: batchedBus<InspectorUpdate[]>(),
-    locatorModeChange: batchedBus<boolean>(),
-    hoveredComponent: batchedBus<{ nodeId: NodeID; state: boolean }>(),
-    inspectedComponent: batchedBus<NodeID>(),
-    dgraphUpdate: batchedBus<DGraphUpdate>(),
-  })
+  // Listener of the client events (from the debugger) will be called synchronously under `batch`
+  // to make sure that the state is updated before the effect queue is flushed.
+  const client = createEventHub<ToEventBusChannels<Debugger.OutputChannels>>($ => ({
+    ResetPanel: batchEmits($()),
+    InspectedNodeDetails: batchEmits($()),
+    StructureUpdates: batchEmits($()),
+    NodeUpdates: batchEmits($()),
+    InspectorUpdate: batchEmits($()),
+    LocatorModeChange: batchEmits($()),
+    HoveredComponent: batchEmits($()),
+    InspectedComponent: batchEmits($()),
+    DgraphUpdate: batchEmits($()),
+  }))
 
   return { client, devtools }
 }
@@ -109,7 +98,7 @@ const [Provider, useControllerCtx] = createContextProvider(
     // send devtools locator state
     createEffect(
       defer(devtoolsLocatorEnabled, enabled =>
-        devtools.toggleModule.emit({ module: DebuggerModule.Locator, enabled }),
+        devtools.ToggleModule.emit({ module: DebuggerModule.Locator, enabled }),
       ),
     )
 
@@ -130,7 +119,7 @@ const [Provider, useControllerCtx] = createContextProvider(
     } | null>(null, { equals: (a, b) => a?.id === b?.id })
 
     // highlight hovered element
-    createEffect(defer(extHoveredNode, devtools.highlightElementChange.emit))
+    createEffect(defer(extHoveredNode, devtools.HighlightElementChange.emit))
 
     const hoveredId = createMemo(() => {
       const extNode = extHoveredNode()
@@ -159,7 +148,7 @@ const [Provider, useControllerCtx] = createContextProvider(
       setOpenedView(view)
     }
 
-    createEffect(defer(openedView, devtools.viewChange.emit))
+    createEffect(defer(openedView, devtools.ViewChange.emit))
 
     //
     // INSPECTOR
@@ -167,36 +156,36 @@ const [Provider, useControllerCtx] = createContextProvider(
     const inspector = createInspector()
 
     // set inspected node
-    createEffect(defer(inspector.inspectedNode, devtools.inspectNode.emit))
+    createEffect(defer(inspector.inspectedNode, devtools.InspectNode.emit))
 
     // toggle inspected value/prop/signal
-    inspector.setOnInspectValue(devtools.inspectValue.emit)
+    inspector.setOnInspectValue(devtools.InspectValue.emit)
 
     // open component location
-    inspector.setOnOpenLocation(devtools.openLocation.emit)
+    inspector.setOnOpenLocation(devtools.OpenLocation.emit)
 
     //
     // Client events
     //
-    client.on('resetPanel', () => {
+    client.ResetPanel.listen(() => {
       setClientLocatorState(false)
       setDevtoolsLocatorState(false)
       inspector.setInspectedOwner(null)
     })
 
-    client.on('setInspectedDetails', inspector.setDetails)
-    client.on('inspectorUpdate', inspector.update)
+    client.InspectedNodeDetails.listen(inspector.setDetails)
+    client.InspectorUpdate.listen(inspector.update)
 
-    client.on('hoveredComponent', ({ nodeId, state }) => {
+    client.HoveredComponent.listen(({ nodeId, state }) => {
       setClientHoveredNode(p => (state ? nodeId : p && p === nodeId ? null : p))
     })
 
-    client.on('inspectedComponent', node => {
+    client.InspectedComponent.listen(node => {
       inspector.setInspectedOwner(node)
       setDevtoolsLocatorState(false)
     })
 
-    client.on('locatorModeChange', setClientLocatorState)
+    client.LocatorModeChange.listen(setClientLocatorState)
 
     return {
       locator: {

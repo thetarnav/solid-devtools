@@ -9,7 +9,7 @@ import {
   type TreeWalkerMode,
 } from '@solid-devtools/debugger/types'
 import { defer } from '@solid-devtools/shared/primitives'
-import { createSimpleEmitter } from '@solid-primitives/event-bus'
+import { createEventBus } from '@solid-primitives/event-bus'
 import { entries } from '@solid-primitives/utils'
 import { batch, createEffect, createMemo, createSelector, createSignal, untrack } from 'solid-js'
 
@@ -212,10 +212,10 @@ export default function createStructure() {
     }
   }
 
-  const [listenToComputationUpdate, emitComputationUpdate] = createSimpleEmitter<NodeID>()
+  const computationUpdate = createEventBus<NodeID>()
 
-  client.nodeUpdates.listen(updated => {
-    updated.forEach(id => emitComputationUpdate(id))
+  client.NodeUpdates.listen(updated => {
+    updated.forEach(id => computationUpdate.emit(id))
   })
 
   const [searchResult, setSearchResult] = createSignal<NodeID[]>()
@@ -256,21 +256,21 @@ export default function createStructure() {
   //
   // Listen to Client Events
   //
-  client.on('resetPanel', () => {
+  client.ResetPanel.listen(() => {
     updateStructure(null)
   })
 
-  client.on('structureUpdate', updateStructure)
+  client.StructureUpdates.listen(updateStructure)
 
   // TREE VIEW MODE
-  createEffect(defer(mode, devtools.treeViewModeChange.emit))
+  createEffect(defer(mode, devtools.TreeViewModeChange.emit))
 
   return {
     state,
     inspectedNode,
     updateStructure,
     isSearched,
-    listenToComputationUpdate,
+    listenToComputationUpdate: computationUpdate.listen,
     findNode,
     getRootNode,
     getClosestComponentNode,

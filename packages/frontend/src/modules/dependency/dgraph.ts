@@ -13,10 +13,10 @@ export function createDependencyGraph() {
   const { client, devtools } = ctx.controller
 
   const [graph, setGraph] = createSignal<DGraphUpdate>(null)
-  client.dgraphUpdate.listen(setGraph)
+  client.DgraphUpdate.listen(setGraph)
 
-  devtools.emit('toggleModule', { module: DebuggerModule.Dgraph, enabled: true })
-  onCleanup(() => devtools.emit('toggleModule', { module: DebuggerModule.Dgraph, enabled: false }))
+  devtools.ToggleModule.emit({ module: DebuggerModule.Dgraph, enabled: true })
+  onCleanup(() => devtools.ToggleModule.emit({ module: DebuggerModule.Dgraph, enabled: false }))
 
   function inspectNode(id: NodeID) {
     const node = graph()?.[id]

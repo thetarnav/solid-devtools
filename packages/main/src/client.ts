@@ -1,77 +1,37 @@
-// import { createInternalRoot, useDebugger } from '@solid-devtools/debugger'
-// import { defer } from '@solid-devtools/shared/primitives'
-// import { createEffect, onCleanup } from 'solid-js'
-// import {
-//   makeMessageListener,
-//   makePostMessage,
-//   Messages,
-//   startListeningWindowMessages,
-// } from './bridge'
+import { createInternalRoot, useDebugger } from '@solid-devtools/debugger'
+import { Debugger } from '@solid-devtools/debugger/types'
+import { createEffect, onCleanup } from 'solid-js'
+import { makeMessageListener, makePostMessage, startListeningWindowMessages } from './bridge'
 
-// startListeningWindowMessages()
-// const _fromContent = makeMessageListener<Messages.Extension>()
-// const fromContent: typeof _fromContent = (...args) => onCleanup(_fromContent(...args))
-// const toContent = makePostMessage<Messages.Client>()
+startListeningWindowMessages()
+const _fromContent = makeMessageListener<Debugger.InputChannels>()
+const fromContent: typeof _fromContent = ((...args: [any, any]) =>
+  onCleanup(_fromContent(...args))) as any
+const toContent = makePostMessage<Debugger.OutputChannels>()
 
-// // in case of navigation/page reload, reset the locator mode state in the extension
-// toContent('ResetPanel')
+// in case of navigation/page reload, reset the locator mode state in the extension
+toContent('ResetPanel')
 
-// toContent('ClientConnected', process.env['VERSION']!)
+toContent('ClientConnected', process.env['VERSION']!)
 
-// let loadedBefore = false
+let loadedBefore = false
 
-// createInternalRoot(() => {
-//   const debug = useDebugger()
+createInternalRoot(() => {
+  const debug = useDebugger()
 
-//   fromContent('DevtoolsOpened', () => {
-//     debug.toggleEnabled(true)
-//     debug.structure.toggleEnabled(true)
-//   })
-//   fromContent('DevtoolsClosed', () => {
-//     debug.toggleEnabled(false)
-//     debug.structure.toggleEnabled(false)
-//   })
+  fromContent('DevtoolsOpened', () => debug.toggleEnabled(true))
+  fromContent('DevtoolsClosed', () => debug.toggleEnabled(false))
 
-//   createEffect(() => {
-//     if (!debug.enabled()) return
+  createEffect(() => {
+    if (!debug.enabled()) return
 
-//     if (loadedBefore) debug.structure.forceTriggerUpdate()
-//     else loadedBefore = true
+    if (loadedBefore) debug.emit('ForceUpdate')
+    else loadedBefore = true
 
-//     fromContent('ForceUpdate', () => debug.structure.forceTriggerUpdate())
+    // pass all the devtools events to the debugger
+    fromContent(e => debug.emit(e.name as any, e.details))
 
-//     fromContent('InspectValue', debug.inspector.toggleValueNode)
-//     fromContent('InspectNode', debug.inspector.setInspectedNode)
-
-//     debug.listenTo('StructureUpdates', updates => toContent('StructureUpdate', updates))
-
-//     debug.listenTo('NodeUpdates', updates => {
-//       toContent('ComputationUpdates', updates)
-//     })
-
-//     debug.listenTo('InspectorUpdate', update => toContent('InspectorUpdate', update))
-
-//     // send the focused owner details
-//     debug.listenTo('InspectedNodeDetails', details => toContent('InspectedDetails', details))
-
-//     // state of the extension's locator mode
-//     fromContent('LocatorMode', debug.locator.toggleEnabled)
-//     createEffect(defer(debug.locator.enabledByDebugger, state => toContent('LocatorMode', state)))
-
-//     // intercept on-page components clicks and send them to the devtools panel
-//     debug.locator.addClickInterceptor((e, component) => {
-//       e.preventDefault()
-//       e.stopPropagation()
-//       toContent('ClientInspectedNode', component.id)
-//       return false
-//     })
-
-//     debug.locator.onHoveredComponent(data => toContent('HoverComponent', data))
-
-//     fromContent('HighlightElement', payload => debug.locator.setHighlightTarget(payload))
-
-//     fromContent('OpenLocation', debug.openInspectedNodeLocation)
-
-//     fromContent('TreeViewMode', debug.structure.setTreeWalkerMode)
-//   })
-// })
+    // pass all the debugger events to the content script
+    debug.listen(e => toContent(e.name, e.details))
+  })
+})

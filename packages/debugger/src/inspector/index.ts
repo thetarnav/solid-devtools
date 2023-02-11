@@ -2,7 +2,7 @@ import { warn } from '@solid-devtools/shared/utils'
 import { Listen } from '@solid-primitives/event-bus'
 import { scheduleIdle, throttle } from '@solid-primitives/scheduled'
 import { Accessor, createEffect, untrack } from 'solid-js'
-import { DebuggerEventHub, InspectedState } from '../main'
+import { DebuggerEmitter, InspectedState } from '../main'
 import { Mapped, Solid, ValueItemID } from '../main/types'
 import { makeSolidUpdateListener } from '../main/update'
 import {
@@ -23,7 +23,7 @@ export type ToggleInspectedValueData = { id: ValueItemID; selected: boolean }
  * Plugin module
  */
 export function createInspector(props: {
-  eventHub: DebuggerEventHub
+  hub: DebuggerEmitter
   enabled: Accessor<boolean>
   listenToInspectedNodeChange: Listen<InspectedState>
 }) {
@@ -88,7 +88,7 @@ export function createInspector(props: {
         }
 
         // Emit updates
-        batchedUpdates.length && props.eventHub.emit('InspectorUpdate', batchedUpdates)
+        batchedUpdates.length && props.hub.output.emit('InspectorUpdate', batchedUpdates)
       })
 
       const flushPropsCheck = throttle(flush, 200)
@@ -148,7 +148,7 @@ export function createInspector(props: {
         onPropStateChange: pushPropState,
         observedPropsMap: propsMap,
       })
-      props.eventHub.emit('InspectedNodeDetails', result.details)
+      props.hub.output.emit('InspectedNodeDetails', result.details)
       valueMap = result.valueMap
       lastDetails = result.details
       checkProxyProps = result.checkProxyProps || null

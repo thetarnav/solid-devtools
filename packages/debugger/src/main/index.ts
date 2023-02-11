@@ -1,12 +1,13 @@
 import { defer } from '@solid-devtools/shared/primitives'
-import { createEventHub, createSimpleEmitter } from '@solid-primitives/event-bus'
+import { createEventBus, createGlobalEmitter, GlobalEmitter } from '@solid-primitives/event-bus'
 import { createStaticStore } from '@solid-primitives/utils'
 import { batch, createComputed, createEffect, createMemo } from 'solid-js'
 import { createDependencyGraph, DGraphUpdate } from '../dependency'
-import { createInspector, InspectorUpdate } from '../inspector'
+import { createInspector, InspectorUpdate, ToggleInspectedValueData } from '../inspector'
 import { createLocator } from '../locator'
+import { HighlightElementPayload } from '../locator/types'
 import { createStructure, StructureUpdates } from '../structure'
-import { DebuggerModule, DEFAULT_MAIN_VIEW, DevtoolsMainView } from './constants'
+import { DebuggerModule, DEFAULT_MAIN_VIEW, DevtoolsMainView, TreeWalkerMode } from './constants'
 import { getObjectById, ObjectType } from './id'
 import { createInternalRoot } from './roots'
 import { Mapped, NodeID, Solid } from './types'
@@ -17,20 +18,41 @@ export type InspectedState = {
   readonly signal: Solid.Signal | null
 }
 
-function createDebuggerEventHub() {
-  return createEventHub($ => ({
-    NodeUpdates: $<NodeID[]>(),
-    StructureUpdates: $<StructureUpdates>(),
-    InspectorUpdate: $<InspectorUpdate[]>(),
-    InspectedNodeDetails: $<Mapped.OwnerDetails>(),
-    DgraphUpdate: $<DGraphUpdate>(),
-    DebuggerDisabled: $<void>(),
-  }))
+export namespace Debugger {
+  export type OutputChannels = {
+    ResetPanel: void
+    InspectedNodeDetails: Mapped.OwnerDetails
+    StructureUpdates: StructureUpdates
+    NodeUpdates: NodeID[]
+    InspectorUpdate: InspectorUpdate[]
+    LocatorModeChange: boolean
+    HoveredComponent: { nodeId: NodeID; state: boolean }
+    InspectedComponent: NodeID
+    DgraphUpdate: DGraphUpdate
+  }
+
+  export type InputChannels = {
+    ForceUpdate: void
+    InspectNode: { ownerId: NodeID | null; signalId: NodeID | null } | null
+    InspectValue: ToggleInspectedValueData
+    HighlightElementChange: HighlightElementPayload
+    OpenLocation: void
+    TreeViewModeChange: TreeWalkerMode
+    ViewChange: DevtoolsMainView
+    ToggleModule: { module: DebuggerModule; enabled: boolean }
+  }
 }
-export type DebuggerEventHub = ReturnType<typeof createDebuggerEventHub>
+
+export type DebuggerEmitter = {
+  output: GlobalEmitter<Debugger.OutputChannels>
+  input: GlobalEmitter<Debugger.InputChannels>
+}
 
 const plugin = createInternalRoot(() => {
-  const eventHub = createDebuggerEventHub()
+  const hub: DebuggerEmitter = {
+    output: createGlobalEmitter(),
+    input: createGlobalEmitter(),
+  }
 
   //
   // Debugger Enabled
@@ -50,8 +72,10 @@ const plugin = createInternalRoot(() => {
     () => (modules.locatorKeyPressSignal() || modules.locator) && debuggerEnabled(),
   )
 
+  const debuggerEnabledBus = createEventBus<boolean>()
+
   createEffect(() => {
-    if (!debuggerEnabled()) eventHub.DebuggerDisabled.emit()
+    if (!debuggerEnabled()) debuggerEnabledBus.emit(false)
   })
 
   //
@@ -59,20 +83,20 @@ const plugin = createInternalRoot(() => {
   //
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   let currentView: DevtoolsMainView = DEFAULT_MAIN_VIEW
-  const [listenToViewChange, emitViewChange] = createSimpleEmitter<DevtoolsMainView>()
+  const viewChange = createEventBus<DevtoolsMainView>()
 
   function setView(view: DevtoolsMainView) {
     batch(() => {
       // setStructureEnabled(view === DevtoolsMainView.Structure)
       // setDgraphEnabled(view === DevtoolsMainView.Dgraph)
-      emitViewChange((currentView = view))
+      viewChange.emit((currentView = view))
     })
   }
 
   //
   // Enabled Modules
   //
-  function toggleModule(data: { module: DebuggerModule; enabled: boolean }): void {
+  function toggleModule(data: Debugger.InputChannels['ToggleModule']): void {
     switch (data.module) {
       case DebuggerModule.Structure:
         // * Structure is always enabled
@@ -92,11 +116,11 @@ const plugin = createInternalRoot(() => {
 
   // Current inspected node is shared between modules
   let inspectedState: InspectedState = { owner: null, signal: null }
-  const [listenToInspectedState, emitInspectedStateChange] = createSimpleEmitter<InspectedState>()
+  const inspectedStateBus = createEventBus<InspectedState>()
 
   createComputed(
     defer(debuggerEnabled, enabled => {
-      if (!enabled) emitInspectedStateChange((inspectedState = { owner: null, signal: null }))
+      if (!enabled) inspectedStateBus.emit((inspectedState = { owner: null, signal: null }))
     }),
   )
 
@@ -106,45 +130,40 @@ const plugin = createInternalRoot(() => {
     const closest = structure.getClosestIncludedOwner(inspectedState.owner)
     if (closest && closest === inspectedState.owner) return
 
-    emitInspectedStateChange((inspectedState = { owner: closest, signal: null }))
+    inspectedStateBus.emit((inspectedState = { owner: closest, signal: null }))
   }
 
-  function setInspectedNode(
-    data: {
-      ownerId: NodeID | null
-      signalId: NodeID | null
-    } | null,
-  ): void {
+  function setInspectedNode(data: Debugger.InputChannels['InspectNode']): void {
     const { ownerId, signalId } = data ?? {}
     const owner = ownerId && getObjectById(ownerId, ObjectType.Owner)
     const signal = signalId && getObjectById(signalId, ObjectType.Signal)
-    emitInspectedStateChange((inspectedState = { owner: owner ?? null, signal: signal ?? null }))
+    inspectedStateBus.emit((inspectedState = { owner: owner ?? null, signal: signal ?? null }))
   }
 
   //
   // Structure & Computation updates:
   //
   const pushNodeUpdate = createBatchedUpdateEmitter<NodeID>(updates => {
-    eventHub.emit('NodeUpdates', updates)
+    hub.output.emit('NodeUpdates', updates)
   })
 
   const structure = createStructure({
     onStructureUpdate(updates) {
-      eventHub.emit('StructureUpdates', updates)
+      hub.output.emit('StructureUpdates', updates)
       updateInspectedNode()
     },
     onNodeUpdate: pushNodeUpdate,
     enabled: debuggerEnabled,
-    listenToViewChange,
+    listenToViewChange: viewChange.listen,
   })
 
   //
   // Inspected Owner details:
   //
   const inspector = createInspector({
-    eventHub,
+    hub,
     enabled: debuggerEnabled,
-    listenToInspectedNodeChange: listenToInspectedState,
+    listenToInspectedNodeChange: inspectedStateBus.listen,
   })
 
   //
@@ -153,9 +172,9 @@ const plugin = createInternalRoot(() => {
 
   createDependencyGraph({
     enabled: dgraphEnabled,
-    listenToInspectedStateChange: listenToInspectedState,
-    listenToViewChange,
-    emitDependencyGraph: graph => eventHub.emit('DgraphUpdate', graph),
+    listenToInspectedStateChange: inspectedStateBus.listen,
+    listenToViewChange: viewChange.listen,
+    emitDependencyGraph: graph => hub.output.emit('DgraphUpdate', graph),
     onNodeUpdate: pushNodeUpdate,
   })
 
@@ -163,7 +182,7 @@ const plugin = createInternalRoot(() => {
   // Locator
   //
   const locator = createLocator({
-    eventHub,
+    listenToDebuggerEenable: debuggerEnabledBus.listen,
     locatorEnabled,
     setLocatorEnabledSignal: signal => toggleModules('locatorKeyPressSignal', () => signal),
   })
@@ -175,6 +194,42 @@ const plugin = createInternalRoot(() => {
     locator.openElementSourceCode(details.location, details.name)
   }
 
+  // send the state of the client locator mode
+  createEffect(
+    defer(modules.locatorKeyPressSignal, state => hub.output.emit('LocatorModeChange', state)),
+  )
+
+  // intercept on-page components clicks and send them to the devtools overlay
+  locator.addClickInterceptor((e, component) => {
+    e.preventDefault()
+    e.stopPropagation()
+    hub.output.emit('InspectedComponent', component.id)
+    return false
+  })
+
+  locator.onDebuggerHoveredComponentChange(data => hub.output.emit('HoveredComponent', data))
+
+  hub.input.listen(e => {
+    switch (e.name) {
+      case 'ForceUpdate':
+        return structure.forceUpdateAllRoots()
+      case 'HighlightElementChange':
+        return locator.setDevtoolsHighlightTarget(e.details)
+      case 'InspectNode':
+        return setInspectedNode(e.details)
+      case 'InspectValue':
+        return inspector.toggleValueNode(e.details)
+      case 'OpenLocation':
+        return openInspectedNodeLocation()
+      case 'TreeViewModeChange':
+        return structure.setTreeWalkerMode(e.details)
+      case 'ViewChange':
+        return setView(e.details)
+      case 'ToggleModule':
+        return toggleModule(e.details)
+    }
+  })
+
   /**
    * Used for connecting debugger to devtools
    */
@@ -182,25 +237,9 @@ const plugin = createInternalRoot(() => {
     return {
       enabled: debuggerEnabled,
       toggleEnabled: (enabled: boolean) => void toggleModules('debugger', enabled),
-      listenTo: eventHub.on,
-      openInspectedNodeLocation,
-      setInspectedNode,
-      setView,
-      toggleModule,
-      structure: {
-        setTreeWalkerMode: structure.setTreeWalkerMode,
-        triggerUpdate: structure.updateAllRoots,
-        forceTriggerUpdate: structure.forceUpdateAllRoots,
-      },
-      inspector: {
-        toggleValueNode: inspector.toggleValueNode,
-      },
-      locator: {
-        enabledByDebugger: modules.locatorKeyPressSignal,
-        addClickInterceptor: locator.addClickInterceptor,
-        setHighlightTarget: locator.setDevtoolsHighlightTarget,
-        onHoveredComponent: locator.onDebuggerHoveredComponentChange,
-      },
+      on: hub.output.on,
+      listen: hub.output.listen,
+      emit: hub.input.emit,
     }
   }
 
@@ -209,11 +248,5 @@ const plugin = createInternalRoot(() => {
     useLocator: locator.useLocator,
   }
 })
-
-export type ToggleModuleData = Parameters<ReturnType<typeof plugin.useDebugger>['toggleModule']>[0]
-
-export type SetInspectedNodeData = Parameters<
-  ReturnType<typeof plugin.useDebugger>['setInspectedNode']
->[0]
 
 export const { useDebugger, useLocator } = plugin

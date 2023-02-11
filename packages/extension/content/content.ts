@@ -5,7 +5,6 @@ import {
   isForwardMessage,
   makeMessageListener,
   makePostMessage,
-  onAllClientMessages,
   startListeningWindowMessages,
 } from 'solid-devtools/bridge'
 import { CONTENT_CONNECTION_NAME, createPortMessanger } from '../src/messanger'
@@ -93,9 +92,9 @@ fromBackground('DevtoolsOpened', () => {
 })
 fromBackground('DevtoolsClosed', () => toClient('DevtoolsClosed'))
 
-onAllClientMessages(data => {
+fromClient(e => {
   // forward all client messages to the background script in
-  const payload: ForwardPayload = { forwarding: true, id: data.id, payload: data.payload }
+  const payload: ForwardPayload = { forwarding: true, name: e.name, details: e.details }
   port.postMessage(payload)
 })
 

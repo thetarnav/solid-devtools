@@ -4,7 +4,7 @@ import { useIsMobile, useIsTouch } from '@solid-devtools/shared/primitives'
 import { warn } from '@solid-devtools/shared/utils'
 import { createBodyCursor } from '@solid-primitives/cursor'
 import { makeEventListener } from '@solid-primitives/event-listener'
-import { clamp, onRootCleanup } from '@solid-primitives/utils'
+import { clamp, tryOnCleanup } from '@solid-primitives/utils'
 import { Component, ComponentProps, createComputed, createSignal, Show } from 'solid-js'
 import { Dynamic, Portal } from 'solid-js/web'
 import { createOverlayController } from './controller'
@@ -30,7 +30,7 @@ export function attachDevtoolsOverlay(props: ComponentProps<typeof Overlay> = {}
     })
   })
 
-  return onRootCleanup(() => {
+  return tryOnCleanup(() => {
     isAlreadyMounted = false
     dispose && dispose()
   })

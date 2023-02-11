@@ -1,7 +1,6 @@
 import { enableRootsAutoattach, useDebugger } from '@solid-devtools/debugger'
 import { Controller, createController } from '@solid-devtools/frontend'
-import { defer } from '@solid-devtools/shared/primitives'
-import { createEffect, onCleanup } from 'solid-js'
+import { onCleanup } from 'solid-js'
 
 enableRootsAutoattach()
 
@@ -16,67 +15,17 @@ const separate = <T>(obj: T, callback: (value: T) => void): void => {
 export function createOverlayController(): Controller {
   const debug = useDebugger()
 
-  onCleanup(() => debug.setInspectedNode(null))
+  onCleanup(() => debug.emit('InspectNode', null))
 
   const controller = createController()
-  const { devtools, client } = controller
 
-  devtools.on('highlightElementChange', data => {
-    queueMicrotask(() => debug.locator.setHighlightTarget(data))
-  })
-  devtools.on('inspectNode', node => {
-    queueMicrotask(() => debug.setInspectedNode(node))
-  })
-  devtools.on('inspectValue', node => {
-    queueMicrotask(() => debug.inspector.toggleValueNode(node))
-  })
-  devtools.on('openLocation', () => {
-    queueMicrotask(() => debug.openInspectedNodeLocation())
-  })
-  devtools.on('treeViewModeChange', mode => {
-    queueMicrotask(() => debug.structure.setTreeWalkerMode(mode))
-  })
-  devtools.on('viewChange', view => queueMicrotask(() => debug.setView(view)))
-  devtools.on('toggleModule', data => queueMicrotask(() => debug.toggleModule(data)))
-
-  debug.listenTo('StructureUpdates', updates => {
-    queueMicrotask(() => client.structureUpdate.emit(updates))
+  controller.devtools.listen(e => {
+    separate(e.details, details => debug.emit(e.name, details as never))
   })
 
-  debug.listenTo('NodeUpdates', updates => {
-    queueMicrotask(() => client.nodeUpdates.emit(updates))
-  })
-
-  debug.listenTo('InspectorUpdate', payload => {
-    separate(payload, client.inspectorUpdate.emit)
-  })
-
-  // send the focused owner details
-  debug.listenTo('InspectedNodeDetails', details => {
-    separate(details, client.setInspectedDetails.emit)
-  })
-
-  debug.listenTo('DgraphUpdate', update => {
-    separate(update, client.dgraphUpdate.emit)
-  })
-
-  // send the state of the client locator mode
-  createEffect(
-    defer(debug.locator.enabledByDebugger, state => {
-      queueMicrotask(() => client.locatorModeChange.emit(state))
-    }),
-  )
-
-  // intercept on-page components clicks and send them to the devtools overlay
-  debug.locator.addClickInterceptor((e, component) => {
-    e.preventDefault()
-    e.stopPropagation()
-    queueMicrotask(() => client.inspectedComponent.emit(component.id))
-    return false
-  })
-
-  debug.locator.onHoveredComponent(data => {
-    queueMicrotask(() => client.hoveredComponent.emit(data))
+  debug.listen(e => {
+    // TODO this should be fixed in the solid-primitives package (allow for passing events straight through)
+    separate(e.details, details => controller.client.emit(e.name, details as never))
   })
 
   return controller
