@@ -99,7 +99,7 @@ export class ObservedProps {
     }
 
     const self = this
-    const o: typeof this.observedGetters[string] = (this.observedGetters[key] = {
+    const o: (typeof this.observedGetters)[string] = (this.observedGetters[key] = {
       v: $NOT_SET,
       n: 0,
     })
