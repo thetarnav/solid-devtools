@@ -21,7 +21,7 @@ export type InspectedState = {
 export namespace Debugger {
   export type OutputChannels = {
     ResetPanel: void
-    InspectedNodeDetails: Mapped.OwnerDetails
+    InspectedNodeDetails: Mapped.OwnerDetails | null
     StructureUpdates: StructureUpdates
     NodeUpdates: NodeID[]
     InspectorUpdate: InspectorUpdate[]

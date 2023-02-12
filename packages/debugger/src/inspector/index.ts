@@ -1,7 +1,7 @@
 import { warn } from '@solid-devtools/shared/utils'
 import { Listen } from '@solid-primitives/event-bus'
 import { scheduleIdle, throttle } from '@solid-primitives/scheduled'
-import { Accessor, createEffect, untrack } from 'solid-js'
+import { Accessor, createEffect } from 'solid-js'
 import { DebuggerEmitter, InspectedState } from '../main'
 import { Mapped, Solid, ValueItemID } from '../main/types'
 import { makeSolidUpdateListener } from '../main/update'
@@ -136,23 +136,21 @@ export function createInspector(props: {
     const owner = inspectedState.owner ?? null
     inspectedOwner && clearOwnerObservers(inspectedOwner, propsMap)
     inspectedOwner = owner
-    checkProxyProps = null
-    lastDetails = undefined
     valueMap.reset()
     clearUpdates()
-    if (!owner) return
 
-    untrack(() => {
-      const result = collectOwnerDetails(owner, {
-        onValueUpdate: pushValueUpdate,
-        onPropStateChange: pushPropState,
-        observedPropsMap: propsMap,
-      })
-      props.hub.output.emit('InspectedNodeDetails', result.details)
-      valueMap = result.valueMap
-      lastDetails = result.details
-      checkProxyProps = result.checkProxyProps || null
-    })
+    const result = owner
+      ? collectOwnerDetails(owner, {
+          onValueUpdate: pushValueUpdate,
+          onPropStateChange: pushPropState,
+          observedPropsMap: propsMap,
+        })
+      : null
+
+    props.hub.output.emit('InspectedNodeDetails', result ? result.details : null)
+    if (result) valueMap = result.valueMap
+    lastDetails = result ? result.details : undefined
+    checkProxyProps = (result && result.checkProxyProps) || null
   })
 
   createEffect(() => {

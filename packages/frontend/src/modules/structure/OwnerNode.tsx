@@ -1,6 +1,5 @@
 import { Badge, CollapseToggle, Highlight } from '@/ui'
 import { OwnerName } from '@/ui/components/Owner'
-import { NodeType } from '@solid-devtools/debugger/types'
 import { createHover, createPingedSignal } from '@solid-devtools/shared/primitives'
 import { assignInlineVars } from '@vanilla-extract/dynamic'
 import { Component } from 'solid-js'
@@ -32,10 +31,7 @@ export const OwnerNode: Component<{
       data-hovered={props.isHovered}
       data-selected={props.isSelected}
       class={styles.container}
-      onClick={() => {
-        // html elements are not inspectable (yet)
-        type !== NodeType.Element && onInspectChange(!props.isSelected)
-      }}
+      onClick={() => onInspectChange(!props.isSelected)}
       {...hoverProps}
       style={assignInlineVars({ [styles.levelVar]: props.owner.level + '' })}
     >

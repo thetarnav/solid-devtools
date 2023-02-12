@@ -1,3 +1,4 @@
+import { untrackedCallback } from '@solid-devtools/shared/primitives'
 import { isRecord } from '@solid-devtools/shared/utils'
 import { $PROXY, getListener, onCleanup } from 'solid-js'
 import { NodeType, ValueItemType } from '../main/constants'
@@ -245,7 +246,7 @@ function mapProps(props: Solid.Component['props']) {
   return { props: { proxy: isProxy, record }, checkProxyProps }
 }
 
-export function collectOwnerDetails(
+export const collectOwnerDetails = /*#__PURE__*/ untrackedCallback(function (
   owner: Solid.Owner,
   config: {
     onPropStateChange: Inspector.OnPropStateChange
@@ -334,4 +335,4 @@ export function collectOwnerDetails(
   ValueMap = OnValueUpdate = OnPropStateChange = PropsMap = undefined!
 
   return result
-}
+})

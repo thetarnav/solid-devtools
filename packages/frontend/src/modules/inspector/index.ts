@@ -1,8 +1,8 @@
 import {
+  Debugger,
   InspectorUpdate,
   InspectorUpdateMap,
   LocationAttr,
-  Mapped,
   NodeID,
   NodeType,
   PropGetterState,
@@ -203,7 +203,13 @@ export default function createInspector() {
 
   const storeNodeMap = new StoreNodeMap()
 
-  function setNewDetails(raw: Mapped.OwnerDetails): void {
+  function setNewDetails(raw: Debugger.OutputChannels['InspectedNodeDetails']): void {
+    // debugger will send null when the inspected node is not found
+    if (!raw) {
+      setInspected(prev => ({ ownerId: null, signalId: prev.signalId }))
+      return
+    }
+
     const id = inspected.ownerId
     batch(() => {
       // The current inspected node is not the same as the one that sent the details
