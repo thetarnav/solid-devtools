@@ -70,19 +70,24 @@ function addNodeToGraph(node: Solid.Signal | Solid.Memo | Solid.Computation) {
 }
 
 function visitSources(node: Solid.Computation | Solid.Memo | Solid.Signal) {
+  let n = 0
   if ('sources' in node && node.sources) {
     for (const source of node.sources) {
-      if (
-        VisitedSources.has(source) ||
-        (isSolidOwner(source) && getOwnerType(source) === NodeType.Refresh)
-      ) {
+      const isOwner = isSolidOwner(source)
+      // skip refresh nodes (they aren't part of the actual graph)
+      if (isOwner && getOwnerType(source) === NodeType.Refresh) continue
+      n++
+      if (VisitedSources.has(source)) continue
+      VisitedSources.add(source)
+      // skip frozen memos (if memo is not subscribed to anything it won't ever update)
+      if (isOwner && visitSources(source) === 0) {
+        n--
         continue
       }
-      VisitedSources.add(source)
       addNodeToGraph(source)
-      visitSources(source)
     }
   }
+  return n
 }
 
 function visitObservers(node: Solid.Computation | Solid.Memo | Solid.Signal) {
