@@ -59,12 +59,17 @@ export function createStructure(props: {
   const removedRoots = new Set<NodeID>()
   let shouldUpdateAllRoots = false
 
-  const onComputationUpdate: ComputationUpdateHandler = (rootId, owner, changedStructure) => {
+  const onComputationUpdate: ComputationUpdateHandler = (
+    rootId,
+    owner,
+    ownerId,
+    changedStructure,
+  ) => {
     // separate the callback from the computation
     queueMicrotask(() => {
       if (!props.enabled()) return
       changedStructure && updateOwner(owner, rootId)
-      props.onNodeUpdate(getSdtId(owner, ObjectType.Owner))
+      props.onNodeUpdate(ownerId)
     })
   }
 

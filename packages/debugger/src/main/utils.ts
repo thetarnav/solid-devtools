@@ -282,7 +282,10 @@ export function getFunctionSources(fn: () => unknown): Solid.Signal[] {
 export function createBatchedUpdateEmitter<T>(emit: Emit<T[]>): (update: T) => void {
   const updates = new Set<T>()
 
-  const triggerUpdateEmit = throttle(() => emit([...updates]))
+  const triggerUpdateEmit = throttle(() => {
+    emit([...updates])
+    updates.clear()
+  })
 
   return update => {
     updates.add(update)

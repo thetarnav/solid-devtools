@@ -1,3 +1,4 @@
+import { untrackedCallback } from '@solid-devtools/shared/primitives'
 import type { ComponentRegisterHandler } from '../main/componentRegistry'
 import { NodeType, TreeWalkerMode } from '../main/constants'
 import { getSdtId, ObjectType } from '../main/id'
@@ -13,6 +14,7 @@ import {
 export type ComputationUpdateHandler = (
   rootId: NodeID,
   owner: Solid.Owner,
+  ownerId: NodeID,
   changedStructure: boolean,
 ) => void
 
@@ -31,7 +33,12 @@ function observeComputation(owner: Solid.Computation, attachedData: Solid.Owner)
   // Unless the walker is in DOM mode, then we need to observe all computations
   // This is because DOM can change without the owner structure changing
   let isLeaf = !owner.owned || owner.owned.length === 0
-  const boundHandler = OnComputationUpdate.bind(void 0, RootId, attachedData)
+  const boundHandler = OnComputationUpdate.bind(
+    void 0,
+    RootId,
+    attachedData,
+    getSdtId(owner, ObjectType.Owner),
+  )
   const handler =
     isLeaf && Mode !== TreeWalkerMode.DOM
       ? () => {
@@ -229,7 +236,7 @@ function mapOwner(
   return addedToParent ? undefined : mapped
 }
 
-export function walkSolidTree(
+export const walkSolidTree = /*#__PURE__*/ untrackedCallback(function (
   owner: Solid.Owner | Solid.Root,
   config: {
     mode: TreeWalkerMode
@@ -263,4 +270,4 @@ export function walkSolidTree(
   Mode = RootId = OnComputationUpdate = RegisterComponent = undefined!
 
   return r
-}
+})
