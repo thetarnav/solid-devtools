@@ -1,6 +1,6 @@
 {
   "name": "@solid-devtools/debugger",
-  "version": "0.20.0",
+  "version": "0.20.1",
   "description": "Debugger of the Solid's reactivity graph — a cornerstone of all solid-devtools.",
   "license": "MIT",
   "author": "Damian Tarnawski <gthetarnav@gmail.com>",

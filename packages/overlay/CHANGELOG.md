@@ -1,5 +1,13 @@
 # @solid-devtools/overlay
 
+## 0.5.1
+
+### Patch Changes
+
+- a37f73d: fix: Don't open overlay when using locator.
+- Updated dependencies [a37f73d]
+  - @solid-devtools/debugger@0.20.1
+
 ## 0.5.0
 
 ### Minor Changes

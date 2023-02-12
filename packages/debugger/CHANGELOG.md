@@ -1,5 +1,11 @@
 # @solid-devtools/debugger
 
+## 0.20.1
+
+### Patch Changes
+
+- a37f73d: Correct behavior of locator. If extension isn't open - should open the component location.
+
 ## 0.20.0
 
 ### Minor Changes
