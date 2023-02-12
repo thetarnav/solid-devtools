@@ -1,5 +1,5 @@
 import { useController } from '@/controller'
-import { Icon, Scrollable, ToggleButton } from '@/ui'
+import { Icon, Scrollable, ToggleButton, ToggleTabs } from '@/ui'
 import { NodeID, NodeType, TreeWalkerMode } from '@solid-devtools/debugger/types'
 import { defer } from '@solid-devtools/shared/primitives'
 import { createShortcut } from '@solid-primitives/keyboard'
@@ -8,40 +8,54 @@ import { useRemSize } from '@solid-primitives/styles'
 import { assignInlineVars } from '@vanilla-extract/dynamic'
 import {
   Component,
+  createContext,
   createEffect,
   createMemo,
-  createSelector,
   createSignal,
   For,
   Setter,
+  useContext,
 } from 'solid-js'
 import type { Structure } from '.'
+import createStructure from '.'
 import { OwnerNode } from './OwnerNode'
 import { OwnerPath } from './Path'
 import * as styles from './structure.css'
 import { getVirtualVars } from './virtual'
 
+const StructureContext = createContext<Structure.Module>()
+
+export const useStructure = () => {
+  const ctx = useContext(StructureContext)
+  if (!ctx) throw new Error('Structure context not found')
+  return ctx
+}
+
 export default function StructureView() {
+  const structure = createStructure()
+
   return (
-    <div class={styles.panelWrapper}>
-      <div class={styles.header}>
-        <LocatorButton />
-        <Search />
-        <ToggleMode />
+    <StructureContext.Provider value={structure}>
+      <div class={styles.panelWrapper}>
+        <div class={styles.header}>
+          <LocatorButton />
+          <Search />
+          <ToggleMode />
+        </div>
+        <DisplayStructureTree />
+        <OwnerPath />
       </div>
-      <DisplayStructureTree />
-      <OwnerPath />
-    </div>
+    </StructureContext.Provider>
   )
 }
 
 const LocatorButton: Component = () => {
-  const ctx = useController()
+  const { locator } = useController()
   return (
     <ToggleButton
       class={styles.locatorButton}
-      onToggle={ctx.setLocatorState}
-      selected={ctx.locatorEnabled()}
+      onToggle={locator.setLocatorState}
+      selected={locator.locatorEnabled()}
     >
       <Icon.Select class={styles.locatorIcon} />
     </ToggleButton>
@@ -49,13 +63,14 @@ const LocatorButton: Component = () => {
 }
 
 const Search: Component = () => {
-  const ctx = useController()
+  const { options } = useController()
+  const structure = useStructure()
 
   const [value, setValue] = createSignal('')
 
   const handleChange = (v: string) => {
     setValue(v)
-    ctx.searchStructure('')
+    structure.search('')
   }
 
   return (
@@ -63,13 +78,13 @@ const Search: Component = () => {
       class={styles.search.form}
       onSubmit={e => {
         e.preventDefault()
-        ctx.searchStructure(value())
+        structure.search(value())
       }}
       onReset={() => handleChange('')}
     >
       <input
         ref={input => {
-          if (ctx.options.useShortcuts) {
+          if (options.useShortcuts) {
             createShortcut(['/'], () => input.focus())
             createShortcut(['Escape'], () => {
               if (document.activeElement === input) input.blur()
@@ -96,7 +111,7 @@ const Search: Component = () => {
 }
 
 const ToggleMode: Component = () => {
-  const ctx = useController()
+  const structure = useStructure()
 
   const tabsContentMap: Readonly<Record<TreeWalkerMode, string>> = {
     [TreeWalkerMode.Owners]: 'Owners',
@@ -104,21 +119,21 @@ const ToggleMode: Component = () => {
     [TreeWalkerMode.DOM]: 'DOM',
   }
 
-  const isSelected = createSelector<TreeWalkerMode, TreeWalkerMode>(ctx.structure.mode)
-
   return (
     <div class={styles.toggleMode.group}>
-      <div class={styles.toggleMode.list} role="group">
-        {[TreeWalkerMode.Components, TreeWalkerMode.Owners, TreeWalkerMode.DOM].map(mode => (
-          <button
-            aria-selected={isSelected(mode)}
-            class={styles.toggleMode.tab[mode]}
-            onClick={() => ctx.changeTreeViewMode(mode)}
-          >
-            {tabsContentMap[mode]}
-          </button>
-        ))}
-      </div>
+      <ToggleTabs
+        class={styles.toggleMode.list}
+        active={structure.mode()}
+        onSelect={structure.changeTreeViewMode}
+      >
+        {Option =>
+          [TreeWalkerMode.Components, TreeWalkerMode.Owners, TreeWalkerMode.DOM].map(mode => (
+            <Option for={mode} class={styles.toggleMode.tab[mode]}>
+              {tabsContentMap[mode]}
+            </Option>
+          ))
+        }
+      </ToggleTabs>
     </div>
   )
 }
@@ -167,15 +182,9 @@ const DisplayStructureTree: Component = () => {
       return set
     })
 
-  const {
-    structureState,
-    inspector,
-    structure,
-    isNodeInspected,
-    listenToComputationUpdate,
-    toggleHoveredNode,
-    setInspectedNode,
-  } = useController()
+  const ctx = useController()
+  const { inspector, hovered } = ctx
+  const structure = useStructure()
 
   let lastVirtualStart = 0
   let lastVirtualEnd = 0
@@ -199,7 +208,7 @@ const DisplayStructureTree: Component = () => {
       lastInspectedIndex,
     )
 
-    const nodeList = structureState().nodeList
+    const nodeList = structure.state().nodeList
     // eslint-disable-next-line @typescript-eslint/no-shadow
     const collapsedList: Structure.Node[] = []
     const set = collapsed()
@@ -270,7 +279,7 @@ const DisplayStructureTree: Component = () => {
 
   // Index of the inspected node in the collapsed list
   const inspectedIndex = createMemo(() => {
-    const id = inspector.inspectedId()
+    const id = inspector.inspected.ownerId
     return id ? getNodeIndexById(id) : -1
   })
 
@@ -289,13 +298,13 @@ const DisplayStructureTree: Component = () => {
   // Scroll to selected node when it changes
   // listen to inspected ID, instead of node, because node reference can change
   createEffect(() => {
-    if (!inspector.inspectedId()) return
+    if (!inspector.inspected.ownerId) return
     // Run in next tick to ensure the scroll data is updated and virtual list recalculated
     // inspect node -> open inspector -> container changes height -> scroll data changes -> virtual list changes -> scroll to node
     setTimeout(() => {
       let index = inspectedIndex()
       if (index === -1) {
-        const node = inspector.inspectedNode()
+        const node = structure.inspectedNode()
         if (!node) return
         // Un-collapse parents if needed
         const set = collapsed()
@@ -348,13 +357,13 @@ const DisplayStructureTree: Component = () => {
                 return (
                   <OwnerNode
                     owner={data.node}
-                    isHovered={structure.isHovered(id)}
-                    isSelected={isNodeInspected(id)}
-                    listenToUpdate={listener =>
-                      listenToComputationUpdate(updatedId => updatedId === id && listener())
+                    isHovered={hovered.isNodeHovered(id) || structure.isSearched(id)}
+                    isSelected={inspector.isInspected(id)}
+                    listenToUpdate={listener => ctx.listenToNodeUpdate(id, listener)}
+                    onHoverChange={state => hovered.toggleHoveredNode(id, 'node', state)}
+                    onInspectChange={inspected =>
+                      inspector.setInspectedOwner(inspected ? id : null)
                     }
-                    onHoverChange={hovered => toggleHoveredNode(id, hovered)}
-                    onInspectChange={inspected => setInspectedNode(inspected ? id : null)}
                     toggleCollapsed={toggleCollapsed}
                     isCollapsed={collapsed().has(data.node)}
                   />

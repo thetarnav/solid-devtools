@@ -1,11 +1,12 @@
 import { createVar, style } from '@vanilla-extract/css'
-import { color, dark, hexToRgbValue, media } from './theme.css'
+import { color, dark, hexToRgbValue, media, spacing } from './theme.css'
 
 export const vars = {
   panel: {
     bg: createVar(),
     border: createVar(),
     lightBorder: createVar(),
+    headerHeight: spacing[7],
   },
   grayHighlight: {
     color: createVar(),

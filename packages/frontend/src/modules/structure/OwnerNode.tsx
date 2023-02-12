@@ -1,6 +1,5 @@
-import { Badge, CollapseToggle, Highlight } from '@/ui'
-import { OwnerName } from '@/ui/components/Owner'
-import { createHover, createPingedSignal } from '@solid-devtools/shared/primitives'
+import { Badge, CollapseToggle, createHighlightedOwnerName } from '@/ui'
+import { createHover } from '@solid-devtools/shared/primitives'
 import { assignInlineVars } from '@vanilla-extract/dynamic'
 import { Component } from 'solid-js'
 import type { Structure } from '.'
@@ -21,7 +20,7 @@ export const OwnerNode: Component<{
 
   const { toggleCollapsed } = props
 
-  const [isUpdated, pingUpdated] = createPingedSignal()
+  const { pingUpdated, OwnerName } = createHighlightedOwnerName()
   listenToUpdate(pingUpdated)
 
   const hoverProps = createHover(onHoverChange)
@@ -43,9 +42,7 @@ export const OwnerNode: Component<{
           onToggle={() => toggleCollapsed(props.owner)}
           isCollapsed={props.isCollapsed}
         />
-        <Highlight highlight={isUpdated()}>
-          <OwnerName name={name} type={type} isFrozen={props.owner.frozen} />
-        </Highlight>
+        <OwnerName name={name} type={type} isFrozen={props.owner.frozen} />
         {hmr && <Badge>HMR</Badge>}
       </div>
     </div>

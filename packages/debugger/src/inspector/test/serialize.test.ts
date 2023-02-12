@@ -1,12 +1,12 @@
 import { Truthy } from '@solid-primitives/utils'
 import { createMutable, createStore } from 'solid-js/store'
 import { describe, expect, test, vi } from 'vitest'
-import { NodeIDMap } from '../../main/utils'
+import { getObjectById, ObjectType } from '../../main/id'
 import { encodeValue } from '../serialize'
 import { EncodedValue, INFINITY, NAN, NEGATIVE_INFINITY, UNDEFINED, ValueType } from '../types'
 
 let mockLAST_ID = 0
-vi.mock('../../main/id', () => ({ getNewSdtId: () => mockLAST_ID++ + '' }))
+vi.mock('../../main/getId', () => ({ getNewSdtId: () => '#' + mockLAST_ID++ }))
 
 type Expectations = [name: string, data: unknown, encoded: EncodedValue[]][]
 
@@ -37,8 +37,8 @@ describe('encodeValue Preview', () => {
     ['Symbol', Symbol(), [[ValueType.Symbol, '']]],
     ['Function', () => {}, [[ValueType.Function, '']]],
     ['Named Function', _testFunction, [[ValueType.Function, '_testFunction']]],
-    ['Element div', div1, [[ValueType.Element, '0:div']]],
-    ['Element a', a1, [[ValueType.Element, '1:a']]],
+    ['Element div', div1, [[ValueType.Element, '#0:div']]],
+    ['Element a', a1, [[ValueType.Element, '#1:a']]],
     ['Array empty', [], [[ValueType.Array, 0]]],
     ['Array', [1, 2, 3], [[ValueType.Array, 3]]],
     ['Object empty', {}, [[ValueType.Object, 0]]],
@@ -52,7 +52,7 @@ describe('encodeValue Preview', () => {
       'Store',
       state,
       [
-        [ValueType.Store, '2:1'],
+        [ValueType.Store, '#2:1'],
         [ValueType.Object, 3],
       ],
     ],
@@ -60,7 +60,7 @@ describe('encodeValue Preview', () => {
       'Mutable',
       mutable,
       [
-        [ValueType.Store, '3:1'],
+        [ValueType.Store, '#3:1'],
         [ValueType.Object, 3],
       ],
     ],
@@ -68,7 +68,7 @@ describe('encodeValue Preview', () => {
 
   for (const [testName, value, expectation] of encodePreviewExpectations) {
     test(testName, () => {
-      const s = encodeValue(value, false, new NodeIDMap())
+      const s = encodeValue(value, false)
       expect(s).toEqual(expectation)
       expect(JSON.parse(JSON.stringify(s))).toEqual(s)
     })
@@ -145,7 +145,7 @@ describe('encodeValue Deep', () => {
 
   for (const [testName, value, expectation] of encodeDeepExpectations) {
     test(testName, () => {
-      const s = encodeValue(value, true, new NodeIDMap())
+      const s = encodeValue(value, true)
       expect(s).toEqual(expectation)
       expect(JSON.parse(JSON.stringify(s))).toEqual(s)
     })
@@ -156,30 +156,29 @@ describe('save elements to a map', () => {
   mockLAST_ID = 0
 
   const elMapExpectations: Expectations = [
-    ['Element div', div1, [[ValueType.Element, '0:div']]],
-    ['Element a', a1, [[ValueType.Element, '1:a']]],
+    ['Element div', div1, [[ValueType.Element, '#0:div']]],
+    ['Element a', a1, [[ValueType.Element, '#1:a']]],
     [
       'Element in object',
       { el: div2 },
       [
         [ValueType.Object, { el: 1 }],
-        [ValueType.Element, '4:div'],
+        [ValueType.Element, '#4:div'],
       ],
     ],
   ]
 
-  const map = new NodeIDMap<Element>()
   for (const [testName, value, expectation] of elMapExpectations) {
     test(testName, () => {
-      const s = encodeValue(value, true, map)
+      const s = encodeValue(value, true)
       expect(s).toEqual(expectation)
       expect(JSON.parse(JSON.stringify(s))).toEqual(s)
     })
   }
   test('map containing correct values', () => {
-    expect(map.get('0')).toBe(div1)
-    expect(map.get('1')).toBe(a1)
-    expect(map.get('4')).toBe(div2)
+    expect(getObjectById('#0', ObjectType.Element)).toBe(div1)
+    expect(getObjectById('#1', ObjectType.Element)).toBe(a1)
+    expect(getObjectById('#4', ObjectType.Element)).toBe(div2)
   })
 })
 
@@ -223,7 +222,7 @@ describe('encodeValue with repeated references', () => {
 
   for (const [testName, value, expectation] of circularExpectations) {
     test(testName, () => {
-      const s = encodeValue(value, true, new NodeIDMap())
+      const s = encodeValue(value, true)
       expect(s).toEqual(expectation)
       expect(JSON.parse(JSON.stringify(s))).toEqual(s)
     })
@@ -245,71 +244,71 @@ describe('finding stores in values', () => {
     name: string,
     data: unknown,
     encoded: EncodedValue[],
-    calledWith: Parameters<Truthy<Parameters<typeof encodeValue>[3]>>[],
+    calledWith: Parameters<Truthy<Parameters<typeof encodeValue>[2]>>[],
   ][] = [
     [
       'Store',
       state1,
       [
-        [ValueType.Store, '5:1'],
+        [ValueType.Store, '#5:1'],
         [ValueType.Object, { a: 2 }],
         [ValueType.Number, 1],
       ],
-      [[state1, '5']],
+      [[state1, '#5']],
     ],
     [
       'Store in array',
       [state1],
       [
         [ValueType.Array, [1]],
-        [ValueType.Store, '5:2'],
+        [ValueType.Store, '#5:2'],
         [ValueType.Object, { a: 3 }],
         [ValueType.Number, 1],
       ],
-      [[state1, '5']],
+      [[state1, '#5']],
     ],
     [
       'referenced store',
       { state2 },
       [
         [ValueType.Object, { state2: 1 }],
-        [ValueType.Store, '6:2'],
+        [ValueType.Store, '#6:2'],
         [ValueType.Object, { ref: 3 }],
-        [ValueType.Store, '5:4'],
+        [ValueType.Store, '#5:4'],
         [ValueType.Object, { a: 5 }],
         [ValueType.Number, 1],
       ],
-      [[state2, '6']],
+      [[state2, '#6']],
     ],
     [
       'nested store',
       state3,
       [
-        [ValueType.Store, '7:1'],
+        [ValueType.Store, '#7:1'],
         [ValueType.Object, { a: 2, b: 3 }],
         [ValueType.Number, 1],
-        [ValueType.Store, '8:4'],
+        [ValueType.Store, '#8:4'],
         [ValueType.Array, [5]],
         [ValueType.String, 'foo'],
       ],
-      [[state3, '7']],
+      [[state3, '#7']],
     ],
     [
       'circular store',
       circ,
       [
-        [ValueType.Store, '9:1'],
+        [ValueType.Store, '#9:1'],
         [ValueType.Object, { a: 2, b: 0 }],
         [ValueType.Number, 1],
       ],
-      [[circ, '9']],
+      [[circ, '#9']],
     ],
   ]
 
   for (const [testName, value, expectation, calledWith] of storeExpectations) {
     test(testName, () => {
       const onStore = vi.fn()
-      const s = encodeValue(value, true, new NodeIDMap(), onStore)
+      const s = encodeValue(value, true, onStore)
       expect(s).toEqual(expectation)
       expect(JSON.parse(JSON.stringify(s))).toEqual(s)
       expect(onStore).toBeCalledTimes(calledWith.length)

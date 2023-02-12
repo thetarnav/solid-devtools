@@ -1,8 +1,9 @@
 import type { EncodedValue, PropGetterState } from '../inspector/types'
 import type { LocationAttr } from '../locator/findComponent'
-import { $SDT_ID, NodeType, ValueItemType } from './constants'
+import { NodeType, ValueItemType } from './constants'
 
-export type NodeID = string & {}
+// Additional "#" character is added to distinguish NodeID from string
+export type NodeID = `#${string}`
 
 export type ValueItemID =
   | `${ValueItemType.Signal}:${NodeID}`
@@ -23,6 +24,7 @@ export namespace Core {
   export type Owner = import('solid-js/types/reactive/signal').Owner
   export type SignalState = import('solid-js/types/reactive/signal').SignalState<unknown>
   export type Computation = import('solid-js/types/reactive/signal').Computation<unknown>
+  export type Memo = import('solid-js/types/reactive/signal').Memo<unknown>
   export type RootFunction<T> = import('solid-js/types/reactive/signal').RootFunction<T>
   export type EffectFunction = import('solid-js/types/reactive/signal').EffectFunction<unknown>
   export type Component = import('solid-js/types/reactive/signal').DevComponent<{
@@ -35,36 +37,20 @@ export namespace Core {
   }
 }
 
-declare global {
-  interface Element {
-    [$SDT_ID]?: NodeID
-  }
-}
-
 declare module 'solid-js/types/reactive/signal' {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   interface SignalState<T> {
-    [$SDT_ID]?: NodeID
     sdtName?: string
   }
   interface Owner {
-    [$SDT_ID]?: NodeID
     sdtName?: string
     sdtType?: NodeType
     sdtSubRoots?: Solid.Root[] | null
   }
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   interface Computation<Init, Next> {
-    [$SDT_ID]?: NodeID
     sdtType?: NodeType
     onValueUpdate?: Record<symbol, ValueUpdateListener>
-    onComputationUpdate?: VoidFunction
-  }
-}
-
-declare module 'solid-js/store' {
-  interface StoreNode {
-    [$SDT_ID]?: NodeID
   }
 }
 
@@ -74,12 +60,14 @@ declare module 'solid-js/store' {
 
 export namespace Solid {
   export interface SignalState {
+    graph?: Owner
     value: unknown
     observers?: Computation[] | null
     onValueUpdate?: Record<symbol, ValueUpdateListener>
   }
 
   export interface Signal extends Core.SignalState, SignalState {
+    graph?: Owner
     value: unknown
     observers: Computation[] | null
   }
@@ -91,7 +79,6 @@ export namespace Solid {
 
   export interface Store {
     value: Core.Store.StoreNode
-    [$SDT_ID]?: NodeID
   }
 
   export interface Root extends Core.Owner {
@@ -116,7 +103,6 @@ export namespace Solid {
   export interface Computation extends Core.Computation {
     name: string
     value: unknown
-    observers?: Computation[] | null
     owned: Computation[] | null
     owner: Owner | null
     sourceMap?: Record<string, Signal>
@@ -125,8 +111,6 @@ export namespace Solid {
 
   export interface Memo extends Signal, Computation {
     name: string
-    value: unknown
-    observers: Computation[] | null
   }
 
   export interface Component extends Memo {
@@ -180,12 +164,4 @@ export namespace Mapped {
     // component with a location
     location?: LocationAttr
   }
-}
-
-export type ComputationUpdate = { rootId: NodeID; id: NodeID }
-
-export type StructureUpdates = {
-  removed: NodeID[]
-  /** Record: `rootId` -- Record of updated nodes by `nodeId` */
-  updated: Partial<Record<NodeID, Partial<Record<NodeID, Mapped.Owner>>>>
 }

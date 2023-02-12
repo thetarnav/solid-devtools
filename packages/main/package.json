@@ -40,7 +40,7 @@
     ".": {
       "worker": {
         "import": {
-          "types": "./types/index.d.ts",
+          "types": "./dist/index.d.ts",
           "default": "./dist/server.js"
         },
         "require": "./dist/server.cjs"
@@ -48,40 +48,40 @@
       "browser": {
         "development": {
           "import": {
-            "types": "./types/index.d.ts",
+            "types": "./dist/index.d.ts",
             "default": "./dist/index.js"
           },
           "require": "./dist/index.cjs"
         },
         "import": {
-          "types": "./types/index.d.ts",
+          "types": "./dist/index.d.ts",
           "default": "./dist/server.js"
         },
         "require": "./dist/server.cjs"
       },
       "deno": {
         "import": {
-          "types": "./types/index.d.ts",
+          "types": "./dist/index.d.ts",
           "default": "./dist/server.js"
         },
         "require": "./dist/server.cjs"
       },
       "node": {
         "import": {
-          "types": "./types/index.d.ts",
+          "types": "./dist/index.d.ts",
           "default": "./dist/server.js"
         },
         "require": "./dist/server.cjs"
       },
       "development": {
         "import": {
-          "types": "./types/index.d.ts",
+          "types": "./dist/index.d.ts",
           "default": "./dist/server.js"
         },
         "require": "./dist/index.cjs"
       },
       "import": {
-        "types": "./types/index.d.ts",
+        "types": "./dist/index.d.ts",
         "default": "./dist/server.js"
       },
       "require": "./dist/server.cjs"
@@ -138,11 +138,12 @@
     "@babel/types": "^7.20.7",
     "@solid-devtools/debugger": "workspace:^0.19.0",
     "@solid-devtools/shared": "workspace:^0.10.6",
-    "@solid-primitives/utils": "^4.0.0",
+    "@solid-primitives/event-bus": "^1.0.0",
+    "@solid-primitives/utils": "^5.1.0",
     "type-fest": "^3.5.1"
   },
   "peerDependencies": {
-    "solid-js": "^1.6.8",
+    "solid-js": "^1.6.9",
     "vite": "^2.2.3 || ^3.0.0 || ^4.0.0"
   },
   "optionalDependencies": {

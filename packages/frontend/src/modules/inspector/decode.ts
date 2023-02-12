@@ -121,8 +121,8 @@ function decode(index: number): DecodedValue {
           ? data.length
           : Object.keys(data).length,
       )
-      const initValue: Writable<ObjectValueData['value']> =
-        typeof data === 'number' ? null : data.constructor()
+      const initValue =
+        typeof data === 'number' ? null : (data.constructor() as Writable<ObjectValueData['value']>)
       const [value, setActualValue] = createSignal<ObjectValueData['value']>(initValue)
 
       const valueObject: ObjectValueData = saveToMap(index, {

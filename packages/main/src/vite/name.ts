@@ -151,7 +151,7 @@ const namePlugin: PluginObj<any> = {
             )
           )
             continue
-          if (options.type !== 'ObjectExpression') continue
+
           options.properties.unshift(nameProperty)
           break
         }

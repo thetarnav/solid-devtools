@@ -1,130 +1,40 @@
-import { warn, whileArray } from '@solid-devtools/shared/utils'
-import { throttle } from '@solid-primitives/scheduled'
+import { warn } from '@solid-devtools/shared/utils'
 import { createRoot } from 'solid-js'
-import { clearComponentRegistry, registerComponent } from './componentRegistry'
-import { defaultWalkerMode, NodeType, TreeWalkerMode } from './constants'
-import { Core, NodeID, Solid, StructureUpdates } from './types'
-import { getOwner, isSolidRoot, markNodeID, onOwnerCleanup } from './utils'
-import {
-  ComputationUpdateHandler,
-  getClosestIncludedOwner,
-  getTopRoot,
-  walkSolidTree,
-} from './walker'
-
-// TREE WALKER MODE
-let CurrentTreeWalkerMode: TreeWalkerMode = defaultWalkerMode
-
-export function changeTreeWalkerMode(newMode: TreeWalkerMode): void {
-  CurrentTreeWalkerMode = newMode
-  updateAllRoots()
-  clearComponentRegistry()
-}
+import { clearComponentRegistry } from './componentRegistry'
+import { NodeType } from './constants'
+import { getSdtId, ObjectType } from './id'
+import { Core, NodeID, Solid } from './types'
+import { getOwner, isSolidRoot, onOwnerCleanup } from './utils'
 
 // ROOTS
 // map of all top-roots
 const RootMap = new Map<NodeID, Solid.Root>()
+export const getCurrentRoots = (): Iterable<Solid.Root> => RootMap.values()
 
-const UpdateQueue = new Set<Solid.Owner>()
-const OwnerRoots = new Map<Solid.Owner, NodeID>()
-const RemovedRoots = new Set<NodeID>()
-let UpdateAllRoots = false
-
-export type StructureUpdateHandler = (
-  structureUpdates: StructureUpdates['updated'],
-  removedIds: ReadonlySet<NodeID>,
-) => void
-
-let OnRootUpdates: StructureUpdateHandler | null = null
-export function setRootUpdatesHandler(handler: StructureUpdateHandler | null): void {
-  OnRootUpdates = handler
-  if (handler) updateAllRoots()
+let OnOwnerNeedsUpdate: ((owner: Solid.Owner, rootId: NodeID) => void) | undefined
+/** Listens to owners that have their structure changed, because of roots */
+export function setOnOwnerNeedsUpdate(fn: typeof OnOwnerNeedsUpdate) {
+  OnOwnerNeedsUpdate = fn
 }
-
-// will be set in `plugin.ts`
-let OnComputationUpdates!: (rootId: NodeID, nodeId: NodeID) => void
-export function setComputationUpdateHandler(handler: typeof OnComputationUpdates): void {
-  OnComputationUpdates = handler
-}
-const onComputationUpdate: ComputationUpdateHandler = (rootId, node, changedStructure) => {
-  // only if debugger is enabled
-  if (!OnRootUpdates) return
-  changedStructure && updateOwner(node, rootId)
-  queueMicrotask(() => {
-    if (!OnRootUpdates) return
-    OnComputationUpdates(rootId, markNodeID(node))
-  })
-}
-
-function forceFlushRootUpdateQueue(): void {
-  // $_on_root_updates being null means debugger is disabled
-  if (OnRootUpdates) {
-    const updated: StructureUpdates['updated'] = {}
-
-    const [owners, getRootId] = UpdateAllRoots
-      ? [RootMap.values(), (owner: Solid.Owner) => markNodeID(owner)]
-      : [UpdateQueue, (owner: Solid.Owner) => OwnerRoots.get(owner)!]
-    UpdateAllRoots = false
-
-    for (const owner of owners) {
-      const rootId = getRootId(owner)
-      const tree = walkSolidTree(owner, {
-        rootId,
-        mode: CurrentTreeWalkerMode,
-        onComputationUpdate,
-        registerComponent,
-      })
-      const map = updated[rootId]
-      if (map) map[tree.id] = tree
-      else updated[rootId] = { [tree.id]: tree }
-    }
-
-    OnRootUpdates(updated, RemovedRoots)
-  }
-  UpdateQueue.clear()
-  flushRootUpdateQueue.clear()
-  RemovedRoots.clear()
-  OwnerRoots.clear()
-}
-const flushRootUpdateQueue = throttle(forceFlushRootUpdateQueue, 250)
-
-function updateOwner(node: Solid.Owner, topRootId: NodeID): void {
-  UpdateQueue.add(node)
-  OwnerRoots.set(node, topRootId)
-  flushRootUpdateQueue()
-}
-
-function updateClosestIncludedOwner(node: Solid.Owner, topRootId: NodeID): void {
-  const closestIncludedOwner = getClosestIncludedOwner(node, CurrentTreeWalkerMode)
-  closestIncludedOwner && updateOwner(closestIncludedOwner, topRootId)
-}
-
-export function updateAllRoots(): void {
-  UpdateAllRoots = true
-  flushRootUpdateQueue()
-}
-
-export function forceUpdateAllRoots(): void {
-  UpdateAllRoots = true
-  queueMicrotask(forceFlushRootUpdateQueue)
+let OnRootRemoved: ((rootId: NodeID) => void) | undefined
+/** Listens to roots that were removed */
+export function setOnRootRemoved(fn: typeof OnRootRemoved) {
+  OnRootRemoved = fn
 }
 
 export function createTopRoot(owner: Solid.Root): void {
-  const rootId = markNodeID(owner)
+  const rootId = getSdtId(owner, ObjectType.Owner)
   RootMap.set(rootId, owner)
-  updateOwner(owner, rootId)
+  OnOwnerNeedsUpdate?.(owner, rootId)
 }
 
 function cleanupRoot(root: Solid.Root): void {
-  const rootId = markNodeID(root)
+  const rootId = getSdtId(root, ObjectType.Owner)
   root.isDisposed = true
   changeRootAttachment(root, null)
 
   const wasTarcked = RootMap.delete(rootId)
-  if (wasTarcked) {
-    RemovedRoots.add(rootId)
-    flushRootUpdateQueue()
-  }
+  if (wasTarcked) OnRootRemoved?.(rootId)
 }
 
 /**
@@ -137,7 +47,7 @@ function changeRootAttachment(root: Solid.Root, newParent: Solid.Owner | null): 
   if (root.sdtAttached) {
     root.sdtAttached.sdtSubRoots!.splice(root.sdtAttached.sdtSubRoots!.indexOf(root), 1)
     topRoot = getTopRoot(root.sdtAttached)
-    if (topRoot) updateClosestIncludedOwner(root.sdtAttached, markNodeID(topRoot))
+    if (topRoot) OnOwnerNeedsUpdate?.(root.sdtAttached, getSdtId(topRoot, ObjectType.Owner))
   }
 
   if (newParent) {
@@ -146,7 +56,7 @@ function changeRootAttachment(root: Solid.Root, newParent: Solid.Owner | null): 
     else newParent.sdtSubRoots = [root]
 
     if (topRoot === undefined) topRoot = getTopRoot(newParent)
-    if (topRoot) updateClosestIncludedOwner(newParent, markNodeID(topRoot))
+    if (topRoot) OnOwnerNeedsUpdate?.(newParent, getSdtId(topRoot, ObjectType.Owner))
   } else {
     delete root.sdtAttached
   }
@@ -165,7 +75,7 @@ function changeRootAttachment(root: Solid.Root, newParent: Solid.Owner | null): 
  * });
  */
 export function attachDebugger(_owner: Core.Owner = getOwner()!): void {
-  let owner = _owner as Solid.Owner
+  let owner = _owner as Solid.Owner | undefined | null
   if (!owner) return warn('reatachOwner helper should be called synchronously in a reactive owner.')
 
   // find all the roots in the owner tree (walking up the tree)
@@ -176,13 +86,13 @@ export function attachDebugger(_owner: Core.Owner = getOwner()!): void {
       // INTERNAL | disposed
       if (owner.isInternal || owner.isDisposed) return
       // already attached
-      if (RootMap.has(markNodeID(owner))) {
+      if (RootMap.has(getSdtId(owner, ObjectType.Owner))) {
         isFirstTopLevel = false
         break
       }
       roots.push(owner)
     }
-    owner = owner.owner!
+    owner = owner.owner
   }
 
   // attach roots in reverse order (from top to bottom)
@@ -273,16 +183,16 @@ export const createInternalRoot: typeof createRoot = (fn, detachedOwner) => {
 }
 
 /**
- * Looks though the children and subroots of the given root to find owner of given {@link id}.
+ * Finds the top-level root owner of a given owner.
  */
-export const findOwnerById = (rootId: NodeID, id: NodeID): Solid.Owner | undefined => {
-  const root = RootMap.get(rootId)
-  if (!root) return
-  return whileArray([root], (owner: Solid.Owner, toCheck) => {
-    if (markNodeID(owner) === id) return owner
-    if (owner.owned) toCheck.push.apply(toCheck, owner.owned)
-    if (owner.sdtSubRoots) toCheck.push.apply(toCheck, owner.sdtSubRoots)
-  })
+export function getTopRoot(owner: Solid.Owner): Solid.Root | null {
+  let root: Solid.Root | null = null
+  do {
+    if (isSolidRoot(owner) && !owner.isInternal && !owner.isDisposed) root = owner
+    owner = owner.owner!
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+  } while (owner)
+  return root
 }
 
 /**
@@ -291,7 +201,7 @@ export const findOwnerById = (rootId: NodeID, id: NodeID): Solid.Owner | undefin
  * @param owner
  * @returns `{ owner: SolidOwner; root: SolidRoot }`
  */
-function findClosestAliveParent(
+export function findClosestAliveParent(
   owner: Solid.Owner,
 ): { owner: Solid.Owner; root: Solid.Root } | { owner: null; root: null } {
   let disposed: Solid.Root | null = null
@@ -305,5 +215,5 @@ function findClosestAliveParent(
     }
   }
   if (!closestAliveRoot) return { owner: null, root: null }
-  return { owner: disposed?.owner ?? owner.owner!, root: closestAliveRoot }
+  return { owner: (disposed ?? owner).owner!, root: closestAliveRoot }
 }

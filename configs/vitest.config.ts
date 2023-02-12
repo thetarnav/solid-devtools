@@ -24,8 +24,13 @@ export const resolveConfig: UserConfig['resolve'] = {
   },
 }
 
-export const vitestFullConfig = defineConfig({
-  plugins: [solid()],
-  test: testConfig,
-  resolve: resolveConfig,
-})
+export const vitestFullConfig = (patch?: (config: UserConfig) => void) =>
+  defineConfig(() => {
+    const config: UserConfig = {
+      plugins: [solid()],
+      test: testConfig,
+      resolve: resolveConfig,
+    }
+    patch?.(config)
+    return config
+  })

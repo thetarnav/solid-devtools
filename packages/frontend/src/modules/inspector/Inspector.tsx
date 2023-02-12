@@ -1,49 +1,31 @@
 import { useController } from '@/controller'
-import { Badge, Icon, Scrollable } from '@/ui'
-import { OwnerName } from '@/ui/components/Owner'
+import { SidePanelCtx } from '@/SidePanel'
+import { Badge, Scrollable } from '@/ui'
 import { NodeType, NODE_TYPE_NAMES, PropGetterState } from '@solid-devtools/debugger/types'
 import { Entries } from '@solid-primitives/keyed'
-import { Component, createMemo, For, JSX, Show } from 'solid-js'
+import { batch, Component, createMemo, For, JSX, Show, useContext } from 'solid-js'
 import * as styles from './inspector.css'
 import { ValueNode } from './ValueNode'
 
-export default function Details() {
-  const { inspector } = useController()
-  const { details, inspectedNode, openComponentLocation, setInspectedNode } = inspector
-
+function ListSignals<T>(props: { when: T; title: JSX.Element; children: JSX.Element }) {
   return (
-    <Show when={inspectedNode()}>
-      <div class={styles.root}>
-        <header class={styles.header}>
-          <OwnerName name={inspectedNode()!.name} type={inspectedNode()!.type} isTitle />
-          <div class={styles.actions.container}>
-            {/* <button class={styles.actions.button}>
-              <Icon.Eye class={styles.actions.icon} />
-            </button> */}
-            {details.location && (
-              <button class={styles.actions.button} onClick={openComponentLocation}>
-                <Icon.Code class={styles.actions.icon} />
-              </button>
-            )}
-            <button class={styles.actions.button} onClick={() => setInspectedNode(null)}>
-              <Icon.Close class={styles.actions.icon} />
-            </button>
-          </div>
-        </header>
-        <Scrollable>
-          <DetailsContent />
-        </Scrollable>
+    <Show when={props.when}>
+      <div>
+        <h2 class={styles.h2}>{props.title}</h2>
+        <ul>{props.children}</ul>
       </div>
     </Show>
   )
 }
 
-const DetailsContent: Component = () => {
-  const { inspector } = useController()
-  const { details, inspectedNode } = inspector
+const InspectorView: Component = () => {
+  const { inspector, hovered } = useController()
+  const { state } = inspector
 
-  const allSignals = createMemo(() => {
-    const list = Object.values(details.signals)
+  const { setOpenPanel } = useContext(SidePanelCtx)!
+
+  const valueItems = createMemo(() => {
+    const list = Object.values(state.signals)
     const memos: typeof list = []
     const signals: typeof list = []
     const stores: typeof list = []
@@ -56,73 +38,116 @@ const DetailsContent: Component = () => {
   })
 
   return (
-    <div class={styles.content}>
-      <ListSignals
-        when={details.props && Object.keys(details.props.record).length}
-        title={<>Props {details.props!.proxy && <Badge>PROXY</Badge>}</>}
-      >
-        <Entries of={details.props!.record}>
-          {(name, value) => (
-            <ValueNode
-              name={name}
-              value={value().value}
-              extended={value().selected}
-              onClick={() => inspector.inspectValueItem(value())}
-              onElementHover={inspector.toggleHoveredElement}
-              isSignal={value().getter !== false}
-              isStale={value().getter === PropGetterState.Stale}
-            />
-          )}
-        </Entries>
-      </ListSignals>
-      {(['stores', 'signals', 'memos'] as const).map(type => (
-        <ListSignals when={allSignals()[type].length} title={type}>
-          <For each={allSignals()[type]}>
-            {signal => (
+    <Scrollable>
+      <div class={styles.content}>
+        <ListSignals
+          when={state.props && Object.keys(state.props.record).length}
+          title={<>Props {state.props!.proxy && <Badge>PROXY</Badge>}</>}
+        >
+          <Entries of={state.props!.record}>
+            {(name, value) => (
               <ValueNode
-                name={signal.name}
-                value={signal.value}
-                extended={signal.selected}
-                onClick={() => inspector.inspectValueItem(signal)}
-                onElementHover={inspector.toggleHoveredElement}
-                isSignal={type !== 'stores'}
+                name={name}
+                value={value().value}
+                isExtended={value().extended}
+                onClick={() => inspector.inspectValueItem(value())}
+                onElementHover={hovered.toggleHoveredElement}
+                isSignal={value().getter !== false}
+                isStale={value().getter === PropGetterState.Stale}
+              />
+            )}
+          </Entries>
+        </ListSignals>
+        <ListSignals when={valueItems().stores.length} title="Stores">
+          <For each={valueItems().stores}>
+            {store => (
+              <ValueNode
+                name={store.name}
+                value={store.value}
+                isExtended={store.extended}
+                onClick={() => inspector.inspectValueItem(store)}
+                onElementHover={hovered.toggleHoveredElement}
               />
             )}
           </For>
         </ListSignals>
-      ))}
-      <Show when={details.value} keyed>
-        {valueItem => (
+        <ListSignals when={valueItems().signals.length} title="Signals">
+          <For each={valueItems().signals}>
+            {signal => (
+              <ValueNode
+                name={signal.name}
+                value={signal.value}
+                onClick={() => inspector.inspectValueItem(signal)}
+                onElementHover={hovered.toggleHoveredElement}
+                isExtended={signal.extended}
+                isInspected={inspector.isInspected(signal.id)}
+                isSignal
+                actions={[
+                  {
+                    icon: 'Graph',
+                    title: 'Open in Graph panel',
+                    onClick() {
+                      batch(() => {
+                        inspector.setInspectedSignal(signal.id)
+                        setOpenPanel('dgraph')
+                      })
+                    },
+                  },
+                ]}
+              />
+            )}
+          </For>
+        </ListSignals>
+        <ListSignals when={valueItems().memos.length} title="Memos">
+          <For each={valueItems().memos}>
+            {memo => (
+              <ValueNode
+                name={memo.name}
+                value={memo.value}
+                isExtended={memo.extended}
+                onClick={() => inspector.inspectValueItem(memo)}
+                onElementHover={hovered.toggleHoveredElement}
+                isSignal
+                actions={[
+                  {
+                    icon: 'Graph',
+                    title: 'Open in Graph panel',
+                    onClick() {
+                      batch(() => {
+                        inspector.setInspectedOwner(memo.id)
+                        setOpenPanel('dgraph')
+                      })
+                    },
+                  },
+                ]}
+              />
+            )}
+          </For>
+        </ListSignals>
+        <Show when={state.value} keyed>
+          {valueItem => (
+            <div>
+              <h2 class={styles.h2}>{state.type ? NODE_TYPE_NAMES[state.type] : 'Owner'}</h2>
+              <ValueNode
+                name="value"
+                value={valueItem.value}
+                isExtended={valueItem.extended}
+                onClick={() => inspector.inspectValueItem(valueItem)}
+                onElementHover={hovered.toggleHoveredElement}
+                isSignal
+              />
+            </div>
+          )}
+        </Show>
+        {state.location && (
           <div>
-            <h2 class={styles.h2}>{NODE_TYPE_NAMES[inspectedNode()!.type]}</h2>
-            <ValueNode
-              name="value"
-              value={valueItem.value}
-              extended={valueItem.selected}
-              onClick={() => inspector.inspectValueItem(valueItem)}
-              onElementHover={inspector.toggleHoveredElement}
-              isSignal
-            />
+            <h2 class={styles.h2}>Location</h2>
+            <p class={styles.location}>{state.location}</p>
           </div>
         )}
-      </Show>
-      {details.location && (
-        <div>
-          <h2 class={styles.h2}>Location</h2>
-          <p class={styles.location}>{details.location}</p>
-        </div>
-      )}
-    </div>
+      </div>
+    </Scrollable>
   )
 }
 
-function ListSignals<T>(props: { when: T; title: JSX.Element; children: JSX.Element }) {
-  return (
-    <Show when={props.when}>
-      <div>
-        <h2 class={styles.h2}>{props.title}</h2>
-        <ul>{props.children}</ul>
-      </div>
-    </Show>
-  )
-}
+export default InspectorView

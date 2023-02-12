@@ -5,15 +5,22 @@ import { NodeType } from '@solid-devtools/debugger/types'
 import { createHover } from '@solid-devtools/shared/primitives'
 import { createElementSize } from '@solid-primitives/resize-observer'
 import { useRemSize } from '@solid-primitives/styles'
-import { Component } from 'solid-js'
+import { Component, createMemo } from 'solid-js'
 import * as styles from './path.css'
+import { useStructure } from './Structure'
 
 export const OwnerPath: Component = () => {
-  const { structure, toggleHoveredNode, setInspectedNode, inspector } = useController()
+  const { inspector, hovered } = useController()
+  const structure = useStructure()
 
   const rem = useRemSize()
   const containerSize = createElementSize(() => container)
   const expandable = () => (containerSize.height ?? 0) > rem() * styles.MIN_PATH_HEIGHT_IN_REM
+
+  const path = createMemo(() => {
+    const node = structure.inspectedNode()
+    return node ? structure.getNodePath(node) : []
+  })
 
   let container!: HTMLDivElement
   return (
@@ -25,8 +32,10 @@ export const OwnerPath: Component = () => {
           </div>
         )}
         <div class={styles.container} ref={container}>
-          {inspector.details.path.map(node => {
-            const hoverProps = createHover(hovering => toggleHoveredNode(node.id, hovering))
+          {path().map(node => {
+            const hoverProps = createHover(hovering =>
+              hovered.toggleHoveredNode(node.id, 'node', hovering),
+            )
             return (
               <>
                 <div class={styles.divider}>
@@ -34,9 +43,9 @@ export const OwnerPath: Component = () => {
                 </div>
                 <div
                   class={styles.item}
-                  data-hovered={structure.isHovered(node.id)}
+                  data-hovered={hovered.isNodeHovered(node.id)}
                   {...hoverProps}
-                  onClick={() => setInspectedNode(node)}
+                  onClick={() => inspector.setInspectedOwner(node.id)}
                 >
                   <div class={styles.highlight} />
                   {node.type === NodeType.Component || node.type === NodeType.Element ? (

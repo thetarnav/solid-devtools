@@ -1,11 +1,10 @@
 import { warn } from '@solid-devtools/shared/utils'
+import { Listen } from '@solid-primitives/event-bus'
 import { scheduleIdle, throttle } from '@solid-primitives/scheduled'
-import { Accessor, createEffect, onCleanup, untrack } from 'solid-js'
-import { DebuggerEventHub } from '../main/plugin'
-import { findOwnerById } from '../main/roots'
-import { Core, Mapped, NodeID, Solid, ValueItemID } from '../main/types'
+import { Accessor, createEffect } from 'solid-js'
+import { DebuggerEmitter, InspectedState } from '../main'
+import { Mapped, Solid, ValueItemID } from '../main/types'
 import { makeSolidUpdateListener } from '../main/update'
-import { NodeIDMap } from '../main/utils'
 import {
   clearOwnerObservers,
   collectOwnerDetails,
@@ -18,19 +17,18 @@ import { InspectorUpdate, InspectorUpdateMap, PropGetterState } from './types'
 
 export * from './types'
 
-export type SetInspectedNodeData = null | { rootId: NodeID; nodeId: NodeID }
 export type ToggleInspectedValueData = { id: ValueItemID; selected: boolean }
 
 /**
  * Plugin module
  */
-export function createInspector(
-  debuggerEnabled: Accessor<boolean>,
-  { eventHub }: { eventHub: DebuggerEventHub },
-) {
+export function createInspector(props: {
+  hub: DebuggerEmitter
+  enabled: Accessor<boolean>
+  listenToInspectedNodeChange: Listen<InspectedState>
+}) {
   let lastDetails: Mapped.OwnerDetails | undefined
-  let inspectedOwner: Solid.Owner | undefined
-  let nodeIdMap = new NodeIDMap<Element | Core.Store.StoreNode>()
+  let inspectedOwner: Solid.Owner | null
   let valueMap = new ValueNodeMap()
   const propsMap: ObservedPropsMap = new WeakMap()
   /** compare props object with the previous one to see whats changed */
@@ -57,7 +55,6 @@ export function createInspector(
           const encoded = encodeValue(
             node.getValue(),
             selected,
-            nodeIdMap,
             selected && (storeNode => node.addStoreObserver(observeStoreNode(storeNode))),
           )
           batchedUpdates.push([toggleChange === null ? 'value' : 'inspectToggle', [id, encoded]])
@@ -71,7 +68,7 @@ export function createInspector(
             [
               storeProperty,
               typeof data === 'object'
-                ? encodeValue(data.value, true, nodeIdMap, undefined, true)
+                ? encodeValue(data.value, true, undefined, true)
                 : data ?? null,
             ],
           ])
@@ -91,7 +88,7 @@ export function createInspector(
         }
 
         // Emit updates
-        batchedUpdates.length && eventHub.emit('InspectorUpdate', batchedUpdates)
+        batchedUpdates.length && props.hub.output.emit('InspectorUpdate', batchedUpdates)
       })
 
       const flushPropsCheck = throttle(flush, 200)
@@ -135,34 +132,29 @@ export function createInspector(
       }
     })()
 
-  function setInspectedOwner(owner: Solid.Owner | undefined) {
+  props.listenToInspectedNodeChange(inspectedState => {
+    const owner = inspectedState.owner ?? null
     inspectedOwner && clearOwnerObservers(inspectedOwner, propsMap)
     inspectedOwner = owner
-    checkProxyProps = null
-    lastDetails = undefined
     valueMap.reset()
     clearUpdates()
-    if (!owner) return
 
-    untrack(() => {
-      const result = collectOwnerDetails(owner, {
-        onValueUpdate: pushValueUpdate,
-        onPropStateChange: pushPropState,
-        observedPropsMap: propsMap,
-      })
-      eventHub.emit('InspectedNodeDetails', result.details)
-      valueMap = result.valueMap
-      nodeIdMap = result.nodeIdMap
-      lastDetails = result.details
-      checkProxyProps = result.checkProxyProps || null
-    })
-  }
+    const result = owner
+      ? collectOwnerDetails(owner, {
+          onValueUpdate: pushValueUpdate,
+          onPropStateChange: pushPropState,
+          observedPropsMap: propsMap,
+        })
+      : null
+
+    props.hub.output.emit('InspectedNodeDetails', result ? result.details : null)
+    if (result) valueMap = result.valueMap
+    lastDetails = result ? result.details : undefined
+    checkProxyProps = (result && result.checkProxyProps) || null
+  })
 
   createEffect(() => {
-    if (!debuggerEnabled()) return
-
-    // Clear the inspected owner when the debugger is disabled
-    onCleanup(() => setInspectedOwner(undefined))
+    if (!props.enabled()) return
 
     // Check if proxy props have changed keys after each update queue
     makeSolidUpdateListener(() => checkProxyProps && triggerPropsCheck())
@@ -170,19 +162,11 @@ export function createInspector(
 
   return {
     getLastDetails: () => lastDetails,
-    setInspectedNode(data: SetInspectedNodeData) {
-      if (!data) return setInspectedOwner(undefined)
-      setInspectedOwner(findOwnerById(data.rootId, data.nodeId))
-    },
     toggleValueNode({ id, selected }: ToggleInspectedValueData): void {
       const node = valueMap.get(id)
       if (!node) return warn('Could not find value node:', id)
       node.setSelected(selected)
       pushInspectToggle(id, selected)
-    },
-    getElementById(id: NodeID): HTMLElement | undefined {
-      const el = nodeIdMap.get(id)
-      if (el instanceof HTMLElement) return el
     },
   }
 }

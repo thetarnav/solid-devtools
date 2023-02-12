@@ -49,10 +49,10 @@
     "@solid-primitives/cursor": "^0.0.103",
     "@solid-primitives/event-listener": "^2.2.3",
     "@solid-primitives/media": "^2.0.3",
-    "@solid-primitives/utils": "^4.0.0"
+    "@solid-primitives/utils": "^5.1.0"
   },
   "peerDependencies": {
-    "solid-js": "^1.6.8"
+    "solid-js": "^1.6.9"
   },
   "packageManager": "pnpm@7.20.0",
   "devDependencies": {

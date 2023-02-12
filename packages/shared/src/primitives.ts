@@ -6,30 +6,27 @@ import {
   AnyFunction,
   AnyStatic,
   entries,
-  onRootCleanup,
-  SetterValue,
+  SetterParam,
   StaticStoreSetter,
+  tryOnCleanup,
 } from '@solid-primitives/utils'
 import {
   $TRACK,
   Accessor,
+  AccessorArray,
   batch,
   createMemo,
   createSignal,
+  EffectFunction,
   getListener,
   getOwner,
+  MemoOptions,
+  NoInfer,
   onCleanup,
   Signal,
   SignalOptions,
   untrack,
 } from 'solid-js'
-import type {
-  AccessorArray,
-  EffectFunction,
-  MemoOptions,
-  NoInfer,
-  OnEffectFunction,
-} from 'solid-js/types/reactive/signal'
 import { Primitive } from 'type-fest'
 
 export type WritableDeep<T> = 0 extends 1 & T
@@ -85,7 +82,7 @@ export function createConsumers(
     enabled,
     consumer => {
       setConsumers(p => [...p, consumer])
-      onRootCleanup(() => setConsumers(p => p.filter(c => c !== consumer)))
+      tryOnCleanup(() => setConsumers(p => p.filter(c => c !== consumer)))
     },
   ]
 }
@@ -146,17 +143,17 @@ export function makeHoverElementListener(onHover: (el: HTMLElement | null) => vo
  */
 export function defer<S, Next extends Prev, Prev = Next>(
   deps: AccessorArray<S> | Accessor<S>,
-  fn: OnEffectFunction<S, undefined | NoInfer<Prev>, Next>,
+  fn: (input: S, prevInput: S, prev: undefined | NoInfer<Prev>) => Next,
   initialValue: Next,
 ): EffectFunction<undefined | NoInfer<Next>, NoInfer<Next>>
 export function defer<S, Next extends Prev, Prev = Next>(
   deps: AccessorArray<S> | Accessor<S>,
-  fn: OnEffectFunction<S, undefined | NoInfer<Prev>, Next>,
+  fn: (input: S, prevInput: S, prev: undefined | NoInfer<Prev>) => Next,
   initialValue?: undefined,
 ): EffectFunction<undefined | NoInfer<Next>>
 export function defer<S, Next extends Prev, Prev = Next>(
   deps: AccessorArray<S> | Accessor<S>,
-  fn: OnEffectFunction<S, undefined | NoInfer<Prev>, Next>,
+  fn: (input: S, prevInput: S, prev: undefined | NoInfer<Prev>) => Next,
   initialValue?: Next,
 ): EffectFunction<undefined | NoInfer<Next>> {
   const isArray = Array.isArray(deps)
@@ -170,6 +167,7 @@ export function defer<S, Next extends Prev, Prev = Next>(
     } else input = deps()
     if (shouldDefer) {
       shouldDefer = false
+      prevInput = input
       return initialValue
     }
     const result = untrack(() => fn(input, prevInput, prevValue))
@@ -228,8 +226,8 @@ export function createShallowStore<T extends Readonly<AnyStatic>>(
 
   // TODO handle arrays
 
-  const setValue = <K extends keyof T>(key: K, setterParam: SetterValue<any>): void => {
-    const saved = signals[key]
+  const setValue = (key: keyof T, setterParam: SetterParam<any>): void => {
+    const saved = signals[key] as Signal<any> | undefined
     const newValue = saved ? saved[1](setterParam) : accessWith(setterParam, storeValue[key])
     if (newValue === void 0) {
       delete storeValue[key]
@@ -239,9 +237,9 @@ export function createShallowStore<T extends Readonly<AnyStatic>>(
     }
   }
 
-  const setter = (a: ((prev: T) => Partial<T>) | Partial<T> | keyof T, b?: SetterValue<any>) => {
+  const setter = (a: ((prev: T) => Partial<T>) | Partial<T> | keyof T, b?: SetterParam<any>) => {
     batch(() => {
-      if (a !== null && (typeof a === 'object' || typeof a === 'function'))
+      if (typeof a === 'object' || typeof a === 'function')
         untrack(() => {
           for (const [key, newValue] of entries(accessWith(a, store) as Partial<T>))
             setValue(key, () => newValue)

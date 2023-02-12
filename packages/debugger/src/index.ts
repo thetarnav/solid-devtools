@@ -7,6 +7,7 @@ export const Debugger: ParentComponent = props => {
 }
 
 export { markComponentLoc } from './locator'
+export { useDebugger, useLocator } from './main'
 export {
   attachDebugger,
   createInternalRoot,
@@ -36,7 +37,3 @@ export {
   onParentCleanup,
 } from './main/utils'
 export * from './types'
-
-import plugin from './main/plugin'
-export const useDebugger = plugin.useDebugger
-export const useLocator = plugin.useLocator

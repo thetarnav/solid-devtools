@@ -411,7 +411,9 @@ export function debugSignals(
  * ```
  */
 export function debugOwnerSignals(owner?: Core.Owner, options: DebugSignalOptions = {}) {
+  // ? why assign, why solidOwner? is the param just ignored?
   owner = getOwner()!
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
   if (!owner) return console.warn('debugOwnerState found no Owner')
 
   if (markDebugNode(owner, 'signals') === true) return

@@ -1,35 +1,19 @@
-import { media, mobile, spacing, transition, vars } from '@/ui/theme'
-import { createVar, style, StyleRule } from '@vanilla-extract/css'
+import { media, mobile, transition, vars } from '@/ui/theme'
+import { createVar, style } from '@vanilla-extract/css'
 import { CSSVarFunction } from '@vanilla-extract/private'
 
-const minSize = spacing[36]
-const splitSize = '1px'
+export const MIN_SIZE_IN_REM = 8
+export const MIN_SIZE = `${MIN_SIZE_IN_REM}rem`
+export const SPLIT_SIZE = '1px'
 export const progress: CSSVarFunction = createVar()
-
-const gridTemplate: StyleRule['gridTemplateRows'] = `minmax(${minSize}, ${progress}) ${splitSize} minmax(${minSize}, 1fr)`
 
 export const container = style({
   display: 'grid',
   gridAutoFlow: 'column',
   height: '100%',
   width: '100%',
-  gridTemplateColumns: `1fr`,
-  selectors: {
-    '&[data-open="true"]': {
-      gridTemplateColumns: gridTemplate,
-      gridTemplateRows: '100%',
-    },
-  },
-  ...media({
-    [mobile]: {
-      selectors: {
-        '&[data-open="true"]': {
-          gridTemplateColumns: `100%`,
-          gridTemplateRows: gridTemplate,
-        },
-      },
-    },
-  }),
+  gridTemplateColumns: `100%`,
+  gridTemplateRows: `100%`,
 })
 
 export const content = style({
@@ -46,7 +30,7 @@ export const split = style({
 export const splitHandle = style({
   position: 'absolute',
   zIndex: 999,
-  inset: `0 -2px`,
+  inset: `0 -3px`,
   cursor: 'col-resize',
   userSelect: 'none',
   ':after': {
@@ -60,7 +44,7 @@ export const splitHandle = style({
   ...media({
     [mobile]: {
       cursor: 'row-resize',
-      inset: `-2px 0`,
+      inset: `-3px 0`,
       ':after': {
         inset: `1px 0`,
       },

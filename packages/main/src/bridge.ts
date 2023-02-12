@@ -1,127 +1,89 @@
-import type {
-  ComputationUpdate,
-  HighlightElementPayload,
-  InspectorUpdate,
-  Mapped,
-  NodeID,
-  SetInspectedNodeData,
-  StructureUpdates,
-  ToggleInspectedValueData,
-  TreeWalkerMode,
-} from '@solid-devtools/debugger/types'
-
 export type Versions = { client: string; expectedClient: string; extension: string }
 
-export namespace Messages {
-  export interface General {
-    // client -> content -> devtools.html
-    // the `string` payload is the main version
-    SolidOnPage: {}
-    ClientConnected: string
-    Versions: Versions
+export interface GeneralMessages {
+  // client -> content -> devtools.html
+  // the `string` payload is the main version
+  SolidOnPage: void
+  ClientConnected: string
+  Versions: Versions
 
-    /** devtools -> client: the chrome devtools got opened or entirely closed */
-    DevtoolsOpened: {}
-    DevtoolsClosed: {}
+  /** devtools -> client: the chrome devtools got opened or entirely closed */
+  DevtoolsOpened: void
+  DevtoolsClosed: void
 
-    ResetPanel: {}
-  }
-
-  export interface Client {
-    StructureUpdate: StructureUpdates
-    ComputationUpdates: ComputationUpdate[]
-    InspectorUpdate: InspectorUpdate[]
-    /** send component clicked with the locator to the extension */
-    ClientInspectedNode: NodeID
-    /** send updates to the owner details */
-    InspectedDetails: Mapped.OwnerDetails
-    /** send hovered (by the locator) owner to the extension */
-    HoverComponent: { nodeId: NodeID; state: boolean }
-
-    LocatorMode: boolean
-  }
-
-  export interface Extension {
-    /** force the debugger to walk the whole tree and send it */
-    ForceUpdate: {}
-    /** request for node/signal/prop details — subscribe or unsubscribe */
-    InspectValue: ToggleInspectedValueData
-    InspectNode: SetInspectedNodeData
-    HighlightElement: HighlightElementPayload
-    /** user is selecting component from the page */
-    LocatorMode: boolean
-    /** open the location of the inspected component in the code editor */
-    OpenLocation: {}
-    /** toggle treeview mode */
-    TreeViewMode: TreeWalkerMode
-  }
+  ResetPanel: void
 }
 
-export type PostMessageFn<M extends { [K in string]: any } = {}> = <
-  K extends keyof (Messages.General & M),
+export type { Debugger } from '@solid-devtools/debugger/types'
+
+export type PostMessageFn<M extends Record<string, any> = {}> = <
+  K extends keyof (GeneralMessages & M),
 >(
   type: K,
-  ..._: {} extends (Messages.General & M)[K] ? [] : [payload: (Messages.General & M)[K]]
+  ..._: void extends (GeneralMessages & M)[K]
+    ? [payload?: (GeneralMessages & M)[K]]
+    : [payload: (GeneralMessages & M)[K]]
 ) => void
 
-export type OnMessageFn<M extends { [K in string]: any } = {}> = <
-  K extends keyof (Messages.General & M),
->(
-  id: K,
-  handler: (payload: (Messages.General & M)[K]) => void,
-) => VoidFunction
+export type OnMessageFn<M extends Record<string, any> = {}> = {
+  <K extends keyof (GeneralMessages & M)>(
+    name: K,
+    handler: (payload: (GeneralMessages & M)[K]) => void,
+  ): VoidFunction
+  <K extends keyof (GeneralMessages & M)>(
+    handler: (e: { name: K; details: (GeneralMessages & M)[K] }) => void,
+  ): VoidFunction
+}
 
-export const makePostMessage: <M extends { [K in string]: any }>() => PostMessageFn<M> =
-  () => (id, payload?: any) =>
-    postMessage({ id, payload }, '*')
-
-let onAllMessages: ((data: { id: string; payload: any }) => void) | undefined
+export const makePostMessage: <M extends Record<string, any>>() => PostMessageFn<M> =
+  () => (name, details?: any) =>
+    postMessage({ name, details }, '*')
 
 const listeners: {
   [K in any]?: ((payload: any) => void)[]
 } = {}
 
 /**
- * Important ot call this if you want to use {@link fromContent}
+ * Important ot call this if you want to use
  */
 export function startListeningWindowMessages() {
   if (typeof window === 'undefined') return
   addEventListener('message', event => {
-    const id = event.data?.id
-    if (typeof id !== 'string') return
-    const arr = listeners[id]
-    if (arr) arr.forEach(f => f(event.data.payload as never))
-    else if (onAllMessages) onAllMessages(event.data)
+    const name = event.data?.name
+    if (typeof name !== 'string') return
+    const arr = listeners[name]
+    if (arr) arr.forEach(f => f(event.data.details as never))
+    const arr2 = listeners['*']
+    if (arr2) arr2.forEach(f => f({ name, details: event.data.details }))
   })
 }
 
-export const makeMessageListener: <M extends { [K in string]: any }>() => OnMessageFn<M> =
-  () => (id, handler) => {
-    let arr = listeners[id]
-    if (!arr) arr = listeners[id] = []
+export function makeMessageListener<M extends Record<string, any>>(): OnMessageFn<M> {
+  return (...args: [any, any] | [any]) => {
+    const name = typeof args[0] === 'string' ? args[0] : '*'
+    const handler = typeof args[0] === 'string' ? args[1] : args[0]
+    let arr = listeners[name]
+    if (!arr) arr = listeners[name] = []
     arr.push(handler)
-    return () => (listeners[id] = arr!.filter(l => l !== handler) as any)
+    return () => (listeners[name] = arr!.filter(l => l !== handler) as any)
   }
-
-export type ForwardPayload = { forwarding: true; id: string; payload: any }
-
-export const onAllClientMessages = (fn: (data: { id: string; payload: any }) => void) => {
-  onAllMessages = fn
 }
+
+export type ForwardPayload = { forwarding: true; name: string; details: any }
 
 export const isForwardMessage = (data: any): data is ForwardPayload =>
-  typeof data === 'object' && data !== null && data.forwarding === true && 'id' in data
+  typeof data === 'object' && data !== null && data.forwarding === true && 'name' in data
 
 export const forwardMessageToWindow = (message: ForwardPayload) => {
-  postMessage({ id: message.id, payload: message.payload }, '*')
+  postMessage({ name: message.name, details: message.details }, '*')
 }
 
-export function once<M extends { [K in string]: any }, K extends keyof (Messages.General & M)>(
+export function once<M extends Record<string, any>, K extends keyof (GeneralMessages & M)>(
   method: OnMessageFn<M>,
-  id: K,
-  handler: (payload: (Messages.General & M)[K]) => void,
+  name: K,
+  handler: (details: (GeneralMessages & M)[K]) => void,
 ): VoidFunction {
-  const unsub = method(id, (...cbArgs) => {
+  const unsub = method(name, (...cbArgs) => {
     unsub()
     return handler(...cbArgs)
   })

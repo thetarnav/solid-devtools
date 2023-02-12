@@ -2,9 +2,33 @@ import { Icon, Splitter } from '@/ui'
 import { Menu, MenuItem, Popover, PopoverButton, PopoverPanel } from 'solid-headless'
 import { Component, JSX, Show } from 'solid-js'
 import * as styles from './App.css'
-import { useController } from './controller'
-import Inspector from './modules/inspector/Inspector'
-import Structure from './modules/structure/Structure'
+import StructureView from './modules/structure/Structure'
+import { createSidePanel } from './SidePanel'
+
+// const MainViewTabs: Component = () => {
+//   const { view } = useController()
+
+//   return (
+//     <button
+//       style={{
+//         margin: '0 10px',
+//         padding: '5px 10px',
+//         border: '1px solid #fff',
+//         'border-radius': '5px',
+//         cursor: 'pointer',
+//       }}
+//       onClick={() => {
+//         view.set(
+//           view.get() === DevtoolsMainView.Structure
+//             ? DevtoolsMainView.Dgraph
+//             : DevtoolsMainView.Structure,
+//         )
+//       }}
+//     >
+//       View: {view.get().toUpperCase()}
+//     </button>
+//   )
+// }
 
 const Options: Component = () => {
   return (
@@ -40,7 +64,9 @@ const Options: Component = () => {
 }
 
 const App: Component<{ headerSubtitle?: JSX.Element }> = props => {
-  const ctx = useController()
+  // side panel is created here to keep the state between renders
+  const sidePanel = createSidePanel()
+
   return (
     <div class={styles.app}>
       <header class={styles.header.header}>
@@ -51,12 +77,20 @@ const App: Component<{ headerSubtitle?: JSX.Element }> = props => {
             {props.headerSubtitle && <p class={styles.header.subtitle}>{props.headerSubtitle}</p>}
           </div>
         </div>
+        {/* <MainViewTabs /> */}
         <Options />
       </header>
       <div class={styles.content}>
-        <Splitter onToggle={() => ctx.setInspectedNode(null)} side={<Inspector />}>
-          <Structure />
-        </Splitter>
+        <Splitter.Root>
+          <Splitter.Panel>
+            <StructureView />
+          </Splitter.Panel>
+          {sidePanel.isOpen() && (
+            <Splitter.Panel>
+              <sidePanel.SidePanel />
+            </Splitter.Panel>
+          )}
+        </Splitter.Root>
       </div>
     </div>
   )

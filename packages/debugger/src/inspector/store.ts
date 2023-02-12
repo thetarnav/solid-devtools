@@ -1,6 +1,6 @@
 import { untrack } from 'solid-js'
 import { DEV as STORE_DEV, unwrap } from 'solid-js/store'
-import { markNodeID } from '../main/utils'
+import { getSdtId, ObjectType } from '../main/id'
 import type { Core, NodeID } from '../types'
 
 const DEV = STORE_DEV!
@@ -32,7 +32,7 @@ globalThis._$onStoreNodeUpdate = (node, property, value, prev) =>
     if (!OnNodeUpdate || !Nodes.has(node) || typeof property === 'symbol') return
 
     property = property.toString()
-    const storeProperty: StoreNodeProperty = `${markNodeID(node)}:${property}`
+    const storeProperty: StoreNodeProperty = `${getSdtId(node, ObjectType.StoreNode)}:${property}`
     // Update array length
     if (property === 'length' && typeof value === 'number' && Array.isArray(node)) {
       return OnNodeUpdate(storeProperty, value)
@@ -65,7 +65,7 @@ function trackStore(node: Core.Store.StoreNode, parent: ParentProperty): void {
   if (data) data.add(parent)
   else {
     Nodes.set(node, new Set([parent]))
-    const id = markNodeID(node)
+    const id = getSdtId(node, ObjectType.StoreNode)
     forEachStoreProp(node, (key, child) => trackStore(child, `${id}:${key}`))
   }
 }
@@ -74,7 +74,7 @@ function untrackStore(node: Core.Store.StoreNode, parent: ParentProperty): void 
   const data = Nodes.get(node)
   if (data && data.delete(parent)) {
     data.size === 0 && Nodes.delete(node)
-    const id = markNodeID(node)
+    const id = getSdtId(node, ObjectType.StoreNode)
     forEachStoreProp(node, (key, child) => untrackStore(child, `${id}:${key}`))
   }
 }

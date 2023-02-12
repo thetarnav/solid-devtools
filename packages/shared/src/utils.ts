@@ -147,3 +147,23 @@ export const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && Object.getPrototypeOf(value) === Object.prototype
 
 export const XOR = (a: unknown, b: unknown) => (a || b) && !(a && b)
+
+export type ToDyscriminatedUnion<
+  T extends {},
+  TK extends PropertyKey = 'type',
+  DK extends void | PropertyKey = void,
+> = {
+  [K in keyof T]: { [k in TK]: K } & (DK extends PropertyKey ? { [k in DK]: T[K] } : T[K])
+}[keyof T]
+
+export function dedupeArrayById<T extends { id: unknown }>(input: T[]): T[] {
+  const ids = new Set<unknown>()
+  const deduped: T[] = []
+  for (let i = input.length - 1; i >= 0; i--) {
+    const update = input[i]!
+    if (ids.has(update.id)) continue
+    ids.add(update.id)
+    deduped.push(update)
+  }
+  return deduped
+}

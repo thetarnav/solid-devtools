@@ -1,7 +1,7 @@
 import type { NodeID, ValueItemID } from '../main/types'
 import type { StoreNodeProperty } from './store'
 
-export type { SetInspectedNodeData, ToggleInspectedValueData } from '.'
+export type { ToggleInspectedValueData } from '.'
 
 export const INFINITY = 'Infinity'
 export const NEGATIVE_INFINITY = 'NegativeInfinity'

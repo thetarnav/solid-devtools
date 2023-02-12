@@ -1,6 +1,5 @@
-import { whileArray } from '@solid-devtools/shared/utils'
 import { NodeID, Solid } from './types'
-import { markNodeID, onOwnerCleanup } from './utils'
+import { onOwnerCleanup } from './utils'
 
 const $CLEANUP = Symbol('component-registry-cleanup')
 
@@ -9,50 +8,95 @@ type ComponentData = {
   owner: Solid.Component
   name: string
   elements: Set<HTMLElement>
+  elementNodes: Set<NodeID>
   cleanup: VoidFunction
 }
 
+// Map of component nodes
 const ComponentMap = new Map<NodeID, ComponentData>()
 
-const removeComponent = (nodeID: NodeID) => {
+// Map of element nodes to component nodes
+const ElementNodeMap = new Map<NodeID, { el: HTMLElement; component: ComponentData }>()
+
+function cleanupComponent(nodeID: NodeID) {
   const component = ComponentMap.get(nodeID)
   if (!component) return
   component.cleanup()
   ComponentMap.delete(nodeID)
+  for (const element of component.elementNodes) ElementNodeMap.delete(element)
 }
 
 export type ComponentRegisterHandler = typeof registerComponent
 
 // used in walker to register component nodes
-export const registerComponent = (
-  owner: Solid.Component,
-  nodeId: NodeID,
-  name: string,
-  elements: HTMLElement[] | null,
-): void => {
-  if (!elements) return removeComponent(nodeId)
+export function registerComponent(
+  data:
+    | {
+        owner: Solid.Component
+        id: NodeID
+        name: string
+        elements: HTMLElement[] | null
+      }
+    | {
+        componentId: NodeID
+        elementId: NodeID
+        element: HTMLElement
+      },
+): void {
+  // Add new element node to existing component node
+  if ('elementId' in data) {
+    const { componentId, elementId, element } = data
+    const component = ComponentMap.get(componentId)
+    if (!component) return
 
-  const set = new Set(elements)
-
-  const existing = ComponentMap.get(nodeId)
-  if (existing) {
-    existing.elements = set
-    return
+    component.elementNodes.add(elementId)
+    ElementNodeMap.set(elementId, { el: element, component })
   }
+  // Add new component node
+  else {
+    const { owner, id, name, elements: elementsList } = data
+    if (!elementsList) return cleanupComponent(id)
 
-  const cleanup = onOwnerCleanup(owner, () => removeComponent(nodeId), false, $CLEANUP)
+    const set = new Set(elementsList)
 
-  ComponentMap.set(nodeId, { id: nodeId, owner, name, elements: set, cleanup })
+    const existing = ComponentMap.get(id)
+    if (existing) {
+      existing.elements = set
+      return
+    }
+
+    const cleanup = onOwnerCleanup(owner, () => cleanupComponent(id), false, $CLEANUP)
+
+    ComponentMap.set(id, {
+      id,
+      owner,
+      name,
+      elements: set,
+      cleanup,
+      elementNodes: new Set(),
+    })
+  }
 }
 
 export function clearComponentRegistry() {
   for (const component of ComponentMap.values()) component.cleanup()
   ComponentMap.clear()
+  ElementNodeMap.clear()
 }
 
-export function getComponent(nodeId: NodeID): { name: string; elements: HTMLElement[] } | null {
-  const component = ComponentMap.get(nodeId)
-  return component ? { name: component.name, elements: [...component.elements] } : null
+export function getComponent(
+  id: NodeID,
+): { name: string; id: NodeID; elements: HTMLElement[] } | null {
+  // provided if might be of an element node (in DOM mode) or component node
+  // both need to be checked
+
+  const component = ComponentMap.get(id)
+  if (component) return { name: component.name, elements: [...component.elements], id }
+
+  const elData = ElementNodeMap.get(id)
+  return elData
+    ? { name: elData.component.name, id: elData.component.id, elements: [elData.el] }
+    : null
 }
 
 /**
@@ -62,17 +106,11 @@ export function getComponent(nodeId: NodeID): { name: string; elements: HTMLElem
  *
  * Used only in the DOM walker mode.
  */
-export function findComponentElement(
-  nodeId: NodeID,
+export function getComponentElement(
   elementId: NodeID,
 ): { name: string; id: NodeID; element: HTMLElement } | undefined {
-  const component = ComponentMap.get(nodeId)
-  if (!component) return
-
-  return whileArray([...component.elements], (el, toCheck) => {
-    if (markNodeID(el) === elementId) return { name: component.name, id: nodeId, element: el }
-    for (const child of el.children) child instanceof HTMLElement && toCheck.push(child)
-  })
+  const elData = ElementNodeMap.get(elementId)
+  return elData && { name: elData.component.name, id: elData.component.id, element: elData.el }
 }
 
 // TODO could use some optimization (caching)

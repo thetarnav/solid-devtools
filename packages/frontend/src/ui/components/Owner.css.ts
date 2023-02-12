@@ -56,6 +56,13 @@ export const elementName = style([
   },
 ])
 
+export const signalName = style([
+  name,
+  {
+    color: vars.domColor,
+  },
+])
+
 export const type = style({
   fontSize: '0.8em',
   userSelect: 'none',
@@ -69,6 +76,6 @@ export const typeIcon = style({
   width: spacing[3],
   height: spacing[3],
   marginRight: spacing[1],
-  marginBottom: `-1px`,
+  marginBottom: `-2px`,
   color: vars.disabled.color,
 })

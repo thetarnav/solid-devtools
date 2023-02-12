@@ -41,29 +41,29 @@ describe('Preview Value', () => {
     ],
     [
       'Element div',
-      [[ValueType.Element, '0:div']],
-      { type: ValueType.Element, name: 'div', id: '0' },
+      [[ValueType.Element, '#0:div']],
+      { type: ValueType.Element, name: 'div', id: '#0' },
     ],
-    ['Element a', [[ValueType.Element, '1:a']], { type: ValueType.Element, name: 'a', id: '1' }],
+    ['Element a', [[ValueType.Element, '#1:a']], { type: ValueType.Element, name: 'a', id: '#1' }],
     [
       'Array empty',
       [[ValueType.Array, 0]],
-      { type: ValueType.Array, length: 0, value: null } as DecodedValue,
+      { type: ValueType.Array, length: 0, value: null, setValue: expect.any(Function) },
     ],
     [
       'Array',
       [[ValueType.Array, 3]],
-      { type: ValueType.Array, length: 3, value: null } as DecodedValue,
+      { type: ValueType.Array, length: 3, value: null, setValue: expect.any(Function) },
     ],
     [
       'Object empty',
       [[ValueType.Object, 0]],
-      { type: ValueType.Object, value: null, length: 0 } as DecodedValue,
+      { type: ValueType.Object, value: null, length: 0, setValue: expect.any(Function) },
     ],
     [
       'Object',
       [[ValueType.Object, 3]],
-      { type: ValueType.Object, value: null, length: 3 } as DecodedValue,
+      { type: ValueType.Object, value: null, length: 3, setValue: expect.any(Function) },
     ],
     ['Date', [[ValueType.Instance, 'Date']], { type: ValueType.Instance, name: 'Date' }],
     ['Error', [[ValueType.Instance, 'Error']], { type: ValueType.Instance, name: 'Error' }],
@@ -73,37 +73,39 @@ describe('Preview Value', () => {
     [
       'Store',
       [
-        [ValueType.Store, '2:1'],
+        [ValueType.Store, '#2:1'],
         [ValueType.Object, 3],
       ],
       {
         type: ValueType.Store,
-        id: '2',
+        id: '#2',
         valueType: ValueType.Object,
         value: null,
         length: 3,
-      } as DecodedValue,
+        setValue: expect.any(Function),
+      },
     ],
     [
       'Mutable',
       [
-        [ValueType.Store, '3:1'],
+        [ValueType.Store, '#3:1'],
         [ValueType.Object, 3],
       ],
       {
         type: ValueType.Store,
-        id: '3',
+        id: '#3',
         valueType: ValueType.Object,
         value: null,
         length: 3,
-      } as DecodedValue,
+        setValue: expect.any(Function),
+      },
     ],
   ]
 
   for (const [testName, value, expectation] of encodePreviewExpectations) {
     test(testName, () => {
       const s = decodeValue(value, null, new StoreNodeMap())
-      expect(s).toMatchObject(typeof expectation === 'function' ? expectation(s) : expectation)
+      expect(s).toEqual(typeof expectation === 'function' ? expectation(s) : expectation)
     })
   }
 })
@@ -113,7 +115,7 @@ describe('deep values', () => {
     [
       'Array empty',
       [[ValueType.Array, []]],
-      { type: ValueType.Array, length: 0, value: [] as any[] } as DecodedValue,
+      { type: ValueType.Array, length: 0, value: [] as any[], setValue: expect.any(Function) },
     ],
     [
       'Array shallow',
@@ -130,7 +132,8 @@ describe('deep values', () => {
           { type: ValueType.Number, value: 1 },
           { type: ValueType.Number, value: 4 },
         ],
-      } as DecodedValue,
+        setValue: expect.any(Function),
+      },
     ],
 
     [
@@ -158,22 +161,26 @@ describe('deep values', () => {
                 type: ValueType.Object,
                 length: 1,
                 value: { foo: { type: ValueType.String, value: 'bar' } },
-              } as any,
+                setValue: expect.any(Function),
+              },
             ],
-          } as any,
+            setValue: expect.any(Function),
+          },
           { type: ValueType.Number, value: 2 },
           {
             type: ValueType.Object,
             length: 1,
             value: { map: { type: ValueType.Instance, name: 'Map' } },
+            setValue: expect.any(Function),
           },
         ],
-      } as any,
+        setValue: expect.any(Function),
+      },
     ],
     [
       'Object empty',
       [[ValueType.Object, {}]],
-      { type: ValueType.Object, length: 0, value: {} } as any,
+      { type: ValueType.Object, length: 0, value: {}, setValue: expect.any(Function) },
     ],
     [
       'Object shallow',
@@ -190,7 +197,8 @@ describe('deep values', () => {
           b: { type: ValueType.Number, value: 2 },
           c: { type: ValueType.Number, value: 4 },
         },
-      } as any,
+        setValue: expect.any(Function),
+      },
     ],
     [
       'Object nested',
@@ -217,17 +225,21 @@ describe('deep values', () => {
                 type: ValueType.Object,
                 length: 1,
                 value: { foo: { type: ValueType.String, value: 'bar' } },
-              } as any,
+                setValue: expect.any(Function),
+              },
             ],
-          } as any,
+            setValue: expect.any(Function),
+          },
           b: { type: ValueType.Number, value: 2 },
           c: {
             type: ValueType.Object,
             length: 1,
             value: { map: { type: ValueType.Instance, name: 'Map' } },
+            setValue: expect.any(Function),
           },
         },
-      } as any,
+        setValue: expect.any(Function),
+      },
     ],
     [
       'Object with getter properties',
@@ -242,14 +254,15 @@ describe('deep values', () => {
           a: { type: ValueType.Number, value: 123 },
           b: { type: ValueType.Getter, name: 'b' },
         },
-      } as any,
+        setValue: expect.any(Function),
+      },
     ],
   ]
 
   for (const [testName, value, expectation] of encodeDeepExpectations) {
     test(testName, () => {
       const s = decodeValue(value, null, new StoreNodeMap())
-      expect(s).toMatchObject(typeof expectation === 'function' ? expectation(s) : expectation)
+      expect(s).toEqual(typeof expectation === 'function' ? expectation(s) : expectation)
     })
   }
 })
@@ -277,8 +290,10 @@ describe('repeated references', () => {
                 type: ValueType.Object,
                 length: 1,
                 value: { c: { type: ValueType.Number, value: 2 } },
+                setValue: expect.any(Function),
               },
             ],
+            setValue: expect.any(Function),
           },
           {
             type: ValueType.Object,
@@ -288,11 +303,14 @@ describe('repeated references', () => {
                 type: ValueType.Object,
                 length: 1,
                 value: { c: { type: ValueType.Number, value: 2 } },
+                setValue: expect.any(Function),
               },
             },
+            setValue: expect.any(Function),
           },
         ],
-      } as any,
+        setValue: expect.any(Function),
+      },
     ],
     [
       'Circular reference',
@@ -347,7 +365,7 @@ describe('repeated references', () => {
   for (const [testName, value, expectation] of circularExpectations) {
     test(testName, () => {
       const s = decodeValue(value, null, new StoreNodeMap())
-      expect(s).toMatchObject(typeof expectation === 'function' ? expectation(s) : expectation)
+      expect(s).toEqual(typeof expectation === 'function' ? expectation(s) : expectation)
     })
   }
 })
@@ -357,23 +375,24 @@ describe('finding stores in values', () => {
     [
       'Store',
       [
-        [ValueType.Store, '5:1'],
+        [ValueType.Store, '#5:1'],
         [ValueType.Object, { a: 2 }],
         [ValueType.Number, 1],
       ],
       {
         type: ValueType.Store,
-        id: '5',
+        id: '#5',
         valueType: ValueType.Object,
         length: 1,
         value: { a: { type: ValueType.Number, value: 1 } },
-      } as any,
+        setValue: expect.any(Function),
+      },
     ],
     [
       'Store in array',
       [
         [ValueType.Array, [1]],
-        [ValueType.Store, '5:2'],
+        [ValueType.Store, '#5:2'],
         [ValueType.Object, { a: 3 }],
         [ValueType.Number, 1],
       ],
@@ -383,21 +402,23 @@ describe('finding stores in values', () => {
         value: [
           {
             type: ValueType.Store,
-            id: '5',
+            id: '#5',
             valueType: ValueType.Object,
             length: 1,
             value: { a: { type: ValueType.Number, value: 1 } },
+            setValue: expect.any(Function),
           },
         ],
-      } as any,
+        setValue: expect.any(Function),
+      },
     ],
     [
       'referenced store',
       [
         [ValueType.Object, { state2: 1 }],
-        [ValueType.Store, '6:2'],
+        [ValueType.Store, '#6:2'],
         [ValueType.Object, { ref: 3 }],
-        [ValueType.Store, '5:4'],
+        [ValueType.Store, '#5:4'],
         [ValueType.Object, { a: 5 }],
         [ValueType.Number, 1],
       ],
@@ -407,54 +428,65 @@ describe('finding stores in values', () => {
         value: {
           state2: {
             type: ValueType.Store,
-            id: '6',
+            id: '#6',
             valueType: ValueType.Object,
             length: 1,
             value: {
-              ref: { type: ValueType.Store, id: '5', valueType: ValueType.Object, length: 1 },
+              ref: {
+                type: ValueType.Store,
+                id: '#5',
+                valueType: ValueType.Object,
+                length: 1,
+                value: expect.any(Object),
+                setValue: expect.any(Function),
+              },
             },
+            setValue: expect.any(Function),
           },
         },
-      } as any,
+        setValue: expect.any(Function),
+      },
     ],
     [
       'nested store',
       [
-        [ValueType.Store, '7:1'],
+        [ValueType.Store, '#7:1'],
         [ValueType.Object, { a: 2, b: 3 }],
         [ValueType.Number, 1],
-        [ValueType.Store, '8:4'],
+        [ValueType.Store, '#8:4'],
         [ValueType.Array, [5]],
         [ValueType.String, 'foo'],
       ],
       {
         type: ValueType.Store,
-        id: '7',
+        id: '#7',
         valueType: ValueType.Object,
         length: 2,
         value: {
           a: { type: ValueType.Number, value: 1 },
           b: {
             type: ValueType.Store,
-            id: '8',
+            id: '#8',
             valueType: ValueType.Array,
             length: 1,
             value: [{ type: ValueType.String, value: 'foo' }],
+            setValue: expect.any(Function),
           },
         },
-      } as any,
+        setValue: expect.any(Function),
+      },
     ],
     [
       'circular store',
       [
-        [ValueType.Store, '9:1'],
+        [ValueType.Store, '#9:1'],
         [ValueType.Object, { a: 2, b: 0 }],
         [ValueType.Number, 1],
       ],
       (s: any) => {
         const topObject: DecodedValue<ValueType.Store> = {
           type: ValueType.Store,
-          id: '9',
+          id: '#9',
           valueType: ValueType.Object,
           length: 2,
           value: { a: { type: ValueType.Number, value: 1 } },
@@ -472,7 +504,7 @@ describe('finding stores in values', () => {
   for (const [testName, value, expectation] of storeExpectations) {
     test(testName, () => {
       const s = decodeValue(value, null, new StoreNodeMap())
-      expect(s).toMatchObject(typeof expectation === 'function' ? expectation(s) : expectation)
+      expect(s).toEqual(typeof expectation === 'function' ? expectation(s) : expectation)
     })
   }
 })

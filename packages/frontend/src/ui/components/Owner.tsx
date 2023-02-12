@@ -1,9 +1,14 @@
 import { NodeType } from '@solid-devtools/debugger'
-import { Component, JSX } from 'solid-js'
-import { Icon, IconComponent } from '..'
+import { createPingedSignal } from '@solid-devtools/shared/primitives'
+import { Component, createMemo, JSX } from 'solid-js'
+import Icon, { IconComponent } from '../icons'
+import { Highlight } from './highlight/Highlight'
 import * as styles from './Owner.css'
 
-export const NodeTypeIcon: Component<{ type: NodeType; class?: string }> = props => {
+export const NodeTypeIcon: Component<{
+  type: NodeType | undefined | null
+  class?: string
+}> = props => {
   let prevIcon: IconComponent | undefined
   let prevRendered: JSX.Element | undefined
   return () => {
@@ -21,6 +26,8 @@ export const NodeTypeIcon: Component<{ type: NodeType; class?: string }> = props
           return Icon.Computation
         case NodeType.Context:
           return Icon.Context
+        case NodeType.Signal:
+          return Icon.Signal
       }
     })()
     if (IconComp === prevIcon) return prevRendered
@@ -28,9 +35,33 @@ export const NodeTypeIcon: Component<{ type: NodeType; class?: string }> = props
   }
 }
 
+export const NodeName: Component<{
+  name: string | undefined | null
+  type: NodeType | undefined | null
+}> = props => {
+  return createMemo(() => {
+    switch (props.type) {
+      case NodeType.Root:
+        return <span class={styles.type}>Root</span>
+      case NodeType.Context:
+        return <span class={styles.type}>Context</span>
+      case NodeType.Render:
+        return <span class={styles.type}>Render Effect</span>
+      case NodeType.Component:
+        return <span class={styles.componentName}>{props.name}</span>
+      case NodeType.Element:
+        return <span class={styles.elementName}>{props.name}</span>
+      case NodeType.Signal:
+        return <span class={styles.signalName}>{props.name}</span>
+      default:
+        return <span class={styles.name}>{props.name}</span>
+    }
+  })
+}
+
 export const OwnerName: Component<{
-  name: string | undefined
-  type: NodeType
+  name: string | undefined | null
+  type: NodeType | undefined | null
   isTitle?: boolean
   isFrozen?: boolean
 }> = props => {
@@ -41,22 +72,20 @@ export const OwnerName: Component<{
       data-frozen={props.isFrozen}
     >
       <NodeTypeIcon type={props.type} class={styles.typeIcon} />
-      {() => {
-        switch (props.type) {
-          case NodeType.Root:
-            return <span class={styles.type}>Root</span>
-          case NodeType.Context:
-            return <span class={styles.type}>Context</span>
-          case NodeType.Render:
-            return <span class={styles.type}>Render Effect</span>
-          case NodeType.Component:
-            return <span class={styles.componentName}>{props.name}</span>
-          case NodeType.Element:
-            return <span class={styles.elementName}>{props.name}</span>
-          default:
-            return <span class={styles.name}>{props.name}</span>
-        }
-      }}
+      <NodeName name={props.name} type={props.type} />
     </span>
   )
+}
+
+export function createHighlightedOwnerName() {
+  const [isUpdated, pingUpdated] = createPingedSignal()
+  return {
+    isUpdated,
+    pingUpdated,
+    OwnerName: (props: Parameters<typeof OwnerName>[0]) => (
+      <Highlight highlight={isUpdated()} isSignal={props.type === NodeType.Signal}>
+        <OwnerName {...props} />
+      </Highlight>
+    ),
+  }
 }

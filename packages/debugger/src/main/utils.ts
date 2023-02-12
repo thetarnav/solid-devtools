@@ -9,9 +9,8 @@ import {
   runWithOwner,
 } from 'solid-js'
 import { DEV as _STORE_DEV } from 'solid-js/store'
-import { $SDT_ID, NodeType } from './constants'
-import { getNewSdtId } from './id'
-import { Core, NodeID, Solid } from './types'
+import { NodeType } from './constants'
+import { Core, Solid } from './types'
 
 const STORE_DEV = _STORE_DEV!
 
@@ -104,23 +103,13 @@ export function markOwnerType(o: Solid.Owner): NodeType {
   return (o.sdtType = getOwnerType(o))
 }
 
-export function markNodeID(o: { [$SDT_ID]?: NodeID }): NodeID {
-  if (o[$SDT_ID] !== undefined) return o[$SDT_ID]
-  return (o[$SDT_ID] = getNewSdtId())
-}
-
-export class NodeIDMap<T extends { [$SDT_ID]?: NodeID }> {
-  private obj: Record<NodeID, T> = {}
-
-  get(id: NodeID): T | undefined {
-    return this.obj[id]
-  }
-
-  set(o: T): NodeID {
-    const id = markNodeID(o)
-    if (!(id in this.obj)) this.obj[id] = o
-    return id
-  }
+/**
+ * Checks if the passed owner is disposed.
+ */
+export function isDisposed(o: Readonly<Solid.Owner>): boolean {
+  return !!(isSolidRoot(o)
+    ? o.isDisposed
+    : o.owner && (!o.owner.owned || !o.owner.owned.includes(o)))
 }
 
 export function getComponentRefreshNode(owner: Readonly<Solid.Component>): Solid.Memo | null {
@@ -221,11 +210,25 @@ export function onParentCleanup(
   owner: Solid.Owner,
   fn: VoidFunction,
   prepend = false,
+  symbol?: symbol,
 ): VoidFunction {
-  if (owner.owner) return onOwnerCleanup(owner.owner, fn, prepend)
+  if (owner.owner) return onOwnerCleanup(owner.owner, fn, prepend, symbol)
   return () => {
     /* noop */
   }
+}
+
+/**
+ * Listen to when the owner is disposed. (not on cleanup)
+ */
+export function onOwnerDispose(
+  owner: Solid.Owner,
+  fn: VoidFunction,
+  prepend = false,
+  symbol?: symbol,
+): VoidFunction {
+  if (isSolidRoot(owner)) return onOwnerCleanup(owner, fn, prepend, symbol)
+  return onParentCleanup(owner, fn, prepend, symbol)
 }
 
 // TODO: move onDispose to solid-primitives
@@ -271,36 +274,21 @@ export function getFunctionSources(fn: () => unknown): Solid.Signal[] {
   return nodes ?? []
 }
 
-export function dedupeArrayById<T extends { id: NodeID }>(input: T[]): T[] {
-  const ids = new Set<NodeID>()
-  const deduped: T[] = []
-  for (let i = input.length - 1; i >= 0; i--) {
-    const update = input[i]!
-    if (ids.has(update.id)) continue
-    ids.add(update.id)
-    deduped.push(update)
-  }
-  return deduped
-}
-
 /**
  * Batches series of updates to a single array of updates.
  *
  * The updates are deduped by `id` property
  */
-export function createBatchedUpdateEmitter<T extends { id: NodeID }>(
-  emit: Emit<T[]>,
-): (update: T) => void {
-  const updates: T[] = []
+export function createBatchedUpdateEmitter<T>(emit: Emit<T[]>): (update: T) => void {
+  const updates = new Set<T>()
 
   const triggerUpdateEmit = throttle(() => {
-    const deduped = dedupeArrayById(updates)
-    updates.length = 0
-    emit(deduped)
+    emit([...updates])
+    updates.clear()
   })
 
   return update => {
-    updates.push(update)
+    updates.add(update)
     triggerUpdateEmit()
   }
 }

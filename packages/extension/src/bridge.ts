@@ -1,18 +1,18 @@
-import { Controller } from '@solid-devtools/frontend'
-import { Messages, once } from 'solid-devtools/bridge'
+import { Controller, createController } from '@solid-devtools/frontend'
+import { Debugger, once } from 'solid-devtools/bridge'
 import { createPortMessanger, PANEL_CONNECTION_NAME } from './messanger'
 
 const port = chrome.runtime.connect({ name: PANEL_CONNECTION_NAME })
 const { postPortMessage: toBackground, onPortMessage: fromBackground } = createPortMessanger<
-  Messages.Client,
-  Messages.Extension
+  Debugger.OutputChannels,
+  Debugger.InputChannels
 >(port)
 
 export default function createBridge({
   setVersions,
 }: {
   setVersions: (versions: { client: string; expectedClient: string; extension: string }) => void
-}) {
+}): Controller {
   // in development — force update the graph on load to work with hot reloading
   if (import.meta.env.DEV) {
     toBackground('ForceUpdate')
@@ -20,42 +20,12 @@ export default function createBridge({
 
   once(fromBackground, 'Versions', v => setVersions(v))
 
-  const controller = new Controller({
-    onDevtoolsLocatorStateChange(enabled) {
-      toBackground('LocatorMode', enabled)
-    },
-    onHighlightElementChange(data) {
-      toBackground('HighlightElement', data)
-    },
-    onInspectValue(payload) {
-      toBackground('InspectValue', payload)
-    },
-    onInspectNode(node) {
-      toBackground('InspectNode', node)
-    },
-    onOpenLocation() {
-      toBackground('OpenLocation')
-    },
-    onTreeViewModeChange(mode) {
-      toBackground('TreeViewMode', mode)
-    },
-  })
+  const controller = createController()
 
-  fromBackground('StructureUpdate', controller.updateStructure.bind(controller))
+  controller.devtools.listen(e => toBackground(e.name, e.details))
 
-  fromBackground('ResetPanel', controller.resetPanel.bind(controller))
-
-  fromBackground('ComputationUpdates', controller.updateComputation.bind(controller))
-
-  fromBackground('InspectedDetails', controller.setInspectedDetails.bind(controller))
-
-  fromBackground('InspectorUpdate', controller.updateInspector.bind(controller))
-
-  fromBackground('LocatorMode', controller.setLocatorState.bind(controller))
-
-  fromBackground('HoverComponent', controller.setHoveredNode.bind(controller))
-
-  fromBackground('ClientInspectedNode', controller.setInspectedNode.bind(controller))
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+  fromBackground(e => controller.client.emit(e.name as any, e.details))
 
   return controller
 }

@@ -129,7 +129,9 @@ const Broken: Component = () => {
 const App: Component = () => {
   const [count, setCount] = createSignal(0)
   const [showEven, setShowEven] = createSignal(false)
-  const fnSig = createSignal(() => {})
+  const fnSig = createSignal({
+    fn: () => {},
+  })
   const nullSig = createSignal(null)
   const symbolSig = createSignal(Symbol('hello-symbol'))
   const [header, setHeader] = createSignal(
@@ -153,11 +155,11 @@ const App: Component = () => {
   createComputed(
     _ => {
       const hello = createSignal('hello')
-      setShowEven(count() % 2 === 0)
+      setShowEven(count() % 3 === 0)
       return count()
     },
     undefined,
-    { name: 'c-12-3-1-2-3-2-1-1-1-1-1-1-1-0-1-2-1-1-0' },
+    { name: 'very-long-name-that-will-definitely-not-have-enough-space-to-render' },
   )
 
   createComputed(() => {}, undefined, { name: 'frozen' })
@@ -167,7 +169,7 @@ const App: Component = () => {
 
   const [showBroken, setShowBroken] = createSignal(false)
 
-  return (
+  return () => (
     <>
       {header()}
       {objmemo().subheader}
@@ -177,7 +179,7 @@ const App: Component = () => {
           <Button onClick={() => setCount(p => ++p)} text={`Count: ${count()}`} />
         </header>
         <div style={{ height: '1rem', 'margin-top': '1rem' }}>
-          <Show when={count() % 3 === 0}>
+          <Show when={showEven()}>
             <Bold>{count()} is even!</Bold>
           </Show>
         </div>

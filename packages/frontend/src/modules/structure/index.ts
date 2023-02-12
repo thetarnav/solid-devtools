@@ -1,13 +1,16 @@
+import { useController } from '@/controller'
 import {
-  defaultWalkerMode,
+  DEFAULT_WALKER_MODE,
+  DevtoolsMainView,
   Mapped,
   NodeID,
   NodeType,
   StructureUpdates,
   type TreeWalkerMode,
 } from '@solid-devtools/debugger/types'
-import { createSimpleEmitter } from '@solid-primitives/event-bus'
-import { Accessor, createSelector, createSignal, untrack } from 'solid-js'
+import { defer } from '@solid-devtools/shared/primitives'
+import { entries } from '@solid-primitives/utils'
+import { batch, createEffect, createMemo, createSelector, createSignal, untrack } from 'solid-js'
 
 export namespace Structure {
   export interface Node {
@@ -28,11 +31,16 @@ export namespace Structure {
   }
 
   export type State = { roots: Node[]; nodeList: Node[] }
+
+  // State to be stored in the controller cache
+  export type Cache = { short: State; long: { mode: TreeWalkerMode } }
+
+  export type Module = ReturnType<typeof createStructure>
 }
 
 export const { reconcileStructure } = (() => {
-  let $_updated: StructureUpdates['updated']
-  let $_node_list: Structure.Node[]
+  let Updated: StructureUpdates['updated']
+  let NewNodeList: Structure.Node[]
 
   function createNode(
     raw: Mapped.Owner,
@@ -48,7 +56,7 @@ export const { reconcileStructure } = (() => {
     if (type === NodeType.Component && raw.hmr) node.hmr = raw.hmr
     else if (type !== NodeType.Root && raw.frozen) node.frozen = true
 
-    $_node_list.push(node)
+    NewNodeList.push(node)
 
     // map children
     for (const child of rawChildren) children.push(createNode(child, node, level + 1))
@@ -63,10 +71,10 @@ export const { reconcileStructure } = (() => {
     level: number,
   ): Structure.Node {
     const { id, children } = node
-    $_node_list.push(node)
+    NewNodeList.push(node)
     node.level = level
 
-    if (!raw) raw = $_updated[rootId]?.[id]
+    if (!raw) raw = Updated[rootId]?.[id]
 
     if (raw) {
       // update frozen computations
@@ -80,7 +88,7 @@ export const { reconcileStructure } = (() => {
         for (const child of children) prevChildrenMap[child.id] = child
 
         for (const childRaw of rawChildren) {
-          const childNode = prevChildrenMap[childRaw.id] as Structure.Node | undefined
+          const childNode = prevChildrenMap[childRaw.id]
           newChildren.push(
             childNode
               ? updateNode(childNode, rootId, childRaw, level + 1)
@@ -90,7 +98,7 @@ export const { reconcileStructure } = (() => {
       }
     } else {
       for (const child of children) {
-        updateNode(child, rootId, $_updated[rootId]?.[child.id], level + 1)
+        updateNode(child, rootId, Updated[rootId]?.[child.id], level + 1)
       }
     }
 
@@ -100,27 +108,29 @@ export const { reconcileStructure } = (() => {
   // eslint-disable-next-line @typescript-eslint/no-shadow
   function reconcileStructure(
     prevRoots: Structure.Node[],
-    { removed, updated }: StructureUpdates,
+    { removed, updated, partial }: StructureUpdates,
   ): Structure.State {
-    $_updated = updated
-    $_node_list = []
+    Updated = updated
+    NewNodeList = []
     const nextRoots: Structure.Node[] = []
 
     const upatedTopLevelRoots = new Set<NodeID>()
     for (const root of prevRoots) {
       const { id } = root
-      if (removed.includes(id)) continue
+      // skip removed roots for partial updates
+      // and for full updates skip roots that were not sent
+      if (partial ? removed.includes(id) : !(id in Updated)) continue
       upatedTopLevelRoots.add(id)
-      nextRoots.push(updateNode(root, id, $_updated[id]?.[id], 0))
+      nextRoots.push(updateNode(root, id, Updated[id]?.[id], 0))
     }
 
-    for (const [rootId, updatedNodes] of Object.entries($_updated)) {
-      const root = updatedNodes![rootId]!
+    for (const [rootId, updatedNodes] of entries(Updated)) {
+      const root = updatedNodes![rootId]
       if (!root || upatedTopLevelRoots.has(rootId)) continue
       nextRoots.push(createNode(root, null, 0))
     }
 
-    return { roots: nextRoots, nodeList: $_node_list }
+    return { roots: nextRoots, nodeList: NewNodeList }
   }
 
   return { reconcileStructure }
@@ -148,17 +158,6 @@ export function getClosestComponentNode(node: Structure.Node): Structure.Node | 
   }
 }
 
-export function findClosestInspectableNode(node: Structure.Node): Structure.Node | undefined {
-  let current: Structure.Node | null = node
-  let lastRoot: Structure.Node | undefined
-  while (current) {
-    if (current.type === NodeType.Component || current.type === NodeType.Context) return current
-    if (current.type === NodeType.Root) lastRoot = current
-    current = current.parent
-  }
-  return lastRoot
-}
-
 export function getNodePath(node: Structure.Node): Structure.Node[] {
   const path = [node]
   let parent = node.parent
@@ -169,17 +168,36 @@ export function getNodePath(node: Structure.Node): Structure.Node[] {
   return path
 }
 
-export default function createStructure({
-  clientHoveredNodeId,
-}: {
-  clientHoveredNodeId: Accessor<NodeID | null>
-}) {
-  const [mode, setMode] = createSignal<TreeWalkerMode>(defaultWalkerMode)
+export default function createStructure() {
+  const ctx = useController()
+  const { inspector } = ctx
+  const { client, devtools } = ctx.controller
+  const cachedInitialState = ctx.viewCache.get(DevtoolsMainView.Structure)
+
+  const [mode, setMode] = createSignal<TreeWalkerMode>(
+    cachedInitialState.long?.mode ?? DEFAULT_WALKER_MODE,
+  )
+
+  function changeTreeViewMode(newMode: TreeWalkerMode): void {
+    if (newMode === mode()) return
+    batch(() => {
+      setMode(newMode)
+      search('')
+    })
+  }
 
   const [state, setState] = createSignal<Structure.State>(
-    { nodeList: [], roots: [] },
-    { internal: true },
+    cachedInitialState.short || { nodeList: [], roots: [] },
   )
+  ctx.viewCache.set(DevtoolsMainView.Structure, () => ({
+    short: state(),
+    long: { mode: mode() },
+  }))
+
+  const inspectedNode = createMemo(() => {
+    const id = inspector.inspected.ownerId
+    return id ? findNode(id) : null
+  })
 
   function updateStructure(update: StructureUpdates | null): void {
     setState(prev =>
@@ -193,24 +211,10 @@ export default function createStructure({
     }
   }
 
-  const [listenToComputationUpdate, emitComputationUpdate] = createSimpleEmitter<NodeID>()
-
-  const [extHovered, setHovered] = createSignal<NodeID | null>(null)
-  const hovered = () => extHovered() || clientHoveredNodeId()
-
-  const isNodeHovered = createSelector<NodeID | null, NodeID>(hovered)
-
-  function toggleHoveredNode(id: NodeID, isHovered: boolean): NodeID | null {
-    return setHovered(p => {
-      if (isHovered) return id
-      return p && p === id ? null : p
-    })
-  }
-
   const [searchResult, setSearchResult] = createSignal<NodeID[]>()
   const isSearched = createSelector(searchResult, (node: NodeID, o) => !!o && o.includes(node))
 
-  function search(query: string): NodeID[] | undefined {
+  function searchNodeList(query: string): NodeID[] | undefined {
     if (!query) return setSearchResult()
     return untrack(() => {
       const result: NodeID[] = []
@@ -223,21 +227,48 @@ export default function createStructure({
     })
   }
 
+  // SEARCH NODES
+  let lastSearch: string = ''
+  let lastSearchResults: NodeID[] | undefined
+  let lastSearchIndex = 0
+  function search(query: string): void {
+    if (query === lastSearch) {
+      if (lastSearchResults) {
+        lastSearchIndex = (lastSearchIndex + 1) % lastSearchResults.length
+        inspector.setInspectedOwner(lastSearchResults[lastSearchIndex]!)
+      }
+      return
+    } else {
+      lastSearch = query
+      const result = searchNodeList(query)
+      if (result) inspector.setInspectedOwner(result[(lastSearchIndex = 0)]!)
+      lastSearchResults = result
+    }
+  }
+
+  //
+  // Listen to Client Events
+  //
+  client.ResetPanel.listen(() => {
+    updateStructure(null)
+  })
+
+  client.StructureUpdates.listen(updateStructure)
+
+  // TREE VIEW MODE
+  createEffect(defer(mode, devtools.TreeViewModeChange.emit))
+
   return {
     state,
+    inspectedNode,
     updateStructure,
-    hovered,
-    extHovered,
-    isHovered: (node: NodeID) => isNodeHovered(node) || isSearched(node),
-    listenToComputationUpdate,
-    emitComputationUpdate,
-    toggleHoveredNode,
+    isSearched,
     findNode,
     getRootNode,
     getClosestComponentNode,
-    findClosestInspectableNode,
     getNodePath,
     search,
+    changeTreeViewMode,
     mode,
     setMode,
   }

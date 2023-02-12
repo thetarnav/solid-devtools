@@ -1,10 +1,10 @@
-import { atom, defer, makeHoverElementListener } from '@solid-devtools/shared/primitives'
-import { asArray, warn } from '@solid-devtools/shared/utils'
-import { createSimpleEmitter } from '@solid-primitives/event-bus'
+import { defer, makeHoverElementListener } from '@solid-devtools/shared/primitives'
+import { warn } from '@solid-devtools/shared/utils'
+import { createEventBus, Listen } from '@solid-primitives/event-bus'
 import { makeEventListener } from '@solid-primitives/event-listener'
 import { createKeyHold } from '@solid-primitives/keyboard'
 import { scheduleIdle } from '@solid-primitives/scheduled'
-import { onRootCleanup } from '@solid-primitives/utils'
+import { tryOnCleanup } from '@solid-primitives/utils'
 import {
   Accessor,
   createEffect,
@@ -15,6 +15,7 @@ import {
   runWithOwner,
 } from 'solid-js'
 import * as registry from '../main/componentRegistry'
+import { getObjectById, ObjectType } from '../main/id'
 import { createInternalRoot, enableRootsAutoattach } from '../main/roots'
 import { NodeID } from '../main/types'
 import { attachElementOverlay } from './ElementOverlay'
@@ -31,31 +32,20 @@ import { ClickMiddleware, HighlightElementPayload, LocatorOptions } from './type
 
 export { markComponentLoc } from './markComponent'
 
-export function createLocator({
-  debuggerEnabled,
-  getElementById,
-  setLocatorEnabledSignal,
-}: {
-  debuggerEnabled: Accessor<boolean>
-  getElementById(id: string): HTMLElement | undefined
+export function createLocator(props: {
+  listenToDebuggerEenable: Listen<boolean>
+  locatorEnabled: Accessor<boolean>
   setLocatorEnabledSignal(signal: Accessor<boolean>): void
 }) {
-  // enables capturing hovered elements
-  const enabledByPlugin = atom(false)
-  const enabledByPressingSignal = atom<Accessor<boolean>>()
-  const enabledByPressing = createMemo(() => !!enabledByPressingSignal()?.())
-  setLocatorEnabledSignal(enabledByPressing)
-  // locator is enabled if debugger is enabled, and user pressed the key to activate it, or the plugin activated it
-  const locatorEnabled = createMemo(
-    () => debuggerEnabled() && (enabledByPressing() || enabledByPlugin()),
-  )
+  const [enabledByPressingSignal, setEnabledByPressingSignal] = createSignal((): boolean => false)
+  props.setLocatorEnabledSignal(createMemo(() => enabledByPressingSignal()()))
 
-  function togglePluginLocatorMode(state?: boolean) {
-    enabledByPlugin(p => state ?? !p)
-  }
+  props.listenToDebuggerEenable(enabled => {
+    if (!enabled) setDevtoolsTarget(null)
+  })
 
-  const hoverTarget = atom<HTMLElement | null>(null)
-  const devtoolsTarget = atom<HighlightElementPayload>(null)
+  const [hoverTarget, setHoverTarget] = createSignal<HTMLElement | null>(null)
+  const [devtoolsTarget, setDevtoolsTarget] = createSignal<HighlightElementPayload>(null)
 
   const [highlightedComponents, setHighlightedComponents] = createSignal<LocatorComponent[]>([])
 
@@ -66,8 +56,8 @@ export function createLocator({
 
     // target is an elementId
     if ('type' in target && target.type === 'element') {
-      const element = getElementById(target.elementId)
-      if (!element) return []
+      const element = getObjectById(target.id, ObjectType.Element)
+      if (!(element instanceof HTMLElement)) return []
       target = element
     }
 
@@ -85,21 +75,14 @@ export function createLocator({
       ]
     }
 
-    // target is a component
-    if (target.type === 'componentNode') {
-      const { componentId } = target
-      const comp = registry.getComponent(componentId)
-      if (!comp) return []
-      return asArray(comp.elements).map(element => ({
-        element,
-        id: componentId,
-        name: comp.name,
-      }))
-    }
-
-    // target is an element of a component (in DOM walker mode)
-    const comp = registry.findComponentElement(target.componentId, target.elementId)
-    return comp ? [comp] : []
+    // target is a component or an element of a component (in DOM walker mode)
+    const comp = registry.getComponent(target.id)
+    if (!comp) return []
+    return comp.elements.map(element => ({
+      element,
+      id: comp.id,
+      name: comp.name,
+    }))
   }
 
   createEffect(
@@ -120,25 +103,20 @@ export function createLocator({
     createInternalRoot(() => attachElementOverlay(highlightedComponents))
   }, 1000)
 
-  const [onDebuggerHoveredComponentChange, emitDebuggerHoveredComponentChange] =
-    createSimpleEmitter<{ nodeId: NodeID; state: boolean }>()
+  const debuggerHoveredComponentBus = createEventBus<{ nodeId: NodeID; state: boolean }>()
 
   // notify of component hovered by using the debugger
   createEffect((prev: NodeID | undefined) => {
     const target = hoverTarget()
     if (!target) return
     const comp = registry.findComponent(target)
-    if (prev) emitDebuggerHoveredComponentChange({ nodeId: prev, state: false })
+    if (prev) debuggerHoveredComponentBus.emit({ nodeId: prev, state: false })
     if (comp) {
       const { id } = comp
-      emitDebuggerHoveredComponentChange({ nodeId: id, state: true })
+      debuggerHoveredComponentBus.emit({ nodeId: id, state: true })
       return id
     }
   })
-
-  function setDevtoolsHighlightTarget(data: HighlightElementPayload) {
-    devtoolsTarget(data)
-  }
 
   // functions to be called when user clicks on a component
   const clickInterceptors = new Set<ClickMiddleware>()
@@ -150,17 +128,17 @@ export function createLocator({
   }
   function addClickInterceptor(interceptor: ClickMiddleware) {
     clickInterceptors.add(interceptor)
-    onRootCleanup(() => clickInterceptors.delete(interceptor))
+    tryOnCleanup(() => clickInterceptors.delete(interceptor))
   }
 
   let targetIDE: TargetIDE | TargetURLFunction | undefined
 
   createEffect(() => {
-    if (!locatorEnabled()) return
+    if (!props.locatorEnabled()) return
 
     // set hovered element as target
-    makeHoverElementListener(el => hoverTarget(el))
-    onCleanup(() => hoverTarget(null))
+    makeHoverElementListener(el => setHoverTarget(el))
+    onCleanup(() => setHoverTarget(null))
 
     // go to selected component source code on click
     makeEventListener(
@@ -200,7 +178,7 @@ export function createLocator({
       if (options.targetIDE) targetIDE = options.targetIDE
       if (options.key !== false) {
         const isHoldingKey = createKeyHold(options.key ?? 'Alt', { preventDefault: true })
-        enabledByPressingSignal(() => isHoldingKey)
+        setEnabledByPressingSignal(() => isHoldingKey)
       }
     })
   }
@@ -213,11 +191,9 @@ export function createLocator({
 
   return {
     useLocator,
-    togglePluginLocatorMode,
-    enabledByDebugger: enabledByPressing,
     addClickInterceptor,
-    setPluginHighlightTarget: setDevtoolsHighlightTarget,
-    onDebuggerHoveredComponentChange,
+    setDevtoolsHighlightTarget: (target: HighlightElementPayload) => void setDevtoolsTarget(target),
+    onDebuggerHoveredComponentChange: debuggerHoveredComponentBus.listen,
     openElementSourceCode,
   }
 }

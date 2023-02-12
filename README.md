@@ -85,10 +85,10 @@ A couple of resources on the topic on chrome devtools extensions:
 
 Other devtools projects for solid and other frameworks:
 
-- [fictitious/solid-devtools](https://github.com/fictitious/solid-devtools)
 - [CM-Tech/solid-debugger](https://github.com/CM-Tech/solid-debugger)
 - [Svelte Devtools](https://github.com/sveltejs/svelte-devtools)
 - [Vue Devtools](https://github.com/vuejs/devtools)
 - [MobX Devtools](https://github.com/mobxjs/mobx-devtools)
 - [React Devtools](https://react-devtools-experimental.vercel.app)
+- [Preact Devtools](https://github.com/preactjs/preact-devtools)
 - [LocatorJS](https://www.locatorjs.com)

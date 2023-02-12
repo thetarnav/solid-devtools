@@ -1,6 +1,8 @@
+import { untrackedCallback } from '@solid-devtools/shared/primitives'
 import { isRecord } from '@solid-devtools/shared/utils'
 import { $PROXY, getListener, onCleanup } from 'solid-js'
 import { NodeType, ValueItemType } from '../main/constants'
+import { getSdtId, ObjectType } from '../main/id'
 import type { Core, Mapped, NodeID, Solid, ValueItemID } from '../main/types'
 import { observeValueUpdate, removeValueUpdateObserver } from '../main/update'
 import {
@@ -13,10 +15,8 @@ import {
   isSolidComputation,
   isSolidMemo,
   isSolidStore,
-  markNodeID,
   markOwnerName,
   markOwnerType,
-  NodeIDMap,
 } from '../main/utils'
 import { encodeValue } from './serialize'
 import { InspectorUpdateMap, PropGetterState } from './types'
@@ -162,7 +162,6 @@ export function clearOwnerObservers(owner: Solid.Owner, observedPropsMap: Observ
 }
 
 // Globals set before collecting the owner details
-let NodeMap!: NodeIDMap<Element | Core.Store.StoreNode>
 let ValueMap!: ValueNodeMap
 let OnValueUpdate: Inspector.OnValueUpdate
 let OnPropStateChange: Inspector.OnPropStateChange
@@ -175,11 +174,12 @@ function mapSignalNode(
   handler: (nodeId: NodeID, value: unknown) => void,
 ): Mapped.Signal {
   const { value } = node
-  const id = markNodeID(node)
+  const isStore = isSolidStore(node)
+  const id = getSdtId(node, isStore ? ObjectType.Store : ObjectType.Signal)
   let name: string
   ValueMap.add(`${ValueItemType.Signal}:${id}`, () => node.value)
 
-  if (isSolidStore(node)) {
+  if (isStore) {
     name = getDisplayName(getStoreNodeName(value as Core.Store.StoreNode))
   } else {
     name = getNodeName(node)
@@ -190,7 +190,7 @@ function mapSignalNode(
     type: getNodeType(node) as NodeType.Memo | NodeType.Signal | NodeType.Store,
     name,
     id,
-    value: encodeValue(value, false, NodeMap),
+    value: encodeValue(value, false),
   }
 }
 
@@ -228,14 +228,14 @@ function mapProps(props: Solid.Component['props']) {
         const lastValue = getValue()
         record[key] = {
           getter: isStale ? PropGetterState.Stale : PropGetterState.Live,
-          value: lastValue !== $NOT_SET ? encodeValue(getValue(), false, NodeMap) : null,
+          value: lastValue !== $NOT_SET ? encodeValue(getValue(), false) : null,
         }
       }
       // VALUE
       else {
         record[key] = {
           getter: false,
-          value: encodeValue(desc.value, false, NodeMap),
+          value: encodeValue(desc.value, false),
         }
         // non-object props cannot be inspected (won't ever change and aren't deep)
         if (Array.isArray(desc.value) || isRecord(desc.value)) ValueMap.add(id, () => desc.value)
@@ -246,7 +246,7 @@ function mapProps(props: Solid.Component['props']) {
   return { props: { proxy: isProxy, record }, checkProxyProps }
 }
 
-export function collectOwnerDetails(
+export const collectOwnerDetails = /*#__PURE__*/ untrackedCallback(function (
   owner: Solid.Owner,
   config: {
     onPropStateChange: Inspector.OnPropStateChange
@@ -257,13 +257,12 @@ export function collectOwnerDetails(
   const { onValueUpdate } = config
 
   // Set globals
-  NodeMap = new NodeIDMap()
   ValueMap = new ValueNodeMap()
   OnValueUpdate = onValueUpdate
   OnPropStateChange = config.onPropStateChange
   PropsMap = config.observedPropsMap
 
-  const id = markNodeID(owner)
+  const id = getSdtId(owner, ObjectType.Owner)
   const type = markOwnerType(owner)
   const name = markOwnerName(owner)
   let { sourceMap, owned } = owner
@@ -303,7 +302,7 @@ export function collectOwnerDetails(
       observeValueUpdate(owner, () => onValueUpdate(ValueItemType.Value), $INSPECTOR)
     }
 
-    details.value = encodeValue(getValue(), false, NodeMap)
+    details.value = encodeValue(getValue(), false)
   }
 
   const onSignalUpdate = (signalId: NodeID) => onValueUpdate(`${ValueItemType.Signal}:${signalId}`)
@@ -329,12 +328,11 @@ export function collectOwnerDetails(
   const result = {
     details,
     valueMap: ValueMap,
-    nodeIdMap: NodeMap,
     checkProxyProps,
   }
 
   // clear globals
-  NodeMap = ValueMap = OnValueUpdate = OnPropStateChange = PropsMap = undefined!
+  ValueMap = OnValueUpdate = OnPropStateChange = PropsMap = undefined!
 
   return result
-}
+})

@@ -1,4 +1,7 @@
+export type { DGraphUpdate, SerializedDGraph } from './dependency'
 export * from './inspector/types'
 export * from './locator/types'
+export type { Debugger } from './main'
 export * from './main/constants'
 export * from './main/types'
+export type { StructureUpdates } from './structure'

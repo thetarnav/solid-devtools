@@ -68,6 +68,27 @@ export function interceptComputationRerun(
       }
 }
 
+const ComputationUpdateListeners = new WeakMap<Solid.Computation, Record<symbol, VoidFunction>>()
+
+export function observeComputationUpdate(
+  owner: Solid.Computation,
+  onRun: VoidFunction,
+  symbol = Symbol(),
+): void {
+  let map = ComputationUpdateListeners.get(owner)
+  if (!map) ComputationUpdateListeners.set(owner, (map = {}))
+  map[symbol] = onRun
+  interceptComputationRerun(owner, fn => {
+    fn()
+    for (const sym of Object.getOwnPropertySymbols(map)) map![sym]!()
+  })
+}
+
+export function removeComputationUpdateObserver(owner: Solid.Computation, symbol: symbol): void {
+  const map = ComputationUpdateListeners.get(owner)
+  if (map) delete map[symbol]
+}
+
 /**
  * Patches the owner/signal value, firing the callback on each update immediately as it happened.
  */

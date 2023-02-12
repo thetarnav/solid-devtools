@@ -71,4 +71,6 @@ export const content = style({
   width: 'max-content',
   height: 'max-content',
   minWidth: '100%',
+  minHeight: '100%',
+  position: 'relative',
 })

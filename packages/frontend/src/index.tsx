@@ -3,8 +3,8 @@ import { Component, JSX } from 'solid-js'
 import App from './App'
 import * as Controller from './controller'
 
-export { Controller } from './controller'
-export type { ClientListeners } from './controller'
+export { createController } from './controller'
+export type { Controller } from './controller'
 export { Icon, MountIcons } from './ui'
 export type { IconComponent } from './ui'
 
