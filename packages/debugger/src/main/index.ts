@@ -161,7 +161,7 @@ const plugin = createInternalRoot(() => {
   // Inspected Owner details:
   //
   const inspector = createInspector({
-    hub,
+    emit: hub.output.emit,
     enabled: debuggerEnabled,
     listenToInspectedNodeChange: inspectedStateBus.listen,
   })
@@ -170,10 +170,10 @@ const plugin = createInternalRoot(() => {
   // Dependency Graph
   //
   createDependencyGraph({
+    emit: hub.output.emit,
     enabled: dgraphEnabled,
     listenToInspectedStateChange: inspectedStateBus.listen,
     listenToViewChange: viewChange.listen,
-    emitDependencyGraph: graph => hub.output.emit('DgraphUpdate', graph),
     onNodeUpdate: pushNodeUpdate,
   })
 
@@ -181,6 +181,7 @@ const plugin = createInternalRoot(() => {
   // Locator
   //
   const locator = createLocator({
+    emit: hub.output.emit,
     listenToDebuggerEenable: debuggerEnabledBus.listen,
     locatorEnabled,
     setLocatorEnabledSignal: signal => toggleModules('locatorKeyPressSignal', () => signal),
@@ -199,14 +200,14 @@ const plugin = createInternalRoot(() => {
   )
 
   // intercept on-page components clicks and send them to the devtools overlay
+  // TODO: this shouldn't be abstracted away here
   locator.addClickInterceptor((e, component) => {
+    if (!modules.debugger) return
     e.preventDefault()
     e.stopPropagation()
     hub.output.emit('InspectedComponent', component.id)
     return false
   })
-
-  locator.onDebuggerHoveredComponentChange(data => hub.output.emit('HoveredComponent', data))
 
   hub.input.listen(e => {
     switch (e.name) {

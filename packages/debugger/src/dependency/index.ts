@@ -1,7 +1,7 @@
-import { Listen } from '@solid-primitives/event-bus'
+import { EmitterEmit, Listen } from '@solid-primitives/event-bus'
 import { throttle } from '@solid-primitives/scheduled'
 import { Accessor, createEffect } from 'solid-js'
-import { InspectedState } from '../main'
+import type { Debugger, InspectedState } from '../main'
 import { DevtoolsMainView } from '../main/constants'
 import { NodeID } from '../main/types'
 import { isSolidComponent, isSolidComputation, isSolidOwner } from '../main/utils'
@@ -12,10 +12,10 @@ export { SerializedDGraph } from './collect'
 export type DGraphUpdate = SerializedDGraph.Graph | null
 
 export function createDependencyGraph(props: {
+  emit: EmitterEmit<Debugger.OutputChannels>
   enabled: Accessor<boolean>
   listenToInspectedStateChange: Listen<InspectedState>
   listenToViewChange: Listen<DevtoolsMainView>
-  emitDependencyGraph: (update: DGraphUpdate) => void
   onNodeUpdate: (nodeId: NodeID) => void
 }) {
   let inspectedState: InspectedState = { signal: null, owner: null }
@@ -42,13 +42,13 @@ export function createDependencyGraph(props: {
         (!isSolidComputation(inspectedNode) || isSolidComponent(inspectedNode)))
     ) {
       clearListeners = null
-      props.emitDependencyGraph(null)
+      props.emit('DgraphUpdate', null)
       return
     }
 
     const dgraph = collectDependencyGraph(inspectedNode, { onNodeUpdate })
     clearListeners = dgraph.clearListeners
-    props.emitDependencyGraph(dgraph.graph)
+    props.emit('DgraphUpdate', dgraph.graph)
   }
   const triggerInspect = throttle(inspectDGraph, 200)
 

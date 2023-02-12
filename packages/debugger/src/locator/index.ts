@@ -1,6 +1,6 @@
 import { makeHoverElementListener } from '@solid-devtools/shared/primitives'
 import { warn } from '@solid-devtools/shared/utils'
-import { createEventBus, Listen } from '@solid-primitives/event-bus'
+import { EmitterEmit, Listen } from '@solid-primitives/event-bus'
 import { makeEventListener } from '@solid-primitives/event-listener'
 import { createKeyHold } from '@solid-primitives/keyboard'
 import { scheduleIdle } from '@solid-primitives/scheduled'
@@ -14,6 +14,7 @@ import {
   onCleanup,
   runWithOwner,
 } from 'solid-js'
+import type { Debugger } from '../main'
 import * as registry from '../main/componentRegistry'
 import { getObjectById, ObjectType } from '../main/id'
 import { createInternalRoot, enableRootsAutoattach } from '../main/roots'
@@ -33,6 +34,7 @@ import { ClickMiddleware, HighlightElementPayload, LocatorOptions } from './type
 export { markComponentLoc } from './markComponent'
 
 export function createLocator(props: {
+  emit: EmitterEmit<Debugger.OutputChannels>
   listenToDebuggerEenable: Listen<boolean>
   locatorEnabled: Accessor<boolean>
   setLocatorEnabledSignal(signal: Accessor<boolean>): void
@@ -103,17 +105,15 @@ export function createLocator(props: {
     createInternalRoot(() => attachElementOverlay(highlightedComponents))
   }, 1000)
 
-  const debuggerHoveredComponentBus = createEventBus<{ nodeId: NodeID; state: boolean }>()
-
   // notify of component hovered by using the debugger
   createEffect((prev: NodeID | undefined) => {
     const target = hoverTarget()
     if (!target) return
     const comp = registry.findComponent(target)
-    if (prev) debuggerHoveredComponentBus.emit({ nodeId: prev, state: false })
+    if (prev) props.emit('HoveredComponent', { nodeId: prev, state: false })
     if (comp) {
       const { id } = comp
-      debuggerHoveredComponentBus.emit({ nodeId: id, state: true })
+      props.emit('HoveredComponent', { nodeId: id, state: true })
       return id
     }
   })
@@ -193,7 +193,6 @@ export function createLocator(props: {
     useLocator,
     addClickInterceptor,
     setDevtoolsHighlightTarget: (target: HighlightElementPayload) => void setDevtoolsTarget(target),
-    onDebuggerHoveredComponentChange: debuggerHoveredComponentBus.listen,
     openElementSourceCode,
   }
 }

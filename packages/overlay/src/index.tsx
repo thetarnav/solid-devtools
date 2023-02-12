@@ -5,7 +5,7 @@ import { warn } from '@solid-devtools/shared/utils'
 import { createBodyCursor } from '@solid-primitives/cursor'
 import { makeEventListener } from '@solid-primitives/event-listener'
 import { clamp, tryOnCleanup } from '@solid-primitives/utils'
-import { Component, ComponentProps, createComputed, createSignal, Show } from 'solid-js'
+import { batch, Component, ComponentProps, createComputed, createSignal, Show } from 'solid-js'
 import { Dynamic, Portal } from 'solid-js/web'
 import { createOverlayController } from './controller'
 
@@ -43,8 +43,15 @@ const Overlay: Component<{
 }> = ({ defaultOpen, alwaysOpen, noPadding }) => {
   const debug = useDebugger()
   if (defaultOpen || alwaysOpen) debug.toggleEnabled(true)
-  const isOpen = debug.enabled
-  const setOpen = alwaysOpen ? () => {} : (enabled: boolean) => debug.toggleEnabled(enabled)
+  const [isOpen, _setOpen] = createSignal(alwaysOpen || debug.enabled())
+  const setOpen = alwaysOpen
+    ? () => {}
+    : (enabled: boolean) => {
+        batch(() => {
+          debug.toggleEnabled(enabled)
+          _setOpen(enabled)
+        })
+      }
 
   const isMobile = useIsMobile()
   const isTouch = useIsTouch()

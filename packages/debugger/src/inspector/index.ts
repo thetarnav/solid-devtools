@@ -1,8 +1,8 @@
 import { warn } from '@solid-devtools/shared/utils'
-import { Listen } from '@solid-primitives/event-bus'
+import { EmitterEmit, Listen } from '@solid-primitives/event-bus'
 import { scheduleIdle, throttle } from '@solid-primitives/scheduled'
 import { Accessor, createEffect } from 'solid-js'
-import { DebuggerEmitter, InspectedState } from '../main'
+import type { Debugger, InspectedState } from '../main'
 import { Mapped, Solid, ValueItemID } from '../main/types'
 import { makeSolidUpdateListener } from '../main/update'
 import {
@@ -23,7 +23,7 @@ export type ToggleInspectedValueData = { id: ValueItemID; selected: boolean }
  * Plugin module
  */
 export function createInspector(props: {
-  hub: DebuggerEmitter
+  emit: EmitterEmit<Debugger.OutputChannels>
   enabled: Accessor<boolean>
   listenToInspectedNodeChange: Listen<InspectedState>
 }) {
@@ -88,7 +88,7 @@ export function createInspector(props: {
         }
 
         // Emit updates
-        batchedUpdates.length && props.hub.output.emit('InspectorUpdate', batchedUpdates)
+        batchedUpdates.length && props.emit('InspectorUpdate', batchedUpdates)
       })
 
       const flushPropsCheck = throttle(flush, 200)
@@ -147,7 +147,7 @@ export function createInspector(props: {
         })
       : null
 
-    props.hub.output.emit('InspectedNodeDetails', result ? result.details : null)
+    props.emit('InspectedNodeDetails', result ? result.details : null)
     if (result) valueMap = result.valueMap
     lastDetails = result ? result.details : undefined
     checkProxyProps = (result && result.checkProxyProps) || null
