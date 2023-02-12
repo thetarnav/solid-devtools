@@ -8,7 +8,7 @@ import {
 } from 'solid-js'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { NodeType, TreeWalkerMode } from '../../main/constants'
-import { $setSdtId } from '../../main/id'
+import { $setSdtId, getSdtId, ObjectType } from '../../main/id'
 import { Mapped, Solid } from '../../main/types'
 import { getNodeName, getOwner } from '../../main/utils'
 import { ComputationUpdateHandler, walkSolidTree } from '../walker'
@@ -155,7 +155,12 @@ describe('TreeWalkerMode.Owners', () => {
       setA(1)
 
       expect(capturedComputationUpdates.length).toBe(1)
-      expect(capturedComputationUpdates[0]).toEqual(['#ff', computedOwner, false])
+      expect(capturedComputationUpdates[0]).toEqual([
+        '#ff',
+        computedOwner,
+        getSdtId(computedOwner, ObjectType.Owner),
+        false,
+      ])
 
       dispose()
     })
@@ -303,7 +308,12 @@ describe('TreeWalkerMode.Components', () => {
       expect(computationUpdates.length).toBe(4)
 
       for (let i = 0; i < 4; i++) {
-        expect(computationUpdates[i]).toEqual(['#ff', testComponents[i], false])
+        expect(computationUpdates[i]).toEqual([
+          '#ff',
+          testComponents[i],
+          getSdtId(testComponents[i]!, ObjectType.Owner),
+          false,
+        ])
       }
 
       dispose()
@@ -448,7 +458,12 @@ describe('TreeWalkerMode.DOM', () => {
       toTrigger.forEach(t => t())
 
       for (let i = 0; i < 3; i++) {
-        expect(computationUpdates[i]).toEqual(['#ff', testComponents[i], true])
+        expect(computationUpdates[i]).toEqual([
+          '#ff',
+          testComponents[i],
+          getSdtId(testComponents[i]!, ObjectType.Owner),
+          true,
+        ])
       }
 
       dispose()

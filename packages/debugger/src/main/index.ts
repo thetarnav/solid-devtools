@@ -140,13 +140,14 @@ const plugin = createInternalRoot(() => {
     inspectedStateBus.emit((inspectedState = { owner: owner ?? null, signal: signal ?? null }))
   }
 
-  //
-  // Structure & Computation updates:
-  //
+  // Computation and signal updates
   const pushNodeUpdate = createBatchedUpdateEmitter<NodeID>(updates => {
     hub.output.emit('NodeUpdates', updates)
   })
 
+  //
+  // Structure:
+  //
   const structure = createStructure({
     onStructureUpdate(updates) {
       hub.output.emit('StructureUpdates', updates)
@@ -169,7 +170,6 @@ const plugin = createInternalRoot(() => {
   //
   // Dependency Graph
   //
-
   createDependencyGraph({
     enabled: dgraphEnabled,
     listenToInspectedStateChange: inspectedStateBus.listen,

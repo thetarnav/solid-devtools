@@ -37,7 +37,7 @@ function observeComputation(owner: Solid.Computation, attachedData: Solid.Owner)
     void 0,
     RootId,
     attachedData,
-    getSdtId(owner, ObjectType.Owner),
+    getSdtId(attachedData, ObjectType.Owner),
   )
   const handler =
     isLeaf && Mode !== TreeWalkerMode.DOM
