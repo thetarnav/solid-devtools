@@ -66,13 +66,13 @@
   },
   "dependencies": {
     "@solid-primitives/event-bus": "^1.0.0",
-    "@solid-primitives/event-listener": "^2.2.3",
-    "@solid-primitives/media": "^2.0.3",
-    "@solid-primitives/refs": "^0.3.4",
-    "@solid-primitives/rootless": "^1.2.0",
-    "@solid-primitives/scheduled": "^1.1.0",
-    "@solid-primitives/styles": "^0.0.101",
+    "@solid-primitives/event-listener": "^2.2.6",
+    "@solid-primitives/media": "^2.1.0",
+    "@solid-primitives/refs": "^0.3.6",
+    "@solid-primitives/rootless": "^1.2.3",
+    "@solid-primitives/scheduled": "^1.2.1",
+    "@solid-primitives/styles": "^0.0.102",
     "@solid-primitives/utils": "^5.1.0",
-    "type-fest": "^3.5.1"
+    "type-fest": "^3.5.7"
   }
 }

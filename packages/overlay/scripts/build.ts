@@ -85,7 +85,6 @@ const commonOptions: esbuild.BuildOptions = {
   format: 'esm',
   bundle: true,
   loader: { '.css': 'text' },
-  watch: isDev,
   minify: !isDev,
   color: true,
   external: externals,
@@ -93,17 +92,25 @@ const commonOptions: esbuild.BuildOptions = {
 }
 
 // dev.js
-esbuild.build({
-  ...commonOptions,
-  entryPoints: [entryFile],
-  outfile: `dist/dev.js`,
-  plugins: [customPlugin('dev'), solidPlugin()],
-})
+esbuild
+  .context({
+    ...commonOptions,
+    entryPoints: [entryFile],
+    outfile: `dist/dev.js`,
+    plugins: [customPlugin('dev'), solidPlugin()],
+  })
+  .then(async ctx => {
+    isDev ? ctx.watch() : ctx.rebuild().then(() => ctx.dispose())
+  })
 
 // prod.js
-esbuild.build({
-  ...commonOptions,
-  entryPoints: [path.relative(cwd, 'src/prod.ts')],
-  outfile: `dist/prod.js`,
-  plugins: [customPlugin('prod')],
-})
+esbuild
+  .context({
+    ...commonOptions,
+    entryPoints: [path.relative(cwd, 'src/prod.ts')],
+    outfile: `dist/prod.js`,
+    plugins: [customPlugin('prod')],
+  })
+  .then(async ctx => {
+    isDev ? ctx.watch() : ctx.rebuild().then(() => ctx.dispose())
+  })

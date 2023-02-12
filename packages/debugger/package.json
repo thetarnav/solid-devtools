@@ -108,18 +108,18 @@
   },
   "dependencies": {
     "@solid-devtools/shared": "workspace:^0.11.0",
-    "@solid-primitives/bounds": "^0.0.105",
-    "@solid-primitives/cursor": "^0.0.103",
+    "@solid-primitives/bounds": "^0.0.107",
+    "@solid-primitives/cursor": "^0.0.105",
     "@solid-primitives/event-bus": "^1.0.0",
-    "@solid-primitives/event-listener": "^2.2.3",
-    "@solid-primitives/keyboard": "^1.0.3",
-    "@solid-primitives/platform": "^0.0.102",
-    "@solid-primitives/scheduled": "^1.2.0",
+    "@solid-primitives/event-listener": "^2.2.6",
+    "@solid-primitives/keyboard": "^1.0.7",
+    "@solid-primitives/platform": "^0.0.103",
+    "@solid-primitives/scheduled": "^1.2.1",
     "@solid-primitives/utils": "^5.1.0",
-    "type-fest": "^3.5.1"
+    "type-fest": "^3.5.7"
   },
   "peerDependencies": {
     "solid-js": "^1.6.9"
   },
-  "packageManager": "pnpm@7.20.0"
+  "packageManager": "pnpm@7.22.0"
 }

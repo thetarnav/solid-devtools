@@ -119,18 +119,18 @@
   },
   "devDependencies": {
     "@babel/core": "^7.18.13",
-    "@babel/generator": "^7.20.7",
-    "@babel/parser": "^7.20.7",
+    "@babel/generator": "^7.20.14",
+    "@babel/parser": "^7.20.15",
     "@babel/plugin-syntax-jsx": "^7.18.6",
-    "@babel/traverse": "^7.20.12",
-    "@types/babel__core": "^7.1.19",
+    "@babel/traverse": "^7.20.13",
+    "@types/babel__core": "^7.20.0",
     "@types/babel__generator": "^7.6.4",
     "@types/babel__traverse": "^7.18.2",
     "solid-start": "^0.2.9",
-    "tsup": "^6.5.0",
-    "typescript": "^4.9.3",
-    "vite": "^4.0.4",
-    "vitest": "^0.26.3"
+    "tsup": "^6.6.2",
+    "typescript": "^4.9.5",
+    "vite": "^4.1.1",
+    "vitest": "^0.28.4"
   },
   "dependencies": {
     "@babel/core": "^7.20.12",
@@ -140,14 +140,14 @@
     "@solid-devtools/shared": "workspace:^0.11.0",
     "@solid-primitives/event-bus": "^1.0.0",
     "@solid-primitives/utils": "^5.1.0",
-    "type-fest": "^3.5.1"
+    "type-fest": "^3.5.7"
   },
   "peerDependencies": {
     "solid-js": "^1.6.9",
     "vite": "^2.2.3 || ^3.0.0 || ^4.0.0"
   },
   "optionalDependencies": {
-    "solid-start": "^0.2.11"
+    "solid-start": "^0.2.20"
   },
-  "packageManager": "pnpm@7.20.0"
+  "packageManager": "pnpm@7.22.0"
 }

@@ -8,8 +8,7 @@ import {
   StructureUpdates,
   type TreeWalkerMode,
 } from '@solid-devtools/debugger/types'
-import { defer } from '@solid-devtools/shared/primitives'
-import { entries } from '@solid-primitives/utils'
+import { defer, entries } from '@solid-primitives/utils'
 import { batch, createEffect, createMemo, createSelector, createSignal, untrack } from 'solid-js'
 
 export namespace Structure {

@@ -1,10 +1,10 @@
-import { defer, makeHoverElementListener } from '@solid-devtools/shared/primitives'
+import { makeHoverElementListener } from '@solid-devtools/shared/primitives'
 import { warn } from '@solid-devtools/shared/utils'
 import { createEventBus, Listen } from '@solid-primitives/event-bus'
 import { makeEventListener } from '@solid-primitives/event-listener'
 import { createKeyHold } from '@solid-primitives/keyboard'
 import { scheduleIdle } from '@solid-primitives/scheduled'
-import { tryOnCleanup } from '@solid-primitives/utils'
+import { defer, tryOnCleanup } from '@solid-primitives/utils'
 import {
   Accessor,
   createEffect,

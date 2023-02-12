@@ -1,7 +1,8 @@
 import { CollapseToggle, Highlight, Icon } from '@/ui'
 import { NodeID, ValueType } from '@solid-devtools/debugger/types'
-import { createHover, createPingedSignal, defer } from '@solid-devtools/shared/primitives'
+import { createHover, createPingedSignal } from '@solid-devtools/shared/primitives'
 import { Entries } from '@solid-primitives/keyed'
+import { defer } from '@solid-primitives/utils'
 import clsx from 'clsx'
 import {
   Component,

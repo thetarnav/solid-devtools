@@ -55,7 +55,7 @@
     "typecheck": "tsc --noEmit --paths null"
   },
   "devDependencies": {
-    "tsup": "^6.5.0"
+    "tsup": "^6.6.2"
   },
   "dependencies": {
     "@solid-devtools/debugger": "workspace:^0.20.0",
@@ -65,5 +65,5 @@
   "peerDependencies": {
     "solid-js": "^1.6.9"
   },
-  "packageManager": "pnpm@7.20.0"
+  "packageManager": "pnpm@7.22.0"
 }

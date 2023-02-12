@@ -1,10 +1,10 @@
 import { useController } from '@/controller'
 import { Icon, Scrollable, ToggleButton, ToggleTabs } from '@/ui'
 import { NodeID, NodeType, TreeWalkerMode } from '@solid-devtools/debugger/types'
-import { defer } from '@solid-devtools/shared/primitives'
 import { createShortcut } from '@solid-primitives/keyboard'
 import { createResizeObserver } from '@solid-primitives/resize-observer'
 import { useRemSize } from '@solid-primitives/styles'
+import { defer } from '@solid-primitives/utils'
 import { assignInlineVars } from '@vanilla-extract/dynamic'
 import {
   Component,

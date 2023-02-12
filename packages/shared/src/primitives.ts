@@ -13,15 +13,12 @@ import {
 import {
   $TRACK,
   Accessor,
-  AccessorArray,
   batch,
   createMemo,
   createSignal,
-  EffectFunction,
   getListener,
   getOwner,
   MemoOptions,
-  NoInfer,
   onCleanup,
   Signal,
   SignalOptions,
@@ -132,48 +129,6 @@ export function makeHoverElementListener(onHover: (el: HTMLElement | null) => vo
   }
   makeEventListener(window, 'mouseover', handleHover)
   makeEventListener(document, 'mouseleave', handleHover.bind(void 0, { target: null }))
-}
-
-/**
- * Solid's `on` helper, but always defers and returns a provided initial value when if does instead of `undefined`.
- *
- * @param deps
- * @param fn
- * @param initialValue
- */
-export function defer<S, Next extends Prev, Prev = Next>(
-  deps: AccessorArray<S> | Accessor<S>,
-  fn: (input: S, prevInput: S, prev: undefined | NoInfer<Prev>) => Next,
-  initialValue: Next,
-): EffectFunction<undefined | NoInfer<Next>, NoInfer<Next>>
-export function defer<S, Next extends Prev, Prev = Next>(
-  deps: AccessorArray<S> | Accessor<S>,
-  fn: (input: S, prevInput: S, prev: undefined | NoInfer<Prev>) => Next,
-  initialValue?: undefined,
-): EffectFunction<undefined | NoInfer<Next>>
-export function defer<S, Next extends Prev, Prev = Next>(
-  deps: AccessorArray<S> | Accessor<S>,
-  fn: (input: S, prevInput: S, prev: undefined | NoInfer<Prev>) => Next,
-  initialValue?: Next,
-): EffectFunction<undefined | NoInfer<Next>> {
-  const isArray = Array.isArray(deps)
-  let prevInput: S
-  let shouldDefer = true
-  return prevValue => {
-    let input: S
-    if (isArray) {
-      input = Array(deps.length) as S
-      for (let i = 0; i < deps.length; i++) (input as any[])[i] = deps[i]()
-    } else input = deps()
-    if (shouldDefer) {
-      shouldDefer = false
-      prevInput = input
-      return initialValue
-    }
-    const result = untrack(() => fn(input, prevInput, prevValue))
-    prevInput = input
-    return result
-  }
 }
 
 export type Atom<T> = (<U extends T>(value: (prev: T) => U) => U) &
