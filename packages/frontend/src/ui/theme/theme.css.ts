@@ -116,9 +116,9 @@ export type Spacing = Prettify<
   UnionToIntersection<
     {
       [K in keyof typeof rawSpacing]: {
-        [K2 in `-${K}`]: `-${typeof rawSpacing[K]}`
+        [K2 in `-${K}`]: `-${(typeof rawSpacing)[K]}`
       } & {
-        [K2 in K]: typeof rawSpacing[K]
+        [K2 in K]: (typeof rawSpacing)[K]
       }
     }[keyof typeof rawSpacing]
   >
