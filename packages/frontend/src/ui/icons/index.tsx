@@ -261,6 +261,22 @@ const Triangle: ProxyIconComponent<'Triangle'> = ({ id }) => (
   </svg>
 )
 
+const Signal: ProxyIconComponent<'Signal'> = ({ id }) => (
+  <svg id={`sdt_icon_${id}`} viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="128" cy="128" r="96" fill="currentColor" opacity=".2"></circle>
+    <circle
+      cx="128"
+      cy="128"
+      r="96"
+      fill="none"
+      stroke="currentColor"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      stroke-width="16"
+    ></circle>
+  </svg>
+)
+
 const Root: ProxyIconComponent<'Root'> = ({ id }) => (
   <svg id={`sdt_icon_${id}`} fill="none" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
     <path
@@ -749,6 +765,7 @@ const embedIconComponents = {
   Options,
   Close,
   Triangle,
+  Signal,
   Root,
   Memo,
   Effect,

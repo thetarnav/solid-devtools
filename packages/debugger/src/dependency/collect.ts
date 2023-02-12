@@ -29,7 +29,7 @@ let Graph: SerializedDGraph.Graph
 let VisitedSources: Set<Solid.Signal>
 let VisitedObservers: Set<Solid.Computation>
 let DepthMap: Record<NodeID, number | undefined>
-let OnNodeUpdate: (node: Solid.Computation | Solid.Memo | Solid.Signal) => void
+let OnNodeUpdate: (id: NodeID) => void
 export type OnNodeUpdate = typeof OnNodeUpdate
 
 function observeNodeUpdate(
@@ -51,7 +51,7 @@ function addNodeToGraph(node: Solid.Signal | Solid.Memo | Solid.Computation) {
 
   // observe each mapped node, to update the graph when it changes
   const onNodeUpdate = OnNodeUpdate
-  observeNodeUpdate(node, () => onNodeUpdate(node))
+  observeNodeUpdate(node, () => onNodeUpdate(id))
 
   Graph[id] = {
     name: getNodeName(node),

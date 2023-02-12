@@ -3,7 +3,6 @@ import { throttle } from '@solid-primitives/scheduled'
 import { Accessor, createEffect } from 'solid-js'
 import { InspectedState } from '../main'
 import { DevtoolsMainView } from '../main/constants'
-import { getSdtId, ObjectType } from '../main/id'
 import { NodeID } from '../main/types'
 import { isSolidComponent, isSolidComputation, isSolidOwner } from '../main/utils'
 import { collectDependencyGraph, OnNodeUpdate, SerializedDGraph } from './collect'
@@ -22,11 +21,11 @@ export function createDependencyGraph(props: {
   let inspectedState: InspectedState = { signal: null, owner: null }
   let clearListeners: VoidFunction | null = null
 
-  const onNodeUpdate: OnNodeUpdate = node => {
+  const onNodeUpdate: OnNodeUpdate = id => {
     // separate the callback from the computation
     queueMicrotask(() => {
       if (!props.enabled()) return
-      props.onNodeUpdate(getSdtId(node, isSolidOwner(node) ? ObjectType.Owner : ObjectType.Signal))
+      props.onNodeUpdate(id)
       triggerInspect()
     })
   }

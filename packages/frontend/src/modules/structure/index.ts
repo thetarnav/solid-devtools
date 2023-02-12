@@ -9,7 +9,6 @@ import {
   type TreeWalkerMode,
 } from '@solid-devtools/debugger/types'
 import { defer } from '@solid-devtools/shared/primitives'
-import { createEventBus } from '@solid-primitives/event-bus'
 import { entries } from '@solid-primitives/utils'
 import { batch, createEffect, createMemo, createSelector, createSignal, untrack } from 'solid-js'
 
@@ -212,12 +211,6 @@ export default function createStructure() {
     }
   }
 
-  const computationUpdate = createEventBus<NodeID>()
-
-  client.NodeUpdates.listen(updated => {
-    updated.forEach(id => computationUpdate.emit(id))
-  })
-
   const [searchResult, setSearchResult] = createSignal<NodeID[]>()
   const isSearched = createSelector(searchResult, (node: NodeID, o) => !!o && o.includes(node))
 
@@ -270,7 +263,6 @@ export default function createStructure() {
     inspectedNode,
     updateStructure,
     isSearched,
-    listenToComputationUpdate: computationUpdate.listen,
     findNode,
     getRootNode,
     getClosestComponentNode,

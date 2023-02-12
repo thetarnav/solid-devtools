@@ -2,7 +2,7 @@ import { Debugger, DebuggerModule, DevtoolsMainView, NodeID } from '@solid-devto
 import { defer } from '@solid-devtools/shared/primitives'
 import { createContextProvider } from '@solid-primitives/context'
 import { SECOND } from '@solid-primitives/date'
-import { batchEmits, createEventHub, EventBus } from '@solid-primitives/event-bus'
+import { batchEmits, createEventBus, createEventHub, EventBus } from '@solid-primitives/event-bus'
 import { debounce } from '@solid-primitives/scheduled'
 import { batch, createEffect, createMemo, createSelector, createSignal, onCleanup } from 'solid-js'
 import createInspector from './modules/inspector'
@@ -151,6 +151,12 @@ const [Provider, useControllerCtx] = createContextProvider(
     createEffect(defer(openedView, devtools.ViewChange.emit))
 
     //
+    // Node updates - signals and computations updating
+    //
+    const nodeUpdates = createEventBus<NodeID>()
+    client.NodeUpdates.listen(updated => updated.forEach(id => nodeUpdates.emit(id)))
+
+    //
     // INSPECTOR
     //
     const inspector = createInspector()
@@ -206,6 +212,10 @@ const [Provider, useControllerCtx] = createContextProvider(
       options,
       controller,
       viewCache,
+      listenToNodeUpdates: nodeUpdates.listen,
+      listenToNodeUpdate(id: NodeID, fn: VoidFunction) {
+        return nodeUpdates.listen(updatedId => updatedId === id && fn())
+      },
     }
   },
 )

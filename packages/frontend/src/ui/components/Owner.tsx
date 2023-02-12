@@ -1,6 +1,8 @@
 import { NodeType } from '@solid-devtools/debugger'
+import { createPingedSignal } from '@solid-devtools/shared/primitives'
 import { Component, createMemo, JSX } from 'solid-js'
-import { Icon, IconComponent } from '..'
+import Icon, { IconComponent } from '../icons'
+import { Highlight } from './highlight/Highlight'
 import * as styles from './Owner.css'
 
 export const NodeTypeIcon: Component<{
@@ -24,6 +26,8 @@ export const NodeTypeIcon: Component<{
           return Icon.Computation
         case NodeType.Context:
           return Icon.Context
+        case NodeType.Signal:
+          return Icon.Signal
       }
     })()
     if (IconComp === prevIcon) return prevRendered
@@ -47,6 +51,8 @@ export const NodeName: Component<{
         return <span class={styles.componentName}>{props.name}</span>
       case NodeType.Element:
         return <span class={styles.elementName}>{props.name}</span>
+      case NodeType.Signal:
+        return <span class={styles.signalName}>{props.name}</span>
       default:
         return <span class={styles.name}>{props.name}</span>
     }
@@ -69,4 +75,17 @@ export const OwnerName: Component<{
       <NodeName name={props.name} type={props.type} />
     </span>
   )
+}
+
+export function createHighlightedOwnerName() {
+  const [isUpdated, pingUpdated] = createPingedSignal()
+  return {
+    isUpdated,
+    pingUpdated,
+    OwnerName: (props: Parameters<typeof OwnerName>[0]) => (
+      <Highlight highlight={isUpdated()} isSignal={props.type === NodeType.Signal}>
+        <OwnerName {...props} />
+      </Highlight>
+    ),
+  }
 }

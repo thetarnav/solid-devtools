@@ -182,7 +182,8 @@ const DisplayStructureTree: Component = () => {
       return set
     })
 
-  const { inspector, hovered } = useController()
+  const ctx = useController()
+  const { inspector, hovered } = ctx
   const structure = useStructure()
 
   let lastVirtualStart = 0
@@ -358,11 +359,7 @@ const DisplayStructureTree: Component = () => {
                     owner={data.node}
                     isHovered={hovered.isNodeHovered(id) || structure.isSearched(id)}
                     isSelected={inspector.isInspected(id)}
-                    listenToUpdate={listener =>
-                      structure.listenToComputationUpdate(
-                        updatedId => updatedId === id && listener(),
-                      )
-                    }
+                    listenToUpdate={listener => ctx.listenToNodeUpdate(id, listener)}
                     onHoverChange={state => hovered.toggleHoveredNode(id, 'node', state)}
                     onInspectChange={inspected =>
                       inspector.setInspectedOwner(inspected ? id : null)

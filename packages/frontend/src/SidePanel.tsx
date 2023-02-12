@@ -1,10 +1,9 @@
-import { Accessor, createContext, createSignal, Match, Switch } from 'solid-js'
+import { createHighlightedOwnerName, Icon, ToggleTabs } from '@/ui'
+import { Accessor, createContext, createEffect, createSignal, Match, Switch } from 'solid-js'
 import { useController } from './controller'
 import DgraphView from './modules/dependency/DgraphView'
 import InspectorView from './modules/inspector/Inspector'
 import * as styles from './side-panel.css'
-import { Icon, ToggleTabs } from './ui'
-import { OwnerName } from './ui/components/Owner'
 
 export const SidePanelCtx = createContext<{
   openPanel: Accessor<'inspector' | 'dgraph'>
@@ -12,7 +11,8 @@ export const SidePanelCtx = createContext<{
 }>()
 
 export function createSidePanel() {
-  const { inspector } = useController()
+  const ctx = useController()
+  const { inspector } = ctx
   const { state, openComponentLocation, setInspectedOwner } = inspector
 
   const tabsTitleMap = {
@@ -21,6 +21,12 @@ export function createSidePanel() {
   } as const
 
   const [openPanel, setOpenPanel] = createSignal<keyof typeof tabsTitleMap>('inspector')
+
+  const { OwnerName, pingUpdated } = createHighlightedOwnerName()
+  createEffect(() => {
+    const id = inspector.inspected.ownerId
+    id && ctx.listenToNodeUpdate(id, pingUpdated)
+  })
 
   function SidePanel() {
     return (

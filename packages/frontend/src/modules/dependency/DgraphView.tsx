@@ -1,5 +1,5 @@
 import { useController } from '@/controller'
-import { OwnerName, Scrollable } from '@/ui'
+import { createHighlightedOwnerName, Scrollable } from '@/ui'
 import { NodeID, SerializedDGraph } from '@solid-devtools/debugger/types'
 import { createHover } from '@solid-devtools/shared/primitives'
 import { assignInlineVars } from '@vanilla-extract/dynamic'
@@ -100,9 +100,13 @@ const GraphNode: Component<{
   onInspect: VoidFunction
   isHovered: boolean
   onHoverChange: (hovered: boolean) => void
+  listenToUpdate(cb: VoidFunction): VoidFunction
 }> = props => {
   const { name, type } = props.node
   const hoverProps = createHover(props.onHoverChange)
+
+  const { pingUpdated, OwnerName } = createHighlightedOwnerName()
+  props.listenToUpdate(pingUpdated)
 
   return (
     <div
@@ -119,7 +123,8 @@ const GraphNode: Component<{
 }
 
 const DgraphView: Component = () => {
-  const { inspector, hovered } = useController()
+  const ctx = useController()
+  const { inspector, hovered } = ctx
   const dgraph = createDependencyGraph()
 
   const order = createMemo<ReadonlyDeep<ReturnType<typeof calculateNodeOrder>> | null>(
@@ -160,6 +165,7 @@ const DgraphView: Component = () => {
                       onInspect={() => dgraph.inspectNode(id)}
                       isHovered={hovered.isNodeHovered(id)}
                       onHoverChange={state => hovered.toggleHoveredNode(id, 'node', state)}
+                      listenToUpdate={listener => ctx.listenToNodeUpdate(id, listener)}
                     />
                   )}
                 </For>
