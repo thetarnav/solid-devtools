@@ -1,5 +1,26 @@
 # @solid-devtools/logger
 
+## 0.6.0
+
+### Minor Changes
+
+- de40800: #### Dependency graph
+
+  Adds a dependency graph to the debugger. It collcts observers and sources of currently inspected computation or signal.
+
+  Breaking changes to the debugger emitter API - instead of events being emitted and listened to individually, now they all can be listened to at once which makes it easier to add new events in the future and maintaining the debugger - devtools bridge implementation in packages that use it.
+
+  Closes #113
+  Closes #208
+  Closes #213
+  Fixes #210
+
+### Patch Changes
+
+- Updated dependencies [de40800]
+  - @solid-devtools/debugger@0.20.0
+  - @solid-devtools/shared@0.11.0
+
 ## 0.5.6
 
 ### Patch Changes
