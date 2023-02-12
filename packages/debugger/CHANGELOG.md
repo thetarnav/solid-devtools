@@ -1,5 +1,11 @@
 # @solid-devtools/debugger
 
+## 0.20.2
+
+### Patch Changes
+
+- 0c98076: Switch back the default structure view mode to Components.
+
 ## 0.20.1
 
 ### Patch Changes
