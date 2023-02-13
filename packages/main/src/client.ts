@@ -25,7 +25,7 @@ createInternalRoot(() => {
   createEffect(() => {
     if (!debug.enabled()) return
 
-    if (loadedBefore) debug.emit('ForceUpdate')
+    if (loadedBefore) debug.emit('ResetState')
     else loadedBefore = true
 
     // pass all the devtools events to the debugger

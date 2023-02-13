@@ -17,6 +17,8 @@ function separate<T>(obj: T, callback: (value: T) => void): void {
 export function Devtools(props: DevtoolsProps) {
   const debug = useDebugger()
 
+  debug.emit('ResetState')
+
   onCleanup(() => debug.emit('InspectNode', null))
 
   const { bridge, Devtools: Frontend } = createDevtools()

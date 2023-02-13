@@ -21,7 +21,7 @@ function App() {
 
   // in development — force update the graph on load to work with hot reloading
   if (import.meta.env.DEV) {
-    toBackground('ForceUpdate')
+    toBackground('ResetState')
   }
 
   once(fromBackground, 'Versions', v => setVersions(v))

@@ -31,7 +31,7 @@ export namespace Debugger {
   }
 
   export type InputChannels = {
-    ForceUpdate: void
+    ResetState: void
     InspectNode: { ownerId: NodeID | null; signalId: NodeID | null } | null
     InspectValue: ToggleInspectedValueData
     HighlightElementChange: HighlightElementPayload
@@ -211,8 +211,13 @@ const plugin = createInternalRoot(() => {
 
   hub.input.listen(e => {
     switch (e.name) {
-      case 'ForceUpdate':
-        return structure.forceUpdateAllRoots()
+      case 'ResetState': {
+        // reset all the internal state
+        inspectedStateBus.emit((inspectedState = { owner: null, signal: null }))
+        currentView = DEFAULT_MAIN_VIEW
+        structure.resetTreeWalkerMode()
+        break
+      }
       case 'HighlightElementChange':
         return locator.setDevtoolsHighlightTarget(e.details)
       case 'InspectNode':
