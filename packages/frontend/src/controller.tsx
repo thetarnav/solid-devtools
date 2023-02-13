@@ -25,7 +25,7 @@ type ToEventBusChannels<T extends Record<string, any>> = {
 
 function createDebuggerBridge() {
   const output = createEventHub<ToEventBusChannels<Debugger.InputChannels>>($ => ({
-    ForceUpdate: $(),
+    ResetState: $(),
     InspectNode: $(),
     InspectValue: $(),
     HighlightElementChange: $(),
