@@ -1,5 +1,5 @@
 import { createInternalRoot, useDebugger } from '@solid-devtools/debugger'
-import { Devtools, Icon, MountIcons } from '@solid-devtools/frontend'
+import { Icon, MountIcons } from '@solid-devtools/frontend'
 import { useIsMobile, useIsTouch } from '@solid-devtools/shared/primitives'
 import { warn } from '@solid-devtools/shared/utils'
 import { createBodyCursor } from '@solid-primitives/cursor'
@@ -7,7 +7,7 @@ import { makeEventListener } from '@solid-primitives/event-listener'
 import { clamp, tryOnCleanup } from '@solid-primitives/utils'
 import { batch, Component, ComponentProps, createComputed, createSignal, Show } from 'solid-js'
 import { Dynamic, Portal } from 'solid-js/web'
-import { createOverlayController } from './controller'
+import { Devtools } from './controller'
 
 import frontendStyles from '@solid-devtools/frontend/dist/index.css'
 import overlayStyles from './styles.css'
@@ -98,10 +98,7 @@ const Overlay: Component<{
           </Show>
           <div class="overlay__container__inner">
             <Show when={isOpen()}>
-              {() => {
-                const controller = createOverlayController()
-                return <Devtools controller={controller} headerSubtitle="overlay" />
-              }}
+              <Devtools headerSubtitle="overlay" />
             </Show>
           </div>
         </div>

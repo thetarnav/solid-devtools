@@ -63,7 +63,7 @@ const Options: Component = () => {
   )
 }
 
-const App: Component<{ headerSubtitle?: JSX.Element }> = props => {
+export const App: Component<{ headerSubtitle?: JSX.Element }> = props => {
   // side panel is created here to keep the state between renders
   const sidePanel = createSidePanel()
 
@@ -95,5 +95,3 @@ const App: Component<{ headerSubtitle?: JSX.Element }> = props => {
     </div>
   )
 }
-
-export default App

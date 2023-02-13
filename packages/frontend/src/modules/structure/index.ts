@@ -169,8 +169,7 @@ export function getNodePath(node: Structure.Node): Structure.Node[] {
 
 export default function createStructure() {
   const ctx = useController()
-  const { inspector } = ctx
-  const { client, devtools } = ctx.controller
+  const { inspector, bridge } = ctx
   const cachedInitialState = ctx.viewCache.get(DevtoolsMainView.Structure)
 
   const [mode, setMode] = createSignal<TreeWalkerMode>(
@@ -248,14 +247,14 @@ export default function createStructure() {
   //
   // Listen to Client Events
   //
-  client.ResetPanel.listen(() => {
+  bridge.input.ResetPanel.listen(() => {
     updateStructure(null)
   })
 
-  client.StructureUpdates.listen(updateStructure)
+  bridge.input.StructureUpdates.listen(updateStructure)
 
   // TREE VIEW MODE
-  createEffect(defer(mode, devtools.TreeViewModeChange.emit))
+  createEffect(defer(mode, bridge.output.TreeViewModeChange.emit))
 
   return {
     state,

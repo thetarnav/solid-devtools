@@ -4,17 +4,27 @@ import { SECOND } from '@solid-primitives/date'
 import { batchEmits, createEventBus, createEventHub, EventBus } from '@solid-primitives/event-bus'
 import { debounce } from '@solid-primitives/scheduled'
 import { defer } from '@solid-primitives/utils'
-import { batch, createEffect, createMemo, createSelector, createSignal, onCleanup } from 'solid-js'
+import {
+  batch,
+  createEffect,
+  createMemo,
+  createSelector,
+  createSignal,
+  JSX,
+  onCleanup,
+} from 'solid-js'
+import { App } from './App'
 import createInspector from './modules/inspector'
 import type { Structure } from './modules/structure'
+import { ErrorOverlay } from './ui'
 
 // TODO: add to solid-primitives/event-bus
 type ToEventBusChannels<T extends Record<string, any>> = {
   [K in keyof T]: EventBus<T[K]>
 }
 
-export function createController() {
-  const devtools = createEventHub<ToEventBusChannels<Debugger.InputChannels>>($ => ({
+function createDebuggerBridge() {
+  const output = createEventHub<ToEventBusChannels<Debugger.InputChannels>>($ => ({
     ForceUpdate: $(),
     InspectNode: $(),
     InspectValue: $(),
@@ -27,7 +37,7 @@ export function createController() {
 
   // Listener of the client events (from the debugger) will be called synchronously under `batch`
   // to make sure that the state is updated before the effect queue is flushed.
-  const client = createEventHub<ToEventBusChannels<Debugger.OutputChannels>>($ => ({
+  const input = createEventHub<ToEventBusChannels<Debugger.OutputChannels>>($ => ({
     ResetPanel: batchEmits($()),
     InspectedNodeDetails: batchEmits($()),
     StructureUpdates: batchEmits($()),
@@ -39,10 +49,34 @@ export function createController() {
     DgraphUpdate: batchEmits($()),
   }))
 
-  return { client, devtools }
+  return { input, output }
 }
 
-export type Controller = ReturnType<typeof createController>
+export type DebuggerBridge = ReturnType<typeof createDebuggerBridge>
+
+export type DevtoolsProps = {
+  errorOverlayFooter?: JSX.Element
+  headerSubtitle?: JSX.Element
+  useShortcuts?: boolean
+  catchWindowErrors?: boolean
+}
+
+export function createDevtools() {
+  const bridge = createDebuggerBridge()
+
+  return {
+    bridge,
+    Devtools(props: DevtoolsProps) {
+      return (
+        <ErrorOverlay footer={props.errorOverlayFooter} catchWindowErrors={props.catchWindowErrors}>
+          <Provider bridge={bridge} options={{ useShortcuts: props.useShortcuts ?? false }}>
+            <App headerSubtitle={props.headerSubtitle} />
+          </Provider>
+        </ErrorOverlay>
+      )
+    },
+  }
+}
 
 /**
  * Views when disposed can cache their state to be restored when opened again.
@@ -85,9 +119,7 @@ function createViewCache() {
 }
 
 const [Provider, useControllerCtx] = createContextProvider(
-  ({ controller, options }: { controller: Controller; options: { useShortcuts: boolean } }) => {
-    const { client, devtools } = controller
-
+  ({ bridge, options }: { bridge: DebuggerBridge; options: { useShortcuts: boolean } }) => {
     //
     // LOCATOR
     //
@@ -98,7 +130,7 @@ const [Provider, useControllerCtx] = createContextProvider(
     // send devtools locator state
     createEffect(
       defer(devtoolsLocatorEnabled, enabled =>
-        devtools.ToggleModule.emit({ module: DebuggerModule.Locator, enabled }),
+        bridge.output.ToggleModule.emit({ module: DebuggerModule.Locator, enabled }),
       ),
     )
 
@@ -119,7 +151,7 @@ const [Provider, useControllerCtx] = createContextProvider(
     } | null>(null, { equals: (a, b) => a?.id === b?.id })
 
     // highlight hovered element
-    createEffect(defer(extHoveredNode, devtools.HighlightElementChange.emit))
+    createEffect(defer(extHoveredNode, bridge.output.HighlightElementChange.emit))
 
     const hoveredId = createMemo(() => {
       const extNode = extHoveredNode()
@@ -148,13 +180,13 @@ const [Provider, useControllerCtx] = createContextProvider(
       setOpenedView(view)
     }
 
-    createEffect(defer(openedView, devtools.ViewChange.emit))
+    createEffect(defer(openedView, bridge.output.ViewChange.emit))
 
     //
     // Node updates - signals and computations updating
     //
     const nodeUpdates = createEventBus<NodeID>()
-    client.NodeUpdates.listen(updated => updated.forEach(id => nodeUpdates.emit(id)))
+    bridge.input.NodeUpdates.listen(updated => updated.forEach(id => nodeUpdates.emit(id)))
 
     //
     // INSPECTOR
@@ -162,36 +194,36 @@ const [Provider, useControllerCtx] = createContextProvider(
     const inspector = createInspector()
 
     // set inspected node
-    createEffect(defer(inspector.inspectedNode, devtools.InspectNode.emit))
+    createEffect(defer(inspector.inspectedNode, bridge.output.InspectNode.emit))
 
     // toggle inspected value/prop/signal
-    inspector.setOnInspectValue(devtools.InspectValue.emit)
+    inspector.setOnInspectValue(bridge.output.InspectValue.emit)
 
     // open component location
-    inspector.setOnOpenLocation(devtools.OpenLocation.emit)
+    inspector.setOnOpenLocation(bridge.output.OpenLocation.emit)
 
     //
     // Client events
     //
-    client.ResetPanel.listen(() => {
+    bridge.input.ResetPanel.listen(() => {
       setClientLocatorState(false)
       setDevtoolsLocatorState(false)
       inspector.setInspectedOwner(null)
     })
 
-    client.InspectedNodeDetails.listen(inspector.setDetails)
-    client.InspectorUpdate.listen(inspector.update)
+    bridge.input.InspectedNodeDetails.listen(inspector.setDetails)
+    bridge.input.InspectorUpdate.listen(inspector.update)
 
-    client.HoveredComponent.listen(({ nodeId, state }) => {
+    bridge.input.HoveredComponent.listen(({ nodeId, state }) => {
       setClientHoveredNode(p => (state ? nodeId : p && p === nodeId ? null : p))
     })
 
-    client.InspectedComponent.listen(node => {
+    bridge.input.InspectedComponent.listen(node => {
       inspector.setInspectedOwner(node)
       setDevtoolsLocatorState(false)
     })
 
-    client.LocatorModeChange.listen(setClientLocatorState)
+    bridge.input.LocatorModeChange.listen(setClientLocatorState)
 
     return {
       locator: {
@@ -210,7 +242,7 @@ const [Provider, useControllerCtx] = createContextProvider(
       },
       inspector,
       options,
-      controller,
+      bridge,
       viewCache,
       listenToNodeUpdates: nodeUpdates.listen,
       listenToNodeUpdate(id: NodeID, fn: VoidFunction) {
