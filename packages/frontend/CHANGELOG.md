@@ -1,5 +1,13 @@
 # @solid-devtools/frontend
 
+## 0.7.1
+
+### Patch Changes
+
+- 0c98076: Switch back the default structure view mode to Components.
+- Updated dependencies [0c98076]
+  - @solid-devtools/debugger@0.20.2
+
 ## 0.7.0
 
 ### Minor Changes

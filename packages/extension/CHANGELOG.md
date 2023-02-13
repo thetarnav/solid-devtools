@@ -1,5 +1,13 @@
 # solid-devtools-extension
 
+## 0.21.1
+
+### Patch Changes
+
+- 0c98076: Switch back the default structure view mode to Components.
+- Updated dependencies [0c98076]
+  - @solid-devtools/frontend@0.7.1
+
 ## 0.21.0
 
 ### Minor Changes
