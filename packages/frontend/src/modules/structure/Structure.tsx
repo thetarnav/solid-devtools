@@ -279,7 +279,7 @@ const DisplayStructureTree: Component = () => {
 
   // Index of the inspected node in the collapsed list
   const inspectedIndex = createMemo(() => {
-    const id = inspector.inspected.ownerId
+    const id = inspector.inspected.treeWalkerOwnerId
     return id ? getNodeIndexById(id) : -1
   })
 
@@ -298,7 +298,7 @@ const DisplayStructureTree: Component = () => {
   // Scroll to selected node when it changes
   // listen to inspected ID, instead of node, because node reference can change
   createEffect(() => {
-    if (!inspector.inspected.ownerId) return
+    if (!inspector.inspected.treeWalkerOwnerId) return
     // Run in next tick to ensure the scroll data is updated and virtual list recalculated
     // inspect node -> open inspector -> container changes height -> scroll data changes -> virtual list changes -> scroll to node
     setTimeout(() => {
@@ -358,12 +358,10 @@ const DisplayStructureTree: Component = () => {
                   <OwnerNode
                     owner={data.node}
                     isHovered={hovered.isNodeHovered(id) || structure.isSearched(id)}
-                    isSelected={inspector.isInspected(id)}
+                    isSelected={inspector.isInspectedTreeWalkerOwner(id)}
                     listenToUpdate={listener => ctx.listenToNodeUpdate(id, listener)}
                     onHoverChange={state => hovered.toggleHoveredNode(id, 'node', state)}
-                    onInspectChange={inspected =>
-                      inspector.setInspectedOwner(inspected ? id : null)
-                    }
+                    onInspectChange={() => inspector.toggleInspectedOwner(id)}
                     toggleCollapsed={toggleCollapsed}
                     isCollapsed={collapsed().has(data.node)}
                   />

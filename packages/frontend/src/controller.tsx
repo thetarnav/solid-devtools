@@ -39,6 +39,7 @@ function createDebuggerBridge() {
   // to make sure that the state is updated before the effect queue is flushed.
   const input = createEventHub<ToEventBusChannels<Debugger.OutputChannels>>($ => ({
     ResetPanel: batchEmits($()),
+    InspectedState: batchEmits($()),
     InspectedNodeDetails: batchEmits($()),
     StructureUpdates: batchEmits($()),
     NodeUpdates: batchEmits($()),
@@ -191,16 +192,7 @@ const [Provider, useControllerCtx] = createContextProvider(
     //
     // INSPECTOR
     //
-    const inspector = createInspector()
-
-    // set inspected node
-    createEffect(defer(inspector.inspectedNode, bridge.output.InspectNode.emit))
-
-    // toggle inspected value/prop/signal
-    inspector.setOnInspectValue(bridge.output.InspectValue.emit)
-
-    // open component location
-    inspector.setOnOpenLocation(bridge.output.OpenLocation.emit)
+    const inspector = createInspector({ bridge })
 
     //
     // Client events
@@ -210,9 +202,6 @@ const [Provider, useControllerCtx] = createContextProvider(
       setDevtoolsLocatorState(false)
       inspector.setInspectedOwner(null)
     })
-
-    bridge.input.InspectedNodeDetails.listen(inspector.setDetails)
-    bridge.input.InspectorUpdate.listen(inspector.update)
 
     bridge.input.HoveredComponent.listen(({ nodeId, state }) => {
       setClientHoveredNode(p => (state ? nodeId : p && p === nodeId ? null : p))

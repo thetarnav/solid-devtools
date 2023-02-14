@@ -193,7 +193,7 @@ export default function createStructure() {
   }))
 
   const inspectedNode = createMemo(() => {
-    const id = inspector.inspected.ownerId
+    const id = inspector.inspected.treeWalkerOwnerId
     return id ? findNode(id) : null
   })
 
