@@ -7,5 +7,6 @@
   "useTabs": false,
   "arrowParens": "avoid",
   "bracketSpacing": true,
+  "endOfLine": "lf",
   "plugins": ["prettier-plugin-organize-imports"]
 }
