@@ -1,5 +1,17 @@
 # @solid-devtools/debugger
 
+## 0.21.0
+
+### Minor Changes
+
+- 811b4bb: Improve management of inspected state. When inspecting nodes that are omitted from the structure view (if displaying only components) the closest node will be highlighted instead.
+- b7514c5: Fix treeview mode not resetting when the devtools get closed. Rename the `ForceUpdate` event to `ResetState`.
+
+### Patch Changes
+
+- a99d42b: Fix opening component location with the overlay.
+- cbe62bd: Fix component inspected with locator not loosing hover state.
+
 ## 0.20.2
 
 ### Patch Changes

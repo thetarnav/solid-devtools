@@ -1,6 +1,6 @@
 {
   "name": "@solid-devtools/overlay",
-  "version": "0.5.1",
+  "version": "0.6.0",
   "description": "On-page Devtools Overlay for SolidJS Applications.",
   "license": "MIT",
   "author": "Damian Tarnawski <gthetarnav@gmail.com>",
@@ -43,8 +43,8 @@
     "typecheck": "tsc --noEmit --paths null"
   },
   "dependencies": {
-    "@solid-devtools/debugger": "workspace:^0.20.1",
-    "@solid-devtools/frontend": "workspace:^0.7.0",
+    "@solid-devtools/debugger": "workspace:^0.21.0",
+    "@solid-devtools/frontend": "workspace:^0.8.0",
     "@solid-devtools/shared": "workspace:^0.11.0",
     "@solid-primitives/cursor": "^0.0.105",
     "@solid-primitives/event-listener": "^2.2.6",
