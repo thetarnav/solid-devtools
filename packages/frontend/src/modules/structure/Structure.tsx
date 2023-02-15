@@ -18,7 +18,7 @@ import {
 } from 'solid-js'
 import type { Structure } from '.'
 import createStructure from '.'
-import { OwnerNode } from './OwnerNode'
+import { OwnerNode } from './owner-node'
 import { OwnerPath } from './Path'
 import * as styles from './structure.css'
 import { getVirtualVars } from './virtual'

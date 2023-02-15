@@ -1,6 +1,7 @@
 import { NodeID, NodeType, StructureUpdates } from '@solid-devtools/debugger/types'
 import { describe, expect, test } from 'vitest'
-import { reconcileStructure, Structure } from '..'
+import type { Structure } from '..'
+import { reconcileStructure } from '../reconcile'
 
 describe('reconcileStructure', () => {
   let updated: StructureUpdates['updated'] = {
