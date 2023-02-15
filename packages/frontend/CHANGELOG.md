@@ -1,5 +1,21 @@
 # @solid-devtools/frontend
 
+## 0.8.0
+
+### Minor Changes
+
+- 811b4bb: Improve management of inspected state. When inspecting nodes that are omitted from the structure view (if displaying only components) the closest node will be highlighted instead.
+- f1b90ba: Change the API of using the frontend package.
+
+### Patch Changes
+
+- a99d42b: Improve displaying location of inspected components.
+- Updated dependencies [a99d42b]
+- Updated dependencies [811b4bb]
+- Updated dependencies [cbe62bd]
+- Updated dependencies [b7514c5]
+  - @solid-devtools/debugger@0.21.0
+
 ## 0.7.1
 
 ### Patch Changes

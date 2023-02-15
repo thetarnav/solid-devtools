@@ -14,10 +14,10 @@
     "vite": "^4.1.1"
   },
   "dependencies": {
-    "@solid-devtools/overlay": "workspace:^0.5.1",
+    "@solid-devtools/overlay": "workspace:^0.6.0",
     "@solidjs/meta": "^0.28.2",
     "@solidjs/router": "^0.7.0",
-    "solid-devtools": "workspace:^0.25.0",
+    "solid-devtools": "workspace:^0.26.0",
     "solid-js": "^1.6.10",
     "solid-start": "^0.2.20",
     "undici": "^5.18.0"

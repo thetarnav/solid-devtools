@@ -1,5 +1,22 @@
 # solid-devtools-extension
 
+## 0.22.0
+
+### Minor Changes
+
+- 811b4bb: Improve management of inspected state. When inspecting nodes that are omitted from the structure view (if displaying only components) the closest node will be highlighted instead.
+- b7514c5: Fix treeview mode not resetting when the devtools get closed. Rename the `ForceUpdate` event to `ResetState`.
+- f1b90ba: Change the API of using the frontend package.
+
+### Patch Changes
+
+- Updated dependencies [811b4bb]
+- Updated dependencies [b7514c5]
+- Updated dependencies [f1b90ba]
+- Updated dependencies [a99d42b]
+  - @solid-devtools/frontend@0.8.0
+  - solid-devtools@0.26.0
+
 ## 0.21.1
 
 ### Patch Changes
