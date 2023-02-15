@@ -155,9 +155,10 @@ export function createInspector(props: {
       valueMap = result.valueMap
       lastDetails = result.details
       checkProxyProps = result.checkProxyProps || null
+    } else {
+      lastDetails = undefined
+      checkProxyProps = null
     }
-    lastDetails = undefined
-    checkProxyProps = null
 
     clearPrevDisposeListener?.()
     clearPrevDisposeListener = owner ? onOwnerDispose(owner, props.resetInspectedNode) : undefined

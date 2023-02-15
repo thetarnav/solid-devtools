@@ -1,7 +1,12 @@
 import { useController } from '@/controller'
 import { SidePanelCtx } from '@/SidePanel'
 import { Badge, Scrollable } from '@/ui'
-import { NodeType, NODE_TYPE_NAMES, PropGetterState } from '@solid-devtools/debugger/types'
+import {
+  NodeType,
+  NODE_TYPE_NAMES,
+  PropGetterState,
+  ValueType,
+} from '@solid-devtools/debugger/types'
 import { Entries } from '@solid-primitives/keyed'
 import { batch, Component, createMemo, For, JSX, Show, useContext } from 'solid-js'
 import * as styles from './inspector.css'
@@ -124,27 +129,37 @@ const InspectorView: Component = () => {
             )}
           </For>
         </ListSignals>
-        <Show when={state.value} keyed>
-          {valueItem => (
-            <div>
-              <h2 class={styles.h2}>{state.type ? NODE_TYPE_NAMES[state.type] : 'Owner'}</h2>
+        <Show when={state.value || state.location}>
+          <div>
+            <h2 class={styles.h2}>{state.type ? NODE_TYPE_NAMES[state.type] : 'Owner'}</h2>
+            {state.value && (
               <ValueNode
                 name="value"
-                value={valueItem.value}
-                isExtended={valueItem.extended}
-                onClick={() => inspector.inspectValueItem(valueItem)}
+                value={state.value.value}
+                isExtended={state.value.extended}
+                onClick={() => inspector.inspectValueItem(state.value!)}
                 onElementHover={hovered.toggleHoveredElement}
                 isSignal
               />
-            </div>
-          )}
-        </Show>
-        {state.location && (
-          <div>
-            <h2 class={styles.h2}>Location</h2>
-            <p class={styles.location}>{state.location}</p>
+            )}
+            {state.location && (
+              <ValueNode
+                name="location"
+                value={{
+                  type: ValueType.String,
+                  value: state.location,
+                }}
+                actions={[
+                  {
+                    icon: 'Code',
+                    title: 'Open component location',
+                    onClick: inspector.openComponentLocation,
+                  },
+                ]}
+              />
+            )}
           </div>
-        )}
+        </Show>
       </div>
     </Scrollable>
   )

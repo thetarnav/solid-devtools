@@ -4,12 +4,12 @@ import { onCleanup } from 'solid-js'
 
 enableRootsAutoattach()
 
-function clone<T>(obj: T): T {
-  return JSON.parse(JSON.stringify(obj))
+function clone<T>(data: T): T {
+  return typeof data === 'object' ? JSON.parse(JSON.stringify(data)) : data
 }
-function separate<T>(obj: T, callback: (value: T) => void): void {
+function separate<T>(data: T, callback: (value: T) => void): void {
   queueMicrotask(() => {
-    const v = clone(obj)
+    const v = clone(data)
     queueMicrotask(() => callback(v))
   })
 }

@@ -227,12 +227,6 @@ export default function createInspector({ bridge }: { bridge: DebuggerBridge }) 
   })
 
   bridge.input.InspectedNodeDetails.listen(function (raw) {
-    // debugger will send null when the inspected node is not found
-    if (!raw) {
-      setInspected(prev => ({ ownerId: null, signalId: prev.signalId }))
-      return
-    }
-
     const id = inspected.ownerId
     batch(() => {
       // The current inspected node is not the same as the one that sent the details

@@ -220,8 +220,7 @@ const plugin = createInternalRoot(() => {
   // Opens the source code of the inspected component
   function openInspectedNodeLocation() {
     const details = inspector.getLastDetails()
-    if (!details || !details.location) return
-    locator.openElementSourceCode(details.location, details.name)
+    details?.location && locator.openElementSourceCode(details.location, details.name)
   }
 
   // send the state of the client locator mode
