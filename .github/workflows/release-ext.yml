@@ -31,7 +31,7 @@ jobs:
           VITEST_SEGFAULT_RETRY: 3
 
       - name: Upload & release Extension
-        uses: mnao305/chrome-extension-upload@3.0.0
+        uses: mnao305/chrome-extension-upload@4
         with:
           file-path: packages/extension/dist.zip
           extension-id: kmcfjchnmmaeeagadbhoofajiopoceel
