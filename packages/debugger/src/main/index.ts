@@ -212,6 +212,9 @@ const plugin = createInternalRoot(() => {
     listenToDebuggerEenable: debuggerEnabledBus.listen,
     locatorEnabled,
     setLocatorEnabledSignal: signal => toggleModules('locatorKeyPressSignal', () => signal),
+    onComponentClick(componentId, next) {
+      modules.debugger ? hub.output.emit('InspectedComponent', componentId) : next()
+    },
   })
 
   // Opens the source code of the inspected component
@@ -225,16 +228,6 @@ const plugin = createInternalRoot(() => {
   createEffect(
     defer(modules.locatorKeyPressSignal, state => hub.output.emit('LocatorModeChange', state)),
   )
-
-  // intercept on-page components clicks and send them to the devtools overlay
-  // TODO: this shouldn't be abstracted away here
-  locator.addClickInterceptor((e, component) => {
-    if (!modules.debugger) return
-    e.preventDefault()
-    e.stopPropagation()
-    hub.output.emit('InspectedComponent', component.id)
-    return false
-  })
 
   hub.input.listen(e => {
     switch (e.name) {

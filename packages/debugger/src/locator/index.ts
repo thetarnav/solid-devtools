@@ -4,7 +4,7 @@ import { EmitterEmit, Listen } from '@solid-primitives/event-bus'
 import { makeEventListener } from '@solid-primitives/event-listener'
 import { createKeyHold } from '@solid-primitives/keyboard'
 import { scheduleIdle } from '@solid-primitives/scheduled'
-import { defer, tryOnCleanup } from '@solid-primitives/utils'
+import { defer } from '@solid-primitives/utils'
 import {
   Accessor,
   createEffect,
@@ -29,7 +29,7 @@ import {
   TargetIDE,
   TargetURLFunction,
 } from './findComponent'
-import { ClickMiddleware, HighlightElementPayload, LocatorOptions } from './types'
+import { HighlightElementPayload, LocatorOptions } from './types'
 
 export { markComponentLoc } from './markComponent'
 
@@ -38,6 +38,7 @@ export function createLocator(props: {
   listenToDebuggerEenable: Listen<boolean>
   locatorEnabled: Accessor<boolean>
   setLocatorEnabledSignal(signal: Accessor<boolean>): void
+  onComponentClick(componentId: NodeID, next: VoidFunction): void
 }) {
   const [enabledByPressingSignal, setEnabledByPressingSignal] = createSignal((): boolean => false)
   props.setLocatorEnabledSignal(createMemo(() => enabledByPressingSignal()()))
@@ -94,12 +95,6 @@ export function createLocator(props: {
     ),
   )
 
-  // TODO invalidate when components change
-
-  // components.onComponentsChange(() => {
-  //   // TODO
-  // })
-
   // wait a second to let the framework mess with the document before attaching the overlay
   setTimeout(() => {
     createInternalRoot(() => attachElementOverlay(highlightedComponents))
@@ -108,8 +103,7 @@ export function createLocator(props: {
   // notify of component hovered by using the debugger
   createEffect((prev: NodeID | undefined) => {
     const target = hoverTarget()
-    if (!target) return
-    const comp = registry.findComponent(target)
+    const comp = target && registry.findComponent(target)
     if (prev) props.emit('HoveredComponent', { nodeId: prev, state: false })
     if (comp) {
       const { id } = comp
@@ -117,19 +111,6 @@ export function createLocator(props: {
       return id
     }
   })
-
-  // functions to be called when user clicks on a component
-  const clickInterceptors = new Set<ClickMiddleware>()
-  function runClickInterceptors(...[e, c, l]: Parameters<ClickMiddleware>): true | undefined {
-    for (const interceptor of clickInterceptors) {
-      interceptor(e, c, l)
-      if (e.defaultPrevented) return true
-    }
-  }
-  function addClickInterceptor(interceptor: ClickMiddleware) {
-    clickInterceptors.add(interceptor)
-    tryOnCleanup(() => clickInterceptors.delete(interceptor))
-  }
 
   let targetIDE: TargetIDE | TargetURLFunction | undefined
 
@@ -151,11 +132,14 @@ export function createLocator(props: {
         const comp = highlighted.find(({ element }) => target.contains(element)) ?? highlighted[0]
         if (!comp) return
         const sourceCodeData = comp.location && getSourceCodeData(comp.location, comp.element)
-        if (!runClickInterceptors(e, comp, sourceCodeData) && targetIDE && sourceCodeData) {
+
+        // intercept on-page components clicks and send them to the devtools overlay
+        props.onComponentClick(comp.id, () => {
+          if (!targetIDE || !sourceCodeData) return
           e.preventDefault()
           e.stopPropagation()
           openSourceCode(targetIDE, sourceCodeData)
-        }
+        })
       },
       true,
     )
@@ -191,7 +175,6 @@ export function createLocator(props: {
 
   return {
     useLocator,
-    addClickInterceptor,
     setDevtoolsHighlightTarget: (target: HighlightElementPayload) => void setDevtoolsTarget(target),
     openElementSourceCode,
   }
