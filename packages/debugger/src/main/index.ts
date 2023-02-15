@@ -1,26 +1,29 @@
 import { createEventBus, createGlobalEmitter, GlobalEmitter } from '@solid-primitives/event-bus'
 import { createStaticStore, defer } from '@solid-primitives/utils'
-import { batch, createComputed, createEffect, createMemo } from 'solid-js'
+import { batch, createComputed, createEffect, createMemo, createSignal } from 'solid-js'
 import { createDependencyGraph, DGraphUpdate } from '../dependency'
 import { createInspector, InspectorUpdate, ToggleInspectedValueData } from '../inspector'
 import { createLocator } from '../locator'
 import { HighlightElementPayload } from '../locator/types'
 import { createStructure, StructureUpdates } from '../structure'
 import { DebuggerModule, DEFAULT_MAIN_VIEW, DevtoolsMainView, TreeWalkerMode } from './constants'
-import { getObjectById, ObjectType } from './id'
+import { getObjectById, getSdtId, ObjectType } from './id'
 import { createInternalRoot } from './roots'
-import { Mapped, NodeID, Solid } from './types'
+import { Mapped, NodeID } from './types'
 import { createBatchedUpdateEmitter } from './utils'
 
-export type InspectedState = {
-  readonly owner: Solid.Owner | null
-  readonly signal: Solid.Signal | null
-}
-
 export namespace Debugger {
+  export type InspectedState = {
+    readonly ownerId: NodeID | null
+    readonly signalId: NodeID | null
+    /** closest note to inspected signal/owner on the owner structure */
+    readonly treeWalkerOwnerId: NodeID | null
+  }
+
   export type OutputChannels = {
     ResetPanel: void
-    InspectedNodeDetails: Mapped.OwnerDetails | null
+    InspectedState: InspectedState
+    InspectedNodeDetails: Mapped.OwnerDetails
     StructureUpdates: StructureUpdates
     NodeUpdates: NodeID[]
     InspectorUpdate: InspectorUpdate[]
@@ -31,7 +34,7 @@ export namespace Debugger {
   }
 
   export type InputChannels = {
-    ForceUpdate: void
+    ResetState: void
     InspectNode: { ownerId: NodeID | null; signalId: NodeID | null } | null
     InspectValue: ToggleInspectedValueData
     HighlightElementChange: HighlightElementPayload
@@ -114,30 +117,52 @@ const plugin = createInternalRoot(() => {
   //
 
   // Current inspected node is shared between modules
-  let inspectedState: InspectedState = { owner: null, signal: null }
-  const inspectedStateBus = createEventBus<InspectedState>()
+  const INITIAL_INSPECTED_STATE = {
+    ownerId: null,
+    signalId: null,
+    treeWalkerOwnerId: null,
+  } as const satisfies Debugger.OutputChannels['InspectedState']
 
-  createComputed(
-    defer(debuggerEnabled, enabled => {
-      if (!enabled) inspectedStateBus.emit((inspectedState = { owner: null, signal: null }))
-    }),
-  )
+  const [inspectedState, setInspectedState] = createSignal<
+    Debugger.OutputChannels['InspectedState']
+  >(INITIAL_INSPECTED_STATE, { equals: false })
+
+  createEffect(() => {
+    const state = inspectedState()
+    queueMicrotask(() => hub.output.emit('InspectedState', state))
+  })
+
+  function getTreeWalkerOwnerId(ownerId: NodeID | null): NodeID | null {
+    const owner = ownerId && getObjectById(ownerId, ObjectType.Owner)
+    const treeWalkerOwner = owner && structure.getClosestIncludedOwner(owner)
+    return treeWalkerOwner ? getSdtId(treeWalkerOwner, ObjectType.Owner) : null
+  }
 
   /** Check if the inspected node doesn't need to change (treeview mode changed or sth) */
   function updateInspectedNode() {
-    if (!inspectedState.owner) return
-    const closest = structure.getClosestIncludedOwner(inspectedState.owner)
-    if (closest && closest === inspectedState.owner) return
+    setInspectedState(p => ({ ...p, treeWalkerOwnerId: getTreeWalkerOwnerId(p.treeWalkerOwnerId) }))
+  }
 
-    inspectedStateBus.emit((inspectedState = { owner: closest, signal: null }))
+  function resetInspectedNode() {
+    setInspectedState(INITIAL_INSPECTED_STATE)
   }
 
   function setInspectedNode(data: Debugger.InputChannels['InspectNode']): void {
-    const { ownerId, signalId } = data ?? {}
-    const owner = ownerId && getObjectById(ownerId, ObjectType.Owner)
-    const signal = signalId && getObjectById(signalId, ObjectType.Signal)
-    inspectedStateBus.emit((inspectedState = { owner: owner ?? null, signal: signal ?? null }))
+    let { ownerId, signalId } = data ?? { ownerId: null, signalId: null }
+    if (ownerId && !getObjectById(ownerId, ObjectType.Owner)) ownerId = null
+    if (signalId && !getObjectById(signalId, ObjectType.Signal)) signalId = null
+    setInspectedState({
+      ownerId,
+      signalId,
+      treeWalkerOwnerId: getTreeWalkerOwnerId(ownerId),
+    })
   }
+
+  createComputed(
+    defer(debuggerEnabled, enabled => {
+      if (!enabled) resetInspectedNode()
+    }),
+  )
 
   // Computation and signal updates
   const pushNodeUpdate = createBatchedUpdateEmitter<NodeID>(updates => {
@@ -163,7 +188,8 @@ const plugin = createInternalRoot(() => {
   const inspector = createInspector({
     emit: hub.output.emit,
     enabled: debuggerEnabled,
-    listenToInspectedNodeChange: inspectedStateBus.listen,
+    listenToInspectedOwnerChange: l => hub.output.on('InspectedState', s => l(s.ownerId)),
+    resetInspectedNode,
   })
 
   //
@@ -172,9 +198,10 @@ const plugin = createInternalRoot(() => {
   createDependencyGraph({
     emit: hub.output.emit,
     enabled: dgraphEnabled,
-    listenToInspectedStateChange: inspectedStateBus.listen,
     listenToViewChange: viewChange.listen,
     onNodeUpdate: pushNodeUpdate,
+    inspectedState,
+    listenToInspectedStateChange: l => hub.output.on('InspectedState', l),
   })
 
   //
@@ -185,13 +212,15 @@ const plugin = createInternalRoot(() => {
     listenToDebuggerEenable: debuggerEnabledBus.listen,
     locatorEnabled,
     setLocatorEnabledSignal: signal => toggleModules('locatorKeyPressSignal', () => signal),
+    onComponentClick(componentId, next) {
+      modules.debugger ? hub.output.emit('InspectedComponent', componentId) : next()
+    },
   })
 
   // Opens the source code of the inspected component
   function openInspectedNodeLocation() {
     const details = inspector.getLastDetails()
-    if (!details || !details.location) return
-    locator.openElementSourceCode(details.location, details.name)
+    details?.location && locator.openElementSourceCode(details.location, details.name)
   }
 
   // send the state of the client locator mode
@@ -199,20 +228,15 @@ const plugin = createInternalRoot(() => {
     defer(modules.locatorKeyPressSignal, state => hub.output.emit('LocatorModeChange', state)),
   )
 
-  // intercept on-page components clicks and send them to the devtools overlay
-  // TODO: this shouldn't be abstracted away here
-  locator.addClickInterceptor((e, component) => {
-    if (!modules.debugger) return
-    e.preventDefault()
-    e.stopPropagation()
-    hub.output.emit('InspectedComponent', component.id)
-    return false
-  })
-
   hub.input.listen(e => {
     switch (e.name) {
-      case 'ForceUpdate':
-        return structure.forceUpdateAllRoots()
+      case 'ResetState': {
+        // reset all the internal state
+        resetInspectedNode()
+        currentView = DEFAULT_MAIN_VIEW
+        structure.resetTreeWalkerMode()
+        break
+      }
       case 'HighlightElementChange':
         return locator.setDevtoolsHighlightTarget(e.details)
       case 'InspectNode':

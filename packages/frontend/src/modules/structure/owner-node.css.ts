@@ -57,8 +57,8 @@ const linesColor = createVar()
 export const levelPadding = style({
   position: 'relative',
   zIndex: -2,
-  marginLeft: spacing[3],
-  width: `calc(${levelVar} * ${rowPadding} + ${spacing[2.5]})`,
+  marginLeft: spacing[3.5],
+  width: `calc(${levelVar} * ${rowPadding} + ${spacing[2]})`,
   // ...transition('width'),
   height: `calc(${rowHeight} + 0.95px)`,
   vars: {
@@ -86,7 +86,7 @@ export const nameContainer = style({
 
 export const collapse = style({
   position: 'absolute',
-  left: `calc(-${rowHeight} - 2px)`,
+  left: `-${rowHeight}`,
   opacity: 0,
   ...transition('background-color'),
   ':before': {

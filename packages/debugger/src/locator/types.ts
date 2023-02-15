@@ -1,12 +1,7 @@
 import type { ToDyscriminatedUnion } from '@solid-devtools/shared/utils'
 import type { KbdKey } from '@solid-primitives/keyboard'
 import type { NodeID } from '../main/types'
-import type {
-  LocatorComponent,
-  SourceCodeData,
-  TargetIDE,
-  TargetURLFunction,
-} from './findComponent'
+import type { TargetIDE, TargetURLFunction } from './findComponent'
 
 export type { LocationAttr, LocatorComponent, TargetIDE, TargetURLFunction } from './findComponent'
 
@@ -24,12 +19,6 @@ export type HighlightElementPayload = ToDyscriminatedUnion<{
   node: { id: NodeID }
   element: { id: NodeID }
 }> | null
-
-export type ClickMiddleware = (
-  event: MouseEvent | CustomEvent,
-  component: LocatorComponent,
-  data: SourceCodeData | undefined,
-) => void
 
 // used by the transform
 export const WINDOW_PROJECTPATH_PROPERTY = '$sdt_projectPath'

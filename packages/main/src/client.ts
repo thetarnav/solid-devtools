@@ -12,7 +12,7 @@ const toContent = makePostMessage<Debugger.OutputChannels>()
 // in case of navigation/page reload, reset the locator mode state in the extension
 toContent('ResetPanel')
 
-toContent('ClientConnected', process.env['VERSION']!)
+toContent('ClientConnected', process.env.VERSION)
 
 let loadedBefore = false
 
@@ -25,7 +25,7 @@ createInternalRoot(() => {
   createEffect(() => {
     if (!debug.enabled()) return
 
-    if (loadedBefore) debug.emit('ForceUpdate')
+    if (loadedBefore) debug.emit('ResetState')
     else loadedBefore = true
 
     // pass all the devtools events to the debugger

@@ -1,12 +1,10 @@
 import {
   Debugger,
-  InspectorUpdate,
   InspectorUpdateMap,
   LocationAttr,
   NodeID,
   NodeType,
   PropGetterState,
-  ToggleInspectedValueData,
   ValueItemID,
   ValueItemType,
   ValueType,
@@ -14,9 +12,18 @@ import {
 import { handleTupleUpdates } from '@solid-devtools/shared/primitives'
 import { splitOnColon, warn } from '@solid-devtools/shared/utils'
 import { shallowCopy } from '@solid-primitives/immutable'
-import { createStaticStore } from '@solid-primitives/utils'
-import { batch, createMemo, createSelector, createSignal, mergeProps, Setter } from 'solid-js'
+import { createStaticStore, defer } from '@solid-primitives/utils'
+import {
+  batch,
+  createEffect,
+  createMemo,
+  createSelector,
+  createSignal,
+  mergeProps,
+  Setter,
+} from 'solid-js'
 import { Writable } from 'type-fest'
+import type { DebuggerBridge } from '../../controller'
 import {
   DecodedValue,
   decodeValue,
@@ -155,27 +162,30 @@ const NULL_STATE = {
   value: null,
 } as const satisfies Inspector.State
 
-export type InspectorNodeId = {
-  readonly ownerId: NodeID | null
-  readonly signalId: NodeID | null
-}
-const NULL_INSPECTED_NODE = { ownerId: null, signalId: null } as const satisfies InspectorNodeId
+const NULL_INSPECTED_NODE = {
+  ownerId: null,
+  signalId: null,
+  treeWalkerOwnerId: null,
+} as const satisfies Debugger.InspectedState
 
-export default function createInspector() {
+export default function createInspector({ bridge }: { bridge: DebuggerBridge }) {
   //
   // Inspected owner/signal
   //
 
-  const [inspected, setInspected] = createStaticStore<InspectorNodeId>(NULL_INSPECTED_NODE)
+  const [inspected, setInspected] = createStaticStore<Debugger.InspectedState>(NULL_INSPECTED_NODE)
   const inspectedNode = createMemo(() => ({ ...inspected }), void 0, {
     equals: (a, b) => a.ownerId === b.ownerId && a.signalId === b.signalId,
   })
   const isSomeNodeInspected = createMemo(
     () => inspected.ownerId !== null || inspected.signalId !== null,
   )
-  const isInspected = createSelector<InspectorNodeId, NodeID>(
+  const isInspected = createSelector<Debugger.InspectedState, NodeID>(
     inspectedNode,
     (id, node) => node.ownerId === id || node.signalId === id,
+  )
+  const isInspectedTreeWalkerOwner = createSelector<NodeID | null, NodeID>(
+    () => inspected.treeWalkerOwnerId,
   )
 
   function setInspectedNode(ownerId: NodeID | null, signalId: NodeID | null) {
@@ -191,9 +201,15 @@ export default function createInspector() {
   function setInspectedOwner(id: NodeID | null) {
     setInspectedNode(id, null)
   }
+  function toggleInspectedOwner(id: NodeID) {
+    setInspectedNode(inspected.ownerId === id ? null : id, null)
+  }
   function setInspectedSignal(id: NodeID | null) {
     setInspected(prev => ({ ownerId: prev.ownerId, signalId: id }))
   }
+
+  // sync inspected node with the debugger
+  createEffect(defer(inspectedNode, bridge.output.InspectNode.emit))
 
   //
   // Inspector state
@@ -203,13 +219,14 @@ export default function createInspector() {
 
   const storeNodeMap = new StoreNodeMap()
 
-  function setNewDetails(raw: Debugger.OutputChannels['InspectedNodeDetails']): void {
-    // debugger will send null when the inspected node is not found
-    if (!raw) {
-      setInspected(prev => ({ ownerId: null, signalId: prev.signalId }))
-      return
-    }
+  bridge.input.InspectedState.listen(newState => {
+    batch(() => {
+      setInspected(newState)
+      setState({ ...NULL_STATE })
+    })
+  })
 
+  bridge.input.InspectedNodeDetails.listen(function (raw) {
     const id = inspected.ownerId
     batch(() => {
       // The current inspected node is not the same as the one that sent the details
@@ -247,7 +264,7 @@ export default function createInspector() {
           : null,
       })
     })
-  }
+  })
 
   function getValueItem(valueId: ValueItemID): Inspector.ValueItem | undefined {
     const [valueItemType, id] = splitOnColon(valueId)
@@ -261,38 +278,35 @@ export default function createInspector() {
     return valueItem ?? warn(`ValueItem (${valueId}) not found`)
   }
 
-  // Handle Inspector updates comming from the debugger
-  const handleUpdates = handleTupleUpdates<InspectorUpdate>({
-    value(update) {
-      const [valueId, value] = update
-      const valueItem = getValueItem(valueId)
-      valueItem?.setValue(decodeValue(value, valueItem.value, storeNodeMap))
-    },
-    inspectToggle(update) {
-      const [valueId, value] = update
-      const valueItem = getValueItem(valueId)
+  bridge.input.InspectorUpdate.listen(
+    handleTupleUpdates({
+      value(update) {
+        const [valueId, value] = update
+        const valueItem = getValueItem(valueId)
+        valueItem?.setValue(decodeValue(value, valueItem.value, storeNodeMap))
+      },
+      inspectToggle(update) {
+        const [valueId, value] = update
+        const valueItem = getValueItem(valueId)
 
-      if (valueItem && isObjectType(valueItem.value))
-        updateCollapsedValue(valueItem.value, value, storeNodeMap)
-    },
-    propKeys(update) {
-      setState('props', updateProxyProps(update))
-    },
-    propState(update) {
-      if (!state.props) return
+        if (valueItem && isObjectType(valueItem.value))
+          updateCollapsedValue(valueItem.value, value, storeNodeMap)
+      },
+      propKeys(update) {
+        setState('props', updateProxyProps(update))
+      },
+      propState(update) {
+        if (!state.props) return
 
-      for (const [key, getterState] of Object.entries(update)) {
-        state.props.record[key]?.setGetter(getterState)
-      }
-    },
-    store(update) {
-      updateStore(update, storeNodeMap)
-    },
-  })
-
-  /** variable for a callback in controller.tsx */
-  let onInspectValue: (data: ToggleInspectedValueData) => void = () => {}
-  const setOnInspectValue = (fn: typeof onInspectValue) => (onInspectValue = fn)
+        for (const [key, getterState] of Object.entries(update)) {
+          state.props.record[key]?.setGetter(getterState)
+        }
+      },
+      store(update) {
+        updateStore(update, storeNodeMap)
+      },
+    }),
+  )
 
   /**
    * Toggle the inspection of a value item (signal, prop, or owner value)
@@ -300,33 +314,28 @@ export default function createInspector() {
   function inspectValueItem(item: Inspector.ValueItem, selected?: boolean): void {
     if (selected !== undefined && item.extended === selected) return
     selected = item.setExtended(p => selected ?? !p)
-    onInspectValue({ id: item.itemId, selected })
+    bridge.output.InspectValue.emit({ id: item.itemId, selected })
   }
 
   //
   // LOCATION
   //
-  let onOpenLocation: VoidFunction
-  const setOnOpenLocation = (fn: typeof onOpenLocation) => (onOpenLocation = fn)
   function openComponentLocation() {
-    onOpenLocation()
+    bridge.output.OpenLocation.emit()
   }
 
   return {
     inspected,
     inspectedNode,
     isSomeNodeInspected,
+    isInspected,
+    isInspectedTreeWalkerOwner,
     state,
     setInspectedNode,
     setInspectedOwner,
+    toggleInspectedOwner,
     setInspectedSignal,
-    isInspected,
-    setDetails: setNewDetails,
-    update: handleUpdates,
     inspectValueItem,
-    onInspectedHandler: onInspectValue,
-    setOnInspectValue,
     openComponentLocation,
-    setOnOpenLocation,
   }
 }

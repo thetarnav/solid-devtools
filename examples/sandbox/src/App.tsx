@@ -2,6 +2,7 @@
 import { unobserveAllRoots } from '@solid-devtools/debugger'
 import {
   Component,
+  createComponent,
   createComputed,
   createEffect,
   createMemo,
@@ -180,7 +181,9 @@ const App: Component = () => {
         </header>
         <div style={{ height: '1rem', 'margin-top': '1rem' }}>
           <Show when={showEven()}>
-            <Bold>{count()} is even!</Bold>
+            {createComponent(() => {
+              return <Bold>{count()} is even!</Bold>
+            }, {})}
           </Show>
         </div>
         <button onClick={() => disposeApp()}>Dispose whole application</button>

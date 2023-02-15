@@ -9,14 +9,15 @@ export namespace Dgraph {
 }
 
 export function createDependencyGraph() {
-  const ctx = useController()
-  const { client, devtools } = ctx.controller
+  const { bridge, inspector } = useController()
 
   const [graph, setGraph] = createSignal<DGraphUpdate>(null)
-  client.DgraphUpdate.listen(setGraph)
+  bridge.input.DgraphUpdate.listen(setGraph)
 
-  devtools.ToggleModule.emit({ module: DebuggerModule.Dgraph, enabled: true })
-  onCleanup(() => devtools.ToggleModule.emit({ module: DebuggerModule.Dgraph, enabled: false }))
+  bridge.output.ToggleModule.emit({ module: DebuggerModule.Dgraph, enabled: true })
+  onCleanup(() =>
+    bridge.output.ToggleModule.emit({ module: DebuggerModule.Dgraph, enabled: false }),
+  )
 
   function inspectNode(id: NodeID) {
     const node = graph()?.[id]
@@ -24,9 +25,9 @@ export function createDependencyGraph() {
     if (!node) return console.warn('inspectNode: node not found', id)
 
     if (node.type === NodeType.Signal) {
-      ctx.inspector.setInspectedNode(node.graph ?? null, id)
+      inspector.setInspectedNode(node.graph ?? null, id)
     } else {
-      ctx.inspector.setInspectedOwner(id)
+      inspector.setInspectedOwner(id)
     }
   }
 

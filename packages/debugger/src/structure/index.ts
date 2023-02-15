@@ -148,6 +148,7 @@ export function createStructure(props: {
     updateAllRoots,
     forceUpdateAllRoots,
     setTreeWalkerMode,
+    resetTreeWalkerMode: () => setTreeWalkerMode(DEFAULT_WALKER_MODE),
     getClosestIncludedOwner(owner: Solid.Owner) {
       return getClosestIncludedOwner(owner, treeWalkerMode)
     },

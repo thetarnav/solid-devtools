@@ -14,6 +14,7 @@ import {
   isSolidComponent,
   isSolidComputation,
   isSolidMemo,
+  isSolidOwner,
   isSolidStore,
   markOwnerName,
   markOwnerType,
@@ -169,13 +170,16 @@ let PropsMap: ObservedPropsMap
 
 const $INSPECTOR = Symbol('inspector')
 
-function mapSignalNode(
-  node: Solid.Signal | Solid.Store,
+function mapSourceValue(
+  node: Solid.Signal | Solid.Memo | Solid.Store,
   handler: (nodeId: NodeID, value: unknown) => void,
 ): Mapped.Signal {
   const { value } = node
   const isStore = isSolidStore(node)
-  const id = getSdtId(node, isStore ? ObjectType.Store : ObjectType.Signal)
+  const id = getSdtId(
+    node,
+    isStore ? ObjectType.Store : isSolidOwner(node) ? ObjectType.Owner : ObjectType.Signal,
+  )
   let name: string
   ValueMap.add(`${ValueItemType.Signal}:${id}`, () => node.value)
 
@@ -312,14 +316,14 @@ export const collectOwnerDetails = /*#__PURE__*/ untrackedCallback(function (
     const signalNodes = Object.values(sourceMap)
     details.signals = Array(signalNodes.length)
     for (let i = 0; i < signalNodes.length; i++) {
-      details.signals[i] = mapSignalNode(signalNodes[i]!, onSignalUpdate)
+      details.signals[i] = mapSourceValue(signalNodes[i]!, onSignalUpdate)
     }
   } else details.signals = []
 
   // map memos
   if (owned) {
     for (const node of owned) {
-      isSolidMemo(node) && details.signals.push(mapSignalNode(node, onSignalUpdate))
+      isSolidMemo(node) && details.signals.push(mapSourceValue(node, onSignalUpdate))
     }
   }
 

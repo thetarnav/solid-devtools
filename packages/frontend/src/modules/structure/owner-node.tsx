@@ -3,7 +3,7 @@ import { createHover } from '@solid-devtools/shared/primitives'
 import { assignInlineVars } from '@vanilla-extract/dynamic'
 import { Component } from 'solid-js'
 import type { Structure } from '.'
-import * as styles from './ownerNode.css'
+import * as styles from './owner-node.css'
 
 export const OwnerNode: Component<{
   owner: Structure.Node
