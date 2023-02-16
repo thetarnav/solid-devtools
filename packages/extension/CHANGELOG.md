@@ -1,4 +1,4 @@
-# solid-devtools-extension
+# @solid-devtools/extension
 
 ## 0.22.0
 

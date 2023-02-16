@@ -1,5 +1,5 @@
 {
-  "name": "solid-devtools-todomvc-example",
+  "name": "solid-devtools-example-todomvc",
   "version": "0.0.1",
   "private": true,
   "description": "Solid implementation of TodoMVC",

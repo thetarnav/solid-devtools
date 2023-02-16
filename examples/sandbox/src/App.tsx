@@ -36,22 +36,20 @@ createRoot(dispose => {
   const [count, setCount] = createSignal(0)
   setRootCount = setCount
 
-  createEffect(
-    () => {
-      count()
-      if (count() === 1) {
-        createRoot(dispose => {
-          createEffect(() => count() === 4 && dispose(), undefined, { name: 'eff_2' })
+  function createEffectInRoot(dispose: VoidFunction) {
+    createEffect(() => count() === 4 && dispose(), undefined, {})
 
-          createRoot(_ => {
-            createEffect(() => count(), undefined, { name: 'eff_3' })
-          })
-        })
-      }
-    },
-    undefined,
-    { name: 'eff_1' },
-  )
+    createRoot(_ => {
+      createEffect(() => count())
+    })
+  }
+
+  createEffect(() => {
+    count()
+    if (count() === 1) {
+      createRoot(createEffectInRoot)
+    }
+  }, undefined)
 })
 
 const Button = (props: { text: string; onClick: VoidFunction }) => {
@@ -130,9 +128,7 @@ const Broken: Component = () => {
 const App: Component = () => {
   const [count, setCount] = createSignal(0)
   const [showEven, setShowEven] = createSignal(false)
-  const fnSig = createSignal({
-    fn: () => {},
-  })
+  const fnSig = createSignal({ fn: () => {} }, { equals: (a, b) => a.fn === b.fn })
   const nullSig = createSignal(null)
   const symbolSig = createSignal(Symbol('hello-symbol'))
   const [header, setHeader] = createSignal(

@@ -1,5 +1,5 @@
 {
-  "name": "solid-devtools-extension",
+  "name": "@solid-devtools/extension",
   "version": "0.22.0",
   "private": true,
   "license": "MIT",

@@ -38,8 +38,10 @@ export type DevtoolsPluginOptions = {
 }
 
 function getFileExtension(filename: string): string {
-  const index = filename.lastIndexOf('.')
-  return index < 0 ? '' : filename.substring(index + 1)
+  const index = filename.indexOf('?')
+  const filenameWithoutQuery = index !== -1 ? filename.slice(0, index) : filename
+  const lastDotIndex = filenameWithoutQuery.lastIndexOf('.')
+  return lastDotIndex !== -1 ? filenameWithoutQuery.slice(lastDotIndex + 1) : ''
 }
 
 // This export is used for configuration.
@@ -110,7 +112,7 @@ export const devtoolsPlugin = (_options: DevtoolsPluginOptions = {}): PluginOpti
 
       const extension = getFileExtension(id)
 
-      if (!['js', 'jsx', 'ts', 'tsx'].includes(extension)) return
+      if (!['mjs', 'cjs', 'cts', 'mts', 'js', 'jsx', 'ts', 'tsx'].includes(extension)) return
 
       const isJSX = extension === 'jsx' || extension === 'tsx'
       const plugins: PluginItem[] = []
