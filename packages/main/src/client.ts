@@ -14,8 +14,6 @@ toContent('ResetPanel')
 
 toContent('ClientConnected', process.env.VERSION)
 
-let loadedBefore = false
-
 createInternalRoot(() => {
   const debug = useDebugger()
 
@@ -24,9 +22,6 @@ createInternalRoot(() => {
 
   createEffect(() => {
     if (!debug.enabled()) return
-
-    if (loadedBefore) debug.emit('ResetState')
-    else loadedBefore = true
 
     // pass all the devtools events to the debugger
     fromContent(e => debug.emit(e.name as any, e.details))

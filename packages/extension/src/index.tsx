@@ -12,17 +12,15 @@ const { postPortMessage: toBackground, onPortMessage: fromBackground } = createP
   Debugger.InputChannels
 >(port)
 
+// Force debugger to send state on connect
+toBackground('ResetState')
+
 function App() {
   const [versions, setVersions] = createSignal({
     client: '',
     expectedClient: '',
     extension: '',
   })
-
-  // in development — force update the graph on load to work with hot reloading
-  if (import.meta.env.DEV) {
-    toBackground('ResetState')
-  }
 
   once(fromBackground, 'Versions', v => setVersions(v))
 
