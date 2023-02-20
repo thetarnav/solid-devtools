@@ -6,9 +6,8 @@
   "license": "MIT",
   "type": "module",
   "scripts": {
-    "start": "vite --port 3000",
-    "dev": "pnpm start",
-    "dev:ext": "cross-env EXT=true pnpm start",
+    "dev": "vite --port 3000",
+    "dev:ext": "cross-env EXT=true pnpm dev",
     "build": "vite build",
     "serve": "vite preview"
   },

@@ -14,7 +14,7 @@ import namePlugin from './name'
 
 const enum Module {
   Setup = 'solid-devtools/setup',
-  Virtual = '/__solid-devtools',
+  Virtual = '/@solid-devtools',
 }
 
 export type DevtoolsPluginOptions = {

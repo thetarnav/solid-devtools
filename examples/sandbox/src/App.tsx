@@ -16,7 +16,7 @@ import {
   Suspense,
 } from 'solid-js'
 import { createMutable } from 'solid-js/store'
-import { disposeApp } from '.'
+import { disposeApp } from './main'
 import Recursive from './Recursive'
 import { ThemeExample } from './Theme'
 import Todos from './Todos'
