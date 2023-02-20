@@ -6,7 +6,6 @@
   "author": "Damian Tarnawski <gthetarnav@gmail.com>",
   "contributors": [],
   "scripts": {
-    "postinstall": "pnpm build",
     "dev:ext": "pnpm -dir packages/extension run dev",
     "dev:transform": "pnpm -dir packages/transform run dev",
     "dev": "pnpm run --parallel --filter ./packages/* --filter !./packages/extension dev",
