@@ -1,8 +1,5 @@
 /* eslint-disable no-console */
 import {
-  Core,
-  getFunctionSources,
-  getOwner,
   getOwnerType,
   interceptComputationRerun,
   isSolidComputation,
@@ -14,12 +11,11 @@ import {
   observeValueUpdate,
   onParentCleanup,
   removeValueUpdateObserver,
-  Solid,
 } from '@solid-devtools/debugger'
-import { NodeType } from '@solid-devtools/debugger/types'
+import { Core, NodeType, Solid } from '@solid-devtools/debugger/types'
 import { arrayRefEquals, dedupeArray } from '@solid-devtools/shared/utils'
 import { arrayEquals, asArray, Many } from '@solid-primitives/utils'
-import { $PROXY, Accessor, createEffect, on, onCleanup, untrack } from 'solid-js'
+import { $PROXY, Accessor, createEffect, getOwner, on, onCleanup, untrack } from 'solid-js'
 import {
   getComputationCreatedLabel,
   getComputationRerunLabel,
@@ -39,7 +35,7 @@ import {
   paddedForEach,
   UNUSED,
 } from './log'
-import { getDiffMap, makeTimeMeter } from './utils'
+import { getDiffMap, getFunctionSources, makeTimeMeter } from './utils'
 
 declare module 'solid-js/types/reactive/signal' {
   interface Owner {
@@ -106,7 +102,7 @@ export function debugComputation(
   _owner?: Core.Owner,
   { initialRun = true }: DebugComputationOptions = {},
 ): void {
-  const owner = _owner === undefined ? getOwner() : (_owner as Solid.Owner)
+  const owner = _owner === undefined ? (getOwner() as Solid.Owner | null) : (_owner as Solid.Owner)
   if (!owner || !isSolidComputation(owner)) return console.warn('owner is not a computation')
 
   if (markDebugNode(owner, 'computation') === true) return
@@ -221,7 +217,7 @@ export function debugComputation(
  */
 export function debugOwnerComputations(owner?: Core.Owner): void
 export function debugOwnerComputations(_owner?: Core.Owner): void {
-  const owner = _owner === undefined ? getOwner() : (_owner as Solid.Owner)
+  const owner = _owner === undefined ? (getOwner() as Solid.Owner | null) : (_owner as Solid.Owner)
   if (!owner) return console.warn('no owner passed to debugOwnedComputations')
 
   const marked = markDebugNode(owner, 'owned')
@@ -468,7 +464,7 @@ const getPropValue = (props: Record<string, unknown>, desc: PropertyDescriptor):
  * ```
  */
 export function debugProps(props: Record<string, unknown>): void {
-  const owner = getOwner()
+  const owner = getOwner() as Solid.Owner | null
   if (!owner) return console.warn('debugProps should be used synchronously inside a component')
 
   // for solid-refresh HMR memos, return the owned component

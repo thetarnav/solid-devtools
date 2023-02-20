@@ -24,7 +24,7 @@ import {
   SignalOptions,
   untrack,
 } from 'solid-js'
-import { Primitive } from 'type-fest'
+import type { Primitive } from 'type-fest'
 
 export type WritableDeep<T> = 0 extends 1 & T
   ? T

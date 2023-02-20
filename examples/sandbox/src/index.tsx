@@ -1,5 +1,13 @@
 /* @refresh reload */
-import './devtools'
+
+if (!process.env.EXT) {
+  const { attachDevtoolsOverlay } = await import('@solid-devtools/overlay')
+
+  attachDevtoolsOverlay({
+    defaultOpen: true,
+    noPadding: true,
+  })
+}
 
 import { render } from 'solid-js/web'
 

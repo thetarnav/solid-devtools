@@ -12,8 +12,11 @@ import type { Options as SolidStartOptions } from 'solid-start/vite/plugin'
 import jsxLocationPlugin, { MARK_COMPONENT_GLOBAL } from './location'
 import namePlugin from './name'
 
-const CLIENT_MODULE = 'solid-devtools'
-const INJECT_SCRIPT_ID = '/__solid-devtools'
+const enum Module {
+  Client = 'solid-devtools',
+  SetupDebugger = 'solid-devtools/setup',
+  Virtual = '/__solid-devtools',
+}
 
 export type DevtoolsPluginOptions = {
   /** Add automatic name when creating signals, memos, stores, or mutables */
@@ -82,26 +85,26 @@ export const devtoolsPlugin = (_options: DevtoolsPluginOptions = {}): PluginOpti
         return [
           {
             tag: 'script',
-            attrs: { type: 'module', src: INJECT_SCRIPT_ID },
+            attrs: { type: 'module', src: Module.Virtual },
             injectTo: 'body-prepend',
           },
         ]
     },
     resolveId(id) {
-      if (id === INJECT_SCRIPT_ID) return INJECT_SCRIPT_ID
+      if (id === Module.Virtual) return Module.Virtual
     },
     load(id) {
       // Inject runtime debugger script
-      if (!enablePlugin || id !== INJECT_SCRIPT_ID) return
+      if (!enablePlugin || id !== Module.Virtual) return
 
-      const importPath = JSON.stringify(CLIENT_MODULE)
+      const importPath = JSON.stringify(Module.SetupDebugger)
 
       let code = `import ${importPath};`
 
       if (options.locator) {
         code += `\nimport { ${USE_LOCATOR}, ${MARK_COMPONENT} } from ${importPath};
-    ${USE_LOCATOR}(${JSON.stringify(options.locator)});
-    window.${MARK_COMPONENT_GLOBAL} = ${MARK_COMPONENT};`
+        ${USE_LOCATOR}(${JSON.stringify(options.locator)});
+        window.${MARK_COMPONENT_GLOBAL} = ${MARK_COMPONENT};`
       }
 
       return code
@@ -132,7 +135,7 @@ export const devtoolsPlugin = (_options: DevtoolsPluginOptions = {}): PluginOpti
 
       // For solid-start, inject the debugger script before the root entry point
       if (solidStartRootEntry && path.normalize(id) === solidStartRootEntry) {
-        source = `import ${JSON.stringify(INJECT_SCRIPT_ID)}\n${source}`
+        source = `import ${JSON.stringify(Module.Virtual)}\n${source}`
       }
 
       if (plugins.length === 0) return { code: source }

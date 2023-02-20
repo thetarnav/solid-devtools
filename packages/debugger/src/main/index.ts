@@ -21,6 +21,7 @@ export namespace Debugger {
   }
 
   export type OutputChannels = {
+    DebuggerEnabled: boolean
     ResetPanel: void
     InspectedState: InspectedState
     InspectedNodeDetails: Mapped.OwnerDetails
@@ -74,11 +75,11 @@ const plugin = createInternalRoot(() => {
     () => (modules.locatorKeyPressSignal() || modules.locator) && debuggerEnabled(),
   )
 
-  const debuggerEnabledBus = createEventBus<boolean>()
-
-  createEffect(() => {
-    if (!debuggerEnabled()) debuggerEnabledBus.emit(false)
-  })
+  createEffect(
+    defer(debuggerEnabled, enabled => {
+      hub.output.emit('DebuggerEnabled', enabled)
+    }),
+  )
 
   //
   // Current Open VIEW (currently not used)
@@ -126,11 +127,9 @@ const plugin = createInternalRoot(() => {
   const [inspectedState, setInspectedState] = createSignal<
     Debugger.OutputChannels['InspectedState']
   >(INITIAL_INSPECTED_STATE, { equals: false })
+  const inspectedOwnerId = createMemo(() => inspectedState().ownerId)
 
-  createEffect(() => {
-    const state = inspectedState()
-    queueMicrotask(() => hub.output.emit('InspectedState', state))
-  })
+  createEffect(() => hub.output.emit('InspectedState', inspectedState()))
 
   function getTreeWalkerOwnerId(ownerId: NodeID | null): NodeID | null {
     const owner = ownerId && getObjectById(ownerId, ObjectType.Owner)
@@ -188,7 +187,7 @@ const plugin = createInternalRoot(() => {
   const inspector = createInspector({
     emit: hub.output.emit,
     enabled: debuggerEnabled,
-    listenToInspectedOwnerChange: l => hub.output.on('InspectedState', s => l(s.ownerId)),
+    inspectedOwnerId,
     resetInspectedNode,
   })
 
@@ -201,7 +200,6 @@ const plugin = createInternalRoot(() => {
     listenToViewChange: viewChange.listen,
     onNodeUpdate: pushNodeUpdate,
     inspectedState,
-    listenToInspectedStateChange: l => hub.output.on('InspectedState', l),
   })
 
   //
@@ -209,7 +207,6 @@ const plugin = createInternalRoot(() => {
   //
   const locator = createLocator({
     emit: hub.output.emit,
-    listenToDebuggerEenable: debuggerEnabledBus.listen,
     locatorEnabled,
     setLocatorEnabledSignal: signal => toggleModules('locatorKeyPressSignal', () => signal),
     onComponentClick(componentId, next) {
@@ -232,9 +229,12 @@ const plugin = createInternalRoot(() => {
     switch (e.name) {
       case 'ResetState': {
         // reset all the internal state
-        resetInspectedNode()
-        currentView = DEFAULT_MAIN_VIEW
-        structure.resetTreeWalkerMode()
+        batch(() => {
+          resetInspectedNode()
+          currentView = DEFAULT_MAIN_VIEW
+          structure.resetTreeWalkerMode()
+          locator.setDevtoolsHighlightTarget(null)
+        })
         break
       }
       case 'HighlightElementChange':

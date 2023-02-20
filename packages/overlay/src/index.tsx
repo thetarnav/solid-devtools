@@ -1,3 +1,5 @@
+import '@solid-devtools/debugger/setup'
+
 import { createInternalRoot, useDebugger } from '@solid-devtools/debugger'
 import { Icon, MountIcons } from '@solid-devtools/frontend'
 import { useIsMobile, useIsTouch } from '@solid-devtools/shared/primitives'

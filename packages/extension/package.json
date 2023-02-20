@@ -20,10 +20,10 @@
     "rimraf": "^4.1.2",
     "vite": "^4.1.1",
     "vitest": "^0.28.4",
-    "webextension-polyfill": "^0.10.0",
     "zip-a-folder": "^1.1.5"
   },
   "dependencies": {
+    "@solid-devtools/debugger": "workspace:^0.21.0",
     "@solid-devtools/frontend": "workspace:^0.8.0",
     "@solid-devtools/shared": "workspace:^0.11.0",
     "@solid-primitives/utils": "^5.1.0",
@@ -32,7 +32,7 @@
   },
   "overrides": {
     "@crxjs/vite-plugin": {
-      "vite": "^3"
+      "vite": "^4"
     }
   },
   "packageManager": "pnpm@7.22.0"

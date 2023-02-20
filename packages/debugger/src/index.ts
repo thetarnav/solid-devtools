@@ -1,12 +1,3 @@
-import { ParentComponent } from 'solid-js'
-import { attachDebugger } from './main/roots'
-
-export const Debugger: ParentComponent = props => {
-  attachDebugger()
-  return props.children
-}
-
-export { markComponentLoc } from './locator'
 export { useDebugger, useLocator } from './main'
 export {
   attachDebugger,
@@ -22,10 +13,8 @@ export {
   removeValueUpdateObserver,
 } from './main/update'
 export {
-  getFunctionSources,
   getNodeName,
   getNodeType,
-  getOwner,
   getOwnerType,
   isSolidComputation,
   isSolidMemo,
@@ -36,4 +25,3 @@ export {
   onOwnerCleanup,
   onParentCleanup,
 } from './main/utils'
-export * from './types'

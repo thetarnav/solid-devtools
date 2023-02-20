@@ -1,15 +1,25 @@
-import defineConfig from '../../configs/tsup.config'
+import { defineConfig } from 'tsup-preset-solid'
 
-import { version } from './package.json'
-
-export default defineConfig({
-  server: true,
-  additionalEntries: ['bridge', 'vite'],
-  overwrite: config => {
-    config.env = {
-      ...config.env,
-      VERSION: version,
-    }
-    return config
+export default defineConfig(
+  [
+    {
+      name: 'index',
+      entry: 'src/server.ts',
+      devEntry: 'src/index.ts',
+    },
+    {
+      entry: 'src/setup.ts',
+    },
+    {
+      entry: 'src/vite.ts',
+    },
+  ],
+  {
+    // writePackageJson: true,
+    tsupOptions(o) {
+      // TODO: this should be configurable in tsup preset
+      delete o.platform
+      return o
+    },
   },
-})
+)

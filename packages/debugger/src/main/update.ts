@@ -1,5 +1,5 @@
+import { tryOnCleanup } from '@solid-primitives/utils'
 import { Solid, ValueUpdateListener } from './types'
-import { tryOnCleanup } from './utils'
 
 //
 // AFTER UPDATE

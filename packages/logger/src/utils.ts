@@ -1,3 +1,24 @@
+import { Solid } from '@solid-devtools/debugger/types'
+import { createComputed, createRoot, getOwner, runWithOwner } from 'solid-js'
+
+export function getFunctionSources(fn: () => unknown): Solid.Signal[] {
+  let nodes: Solid.Signal[] | undefined
+  let init = true
+  runWithOwner(null as any, () =>
+    createRoot(dispose =>
+      createComputed(() => {
+        if (!init) return
+        init = false
+        fn()
+        const sources = (getOwner() as Solid.Computation).sources
+        if (sources) nodes = [...sources]
+        dispose()
+      }),
+    ),
+  )
+  return nodes ?? []
+}
+
 /**
  * For measuring the time elapsed. Returns a function that will return the time elapsed since it's last call.
  * */

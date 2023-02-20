@@ -8,21 +8,16 @@ It has to coordinate the communication between the different scripts based on th
 
 import { createCallbackStack, error, log } from '@solid-devtools/shared/utils'
 import {
+  ConnectionName,
+  createPortMessanger,
   ForwardPayload,
   isForwardMessage,
   once,
   OnMessageFn,
   PostMessageFn,
   Versions,
-} from 'solid-devtools/bridge'
+} from '../src/bridge'
 import icons from '../src/icons'
-import {
-  CONTENT_CONNECTION_NAME,
-  createPortMessanger,
-  DEVTOOLS_CONNECTION_NAME,
-  PANEL_CONNECTION_NAME,
-  POPUP_CONNECTION_NAME,
-} from '../src/messanger'
 
 log('Background script working.')
 
@@ -206,16 +201,16 @@ function handlePopupConnection(port: chrome.runtime.Port) {
 
 chrome.runtime.onConnect.addListener(port => {
   switch (port.name) {
-    case CONTENT_CONNECTION_NAME:
+    case ConnectionName.Content:
       port.sender?.tab?.id && handleContentScriptConnection(port, port.sender.tab.id)
       break
-    case DEVTOOLS_CONNECTION_NAME:
+    case ConnectionName.Devtools:
       handleDevtoolsConnection(port)
       break
-    case PANEL_CONNECTION_NAME:
+    case ConnectionName.Panel:
       handlePanelConnection(port)
       break
-    case POPUP_CONNECTION_NAME:
+    case ConnectionName.Popup:
       handlePopupConnection(port)
       break
   }

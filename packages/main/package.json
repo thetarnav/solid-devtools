@@ -29,85 +29,43 @@
     "dist"
   ],
   "type": "module",
-  "main": "dist/server.cjs",
-  "module": "dist/server.js",
-  "types": "dist/index.d.ts",
-  "browser": {
-    "./dist/server.cjs": "./dist/index.cjs",
-    "./dist/server.js": "./dist/index.js"
-  },
+  "main": "./dist/index/index.js",
+  "module": "./dist/index/index.js",
+  "types": "./dist/index/index.d.ts",
+  "browser": {},
   "exports": {
     ".": {
-      "worker": {
-        "import": {
-          "types": "./dist/index.d.ts",
-          "default": "./dist/server.js"
-        },
-        "require": "./dist/server.cjs"
-      },
-      "browser": {
-        "development": {
-          "import": {
-            "types": "./dist/index.d.ts",
-            "default": "./dist/index.js"
-          },
-          "require": "./dist/index.cjs"
-        },
-        "import": {
-          "types": "./dist/index.d.ts",
-          "default": "./dist/server.js"
-        },
-        "require": "./dist/server.cjs"
-      },
-      "deno": {
-        "import": {
-          "types": "./dist/index.d.ts",
-          "default": "./dist/server.js"
-        },
-        "require": "./dist/server.cjs"
-      },
-      "node": {
-        "import": {
-          "types": "./dist/index.d.ts",
-          "default": "./dist/server.js"
-        },
-        "require": "./dist/server.cjs"
-      },
       "development": {
         "import": {
-          "types": "./dist/index.d.ts",
-          "default": "./dist/server.js"
-        },
-        "require": "./dist/index.cjs"
+          "types": "./dist/index/index.d.ts",
+          "default": "./dist/index/dev.js"
+        }
       },
       "import": {
-        "types": "./dist/index.d.ts",
-        "default": "./dist/server.js"
-      },
-      "require": "./dist/server.cjs"
+        "types": "./dist/index/index.d.ts",
+        "default": "./dist/index/index.js"
+      }
+    },
+    "./setup": {
+      "import": {
+        "types": "./dist/setup/index.d.ts",
+        "default": "./dist/setup/index.js"
+      }
     },
     "./vite": {
       "import": {
-        "types": "./types/vite.d.ts",
-        "default": "./dist/vite.js"
-      },
-      "require": "./dist/vite.cjs"
-    },
-    "./bridge": {
-      "import": {
-        "types": "./types/bridge.d.ts",
-        "default": "./dist/bridge.js"
-      },
-      "require": "./dist/bridge.cjs"
+        "types": "./dist/vite/index.d.ts",
+        "default": "./dist/vite/index.js"
+      }
     }
   },
   "typesVersions": {
     "*": {
-      "vite": [
-        "./dist/vite.d.ts"
+      "setup": [
+        "./dist/setup/index.d.ts"
       ],
-      "bridge": [
-        "./dist/bridge.d.ts"
+      "vite": [
+        "./dist/vite/index.d.ts"
       ]
     }
   },
@@ -126,11 +84,7 @@
     "@types/babel__core": "^7.20.0",
     "@types/babel__generator": "^7.6.4",
     "@types/babel__traverse": "^7.18.2",
-    "solid-start": "^0.2.9",
-    "tsup": "^6.6.2",
-    "typescript": "^4.9.5",
-    "vite": "^4.1.1",
-    "vitest": "^0.28.4"
+    "solid-start": "^0.2.9"
   },
   "dependencies": {
     "@babel/core": "^7.20.12",

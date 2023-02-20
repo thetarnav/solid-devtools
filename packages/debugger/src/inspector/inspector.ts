@@ -1,8 +1,8 @@
 import { untrackedCallback } from '@solid-devtools/shared/primitives'
 import { isRecord } from '@solid-devtools/shared/utils'
-import { $PROXY, getListener, onCleanup } from 'solid-js'
 import { NodeType, ValueItemType } from '../main/constants'
 import { getSdtId, ObjectType } from '../main/id'
+import SolidAPI from '../main/solid-api'
 import type { Core, Mapped, NodeID, Solid, ValueItemID } from '../main/types'
 import { observeValueUpdate, removeValueUpdateObserver } from '../main/update'
 import {
@@ -110,8 +110,10 @@ export class ObservedProps {
     Object.defineProperty(this.props, key, {
       get() {
         const value = get()
-        if (getListener()) {
-          onCleanup(() => --o.n === 0 && self.onPropStateChange?.(key, PropGetterState.Stale))
+        if (SolidAPI.getListener()) {
+          SolidAPI.onCleanup(
+            () => --o.n === 0 && self.onPropStateChange?.(key, PropGetterState.Stale),
+          )
         }
         ++o.n === 1 && self.onPropStateChange?.(key, PropGetterState.Live)
         if (value !== o.v) self.onValueUpdate?.(id)
@@ -200,7 +202,7 @@ function mapSourceValue(
 
 function mapProps(props: Solid.Component['props']) {
   // proxy props need to be checked for changes in keys
-  const isProxy = !!(props as any)[$PROXY]
+  const isProxy = !!(props as any)[SolidAPI.$PROXY]
   const record: Mapped.Props['record'] = {}
 
   let checkProxyProps: (() => ReturnType<typeof compareProxyPropKeys>) | undefined

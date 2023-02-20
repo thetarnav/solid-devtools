@@ -1,6 +1,6 @@
 import { makeHoverElementListener } from '@solid-devtools/shared/primitives'
 import { warn } from '@solid-devtools/shared/utils'
-import { EmitterEmit, Listen } from '@solid-primitives/event-bus'
+import { EmitterEmit } from '@solid-primitives/event-bus'
 import { makeEventListener } from '@solid-primitives/event-listener'
 import { createKeyHold } from '@solid-primitives/keyboard'
 import { scheduleIdle } from '@solid-primitives/scheduled'
@@ -18,6 +18,7 @@ import type { Debugger } from '../main'
 import * as registry from '../main/componentRegistry'
 import { getObjectById, ObjectType } from '../main/id'
 import { createInternalRoot, enableRootsAutoattach } from '../main/roots'
+import SolidAPI from '../main/solid-api'
 import { NodeID } from '../main/types'
 import { attachElementOverlay } from './ElementOverlay'
 import {
@@ -35,17 +36,12 @@ export { markComponentLoc } from './markComponent'
 
 export function createLocator(props: {
   emit: EmitterEmit<Debugger.OutputChannels>
-  listenToDebuggerEenable: Listen<boolean>
   locatorEnabled: Accessor<boolean>
   setLocatorEnabledSignal(signal: Accessor<boolean>): void
   onComponentClick(componentId: NodeID, next: VoidFunction): void
 }) {
   const [enabledByPressingSignal, setEnabledByPressingSignal] = createSignal((): boolean => false)
   props.setLocatorEnabledSignal(createMemo(() => enabledByPressingSignal()()))
-
-  props.listenToDebuggerEenable(enabled => {
-    if (!enabled) setDevtoolsTarget(null)
-  })
 
   const [hoverTarget, setHoverTarget] = createSignal<HTMLElement | null>(null)
   const [devtoolsTarget, setDevtoolsTarget] = createSignal<HighlightElementPayload>(null)
@@ -165,6 +161,11 @@ export function createLocator(props: {
         setEnabledByPressingSignal(() => isHoldingKey)
       }
     })
+  }
+
+  // Enable the locator when the options were passed by the vite plugin
+  if (SolidAPI.locatorOptions) {
+    useLocator(SolidAPI.locatorOptions)
   }
 
   function openElementSourceCode(location: LocationAttr, element: HTMLElement | string) {

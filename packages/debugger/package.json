@@ -28,75 +28,45 @@
     "dist"
   ],
   "type": "module",
-  "main": "dist/server.cjs",
-  "module": "dist/server.js",
-  "types": "dist/index.d.ts",
-  "browser": {
-    "./dist/server.cjs": "./dist/index.cjs",
-    "./dist/server.js": "./dist/index.js"
-  },
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "worker": {
-        "import": {
-          "types": "./dist/index.d.ts",
-          "default": "./dist/server.js"
-        },
-        "require": "./dist/server.cjs"
-      },
-      "browser": {
-        "development": {
-          "import": {
-            "types": "./dist/index.d.ts",
-            "default": "./dist/index.js"
-          },
-          "require": "./dist/index.cjs"
-        },
-        "import": {
-          "types": "./dist/index.d.ts",
-          "default": "./dist/server.js"
-        },
-        "require": "./dist/server.cjs"
-      },
-      "deno": {
-        "import": {
-          "types": "./dist/index.d.ts",
-          "default": "./dist/server.js"
-        },
-        "require": "./dist/server.cjs"
-      },
-      "node": {
-        "import": {
-          "types": "./dist/index.d.ts",
-          "default": "./dist/server.js"
-        },
-        "require": "./dist/server.cjs"
-      },
-      "development": {
-        "import": {
-          "types": "./dist/index.d.ts",
-          "default": "./dist/server.js"
-        },
-        "require": "./dist/index.cjs"
-      },
       "import": {
         "types": "./dist/index.d.ts",
-        "default": "./dist/server.js"
-      },
-      "require": "./dist/server.cjs"
+        "default": "./dist/index.js"
+      }
+    },
+    "./bundled": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/bundled.js"
+      }
     },
     "./types": {
       "import": {
         "types": "./dist/types.d.ts",
         "default": "./dist/types.js"
-      },
-      "require": "./dist/types.cjs"
+      }
+    },
+    "./setup": {
+      "import": {
+        "types": "./dist/setup.d.ts",
+        "default": "./dist/setup.js"
+      }
     }
   },
   "typesVersions": {
     "*": {
+      "bundled": [
+        "./dist/index.d.ts"
+      ],
       "types": [
         "./dist/types.d.ts"
+      ],
+      "setup": [
+        "./dist/setup.d.ts"
       ]
     }
   },

@@ -1,5 +1,5 @@
 import { warn } from '@solid-devtools/shared/utils'
-import { EmitterEmit, Listen } from '@solid-primitives/event-bus'
+import { EmitterEmit } from '@solid-primitives/event-bus'
 import { scheduleIdle, throttle } from '@solid-primitives/scheduled'
 import { Accessor, createEffect } from 'solid-js'
 import type { Debugger } from '../main'
@@ -25,9 +25,9 @@ export type ToggleInspectedValueData = { id: ValueItemID; selected: boolean }
  * Plugin module
  */
 export function createInspector(props: {
+  inspectedOwnerId: Accessor<NodeID | null>
   emit: EmitterEmit<Debugger.OutputChannels>
   enabled: Accessor<boolean>
-  listenToInspectedOwnerChange: Listen<NodeID | null>
   resetInspectedNode: VoidFunction
 }) {
   let lastDetails: Mapped.OwnerDetails | undefined
@@ -137,31 +137,36 @@ export function createInspector(props: {
 
   let clearPrevDisposeListener: VoidFunction | undefined
 
-  props.listenToInspectedOwnerChange(id => {
-    const owner = id && getObjectById(id, ObjectType.Owner)
-    inspectedOwner && clearOwnerObservers(inspectedOwner, propsMap)
-    inspectedOwner = owner
-    valueMap.reset()
-    clearUpdates()
+  createEffect(() => {
+    if (!props.enabled()) return
+    const id = props.inspectedOwnerId()
 
-    if (owner) {
-      const result = collectOwnerDetails(owner, {
-        onValueUpdate: pushValueUpdate,
-        onPropStateChange: pushPropState,
-        observedPropsMap: propsMap,
-      })
+    queueMicrotask(() => {
+      const owner = id && getObjectById(id, ObjectType.Owner)
+      inspectedOwner && clearOwnerObservers(inspectedOwner, propsMap)
+      inspectedOwner = owner
+      valueMap.reset()
+      clearUpdates()
 
-      props.emit('InspectedNodeDetails', result.details)
-      valueMap = result.valueMap
-      lastDetails = result.details
-      checkProxyProps = result.checkProxyProps || null
-    } else {
-      lastDetails = undefined
-      checkProxyProps = null
-    }
+      if (owner) {
+        const result = collectOwnerDetails(owner, {
+          onValueUpdate: pushValueUpdate,
+          onPropStateChange: pushPropState,
+          observedPropsMap: propsMap,
+        })
 
-    clearPrevDisposeListener?.()
-    clearPrevDisposeListener = owner ? onOwnerDispose(owner, props.resetInspectedNode) : undefined
+        props.emit('InspectedNodeDetails', result.details)
+        valueMap = result.valueMap
+        lastDetails = result.details
+        checkProxyProps = result.checkProxyProps || null
+      } else {
+        lastDetails = undefined
+        checkProxyProps = null
+      }
+
+      clearPrevDisposeListener?.()
+      clearPrevDisposeListener = owner ? onOwnerDispose(owner, props.resetInspectedNode) : undefined
+    })
   })
 
   createEffect(() => {

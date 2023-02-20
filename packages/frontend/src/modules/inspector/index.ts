@@ -221,8 +221,9 @@ export default function createInspector({ bridge }: { bridge: DebuggerBridge }) 
 
   bridge.input.InspectedState.listen(newState => {
     batch(() => {
+      const prev = inspected.ownerId
       setInspected(newState)
-      setState({ ...NULL_STATE })
+      if (newState.ownerId !== prev) setState({ ...NULL_STATE })
     })
   })
 

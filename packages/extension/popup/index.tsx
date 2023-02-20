@@ -3,13 +3,12 @@
 import { batch, Component, createSignal, Show } from 'solid-js'
 import { render } from 'solid-js/web'
 
-import { once } from 'solid-devtools/bridge'
-import { createPortMessanger, POPUP_CONNECTION_NAME } from '../src/messanger'
+import { ConnectionName, createPortMessanger, once } from '../src/bridge'
 
 import './popup.css'
 
 // Create a connection to the background page
-const port = chrome.runtime.connect({ name: POPUP_CONNECTION_NAME })
+const port = chrome.runtime.connect({ name: ConnectionName.Popup })
 const { onPortMessage: fromBackground } = createPortMessanger(port)
 
 const [solidOnPage, setSolidOnPage] = createSignal(false)

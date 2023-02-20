@@ -1,4 +1,4 @@
-import { NodeType } from '@solid-devtools/debugger'
+import { NodeType } from '@solid-devtools/debugger/types'
 import { createPingedSignal } from '@solid-devtools/shared/primitives'
 import { Component, createMemo, JSX } from 'solid-js'
 import Icon, { IconComponent } from '../icons'

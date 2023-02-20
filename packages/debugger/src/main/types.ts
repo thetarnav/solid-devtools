@@ -1,6 +1,46 @@
+import type { $PROXY, DEV, getListener, getOwner, onCleanup, untrack } from 'solid-js'
+import type { DEV as STORE_DEV, unwrap } from 'solid-js/store'
 import type { EncodedValue, PropGetterState } from '../inspector/types'
 import type { LocationAttr } from '../locator/findComponent'
+import type { LocatorOptions } from '../locator/types'
 import { NodeType, ValueItemType } from './constants'
+
+//
+// EXPOSED SOLID API
+//
+
+export const enum DevEventType {
+  RootCreated = 'RootCreated',
+}
+
+export type DevEventDataMap = {
+  [DevEventType.RootCreated]: Solid.Root
+}
+
+export type StoredDevEvent = {
+  [K in keyof DevEventDataMap]: {
+    timestamp: number
+    type: K
+    data: DevEventDataMap[K]
+  }
+}[keyof DevEventDataMap]
+
+declare global {
+  interface Window {
+    _$SolidDevAPI?: {
+      readonly DEV: NonNullable<typeof DEV>
+      readonly getOwner: typeof getOwner
+      readonly getListener: typeof getListener
+      readonly onCleanup: typeof onCleanup
+      readonly $PROXY: typeof $PROXY
+      readonly untrack: typeof untrack
+      readonly STORE_DEV: NonNullable<typeof STORE_DEV>
+      readonly unwrap: typeof unwrap
+      readonly takeDevEvents: () => StoredDevEvent[]
+      readonly locatorOptions: LocatorOptions | null
+    }
+  }
+}
 
 // Additional "#" character is added to distinguish NodeID from string
 export type NodeID = `#${string}`

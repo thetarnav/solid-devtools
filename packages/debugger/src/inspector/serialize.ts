@@ -1,6 +1,6 @@
 import { FalsyValue } from '@solid-primitives/utils'
-import { unwrap } from 'solid-js/store'
 import { getSdtId, ObjectType } from '../main/id'
+import SolidAPI from '../main/solid-api'
 import { isStoreNode } from '../main/utils'
 import {
   Core,
@@ -72,7 +72,7 @@ function encode(value: unknown): number {
   // Store Nodes
   else if (!ignoreNextStore && isStoreNode(value)) {
     // might still pass in a proxy
-    const node = unwrap(value)
+    const node = SolidAPI.unwrap(value)
     // set unwrapped as seen as well
     if (node !== value) Seen.set(node, index)
     const id = getSdtId(node, ObjectType.StoreNode)

@@ -1,5 +1,4 @@
 /* @refresh reload */
-import { unobserveAllRoots } from '@solid-devtools/debugger'
 import {
   Component,
   createComponent,
@@ -11,7 +10,6 @@ import {
   createRoot,
   createSignal,
   ErrorBoundary,
-  onCleanup,
   ParentComponent,
   Setter,
   Show,
@@ -166,7 +164,7 @@ const App: Component = () => {
 
   const [showBroken, setShowBroken] = createSignal(false)
 
-  return () => (
+  return (
     <>
       {header()}
       {objmemo().subheader}
@@ -183,8 +181,6 @@ const App: Component = () => {
           </Show>
         </div>
         <button onClick={() => disposeApp()}>Dispose whole application</button>
-        <br />
-        <button onClick={unobserveAllRoots}>Unobserve all roots</button>
         <br />
         <button onClick={() => setShowBroken(p => !p)}>
           {showBroken() ? 'Hide' : 'Show'} broken component.
@@ -229,8 +225,8 @@ const App: Component = () => {
 
 const CountingComponent = () => {
   const [count, setCount] = createSignal(0)
-  const interval = setInterval(() => setCount(c => c + 1), 1000)
-  onCleanup(() => clearInterval(interval))
+  // const interval = setInterval(() => setCount(c => c + 1), 1000)
+  // onCleanup(() => clearInterval(interval))
   return <div>Count value is {count()}</div>
 }
 

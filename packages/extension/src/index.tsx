@@ -1,12 +1,12 @@
+import { Debugger } from '@solid-devtools/debugger/types'
 import { createDevtools, MountIcons } from '@solid-devtools/frontend'
-import { Debugger, once } from 'solid-devtools/bridge'
 import { createSignal } from 'solid-js'
 import { render } from 'solid-js/web'
-import { createPortMessanger, PANEL_CONNECTION_NAME } from './messanger'
+import { ConnectionName, createPortMessanger, once } from './bridge'
 
 import '@solid-devtools/frontend/dist/index.css'
 
-const port = chrome.runtime.connect({ name: PANEL_CONNECTION_NAME })
+const port = chrome.runtime.connect({ name: ConnectionName.Panel })
 const { postPortMessage: toBackground, onPortMessage: fromBackground } = createPortMessanger<
   Debugger.OutputChannels,
   Debugger.InputChannels
@@ -28,8 +28,11 @@ function App() {
 
   bridge.output.listen(e => toBackground(e.name, e.details))
 
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-  fromBackground(e => bridge.input.emit(e.name as any, e.details))
+  fromBackground(e => {
+    // some events are internal and should not be forwarded to the devtools
+    if (!(e.name in bridge.input)) return
+    bridge.input.emit(e.name as any, e.details)
+  })
 
   return (
     <div

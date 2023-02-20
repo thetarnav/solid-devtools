@@ -1,10 +1,11 @@
 import { warn } from '@solid-devtools/shared/utils'
-import { createRoot } from 'solid-js'
+import { createRoot, getOwner } from 'solid-js'
 import { clearComponentRegistry } from './componentRegistry'
 import { NodeType } from './constants'
 import { getSdtId, ObjectType } from './id'
-import { Core, NodeID, Solid } from './types'
-import { getOwner, isSolidRoot, onOwnerCleanup } from './utils'
+import SolidAPI from './solid-api'
+import { Core, DevEventType, NodeID, Solid } from './types'
+import { isSolidRoot, onOwnerCleanup } from './utils'
 
 // ROOTS
 // map of all top-roots
@@ -74,7 +75,7 @@ function changeRootAttachment(root: Solid.Root, newParent: Solid.Owner | null): 
  * 	attachDebugger();
  * });
  */
-export function attachDebugger(_owner: Core.Owner = getOwner()!): void {
+export function attachDebugger(_owner: Core.Owner = SolidAPI.getOwner()!): void {
   let owner = _owner as Solid.Owner | undefined | null
   if (!owner) return warn('reatachOwner helper should be called synchronously in a reactive owner.')
 
@@ -155,18 +156,20 @@ export function enableRootsAutoattach(): void {
   if (AutoattachEnabled) return
   AutoattachEnabled = true
 
-  const autoattach = (root: Core.Owner) => {
+  function autoattach(root: Core.Owner) {
     if (InternalRootCount) return
     attachDebugger(root)
   }
 
-  if (typeof window._$afterCreateRoot === 'function') {
-    const old = window._$afterCreateRoot
-    window._$afterCreateRoot = (root: Core.Owner) => {
-      old(root)
-      autoattach(root)
+  // TODO taking events should probably be done in a different place, so that other events could be taken as well
+  for (const e of SolidAPI.takeDevEvents()) {
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    if (e.type === DevEventType.RootCreated) {
+      autoattach(e.data)
     }
-  } else window._$afterCreateRoot = autoattach
+  }
+
+  window._$afterCreateRoot = autoattach
 }
 
 /**

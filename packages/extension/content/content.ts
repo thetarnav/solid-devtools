@@ -1,15 +1,17 @@
 import { error, log, warn } from '@solid-devtools/shared/utils'
 import {
+  ConnectionName,
+  createPortMessanger,
   forwardMessageToWindow,
   ForwardPayload,
   isForwardMessage,
   makeMessageListener,
   makePostMessage,
+  SOLID_ON_PAGE_MESSAGE,
   startListeningWindowMessages,
-} from 'solid-devtools/bridge'
-import { CONTENT_CONNECTION_NAME, createPortMessanger } from '../src/messanger'
+} from '../src/bridge'
 
-import.meta.env.DEV && log('Content script working.')
+import.meta.env.DEV && log('Content-Script working.')
 
 // @ts-expect-error ?script&module query ensures output in ES module format and only import the script path
 import realWorld from './realWorld?script&module'
@@ -17,7 +19,7 @@ import realWorld from './realWorld?script&module'
 const extVersion = chrome.runtime.getManifest().version
 const matchingClientVersion = __CLIENT_VERSION__
 
-const port = chrome.runtime.connect({ name: CONTENT_CONNECTION_NAME })
+const port = chrome.runtime.connect({ name: ConnectionName.Content })
 
 let devtoolsOpened = false
 
@@ -35,7 +37,7 @@ const { postPortMessage: toBackground, onPortMessage: fromBackground } = createP
   script.addEventListener('error', err => error('Real world script failed to load.', err))
   document.head.append(script)
   const handler = (e: MessageEvent) => {
-    if (e.data === '__SolidOnPage__') {
+    if (e.data === SOLID_ON_PAGE_MESSAGE) {
       toBackground('SolidOnPage')
       window.removeEventListener('message', handler)
     }
