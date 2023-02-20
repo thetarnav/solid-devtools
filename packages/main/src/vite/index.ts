@@ -13,8 +13,7 @@ import jsxLocationPlugin, { MARK_COMPONENT_GLOBAL } from './location'
 import namePlugin from './name'
 
 const enum Module {
-  Client = 'solid-devtools',
-  SetupDebugger = 'solid-devtools/setup',
+  Setup = 'solid-devtools/setup',
   Virtual = '/__solid-devtools',
 }
 
@@ -97,7 +96,7 @@ export const devtoolsPlugin = (_options: DevtoolsPluginOptions = {}): PluginOpti
       // Inject runtime debugger script
       if (!enablePlugin || id !== Module.Virtual) return
 
-      const importPath = JSON.stringify(Module.SetupDebugger)
+      const importPath = JSON.stringify(Module.Setup)
 
       let code = `import ${importPath};`
 
