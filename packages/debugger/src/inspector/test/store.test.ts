@@ -9,9 +9,12 @@ import {
 } from 'solid-js/store'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { getSdtId, ObjectType } from '../../main/id'
-import { getOwner, isSolidStore } from '../../main/utils'
+import SolidApi from '../../main/solid-api'
+import { isSolidStore } from '../../main/utils'
 import { Core, Solid } from '../../types'
 import { observeStoreNode, OnNodeUpdate, setOnStoreNodeUpdate, StoreNodeProperty } from '../store'
+
+const { getOwner } = SolidApi
 
 const getOwnerStore = () =>
   (Object.values(getOwner()!.sourceMap!).find(s => isSolidStore(s))! as Solid.Store).value

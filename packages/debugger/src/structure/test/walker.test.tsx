@@ -9,9 +9,12 @@ import {
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { NodeType, TreeWalkerMode } from '../../main/constants'
 import { $setSdtId, getSdtId, ObjectType } from '../../main/id'
+import SolidApi from '../../main/solid-api'
 import { Mapped, Solid } from '../../main/types'
-import { getNodeName, getOwner } from '../../main/utils'
+import { getNodeName } from '../../main/utils'
 import { ComputationUpdateHandler, walkSolidTree } from '../walker'
+
+const { getOwner } = SolidApi
 
 let mockLAST_ID = 0
 beforeEach(() => {

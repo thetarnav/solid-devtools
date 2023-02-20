@@ -1,12 +1,14 @@
 import { createComputed, createRoot, createSignal } from 'solid-js'
 import { describe, expect, it } from 'vitest'
+import solidApi from '../solid-api'
 import {
   interceptComputationRerun,
   makeSolidUpdateListener,
   observeValueUpdate,
   removeValueUpdateObserver,
 } from '../update'
-import { getOwner } from '../utils'
+
+const { getOwner } = solidApi
 
 describe('makeSolidUpdateListener', () => {
   it('listens to solid updates', () =>

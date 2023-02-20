@@ -2,9 +2,11 @@ import { batch, createComputed, createMemo, createRoot, createSignal } from 'sol
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { NodeType } from '../../main/constants'
 import { $setSdtId } from '../../main/id'
+import SolidApi from '../../main/solid-api'
 import type { NodeID, Solid } from '../../main/types'
-import { getOwner } from '../../main/utils'
 import { collectDependencyGraph, SerializedDGraph } from '../collect'
+
+const { getOwner } = SolidApi
 
 let mockLAST_ID = 0
 beforeEach(() => {
@@ -115,7 +117,7 @@ describe('collectDependencyGraph', () => {
     } satisfies SerializedDGraph.Graph)
 
     expect(result.graph, 'is JSON-serializable').toMatchObject(
-      JSON.parse(JSON.stringify(result.graph)),
+      JSON.parse(JSON.stringify(result.graph)) as any,
     )
 
     result = collectDependencyGraph(memoAOwner, { onNodeUpdate: () => {} })
@@ -156,7 +158,7 @@ describe('collectDependencyGraph', () => {
     } satisfies SerializedDGraph.Graph)
 
     expect(result.graph, 'is JSON-serializable').toMatchObject(
-      JSON.parse(JSON.stringify(result.graph)),
+      JSON.parse(JSON.stringify(result.graph)) as any,
     )
   })
 

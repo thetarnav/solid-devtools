@@ -8,9 +8,11 @@ import {
 } from 'solid-js'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { getObjectById, ObjectType } from '../../main/id'
-import { getOwner } from '../../main/utils'
+import SolidApi from '../../main/solid-api'
 import { Mapped, NodeType, PropGetterState, Solid, ValueType } from '../../types'
 import { collectOwnerDetails } from '../inspector'
+
+const { getOwner } = SolidApi
 
 let mockLAST_ID = 0
 beforeEach(() => {

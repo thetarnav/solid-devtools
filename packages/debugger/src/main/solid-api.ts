@@ -6,10 +6,12 @@ if (!window._$SolidDevAPI)
     '[solid-devtools]: Solid API not found. Please make sure you have installed the Solid Devtools extension...',
   )
 
-export default window._$SolidDevAPI as Modify<
+const SolidApi = window._$SolidDevAPI as Modify<
   typeof window._$SolidDevAPI,
   {
     getOwner: () => Solid.Owner | null
     getListener: () => Solid.Computation | null
   }
 >
+
+export default SolidApi
