@@ -1,4 +1,5 @@
-import path from 'path'
+import { PluginOption } from 'vite'
+
 import { PluginItem, transformAsync } from '@babel/core'
 import {
   LocatorOptions,
@@ -6,8 +7,7 @@ import {
   TargetURLFunction,
   USE_LOCATOR,
 } from '@solid-devtools/debugger/types'
-// organize-imports-ignore vite import needs to happen before solid-start
-import { PluginOption } from 'vite'
+import path from 'path'
 import type { Options as SolidStartOptions } from 'solid-start/vite/plugin'
 import jsxLocationPlugin, { MARK_COMPONENT_GLOBAL } from './location'
 import namePlugin from './name'
