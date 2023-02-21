@@ -85,7 +85,7 @@
     "type-fest": "^3.5.7"
   },
   "peerDependencies": {
-    "solid-js": "^1.6.9",
+    "solid-js": "^1.6.11",
     "vite": "^2.2.3 || ^3.0.0 || ^4.0.0"
   },
   "optionalDependencies": {

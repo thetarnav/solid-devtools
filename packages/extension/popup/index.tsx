@@ -3,7 +3,7 @@
 import { batch, Component, createSignal, Show } from 'solid-js'
 import { render } from 'solid-js/web'
 
-import { ConnectionName, createPortMessanger, once } from '../src/bridge'
+import { ConnectionName, createPortMessanger, once, Versions } from '../src/bridge'
 
 import './popup.css'
 
@@ -12,11 +12,7 @@ const port = chrome.runtime.connect({ name: ConnectionName.Popup })
 const { onPortMessage: fromBackground } = createPortMessanger(port)
 
 const [solidOnPage, setSolidOnPage] = createSignal(false)
-const [versions, setVersions] = createSignal<{
-  client: string
-  expectedClient: string
-  extension: string
-}>()
+const [versions, setVersions] = createSignal<Versions>()
 
 once(fromBackground, 'SolidOnPage', () => setSolidOnPage(true))
 
@@ -58,6 +54,7 @@ const App: Component = () => {
             >
               {v => (
                 <ul>
+                  <li>Solid: {v.solid}</li>
                   <li>Extension: {v.extension}</li>
                   <li>Client: {v.client}</li>
                   <li>Expected client: {v.expectedClient}</li>

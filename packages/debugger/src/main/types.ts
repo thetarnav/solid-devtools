@@ -38,6 +38,11 @@ declare global {
       readonly unwrap: typeof unwrap
       readonly takeDevEvents: () => StoredDevEvent[]
       readonly locatorOptions: LocatorOptions | null
+      readonly versions: {
+        readonly client: string | null
+        readonly solid: string | null
+        readonly expectedSolid: string | null
+      }
     }
   }
 }

@@ -2,7 +2,9 @@ declare global {
   // process.env
   namespace NodeJS {
     interface ProcessEnv {
-      VERSION: string
+      CLIENT_VERSION: string
+      SOLID_VERSION: string
+      EXPECTED_SOLID_VERSION: string
     }
   }
 }

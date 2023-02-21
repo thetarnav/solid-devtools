@@ -2,7 +2,7 @@ import { Debugger } from '@solid-devtools/debugger/types'
 import { createDevtools, MountIcons } from '@solid-devtools/frontend'
 import { createSignal } from 'solid-js'
 import { render } from 'solid-js/web'
-import { ConnectionName, createPortMessanger, once } from './bridge'
+import { ConnectionName, createPortMessanger, once, Versions } from './bridge'
 
 import '@solid-devtools/frontend/dist/index.css'
 
@@ -16,13 +16,14 @@ const { postPortMessage: toBackground, onPortMessage: fromBackground } = createP
 toBackground('ResetState')
 
 function App() {
-  const [versions, setVersions] = createSignal({
+  const [versions, setVersions] = createSignal<Versions>({
+    solid: '',
     client: '',
     expectedClient: '',
     extension: '',
   })
 
-  once(fromBackground, 'Versions', v => setVersions(v))
+  once(fromBackground, 'Versions', setVersions)
 
   const { bridge, Devtools } = createDevtools()
 
@@ -49,6 +50,7 @@ function App() {
         }`}
         errorOverlayFooter={
           <ul>
+            <li>Solid: {versions().solid}</li>
             <li>Extension: {versions().extension}</li>
             <li>Client: {versions().client}</li>
             <li>Expected client: {versions().expectedClient}</li>

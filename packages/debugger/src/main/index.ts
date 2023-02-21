@@ -9,6 +9,7 @@ import { createStructure, StructureUpdates } from '../structure'
 import { DebuggerModule, DEFAULT_MAIN_VIEW, DevtoolsMainView, TreeWalkerMode } from './constants'
 import { getObjectById, getSdtId, ObjectType } from './id'
 import { createInternalRoot } from './roots'
+import SolidApi from './solid-api'
 import { Mapped, NodeID } from './types'
 import { createBatchedUpdateEmitter } from './utils'
 
@@ -259,6 +260,9 @@ const plugin = createInternalRoot(() => {
    */
   function useDebugger() {
     return {
+      meta: {
+        versions: SolidApi.versions,
+      },
       enabled: debuggerEnabled,
       toggleEnabled: (enabled: boolean) => void toggleModules('debugger', enabled),
       on: hub.output.on,

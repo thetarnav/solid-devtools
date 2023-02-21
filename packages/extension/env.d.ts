@@ -1,10 +1,13 @@
-export {}
-
 declare global {
   namespace chrome.runtime {
     interface MessageSender {
       documentId: string
     }
   }
-  const __CLIENT_VERSION__: string
+  // import.meta.env.EXPECTED_CLIENT
+  interface ImportMetaEnv {
+    EXPECTED_CLIENT: string
+  }
 }
+
+export {}

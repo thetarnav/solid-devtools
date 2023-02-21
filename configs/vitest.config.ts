@@ -1,10 +1,11 @@
 import path from 'path'
 import solid from 'vite-plugin-solid'
+import { InlineConfig } from 'vitest'
 import { defineConfig, UserConfig } from 'vitest/config'
 
 const cwd = process.cwd()
 
-export const testConfig: UserConfig['test'] = {
+export const testConfig: InlineConfig = {
   passWithNoTests: true,
   watch: false,
   globals: true,

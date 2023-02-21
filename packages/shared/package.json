@@ -62,7 +62,7 @@
     }
   },
   "peerDependencies": {
-    "solid-js": "^1.6.9"
+    "solid-js": "^1.6.11"
   },
   "dependencies": {
     "@solid-primitives/event-bus": "^1.0.0",

@@ -12,8 +12,10 @@ import type { LocatorOptions } from './locator/types'
 import { DevEventType, Solid, StoredDevEvent } from './main/types'
 
 let PassedLocatorOptions: LocatorOptions | null = null
-
 let DevEvents: StoredDevEvent[] | null = []
+let ClientVersion: string | null = null
+let SolidVersion: string | null = null
+let ExpectedSolidVersion: string | null = null
 
 window._$SolidDevAPI = {
   DEV,
@@ -32,6 +34,17 @@ window._$SolidDevAPI = {
   get locatorOptions() {
     return PassedLocatorOptions
   },
+  versions: {
+    get client() {
+      return ClientVersion
+    },
+    get solid() {
+      return SolidVersion
+    },
+    get expectedSolid() {
+      return ExpectedSolidVersion
+    },
+  },
 }
 
 window._$afterCreateRoot = function (root) {
@@ -49,4 +62,13 @@ export function useLocator(options: LocatorOptions) {
 
 export function markComponentLoc() {
   // TODO
+}
+
+export function setClientVersion(version: string) {
+  ClientVersion = version
+}
+
+export function setSolidVersion(version: string, expected: string) {
+  SolidVersion = version
+  ExpectedSolidVersion = expected
 }

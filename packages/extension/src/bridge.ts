@@ -73,13 +73,21 @@ export function createPortMessanger<
   }
 }
 
-export type Versions = { client: string; expectedClient: string; extension: string }
+export type Versions = {
+  client: string | null
+  solid: string | null
+  expectedClient: string
+  extension: string
+}
 
 export interface GeneralMessages {
   // client -> content -> devtools.html
   // the `string` payload is the main version
   SolidOnPage: void
-  ClientConnected: string
+  ClientConnected: {
+    solid: string | null
+    client: string | null
+  }
   Versions: Versions
 
   /** devtools -> client: the chrome devtools got opened or entirely closed */

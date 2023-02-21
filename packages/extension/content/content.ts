@@ -1,4 +1,4 @@
-import { error, log, warn } from '@solid-devtools/shared/utils'
+import { error, log } from '@solid-devtools/shared/utils'
 import {
   ConnectionName,
   createPortMessanger,
@@ -17,7 +17,6 @@ import.meta.env.DEV && log('Content-Script working.')
 import realWorld from './realWorld?script&module'
 
 const extVersion = chrome.runtime.getManifest().version
-const matchingClientVersion = __CLIENT_VERSION__
 
 const port = chrome.runtime.connect({ name: ConnectionName.Content })
 
@@ -45,7 +44,7 @@ const { postPortMessage: toBackground, onPortMessage: fromBackground } = createP
   window.addEventListener('message', handler)
 }
 
-fromClient('ClientConnected', clientVersion => {
+fromClient('ClientConnected', versions => {
   // eslint-disable-next-line no-console
   console.log(
     '🚧 %csolid-devtools%c is in early development! 🚧\nPlease report any bugs to https://github.com/thetarnav/solid-devtools/issues',
@@ -53,31 +52,11 @@ fromClient('ClientConnected', clientVersion => {
     'color: #e38b1b',
   )
 
-  const toVersionTuple = (version: string) =>
-    version.split('.').map(Number) as [number, number, number]
-
-  // warn if the matching adapter version is not the same minor version range as the actual adapter
-  const adapterTuple = toVersionTuple(clientVersion)
-  const wantedTuple = toVersionTuple(matchingClientVersion)
-
-  // match only major and minor version
-  for (let i = 0; i < 2; i++) {
-    if (adapterTuple[i] !== wantedTuple[i]) {
-      warn(
-        `${i === 0 ? 'MAJOR' : 'MINOR'} VERSION MISMATCH!
-Extension version: ${extVersion}
-Client version: ${clientVersion}
-Expected client version: ${matchingClientVersion}
-Please install "solid-devtools@${matchingClientVersion}" in your project`,
-      )
-      break
-    }
-  }
-
   toBackground('Versions', {
-    client: clientVersion,
+    client: versions.client,
+    solid: versions.solid,
     extension: extVersion,
-    expectedClient: matchingClientVersion,
+    expectedClient: import.meta.env.EXPECTED_CLIENT,
   })
 
   fromClient('ResetPanel', () => toBackground('ResetPanel'))

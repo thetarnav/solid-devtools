@@ -69,7 +69,7 @@
     "postcss": "^8.4.21"
   },
   "peerDependencies": {
-    "solid-js": "^1.6.9"
+    "solid-js": "^1.6.11"
   },
   "packageManager": "pnpm@7.22.0"
 }

@@ -1,7 +1,7 @@
 import { crx } from '@crxjs/vite-plugin'
 import path from 'path'
 import solidPlugin from 'vite-plugin-solid'
-import { defineConfig } from 'vitest/config'
+import { defineConfig, UserConfig } from 'vitest/config'
 
 import { testConfig } from '../../configs/vitest.config'
 import manifest from './manifest'
@@ -20,11 +20,23 @@ export default defineConfig(config => {
         'solid-js': path.resolve(cwd, 'node_modules/solid-js/dist/solid.js'),
       },
     },
-    plugins: [solidPlugin({ dev: false, hot: false }), crx({ manifest })],
-    define: {
-      // need to insert the "" quotes manually, because vite just inserts the value as-is.
-      __CLIENT_VERSION__: `"${pkg.dependencies['solid-devtools'].match(/\d+.\d+.\d+/)![0]}"`,
-    },
+    plugins: [
+      solidPlugin({ dev: false, hot: false }) as any,
+      crx({ manifest }),
+      {
+        name: 'replace-version',
+        enforce: 'pre',
+        transform(code, id) {
+          if (id.includes('solid-devtools')) {
+            return code.replace(
+              /import\.meta\.env\.EXPECTED_CLIENT/g,
+              `"${pkg.dependencies['solid-devtools'].match(/\d+.\d+.\d+/)![0]}"`,
+            )
+          }
+          return code
+        },
+      },
+    ],
     build: {
       emptyOutDir: !isDev,
       rollupOptions: {
@@ -32,6 +44,6 @@ export default defineConfig(config => {
       },
       target: 'esnext',
     },
-    test: testConfig,
-  }
+    test: testConfig as any,
+  } satisfies UserConfig
 })
