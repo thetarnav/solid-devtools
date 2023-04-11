@@ -69,12 +69,8 @@ function markDebugNode(
   else if (type === 'owned') property = '$debugOwned'
   else property = '$debugSignal'
 
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-  if ((o as any)[property])
-    return true
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+  if ((o as any)[property]) return true
   ;(o as any)[property] = true
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
   return () => ((o as any)[property] = false)
 }
 
@@ -106,7 +102,7 @@ export function debugComputation(
   _owner?: Solid.Owner,
   { initialRun = true }: DebugComputationOptions = {},
 ): void {
-  const owner = _owner === undefined ? (getOwner() as Solid.Owner | null) : (_owner as Solid.Owner)
+  const owner = _owner === undefined ? getOwner() : _owner
   if (!owner || !isSolidComputation(owner)) return console.warn('owner is not a computation')
 
   if (markDebugNode(owner, 'computation') === true) return
@@ -221,7 +217,7 @@ export function debugComputation(
  */
 export function debugOwnerComputations(owner?: Solid.Owner): void
 export function debugOwnerComputations(_owner?: Solid.Owner): void {
-  const owner = _owner === undefined ? (getOwner() as Solid.Owner | null) : (_owner as Solid.Owner)
+  const owner = _owner === undefined ? getOwner() : _owner
   if (!owner) return console.warn('no owner passed to debugOwnedComputations')
 
   const marked = markDebugNode(owner, 'owned')
@@ -294,7 +290,7 @@ export function debugSignal(
       return console.warn('More then one signal was passed to debugSignal')
     signal = sources[0]!
   } else {
-    signal = source as Solid.Signal
+    signal = source
   }
 
   if (markDebugNode(signal) === true) return
@@ -376,7 +372,7 @@ export function debugSignals(
   let signals: Solid.Signal[] = []
   asArray(source).forEach(s => {
     if (typeof s === 'function') signals.push.apply(signals, getFunctionSources(s))
-    else signals.push(s as Solid.Signal)
+    else signals.push(s)
   })
   if (signals.length === 0) return console.warn('No signals were passed to debugSignals')
 
@@ -414,14 +410,10 @@ export function debugSignals(
  * }
  * ```
  */
-export function debugOwnerSignals(owner?: Solid.Owner, options: DebugSignalOptions = {}) {
-  // ? why assign, why solidOwner? is the param just ignored?
-  owner = getOwner()!
+export function debugOwnerSignals(owner = getOwner(), options: DebugSignalOptions = {}) {
   if (!owner) return console.warn('debugOwnerState found no Owner')
 
   if (markDebugNode(owner, 'signals') === true) return
-
-  const solidOwner = owner as Solid.Owner
 
   let prevSourceListLength = 0
   let prevOwnedLength = 0
@@ -432,8 +424,8 @@ export function debugOwnerSignals(owner?: Solid.Owner, options: DebugSignalOptio
 
       let i: number
       // add owned signals
-      if (solidOwner.sourceMap) {
-        const sourceList = Object.values(solidOwner.sourceMap)
+      if (owner.sourceMap) {
+        const sourceList = Object.values(owner.sourceMap)
         // signals can only be added
         for (i = prevSourceListLength; i < sourceList.length; i++) {
           const signal = sourceList[i]!
@@ -442,10 +434,10 @@ export function debugOwnerSignals(owner?: Solid.Owner, options: DebugSignalOptio
         prevSourceListLength = i
       }
       // add owned memos
-      if (solidOwner.owned) {
+      if (owner.owned) {
         // owned can only be added
-        for (i = prevOwnedLength; i < solidOwner.owned.length; i++) {
-          const childOwner = solidOwner.owned[i]!
+        for (i = prevOwnedLength; i < owner.owned.length; i++) {
+          const childOwner = owner.owned[i]!
           if (isSolidMemo(childOwner)) signals.push(childOwner)
         }
         prevOwnedLength = i
