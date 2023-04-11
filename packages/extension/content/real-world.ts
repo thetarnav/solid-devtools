@@ -1,3 +1,11 @@
+/*
+
+The real-world script will check if solid is on the page,
+notify the content script,
+and then import the debugger script.
+
+*/
+
 import { SOLID_ON_PAGE_MESSAGE } from '../src/bridge'
 
 let notified = false

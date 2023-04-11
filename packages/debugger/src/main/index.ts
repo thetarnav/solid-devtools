@@ -1,5 +1,6 @@
 import { createEventBus, createGlobalEmitter, GlobalEmitter } from '@solid-primitives/event-bus'
-import { createStaticStore, defer } from '@solid-primitives/utils'
+import { createStaticStore } from '@solid-primitives/static-store'
+import { defer } from '@solid-primitives/utils'
 import { batch, createComputed, createEffect, createMemo, createSignal } from 'solid-js'
 import { createDependencyGraph, DGraphUpdate } from '../dependency'
 import { createInspector, InspectorUpdate, ToggleInspectedValueData } from '../inspector'

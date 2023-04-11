@@ -67,19 +67,19 @@ type Source =
   | 'createComputed'
 
 const SOURCE_TYPES: Record<'returning' | 'effect', ReadonlySet<Source>> = {
-  returning: new Set(['createSignal', 'createMemo', 'createStore', 'createMutable']),
-  effect: new Set(['createEffect', 'createRenderEffect', 'createComputed']),
+  returning: new Set<Source>(['createSignal', 'createMemo', 'createStore', 'createMutable']),
+  effect: new Set<Source>(['createEffect', 'createRenderEffect', 'createComputed']),
 }
 
 const SOURCE_MODULES: Record<string, ReadonlySet<Source>> = {
-  'solid-js': new Set([
+  'solid-js': new Set<Source>([
     'createSignal',
     'createMemo',
     'createEffect',
     'createRenderEffect',
     'createComputed',
   ]),
-  'solid-js/store': new Set(['createStore', 'createMutable']),
+  'solid-js/store': new Set<Source>(['createStore', 'createMutable']),
 }
 
 const OPTIONS_ARG: Record<Source, number> = {

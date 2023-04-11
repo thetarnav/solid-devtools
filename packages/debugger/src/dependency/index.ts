@@ -4,10 +4,10 @@ import { defer } from '@solid-primitives/utils'
 import { Accessor, createEffect, createMemo } from 'solid-js'
 import type { Debugger } from '../main'
 import { DevtoolsMainView, NodeType } from '../main/constants'
-import { getObjectById, ObjectType } from '../main/id'
+import { ObjectType, getObjectById } from '../main/id'
 import { NodeID, Solid } from '../main/types'
 import { getNodeType } from '../main/utils'
-import { collectDependencyGraph, OnNodeUpdate, SerializedDGraph } from './collect'
+import { OnNodeUpdate, SerializedDGraph, collectDependencyGraph } from './collect'
 
 export { SerializedDGraph } from './collect'
 

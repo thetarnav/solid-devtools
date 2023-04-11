@@ -1,6 +1,6 @@
 import { getSdtId, ObjectType } from '../main/id'
 import SolidAPI from '../main/solid-api'
-import type { Core, NodeID } from '../types'
+import type { NodeID, Solid } from '../types'
 
 const { isWrappable } = SolidAPI.STORE_DEV
 
@@ -17,7 +17,7 @@ type ParentProperty = StoreNodeProperty | symbol
  * Map of all listened-to store nodes, and their parnet nodeId:property
  * (symbol means it is an observed root node)
  */
-const Nodes = new WeakMap<Core.Store.StoreNode, Set<ParentProperty>>()
+const Nodes = new WeakMap<Solid.StoreNode, Set<ParentProperty>>()
 
 export type OnNodeUpdate = (property: StoreNodeProperty, data: StoreUpdateData) => void
 let OnNodeUpdate: OnNodeUpdate | null = null
@@ -26,7 +26,7 @@ export function setOnStoreNodeUpdate(fn: OnNodeUpdate): void {
 }
 
 // path solid global dev hook
-globalThis._$onStoreNodeUpdate = (node, property, value, prev) =>
+SolidAPI.STORE_DEV.hooks.onStoreNodeUpdate = (node, property, value, prev) =>
   SolidAPI.untrack(() => {
     if (!OnNodeUpdate || !Nodes.has(node) || typeof property === 'symbol') return
 
@@ -48,7 +48,7 @@ globalThis._$onStoreNodeUpdate = (node, property, value, prev) =>
     }
   })
 
-export function observeStoreNode(rootNode: Core.Store.StoreNode): VoidFunction {
+export function observeStoreNode(rootNode: Solid.StoreNode): VoidFunction {
   // might still pass in a proxy
   rootNode = SolidAPI.unwrap(rootNode)
   const symbol = Symbol('inspect-store')
@@ -59,7 +59,7 @@ export function observeStoreNode(rootNode: Core.Store.StoreNode): VoidFunction {
   })
 }
 
-function trackStore(node: Core.Store.StoreNode, parent: ParentProperty): void {
+function trackStore(node: Solid.StoreNode, parent: ParentProperty): void {
   const data = Nodes.get(node)
   if (data) data.add(parent)
   else {
@@ -69,7 +69,7 @@ function trackStore(node: Core.Store.StoreNode, parent: ParentProperty): void {
   }
 }
 
-function untrackStore(node: Core.Store.StoreNode, parent: ParentProperty): void {
+function untrackStore(node: Solid.StoreNode, parent: ParentProperty): void {
   const data = Nodes.get(node)
   if (data && data.delete(parent)) {
     data.size === 0 && Nodes.delete(node)
@@ -79,12 +79,12 @@ function untrackStore(node: Core.Store.StoreNode, parent: ParentProperty): void 
 }
 
 function forEachStoreProp(
-  node: Core.Store.StoreNode,
-  fn: (key: string, node: Core.Store.StoreNode) => void,
+  node: Solid.StoreNode,
+  fn: (key: string, node: Solid.StoreNode) => void,
 ): void {
   if (Array.isArray(node)) {
     for (let i = 0; i < node.length; i++) {
-      const child = node[i] as Core.Store.StoreNode
+      const child = node[i] as Solid.StoreNode
       isWrappable(child) && fn(i.toString(), child)
     }
   } else {

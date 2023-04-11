@@ -1,17 +1,12 @@
 export { useDebugger, useLocator } from './main'
 export {
-  attachDebugger,
-  createInternalRoot,
-  enableRootsAutoattach,
-  unobserveAllRoots,
-} from './main/roots'
-export {
+  addSolidUpdateListener,
   interceptComputationRerun,
-  makeSolidUpdateListener,
   makeValueUpdateListener,
   observeValueUpdate,
   removeValueUpdateObserver,
-} from './main/update'
+} from './main/observe'
+export { attachDebugger, createInternalRoot, unobserveAllRoots } from './main/roots'
 export {
   getNodeName,
   getNodeType,
@@ -20,6 +15,7 @@ export {
   isSolidMemo,
   isSolidOwner,
   isSolidRoot,
+  isSolidSignal,
   isSolidStore,
   lookupOwner,
   onOwnerCleanup,

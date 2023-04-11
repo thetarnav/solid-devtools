@@ -1,26 +1,15 @@
 import { makeEventListener } from '@solid-primitives/event-listener'
 import { createMediaQuery } from '@solid-primitives/media'
-import { createSharedRoot } from '@solid-primitives/rootless'
+import { createSingletonRoot } from '@solid-primitives/rootless'
+import { AnyFunction, tryOnCleanup } from '@solid-primitives/utils'
 import {
-  accessWith,
-  AnyFunction,
-  AnyStatic,
-  entries,
-  SetterParam,
-  StaticStoreSetter,
-  tryOnCleanup,
-} from '@solid-primitives/utils'
-import {
-  $TRACK,
   Accessor,
   batch,
   createMemo,
   createSignal,
-  getListener,
   getOwner,
   MemoOptions,
   onCleanup,
-  Signal,
   SignalOptions,
   untrack,
 } from 'solid-js'
@@ -37,8 +26,8 @@ export type WritableDeep<T> = 0 extends 1 & T
 export const untrackedCallback = <Fn extends AnyFunction>(fn: Fn): Fn =>
   ((...a: Parameters<Fn>) => untrack<ReturnType<Fn>>(fn.bind(void 0, ...a))) as any
 
-export const useIsTouch = createSharedRoot(() => createMediaQuery('(hover: none)'))
-export const useIsMobile = createSharedRoot(() => createMediaQuery('(max-width: 640px)'))
+export const useIsTouch = createSingletonRoot(() => createMediaQuery('(hover: none)'))
+export const useIsMobile = createSingletonRoot(() => createMediaQuery('(max-width: 640px)'))
 
 export function createHover(handle: (hovering: boolean) => void): {
   onMouseEnter: VoidFunction
@@ -163,96 +152,6 @@ export function createPingedSignal(
   onCleanup(() => clearTimeout(timeoutId))
 
   return [isUpdated, ping]
-}
-
-// TODO: move createUnownedRoot to solid-primitives
-// export function createUnownedRoot<T>(fn: (dispose: VoidFunction) => T): T {
-//   return runWithOwner(null as any, () => createRoot(fn))
-// }
-
-// ! unfinished
-export function createShallowStore<T extends Readonly<AnyStatic>>(
-  storeValue: T,
-): [T, StaticStoreSetter<T>] {
-  const signals: Record<PropertyKey, Signal<any>> = {}
-
-  const [keys, setKeys] = createSignal(Object.keys(storeValue), { internal: true })
-  let hasKeysChanged = false
-
-  // TODO handle arrays
-
-  const setValue = (key: keyof T, setterParam: SetterParam<any>): void => {
-    const saved = signals[key] as Signal<any> | undefined
-    const newValue = saved ? saved[1](setterParam) : accessWith(setterParam, storeValue[key])
-    if (newValue === void 0) {
-      delete storeValue[key]
-      hasKeysChanged = true
-    } else {
-      storeValue[key] = newValue
-    }
-  }
-
-  const setter = (a: ((prev: T) => Partial<T>) | Partial<T> | keyof T, b?: SetterParam<any>) => {
-    batch(() => {
-      if (typeof a === 'object' || typeof a === 'function')
-        untrack(() => {
-          for (const [key, newValue] of entries(accessWith(a, store) as Partial<T>))
-            setValue(key, () => newValue)
-        })
-      else setValue(a, b)
-      if (hasKeysChanged) {
-        hasKeysChanged = false
-        setKeys(Object.keys(storeValue))
-      }
-    })
-    return store
-  }
-
-  const store = new Proxy(storeValue, {
-    get(target, key) {
-      if (key === $TRACK) {
-        keys()
-        return true
-      }
-      let signal = signals[key]
-      if (!signal) {
-        if (!getListener()) {
-          return storeValue[key as keyof T]
-        }
-        signal = createSignal<any>(storeValue[key as keyof T], { internal: true })
-        signals[key] = signal
-      }
-      return signal[0]()
-    },
-
-    has(target, key) {
-      if (key === $TRACK) return true
-      this.get!(target, key, target)
-      return key in target
-    },
-
-    set() {
-      // eslint-disable-next-line no-console
-      console.warn('Cannot mutate a Store directly')
-      return true
-    },
-
-    deleteProperty() {
-      // eslint-disable-next-line no-console
-      console.warn('Cannot mutate a Store directly')
-      return true
-    },
-
-    ownKeys: () => keys().slice(),
-
-    getOwnPropertyDescriptor() {
-      // eslint-disable-next-line no-console
-      console.warn('getOwnPropertyDescriptor is not yet implemented for shallow stores')
-      return undefined
-    },
-  })
-
-  return [store, setter]
 }
 
 export function handleTupleUpdate<

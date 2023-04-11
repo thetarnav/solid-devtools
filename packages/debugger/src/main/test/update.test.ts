@@ -1,22 +1,22 @@
-import { createComputed, createRoot, createSignal } from 'solid-js'
+import { createComputed, createRoot, createSignal, onCleanup } from 'solid-js'
 import { describe, expect, it } from 'vitest'
-import solidApi from '../solid-api'
 import {
+  addSolidUpdateListener,
   interceptComputationRerun,
-  makeSolidUpdateListener,
   observeValueUpdate,
   removeValueUpdateObserver,
-} from '../update'
+} from '../observe'
+import solidApi from '../solid-api'
 
 const { getOwner } = solidApi
 
-describe('makeSolidUpdateListener', () => {
+describe('addSolidUpdateListener', () => {
   it('listens to solid updates', () =>
     createRoot(dispose => {
       const [count, setCount] = createSignal(0)
       createComputed(count)
       let runs = 0
-      makeSolidUpdateListener(() => runs++)
+      onCleanup(addSolidUpdateListener(() => runs++))
 
       queueMicrotask(() => {
         expect(runs).toBe(1)
@@ -74,7 +74,7 @@ describe('observeValueUpdate', () => {
   it('patches signal', () =>
     createRoot(dispose => {
       const [, setCount] = createSignal(0, { name: 's1' })
-      const signal = getOwner()!.sourceMap!['s1']!
+      const signal = getOwner()!.sourceMap![0]!
       const symbol = Symbol()
       let last_prev: unknown
       let last_value: unknown

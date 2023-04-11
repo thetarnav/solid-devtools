@@ -15,24 +15,22 @@ import {
   runWithOwner,
 } from 'solid-js'
 import type { Debugger } from '../main'
-import * as registry from '../main/componentRegistry'
-import { getObjectById, ObjectType } from '../main/id'
-import { createInternalRoot, enableRootsAutoattach } from '../main/roots'
+import * as registry from '../main/component-registry'
+import { ObjectType, getObjectById } from '../main/id'
+import { createInternalRoot } from '../main/roots'
 import SolidAPI from '../main/solid-api'
 import { NodeID } from '../main/types'
 import { attachElementOverlay } from './ElementOverlay'
 import {
-  getLocationAttr,
-  getSourceCodeData,
   LocationAttr,
   LocatorComponent,
-  openSourceCode,
   TargetIDE,
   TargetURLFunction,
+  getLocationAttr,
+  getSourceCodeData,
+  openSourceCode,
 } from './findComponent'
 import { HighlightElementPayload, LocatorOptions } from './types'
-
-export { markComponentLoc } from './markComponent'
 
 export function createLocator(props: {
   emit: EmitterEmit<Debugger.OutputChannels>
@@ -152,7 +150,6 @@ export function createLocator(props: {
    */
   function useLocator(options: LocatorOptions): void {
     runWithOwner(owner, () => {
-      enableRootsAutoattach()
       if (locatorUsed) return warn('useLocator can be called only once.')
       locatorUsed = true
       if (options.targetIDE) targetIDE = options.targetIDE

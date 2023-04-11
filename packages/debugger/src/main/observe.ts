@@ -1,5 +1,35 @@
-import { tryOnCleanup } from '@solid-primitives/utils'
-import { Solid, ValueUpdateListener } from './types'
+/*
+
+Dev hooks and observing reactive graph nodes
+
+*/
+
+import { chain, tryOnCleanup } from '@solid-primitives/utils'
+import { attachDebugger } from './roots'
+import SolidAPI from './solid-api'
+import { DevEventType, Solid, ValueUpdateListener } from './types'
+import { isSolidRoot } from './utils'
+
+for (const e of SolidAPI.getDevEvents()) {
+  switch (e.type) {
+    case DevEventType.RootCreated:
+      attachDebugger(e.data)
+      break
+
+    default:
+      break
+  }
+}
+
+//
+// AFTER CREATE OWNER
+//
+
+SolidAPI.DEV.hooks.afterCreateOwner = function (owner) {
+  if (isSolidRoot(owner)) {
+    attachDebugger(owner)
+  }
+}
 
 //
 // AFTER UPDATE
@@ -7,14 +37,7 @@ import { Solid, ValueUpdateListener } from './types'
 
 const GraphUpdateListeners = new Set<VoidFunction>()
 
-// Patch window._$afterUpdate
-{
-  const runListeners = () => GraphUpdateListeners.forEach(f => f())
-  if (typeof window._$afterUpdate === 'function') {
-    GraphUpdateListeners.add(window._$afterUpdate)
-  }
-  window._$afterUpdate = runListeners
-}
+SolidAPI.DEV.hooks.afterUpdate = chain(GraphUpdateListeners)
 
 /**
  * Runs the callback on every Solid Graph Update – whenever computations update because of a signal change.
@@ -22,11 +45,9 @@ const GraphUpdateListeners = new Set<VoidFunction>()
  *
  * This will listen to all updates of the reactive graph — including ones outside of the <Debugger> component, and debugger internal computations.
  */
-export function makeSolidUpdateListener(onUpdate: VoidFunction): VoidFunction {
+export function addSolidUpdateListener(onUpdate: VoidFunction): VoidFunction {
   GraphUpdateListeners.add(onUpdate)
-  return tryOnCleanup(() => {
-    GraphUpdateListeners.delete(onUpdate)
-  })
+  return () => GraphUpdateListeners.delete(onUpdate)
 }
 
 //
@@ -89,37 +110,43 @@ export function removeComputationUpdateObserver(owner: Solid.Computation, symbol
   if (map) delete map[symbol]
 }
 
+const SignalUpdateListeners = new WeakMap<
+  Solid.SourceMapValue | Solid.Computation,
+  Map<symbol, ValueUpdateListener>
+>()
+
 /**
  * Patches the owner/signal value, firing the callback on each update immediately as it happened.
  */
 export function observeValueUpdate(
-  node: Solid.SignalState,
+  node: Solid.SourceMapValue | Solid.Computation,
   onUpdate: ValueUpdateListener,
   symbol: symbol,
 ): void {
-  // node already patched
-  if (node.onValueUpdate) {
-    node.onValueUpdate[symbol] = onUpdate
-    return
+  let map = SignalUpdateListeners.get(node)
+  if (!map) {
+    SignalUpdateListeners.set(node, (map = new Map()))
+    let value = node.value
+    Object.defineProperty(node, 'value', {
+      get: () => value,
+      set: newValue => {
+        for (const fn of map!.values()) fn(newValue, value)
+        value = newValue
+      },
+    })
   }
-  // patch node
-  const map = (node.onValueUpdate = { [symbol]: onUpdate })
-  let value = node.value
-  Object.defineProperty(node, 'value', {
-    get: () => value,
-    set: newValue => {
-      for (const sym of Object.getOwnPropertySymbols(map)) map[sym]!(newValue, value)
-      value = newValue
-    },
-  })
+  map.set(symbol, onUpdate)
 }
 
-export function removeValueUpdateObserver(node: Solid.SignalState, symbol: symbol): void {
-  if (node.onValueUpdate) delete node.onValueUpdate[symbol]
+export function removeValueUpdateObserver(
+  node: Solid.SourceMapValue | Solid.Computation,
+  symbol: symbol,
+): void {
+  SignalUpdateListeners.get(node)?.delete(symbol)
 }
 
 export function makeValueUpdateListener(
-  node: Solid.SignalState,
+  node: Solid.SourceMapValue | Solid.Computation,
   onUpdate: ValueUpdateListener,
   symbol: symbol,
 ): void {

@@ -8,18 +8,18 @@ import {
   unwrap,
 } from 'solid-js/store'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { getSdtId, ObjectType } from '../../main/id'
+import { ObjectType, getSdtId } from '../../main/id'
 import SolidApi from '../../main/solid-api'
 import { isSolidStore } from '../../main/utils'
-import { Core, Solid } from '../../types'
-import { observeStoreNode, OnNodeUpdate, setOnStoreNodeUpdate, StoreNodeProperty } from '../store'
+import { Solid } from '../../types'
+import { OnNodeUpdate, StoreNodeProperty, observeStoreNode, setOnStoreNodeUpdate } from '../store'
 
 const { getOwner } = SolidApi
 
 const getOwnerStore = () =>
   (Object.values(getOwner()!.sourceMap!).find(s => isSolidStore(s))! as Solid.Store).value
 
-const getNodeProp = (node: Core.Store.StoreNode, prop: string): StoreNodeProperty =>
+const getNodeProp = (node: Solid.StoreNode, prop: string): StoreNodeProperty =>
   `${getSdtId(unwrap(node), ObjectType.StoreNode)}:${prop}`
 
 let mockLAST_ID = 0

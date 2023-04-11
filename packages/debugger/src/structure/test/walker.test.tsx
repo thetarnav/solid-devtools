@@ -8,7 +8,7 @@ import {
 } from 'solid-js'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { NodeType, TreeWalkerMode } from '../../main/constants'
-import { $setSdtId, getSdtId, ObjectType } from '../../main/id'
+import { $setSdtId, ObjectType, getSdtId } from '../../main/id'
 import SolidApi from '../../main/solid-api'
 import { Mapped, Solid } from '../../main/types'
 import { getNodeName } from '../../main/utils'

@@ -1,11 +1,11 @@
 import { getSdtId, ObjectType } from '../main/id'
-import { NodeID, Solid } from '../main/types'
 import {
   observeComputationUpdate,
   observeValueUpdate,
   removeComputationUpdateObserver,
   removeValueUpdateObserver,
-} from '../main/update'
+} from '../main/observe'
+import { NodeID, Solid } from '../main/types'
 import { getNodeName, getNodeType, getOwnerType, isSolidOwner } from '../main/utils'
 import { NodeType } from '../types'
 

@@ -19,6 +19,6 @@
     "@typescript-eslint/no-useless-empty-export": "warn",
     "@typescript-eslint/prefer-enum-initializers": "warn",
     "no-only-tests/no-only-tests": "warn",
-    "eslint-comments/no-unused-enable": "warn"
+    "eslint-comments/no-unused-disable": "warn"
   }
 }

@@ -1,9 +1,9 @@
 import { untrackedCallback } from '@solid-devtools/shared/primitives'
-import type { ComponentRegisterHandler } from '../main/componentRegistry'
+import type { ComponentRegisterHandler } from '../main/component-registry'
 import { NodeType, TreeWalkerMode } from '../main/constants'
-import { getSdtId, ObjectType } from '../main/id'
+import { ObjectType, getSdtId } from '../main/id'
+import { observeComputationUpdate } from '../main/observe'
 import { Mapped, NodeID, Solid } from '../main/types'
-import { observeComputationUpdate } from '../main/update'
 import {
   getComponentRefreshNode,
   markOwnerName,

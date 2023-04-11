@@ -1,20 +1,20 @@
 import { warn } from '@solid-devtools/shared/utils'
 import { EmitterEmit } from '@solid-primitives/event-bus'
 import { scheduleIdle, throttle } from '@solid-primitives/scheduled'
-import { Accessor, createEffect } from 'solid-js'
+import { Accessor, createEffect, onCleanup } from 'solid-js'
 import type { Debugger } from '../main'
-import { getObjectById, ObjectType } from '../main/id'
+import { ObjectType, getObjectById } from '../main/id'
+import { addSolidUpdateListener } from '../main/observe'
 import { Mapped, NodeID, Solid, ValueItemID } from '../main/types'
-import { makeSolidUpdateListener } from '../main/update'
 import { onOwnerDispose } from '../main/utils'
 import {
-  clearOwnerObservers,
-  collectOwnerDetails,
   ObservedPropsMap,
   ValueNodeMap,
+  clearOwnerObservers,
+  collectOwnerDetails,
 } from './inspector'
 import { encodeValue } from './serialize'
-import { observeStoreNode, setOnStoreNodeUpdate, StoreNodeProperty, StoreUpdateData } from './store'
+import { StoreNodeProperty, StoreUpdateData, observeStoreNode, setOnStoreNodeUpdate } from './store'
 import { InspectorUpdate, InspectorUpdateMap, PropGetterState } from './types'
 
 export * from './types'
@@ -173,7 +173,7 @@ export function createInspector(props: {
     if (!props.enabled()) return
 
     // Check if proxy props have changed keys after each update queue
-    makeSolidUpdateListener(() => checkProxyProps && triggerPropsCheck())
+    onCleanup(addSolidUpdateListener(() => checkProxyProps && triggerPropsCheck()))
   })
 
   return {

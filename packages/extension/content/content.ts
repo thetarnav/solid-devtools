@@ -1,20 +1,31 @@
+/*
+
+Constent Script
+
+This script is injected into every page and is responsible for:
+
+- Forwarding messages between the background script and the debugger
+- Injecting the real-world script to detect if solid is on the page (and the debugger if so)
+
+*/
+
 import { error, log } from '@solid-devtools/shared/utils'
 import {
   ConnectionName,
+  ForwardPayload,
+  SOLID_ON_PAGE_MESSAGE,
   createPortMessanger,
   forwardMessageToWindow,
-  ForwardPayload,
   isForwardMessage,
   makeMessageListener,
   makePostMessage,
-  SOLID_ON_PAGE_MESSAGE,
   startListeningWindowMessages,
 } from '../src/bridge'
 
 import.meta.env.DEV && log('Content-Script working.')
 
 // @ts-expect-error ?script&module query ensures output in ES module format and only import the script path
-import realWorld from './realWorld?script&module'
+import realWorld from './real-world?script&module'
 
 const extVersion = chrome.runtime.getManifest().version
 

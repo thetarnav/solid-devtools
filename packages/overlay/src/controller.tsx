@@ -1,8 +1,6 @@
-import { enableRootsAutoattach, useDebugger } from '@solid-devtools/debugger'
+import { useDebugger } from '@solid-devtools/debugger'
 import { createDevtools, DevtoolsProps } from '@solid-devtools/frontend'
 import { onCleanup } from 'solid-js'
-
-enableRootsAutoattach()
 
 function clone<T>(data: T): T {
   return typeof data === 'object' ? (JSON.parse(JSON.stringify(data)) as T) : data

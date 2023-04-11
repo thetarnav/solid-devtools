@@ -3,57 +3,33 @@ import { Emit } from '@solid-primitives/event-bus'
 import { throttle } from '@solid-primitives/scheduled'
 import { NodeType } from './constants'
 import SolidAPI from './solid-api'
-import { Core, Solid } from './types'
+import { Solid } from './types'
 
-const $NAME = SolidAPI.STORE_DEV.$NAME
+const $NODE = SolidAPI.STORE_DEV.$NODE
 
-export const isSolidComputation = (o: Readonly<Solid.Owner>): o is Solid.Computation => 'fn' in o
-
-export const isSolidMemo = (o: Readonly<Solid.Owner>): o is Solid.Memo =>
-  'sdtType' in o ? o.sdtType === NodeType.Memo : isSolidComputation(o) && _isMemo(o)
+export const isObject = (o: unknown): o is object => typeof o === 'object' && !!o
 
 export const isSolidOwner = (
   o: Readonly<Solid.Owner | Solid.Store | Solid.Signal>,
 ): o is Solid.Owner => 'owned' in o
 
-export const isSolidRoot = (o: Readonly<Solid.Owner>): o is Solid.Root =>
-  o.sdtType === NodeType.Root || !isSolidComputation(o)
+export const isSolidComputation = (o: Readonly<Solid.Owner>): o is Solid.Computation => 'fn' in o
+
+export const isSolidRoot = (o: Readonly<Solid.Owner>): o is Solid.Root => !('fn' in o)
+
+export const isSolidMemo = (o: Readonly<Solid.Owner>): o is Solid.Memo =>
+  'fn' in o && 'observers' in o
 
 export const isSolidComponent = (o: Readonly<Solid.Owner>): o is Solid.Component => 'props' in o
 
-export const isStoreNode = (o: object): o is Core.Store.StoreNode => $NAME in o
+export const isStoreNode = (o: object): o is Solid.StoreNode => $NODE in o
 
-export const isSolidStore = (o: Readonly<Solid.Signal | Solid.Store>): o is Solid.Store => {
-  return !('observers' in o) && $NAME in o.value
-}
+export const isSolidStore = (
+  o: Solid.Owner | Solid.SourceMapValue | Solid.Store,
+): o is Solid.Store => !('observers' in o) && 'value' in o && isObject(o.value) && $NODE in o.value
 
-const _isMemo = (o: Readonly<Solid.Computation>): boolean =>
-  'value' in o && 'comparator' in o && o.pure === true
-
-export function getOwnerName(owner: Readonly<Solid.Owner>): string {
-  const { name, componentName: component } = owner
-  if (component && typeof component === 'string')
-    return component.startsWith('_Hot$$') ? component.slice(6) : component
-  return name || '(unnamed)'
-}
-export function getSignalName(signal: Readonly<Solid.Signal>): string {
-  return signal.name || '(unnamed)'
-}
-
-export const getStoreNodeName = (node: Core.Store.StoreNode): string => node[$NAME] || '(unnamed)'
-
-export function getNodeName(o: Readonly<Solid.Signal | Solid.Owner | Solid.Store>): string {
-  const name = isSolidOwner(o)
-    ? getOwnerName(o)
-    : isSolidStore(o)
-    ? getStoreNodeName(o)
-    : getSignalName(o)
-  return getDisplayName(name)
-}
-
-export function getDisplayName(name: string): string {
-  return trimString(name, 20)
-}
+export const isSolidSignal = (o: Solid.SourceMapValue): o is Solid.Signal =>
+  'value' in o && 'observers' in o && 'observerSlots' in o && 'comparator' in o
 
 export function getNodeType(o: Readonly<Solid.Signal | Solid.Owner | Solid.Store>): NodeType {
   if (isSolidOwner(o)) return getOwnerType(o)
@@ -64,15 +40,17 @@ export const getOwnerType = (o: Readonly<Solid.Owner>): NodeType => {
   if (typeof o.sdtType !== 'undefined') return o.sdtType
   if (!isSolidComputation(o)) return NodeType.Root
   if (isSolidComponent(o)) return NodeType.Component
-  if (_isMemo(o)) {
-    let parent: Solid.Owner | null, parentName: string | undefined
-    if (
-      (parent = o.owner) &&
-      isSolidComponent(parent) &&
-      (parentName = parent.componentName) &&
-      parentName.startsWith('_Hot$$')
-    )
-      return NodeType.Refresh
+  // memo
+  if ('observers' in o) {
+    // TODO
+    // let parent: Solid.Owner | null, parentName: string | undefined
+    // if (
+    //   (parent = o.owner) &&
+    //   isSolidComponent(parent) &&
+    //   (parentName = parent.componentName) &&
+    //   parentName.startsWith('_Hot$$')
+    // )
+    //   return NodeType.Refresh
     return NodeType.Memo
   }
   // Effect
@@ -84,9 +62,26 @@ export const getOwnerType = (o: Readonly<Solid.Owner>): NodeType => {
   return NodeType.Computation
 }
 
+/** @deprecated */
+export function getOwnerName(owner: Solid.Owner): string {
+  return owner.name || '(unnamed)'
+}
+/** @deprecated */
+export function getSignalName(signal: Solid.SourceMapValue): string {
+  return signal.name || '(unnamed)'
+}
+/** @deprecated */
+export const getStoreNodeName = (_: unknown): string => '(unnamed)'
+
+export const getNodeName = (o: { name?: string }): string => getDisplayName(o.name || '(unnamed)')
+
+export function getDisplayName(name: string): string {
+  return trimString(name, 20)
+}
+
+/** @deprecated */
 export function markOwnerName(o: Solid.Owner): string {
-  if (o.sdtName !== undefined) return o.sdtName
-  return (o.sdtName = getNodeName(o))
+  return getNodeName(o)
 }
 export function markOwnerType(o: Solid.Owner): NodeType {
   if (o.sdtType !== undefined) return o.sdtType
@@ -97,9 +92,9 @@ export function markOwnerType(o: Solid.Owner): NodeType {
  * Checks if the passed owner is disposed.
  */
 export function isDisposed(o: Readonly<Solid.Owner>): boolean {
-  return !!(isSolidRoot(o)
-    ? o.isDisposed
-    : o.owner && (!o.owner.owned || !o.owner.owned.includes(o)))
+  return !!(isSolidComputation(o)
+    ? o.owner && (!o.owner.owned || !o.owner.owned.includes(o))
+    : (o as Solid.Root).isDisposed)
 }
 
 export function getComponentRefreshNode(owner: Readonly<Solid.Component>): Solid.Memo | null {

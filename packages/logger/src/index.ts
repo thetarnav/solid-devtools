@@ -1,22 +1,24 @@
 /* eslint-disable no-console */
 import {
+  addSolidUpdateListener,
   getOwnerType,
   interceptComputationRerun,
   isSolidComputation,
   isSolidMemo,
-  isSolidStore,
+  isSolidSignal,
   lookupOwner,
-  makeSolidUpdateListener,
   makeValueUpdateListener,
   observeValueUpdate,
   onParentCleanup,
   removeValueUpdateObserver,
 } from '@solid-devtools/debugger'
-import { Core, NodeType, Solid } from '@solid-devtools/debugger/types'
+import { NodeType, Solid } from '@solid-devtools/debugger/types'
 import { arrayRefEquals, dedupeArray } from '@solid-devtools/shared/utils'
-import { arrayEquals, asArray, Many } from '@solid-primitives/utils'
+import { Many, arrayEquals, asArray } from '@solid-primitives/utils'
 import { $PROXY, Accessor, createEffect, getOwner, on, onCleanup, untrack } from 'solid-js'
 import {
+  NodeStateWithValue,
+  UNUSED,
   getComputationCreatedLabel,
   getComputationRerunLabel,
   getNodeState,
@@ -28,12 +30,10 @@ import {
   logInitialValue,
   logObservers,
   logOwned,
-  logSignalsInitialValues,
   logSignalValue,
   logSignalValueUpdate,
-  NodeStateWithValue,
+  logSignalsInitialValues,
   paddedForEach,
-  UNUSED,
 } from './log'
 import { getDiffMap, getFunctionSources, makeTimeMeter } from './utils'
 
@@ -55,12 +55,12 @@ const isSolidProxy = (o: any): boolean => !!o[$PROXY]
  * @returns true if the node was marked before
  */
 function markDebugNode(
-  o: Core.Owner,
+  o: Solid.Owner,
   type: 'computation' | 'signals' | 'owned',
 ): true | VoidFunction
-function markDebugNode(o: Core.SignalState): true | VoidFunction
+function markDebugNode(o: Solid.Signal): true | VoidFunction
 function markDebugNode(
-  o: Core.Owner | Core.SignalState,
+  o: Solid.Owner | Solid.Signal,
   type?: 'computation' | 'signals' | 'owned',
 ): true | VoidFunction {
   let property: '$debug' | '$debugSignals' | '$debugOwned' | '$debugSignal'
@@ -69,8 +69,12 @@ function markDebugNode(
   else if (type === 'owned') property = '$debugOwned'
   else property = '$debugSignal'
 
-  if ((o as any)[property]) return true
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+  if ((o as any)[property])
+    return true
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
   ;(o as any)[property] = true
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
   return () => ((o as any)[property] = false)
 }
 
@@ -97,9 +101,9 @@ interface DebugComputationOptions {
  * })
  * ```
  */
-export function debugComputation(owner?: Core.Owner, options?: DebugComputationOptions): void
+export function debugComputation(owner?: Solid.Owner, options?: DebugComputationOptions): void
 export function debugComputation(
-  _owner?: Core.Owner,
+  _owner?: Solid.Owner,
   { initialRun = true }: DebugComputationOptions = {},
 ): void {
   const owner = _owner === undefined ? (getOwner() as Solid.Owner | null) : (_owner as Solid.Owner)
@@ -215,8 +219,8 @@ export function debugComputation(
  * }
  * ```
  */
-export function debugOwnerComputations(owner?: Core.Owner): void
-export function debugOwnerComputations(_owner?: Core.Owner): void {
+export function debugOwnerComputations(owner?: Solid.Owner): void
+export function debugOwnerComputations(_owner?: Solid.Owner): void {
   const owner = _owner === undefined ? (getOwner() as Solid.Owner | null) : (_owner as Solid.Owner)
   if (!owner) return console.warn('no owner passed to debugOwnedComputations')
 
@@ -231,28 +235,30 @@ export function debugOwnerComputations(_owner?: Core.Owner): void {
 
   let prevOwned: Solid.Computation[] = []
 
-  makeSolidUpdateListener(() => {
-    const { owned } = owner
-    if (!owned) return
+  onCleanup(
+    addSolidUpdateListener(() => {
+      const { owned } = owner
+      if (!owned) return
 
-    let computations: Solid.Computation[] = []
+      let computations: Solid.Computation[] = []
 
-    let i = prevOwned.length
-    // owned can only be added
-    for (; i < owned.length; i++) {
-      const computation = owned[i]!
-      debugComputation(computation, {
-        initialRun: false,
-      })
-      computations.push(computation)
-    }
-    if (computations.length === 0) return
+      let i = prevOwned.length
+      // owned can only be added
+      for (; i < owned.length; i++) {
+        const computation = owned[i]!
+        debugComputation(computation, {
+          initialRun: false,
+        })
+        computations.push(computation)
+      }
+      if (computations.length === 0) return
 
-    computations = [...prevOwned, ...computations]
-    // log owned computation changes
-    logOwned({ type, typeName, name }, computations, prevOwned)
-    prevOwned = computations
-  })
+      computations = [...prevOwned, ...computations]
+      // log owned computation changes
+      logOwned({ type, typeName, name }, computations, prevOwned)
+      prevOwned = computations
+    }),
+  )
 }
 
 export interface DebugSignalOptions {
@@ -276,7 +282,7 @@ export interface DebugSignalOptions {
  * ```
  */
 export function debugSignal(
-  source: Accessor<unknown> | Core.SignalState,
+  source: Accessor<unknown> | Solid.Signal,
   options: DebugSignalOptions = {},
 ): void {
   let signal: Solid.Signal
@@ -335,13 +341,15 @@ export function debugSignal(
     }
 
     // Listen to Solid's _$afterUpdate hook to check if observers changed
-    makeSolidUpdateListener(() => {
-      actualObservers = signal.observers!
-      if (actualObservers.length !== actualPrevObservers.length) return logObserversChange()
-      for (let i = actualObservers.length; i >= 0; i--) {
-        if (actualObservers[i] !== actualPrevObservers[i]) return logObserversChange()
-      }
-    })
+    onCleanup(
+      addSolidUpdateListener(() => {
+        actualObservers = signal.observers!
+        if (actualObservers.length !== actualPrevObservers.length) return logObserversChange()
+        for (let i = actualObservers.length; i >= 0; i--) {
+          if (actualObservers[i] !== actualPrevObservers[i]) return logObserversChange()
+        }
+      }),
+    )
   }
 }
 
@@ -362,7 +370,7 @@ export function debugSignal(
  * ```
  */
 export function debugSignals(
-  source: Many<Accessor<unknown>> | Core.SignalState[],
+  source: Many<Accessor<unknown>> | Solid.Signal[],
   options: DebugSignalOptions = {},
 ): void {
   let signals: Solid.Signal[] = []
@@ -406,10 +414,9 @@ export function debugSignals(
  * }
  * ```
  */
-export function debugOwnerSignals(owner?: Core.Owner, options: DebugSignalOptions = {}) {
+export function debugOwnerSignals(owner?: Solid.Owner, options: DebugSignalOptions = {}) {
   // ? why assign, why solidOwner? is the param just ignored?
   owner = getOwner()!
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
   if (!owner) return console.warn('debugOwnerState found no Owner')
 
   if (markDebugNode(owner, 'signals') === true) return
@@ -419,34 +426,36 @@ export function debugOwnerSignals(owner?: Core.Owner, options: DebugSignalOption
   let prevSourceListLength = 0
   let prevOwnedLength = 0
 
-  makeSolidUpdateListener(() => {
-    const signals: Solid.Signal[] = []
+  onCleanup(
+    addSolidUpdateListener(() => {
+      const signals: Solid.Signal[] = []
 
-    let i: number
-    // add owned signals
-    if (solidOwner.sourceMap) {
-      const sourceList = Object.values(solidOwner.sourceMap)
-      // signals can only be added
-      for (i = prevSourceListLength; i < sourceList.length; i++) {
-        const signal = sourceList[i]!
-        if (!isSolidStore(signal)) signals.push(signal)
+      let i: number
+      // add owned signals
+      if (solidOwner.sourceMap) {
+        const sourceList = Object.values(solidOwner.sourceMap)
+        // signals can only be added
+        for (i = prevSourceListLength; i < sourceList.length; i++) {
+          const signal = sourceList[i]!
+          if (isSolidSignal(signal)) signals.push(signal)
+        }
+        prevSourceListLength = i
       }
-      prevSourceListLength = i
-    }
-    // add owned memos
-    if (solidOwner.owned) {
-      // owned can only be added
-      for (i = prevOwnedLength; i < solidOwner.owned.length; i++) {
-        const childOwner = solidOwner.owned[i]!
-        if (isSolidMemo(childOwner)) signals.push(childOwner)
+      // add owned memos
+      if (solidOwner.owned) {
+        // owned can only be added
+        for (i = prevOwnedLength; i < solidOwner.owned.length; i++) {
+          const childOwner = solidOwner.owned[i]!
+          if (isSolidMemo(childOwner)) signals.push(childOwner)
+        }
+        prevOwnedLength = i
       }
-      prevOwnedLength = i
-    }
 
-    if (signals.length === 0) return
+      if (signals.length === 0) return
 
-    debugSignals(signals, options)
-  })
+      debugSignals(signals, options)
+    }),
+  )
 }
 
 const getPropValue = (props: Record<string, unknown>, desc: PropertyDescriptor): unknown =>

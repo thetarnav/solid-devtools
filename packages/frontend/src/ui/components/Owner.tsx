@@ -11,7 +11,7 @@ export const NodeTypeIcon: Component<{
 }> = props => {
   let prevIcon: IconComponent | undefined
   let prevRendered: JSX.Element | undefined
-  return () => {
+  return (() => {
     const IconComp = (() => {
       switch (props.type) {
         case NodeType.Memo:
@@ -32,7 +32,7 @@ export const NodeTypeIcon: Component<{
     })()
     if (IconComp === prevIcon) return prevRendered
     return (prevRendered = (prevIcon = IconComp) ? <IconComp class={props.class} /> : null)
-  }
+  }) as unknown as JSX.Element
 }
 
 export const NodeName: Component<{
@@ -56,7 +56,7 @@ export const NodeName: Component<{
       default:
         return <span class={styles.name}>{props.name}</span>
     }
-  })
+  }) as unknown as JSX.Element
 }
 
 export const OwnerName: Component<{

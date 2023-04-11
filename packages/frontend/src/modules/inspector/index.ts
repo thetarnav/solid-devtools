@@ -12,23 +12,24 @@ import {
 import { handleTupleUpdates } from '@solid-devtools/shared/primitives'
 import { splitOnColon, warn } from '@solid-devtools/shared/utils'
 import { shallowCopy } from '@solid-primitives/immutable'
-import { createStaticStore, defer } from '@solid-primitives/utils'
+import { createStaticStore } from '@solid-primitives/static-store'
+import { defer } from '@solid-primitives/utils'
 import {
+  Setter,
   batch,
   createEffect,
   createMemo,
   createSelector,
   createSignal,
   mergeProps,
-  Setter,
 } from 'solid-js'
 import { Writable } from 'type-fest'
 import type { DebuggerBridge } from '../../controller'
 import {
   DecodedValue,
+  StoreNodeMap,
   decodeValue,
   isObjectType,
-  StoreNodeMap,
   updateCollapsedValue,
 } from './decode'
 

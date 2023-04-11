@@ -33,13 +33,13 @@
     "npm": ">=7.20.1"
   },
   "dependencies": {
-    "solid-js": "^1.6.11",
+    "solid-js": "^1.7.3",
     "todomvc-app-css": "^2.4.2",
     "todomvc-common": "^1.0.5"
   },
   "devDependencies": {
-    "typescript": "^4.9.5",
-    "vite": "^4.1.1",
-    "vite-plugin-solid": "^2.3.10"
+    "typescript": "^5.0.4",
+    "vite": "^4.2.1",
+    "vite-plugin-solid": "^2.7.0"
   }
 }

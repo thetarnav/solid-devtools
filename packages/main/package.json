@@ -65,31 +65,31 @@
   },
   "devDependencies": {
     "@babel/core": "^7.18.13",
-    "@babel/generator": "^7.20.14",
-    "@babel/parser": "^7.20.15",
-    "@babel/plugin-syntax-jsx": "^7.18.6",
-    "@babel/traverse": "^7.20.13",
+    "@babel/generator": "^7.21.4",
+    "@babel/parser": "^7.21.4",
+    "@babel/plugin-syntax-jsx": "^7.21.4",
+    "@babel/traverse": "^7.21.4",
     "@types/babel__core": "^7.20.0",
     "@types/babel__generator": "^7.6.4",
-    "@types/babel__traverse": "^7.18.2",
+    "@types/babel__traverse": "^7.18.3",
     "solid-start": "^0.2.9"
   },
   "dependencies": {
-    "@babel/core": "^7.20.12",
-    "@babel/plugin-syntax-typescript": "^7.18.6",
-    "@babel/types": "^7.20.7",
+    "@babel/core": "^7.21.4",
+    "@babel/plugin-syntax-typescript": "^7.21.4",
+    "@babel/types": "^7.21.4",
     "@solid-devtools/debugger": "workspace:^0.21.0",
     "@solid-devtools/shared": "workspace:^0.11.0",
-    "@solid-primitives/event-bus": "^1.0.0",
-    "@solid-primitives/utils": "^5.1.0",
-    "type-fest": "^3.5.7"
+    "@solid-primitives/event-bus": "^1.0.4",
+    "@solid-primitives/utils": "^6.0.0",
+    "type-fest": "^3.8.0"
   },
   "peerDependencies": {
-    "solid-js": "^1.6.11",
+    "solid-js": "^1.7.0",
     "vite": "^2.2.3 || ^3.0.0 || ^4.0.0"
   },
   "optionalDependencies": {
-    "solid-start": "^0.2.20"
+    "solid-start": "^0.2.26"
   },
   "packageManager": "pnpm@7.22.0"
 }

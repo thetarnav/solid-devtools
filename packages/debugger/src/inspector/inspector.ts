@@ -1,20 +1,17 @@
 import { untrackedCallback } from '@solid-devtools/shared/primitives'
 import { isRecord } from '@solid-devtools/shared/utils'
 import { NodeType, ValueItemType } from '../main/constants'
-import { getSdtId, ObjectType } from '../main/id'
+import { ObjectType, getSdtId } from '../main/id'
+import { observeValueUpdate, removeValueUpdateObserver } from '../main/observe'
 import SolidAPI from '../main/solid-api'
-import type { Core, Mapped, NodeID, Solid, ValueItemID } from '../main/types'
-import { observeValueUpdate, removeValueUpdateObserver } from '../main/update'
+import type { Mapped, NodeID, Solid, ValueItemID } from '../main/types'
 import {
   getComponentRefreshNode,
-  getDisplayName,
   getNodeName,
-  getNodeType,
-  getStoreNodeName,
   isSolidComponent,
   isSolidComputation,
   isSolidMemo,
-  isSolidOwner,
+  isSolidSignal,
   isSolidStore,
   markOwnerName,
   markOwnerType,
@@ -172,29 +169,37 @@ let PropsMap: ObservedPropsMap
 
 const $INSPECTOR = Symbol('inspector')
 
+const typeToObjectTypeMap = {
+  [NodeType.Signal]: ObjectType.Signal,
+  [NodeType.Memo]: ObjectType.Owner,
+  [NodeType.Store]: ObjectType.Store,
+}
+
 function mapSourceValue(
-  node: Solid.Signal | Solid.Memo | Solid.Store,
+  node: Solid.SourceMapValue | Solid.Memo | Solid.Store,
   handler: (nodeId: NodeID, value: unknown) => void,
-): Mapped.Signal {
-  const { value } = node
-  const isStore = isSolidStore(node)
-  const id = getSdtId(
-    node,
-    isStore ? ObjectType.Store : isSolidOwner(node) ? ObjectType.Owner : ObjectType.Signal,
-  )
-  let name: string
+  isMemo: boolean,
+): Mapped.Signal | null {
+  const type = isMemo
+    ? NodeType.Memo
+    : isSolidStore(node)
+    ? NodeType.Store
+    : isSolidSignal(node)
+    ? NodeType.Signal
+    : null
+
+  if (!type) return null
+
+  const { value } = node,
+    id = getSdtId(node, typeToObjectTypeMap[type])
+
   ValueMap.add(`${ValueItemType.Signal}:${id}`, () => node.value)
 
-  if (isStore) {
-    name = getDisplayName(getStoreNodeName(value as Core.Store.StoreNode))
-  } else {
-    name = getNodeName(node)
-    observeValueUpdate(node, v => handler(id, v), $INSPECTOR)
-  }
+  if (type !== NodeType.Store) observeValueUpdate(node, v => handler(id, v), $INSPECTOR)
 
   return {
-    type: getNodeType(node) as NodeType.Memo | NodeType.Signal | NodeType.Store,
-    name,
+    type,
+    name: getNodeName(node),
     id,
     value: encodeValue(value, false),
   }
@@ -274,7 +279,7 @@ export const collectOwnerDetails = /*#__PURE__*/ untrackedCallback(function (
   let { sourceMap, owned } = owner
   let getValue = () => owner.value
 
-  const details = { id, name, type } as Mapped.OwnerDetails
+  const details = { id, name, type, signals: [] } as Mapped.OwnerDetails
 
   // handle context node specially
   if (type === NodeType.Context) {
@@ -303,7 +308,8 @@ export const collectOwnerDetails = /*#__PURE__*/ untrackedCallback(function (
       }
 
       ;({ checkProxyProps, props: details.props } = mapProps(owner.props))
-      if (owner.location) details.location = owner.location
+      // TODO: location
+      // if (owner.location) details.location = owner.location
     } else {
       observeValueUpdate(owner, () => onValueUpdate(ValueItemType.Value), $INSPECTOR)
     }
@@ -315,17 +321,18 @@ export const collectOwnerDetails = /*#__PURE__*/ untrackedCallback(function (
 
   // map signals
   if (sourceMap) {
-    const signalNodes = Object.values(sourceMap)
-    details.signals = Array(signalNodes.length)
-    for (let i = 0; i < signalNodes.length; i++) {
-      details.signals[i] = mapSourceValue(signalNodes[i]!, onSignalUpdate)
+    for (const signal of Object.values(sourceMap)) {
+      const mapped = mapSourceValue(signal, onSignalUpdate, false)
+      mapped && details.signals.push(mapped)
     }
-  } else details.signals = []
+  }
 
   // map memos
   if (owned) {
     for (const node of owned) {
-      isSolidMemo(node) && details.signals.push(mapSourceValue(node, onSignalUpdate))
+      if (!isSolidMemo(node)) continue
+      const mapped = mapSourceValue(node, onSignalUpdate, true)
+      mapped && details.signals.push(mapped)
     }
   }
 
