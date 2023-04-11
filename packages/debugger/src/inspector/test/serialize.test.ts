@@ -1,12 +1,12 @@
 import { Truthy } from '@solid-primitives/utils'
 import { createMutable, createStore } from 'solid-js/store'
 import { describe, expect, test, vi } from 'vitest'
-import { getObjectById, ObjectType } from '../../main/id'
+import { ObjectType, getObjectById } from '../../main/id'
 import { encodeValue } from '../serialize'
 import { EncodedValue, INFINITY, NAN, NEGATIVE_INFINITY, UNDEFINED, ValueType } from '../types'
 
 let mockLAST_ID = 0
-vi.mock('../../main/getId', () => ({ getNewSdtId: () => '#' + mockLAST_ID++ }))
+vi.mock('../../main/get-id', () => ({ getNewSdtId: () => '#' + mockLAST_ID++ }))
 
 type Expectations = [name: string, data: unknown, encoded: EncodedValue[]][]
 

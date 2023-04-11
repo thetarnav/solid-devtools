@@ -26,7 +26,7 @@ let mockLAST_ID = 0
 beforeEach(() => {
   mockLAST_ID = 0
 })
-vi.mock('../../main/getId', () => ({ getNewSdtId: () => '#' + mockLAST_ID++ }))
+vi.mock('../../main/get-id', () => ({ getNewSdtId: () => '#' + mockLAST_ID++ }))
 
 type UpdateParams = Parameters<OnNodeUpdate>
 

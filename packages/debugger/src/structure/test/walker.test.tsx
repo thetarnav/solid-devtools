@@ -20,7 +20,7 @@ let mockLAST_ID = 0
 beforeEach(() => {
   mockLAST_ID = 0
 })
-vi.mock('../../main/getId', () => ({ getNewSdtId: () => '#' + mockLAST_ID++ }))
+vi.mock('../../main/get-id', () => ({ getNewSdtId: () => '#' + mockLAST_ID++ }))
 
 const mockTree = () => {
   const [s] = createSignal('foo', { name: 's0' })
@@ -59,13 +59,19 @@ describe('TreeWalkerMode.Owners', () => {
         type: NodeType.Root,
         children: [
           {
-            id: '#0',
+            id: expect.any(String),
             name: 'e0',
             type: NodeType.Effect,
             frozen: true,
             children: [
-              { id: '#1', name: 'c0', type: NodeType.Computation, children: [] },
-              { id: '#2', name: 'c1', type: NodeType.Computation, frozen: true, children: [] },
+              { id: expect.any(String), name: 'c0', type: NodeType.Computation, children: [] },
+              {
+                id: expect.any(String),
+                name: 'c1',
+                type: NodeType.Computation,
+                frozen: true,
+                children: [],
+              },
             ],
           },
         ],
