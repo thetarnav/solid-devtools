@@ -91,5 +91,5 @@
   "optionalDependencies": {
     "solid-start": "^0.2.26"
   },
-  "packageManager": "pnpm@7.22.0"
+  "packageManager": "pnpm@8.2.0"
 }

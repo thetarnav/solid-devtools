@@ -54,7 +54,7 @@
   "peerDependencies": {
     "solid-js": "^1.7.0"
   },
-  "packageManager": "pnpm@7.22.0",
+  "packageManager": "pnpm@8.2.0",
   "devDependencies": {
     "@types/clean-css": "^4.2.6",
     "chokidar": "^3.5.3",
