@@ -1,6 +1,8 @@
+import solidPkg from 'solid-js/package.json' assert { type: 'json' }
 import { defineConfig } from 'tsup-preset-solid'
-import { version as solidVersion } from './node_modules/solid-js/package.json'
-import { peerDependencies, version as clientVersion } from './package.json'
+import { version as clientVersion, peerDependencies } from './package.json'
+
+const solidVersion = solidPkg.version
 
 export default defineConfig(
   [
