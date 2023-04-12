@@ -113,21 +113,27 @@ describe('TreeWalkerMode.Owners', () => {
         })
 
         expect(tree).toEqual({
-          id: '#0',
+          id: expect.any(String),
           type: NodeType.Root,
           children: [
             {
-              id: '#3',
+              id: expect.any(String),
               name: 'WRAPPER',
               type: NodeType.Computation,
               children: [
                 {
-                  id: '#4',
+                  id: expect.any(String),
                   name: 'focused',
                   type: NodeType.Memo,
                   children: [
-                    { id: '#5', name: 'memo', type: NodeType.Memo, frozen: true, children: [] },
-                    { id: '#6', type: NodeType.Render, children: [] },
+                    {
+                      id: expect.any(String),
+                      name: 'memo',
+                      type: NodeType.Memo,
+                      frozen: true,
+                      children: [],
+                    },
+                    { id: expect.any(String), type: NodeType.Render, children: [] },
                   ],
                 },
               ],
@@ -236,13 +242,9 @@ describe('TreeWalkerMode.Components', () => {
         createComputed(a)
         toTrigger.push(() => set(1))
         testComponents.push(getOwner()! as Solid.Component)
-        // * this is a hack to get the subroots
-        // * normally subroots are attached by a separate module
-        const subroots: Solid.Root[] = (getOwner()!.sdtSubRoots = [])
-        return createRoot(_ => {
-          subroots.push(getOwner()! as Solid.Root)
-          return <div>{props.n === 0 ? 'end' : <TestComponent n={props.n - 1} />}</div>
-        })
+        return createRoot(_ => (
+          <div>{props.n === 0 ? 'end' : <TestComponent n={props.n - 1} />}</div>
+        ))
       }
       const Button = () => {
         return <button>Click me</button>
@@ -344,13 +346,9 @@ describe('TreeWalkerMode.DOM', () => {
         createComputed(a)
         toTrigger.push(() => set(1))
         testComponents.push(getOwner()! as Solid.Component)
-        // * this is a hack to get the subroots
-        // * normally subroots are attached by a separate module
-        const subroots: Solid.Root[] = (getOwner()!.sdtSubRoots = [])
-        return createRoot(_ => {
-          subroots.push(getOwner()! as Solid.Root)
-          return <div>{props.n === 0 ? 'end' : <TestComponent n={props.n - 1} />}</div>
-        })
+        return createRoot(_ => (
+          <div>{props.n === 0 ? 'end' : <TestComponent n={props.n - 1} />}</div>
+        ))
       }
       const Button = () => {
         return <button>Click me</button>
