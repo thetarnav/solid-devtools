@@ -16,8 +16,14 @@ import { OnNodeUpdate, StoreNodeProperty, observeStoreNode, setOnStoreNodeUpdate
 
 const { getOwner } = SolidApi
 
-const getOwnerStore = () =>
-  (Object.values(getOwner()!.sourceMap!).find(s => isSolidStore(s))! as Solid.Store).value
+const getOwnerStore = () => {
+  const owner = getOwner()
+  if (!owner) throw new Error('No owner')
+  if (!owner.sourceMap) throw new Error('No sourceMap')
+  const store = owner.sourceMap.find(isSolidStore)
+  if (!store) throw new Error('No store')
+  return store.value
+}
 
 const getNodeProp = (node: Solid.StoreNode, prop: string): StoreNodeProperty =>
   `${getSdtId(unwrap(node), ObjectType.StoreNode)}:${prop}`

@@ -1,6 +1,7 @@
 import { trimString } from '@solid-devtools/shared/utils'
 import { Emit } from '@solid-primitives/event-bus'
 import { throttle } from '@solid-primitives/scheduled'
+import { $PROXY } from 'solid-js'
 import { NodeType } from './constants'
 import SolidAPI from './solid-api'
 import { Solid } from './types'
@@ -26,7 +27,7 @@ export const isStoreNode = (o: object): o is Solid.StoreNode => $NODE in o
 
 export const isSolidStore = (
   o: Solid.Owner | Solid.SourceMapValue | Solid.Store,
-): o is Solid.Store => !('observers' in o) && 'value' in o && isObject(o.value) && $NODE in o.value
+): o is Solid.Store => !('observers' in o) && 'value' in o && isObject(o.value) && $PROXY in o.value
 
 export const isSolidSignal = (o: Solid.SourceMapValue): o is Solid.Signal =>
   'value' in o && 'observers' in o && 'observerSlots' in o && 'comparator' in o
