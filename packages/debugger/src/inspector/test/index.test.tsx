@@ -48,9 +48,8 @@ describe('collectOwnerDetails', () => {
         { name: 'WRAPPER' },
       )
 
-      const [signalA] = memo.sources as [Solid.Signal]
       const [signalB] = memo.sourceMap as [Solid.Signal]
-      const [innerMemo, renderEffect] = memo.owned as [Solid.Memo, Solid.Computation]
+      const [innerMemo] = memo.owned as [Solid.Memo, Solid.Computation]
 
       const { details, valueMap } = collectOwnerDetails(memo, {
         observedPropsMap: new WeakMap(),
