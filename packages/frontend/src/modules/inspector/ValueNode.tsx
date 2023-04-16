@@ -6,18 +6,18 @@ import { defer } from '@solid-primitives/utils'
 import clsx from 'clsx'
 import {
   Component,
+  For,
+  JSX,
+  Show,
   createContext,
   createEffect,
   createMemo,
   createSignal,
-  For,
-  JSX,
-  Show,
   untrack,
   useContext,
 } from 'solid-js'
-import { DecodedValue, isValueNested, ObjectValueData } from './decode'
 import * as styles from './ValueNode.css'
+import { DecodedValue, ObjectValueData, isValueNested } from './decode'
 
 type ToggleElementHover = (elementId: NodeID, hovered?: boolean) => void
 
@@ -129,7 +129,7 @@ const ValuePreview: Component<{ value: DecodedValue; extended?: boolean }> = pro
       default:
         return <ObjectValuePreview type={value.type} data={value} extended={props.extended} />
     }
-  })
+  }) as unknown as JSX.Element
 }
 
 function createNestedHover() {

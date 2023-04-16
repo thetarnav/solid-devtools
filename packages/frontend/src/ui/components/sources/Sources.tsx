@@ -8,6 +8,7 @@ export const Sources: Component<{ length: number }> = props => {
 
   const Row: Component<{ length: number }> = rowProps => (
     <div class={styles.sources.row}>
+      {/* @ts-expect-error types need to be fixed in solid-primitives */}
       <Repeat times={rowProps.length}>
         <div class={styles.sources.dot}></div>
       </Repeat>
