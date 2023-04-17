@@ -6,13 +6,14 @@ import { createHover } from '@solid-devtools/shared/primitives'
 import { createElementSize } from '@solid-primitives/resize-observer'
 import { useRemSize } from '@solid-primitives/styles'
 import { Component, createMemo } from 'solid-js'
-import * as styles from './path.css'
 import { useStructure } from './Structure'
+import * as styles from './path.css'
 
 export const OwnerPath: Component = () => {
   const { inspector, hovered } = useController()
   const structure = useStructure()
 
+  let container!: HTMLDivElement
   const rem = useRemSize()
   const containerSize = createElementSize(() => container)
   const expandable = () => (containerSize.height ?? 0) > rem() * styles.MIN_PATH_HEIGHT_IN_REM
@@ -22,7 +23,6 @@ export const OwnerPath: Component = () => {
     return node ? structure.getNodePath(node) : []
   })
 
-  let container!: HTMLDivElement
   return (
     <div class={styles.path}>
       <div class={styles.content} data-extendable={expandable()}>

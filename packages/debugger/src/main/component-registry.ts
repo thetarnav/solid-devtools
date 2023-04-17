@@ -6,7 +6,7 @@ const $CLEANUP = Symbol('component-registry-cleanup')
 type ComponentData = {
   id: NodeID
   owner: Solid.Component
-  name: string
+  name: string | undefined
   elements: Set<HTMLElement>
   elementNodes: Set<NodeID>
   cleanup: VoidFunction
@@ -34,7 +34,7 @@ export function registerComponent(
     | {
         owner: Solid.Component
         id: NodeID
-        name: string
+        name: string | undefined
         elements: HTMLElement[] | null
       }
     | {
@@ -86,7 +86,7 @@ export function clearComponentRegistry() {
 
 export function getComponent(
   id: NodeID,
-): { name: string; id: NodeID; elements: HTMLElement[] } | null {
+): { name: string | undefined; id: NodeID; elements: HTMLElement[] } | null {
   // provided if might be of an element node (in DOM mode) or component node
   // both need to be checked
 
@@ -108,7 +108,7 @@ export function getComponent(
  */
 export function getComponentElement(
   elementId: NodeID,
-): { name: string; id: NodeID; element: HTMLElement } | undefined {
+): { name: string | undefined; id: NodeID; element: HTMLElement } | undefined {
   const elData = ElementNodeMap.get(elementId)
   return elData && { name: elData.component.name, id: elData.component.id, element: elData.el }
 }

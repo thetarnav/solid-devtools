@@ -78,6 +78,8 @@ export namespace Solid {
     [key: string]: unknown
   }>
 
+  export type CatchError = Omit<Computation, 'fn'> & { fn: undefined }
+
   export type Root = OwnerBase & {
     attachedTo?: Owner
     isDisposed?: true
@@ -93,7 +95,7 @@ export namespace Solid {
     pure?: never
   }
 
-  export type Owner = Root | Computation
+  export type Owner = Root | Computation | CatchError
 
   //
   // STORE

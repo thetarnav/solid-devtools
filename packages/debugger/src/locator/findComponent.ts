@@ -5,7 +5,7 @@ export type LocationAttr = `${string}:${number}:${number}`
 
 export type LocatorComponent = {
   id: NodeID
-  name: string
+  name: string | undefined
   element: HTMLElement
   location?: LocationAttr | undefined
 }

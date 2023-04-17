@@ -30,6 +30,7 @@ export enum NodeType {
   Computation = 'computation',
   Refresh = 'refresh',
   Context = 'context',
+  CatchError = 'catchError',
   Signal = 'signal',
   Store = 'store',
 }
@@ -44,6 +45,7 @@ export const NODE_TYPE_NAMES: Readonly<Record<NodeType, string>> = {
   [NodeType.Computation]: 'Computation',
   [NodeType.Refresh]: 'Refresh',
   [NodeType.Context]: 'Context',
+  [NodeType.CatchError]: 'CatchError',
   [NodeType.Signal]: 'Signal',
   [NodeType.Store]: 'Store',
 }

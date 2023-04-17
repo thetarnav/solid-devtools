@@ -14,7 +14,11 @@ export const isSolidOwner = (
   o: Readonly<Solid.Owner | Solid.Store | Solid.Signal>,
 ): o is Solid.Owner => 'owned' in o
 
-export const isSolidComputation = (o: Readonly<Solid.Owner>): o is Solid.Computation => 'fn' in o
+export const isSolidComputation = (o: Readonly<Solid.Owner>): o is Solid.Computation =>
+  !!(o as any).fn
+
+export const isObservableComputation = (o: Readonly<Solid.Owner>): o is Solid.Computation =>
+  !!(o as any).fn && o.context === null
 
 export const isSolidRoot = (o: Readonly<Solid.Owner>): o is Solid.Root => !('fn' in o)
 
@@ -39,7 +43,10 @@ export function getNodeType(o: Readonly<Solid.Signal | Solid.Owner | Solid.Store
 
 export const getOwnerType = (o: Readonly<Solid.Owner>): NodeType => {
   if (typeof o.sdtType !== 'undefined') return o.sdtType
-  if (!isSolidComputation(o)) return NodeType.Root
+  if (!isSolidComputation(o)) {
+    if ('sources' in o) return NodeType.CatchError
+    return NodeType.Root
+  }
   if (isSolidComponent(o)) return NodeType.Component
   // memo
   if ('observers' in o) {
@@ -74,14 +81,15 @@ export function getSignalName(signal: Solid.SourceMapValue): string {
 /** @deprecated */
 export const getStoreNodeName = (_: unknown): string => '(unnamed)'
 
-export const getNodeName = (o: { name?: string }): string => getDisplayName(o.name || '(unnamed)')
+export const getNodeName = (o: { name?: string }): string | undefined =>
+  o.name && getDisplayName(o.name)
 
 export function getDisplayName(name: string): string {
   return trimString(name, 20)
 }
 
 /** @deprecated */
-export function markOwnerName(o: Solid.Owner): string {
+export function markOwnerName(o: Solid.Owner): string | undefined {
   return getNodeName(o)
 }
 export function markOwnerType(o: Solid.Owner): NodeType {
