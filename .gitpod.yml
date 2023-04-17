@@ -1,5 +1,3 @@
-image:
-  file: Dockerfile
 tasks:
   - init: pnpm install && pnpm run build
 vscode:
