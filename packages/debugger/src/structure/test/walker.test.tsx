@@ -115,6 +115,7 @@ describe('TreeWalkerMode.Owners', () => {
         expect(tree).toEqual({
           id: expect.any(String),
           type: NodeType.Root,
+          name: undefined,
           children: [
             {
               id: expect.any(String),
@@ -133,7 +134,12 @@ describe('TreeWalkerMode.Owners', () => {
                       frozen: true,
                       children: [],
                     },
-                    { id: expect.any(String), type: NodeType.Render, children: [] },
+                    {
+                      id: expect.any(String),
+                      name: 'render',
+                      type: NodeType.Render,
+                      children: [],
+                    },
                   ],
                 },
               ],
