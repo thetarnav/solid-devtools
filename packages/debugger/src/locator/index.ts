@@ -24,6 +24,7 @@ import { attachElementOverlay } from './ElementOverlay'
 import {
   LocationAttr,
   LocatorComponent,
+  SourceCodeData,
   TargetIDE,
   TargetURLFunction,
   getLocationAttr,
@@ -165,7 +166,7 @@ export function createLocator(props: {
     useLocator(SolidAPI.locatorOptions)
   }
 
-  function openElementSourceCode(location: LocationAttr, element: HTMLElement | string) {
+  function openElementSourceCode(location: LocationAttr, element: SourceCodeData['element']) {
     if (!targetIDE) return warn('Please set `targetIDE` it in useLocator options.')
     const sourceCodeData = getSourceCodeData(location, element)
     sourceCodeData && openSourceCode(targetIDE, sourceCodeData)

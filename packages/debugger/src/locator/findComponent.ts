@@ -18,7 +18,10 @@ export type SourceLocation = {
   column: number
 }
 
-export type SourceCodeData = SourceLocation & { projectPath: string; element: HTMLElement | string }
+export type SourceCodeData = SourceLocation & {
+  projectPath: string
+  element: HTMLElement | string | undefined
+}
 
 export type TargetURLFunction = (data: SourceCodeData) => string | void
 
@@ -52,7 +55,7 @@ function getTargetURL(target: TargetIDE | TargetURLFunction, data: SourceCodeDat
 
 export function getSourceCodeData(
   location: LocationAttr,
-  element: HTMLElement | string,
+  element: SourceCodeData['element'],
 ): SourceCodeData | undefined {
   const projectPath: string | undefined = (window as any)[WINDOW_PROJECTPATH_PROPERTY]
   if (!projectPath) return
