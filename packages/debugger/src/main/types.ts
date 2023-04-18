@@ -142,7 +142,7 @@ export namespace Mapped {
 
   export interface Signal {
     type: NodeType.Signal | NodeType.Memo | NodeType.Store
-    name: string
+    name?: string
     id: NodeID
     value: EncodedValue[]
   }
@@ -156,7 +156,7 @@ export namespace Mapped {
 
   export interface OwnerDetails {
     id: NodeID
-    name: string
+    name?: string
     type: NodeType
     props?: Props
     signals: Signal[]

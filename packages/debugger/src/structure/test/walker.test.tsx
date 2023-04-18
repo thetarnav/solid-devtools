@@ -209,7 +209,11 @@ describe('TreeWalkerMode.Owners', () => {
         onComputationUpdate: () => {},
         rootId: $setSdtId(owner, '#ff'),
         mode: TreeWalkerMode.Owners,
-        registerComponent: c => 'owner' in c && components.push(getNodeName(c.owner)),
+        registerComponent: c => {
+          if (!('owner' in c)) return
+          const name = getNodeName(c.owner)
+          name && components.push(name)
+        },
       })
 
       expect(components.length).toBe(7)
