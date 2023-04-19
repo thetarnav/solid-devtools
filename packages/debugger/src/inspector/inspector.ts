@@ -321,7 +321,7 @@ export const collectOwnerDetails = /*#__PURE__*/ untrackedCallback(function (
 
   // map signals
   if (sourceMap) {
-    for (const signal of Object.values(sourceMap)) {
+    for (const signal of sourceMap) {
       const mapped = mapSourceValue(signal, onSignalUpdate, false)
       mapped && details.signals.push(mapped)
     }

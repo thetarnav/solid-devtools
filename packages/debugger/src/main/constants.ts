@@ -55,3 +55,5 @@ export enum ValueItemType {
   Prop = 'prop',
   Value = 'value',
 }
+
+export const UNKNOWN = 'unknown'

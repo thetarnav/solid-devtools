@@ -1,3 +1,4 @@
+import { UNKNOWN } from '../main/constants'
 import type { NodeID, ValueItemID } from '../main/types'
 import type { StoreNodeProperty } from './store'
 
@@ -29,7 +30,7 @@ export enum ValueType {
   Element = 'element',
   Instance = 'instance',
   Store = 'store',
-  Unknown = 'unknown',
+  Unknown = UNKNOWN,
 }
 
 type EncodedValueDataMap = {

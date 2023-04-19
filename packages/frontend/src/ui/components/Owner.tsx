@@ -1,9 +1,9 @@
-import { NodeType } from '@solid-devtools/debugger/types'
+import { NodeType, UNKNOWN } from '@solid-devtools/debugger/types'
 import { createPingedSignal } from '@solid-devtools/shared/primitives'
-import { Component, createMemo, JSX } from 'solid-js'
+import { Component, JSX, createMemo } from 'solid-js'
 import Icon, { IconComponent } from '../icons'
-import { Highlight } from './highlight/Highlight'
 import * as styles from './Owner.css'
+import { Highlight } from './highlight/Highlight'
 
 export const NodeTypeIcon: Component<{
   type: NodeType | undefined | null
@@ -39,7 +39,7 @@ export const NodeName: Component<{
   name: string | undefined | null
   type: NodeType | undefined | null
 }> = props => {
-  const name = () => props.name || 'unknown'
+  const name = () => props.name || UNKNOWN
   return createMemo(() => {
     switch (props.type) {
       case NodeType.Root:

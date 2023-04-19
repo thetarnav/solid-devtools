@@ -23,7 +23,7 @@ export const isObservableComputation = (o: Readonly<Solid.Owner>): o is Solid.Co
 export const isSolidRoot = (o: Readonly<Solid.Owner>): o is Solid.Root => !('fn' in o)
 
 export const isSolidMemo = (o: Readonly<Solid.Owner>): o is Solid.Memo =>
-  'fn' in o && 'observers' in o
+  'fn' in o && 'comparator' in o
 
 export const isSolidComponent = (o: Readonly<Solid.Owner>): o is Solid.Component => 'props' in o
 

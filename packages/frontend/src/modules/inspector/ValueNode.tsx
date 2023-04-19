@@ -1,5 +1,5 @@
 import { CollapseToggle, Highlight, Icon } from '@/ui'
-import { NodeID, ValueType } from '@solid-devtools/debugger/types'
+import { NodeID, UNKNOWN, ValueType } from '@solid-devtools/debugger/types'
 import { createHover, createPingedSignal } from '@solid-devtools/shared/primitives'
 import { Entries } from '@solid-primitives/keyed'
 import { defer } from '@solid-primitives/utils'
@@ -151,7 +151,7 @@ function createNestedHover() {
 
 export const ValueNode: Component<{
   value: DecodedValue
-  name: JSX.Element
+  name: string | undefined
   /** signals can be inspected to be viewed in the dependency graph */
   isInspected?: boolean
   /** for nested values - is it collapsed or extended */
@@ -222,7 +222,7 @@ export const ValueNode: Component<{
       <div class={styles.name.container} onClick={handleSelect}>
         <div class={styles.name.name} data-signal={props.isSignal || ctx?.underStore}>
           <Highlight highlight={isUpdated && isUpdated()} isSignal class={styles.name.highlight}>
-            {props.name}
+            {props.name || UNKNOWN}
           </Highlight>
         </div>
       </div>

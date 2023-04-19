@@ -1,7 +1,7 @@
 import { useController } from '@/controller'
 import { Icon } from '@/ui'
 import { NodeTypeIcon } from '@/ui/components/Owner'
-import { NodeType } from '@solid-devtools/debugger/types'
+import { NodeType, UNKNOWN } from '@solid-devtools/debugger/types'
 import { createHover } from '@solid-devtools/shared/primitives'
 import { createElementSize } from '@solid-primitives/resize-observer'
 import { useRemSize } from '@solid-primitives/styles'
@@ -50,7 +50,7 @@ export const OwnerPath: Component = () => {
                   <div class={styles.highlight} />
                   {node.type === NodeType.Component || node.type === NodeType.Element ? (
                     <div class={styles.name[node.type === NodeType.Component ? 'default' : 'gray']}>
-                      {node.name}
+                      {node.name || UNKNOWN}
                     </div>
                   ) : (
                     <NodeTypeIcon type={node.type} class={styles.typeIcon} />
