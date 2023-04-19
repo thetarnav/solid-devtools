@@ -3,7 +3,7 @@
 // to gen a overview of how to style console messages
 
 import { getNodeName, getNodeType, getOwnerType, isSolidMemo } from '@solid-devtools/debugger'
-import { NodeType, NODE_TYPE_NAMES, Solid } from '@solid-devtools/debugger/types'
+import { NODE_TYPE_NAMES, NodeType, Solid } from '@solid-devtools/debugger/types'
 import { dedupeArray } from '@solid-devtools/shared/utils'
 import { getDiffMap, getStackDiffMap } from './utils'
 
@@ -13,12 +13,7 @@ export type NodeState = {
   name: string
 }
 
-export type NodeStateWithValue = {
-  type: NodeType
-  typeName: string
-  name: string
-  value: unknown
-}
+export type NodeStateWithValue = NodeState & { value: unknown }
 
 export const UNUSED = Symbol('unused')
 
@@ -58,7 +53,7 @@ export function getNodeState(owner: Solid.Owner | Solid.Signal | NodeState): Nod
   return {
     type,
     typeName: NODE_TYPE_NAMES[type],
-    name: getNodeName(owner),
+    name: getNodeName(owner) ?? 'unknown',
   }
 }
 export function getNodeStateWithValue(
@@ -69,7 +64,7 @@ export function getNodeStateWithValue(
   return {
     type,
     typeName: NODE_TYPE_NAMES[type],
-    name: getNodeName(owner),
+    name: getNodeName(owner) ?? 'unknown',
     value: owner.value,
   }
 }

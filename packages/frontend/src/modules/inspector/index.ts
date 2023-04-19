@@ -44,7 +44,7 @@ export namespace Inspector {
 
   export type Signal = ValueItem & {
     readonly type: NodeType.Signal | NodeType.Memo | NodeType.Store
-    readonly name: string
+    readonly name: string | undefined
     readonly id: NodeID
   }
 
@@ -89,7 +89,7 @@ function createValueItem(itemId: ValueItemID, initValue: DecodedValue): Inspecto
 function createSignalItem(
   id: NodeID,
   type: NodeType.Signal | NodeType.Memo | NodeType.Store,
-  name: string,
+  name: string | undefined,
   initValue: DecodedValue,
 ): Inspector.Signal {
   const valueItem = createValueItem(`${ValueItemType.Signal}:${id}`, initValue)
