@@ -51,5 +51,10 @@
   "packageManager": "pnpm@8.2.0",
   "engines": {
     "node": ">=18"
+  },
+  "pnpm": {
+    "patchedDependencies": {
+      "solid-refresh@0.5.2": "patches/solid-refresh@0.5.2.patch"
+    }
   }
 }

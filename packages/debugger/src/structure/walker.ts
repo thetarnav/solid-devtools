@@ -6,8 +6,8 @@ import { observeComputationUpdate } from '../main/observe'
 import { Mapped, NodeID, Solid } from '../main/types'
 import {
   getComponentRefreshNode,
+  getNodeName,
   isObservableComputation,
-  markOwnerName,
   markOwnerType,
   resolveElements,
 } from '../main/utils'
@@ -150,7 +150,7 @@ function mapOwner(
 ): Mapped.Owner | undefined {
   const id = getSdtId(owner, ObjectType.Owner)
   const type = overwriteType ?? markOwnerType(owner)
-  const name = markOwnerName(owner)
+  const name = getNodeName(owner)
   const mapped = { id, type, name } as Mapped.Owner
 
   let resolvedElements: ReturnType<typeof resolveElements> | undefined

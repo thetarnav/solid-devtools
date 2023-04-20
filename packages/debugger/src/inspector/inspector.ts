@@ -13,7 +13,6 @@ import {
   isSolidMemo,
   isSolidSignal,
   isSolidStore,
-  markOwnerName,
   markOwnerType,
 } from '../main/utils'
 import { encodeValue } from './serialize'
@@ -275,11 +274,10 @@ export const collectOwnerDetails = /*#__PURE__*/ untrackedCallback(function (
 
   const id = getSdtId(owner, ObjectType.Owner)
   const type = markOwnerType(owner)
-  const name = markOwnerName(owner)
   let { sourceMap, owned } = owner
   let getValue = () => owner.value
 
-  const details = { id, name, type, signals: [] } as Mapped.OwnerDetails
+  const details = { id, name: getNodeName(owner), type, signals: [] } as Mapped.OwnerDetails
 
   // handle context node specially
   if (type === NodeType.Context) {

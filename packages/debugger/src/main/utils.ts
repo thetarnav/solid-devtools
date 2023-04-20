@@ -25,7 +25,7 @@ export const isSolidRoot = (o: Readonly<Solid.Owner>): o is Solid.Root => !('fn'
 export const isSolidMemo = (o: Readonly<Solid.Owner>): o is Solid.Memo =>
   'fn' in o && 'comparator' in o
 
-export const isSolidComponent = (o: Readonly<Solid.Owner>): o is Solid.Component => 'props' in o
+export const isSolidComponent = (o: Readonly<Solid.Owner>): o is Solid.Component => 'component' in o
 
 export const isStoreNode = (o: object): o is Solid.StoreNode => $NODE in o
 
@@ -41,6 +41,8 @@ export function getNodeType(o: Readonly<Solid.Signal | Solid.Owner | Solid.Store
   return isSolidStore(o) ? NodeType.Store : NodeType.Signal
 }
 
+const SOLID_REFRESH_PREFIX = '[solid-refresh]'
+
 export const getOwnerType = (o: Readonly<Solid.Owner>): NodeType => {
   if (typeof o.sdtType !== 'undefined') return o.sdtType
   if (!isSolidComputation(o)) {
@@ -49,16 +51,12 @@ export const getOwnerType = (o: Readonly<Solid.Owner>): NodeType => {
   }
   if (isSolidComponent(o)) return NodeType.Component
   // memo
-  if ('observers' in o) {
-    // TODO
-    // let parent: Solid.Owner | null, parentName: string | undefined
-    // if (
-    //   (parent = o.owner) &&
-    //   isSolidComponent(parent) &&
-    //   (parentName = parent.componentName) &&
-    //   parentName.startsWith('_Hot$$')
-    // )
-    //   return NodeType.Refresh
+  if ('comparator' in o) {
+    if (
+      (o.owner as { component?: Function } | null)?.component?.name.startsWith(SOLID_REFRESH_PREFIX)
+    ) {
+      return NodeType.Refresh
+    }
     return NodeType.Memo
   }
   // Effect
@@ -70,28 +68,13 @@ export const getOwnerType = (o: Readonly<Solid.Owner>): NodeType => {
   return NodeType.Computation
 }
 
-/** @deprecated */
-export function getOwnerName(owner: Solid.Owner): string {
-  return owner.name || '(unnamed)'
-}
-/** @deprecated */
-export function getSignalName(signal: Solid.SourceMapValue): string {
-  return signal.name || '(unnamed)'
-}
-/** @deprecated */
-export const getStoreNodeName = (_: unknown): string => '(unnamed)'
-
-export const getNodeName = (o: { name?: string }): string | undefined =>
-  o.name && getDisplayName(o.name)
-
-export function getDisplayName(name: string): string {
+export const getNodeName = (o: { name?: string }): string | undefined => {
+  if (!o.name) return
+  let name = o.name
+  if (name.startsWith(SOLID_REFRESH_PREFIX)) name = name.slice(SOLID_REFRESH_PREFIX.length)
   return trimString(name, 20)
 }
 
-/** @deprecated */
-export function markOwnerName(o: Solid.Owner): string | undefined {
-  return getNodeName(o)
-}
 export function markOwnerType(o: Solid.Owner): NodeType {
   if (o.sdtType !== undefined) return o.sdtType
   return (o.sdtType = getOwnerType(o))
