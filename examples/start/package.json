@@ -11,16 +11,16 @@
   "devDependencies": {
     "solid-start-node": "^0.2.26",
     "typescript": "^5.0.4",
-    "vite": "^4.2.1"
+    "vite": "^4.3.0"
   },
   "dependencies": {
-    "@solid-devtools/overlay": "workspace:^0.6.0",
+    "@solid-devtools/overlay": "workspace:^",
     "@solidjs/meta": "^0.28.4",
     "@solidjs/router": "^0.8.2",
-    "solid-devtools": "workspace:^0.26.0",
+    "solid-devtools": "workspace:^",
     "solid-js": "^1.7.3",
     "solid-start": "^0.2.26",
-    "undici": "^5.21.2"
+    "undici": "^5.22.0"
   },
   "engines": {
     "node": ">=18"

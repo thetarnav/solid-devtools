@@ -58,9 +58,10 @@
     "tsup": "^6.7.0"
   },
   "dependencies": {
-    "@solid-devtools/debugger": "workspace:^0.21.0",
-    "@solid-devtools/shared": "workspace:^0.11.0",
-    "@solid-primitives/utils": "^6.0.0"
+    "@solid-devtools/debugger": "workspace:^",
+    "@solid-devtools/shared": "workspace:^",
+    "@solid-primitives/utils": "^6.1.0",
+    "solid-js": "^1.7.3"
   },
   "peerDependencies": {
     "solid-js": "^1.7.0"

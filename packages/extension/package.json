@@ -18,16 +18,16 @@
     "@types/chrome": "^0.0.228",
     "jsdom": "^21.1.1",
     "rimraf": "^4.4.1",
-    "vite": "^4.2.1",
-    "vitest": "^0.30.0",
+    "vite": "^4.3.0",
+    "vitest": "^0.30.1",
     "zip-a-folder": "^1.1.5"
   },
   "dependencies": {
-    "@solid-devtools/debugger": "workspace:^0.21.0",
-    "@solid-devtools/frontend": "workspace:^0.8.0",
-    "@solid-devtools/shared": "workspace:^0.11.0",
-    "@solid-primitives/utils": "^6.0.0",
-    "solid-devtools": "workspace:^0.26.0",
+    "@solid-devtools/debugger": "workspace:^",
+    "@solid-devtools/frontend": "workspace:^",
+    "@solid-devtools/shared": "workspace:^",
+    "@solid-primitives/utils": "^6.1.0",
+    "solid-devtools": "workspace:^",
     "solid-js": "^1.7.3"
   },
   "overrides": {

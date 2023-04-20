@@ -43,13 +43,14 @@
     "typecheck": "tsc --noEmit --paths null"
   },
   "dependencies": {
-    "@solid-devtools/debugger": "workspace:^0.21.0",
-    "@solid-devtools/frontend": "workspace:^0.8.0",
-    "@solid-devtools/shared": "workspace:^0.11.0",
+    "@solid-devtools/debugger": "workspace:^",
+    "@solid-devtools/frontend": "workspace:^",
+    "@solid-devtools/shared": "workspace:^",
     "@solid-primitives/cursor": "^0.0.109",
     "@solid-primitives/event-listener": "^2.2.10",
     "@solid-primitives/media": "^2.1.6",
-    "@solid-primitives/utils": "^6.0.0"
+    "@solid-primitives/utils": "^6.1.0",
+    "solid-js": "^1.7.3"
   },
   "peerDependencies": {
     "solid-js": "^1.7.0"

@@ -12,11 +12,11 @@
   "license": "MIT",
   "devDependencies": {
     "typescript": "^5.0.4",
-    "vite": "^4.2.1",
+    "vite": "^4.3.0",
     "vite-plugin-solid": "^2.7.0"
   },
   "dependencies": {
-    "solid-devtools": "workspace:^0.26.0",
+    "solid-devtools": "workspace:^",
     "solid-js": "^1.7.3"
   }
 }

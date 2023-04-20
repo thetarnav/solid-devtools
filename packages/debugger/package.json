@@ -77,16 +77,17 @@
     "typecheck": "tsc --noEmit --paths null"
   },
   "dependencies": {
-    "@solid-devtools/shared": "workspace:^0.11.0",
+    "@solid-devtools/shared": "workspace:^",
     "@solid-primitives/bounds": "^0.0.111",
     "@solid-primitives/cursor": "^0.0.109",
-    "@solid-primitives/event-bus": "^1.0.4",
+    "@solid-primitives/event-bus": "^1.0.5",
     "@solid-primitives/event-listener": "^2.2.10",
     "@solid-primitives/keyboard": "^1.1.0",
     "@solid-primitives/platform": "^0.0.105",
     "@solid-primitives/scheduled": "^1.3.2",
     "@solid-primitives/static-store": "^0.0.2",
-    "@solid-primitives/utils": "^6.0.0",
+    "@solid-primitives/utils": "^6.1.0",
+    "solid-js": "^1.7.3",
     "type-fest": "^3.8.0"
   },
   "peerDependencies": {
