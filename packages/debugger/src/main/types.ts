@@ -1,5 +1,8 @@
+import type * as SolidAPI from 'solid-js'
 import type { $PROXY, DEV, getListener, getOwner, onCleanup, untrack } from 'solid-js'
+import type * as StoreAPI from 'solid-js/store'
 import type { DEV as STORE_DEV, unwrap } from 'solid-js/store'
+import type * as WebAPI from 'solid-js/web'
 import type { EncodedValue, PropGetterState } from '../inspector/types'
 import type { LocationAttr } from '../locator/findComponent'
 import type { LocatorOptions } from '../locator/types'
@@ -29,6 +32,9 @@ declare global {
   interface Window {
     /** Solid DEV APIs exposed to the debugger by the setup script */
     _$SolidDevAPI?: {
+      readonly Solid: typeof SolidAPI
+      readonly Store: typeof StoreAPI
+      readonly Web: typeof WebAPI
       readonly DEV: NonNullable<typeof DEV>
       readonly getOwner: typeof getOwner
       readonly getListener: typeof getListener

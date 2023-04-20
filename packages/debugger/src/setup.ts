@@ -7,8 +7,11 @@ It also starts listening to Solid DEV events and stores them to be sent to the d
 */
 
 import { error } from '@solid-devtools/shared/utils'
+import * as SolidAPI from 'solid-js'
 import { $PROXY, DEV, getListener, getOwner, onCleanup, untrack } from 'solid-js'
+import * as StoreAPI from 'solid-js/store'
 import { DEV as STORE_DEV, unwrap } from 'solid-js/store'
+import * as WebAPI from 'solid-js/web'
 import type { LocatorOptions } from './locator/types'
 import { DevEventType, StoredDevEvent } from './main/types'
 
@@ -26,6 +29,9 @@ if (!DEV || !STORE_DEV) {
   error('Solid DEV is not enabled')
 } else {
   window._$SolidDevAPI = {
+    Solid: SolidAPI,
+    Store: StoreAPI,
+    Web: WebAPI,
     DEV,
     getOwner,
     getListener,
