@@ -45,7 +45,8 @@
         "types": "./dist/vite/index.d.ts",
         "default": "./dist/vite/index.js"
       }
-    }
+    },
+    "./package.json": "./package.json"
   },
   "typesVersions": {
     "*": {
@@ -82,9 +83,7 @@
     "@solid-devtools/shared": "workspace:^",
     "@solid-primitives/event-bus": "^1.0.5",
     "@solid-primitives/utils": "^6.1.0",
-    "solid-js": "^1.7.3",
-    "type-fest": "^3.8.0",
-    "vite": "^4.3.0"
+    "type-fest": "^3.8.0"
   },
   "peerDependencies": {
     "solid-js": "^1.7.0",

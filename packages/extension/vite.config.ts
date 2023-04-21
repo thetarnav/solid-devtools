@@ -1,13 +1,20 @@
 import { crx } from '@crxjs/vite-plugin'
+import fs from 'fs'
+import { createRequire } from 'node:module'
 import path from 'path'
 import solidPlugin from 'vite-plugin-solid'
 import { defineConfig, UserConfig } from 'vitest/config'
-
 import { testConfig } from '../../configs/vitest.config'
 import manifest from './manifest'
-import pkg from './package.json'
 
+const require = createRequire(import.meta.url)
 const cwd = process.cwd()
+
+const solidDevtoolsPkg = JSON.parse(
+  fs.readFileSync(require.resolve('solid-devtools/package.json'), 'utf-8'),
+) as { version: string }
+
+const solidDevtoolsVersion = JSON.stringify(solidDevtoolsPkg.version.match(/\d+.\d+.\d+/)![0])
 
 export default defineConfig(config => {
   const isDev = config.mode === 'development'
@@ -28,10 +35,7 @@ export default defineConfig(config => {
         enforce: 'pre',
         transform(code, id) {
           if (id.includes('solid-devtools')) {
-            return code.replace(
-              /import\.meta\.env\.EXPECTED_CLIENT/g,
-              `"${pkg.dependencies['solid-devtools'].match(/\d+.\d+.\d+/)![0]}"`,
-            )
+            return code.replace(/import\.meta\.env\.EXPECTED_CLIENT/g, solidDevtoolsVersion)
           }
           return code
         },
