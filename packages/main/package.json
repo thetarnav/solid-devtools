@@ -144,10 +144,16 @@
   },
   "peerDependencies": {
     "solid-js": "^1.6.9",
+    "solid-start": "^0.2.20",
     "vite": "^2.2.3 || ^3.0.0 || ^4.0.0"
   },
-  "optionalDependencies": {
-    "solid-start": "^0.2.20"
+  "peerDependenciesMeta": {
+    "solid-start": {
+      "optional": true
+    },
+    "vite": {
+      "optional": true
+    }
   },
   "packageManager": "pnpm@7.22.0"
 }
