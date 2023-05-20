@@ -66,24 +66,26 @@
   },
   "devDependencies": {
     "@babel/core": "^7.18.13",
-    "@babel/generator": "^7.21.4",
-    "@babel/parser": "^7.21.4",
+    "@babel/generator": "^7.21.5",
+    "@babel/parser": "^7.21.8",
     "@babel/plugin-syntax-jsx": "^7.21.4",
-    "@babel/traverse": "^7.21.4",
+    "@babel/traverse": "^7.21.5",
     "@types/babel__core": "^7.20.0",
     "@types/babel__generator": "^7.6.4",
-    "@types/babel__traverse": "^7.18.3",
+    "@types/babel__traverse": "^7.18.5",
     "solid-start": "^0.2.9"
   },
   "dependencies": {
-    "@babel/core": "^7.21.4",
+    "@babel/core": "^7.21.8",
     "@babel/plugin-syntax-typescript": "^7.21.4",
-    "@babel/types": "^7.21.4",
+    "@babel/types": "^7.21.5",
     "@solid-devtools/debugger": "workspace:^",
     "@solid-devtools/shared": "workspace:^",
-    "@solid-primitives/event-bus": "^1.0.5",
-    "@solid-primitives/utils": "^6.1.0",
-    "type-fest": "^3.8.0"
+    "@solid-primitives/event-bus": "^1.0.7",
+    "@solid-primitives/utils": "^6.2.0",
+    "solid-js": "^1.7.5",
+    "type-fest": "^3.11.0",
+    "vite": "^4.3.8"
   },
   "peerDependencies": {
     "solid-js": "^1.7.0",
