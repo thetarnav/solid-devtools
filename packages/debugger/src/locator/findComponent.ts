@@ -13,7 +13,7 @@ export type LocatorComponent = {
 export type TargetIDE = 'vscode' | 'webstorm' | 'atom' | 'vscode-insiders'
 
 export type SourceLocation = {
-  filePath: string
+  file: string
   line: number
   column: number
 }
@@ -38,13 +38,13 @@ export function getLocationAttr(element: Element): LocationAttr | undefined {
 }
 
 const targetIDEMap: Record<TargetIDE, (data: SourceCodeData) => string> = {
-  vscode: ({ projectPath, filePath, line, column }) =>
-    `vscode://file/${projectPath}/${filePath}:${line}:${column}`,
-  'vscode-insiders': ({ projectPath, filePath, line, column }) =>
+  vscode: ({ projectPath, file, line, column }) =>
+    `vscode://file/${projectPath}/${file}:${line}:${column}`,
+  'vscode-insiders': ({ projectPath, file: filePath, line, column }) =>
     `vscode-insiders://file/${projectPath}/${filePath}:${line}:${column}`,
-  atom: ({ projectPath, filePath, line, column }) =>
+  atom: ({ projectPath, file: filePath, line, column }) =>
     `atom://core/open/file?filename=${projectPath}/${filePath}&line=${line}&column=${column}`,
-  webstorm: ({ projectPath, filePath, line, column }) =>
+  webstorm: ({ projectPath, file: filePath, line, column }) =>
     `webstorm://open?file=${projectPath}/${filePath}&line=${line}&column=${column}`,
 }
 
@@ -53,25 +53,35 @@ function getTargetURL(target: TargetIDE | TargetURLFunction, data: SourceCodeDat
   return targetIDEMap[target](data)
 }
 
+export const getProjectPath = (): string | undefined => (window as any)[WINDOW_PROJECTPATH_PROPERTY]
+
 export function getSourceCodeData(
   location: LocationAttr,
   element: SourceCodeData['element'],
 ): SourceCodeData | undefined {
-  const projectPath: string | undefined = (window as any)[WINDOW_PROJECTPATH_PROPERTY]
+  const projectPath: string | undefined = getProjectPath()
   if (!projectPath) return
-  const match = location.match(LOC_ATTR_REGEX)
-  if (!match) return
-  const [, filePath, line, column] = match
-  if (!filePath || !line || !column) return
-  return { filePath, line: +line, column: +column, projectPath, element }
+  const parsed = parseLocationString(location)
+  if (!parsed) return
+  return { ...parsed, projectPath, element }
 }
 
-export function getLocationFromAttribute(location: LocationAttr): SourceLocation | undefined {
-  const match = location.match(LOC_ATTR_REGEX)
-  if (!match) return
-  const [, filePath, line, column] = match
-  if (!filePath || !line || !column) return
-  return { filePath, line: +line, column: +column }
+/**
+ * Validates and parses a location string to a {@link SourceLocation} object
+ */
+export function parseLocationString(location: string): SourceLocation | undefined {
+  // eslint-disable-next-line prefer-const
+  let [filePath, line, column] = location.split(':') as [string, string | number, string | number]
+  if (
+    filePath &&
+    line &&
+    column &&
+    typeof filePath === 'string' &&
+    !isNaN((line = Number(line))) &&
+    !isNaN((column = Number(column)))
+  ) {
+    return { file: filePath, line, column }
+  }
 }
 
 export function openSourceCode(target: TargetIDE | TargetURLFunction, data: SourceCodeData): void {

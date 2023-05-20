@@ -22,16 +22,19 @@ import SolidAPI from '../main/solid-api'
 import { NodeID } from '../main/types'
 import { attachElementOverlay } from './ElementOverlay'
 import {
-  LocationAttr,
   LocatorComponent,
   SourceCodeData,
+  SourceLocation,
   TargetIDE,
   TargetURLFunction,
   getLocationAttr,
+  getProjectPath,
   getSourceCodeData,
   openSourceCode,
 } from './findComponent'
 import { HighlightElementPayload, LocatorOptions } from './types'
+
+export { parseLocationString } from './findComponent'
 
 export function createLocator(props: {
   emit: EmitterEmit<Debugger.OutputChannels>
@@ -166,15 +169,20 @@ export function createLocator(props: {
     useLocator(SolidAPI.locatorOptions)
   }
 
-  function openElementSourceCode(location: LocationAttr, element: SourceCodeData['element']) {
-    if (!targetIDE) return warn('Please set `targetIDE` it in useLocator options.')
-    const sourceCodeData = getSourceCodeData(location, element)
-    sourceCodeData && openSourceCode(targetIDE, sourceCodeData)
-  }
-
   return {
     useLocator,
-    setDevtoolsHighlightTarget: (target: HighlightElementPayload) => void setDevtoolsTarget(target),
-    openElementSourceCode,
+    setDevtoolsHighlightTarget(target: HighlightElementPayload) {
+      setDevtoolsTarget(target)
+    },
+    openElementSourceCode(location: SourceLocation, element: SourceCodeData['element']) {
+      if (!targetIDE) return warn('Please set `targetIDE` it in useLocator options.')
+      const projectPath = getProjectPath()
+      if (!projectPath) return warn('projectPath is not set.')
+      openSourceCode(targetIDE, {
+        ...location,
+        projectPath,
+        element,
+      })
+    },
   }
 }

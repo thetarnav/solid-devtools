@@ -1,13 +1,12 @@
 import { PluginObj, template } from '@babel/core'
 import * as t from '@babel/types'
 import {
-  LocationAttr,
   LOCATION_ATTRIBUTE_NAME,
+  LocationAttr,
   WINDOW_PROJECTPATH_PROPERTY,
 } from '@solid-devtools/debugger/types'
 import p from 'path'
-
-export const MARK_COMPONENT_GLOBAL = `_$markComponentLoc`
+import { SET_COMPONENT_LOC_GLOBAL } from './constants'
 
 const cwd = process.cwd()
 
@@ -15,7 +14,7 @@ const projectPathAst = template(`globalThis.${WINDOW_PROJECTPATH_PROPERTY} = %%l
   loc: t.stringLiteral(cwd),
 }) as t.Statement
 
-const buildMarkComponent = template(`globalThis.${MARK_COMPONENT_GLOBAL}(%%loc%%);`) as (
+const buildMarkComponent = template(`globalThis.${SET_COMPONENT_LOC_GLOBAL}(%%loc%%);`) as (
   ...args: Parameters<ReturnType<typeof template>>
 ) => t.Statement
 

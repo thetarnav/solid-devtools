@@ -1,5 +1,6 @@
 import { untrackedCallback } from '@solid-devtools/shared/primitives'
 import { isRecord } from '@solid-devtools/shared/utils'
+import { parseLocationString } from '../locator'
 import { NodeType, ValueItemType } from '../main/constants'
 import { ObjectType, getSdtId } from '../main/id'
 import { observeValueUpdate, removeValueUpdateObserver } from '../main/observe'
@@ -306,8 +307,17 @@ export const collectOwnerDetails = /*#__PURE__*/ untrackedCallback(function (
       }
 
       ;({ checkProxyProps, props: details.props } = mapProps(owner.props))
-      // TODO: location
-      // if (owner.location) details.location = owner.location
+
+      let location = (owner.component as any).location
+      if (
+        // get location from component.location
+        (typeof location === 'string' && (location = parseLocationString(location))) ||
+        // get location from the babel plugin marks
+        ((location = SolidAPI.getOwnerLocation(owner)) &&
+          (location = parseLocationString(location)))
+      ) {
+        details.location = location
+      }
     } else {
       observeValueUpdate(owner, () => onValueUpdate(ValueItemType.Value), $INSPECTOR)
     }

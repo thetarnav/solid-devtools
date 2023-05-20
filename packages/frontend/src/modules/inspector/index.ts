@@ -1,7 +1,6 @@
 import {
   Debugger,
   InspectorUpdateMap,
-  LocationAttr,
   NodeID,
   NodeType,
   PropGetterState,
@@ -64,7 +63,7 @@ export namespace Inspector {
     readonly signals: { readonly [key: NodeID]: Signal }
     readonly value: ValueItem | null
     readonly props: Props | null
-    readonly location: LocationAttr | null
+    readonly location: string | null
   }
 
   export type Module = ReturnType<typeof createInspector>
@@ -238,7 +237,7 @@ export default function createInspector({ bridge }: { bridge: DebuggerBridge }) 
       setState({
         name: raw.name,
         type: raw.type,
-        location: raw.location ?? null,
+        location: raw.location?.file ?? null,
         signals: raw.signals.reduce((signals, s) => {
           signals[s.id] = createSignalItem(
             s.id,

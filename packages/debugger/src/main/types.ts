@@ -4,9 +4,8 @@ import type * as StoreAPI from 'solid-js/store'
 import type { DEV as STORE_DEV, unwrap } from 'solid-js/store'
 import type * as WebAPI from 'solid-js/web'
 import type { EncodedValue, PropGetterState } from '../inspector/types'
-import type { LocationAttr } from '../locator/findComponent'
-import type { LocatorOptions } from '../locator/types'
-import { NodeType, ValueItemType } from './constants'
+import type { LocatorOptions, SourceLocation } from '../locator/types'
+import { NodeType, ValueItemType, type GLOBAL_DEVTOOLS_KEY } from './constants'
 
 //
 // EXPOSED SOLID API
@@ -31,7 +30,7 @@ export type StoredDevEvent = {
 declare global {
   interface Window {
     /** Solid DEV APIs exposed to the debugger by the setup script */
-    _$SolidDevAPI?: {
+    [GLOBAL_DEVTOOLS_KEY]?: {
       readonly Solid: typeof SolidAPI
       readonly Store: typeof StoreAPI
       readonly Web: typeof WebAPI
@@ -50,6 +49,7 @@ declare global {
         readonly solid: string | null
         readonly expectedSolid: string | null
       }
+      readonly getOwnerLocation: (owner: Solid.Owner) => string | null
     }
   }
 }
@@ -169,6 +169,6 @@ export namespace Mapped {
     /** for computations */
     value?: EncodedValue[]
     // component with a location
-    location?: LocationAttr
+    location?: SourceLocation
   }
 }

@@ -13,7 +13,7 @@ import * as StoreAPI from 'solid-js/store'
 import { DEV as STORE_DEV, unwrap } from 'solid-js/store'
 import * as WebAPI from 'solid-js/web'
 import type { LocatorOptions } from './locator/types'
-import { DevEventType, StoredDevEvent } from './main/types'
+import { DevEventType, type Solid, type StoredDevEvent } from './main/types'
 
 let PassedLocatorOptions: LocatorOptions | null = null
 let DevEvents: StoredDevEvent[] | null = []
@@ -21,14 +21,29 @@ let ClientVersion: string | null = null
 let SolidVersion: string | null = null
 let ExpectedSolidVersion: string | null = null
 
-if (window._$SolidDevAPI) {
+const OwnerLocationMap = new WeakMap<Solid.Owner, string>()
+
+/**
+ * Set the location of the owner in source code.
+ * Used by the babel plugin.
+ */
+export function setOwnerLocation(location: string) {
+  const owner = getOwner()
+  owner && OwnerLocationMap.set(owner, location)
+}
+
+export function getOwnerLocation(owner: Solid.Owner) {
+  return OwnerLocationMap.get(owner) ?? null
+}
+
+if (window.SolidDevtools$$) {
   error('Debugger is already setup')
 }
 
 if (!DEV || !STORE_DEV) {
   error('Solid DEV is not enabled')
 } else {
-  window._$SolidDevAPI = {
+  window.SolidDevtools$$ = {
     Solid: SolidAPI,
     Store: StoreAPI,
     Web: WebAPI,
@@ -59,6 +74,7 @@ if (!DEV || !STORE_DEV) {
         return ExpectedSolidVersion
       },
     },
+    getOwnerLocation,
   }
 
   DEV.hooks.afterCreateOwner = function (owner) {
@@ -73,10 +89,6 @@ if (!DEV || !STORE_DEV) {
 
 export function useLocator(options: LocatorOptions) {
   PassedLocatorOptions = options
-}
-
-export function markComponentLoc() {
-  // TODO
 }
 
 export function setClientVersion(version: string) {
