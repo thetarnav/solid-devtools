@@ -5,7 +5,8 @@ import {
   WINDOW_PROJECTPATH_PROPERTY,
 } from '@solid-devtools/debugger/types'
 import { describe, test } from 'vitest'
-import getPlugin, { MARK_COMPONENT_GLOBAL } from '../location'
+import { SET_COMPONENT_LOC_GLOBAL } from '../constants'
+import getPlugin from '../location'
 
 describe('location', () => {
   const testData: [
@@ -20,7 +21,7 @@ describe('location', () => {
   return <button>Click me</button>
 }`,
       `function Button(props) {
-  globalThis.${MARK_COMPONENT_GLOBAL}("${file}:1:0");
+  globalThis.${SET_COMPONENT_LOC_GLOBAL}("${file}:1:0");
   return <button>Click me</button>;
 }
 globalThis.${WINDOW_PROJECTPATH_PROPERTY} = "${cwd}";`,
@@ -32,7 +33,7 @@ globalThis.${WINDOW_PROJECTPATH_PROPERTY} = "${cwd}";`,
   return <button>Click me</button>
 }`,
       `const Button = props => {
-  globalThis.${MARK_COMPONENT_GLOBAL}("${file}:1:6");
+  globalThis.${SET_COMPONENT_LOC_GLOBAL}("${file}:1:6");
   return <button>Click me</button>;
 };
 globalThis.${WINDOW_PROJECTPATH_PROPERTY} = "${cwd}";`,
