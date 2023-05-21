@@ -1,7 +1,7 @@
 import { PluginOption } from 'vite'
 
 import { PluginItem, transformAsync } from '@babel/core'
-import { LocatorOptions, TargetURLFunction, USE_LOCATOR } from '@solid-devtools/debugger/types'
+import { LocatorOptions, TargetURLFunction } from '@solid-devtools/debugger/types'
 import path from 'path'
 import type { Options as SolidStartOptions } from 'solid-start/vite/plugin'
 import jsxLocationPlugin from './location'
@@ -96,8 +96,8 @@ export const devtoolsPlugin = (_options: DevtoolsPluginOptions = {}): PluginOpti
       let code = `import ${importPath};`
 
       if (options.locator) {
-        code += `\nimport { ${USE_LOCATOR} } from ${importPath};
-        ${USE_LOCATOR}(${JSON.stringify(options.locator)});`
+        code += `\nimport { setLocatorOptions } from ${importPath};
+        setLocatorOptions(${JSON.stringify(options.locator)});`
       }
 
       return code

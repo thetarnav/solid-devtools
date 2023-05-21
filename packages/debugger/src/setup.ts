@@ -15,12 +15,6 @@ import * as WebAPI from 'solid-js/web'
 import type { LocatorOptions } from './locator/types'
 import { DevEventType, type Solid, type StoredDevEvent } from './main/types'
 
-let PassedLocatorOptions: LocatorOptions | null = null
-let DevEvents: StoredDevEvent[] | null = []
-let ClientVersion: string | null = null
-let SolidVersion: string | null = null
-let ExpectedSolidVersion: string | null = null
-
 const OwnerLocationMap = new WeakMap<Solid.Owner, string>()
 
 /**
@@ -35,6 +29,26 @@ export function setOwnerLocation(location: string) {
 export function getOwnerLocation(owner: Solid.Owner) {
   return OwnerLocationMap.get(owner) ?? null
 }
+
+let PassedLocatorOptions: LocatorOptions | null = null
+export function useLocator(options: LocatorOptions) {
+  PassedLocatorOptions = options
+}
+
+let ClientVersion: string | null = null
+let SolidVersion: string | null = null
+let ExpectedSolidVersion: string | null = null
+
+export function setClientVersion(version: string) {
+  ClientVersion = version
+}
+
+export function setSolidVersion(version: string, expected: string) {
+  SolidVersion = version
+  ExpectedSolidVersion = expected
+}
+
+let DevEvents: StoredDevEvent[] | null = []
 
 if (window.SolidDevtools$$) {
   error('Debugger is already setup')
@@ -85,17 +99,4 @@ if (!DEV || !STORE_DEV) {
       data: owner,
     })
   }
-}
-
-export function useLocator(options: LocatorOptions) {
-  PassedLocatorOptions = options
-}
-
-export function setClientVersion(version: string) {
-  ClientVersion = version
-}
-
-export function setSolidVersion(version: string, expected: string) {
-  SolidVersion = version
-  ExpectedSolidVersion = expected
 }

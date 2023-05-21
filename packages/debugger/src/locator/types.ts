@@ -29,4 +29,3 @@ export type HighlightElementPayload = ToDyscriminatedUnion<{
 // used by the transform
 export const WINDOW_PROJECTPATH_PROPERTY = '$sdt_projectPath'
 export const LOCATION_ATTRIBUTE_NAME = 'data-source-loc'
-export const USE_LOCATOR = `useLocator`
