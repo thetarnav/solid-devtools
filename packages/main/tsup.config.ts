@@ -7,6 +7,9 @@ const solidVersion = solidPkg.version
 export default defineConfig(
   [
     {
+      entry: 'src/index.ts',
+    },
+    {
       entry: 'src/setup.ts',
     },
     {

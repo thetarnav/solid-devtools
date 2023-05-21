@@ -5,8 +5,10 @@ import {
   WINDOW_PROJECTPATH_PROPERTY,
 } from '@solid-devtools/debugger/types'
 import { describe, test } from 'vitest'
-import { SET_COMPONENT_LOC_GLOBAL } from '../constants'
+import { Module, SET_COMPONENT_LOC, SET_COMPONENT_LOC_LOCAL } from '../constants'
 import getPlugin from '../location'
+
+const setLocationImport = `import { ${SET_COMPONENT_LOC} as ${SET_COMPONENT_LOC_LOCAL} } from "${Module.Setup}";`
 
 describe('location', () => {
   const testData: [
@@ -20,8 +22,9 @@ describe('location', () => {
       `function Button(props) {
   return <button>Click me</button>
 }`,
-      `function Button(props) {
-  globalThis.${SET_COMPONENT_LOC_GLOBAL}("${file}:1:0");
+      `${setLocationImport}
+function Button(props) {
+  ${SET_COMPONENT_LOC_LOCAL}("${file}:1:0");
   return <button>Click me</button>;
 }
 globalThis.${WINDOW_PROJECTPATH_PROPERTY} = "${cwd}";`,
@@ -32,8 +35,9 @@ globalThis.${WINDOW_PROJECTPATH_PROPERTY} = "${cwd}";`,
       `const Button = props => {
   return <button>Click me</button>
 }`,
-      `const Button = props => {
-  globalThis.${SET_COMPONENT_LOC_GLOBAL}("${file}:1:6");
+      `${setLocationImport}
+const Button = props => {
+  ${SET_COMPONENT_LOC_LOCAL}("${file}:1:6");
   return <button>Click me</button>;
 };
 globalThis.${WINDOW_PROJECTPATH_PROPERTY} = "${cwd}";`,

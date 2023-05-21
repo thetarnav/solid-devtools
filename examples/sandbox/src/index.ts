@@ -1,19 +1,15 @@
-async function attachOverlay() {
-  const { attachDevtoolsOverlay } = await import('@solid-devtools/overlay')
+import 'solid-devtools'
 
-  attachDevtoolsOverlay({
-    defaultOpen: true,
-    noPadding: true,
-  })
-}
+async function main() {
+  if (!process.env.EXT || process.env.BUILD) {
+    const { attachDevtoolsOverlay } = await import('@solid-devtools/overlay')
 
-;(async () => {
-  if (process.env.BUILD) {
-    await import('solid-devtools/setup')
-    await attachOverlay()
-  } else if (!process.env.EXT) {
-    await attachOverlay()
+    attachDevtoolsOverlay({
+      defaultOpen: true,
+      noPadding: true,
+    })
   }
 
   import('./main')
-})()
+}
+main()

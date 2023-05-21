@@ -29,11 +29,17 @@
     "dist"
   ],
   "type": "module",
-  "main": "./dist/setup/index.js",
-  "module": "./dist/setup/index.js",
-  "types": "./dist/setup/index.d.ts",
+  "main": "./dist/index/index.js",
+  "module": "./dist/index/index.js",
+  "types": "./dist/index/index.d.ts",
   "browser": {},
   "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index/index.d.ts",
+        "default": "./dist/index/index.js"
+      }
+    },
     "./setup": {
       "import": {
         "types": "./dist/setup/index.d.ts",

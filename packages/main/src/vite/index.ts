@@ -1,16 +1,10 @@
-import { PluginOption } from 'vite'
+import type { PluginOption } from 'vite'
 
 import { PluginItem, transformAsync } from '@babel/core'
 import { LocatorOptions, TargetURLFunction } from '@solid-devtools/debugger/types'
-import path from 'path'
-import type { Options as SolidStartOptions } from 'solid-start/vite/plugin'
+import { Module } from './constants'
 import jsxLocationPlugin from './location'
 import namePlugin from './name'
-
-const enum Module {
-  Setup = 'solid-devtools/setup',
-  Virtual = '/@solid-devtools',
-}
 
 export type DevtoolsPluginOptions = {
   /** Add automatic name when creating signals, memos, stores, or mutables */
@@ -61,42 +55,24 @@ export const devtoolsPlugin = (_options: DevtoolsPluginOptions = {}): PluginOpti
 
   let enablePlugin = false
   const projectRoot = process.cwd()
-  let solidStartRootEntry: string | undefined
 
   return {
     name: 'solid-devtools',
     enforce: 'pre',
     configResolved(config) {
       enablePlugin = config.command === 'serve' && config.mode !== 'production'
-
-      if ('solidOptions' in config && typeof config.solidOptions === 'object') {
-        const solidOptions = config.solidOptions as SolidStartOptions
-        solidStartRootEntry = path.normalize(solidOptions.rootEntry)
-      }
-    },
-    transformIndexHtml() {
-      if (enablePlugin)
-        return [
-          {
-            tag: 'script',
-            attrs: { type: 'module', src: Module.Virtual },
-            injectTo: 'body-prepend',
-          },
-        ]
     },
     resolveId(id) {
-      if (id === Module.Virtual) return Module.Virtual
+      if (id === Module.Main) return Module.Main
     },
     load(id) {
       // Inject runtime debugger script
-      if (!enablePlugin || id !== Module.Virtual) return
+      if (!enablePlugin || id !== Module.Main) return
 
-      const importPath = JSON.stringify(Module.Setup)
-
-      let code = `import ${importPath};`
+      let code = `import "${Module.Setup}";`
 
       if (options.locator) {
-        code += `\nimport { setLocatorOptions } from ${importPath};
+        code += `\nimport { setLocatorOptions } from "${Module.Setup}";
         setLocatorOptions(${JSON.stringify(options.locator)});`
       }
 
@@ -124,11 +100,6 @@ export const devtoolsPlugin = (_options: DevtoolsPluginOptions = {}): PluginOpti
       }
       if (options.autoname) {
         plugins.push(namePlugin)
-      }
-
-      // For solid-start, inject the debugger script before the root entry point
-      if (solidStartRootEntry && path.normalize(id) === solidStartRootEntry) {
-        source = `import ${JSON.stringify(Module.Virtual)}\n${source}`
       }
 
       if (plugins.length === 0) return { code: source }
