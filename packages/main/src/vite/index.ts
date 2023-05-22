@@ -63,7 +63,7 @@ export const devtoolsPlugin = (_options: DevtoolsPluginOptions = {}): PluginOpti
       enablePlugin = config.command === 'serve' && config.mode !== 'production'
     },
     resolveId(id) {
-      if (id === Module.Main) return Module.Main
+      if (enablePlugin && id === Module.Main) return Module.Main
     },
     load(id) {
       // Inject runtime debugger script

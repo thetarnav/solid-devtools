@@ -9,7 +9,7 @@
     "dev": "vite --port 3000",
     "dev:ext": "cross-env EXT=true pnpm dev",
     "build": "vite build",
-    "serve": "vite preview"
+    "preview": "vite preview"
   },
   "devDependencies": {
     "@babel/plugin-syntax-typescript": "^7.21.4",
