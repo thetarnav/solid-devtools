@@ -27,9 +27,6 @@ export default defineConfig(mode => {
       'process.env.EXT': JSON.stringify(usingExtension),
       'process.env.BUILD': JSON.stringify(isBuild),
     },
-    resolve: {
-      conditions: ['browser', 'development'],
-    },
     mode: 'development',
     build: {
       target: 'esnext',
