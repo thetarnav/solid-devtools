@@ -15,6 +15,8 @@ import {
 import Nav from './components/nav'
 import './root.css'
 
+import 'solid-devtools'
+
 export default function Root() {
   return (
     <Html lang="en">

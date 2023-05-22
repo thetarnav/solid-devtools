@@ -32,7 +32,9 @@
   "main": "./dist/index/index.js",
   "module": "./dist/index/index.js",
   "types": "./dist/index/index.d.ts",
-  "browser": {},
+  "browser": {
+    "./dist/setup/server.js": "./dist/setup/index.js"
+  },
   "exports": {
     ".": {
       "import": {
@@ -41,6 +43,42 @@
       }
     },
     "./setup": {
+      "worker": {
+        "import": {
+          "types": "./dist/setup/index.d.ts",
+          "default": "./dist/setup/server.js"
+        }
+      },
+      "browser": {
+        "development": {
+          "import": {
+            "types": "./dist/setup/index.d.ts",
+            "default": "./dist/setup/dev.js"
+          }
+        },
+        "import": {
+          "types": "./dist/setup/index.d.ts",
+          "default": "./dist/setup/index.js"
+        }
+      },
+      "deno": {
+        "import": {
+          "types": "./dist/setup/index.d.ts",
+          "default": "./dist/setup/server.js"
+        }
+      },
+      "node": {
+        "import": {
+          "types": "./dist/setup/index.d.ts",
+          "default": "./dist/setup/server.js"
+        }
+      },
+      "development": {
+        "import": {
+          "types": "./dist/setup/index.d.ts",
+          "default": "./dist/setup/dev.js"
+        }
+      },
       "import": {
         "types": "./dist/setup/index.d.ts",
         "default": "./dist/setup/index.js"

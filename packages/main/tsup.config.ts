@@ -10,7 +10,10 @@ export default defineConfig(
       entry: 'src/index.ts',
     },
     {
-      entry: 'src/setup.ts',
+      name: 'setup',
+      entry: 'src/setup-noop.ts',
+      devEntry: 'src/setup.ts',
+      serverEntry: 'src/setup-noop.ts',
     },
     {
       entry: 'src/vite.ts',
