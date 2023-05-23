@@ -5,7 +5,7 @@ import type { DEV as STORE_DEV, unwrap } from 'solid-js/store'
 import type * as WebAPI from 'solid-js/web'
 import type { EncodedValue, PropGetterState } from '../inspector/types'
 import type { LocatorOptions, SourceLocation } from '../locator/types'
-import { NodeType, ValueItemType, type GLOBAL_DEVTOOLS_KEY } from './constants'
+import { NodeType, ValueItemType } from './constants'
 
 //
 // EXPOSED SOLID API
@@ -28,30 +28,30 @@ export type StoredDevEvent = {
 }[keyof DevEventDataMap]
 
 declare global {
-  interface Window {
-    /** Solid DEV APIs exposed to the debugger by the setup script */
-    [GLOBAL_DEVTOOLS_KEY]?: {
-      readonly Solid: typeof SolidAPI
-      readonly Store: typeof StoreAPI
-      readonly Web: typeof WebAPI
-      readonly DEV: NonNullable<typeof DEV>
-      readonly getOwner: typeof getOwner
-      readonly getListener: typeof getListener
-      readonly onCleanup: typeof onCleanup
-      readonly $PROXY: typeof $PROXY
-      readonly untrack: typeof untrack
-      readonly STORE_DEV: NonNullable<typeof STORE_DEV>
-      readonly unwrap: typeof unwrap
-      readonly getDevEvents: () => StoredDevEvent[]
-      readonly locatorOptions: LocatorOptions | null
-      readonly versions: {
-        readonly client: string | null
-        readonly solid: string | null
-        readonly expectedSolid: string | null
+  /** Solid DEV APIs exposed to the debugger by the setup script */
+  var SolidDevtools$$:
+    | {
+        readonly Solid: typeof SolidAPI
+        readonly Store: typeof StoreAPI
+        readonly Web: typeof WebAPI
+        readonly DEV: NonNullable<typeof DEV>
+        readonly getOwner: typeof getOwner
+        readonly getListener: typeof getListener
+        readonly onCleanup: typeof onCleanup
+        readonly $PROXY: typeof $PROXY
+        readonly untrack: typeof untrack
+        readonly STORE_DEV: NonNullable<typeof STORE_DEV>
+        readonly unwrap: typeof unwrap
+        readonly getDevEvents: () => StoredDevEvent[]
+        readonly locatorOptions: LocatorOptions | null
+        readonly versions: {
+          readonly client: string | null
+          readonly solid: string | null
+          readonly expectedSolid: string | null
+        }
+        readonly getOwnerLocation: (owner: Solid.Owner) => string | null
       }
-      readonly getOwnerLocation: (owner: Solid.Owner) => string | null
-    }
-  }
+    | undefined
 }
 
 // Additional "#" character is added to distinguish NodeID from string

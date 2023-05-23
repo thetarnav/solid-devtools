@@ -1,8 +1,9 @@
-if (!window.SolidDevtools$$)
+if (!globalThis.SolidDevtools$$) {
   throw new Error(
-    '[solid-devtools]: Solid API not found. Please make sure you have installed the Solid Devtools extension...',
+    `[solid-devtools]: Debugger hasn't found the exposed Solid Devtools API. Did you import the setup script?`,
   )
+}
 
-const SolidApi = window.SolidDevtools$$
+const SolidApi = globalThis.SolidDevtools$$
 
 export default SolidApi

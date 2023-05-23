@@ -6,6 +6,8 @@ and then import the debugger script.
 
 */
 
+import '@solid-devtools/debugger/types'
+import { interceptPropertySet } from '@solid-devtools/shared/utils'
 import { SOLID_ON_PAGE_MESSAGE } from '../src/bridge'
 
 let notified = false
@@ -16,12 +18,8 @@ function notify() {
   import('./debugger')
 }
 
-if (window.Solid$$ == true) {
+if (window.SolidDevtools$$) {
   notify()
 } else {
-  Object.defineProperty(window, 'Solid$$', {
-    set(v) {
-      if (v === true) notify()
-    },
-  })
+  interceptPropertySet(window, 'SolidDevtools$$', v => v && notify())
 }

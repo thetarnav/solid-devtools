@@ -36,6 +36,38 @@ export function formatTime(d: Date = new Date()): string {
   )
 }
 
+export function interceptPropertySet<TObject extends object, TKey extends keyof TObject>(
+  obj: TObject,
+  key: TKey,
+  cb: (value: TObject[TKey]) => void,
+): void {
+  const descriptor = Object.getOwnPropertyDescriptor(obj, key)
+  if (!descriptor) {
+    let value: TObject[TKey] = obj[key]
+    Object.defineProperty(obj, key, {
+      set(newValue) {
+        value = newValue
+        cb(newValue)
+      },
+      get() {
+        return value
+      },
+    })
+    return
+  }
+  const { set } = descriptor
+  if (!set) return
+  Object.defineProperty(obj, key, {
+    set(value) {
+      cb(value)
+      set.call(this, value)
+    },
+    get() {
+      return descriptor.get?.call(this)
+    },
+  })
+}
+
 // TODO fix this in solid-primitives
 export const asArray = <T>(value: T): (T extends any[] ? T[number] : T)[] =>
   Array.isArray(value) ? (value as any) : [value]

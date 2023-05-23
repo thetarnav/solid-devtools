@@ -57,4 +57,3 @@ export enum ValueItemType {
 }
 
 export const UNKNOWN = 'unknown'
-export const GLOBAL_DEVTOOLS_KEY = 'SolidDevtools$$'
