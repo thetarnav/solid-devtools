@@ -350,25 +350,12 @@ importers:
       '@solid-devtools/shared':
         specifier: workspace:^
         version: link:../shared
-      '@solid-primitives/event-bus':
-        specifier: ^1.0.7
-        version: 1.0.7(solid-js@1.7.5)
-      '@solid-primitives/utils':
-        specifier: ^6.2.0
-        version: 6.2.0(solid-js@1.7.5)
       solid-js:
-        specifier: ^1.7.5
+        specifier: ^1.7.0
         version: 1.7.5
-      type-fest:
-        specifier: ^3.11.0
-        version: 3.11.0
       vite:
-        specifier: ^4.3.8
+        specifier: ^2.2.3 || ^3.0.0 || ^4.0.0
         version: 4.3.8(@types/node@18.16.13)
-    optionalDependencies:
-      solid-start:
-        specifier: ^0.2.26
-        version: 0.2.26(@solidjs/meta@0.28.5)(@solidjs/router@0.8.2)(solid-js@1.7.5)(solid-start-node@0.2.26)(vite@4.3.8)
     devDependencies:
       '@babel/generator':
         specifier: ^7.21.5
@@ -391,6 +378,9 @@ importers:
       '@types/babel__traverse':
         specifier: ^7.18.5
         version: 7.18.5
+      solid-start:
+        specifier: ^0.2.9
+        version: 0.2.26(@solidjs/meta@0.28.5)(@solidjs/router@0.8.2)(solid-js@1.7.5)(solid-start-node@0.2.26)(vite@4.3.8)
 
   packages/overlay:
     dependencies:
