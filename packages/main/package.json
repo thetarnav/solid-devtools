@@ -29,65 +29,62 @@
     "dist"
   ],
   "type": "module",
-  "main": "./dist/index/index.js",
-  "module": "./dist/index/index.js",
-  "types": "./dist/index/index.d.ts",
-  "browser": {
-    "./dist/setup/server.js": "./dist/setup/index.js"
-  },
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
       "import": {
-        "types": "./dist/index/index.d.ts",
-        "default": "./dist/index/index.js"
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
       }
     },
     "./setup": {
       "worker": {
         "import": {
-          "types": "./dist/setup/index.d.ts",
-          "default": "./dist/setup/server.js"
+          "types": "./dist/setup.d.ts",
+          "default": "./dist/setup-noop.js"
         }
       },
       "browser": {
         "development": {
           "import": {
-            "types": "./dist/setup/index.d.ts",
-            "default": "./dist/setup/dev.js"
+            "types": "./dist/setup.d.ts",
+            "default": "./dist/setup.js"
           }
         },
         "import": {
-          "types": "./dist/setup/index.d.ts",
-          "default": "./dist/setup/index.js"
+          "types": "./dist/setup.d.ts",
+          "default": "./dist/setup.js"
         }
       },
       "deno": {
         "import": {
-          "types": "./dist/setup/index.d.ts",
-          "default": "./dist/setup/server.js"
+          "types": "./dist/setup.d.ts",
+          "default": "./dist/setup-noop.js"
         }
       },
       "node": {
         "import": {
-          "types": "./dist/setup/index.d.ts",
-          "default": "./dist/setup/server.js"
+          "types": "./dist/setup.d.ts",
+          "default": "./dist/setup-noop.js"
         }
       },
       "development": {
         "import": {
-          "types": "./dist/setup/index.d.ts",
-          "default": "./dist/setup/dev.js"
+          "types": "./dist/setup.d.ts",
+          "default": "./dist/setup.js"
         }
       },
       "import": {
-        "types": "./dist/setup/index.d.ts",
-        "default": "./dist/setup/index.js"
+        "types": "./dist/setup.d.ts",
+        "default": "./dist/setup.js"
       }
     },
     "./vite": {
       "import": {
-        "types": "./dist/vite/index.d.ts",
-        "default": "./dist/vite/index.js"
+        "types": "./dist/vite.d.ts",
+        "default": "./dist/vite.js"
       }
     },
     "./package.json": "./package.json"
@@ -95,10 +92,10 @@
   "typesVersions": {
     "*": {
       "setup": [
-        "./dist/setup/index.d.ts"
+        "./dist/setup.d.ts"
       ],
       "vite": [
-        "./dist/vite/index.d.ts"
+        "./dist/vite.d.ts"
       ]
     }
   },
