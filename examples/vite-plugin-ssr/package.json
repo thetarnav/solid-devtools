@@ -1,0 +1,13 @@
+{
+  "name": "solid-devtools-example-vite-plugin-ssr",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "solid-devtools": "workspace:^",
+    "vite-plugin-ssr": "0.4.126"
+  }
+}
