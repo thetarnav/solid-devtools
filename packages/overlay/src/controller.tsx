@@ -1,4 +1,4 @@
-import { useDebugger } from '@solid-devtools/debugger'
+import { useDebugger } from '@solid-devtools/debugger/bundled'
 import { createDevtools, DevtoolsProps } from '@solid-devtools/frontend'
 import { onCleanup } from 'solid-js'
 

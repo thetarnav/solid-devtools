@@ -1,13 +1,13 @@
 import '@solid-devtools/debugger/setup'
 
-import { createInternalRoot, useDebugger } from '@solid-devtools/debugger'
+import { createInternalRoot, useDebugger } from '@solid-devtools/debugger/bundled'
 import { Icon, MountIcons } from '@solid-devtools/frontend'
 import { useIsMobile, useIsTouch } from '@solid-devtools/shared/primitives'
 import { warn } from '@solid-devtools/shared/utils'
 import { createBodyCursor } from '@solid-primitives/cursor'
 import { makeEventListener } from '@solid-primitives/event-listener'
 import { clamp, tryOnCleanup } from '@solid-primitives/utils'
-import { batch, Component, ComponentProps, createComputed, createSignal, Show } from 'solid-js'
+import { Component, ComponentProps, Show, batch, createComputed, createSignal } from 'solid-js'
 import { Dynamic, Portal } from 'solid-js/web'
 import { Devtools } from './controller'
 

@@ -26,6 +26,16 @@ pnpm add -D solid-devtools
 
 For the usage guide of the Solid Devtools chrome extension, please refer to the [extension documentation](../extension#Getting-started).
 
+## Type Module
+
+The vite plugin is exported as an **ESM** module, so you need to make sure that you have the `"type": "module"` field in your `package.json`.
+
+```json
+{
+  "type": "module"
+}
+```
+
 ## Vite plugin
 
 The vite plugin is the easiest way to get started with the devtools. It will automatically inject the extension client script to the page and connect the application to the extension.
@@ -44,12 +54,42 @@ import devtools from 'solid-devtools/vite'
 export default defineConfig({
   plugins: [
     devtools({
-      /* additional options */
+      /* features options - all disabled by default */
       autoname: true, // e.g. enable autoname
     }),
     solid(),
   ],
 })
+```
+
+To be able to open the source code of your components in your IDE, you need to enable the component locator. Here is how to do it:
+
+```ts
+// vite.config.ts
+
+devtools({
+  // pass `true` or an object with options
+  locator: {
+    targetIDE: 'vscode',
+    componentLocation: true,
+    jsxLocation: true,
+  },
+})
+```
+
+[**>> Follow this locator guide to know more**](../debugger#using-component-locator)
+
+### Import the devtools runtime
+
+The plugin doesn't automatically import the devtools runtime. You need to import it manually in your application's client-side entry point.
+
+The runtime is important for exposing the devtools API to the extension.
+
+```ts
+// src/index.tsx or src/client-entry.tsx
+
+import 'solid-devtools'
+// or from 'solid-devtools/setup' if you're not using the vite plugin
 ```
 
 ### Options
