@@ -6,14 +6,25 @@ File for utilities, constants and types related to the communication between the
 
 import { log } from '@solid-devtools/shared/utils'
 
+export const DEVTOOLS_ID_PREFIX = '[solid-devtools]_'
+
 export const enum ConnectionName {
-  Content = '[solid-devtools]: Content-Script',
-  Devtools = '[solid-devtools]: Devtools-Script',
-  Popup = '[solid-devtools]: Popup',
-  Panel = '[solid-devtools]: Devtools-Panel',
+  Content = `${DEVTOOLS_ID_PREFIX}Content-Script`,
+  Devtools = `${DEVTOOLS_ID_PREFIX}Devtools-Script`,
+  Popup = `${DEVTOOLS_ID_PREFIX}Popup`,
+  Panel = `${DEVTOOLS_ID_PREFIX}Devtools-Panel`,
 }
 
-export const SOLID_ON_PAGE_MESSAGE = '[solid-devtools]: SOLID_ON_PAGE_MESSAGE'
+export type DetectionState = {
+  Solid: boolean
+  SolidDev: boolean
+  Devtools: boolean
+}
+export const DETECT_MESSAGE = `${DEVTOOLS_ID_PREFIX}DETECT`
+export type DetectEvent = {
+  name: typeof DETECT_MESSAGE
+  state: DetectionState
+}
 
 export function createPortMessanger<
   IM extends { [K in string]: any } = {},
@@ -31,9 +42,9 @@ export function createPortMessanger<
   } = {}
 
   let connected = true
-  import.meta.env.DEV && log(`${port.name.replace('[solid-devtools]: ', '')} port connected.`)
+  import.meta.env.DEV && log(`${port.name.replace(DEVTOOLS_ID_PREFIX, '')} port connected.`)
   port.onDisconnect.addListener(() => {
-    import.meta.env.DEV && log(`${port.name.replace('[solid-devtools]: ', '')} port disconnected.`)
+    import.meta.env.DEV && log(`${port.name.replace(DEVTOOLS_ID_PREFIX, '')} port disconnected.`)
     connected = false
     listeners = {}
     port.onMessage.removeListener(onMessage)
@@ -82,8 +93,9 @@ export type Versions = {
 
 export interface GeneralMessages {
   // client -> content -> devtools.html
+  Detected: DetectionState
+
   // the `string` payload is the main version
-  SolidOnPage: void
   ClientConnected: {
     solid: string | null
     client: string | null

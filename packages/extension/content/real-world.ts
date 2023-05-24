@@ -7,19 +7,33 @@ and then import the debugger script.
 */
 
 import '@solid-devtools/debugger/types'
-import { interceptPropertySet } from '@solid-devtools/shared/utils'
-import { SOLID_ON_PAGE_MESSAGE } from '../src/bridge'
+import { detectSolid, onSolidDevDetect, onSolidDevtoolsDetect } from '@solid-devtools/shared/detect'
+import { DETECT_MESSAGE, DetectEvent, DetectionState } from '../src/bridge'
 
-let notified = false
-function notify() {
-  if (notified) return
-  notified = true
-  postMessage(SOLID_ON_PAGE_MESSAGE, '*')
+const state: DetectionState = {
+  Solid: false,
+  SolidDev: false,
+  Devtools: false,
+}
+
+function postState() {
+  postMessage({ name: DETECT_MESSAGE, state } satisfies DetectEvent, '*')
+}
+
+detectSolid().then(hasSolid => {
+  if (!hasSolid || state.Solid) return
+  state.Solid = true
+  postState()
+})
+
+onSolidDevDetect(() => {
+  state.SolidDev = true
+  state.Solid = true
+  postState()
+})
+
+onSolidDevtoolsDetect(() => {
+  state.Devtools = true
+  postState()
   import('./debugger')
-}
-
-if (window.SolidDevtools$$) {
-  notify()
-} else {
-  interceptPropertySet(window, 'SolidDevtools$$', v => v && notify())
-}
+})

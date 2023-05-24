@@ -24,7 +24,7 @@
   },
   "private": false,
   "sideEffects": false,
-  "main": "./dist/index.cjs",
+  "main": "./dist/index.js",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "type": "module",
@@ -33,22 +33,25 @@
       "import": {
         "types": "./dist/index.d.ts",
         "default": "./dist/index.js"
-      },
-      "require": "./dist/index.cjs"
+      }
     },
     "./utils": {
       "import": {
         "types": "./dist/utils.d.ts",
         "default": "./dist/utils.js"
-      },
-      "require": "./dist/utils.cjs"
+      }
     },
     "./primitives": {
       "import": {
         "types": "./dist/primitives.d.ts",
         "default": "./dist/primitives.js"
-      },
-      "require": "./dist/primitives.cjs"
+      }
+    },
+    "./detect": {
+      "import": {
+        "types": "./dist/detect.d.ts",
+        "default": "./dist/detect.js"
+      }
     }
   },
   "typesVersions": {
@@ -58,6 +61,9 @@
       ],
       "primitives": [
         "./dist/primitives.d.ts"
+      ],
+      "detect": [
+        "./dist/detect.d.ts"
       ]
     }
   },
@@ -74,7 +80,6 @@
     "@solid-primitives/static-store": "^0.0.2",
     "@solid-primitives/styles": "^0.0.108",
     "@solid-primitives/utils": "^6.2.0",
-    "solid-js": "^1.7.5",
-    "type-fest": "^3.11.0"
+    "solid-js": "^1.7.5"
   }
 }

@@ -55,7 +55,7 @@ if (window.SolidDevtools$$) {
 }
 
 if (!DEV || !STORE_DEV) {
-  error('Solid DEV is not enabled')
+  error('SolidJS in not in development mode!')
 } else {
   window.SolidDevtools$$ = {
     Solid: SolidAPI,

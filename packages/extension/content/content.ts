@@ -12,8 +12,8 @@ This script is injected into every page and is responsible for:
 import { error, log } from '@solid-devtools/shared/utils'
 import {
   ConnectionName,
+  DETECT_MESSAGE,
   ForwardPayload,
-  SOLID_ON_PAGE_MESSAGE,
   createPortMessanger,
   forwardMessageToWindow,
   isForwardMessage,
@@ -46,13 +46,11 @@ const { postPortMessage: toBackground, onPortMessage: fromBackground } = createP
   script.type = 'module'
   script.addEventListener('error', err => error('Real world script failed to load.', err))
   document.head.append(script)
-  const handler = (e: MessageEvent) => {
-    if (e.data === SOLID_ON_PAGE_MESSAGE) {
-      toBackground('SolidOnPage')
-      window.removeEventListener('message', handler)
+  window.addEventListener('message', e => {
+    if (e.data && typeof e.data === 'object' && e.data.name === DETECT_MESSAGE) {
+      toBackground('Detected', e.data.state)
     }
-  }
-  window.addEventListener('message', handler)
+  })
 }
 
 fromClient('ClientConnected', versions => {

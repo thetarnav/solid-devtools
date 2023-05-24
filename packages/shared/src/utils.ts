@@ -72,23 +72,6 @@ export function interceptPropertySet<TObject extends object, TKey extends keyof 
 export const asArray = <T>(value: T): (T extends any[] ? T[number] : T)[] =>
   Array.isArray(value) ? (value as any) : [value]
 
-export const createCallbackStack = <A0 = void, A1 = void, A2 = void, A3 = void>(): {
-  push: (...callbacks: ((arg0: A0, arg1: A1, arg2: A2, arg3: A3) => void)[]) => void
-  execute: (arg0: A0, arg1: A1, arg2: A2, arg3: A3) => void
-  clear: VoidFunction
-} => {
-  let stack: Array<(arg0: A0, arg1: A1, arg2: A2, arg3: A3) => void> = []
-  const clear: VoidFunction = () => (stack = [])
-  return {
-    push: (...callbacks) => stack.push(...callbacks),
-    execute(arg0, arg1, arg2, arg3) {
-      stack.forEach(cb => cb(arg0, arg1, arg2, arg3))
-      clear()
-    },
-    clear,
-  }
-}
-
 export function callArrayProp<
   K extends PropertyKey,
   T extends (...args: Args) => void,

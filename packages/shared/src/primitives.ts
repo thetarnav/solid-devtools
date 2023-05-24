@@ -1,23 +1,22 @@
 import { makeEventListener } from '@solid-primitives/event-listener'
 import { createMediaQuery } from '@solid-primitives/media'
 import { createSingletonRoot } from '@solid-primitives/rootless'
-import { AnyFunction, tryOnCleanup } from '@solid-primitives/utils'
+import { AnyFunction, PrimitiveValue, tryOnCleanup } from '@solid-primitives/utils'
 import {
   Accessor,
+  MemoOptions,
+  SignalOptions,
   batch,
   createMemo,
   createSignal,
   getOwner,
-  MemoOptions,
   onCleanup,
-  SignalOptions,
   untrack,
 } from 'solid-js'
-import type { Primitive } from 'type-fest'
 
 export type WritableDeep<T> = 0 extends 1 & T
   ? T
-  : T extends Primitive
+  : T extends PrimitiveValue
   ? T
   : unknown extends T
   ? T

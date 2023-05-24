@@ -1,9 +1,8 @@
 /** @refresh reload */
 
-import { batch, Component, createSignal, Show } from 'solid-js'
+import { Component, ParentComponent, Show, createSignal } from 'solid-js'
 import { render } from 'solid-js/web'
-
-import { ConnectionName, createPortMessanger, once, Versions } from '../src/bridge'
+import { ConnectionName, DetectionState, Versions, createPortMessanger, once } from '../src/bridge'
 
 import './popup.css'
 
@@ -11,30 +10,41 @@ import './popup.css'
 const port = chrome.runtime.connect({ name: ConnectionName.Popup })
 const { onPortMessage: fromBackground } = createPortMessanger(port)
 
-const [solidOnPage, setSolidOnPage] = createSignal(false)
-const [versions, setVersions] = createSignal<Versions>()
-
-once(fromBackground, 'SolidOnPage', () => setSolidOnPage(true))
-
-// "Versions" mean that devtools client is on the page
-once(fromBackground, 'Versions', v => {
-  batch(() => {
-    setVersions(v)
-    setSolidOnPage(true)
-  })
+const [versions, setVersions] = createSignal<Versions | null>(null)
+const [detectionState, setDetectionState] = createSignal<DetectionState>({
+  Solid: false,
+  SolidDev: false,
+  Devtools: false,
 })
 
-const App: Component = () => {
+fromBackground('Detected', setDetectionState)
+once(fromBackground, 'Versions', setVersions)
+
+const DETECTED_TITLES: Record<keyof DetectionState, string> = {
+  Solid: 'Solid',
+  SolidDev: 'Solid development mode',
+  Devtools: 'Solid Devtools setup',
+}
+
+const Detected: ParentComponent<{ name: keyof DetectionState }> = props => {
+  const isDetected = () => detectionState()[props.name]
   return (
     <>
       <div>
-        <p data-detected={!!solidOnPage()}>Solid {solidOnPage() ? 'detected' : 'not detected'}</p>
+        <p data-detected={isDetected()}>
+          {DETECTED_TITLES[props.name]} {isDetected() ? 'detected' : 'not detected'}
+        </p>
       </div>
-      {solidOnPage() && (
-        <div>
-          <p data-detected={!!versions()}>
-            Devtools client {versions() ? 'detected' : 'not detected'}
-          </p>
+      <Show when={isDetected()}>{props.children}</Show>
+    </>
+  )
+}
+
+const App: Component = () => {
+  return (
+    <Detected name="Solid">
+      <Detected name="SolidDev">
+        <Detected name="Devtools">
           <div class="details">
             <Show
               when={versions()}
@@ -62,9 +72,9 @@ const App: Component = () => {
               )}
             </Show>
           </div>
-        </div>
-      )}
-    </>
+        </Detected>
+      </Detected>
+    </Detected>
   )
 }
 
