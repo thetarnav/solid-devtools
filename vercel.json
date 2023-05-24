@@ -1,4 +1,9 @@
 {
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "installCommand": "pnpm i",
+  "buildCommand": "pnpm run build && pnpm -dir examples/sandbox run build",
+  "outputDirectory": "examples/sandbox/dist",
+  "public": true,
   "github": {
     "silent": true
   }
