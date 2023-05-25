@@ -1,5 +1,14 @@
 # solid-devtools
 
+## 0.26.1
+
+### Patch Changes
+
+- Bump
+- Updated dependencies
+  - @solid-devtools/debugger@0.21.1
+  - @solid-devtools/shared@0.11.1
+
 ## 0.26.0
 
 ### Minor Changes
