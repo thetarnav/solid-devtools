@@ -1,5 +1,6 @@
 {
   "name": "solid-devtools-example-vite-plugin-ssr",
+  "private": true,
   "type": "module",
   "scripts": {
     "dev": "vite",
