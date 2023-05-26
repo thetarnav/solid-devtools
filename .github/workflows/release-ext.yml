@@ -30,7 +30,7 @@ jobs:
           CI: true
 
       - name: Upload & release Extension
-        uses: mnao305/chrome-extension-upload@4
+        uses: mnao305/chrome-extension-upload@v4
         with:
           file-path: packages/extension/dist.zip
           extension-id: kmcfjchnmmaeeagadbhoofajiopoceel
