@@ -16,7 +16,8 @@
     "typecheck": "turbo run typecheck --filter=./packages/*",
     "build-test": "turbo run build test typecheck --filter=./packages/*",
     "format": "prettier -w ./{packages,examples}/**/*.{js,ts,json,css,tsx,jsx} --ignore-path .gitignore",
-    "lint": "eslint --ignore-path .gitignore --max-warnings 0 packages/**/*.{js,ts,tsx,jsx} --rule \"@typescript-eslint/no-unnecessary-type-assertion: off\""
+    "lint": "eslint --ignore-path .gitignore --max-warnings 0 packages/**/*.{js,ts,tsx,jsx} --rule \"@typescript-eslint/no-unnecessary-type-assertion: off\"",
+    "changeset": "changeset"
   },
   "devDependencies": {
     "@changesets/cli": "^2.26.1",
