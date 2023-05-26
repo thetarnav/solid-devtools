@@ -1,5 +1,15 @@
 # @solid-devtools/overlay
 
+## 0.6.1
+
+### Patch Changes
+
+- Bump
+- Updated dependencies
+  - @solid-devtools/debugger@0.21.1
+  - @solid-devtools/frontend@0.8.1
+  - @solid-devtools/shared@0.11.1
+
 ## 0.6.0
 
 ### Minor Changes
