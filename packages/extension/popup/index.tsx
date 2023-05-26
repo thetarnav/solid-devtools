@@ -1,6 +1,6 @@
 /** @refresh reload */
 
-import { Component, ParentComponent, Show, createSignal } from 'solid-js'
+import { Accessor, Component, JSX, Show, createSignal } from 'solid-js'
 import { render } from 'solid-js/web'
 import { ConnectionName, DetectionState, Versions, createPortMessanger, once } from '../src/bridge'
 
@@ -26,7 +26,11 @@ const DETECTED_TITLES: Record<keyof DetectionState, string> = {
   Devtools: 'Solid Devtools setup',
 }
 
-const Detected: ParentComponent<{ name: keyof DetectionState }> = props => {
+const Detected: Component<{
+  name: keyof DetectionState
+  details?: (detected: Accessor<boolean>) => JSX.Element
+  children?: JSX.Element
+}> = props => {
   const isDetected = () => detectionState()[props.name]
   return (
     <>
@@ -34,8 +38,9 @@ const Detected: ParentComponent<{ name: keyof DetectionState }> = props => {
         <p data-detected={isDetected()}>
           {DETECTED_TITLES[props.name]} {isDetected() ? 'detected' : 'not detected'}
         </p>
+        {props.details && <div class="details">{props.details(isDetected)}</div>}
       </div>
-      <Show when={isDetected()}>{props.children}</Show>
+      {isDetected() && props.children}
     </>
   )
 }
@@ -44,36 +49,39 @@ const App: Component = () => {
   return (
     <Detected name="Solid">
       <Detected name="SolidDev">
-        <Detected name="Devtools">
-          <div class="details">
-            <Show
-              when={versions()}
-              keyed
-              fallback={
-                <>
-                  Devtools extension requires a runtime client to be installed. Please follow the{' '}
-                  <a
-                    href="https://github.com/thetarnav/solid-devtools/tree/main/packages/extension#getting-started"
-                    target="_blank"
-                  >
-                    installation instructions
-                  </a>
-                  .
-                </>
-              }
-            >
-              {v => (
-                <ul>
-                  <li>Solid: {v.solid}</li>
-                  <li>Extension: {v.extension}</li>
-                  <li>Client: {v.client}</li>
-                  <li>Expected client: {v.expectedClient}</li>
-                </ul>
-              )}
+        <Detected
+          name="Devtools"
+          details={detected => (
+            <Show when={!detected()}>
+              <p>
+                Devtools extension requires a runtime client to be installed.
+                <br />
+                Please follow the{' '}
+                <a
+                  href="https://github.com/thetarnav/solid-devtools/tree/main/packages/extension#getting-started"
+                  target="_blank"
+                >
+                  installation instructions
+                </a>
+                .
+              </p>
             </Show>
-          </div>
-        </Detected>
+          )}
+        />
       </Detected>
+      <Show when={versions()} keyed>
+        {v => (
+          <div class="versions">
+            <p>Versions:</p>
+            <ul>
+              <li>Solid: {v.solid || 'unknown'}</li>
+              <li>Extension: {v.extension}</li>
+              <li>Client: {v.client || 'unknown'}</li>
+              <li>Expected client: {v.expectedClient}</li>
+            </ul>
+          </div>
+        )}
+      </Show>
     </Detected>
   )
 }
