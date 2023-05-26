@@ -2,8 +2,8 @@ import { Icon, Splitter } from '@/ui'
 import { Menu, MenuItem, Popover, PopoverButton, PopoverPanel } from 'solid-headless'
 import { Component, JSX, Show } from 'solid-js'
 import * as styles from './App.css'
-import StructureView from './modules/structure/Structure'
 import { createSidePanel } from './SidePanel'
+import StructureView from './modules/structure/Structure'
 
 // const MainViewTabs: Component = () => {
 //   const { view } = useController()

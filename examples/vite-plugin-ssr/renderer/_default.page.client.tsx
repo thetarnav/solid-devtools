@@ -1,13 +1,13 @@
 export const clientRouting = true
 export { render }
 
-import { hydrate, render as render_ } from "solid-js/web"
-import { PageLayout } from "./PageLayout"
-import type { PageContextBuiltInClientWithClientRouting as PageContextBuiltInClient } from "vite-plugin-ssr/types"
-import type { PageContext } from "./types"
-import { createStore, reconcile } from "solid-js/store"
+import { createStore, reconcile } from 'solid-js/store'
+import { hydrate, render as render_ } from 'solid-js/web'
+import type { PageContextBuiltInClientWithClientRouting as PageContextBuiltInClient } from 'vite-plugin-ssr/types'
+import { PageLayout } from './PageLayout'
+import type { PageContext } from './types'
 
-import "solid-devtools"
+import 'solid-devtools'
 
 type PageContextClient = PageContextBuiltInClient & PageContext
 
@@ -25,7 +25,7 @@ async function render(pageContext: PageContextClient) {
 
     setPageContext(pageContext)
 
-    const container = document.getElementById("page-view")!
+    const container = document.getElementById('page-view')!
     if (pageContext.isHydration) {
       dispose = hydrate(() => <PageLayout pageContext={pageContextStore} />, container)
     } else {

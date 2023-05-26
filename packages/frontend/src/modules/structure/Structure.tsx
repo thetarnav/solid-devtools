@@ -8,24 +8,24 @@ import { defer } from '@solid-primitives/utils'
 import { assignInlineVars } from '@vanilla-extract/dynamic'
 import {
   Component,
+  For,
+  Setter,
   createContext,
   createEffect,
   createMemo,
   createSignal,
-  For,
-  Setter,
   useContext,
 } from 'solid-js'
 import type { Structure } from '.'
 import createStructure from '.'
-import { OwnerNode } from './owner-node'
 import { OwnerPath } from './Path'
+import { OwnerNode } from './owner-node'
 import * as styles from './structure.css'
 import { getVirtualVars } from './virtual'
 
 const StructureContext = createContext<Structure.Module>()
 
-export function useStructure ()  {
+export function useStructure() {
   const ctx = useContext(StructureContext)
   if (!ctx) throw new Error('Structure context not found')
   return ctx

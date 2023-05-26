@@ -6,7 +6,7 @@ import { getPositionInElement } from '@solid-primitives/mouse'
 import { scheduleIdle } from '@solid-primitives/scheduled'
 import { useRemSize } from '@solid-primitives/styles'
 import { clamp } from '@solid-primitives/utils'
-import { batch, createComputed, createMemo, createSignal, Index, JSX } from 'solid-js'
+import { Index, JSX, batch, createComputed, createMemo, createSignal } from 'solid-js'
 import * as styles from './Splitter.css'
 
 export type PanelProps = { children: JSX.Element }

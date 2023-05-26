@@ -1,11 +1,11 @@
 import './reset.css'
 
+export { NodeName, NodeTypeIcon, OwnerName, createHighlightedOwnerName } from './components/Owner'
 export * from './components/badge/Badge'
 export * from './components/button/Button'
 export * from './components/error-overlay/ErrorOverlay'
 export * from './components/highlight/Highlight'
 export { Skeleton } from './components/loading/Skeleton'
-export { createHighlightedOwnerName, NodeName, NodeTypeIcon, OwnerName } from './components/Owner'
 export { Scrollable } from './components/scrollable/Scrollable'
 export * as Splitter from './components/splitter/Splitter'
 export { ToggleTabs } from './components/toggle-tabs/ToggleTabs'

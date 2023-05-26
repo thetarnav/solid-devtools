@@ -1,6 +1,6 @@
 import { createJSXParser, createToken, resolveTokens } from '@solid-primitives/jsx-parser'
 import clsx from 'clsx'
-import { Component, createSelector, For, JSX } from 'solid-js'
+import { Component, For, JSX, createSelector } from 'solid-js'
 import * as styles from './toggle-tabs.css'
 
 export type ToggleTabsOptionProps<T> = (T extends string

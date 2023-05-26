@@ -1,7 +1,7 @@
 import { Icon } from '@/ui'
 import { Component, JSX, ParentComponent } from 'solid-js'
-import * as styles from './error-overlay.css'
 import { HeadlessErrorOverlay, HeadlessErrorOverlayRenderProps } from './HeadlessErrorOverlay'
+import * as styles from './error-overlay.css'
 
 const RenderErrorOverlay: Component<
   HeadlessErrorOverlayRenderProps & { footer?: JSX.Element }

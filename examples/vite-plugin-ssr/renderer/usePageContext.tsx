@@ -1,7 +1,7 @@
 export { usePageContext }
 export { PageContextProvider }
 
-import { useContext, createContext, type JSX } from 'solid-js'
+import { createContext, useContext, type JSX } from 'solid-js'
 import { type Store } from 'solid-js/store'
 import type { PageContext } from './types'
 
@@ -15,6 +15,7 @@ function PageContextProvider(props: { pageContext: Store<PageContext>; children:
 /** Access the pageContext from any SolidJS component */
 function usePageContext() {
   const pageContext = useContext(Context)
-  if (!pageContext) throw new Error('<PageContextProvider> is needed for being able to use usePageContext()')
+  if (!pageContext)
+    throw new Error('<PageContextProvider> is needed for being able to use usePageContext()')
   return pageContext
 }

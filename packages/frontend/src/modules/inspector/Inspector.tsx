@@ -1,16 +1,16 @@
-import { useController } from '@/controller'
 import { SidePanelCtx } from '@/SidePanel'
+import { useController } from '@/controller'
 import { Badge, Scrollable } from '@/ui'
 import {
-  NodeType,
   NODE_TYPE_NAMES,
+  NodeType,
   PropGetterState,
   ValueType,
 } from '@solid-devtools/debugger/types'
 import { Entries } from '@solid-primitives/keyed'
-import { batch, Component, createMemo, For, JSX, Show, useContext } from 'solid-js'
-import * as styles from './inspector.css'
+import { Component, For, JSX, Show, batch, createMemo, useContext } from 'solid-js'
 import { ValueNode } from './ValueNode'
+import * as styles from './inspector.css'
 
 function ListSignals<T>(props: { when: T; title: JSX.Element; children: JSX.Element }) {
   return (

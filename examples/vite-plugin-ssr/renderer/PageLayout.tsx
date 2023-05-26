@@ -1,11 +1,11 @@
-import type { JSX, Component } from 'solid-js'
-import { Link } from './Link'
-import logo from './logo.svg'
-import './PageLayout.css'
-import { PageContextProvider, usePageContext } from './usePageContext'
-import type { PageContext } from './types'
+import type { Component, JSX } from 'solid-js'
 import type { Store } from 'solid-js/store'
 import { Dynamic } from 'solid-js/web'
+import { Link } from './Link'
+import './PageLayout.css'
+import logo from './logo.svg'
+import type { PageContext } from './types'
+import { PageContextProvider, usePageContext } from './usePageContext'
 
 export { PageLayout }
 
@@ -16,7 +16,7 @@ interface Children {
   children: JSX.Element
 }
 
-const PageLayout: Component<Props> = (props) => {
+const PageLayout: Component<Props> = props => {
   return (
     <PageContextProvider pageContext={props.pageContext}>
       <Layout>
@@ -42,13 +42,13 @@ function Page() {
   )
 }
 
-const Layout: Component<Children> = (props) => {
+const Layout: Component<Children> = props => {
   return (
     <div
       style={{
         display: 'flex',
         'max-width': '900px',
-        margin: 'auto'
+        margin: 'auto',
       }}
     >
       {props.children}
@@ -56,7 +56,7 @@ const Layout: Component<Children> = (props) => {
   )
 }
 
-const Sidebar: Component<Children> = (props) => {
+const Sidebar: Component<Children> = props => {
   return (
     <div
       style={{
@@ -65,7 +65,7 @@ const Sidebar: Component<Children> = (props) => {
         display: 'flex',
         'flex-direction': 'column',
         'align-items': 'center',
-        'line-height': '1.8em'
+        'line-height': '1.8em',
       }}
     >
       {props.children}
@@ -73,14 +73,14 @@ const Sidebar: Component<Children> = (props) => {
   )
 }
 
-const Content: Component<Children> = (props) => {
+const Content: Component<Children> = props => {
   return (
     <div
       style={{
         padding: '20px',
         'padding-bottom': '50px',
         'border-left': '2px solid #eee',
-        'min-height': '100vh'
+        'min-height': '100vh',
       }}
     >
       {props.children}
@@ -93,7 +93,7 @@ const Logo: Component = () => {
     <div
       style={{
         'margin-top': '20px',
-        'margin-bottom': '10px'
+        'margin-bottom': '10px',
       }}
     >
       <a href="/">

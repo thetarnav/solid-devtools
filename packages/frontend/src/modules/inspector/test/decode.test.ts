@@ -7,7 +7,7 @@ import {
   ValueType,
 } from '@solid-devtools/debugger/types'
 import { describe, expect, test } from 'vitest'
-import { DecodedValue, decodeValue, StoreNodeMap } from '../decode'
+import { DecodedValue, StoreNodeMap, decodeValue } from '../decode'
 
 type Expectations = [
   name: string,

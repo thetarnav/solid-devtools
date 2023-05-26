@@ -1,8 +1,8 @@
 import { generateHydrationScript, renderToStream } from 'solid-js/web'
+import { dangerouslySkipEscape, escapeInject, stampPipe } from 'vite-plugin-ssr/server'
 import { PageLayout } from './PageLayout'
-import { escapeInject, dangerouslySkipEscape, stampPipe } from 'vite-plugin-ssr/server'
-import { PageContext } from './types'
 import logoUrl from './logo.svg'
+import { PageContext } from './types'
 
 export { render }
 export { passToClient }
@@ -17,7 +17,8 @@ function render(pageContext: PageContext) {
   // See https://vite-plugin-ssr.com/head
   const { documentProps } = pageContext
   const title = (documentProps && documentProps.title) || 'Vite SSR app'
-  const description = (documentProps && documentProps.description) || 'App using Vite + vite-plugin-ssr'
+  const description =
+    (documentProps && documentProps.description) || 'App using Vite + vite-plugin-ssr'
 
   return escapeInject`<!DOCTYPE html>
     <html lang="en">

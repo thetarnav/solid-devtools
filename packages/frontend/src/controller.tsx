@@ -1,16 +1,16 @@
 import { Debugger, DebuggerModule, DevtoolsMainView, NodeID } from '@solid-devtools/debugger/types'
 import { createContextProvider } from '@solid-primitives/context'
 import { SECOND } from '@solid-primitives/date'
-import { batchEmits, createEventBus, createEventHub, EventBus } from '@solid-primitives/event-bus'
+import { EventBus, batchEmits, createEventBus, createEventHub } from '@solid-primitives/event-bus'
 import { debounce } from '@solid-primitives/scheduled'
 import { defer } from '@solid-primitives/utils'
 import {
+  JSX,
   batch,
   createEffect,
   createMemo,
   createSelector,
   createSignal,
-  JSX,
   onCleanup,
 } from 'solid-js'
 import { App } from './App'

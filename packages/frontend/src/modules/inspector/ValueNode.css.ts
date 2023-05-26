@@ -14,7 +14,7 @@ import {
   transition,
   vars,
 } from '@/ui/theme'
-import { createVar, style, StyleRule } from '@vanilla-extract/css'
+import { StyleRule, createVar, style } from '@vanilla-extract/css'
 
 export const RowHeight = spacing[4.5]
 const RowGap = spacing[0.5]
