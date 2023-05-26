@@ -1,5 +1,24 @@
 # solid-devtools
 
+## 0.27.0
+
+### Minor Changes
+
+- eafea66: Improves autoname plugin option: names will be also added to effects based on the name of function calls / declarations. (#216)
+- 2c7353a: Vite plugin doesn't inject the debugger anymore, it needs to be imported manually. Fixes #233
+- d4a35d7: Breaking Changes!
+
+  Extension will now inject the debugger via content script, insted of loading it from installed node modules. This will allow the extension and debugger to updated without having to update the node modules.
+
+  The debugger needs to be initialized by importing `@solid-devtools/debugger/setup`.
+
+### Patch Changes
+
+- 6836778: Fix extension not showing structure when opened for the first time.
+- Updated dependencies [d4a35d7]
+  - @solid-devtools/debugger@0.22.0
+  - @solid-devtools/shared@0.12.0
+
 ## 0.26.1
 
 ### Patch Changes

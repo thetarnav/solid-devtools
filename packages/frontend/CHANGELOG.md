@@ -1,5 +1,21 @@
 # @solid-devtools/frontend
 
+## 0.9.0
+
+### Minor Changes
+
+- d4a35d7: Breaking Changes!
+
+  Extension will now inject the debugger via content script, insted of loading it from installed node modules. This will allow the extension and debugger to updated without having to update the node modules.
+
+  The debugger needs to be initialized by importing `@solid-devtools/debugger/setup`.
+
+### Patch Changes
+
+- Updated dependencies [d4a35d7]
+  - @solid-devtools/debugger@0.22.0
+  - @solid-devtools/shared@0.12.0
+
 ## 0.8.1
 
 ### Patch Changes
