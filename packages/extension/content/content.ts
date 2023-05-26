@@ -1,23 +1,35 @@
-import { error, log, warn } from '@solid-devtools/shared/utils'
+/*
+
+Constent Script
+
+This script is injected into every page and is responsible for:
+
+- Forwarding messages between the background script and the debugger
+- Injecting the real-world script to detect if solid is on the page (and the debugger if so)
+
+*/
+
+import { error, log } from '@solid-devtools/shared/utils'
 import {
-  forwardMessageToWindow,
+  ConnectionName,
+  DETECT_MESSAGE,
   ForwardPayload,
+  createPortMessanger,
+  forwardMessageToWindow,
   isForwardMessage,
   makeMessageListener,
   makePostMessage,
   startListeningWindowMessages,
-} from 'solid-devtools/bridge'
-import { CONTENT_CONNECTION_NAME, createPortMessanger } from '../src/messanger'
+} from '../src/bridge'
 
-import.meta.env.DEV && log('Content script working.')
+import.meta.env.DEV && log('Content-Script working.')
 
 // @ts-expect-error ?script&module query ensures output in ES module format and only import the script path
-import realWorld from './realWorld?script&module'
+import realWorld from './real-world?script&module'
 
 const extVersion = chrome.runtime.getManifest().version
-const matchingClientVersion = __CLIENT_VERSION__
 
-const port = chrome.runtime.connect({ name: CONTENT_CONNECTION_NAME })
+const port = chrome.runtime.connect({ name: ConnectionName.Content })
 
 let devtoolsOpened = false
 
@@ -34,16 +46,14 @@ const { postPortMessage: toBackground, onPortMessage: fromBackground } = createP
   script.type = 'module'
   script.addEventListener('error', err => error('Real world script failed to load.', err))
   document.head.append(script)
-  const handler = (e: MessageEvent) => {
-    if (e.data === '__SolidOnPage__') {
-      toBackground('SolidOnPage')
-      window.removeEventListener('message', handler)
+  window.addEventListener('message', e => {
+    if (e.data && typeof e.data === 'object' && e.data.name === DETECT_MESSAGE) {
+      toBackground('Detected', e.data.state)
     }
-  }
-  window.addEventListener('message', handler)
+  })
 }
 
-fromClient('ClientConnected', clientVersion => {
+fromClient('ClientConnected', versions => {
   // eslint-disable-next-line no-console
   console.log(
     '🚧 %csolid-devtools%c is in early development! 🚧\nPlease report any bugs to https://github.com/thetarnav/solid-devtools/issues',
@@ -51,31 +61,11 @@ fromClient('ClientConnected', clientVersion => {
     'color: #e38b1b',
   )
 
-  const toVersionTuple = (version: string) =>
-    version.split('.').map(Number) as [number, number, number]
-
-  // warn if the matching adapter version is not the same minor version range as the actual adapter
-  const adapterTuple = toVersionTuple(clientVersion)
-  const wantedTuple = toVersionTuple(matchingClientVersion)
-
-  // match only major and minor version
-  for (let i = 0; i < 2; i++) {
-    if (adapterTuple[i] !== wantedTuple[i]) {
-      warn(
-        `${i === 0 ? 'MAJOR' : 'MINOR'} VERSION MISMATCH!
-Extension version: ${extVersion}
-Client version: ${clientVersion}
-Expected client version: ${matchingClientVersion}
-Please install "solid-devtools@${matchingClientVersion}" in your project`,
-      )
-      break
-    }
-  }
-
   toBackground('Versions', {
-    client: clientVersion,
+    client: versions.client,
+    solid: versions.solid,
     extension: extVersion,
-    expectedClient: matchingClientVersion,
+    expectedClient: import.meta.env.EXPECTED_CLIENT,
   })
 
   fromClient('ResetPanel', () => toBackground('ResetPanel'))

@@ -1,10 +1,11 @@
 import { warn } from '@solid-devtools/shared/utils'
-import { createRoot } from 'solid-js'
-import { clearComponentRegistry } from './componentRegistry'
+import { createRoot, getOwner } from 'solid-js'
+import { clearComponentRegistry } from './component-registry'
 import { NodeType } from './constants'
-import { getSdtId, ObjectType } from './id'
-import { Core, NodeID, Solid } from './types'
-import { getOwner, isSolidRoot, onOwnerCleanup } from './utils'
+import { ObjectType, getSdtId } from './id'
+import SolidAPI from './solid-api'
+import { NodeID, Solid } from './types'
+import { isSolidRoot, onOwnerCleanup } from './utils'
 
 // ROOTS
 // map of all top-roots
@@ -44,23 +45,25 @@ function cleanupRoot(root: Solid.Root): void {
 function changeRootAttachment(root: Solid.Root, newParent: Solid.Owner | null): void {
   let topRoot: Solid.Root | undefined | null
 
-  if (root.sdtAttached) {
-    root.sdtAttached.sdtSubRoots!.splice(root.sdtAttached.sdtSubRoots!.indexOf(root), 1)
-    topRoot = getTopRoot(root.sdtAttached)
-    if (topRoot) OnOwnerNeedsUpdate?.(root.sdtAttached, getSdtId(topRoot, ObjectType.Owner))
+  if (root.attachedTo) {
+    root.attachedTo.sdtSubRoots!.splice(root.attachedTo.sdtSubRoots!.indexOf(root), 1)
+    topRoot = getTopRoot(root.attachedTo)
+    if (topRoot) OnOwnerNeedsUpdate?.(root.attachedTo, getSdtId(topRoot, ObjectType.Owner))
   }
 
   if (newParent) {
-    root.sdtAttached = newParent
+    root.attachedTo = newParent
     if (newParent.sdtSubRoots) newParent.sdtSubRoots.push(root)
     else newParent.sdtSubRoots = [root]
 
     if (topRoot === undefined) topRoot = getTopRoot(newParent)
     if (topRoot) OnOwnerNeedsUpdate?.(newParent, getSdtId(topRoot, ObjectType.Owner))
   } else {
-    delete root.sdtAttached
+    delete root.attachedTo
   }
 }
+
+let InternalRootCount = 0
 
 /**
  * Helps the debugger find and reattach an reactive owner created by `createRoot` to it's detached parent.
@@ -74,8 +77,9 @@ function changeRootAttachment(root: Solid.Root, newParent: Solid.Owner | null): 
  * 	attachDebugger();
  * });
  */
-export function attachDebugger(_owner: Core.Owner = getOwner()!): void {
-  let owner = _owner as Solid.Owner | undefined | null
+export function attachDebugger(owner = SolidAPI.getOwner()): void {
+  if (InternalRootCount) return
+
   if (!owner) return warn('reatachOwner helper should be called synchronously in a reactive owner.')
 
   // find all the roots in the owner tree (walking up the tree)
@@ -140,33 +144,6 @@ export function attachDebugger(_owner: Core.Owner = getOwner()!): void {
 export function unobserveAllRoots(): void {
   RootMap.forEach(r => cleanupRoot(r))
   clearComponentRegistry()
-}
-
-//
-// AFTER CREATE ROOT
-//
-
-let AutoattachEnabled = false
-let InternalRootCount = 0
-/**
- * Listens to `createRoot` calls and attaches debugger to them.
- */
-export function enableRootsAutoattach(): void {
-  if (AutoattachEnabled) return
-  AutoattachEnabled = true
-
-  const autoattach = (root: Core.Owner) => {
-    if (InternalRootCount) return
-    attachDebugger(root)
-  }
-
-  if (typeof window._$afterCreateRoot === 'function') {
-    const old = window._$afterCreateRoot
-    window._$afterCreateRoot = (root: Core.Owner) => {
-      old(root)
-      autoattach(root)
-    }
-  } else window._$afterCreateRoot = autoattach
 }
 
 /**

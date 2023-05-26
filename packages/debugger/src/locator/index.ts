@@ -1,6 +1,6 @@
 import { makeHoverElementListener } from '@solid-devtools/shared/primitives'
 import { warn } from '@solid-devtools/shared/utils'
-import { EmitterEmit, Listen } from '@solid-primitives/event-bus'
+import { EmitterEmit } from '@solid-primitives/event-bus'
 import { makeEventListener } from '@solid-primitives/event-listener'
 import { createKeyHold } from '@solid-primitives/keyboard'
 import { scheduleIdle } from '@solid-primitives/scheduled'
@@ -15,37 +15,35 @@ import {
   runWithOwner,
 } from 'solid-js'
 import type { Debugger } from '../main'
-import * as registry from '../main/componentRegistry'
-import { getObjectById, ObjectType } from '../main/id'
-import { createInternalRoot, enableRootsAutoattach } from '../main/roots'
+import * as registry from '../main/component-registry'
+import { ObjectType, getObjectById } from '../main/id'
+import { createInternalRoot } from '../main/roots'
+import SolidAPI from '../main/solid-api'
 import { NodeID } from '../main/types'
 import { attachElementOverlay } from './ElementOverlay'
 import {
-  getLocationAttr,
-  getSourceCodeData,
-  LocationAttr,
   LocatorComponent,
-  openSourceCode,
+  SourceCodeData,
+  SourceLocation,
   TargetIDE,
   TargetURLFunction,
+  getLocationAttr,
+  getProjectPath,
+  getSourceCodeData,
+  openSourceCode,
 } from './findComponent'
 import { HighlightElementPayload, LocatorOptions } from './types'
 
-export { markComponentLoc } from './markComponent'
+export { parseLocationString } from './findComponent'
 
 export function createLocator(props: {
   emit: EmitterEmit<Debugger.OutputChannels>
-  listenToDebuggerEenable: Listen<boolean>
   locatorEnabled: Accessor<boolean>
   setLocatorEnabledSignal(signal: Accessor<boolean>): void
   onComponentClick(componentId: NodeID, next: VoidFunction): void
 }) {
   const [enabledByPressingSignal, setEnabledByPressingSignal] = createSignal((): boolean => false)
   props.setLocatorEnabledSignal(createMemo(() => enabledByPressingSignal()()))
-
-  props.listenToDebuggerEenable(enabled => {
-    if (!enabled) setDevtoolsTarget(null)
-  })
 
   const [hoverTarget, setHoverTarget] = createSignal<HTMLElement | null>(null)
   const [devtoolsTarget, setDevtoolsTarget] = createSignal<HighlightElementPayload>(null)
@@ -156,7 +154,6 @@ export function createLocator(props: {
    */
   function useLocator(options: LocatorOptions): void {
     runWithOwner(owner, () => {
-      enableRootsAutoattach()
       if (locatorUsed) return warn('useLocator can be called only once.')
       locatorUsed = true
       if (options.targetIDE) targetIDE = options.targetIDE
@@ -167,15 +164,25 @@ export function createLocator(props: {
     })
   }
 
-  function openElementSourceCode(location: LocationAttr, element: HTMLElement | string) {
-    if (!targetIDE) return warn('Please set `targetIDE` it in useLocator options.')
-    const sourceCodeData = getSourceCodeData(location, element)
-    sourceCodeData && openSourceCode(targetIDE, sourceCodeData)
+  // Enable the locator when the options were passed by the vite plugin
+  if (SolidAPI.locatorOptions) {
+    useLocator(SolidAPI.locatorOptions)
   }
 
   return {
     useLocator,
-    setDevtoolsHighlightTarget: (target: HighlightElementPayload) => void setDevtoolsTarget(target),
-    openElementSourceCode,
+    setDevtoolsHighlightTarget(target: HighlightElementPayload) {
+      setDevtoolsTarget(target)
+    },
+    openElementSourceCode(location: SourceLocation, element: SourceCodeData['element']) {
+      if (!targetIDE) return warn('Please set `targetIDE` it in useLocator options.')
+      const projectPath = getProjectPath()
+      if (!projectPath) return warn('projectPath is not set.')
+      openSourceCode(targetIDE, {
+        ...location,
+        projectPath,
+        element,
+      })
+    },
   }
 }

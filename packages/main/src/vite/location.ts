@@ -1,13 +1,14 @@
 import { PluginObj, template } from '@babel/core'
+import { NodePath } from '@babel/traverse'
 import * as t from '@babel/types'
 import {
-  LocationAttr,
   LOCATION_ATTRIBUTE_NAME,
+  LocationAttr,
   WINDOW_PROJECTPATH_PROPERTY,
 } from '@solid-devtools/debugger/types'
 import p from 'path'
-
-export const MARK_COMPONENT_GLOBAL = `_$markComponentLoc`
+import { SET_COMPONENT_LOC, SET_COMPONENT_LOC_LOCAL } from './constants'
+import { importFromRuntime } from './utils'
 
 const cwd = process.cwd()
 
@@ -15,7 +16,7 @@ const projectPathAst = template(`globalThis.${WINDOW_PROJECTPATH_PROPERTY} = %%l
   loc: t.stringLiteral(cwd),
 }) as t.Statement
 
-const buildMarkComponent = template(`globalThis.${MARK_COMPONENT_GLOBAL}(%%loc%%);`) as (
+const buildMarkComponent = template(`${SET_COMPONENT_LOC_LOCAL}(%%loc%%);`) as (
   ...args: Parameters<ReturnType<typeof template>>
 ) => t.Statement
 
@@ -39,6 +40,13 @@ function getNodeLocationAttribute(
 }
 
 let transformCurrentFile = false
+let importedRuntime = false
+
+function importComponentSetter(path: NodePath) {
+  if (importedRuntime) return
+  importFromRuntime(path, SET_COMPONENT_LOC, SET_COMPONENT_LOC_LOCAL)
+  importedRuntime = true
+}
 
 const jsxLocationPlugin: (config: {
   jsx: boolean
@@ -48,6 +56,7 @@ const jsxLocationPlugin: (config: {
   visitor: {
     Program(path, state) {
       transformCurrentFile = false
+      importedRuntime = false
       // target only project files
       if (typeof state.filename !== 'string' || !state.filename.includes(cwd)) return
       transformCurrentFile = true
@@ -78,6 +87,8 @@ const jsxLocationPlugin: (config: {
         const location = getNodeLocationAttribute(path.node, state)
         if (!location) return
 
+        importComponentSetter(path)
+
         path.node.body.body.unshift(buildMarkComponent({ loc: t.stringLiteral(location) }))
       },
       VariableDeclarator(path, state) {
@@ -94,6 +105,8 @@ const jsxLocationPlugin: (config: {
 
         const location = getNodeLocationAttribute(path.node, state)
         if (!location) return
+
+        importComponentSetter(path)
 
         init.body.body.unshift(buildMarkComponent({ loc: t.stringLiteral(location) }))
       },

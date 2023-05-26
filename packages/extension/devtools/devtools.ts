@@ -8,14 +8,13 @@ It connects to the background script.
 */
 
 import { error, log } from '@solid-devtools/shared/utils'
-import { once } from 'solid-devtools/bridge'
+import { ConnectionName, createPortMessanger, once } from '../src/bridge'
 import icons from '../src/icons'
-import { createPortMessanger, DEVTOOLS_CONNECTION_NAME } from '../src/messanger'
 
-log('Devtools script working.')
+log('Devtools-Script working.')
 
 // Create a connection to the background page
-const port = chrome.runtime.connect({ name: DEVTOOLS_CONNECTION_NAME })
+const port = chrome.runtime.connect({ name: ConnectionName.Devtools })
 
 const { onPortMessage: fromBackground } = createPortMessanger(port)
 

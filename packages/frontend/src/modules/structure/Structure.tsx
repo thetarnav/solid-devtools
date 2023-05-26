@@ -25,7 +25,7 @@ import { getVirtualVars } from './virtual'
 
 const StructureContext = createContext<Structure.Module>()
 
-export const useStructure = () => {
+export function useStructure ()  {
   const ctx = useContext(StructureContext)
   if (!ctx) throw new Error('Structure context not found')
   return ctx

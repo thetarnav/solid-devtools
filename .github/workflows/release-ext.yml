@@ -22,16 +22,15 @@ jobs:
           cache: pnpm
 
       - name: Install Dependencies
-        run: pnpm install --no-frozen-lockfile
+        run: pnpm install --ignore-scripts
 
-      - name: Build and Test
-        run: pnpm build-test
+      - name: Build
+        run: pnpm build
         env:
           CI: true
-          VITEST_SEGFAULT_RETRY: 3
 
       - name: Upload & release Extension
-        uses: mnao305/chrome-extension-upload@3.0.0
+        uses: mnao305/chrome-extension-upload@4
         with:
           file-path: packages/extension/dist.zip
           extension-id: kmcfjchnmmaeeagadbhoofajiopoceel

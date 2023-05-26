@@ -8,22 +8,31 @@ import {
   unwrap,
 } from 'solid-js/store'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { getSdtId, ObjectType } from '../../main/id'
-import { getOwner, isSolidStore } from '../../main/utils'
-import { Core, Solid } from '../../types'
-import { observeStoreNode, OnNodeUpdate, setOnStoreNodeUpdate, StoreNodeProperty } from '../store'
+import { ObjectType, getSdtId } from '../../main/id'
+import SolidApi from '../../main/solid-api'
+import { isSolidStore } from '../../main/utils'
+import { Solid } from '../../types'
+import { OnNodeUpdate, StoreNodeProperty, observeStoreNode, setOnStoreNodeUpdate } from '../store'
 
-const getOwnerStore = () =>
-  (Object.values(getOwner()!.sourceMap!).find(s => isSolidStore(s))! as Solid.Store).value
+const { getOwner } = SolidApi
 
-const getNodeProp = (node: Core.Store.StoreNode, prop: string): StoreNodeProperty =>
+const getOwnerStore = () => {
+  const owner = getOwner()
+  if (!owner) throw new Error('No owner')
+  if (!owner.sourceMap) throw new Error('No sourceMap')
+  const store = owner.sourceMap.find(isSolidStore)
+  if (!store) throw new Error('No store')
+  return store.value
+}
+
+const getNodeProp = (node: Solid.StoreNode, prop: string): StoreNodeProperty =>
   `${getSdtId(unwrap(node), ObjectType.StoreNode)}:${prop}`
 
 let mockLAST_ID = 0
 beforeEach(() => {
   mockLAST_ID = 0
 })
-vi.mock('../../main/getId', () => ({ getNewSdtId: () => '#' + mockLAST_ID++ }))
+vi.mock('../../main/get-id', () => ({ getNewSdtId: () => '#' + mockLAST_ID++ }))
 
 type UpdateParams = Parameters<OnNodeUpdate>
 

@@ -1,5 +1,5 @@
 {
-  "name": "solid-devtools-start-example",
+  "name": "solid-devtools-example-start",
   "private": true,
   "scripts": {
     "dev": "solid-start dev",
@@ -9,18 +9,15 @@
   "type": "module",
   "main": "./dist/index.js",
   "devDependencies": {
-    "solid-start-node": "^0.2.20",
-    "typescript": "^4.9.5",
-    "vite": "^4.1.1"
+    "solid-start-node": "^0.2.26"
   },
   "dependencies": {
-    "@solid-devtools/overlay": "workspace:^0.6.1",
-    "@solidjs/meta": "^0.28.2",
-    "@solidjs/router": "^0.7.0",
-    "solid-devtools": "workspace:^0.26.1",
-    "solid-js": "^1.6.10",
-    "solid-start": "^0.2.20",
-    "undici": "^5.18.0"
+    "@solid-devtools/overlay": "workspace:^",
+    "@solidjs/meta": "^0.28.5",
+    "@solidjs/router": "^0.8.2",
+    "solid-devtools": "workspace:^",
+    "solid-start": "^0.2.26",
+    "undici": "^5.22.1"
   },
   "engines": {
     "node": ">=18"

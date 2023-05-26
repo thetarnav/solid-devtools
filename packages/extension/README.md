@@ -43,13 +43,18 @@ yarn add -D solid-devtools
 pnpm add -D solid-devtools
 ```
 
-Both the debugger library and the extension change frequently, often breaking backward compatibility with older versions. This is why need to watch out for version mismatches (will be printed to the console).
+> **Note**
+> The extension will usually require the latest version of the debugger library.
+> As the devtools are in active development, the debugger library and the extension change frequently, often breaking backward compatibility with older versions. This is why need to watch out for version mismatches _(will be printed to the console)_.
 
 ### 3. Add devtools vite plugin
 
-As vite is the default bundler used by solid application and starter, the devtools are currently concerned with supporting only it.
+The task of the vite plugin is to enchance the debugging experience by applying additional transforms to your code. That is the recommended way to use the devtools, but it is not required. You can still use the devtools without the plugin, with only the runtime part, but some features will be missing.
 
-To get the debugger working include the vite plugin from `"solid-devtools/vite"` in your vite config. The [vite plugin](../main#vite-plugin) is a way to configure the transform options and add a debugger script to the page. Enabling transforms is not necessary for the devtools to work, but the debugger script needs to be present to analyze your solid application. Enabling some of the options, such as `"autoname"`, will improve the debugging experience or enable additional features.
+> **Note**
+> As **vite** is the default bundler used by solid application and starter, the devtools are currently concerned with supporting only it.
+
+To get the debugger working include the vite plugin from `"solid-devtools/vite"` in your vite config. Enabling some of the options, such as `"autoname"`, will improve the debugging experience or enable additional features.
 
 ```ts
 // vite.config.ts
@@ -61,7 +66,7 @@ import devtools from 'solid-devtools/vite'
 export default defineConfig({
   plugins: [
     devtools({
-      /* additional options */
+      /* features options - all disabled by default */
       autoname: true, // e.g. enable autoname
     }),
     solid(),
@@ -71,24 +76,18 @@ export default defineConfig({
 
 [**>> More about available transform options**](https://github.com/thetarnav/solid-devtools/tree/main/packages/main#options)
 
-### 4. Using component locator (Optional)
+### 4. Import the devtools runtime
 
-Locator let's you locate components on the page, and go to their source code in your IDE.
+The plugin doesn't automatically import the devtools runtime. You need to import it manually in your application's client-side entry point.
+
+The runtime is important for exposing the devtools API to the extension.
 
 ```ts
-// vite.config.ts
+// src/index.tsx or src/client-entry.tsx
 
-devtools({
-  // pass `true` or an object with options
-  locator: {
-    targetIDE: 'vscode',
-    componentLocation: true,
-    jsxLocation: true,
-  },
-})
+import 'solid-devtools'
+// or from 'solid-devtools/setup' if you're not using the vite plugin
 ```
-
-[**Follow this locator guide to know more**](../debugger#using-component-locator)
 
 ### 5. Run the app and play with the devtools!
 

@@ -38,6 +38,7 @@ function createDebuggerBridge() {
   // Listener of the client events (from the debugger) will be called synchronously under `batch`
   // to make sure that the state is updated before the effect queue is flushed.
   const input = createEventHub<ToEventBusChannels<Debugger.OutputChannels>>($ => ({
+    DebuggerEnabled: batchEmits($()),
     ResetPanel: batchEmits($()),
     InspectedState: batchEmits($()),
     InspectedNodeDetails: batchEmits($()),

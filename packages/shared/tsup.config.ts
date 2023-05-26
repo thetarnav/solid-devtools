@@ -7,6 +7,8 @@ const entryPaths = Object.keys(pkq.exports).map(path =>
 
 export default defineConfig(config => ({
   clean: config.watch ? false : true,
+  target: 'esnext',
+  platform: 'browser',
   dts: { entry: entryPaths },
   format: ['cjs', 'esm'],
   entryPoints: entryPaths,

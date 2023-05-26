@@ -2,15 +2,9 @@
   "$schema": "https://unpkg.com/@changesets/config@2.0.0/schema.json",
   "changelog": "@changesets/cli/changelog",
   "commit": false,
-  "fixed": [],
-  "linked": [],
+  "fixed": [["solid-devtools", "@solid-devtools/extension", "@solid-devtools/overlay"]],
   "access": "public",
   "baseBranch": "main",
   "updateInternalDependencies": "patch",
-  "ignore": [
-    "solid-devtools-clock-example",
-    "solid-devtools-sandbox-example",
-    "solid-devtools-start-example",
-    "solid-devtools-todomvc-example"
-  ]
+  "ignore": ["solid-devtools-example-*"]
 }

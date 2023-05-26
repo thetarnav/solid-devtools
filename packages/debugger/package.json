@@ -1,6 +1,6 @@
 {
   "name": "@solid-devtools/debugger",
-  "version": "0.21.1",
+  "version": "0.22.0-next.0",
   "description": "Debugger of the Solid's reactivity graph — a cornerstone of all solid-devtools.",
   "license": "MIT",
   "author": "Damian Tarnawski <gthetarnav@gmail.com>",
@@ -28,75 +28,45 @@
     "dist"
   ],
   "type": "module",
-  "main": "dist/server.cjs",
-  "module": "dist/server.js",
-  "types": "dist/index.d.ts",
-  "browser": {
-    "./dist/server.cjs": "./dist/index.cjs",
-    "./dist/server.js": "./dist/index.js"
-  },
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "worker": {
-        "import": {
-          "types": "./dist/index.d.ts",
-          "default": "./dist/server.js"
-        },
-        "require": "./dist/server.cjs"
-      },
-      "browser": {
-        "development": {
-          "import": {
-            "types": "./dist/index.d.ts",
-            "default": "./dist/index.js"
-          },
-          "require": "./dist/index.cjs"
-        },
-        "import": {
-          "types": "./dist/index.d.ts",
-          "default": "./dist/server.js"
-        },
-        "require": "./dist/server.cjs"
-      },
-      "deno": {
-        "import": {
-          "types": "./dist/index.d.ts",
-          "default": "./dist/server.js"
-        },
-        "require": "./dist/server.cjs"
-      },
-      "node": {
-        "import": {
-          "types": "./dist/index.d.ts",
-          "default": "./dist/server.js"
-        },
-        "require": "./dist/server.cjs"
-      },
-      "development": {
-        "import": {
-          "types": "./dist/index.d.ts",
-          "default": "./dist/server.js"
-        },
-        "require": "./dist/index.cjs"
-      },
       "import": {
         "types": "./dist/index.d.ts",
-        "default": "./dist/server.js"
-      },
-      "require": "./dist/server.cjs"
+        "default": "./dist/index.js"
+      }
+    },
+    "./bundled": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/bundled.js"
+      }
     },
     "./types": {
       "import": {
         "types": "./dist/types.d.ts",
         "default": "./dist/types.js"
-      },
-      "require": "./dist/types.cjs"
+      }
+    },
+    "./setup": {
+      "import": {
+        "types": "./dist/setup.d.ts",
+        "default": "./dist/setup.js"
+      }
     }
   },
   "typesVersions": {
     "*": {
+      "bundled": [
+        "./dist/index.d.ts"
+      ],
       "types": [
         "./dist/types.d.ts"
+      ],
+      "setup": [
+        "./dist/setup.d.ts"
       ]
     }
   },
@@ -107,19 +77,21 @@
     "typecheck": "tsc --noEmit --paths null"
   },
   "dependencies": {
-    "@solid-devtools/shared": "workspace:^0.11.1",
-    "@solid-primitives/bounds": "^0.0.107",
-    "@solid-primitives/cursor": "^0.0.105",
-    "@solid-primitives/event-bus": "^1.0.0",
-    "@solid-primitives/event-listener": "^2.2.6",
-    "@solid-primitives/keyboard": "^1.0.7",
-    "@solid-primitives/platform": "^0.0.103",
-    "@solid-primitives/scheduled": "^1.2.1",
-    "@solid-primitives/utils": "^5.1.0",
-    "type-fest": "^3.5.7"
+    "@solid-devtools/shared": "workspace:^",
+    "@solid-primitives/bounds": "^0.0.111",
+    "@solid-primitives/cursor": "^0.0.109",
+    "@solid-primitives/event-bus": "^1.0.7",
+    "@solid-primitives/event-listener": "^2.2.13",
+    "@solid-primitives/keyboard": "^1.2.3",
+    "@solid-primitives/platform": "^0.0.105",
+    "@solid-primitives/scheduled": "^1.3.2",
+    "@solid-primitives/static-store": "^0.0.2",
+    "@solid-primitives/utils": "^6.2.0",
+    "solid-js": "^1.7.5",
+    "type-fest": "^3.11.0"
   },
   "peerDependencies": {
-    "solid-js": "^1.6.9"
+    "solid-js": "^1.7.0"
   },
-  "packageManager": "pnpm@7.22.0"
+  "packageManager": "pnpm@8.2.0"
 }

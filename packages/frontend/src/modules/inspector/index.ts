@@ -1,7 +1,6 @@
 import {
   Debugger,
   InspectorUpdateMap,
-  LocationAttr,
   NodeID,
   NodeType,
   PropGetterState,
@@ -12,23 +11,24 @@ import {
 import { handleTupleUpdates } from '@solid-devtools/shared/primitives'
 import { splitOnColon, warn } from '@solid-devtools/shared/utils'
 import { shallowCopy } from '@solid-primitives/immutable'
-import { createStaticStore, defer } from '@solid-primitives/utils'
+import { createStaticStore } from '@solid-primitives/static-store'
+import { defer } from '@solid-primitives/utils'
 import {
+  Setter,
   batch,
   createEffect,
   createMemo,
   createSelector,
   createSignal,
   mergeProps,
-  Setter,
 } from 'solid-js'
 import { Writable } from 'type-fest'
 import type { DebuggerBridge } from '../../controller'
 import {
   DecodedValue,
+  StoreNodeMap,
   decodeValue,
   isObjectType,
-  StoreNodeMap,
   updateCollapsedValue,
 } from './decode'
 
@@ -43,7 +43,7 @@ export namespace Inspector {
 
   export type Signal = ValueItem & {
     readonly type: NodeType.Signal | NodeType.Memo | NodeType.Store
-    readonly name: string
+    readonly name: string | undefined
     readonly id: NodeID
   }
 
@@ -63,7 +63,7 @@ export namespace Inspector {
     readonly signals: { readonly [key: NodeID]: Signal }
     readonly value: ValueItem | null
     readonly props: Props | null
-    readonly location: LocationAttr | null
+    readonly location: string | null
   }
 
   export type Module = ReturnType<typeof createInspector>
@@ -88,7 +88,7 @@ function createValueItem(itemId: ValueItemID, initValue: DecodedValue): Inspecto
 function createSignalItem(
   id: NodeID,
   type: NodeType.Signal | NodeType.Memo | NodeType.Store,
-  name: string,
+  name: string | undefined,
   initValue: DecodedValue,
 ): Inspector.Signal {
   const valueItem = createValueItem(`${ValueItemType.Signal}:${id}`, initValue)
@@ -221,8 +221,9 @@ export default function createInspector({ bridge }: { bridge: DebuggerBridge }) 
 
   bridge.input.InspectedState.listen(newState => {
     batch(() => {
+      const prev = inspected.ownerId
       setInspected(newState)
-      setState({ ...NULL_STATE })
+      if (newState.ownerId !== prev) setState({ ...NULL_STATE })
     })
   })
 
@@ -236,7 +237,7 @@ export default function createInspector({ bridge }: { bridge: DebuggerBridge }) 
       setState({
         name: raw.name,
         type: raw.type,
-        location: raw.location ?? null,
+        location: raw.location?.file ?? null,
         signals: raw.signals.reduce((signals, s) => {
           signals[s.id] = createSignalItem(
             s.id,

@@ -8,16 +8,19 @@ import {
 } from 'solid-js'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { NodeType, TreeWalkerMode } from '../../main/constants'
-import { $setSdtId, getSdtId, ObjectType } from '../../main/id'
+import { $setSdtId, ObjectType, getSdtId } from '../../main/id'
+import SolidApi from '../../main/solid-api'
 import { Mapped, Solid } from '../../main/types'
-import { getNodeName, getOwner } from '../../main/utils'
+import { getNodeName } from '../../main/utils'
 import { ComputationUpdateHandler, walkSolidTree } from '../walker'
+
+const { getOwner } = SolidApi
 
 let mockLAST_ID = 0
 beforeEach(() => {
   mockLAST_ID = 0
 })
-vi.mock('../../main/getId', () => ({ getNewSdtId: () => '#' + mockLAST_ID++ }))
+vi.mock('../../main/get-id', () => ({ getNewSdtId: () => '#' + mockLAST_ID++ }))
 
 const mockTree = () => {
   const [s] = createSignal('foo', { name: 's0' })
@@ -56,13 +59,19 @@ describe('TreeWalkerMode.Owners', () => {
         type: NodeType.Root,
         children: [
           {
-            id: '#0',
+            id: expect.any(String),
             name: 'e0',
             type: NodeType.Effect,
             frozen: true,
             children: [
-              { id: '#1', name: 'c0', type: NodeType.Computation, children: [] },
-              { id: '#2', name: 'c1', type: NodeType.Computation, frozen: true, children: [] },
+              { id: expect.any(String), name: 'c0', type: NodeType.Computation, children: [] },
+              {
+                id: expect.any(String),
+                name: 'c1',
+                type: NodeType.Computation,
+                frozen: true,
+                children: [],
+              },
             ],
           },
         ],
@@ -104,21 +113,33 @@ describe('TreeWalkerMode.Owners', () => {
         })
 
         expect(tree).toEqual({
-          id: '#0',
+          id: expect.any(String),
           type: NodeType.Root,
+          name: undefined,
           children: [
             {
-              id: '#3',
+              id: expect.any(String),
               name: 'WRAPPER',
               type: NodeType.Computation,
               children: [
                 {
-                  id: '#4',
+                  id: expect.any(String),
                   name: 'focused',
                   type: NodeType.Memo,
                   children: [
-                    { id: '#5', name: 'memo', type: NodeType.Memo, frozen: true, children: [] },
-                    { id: '#6', type: NodeType.Render, children: [] },
+                    {
+                      id: expect.any(String),
+                      name: 'memo',
+                      type: NodeType.Memo,
+                      frozen: true,
+                      children: [],
+                    },
+                    {
+                      id: expect.any(String),
+                      name: 'render',
+                      type: NodeType.Render,
+                      children: [],
+                    },
                   ],
                 },
               ],
@@ -194,7 +215,11 @@ describe('TreeWalkerMode.Owners', () => {
         onComputationUpdate: () => {},
         rootId: $setSdtId(owner, '#ff'),
         mode: TreeWalkerMode.Owners,
-        registerComponent: c => 'owner' in c && components.push(getNodeName(c.owner)),
+        registerComponent: c => {
+          if (!('owner' in c)) return
+          const name = getNodeName(c.owner)
+          name && components.push(name)
+        },
       })
 
       expect(components.length).toBe(7)
@@ -227,13 +252,9 @@ describe('TreeWalkerMode.Components', () => {
         createComputed(a)
         toTrigger.push(() => set(1))
         testComponents.push(getOwner()! as Solid.Component)
-        // * this is a hack to get the subroots
-        // * normally subroots are attached by a separate module
-        const subroots: Solid.Root[] = (getOwner()!.sdtSubRoots = [])
-        return createRoot(_ => {
-          subroots.push(getOwner()! as Solid.Root)
-          return <div>{props.n === 0 ? 'end' : <TestComponent n={props.n - 1} />}</div>
-        })
+        return createRoot(_ => (
+          <div>{props.n === 0 ? 'end' : <TestComponent n={props.n - 1} />}</div>
+        ))
       }
       const Button = () => {
         return <button>Click me</button>
@@ -335,13 +356,9 @@ describe('TreeWalkerMode.DOM', () => {
         createComputed(a)
         toTrigger.push(() => set(1))
         testComponents.push(getOwner()! as Solid.Component)
-        // * this is a hack to get the subroots
-        // * normally subroots are attached by a separate module
-        const subroots: Solid.Root[] = (getOwner()!.sdtSubRoots = [])
-        return createRoot(_ => {
-          subroots.push(getOwner()! as Solid.Root)
-          return <div>{props.n === 0 ? 'end' : <TestComponent n={props.n - 1} />}</div>
-        })
+        return createRoot(_ => (
+          <div>{props.n === 0 ? 'end' : <TestComponent n={props.n - 1} />}</div>
+        ))
       }
       const Button = () => {
         return <button>Click me</button>

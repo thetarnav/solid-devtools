@@ -1,19 +1,10 @@
-import path from 'path'
-import { PluginItem, transformAsync } from '@babel/core'
-import {
-  LocatorOptions,
-  MARK_COMPONENT,
-  TargetURLFunction,
-  USE_LOCATOR,
-} from '@solid-devtools/debugger/types'
-// organize-imports-ignore vite import needs to happen before solid-start
-import { PluginOption } from 'vite'
-import type { Options as SolidStartOptions } from 'solid-start/vite/plugin'
-import jsxLocationPlugin, { MARK_COMPONENT_GLOBAL } from './location'
-import namePlugin from './name'
+import type { PluginOption } from 'vite'
 
-const CLIENT_MODULE = 'solid-devtools'
-const INJECT_SCRIPT_ID = '/__solid-devtools'
+import { PluginItem, transformAsync } from '@babel/core'
+import { LocatorOptions, TargetURLFunction } from '@solid-devtools/debugger/types'
+import { Module } from './constants'
+import jsxLocationPlugin from './location'
+import namePlugin from './name'
 
 export type DevtoolsPluginOptions = {
   /** Add automatic name when creating signals, memos, stores, or mutables */
@@ -38,8 +29,10 @@ export type DevtoolsPluginOptions = {
 }
 
 function getFileExtension(filename: string): string {
-  const index = filename.lastIndexOf('.')
-  return index < 0 ? '' : filename.substring(index + 1)
+  const index = filename.indexOf('?')
+  const filenameWithoutQuery = index !== -1 ? filename.slice(0, index) : filename
+  const lastDotIndex = filenameWithoutQuery.lastIndexOf('.')
+  return lastDotIndex !== -1 ? filenameWithoutQuery.slice(lastDotIndex + 1) : ''
 }
 
 // This export is used for configuration.
@@ -62,44 +55,25 @@ export const devtoolsPlugin = (_options: DevtoolsPluginOptions = {}): PluginOpti
 
   let enablePlugin = false
   const projectRoot = process.cwd()
-  let solidStartRootEntry: string | undefined
 
   return {
     name: 'solid-devtools',
     enforce: 'pre',
     configResolved(config) {
       enablePlugin = config.command === 'serve' && config.mode !== 'production'
-
-      if ('solidOptions' in config && typeof config.solidOptions === 'object') {
-        const solidOptions = config.solidOptions as SolidStartOptions
-        solidStartRootEntry = path.normalize(solidOptions.rootEntry)
-      }
-    },
-    transformIndexHtml() {
-      if (enablePlugin)
-        return [
-          {
-            tag: 'script',
-            attrs: { type: 'module', src: INJECT_SCRIPT_ID },
-            injectTo: 'body-prepend',
-          },
-        ]
     },
     resolveId(id) {
-      if (id === INJECT_SCRIPT_ID) return INJECT_SCRIPT_ID
+      if (enablePlugin && id === Module.Main) return Module.Main
     },
     load(id) {
       // Inject runtime debugger script
-      if (!enablePlugin || id !== INJECT_SCRIPT_ID) return
+      if (!enablePlugin || id !== Module.Main) return
 
-      const importPath = JSON.stringify(CLIENT_MODULE)
-
-      let code = `import ${importPath};`
+      let code = `import "${Module.Setup}";`
 
       if (options.locator) {
-        code += `\nimport { ${USE_LOCATOR}, ${MARK_COMPONENT} } from ${importPath};
-    ${USE_LOCATOR}(${JSON.stringify(options.locator)});
-    window.${MARK_COMPONENT_GLOBAL} = ${MARK_COMPONENT};`
+        code += `\nimport { setLocatorOptions } from "${Module.Setup}";
+        setLocatorOptions(${JSON.stringify(options.locator)});`
       }
 
       return code
@@ -110,7 +84,7 @@ export const devtoolsPlugin = (_options: DevtoolsPluginOptions = {}): PluginOpti
 
       const extension = getFileExtension(id)
 
-      if (!['js', 'jsx', 'ts', 'tsx'].includes(extension)) return
+      if (!['mjs', 'cjs', 'cts', 'mts', 'js', 'jsx', 'ts', 'tsx'].includes(extension)) return
 
       const isJSX = extension === 'jsx' || extension === 'tsx'
       const plugins: PluginItem[] = []
@@ -126,11 +100,6 @@ export const devtoolsPlugin = (_options: DevtoolsPluginOptions = {}): PluginOpti
       }
       if (options.autoname) {
         plugins.push(namePlugin)
-      }
-
-      // For solid-start, inject the debugger script before the root entry point
-      if (solidStartRootEntry && path.normalize(id) === solidStartRootEntry) {
-        source = `import ${JSON.stringify(INJECT_SCRIPT_ID)}\n${source}`
       }
 
       if (plugins.length === 0) return { code: source }

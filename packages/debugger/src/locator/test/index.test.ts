@@ -8,7 +8,7 @@ vi.mock('@solid-primitives/platform', () => ({
   },
 }))
 
-const fetchFunction = async () => (await import('../findComponent')).getLocationFromAttribute
+const fetchFunction = async () => (await import('../findComponent')).parseLocationString
 
 describe('locator attribute pasting', () => {
   beforeEach(() => {
@@ -20,7 +20,7 @@ describe('locator attribute pasting', () => {
     const getLocationFromAttribute = await fetchFunction()
 
     expect(getLocationFromAttribute(`Users\\user\\Desktop\\test\\test.tsx:1:0`)).toEqual({
-      filePath: 'Users\\user\\Desktop\\test\\test.tsx',
+      file: 'Users\\user\\Desktop\\test\\test.tsx',
       line: 1,
       column: 0,
     })
@@ -31,7 +31,7 @@ describe('locator attribute pasting', () => {
     const getLocationFromAttribute = await fetchFunction()
 
     expect(getLocationFromAttribute(`/home/username/project/src/App.tsx:10:5`)).toEqual({
-      filePath: '/home/username/project/src/App.tsx',
+      file: '/home/username/project/src/App.tsx',
       line: 10,
       column: 5,
     })

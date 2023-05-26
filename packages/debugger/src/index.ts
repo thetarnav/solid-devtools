@@ -1,39 +1,23 @@
-import { ParentComponent } from 'solid-js'
-import { attachDebugger } from './main/roots'
-
-export const Debugger: ParentComponent = props => {
-  attachDebugger()
-  return props.children
-}
-
-export { markComponentLoc } from './locator'
 export { useDebugger, useLocator } from './main'
 export {
-  attachDebugger,
-  createInternalRoot,
-  enableRootsAutoattach,
-  unobserveAllRoots,
-} from './main/roots'
-export {
+  addSolidUpdateListener,
   interceptComputationRerun,
-  makeSolidUpdateListener,
   makeValueUpdateListener,
   observeValueUpdate,
   removeValueUpdateObserver,
-} from './main/update'
+} from './main/observe'
+export { attachDebugger, createInternalRoot, unobserveAllRoots } from './main/roots'
 export {
-  getFunctionSources,
   getNodeName,
   getNodeType,
-  getOwner,
   getOwnerType,
   isSolidComputation,
   isSolidMemo,
   isSolidOwner,
   isSolidRoot,
+  isSolidSignal,
   isSolidStore,
   lookupOwner,
   onOwnerCleanup,
   onParentCleanup,
 } from './main/utils'
-export * from './types'

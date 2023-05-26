@@ -1,5 +1,5 @@
-import { getNewSdtId } from './getId'
-import { Core, NodeID, Solid } from './types'
+import { getNewSdtId } from './get-id'
+import { NodeID, Solid } from './types'
 
 export const enum ObjectType {
   Owner = 'owner',
@@ -15,7 +15,7 @@ type ValueMap = {
   [ObjectType.Element]: Element
   [ObjectType.Signal]: Solid.Signal
   [ObjectType.Store]: Solid.Store
-  [ObjectType.StoreNode]: Core.Store.StoreNode
+  [ObjectType.StoreNode]: Solid.StoreNode
 }
 
 const WeakIdMap = new WeakMap<ValueMap[ObjectType], NodeID>()

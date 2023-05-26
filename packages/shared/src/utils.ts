@@ -36,26 +36,41 @@ export function formatTime(d: Date = new Date()): string {
   )
 }
 
+export function interceptPropertySet<TObject extends object, TKey extends keyof TObject>(
+  obj: TObject,
+  key: TKey,
+  cb: (value: TObject[TKey]) => void,
+): void {
+  const descriptor = Object.getOwnPropertyDescriptor(obj, key)
+  if (!descriptor) {
+    let value: TObject[TKey] = obj[key]
+    Object.defineProperty(obj, key, {
+      set(newValue) {
+        value = newValue
+        cb(newValue)
+      },
+      get() {
+        return value
+      },
+    })
+    return
+  }
+  const { set } = descriptor
+  if (!set) return
+  Object.defineProperty(obj, key, {
+    set(value) {
+      cb(value)
+      set.call(this, value)
+    },
+    get() {
+      return descriptor.get?.call(this)
+    },
+  })
+}
+
 // TODO fix this in solid-primitives
 export const asArray = <T>(value: T): (T extends any[] ? T[number] : T)[] =>
   Array.isArray(value) ? (value as any) : [value]
-
-export const createCallbackStack = <A0 = void, A1 = void, A2 = void, A3 = void>(): {
-  push: (...callbacks: ((arg0: A0, arg1: A1, arg2: A2, arg3: A3) => void)[]) => void
-  execute: (arg0: A0, arg1: A1, arg2: A2, arg3: A3) => void
-  clear: VoidFunction
-} => {
-  let stack: Array<(arg0: A0, arg1: A1, arg2: A2, arg3: A3) => void> = []
-  const clear: VoidFunction = () => (stack = [])
-  return {
-    push: (...callbacks) => stack.push(...callbacks),
-    execute(arg0, arg1, arg2, arg3) {
-      stack.forEach(cb => cb(arg0, arg1, arg2, arg3))
-      clear()
-    },
-    clear,
-  }
-}
 
 export function callArrayProp<
   K extends PropertyKey,

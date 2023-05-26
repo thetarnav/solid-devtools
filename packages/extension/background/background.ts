@@ -6,23 +6,20 @@ It has to coordinate the communication between the different scripts based on th
 
 */
 
-import { createCallbackStack, error, log } from '@solid-devtools/shared/utils'
+import { error, log } from '@solid-devtools/shared/utils'
 import {
+  ConnectionName,
+  DetectionState,
   ForwardPayload,
-  isForwardMessage,
-  once,
   OnMessageFn,
   PostMessageFn,
   Versions,
-} from 'solid-devtools/bridge'
-import icons from '../src/icons'
-import {
-  CONTENT_CONNECTION_NAME,
   createPortMessanger,
-  DEVTOOLS_CONNECTION_NAME,
-  PANEL_CONNECTION_NAME,
-  POPUP_CONNECTION_NAME,
-} from '../src/messanger'
+  isForwardMessage,
+  once,
+} from '../src/bridge'
+import { EventBus } from '../src/event-bus'
+import icons from '../src/icons'
 
 log('Background script working.')
 
@@ -38,14 +35,12 @@ type TabDataConfig = {
 
 class TabData {
   public connected = true
-  public versions: Versions | undefined
-  public solidOnPage: boolean = false
 
-  private disconnectListeners = createCallbackStack()
+  private disconnectBus = new EventBus()
   private connectListeners = new Set<(toContent: PostMessageFn, fromContent: OnMessageFn) => void>()
 
-  public toContent: PostMessageFn
-  public fromContent: OnMessageFn
+  private toContent: PostMessageFn
+  private fromContent: OnMessageFn
   public forwardToDevtools: (fn: (message: ForwardPayload) => void) => void
   public forwardToClient: (message: ForwardPayload) => void
 
@@ -75,14 +70,42 @@ class TabData {
   }
 
   onContentScriptDisconnect(fn: VoidFunction): void {
-    this.disconnectListeners.push(fn)
+    this.disconnectBus.add(fn)
   }
 
   disconnected() {
     this.connected = false
-    this.disconnectListeners.execute()
+    this.disconnectBus.emit()
+    this.disconnectBus.clear()
     this.forwardToClient = () => {}
     this.forwardToDevtools = () => {}
+  }
+
+  #versions: Versions | undefined
+  #versionsBus = new EventBus<Versions>()
+  onVersions(fn: (versions: Versions) => void) {
+    if (this.#versions) fn(this.#versions)
+    else this.#versionsBus.add(fn)
+  }
+  setVersions(versions: Versions) {
+    this.#versions = versions
+    this.#versionsBus.emit(versions)
+    this.#versionsBus.clear()
+  }
+
+  #detected: DetectionState = {
+    Solid: false,
+    SolidDev: false,
+    Devtools: false,
+  }
+  #detectedListeners = new EventBus<DetectionState>()
+  onDetected(fn: (state: DetectionState) => void) {
+    fn(this.#detected)
+    this.#detectedListeners.add(fn)
+  }
+  detected(state: DetectionState) {
+    this.#detected = state
+    this.#detectedListeners.emit(state)
   }
 }
 
@@ -119,16 +142,16 @@ function handleContentScriptConnection(port: chrome.runtime.Port, tabId: number)
   lastDisconnectedTabId = undefined
   tabDataMap.set(tabId, data)
 
-  // "Versions" from content-script, serves also as a "SolidOnPage" message
+  // "Versions" from content-script
   once(fromContent, 'Versions', v => {
-    data.versions = v
+    data.setVersions(v)
 
     // Change the popup icon to indicate that Solid is present on the page
     chrome.action.setIcon({ tabId, path: icons.normal })
   })
 
-  // "SolidOnPage" from content-script (realWorld)
-  once(fromContent, 'SolidOnPage', () => (data.solidOnPage = true))
+  // "DetectSolid" from content-script (realWorld)
+  fromContent('Detected', state => data.detected(state))
 
   port.onDisconnect.addListener(() => {
     data.disconnected()
@@ -153,70 +176,50 @@ function withTabData(
   fn(data, m)
 }
 
-function handleDevtoolsConnection(port: chrome.runtime.Port) {
-  withTabData(port, (data, { postPortMessage: toDevtools }) => {
-    data.onContentScriptConnect((toContent, fromContent) => {
-      // "Versions" means the devtools client is present
-      if (data.versions) toDevtools('Versions', data.versions)
-      else once(fromContent, 'Versions', v => toDevtools('Versions', v))
-
-      port.onDisconnect.addListener(() => toContent('DevtoolsClosed'))
-    })
-  })
-}
-
-function handlePanelConnection(port: chrome.runtime.Port) {
-  withTabData(port, (data, { postPortMessage: toPanel, onForwardMessage }) => {
-    data.onContentScriptConnect((toContent, fromContent) => {
-      const handleVersions = (v: Versions) => {
-        toPanel('Versions', v)
-        // notify the content script that the devtools panel is ready
-        toContent('DevtoolsOpened')
-      }
-
-      if (data.versions) handleVersions(data.versions)
-      else once(fromContent, 'Versions', handleVersions)
-
-      fromContent('ResetPanel', () => toPanel('ResetPanel'))
-      data.onContentScriptDisconnect(() => toPanel('ResetPanel'))
-
-      // FORWARD MESSAGES FROM and TO CLIENT
-      data.forwardToDevtools(message => {
-        // console.log('Forwarding to panel', message)
-        port.postMessage(message)
-      })
-      onForwardMessage(message => data.forwardToClient(message))
-    })
-  })
-}
-
-function handlePopupConnection(port: chrome.runtime.Port) {
-  withTabData(port, (data, { postPortMessage: toPopup }) => {
-    const { fromContent, versions, solidOnPage } = data
-    if (versions) toPopup('Versions', versions)
-    else if (solidOnPage) {
-      toPopup('SolidOnPage')
-      once(fromContent.bind(data), 'Versions', v => toPopup('Versions', v))
-    } else {
-      once(fromContent.bind(data), 'Versions', v => toPopup('Versions', v))
-      once(fromContent.bind(data), 'SolidOnPage', () => toPopup('SolidOnPage'))
-    }
-  })
-}
-
 chrome.runtime.onConnect.addListener(port => {
   switch (port.name) {
-    case CONTENT_CONNECTION_NAME:
+    case ConnectionName.Content:
       port.sender?.tab?.id && handleContentScriptConnection(port, port.sender.tab.id)
       break
-    case DEVTOOLS_CONNECTION_NAME:
-      handleDevtoolsConnection(port)
+
+    case ConnectionName.Devtools:
+      withTabData(port, (data, { postPortMessage: toDevtools }) => {
+        data.onContentScriptConnect(toContent => {
+          // "Versions" means the devtools client is present
+          data.onVersions(v => toDevtools('Versions', v))
+
+          port.onDisconnect.addListener(() => toContent('DevtoolsClosed'))
+        })
+      })
       break
-    case PANEL_CONNECTION_NAME:
-      handlePanelConnection(port)
+
+    case ConnectionName.Panel:
+      withTabData(port, (data, { postPortMessage: toPanel, onForwardMessage }) => {
+        data.onContentScriptConnect((toContent, fromContent) => {
+          data.onVersions(v => {
+            toPanel('Versions', v)
+            // notify the content script that the devtools panel is ready
+            toContent('DevtoolsOpened')
+          })
+
+          fromContent('ResetPanel', () => toPanel('ResetPanel'))
+          data.onContentScriptDisconnect(() => toPanel('ResetPanel'))
+
+          // FORWARD MESSAGES FROM and TO CLIENT
+          data.forwardToDevtools(message => {
+            // console.log('Forwarding to panel', message)
+            port.postMessage(message)
+          })
+          onForwardMessage(message => data.forwardToClient(message))
+        })
+      })
       break
-    case POPUP_CONNECTION_NAME:
-      handlePopupConnection(port)
+
+    case ConnectionName.Popup:
+      withTabData(port, (data, { postPortMessage: toPopup }) => {
+        data.onVersions(v => toPopup('Versions', v))
+        data.onDetected(state => toPopup('Detected', state))
+      })
       break
   }
 })

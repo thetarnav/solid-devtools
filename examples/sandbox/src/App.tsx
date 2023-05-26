@@ -1,5 +1,4 @@
 /* @refresh reload */
-import { unobserveAllRoots } from '@solid-devtools/debugger'
 import {
   Component,
   createComponent,
@@ -11,14 +10,13 @@ import {
   createRoot,
   createSignal,
   ErrorBoundary,
-  onCleanup,
   ParentComponent,
   Setter,
   Show,
   Suspense,
 } from 'solid-js'
 import { createMutable } from 'solid-js/store'
-import { disposeApp } from '.'
+import { disposeApp } from './main'
 import Recursive from './Recursive'
 import { ThemeExample } from './Theme'
 import Todos from './Todos'
@@ -36,22 +34,20 @@ createRoot(dispose => {
   const [count, setCount] = createSignal(0)
   setRootCount = setCount
 
-  createEffect(
-    () => {
-      count()
-      if (count() === 1) {
-        createRoot(dispose => {
-          createEffect(() => count() === 4 && dispose(), undefined, { name: 'eff_2' })
+  function createEffectInRoot(dispose: VoidFunction) {
+    createEffect(() => count() === 4 && dispose(), undefined, {})
 
-          createRoot(_ => {
-            createEffect(() => count(), undefined, { name: 'eff_3' })
-          })
-        })
-      }
-    },
-    undefined,
-    { name: 'eff_1' },
-  )
+    createRoot(_ => {
+      createEffect(() => count())
+    })
+  }
+
+  createEffect(() => {
+    count()
+    if (count() === 1) {
+      createRoot(createEffectInRoot)
+    }
+  }, undefined)
 })
 
 const Button = (props: { text: string; onClick: VoidFunction }) => {
@@ -130,9 +126,7 @@ const Broken: Component = () => {
 const App: Component = () => {
   const [count, setCount] = createSignal(0)
   const [showEven, setShowEven] = createSignal(false)
-  const fnSig = createSignal({
-    fn: () => {},
-  })
+  const fnSig = createSignal({ fn: () => {} }, { equals: (a, b) => a.fn === b.fn })
   const nullSig = createSignal(null)
   const symbolSig = createSignal(Symbol('hello-symbol'))
   const [header, setHeader] = createSignal(
@@ -170,7 +164,7 @@ const App: Component = () => {
 
   const [showBroken, setShowBroken] = createSignal(false)
 
-  return () => (
+  return (
     <>
       {header()}
       {objmemo().subheader}
@@ -187,8 +181,6 @@ const App: Component = () => {
           </Show>
         </div>
         <button onClick={() => disposeApp()}>Dispose whole application</button>
-        <br />
-        <button onClick={unobserveAllRoots}>Unobserve all roots</button>
         <br />
         <button onClick={() => setShowBroken(p => !p)}>
           {showBroken() ? 'Hide' : 'Show'} broken component.
@@ -233,8 +225,8 @@ const App: Component = () => {
 
 const CountingComponent = () => {
   const [count, setCount] = createSignal(0)
-  const interval = setInterval(() => setCount(c => c + 1), 1000)
-  onCleanup(() => clearInterval(interval))
+  // const interval = setInterval(() => setCount(c => c + 1), 1000)
+  // onCleanup(() => clearInterval(interval))
   return <div>Count value is {count()}</div>
 }
 

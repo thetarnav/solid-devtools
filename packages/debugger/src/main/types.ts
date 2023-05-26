@@ -1,6 +1,58 @@
+import type * as SolidAPI from 'solid-js'
+import type { $PROXY, DEV, getListener, getOwner, onCleanup, untrack } from 'solid-js'
+import type * as StoreAPI from 'solid-js/store'
+import type { DEV as STORE_DEV, unwrap } from 'solid-js/store'
+import type * as WebAPI from 'solid-js/web'
 import type { EncodedValue, PropGetterState } from '../inspector/types'
-import type { LocationAttr } from '../locator/findComponent'
+import type { LocatorOptions, SourceLocation } from '../locator/types'
 import { NodeType, ValueItemType } from './constants'
+
+//
+// EXPOSED SOLID API
+//
+
+export const enum DevEventType {
+  RootCreated = 'RootCreated',
+}
+
+export type DevEventDataMap = {
+  [DevEventType.RootCreated]: Solid.Owner
+}
+
+export type StoredDevEvent = {
+  [K in keyof DevEventDataMap]: {
+    timestamp: number
+    type: K
+    data: DevEventDataMap[K]
+  }
+}[keyof DevEventDataMap]
+
+declare global {
+  /** Solid DEV APIs exposed to the debugger by the setup script */
+  var SolidDevtools$$:
+    | {
+        readonly Solid: typeof SolidAPI
+        readonly Store: typeof StoreAPI
+        readonly Web: typeof WebAPI
+        readonly DEV: NonNullable<typeof DEV>
+        readonly getOwner: typeof getOwner
+        readonly getListener: typeof getListener
+        readonly onCleanup: typeof onCleanup
+        readonly $PROXY: typeof $PROXY
+        readonly untrack: typeof untrack
+        readonly STORE_DEV: NonNullable<typeof STORE_DEV>
+        readonly unwrap: typeof unwrap
+        readonly getDevEvents: () => StoredDevEvent[]
+        readonly locatorOptions: LocatorOptions | null
+        readonly versions: {
+          readonly client: string | null
+          readonly solid: string | null
+          readonly expectedSolid: string | null
+        }
+        readonly getOwnerLocation: (owner: Solid.Owner) => string | null
+      }
+    | undefined
+}
 
 // Additional "#" character is added to distinguish NodeID from string
 export type NodeID = `#${string}`
@@ -20,9 +72,10 @@ export const getValueItemId = <T extends ValueItemType>(
 
 export type ValueUpdateListener = (newValue: unknown, oldValue: unknown) => void
 
-export namespace Core {
-  export type Owner = import('solid-js/types/reactive/signal').Owner
-  export type SignalState = import('solid-js/types/reactive/signal').SignalState<unknown>
+export namespace Solid {
+  export type OwnerBase = import('solid-js/types/reactive/signal').Owner
+  export type SourceMapValue = import('solid-js/types/reactive/signal').SourceMapValue
+  export type Signal = import('solid-js/types/reactive/signal').SignalState<unknown>
   export type Computation = import('solid-js/types/reactive/signal').Computation<unknown>
   export type Memo = import('solid-js/types/reactive/signal').Memo<unknown>
   export type RootFunction<T> = import('solid-js/types/reactive/signal').RootFunction<T>
@@ -30,27 +83,40 @@ export namespace Core {
   export type Component = import('solid-js/types/reactive/signal').DevComponent<{
     [key: string]: unknown
   }>
-  export namespace Store {
-    export type StoreNode = import('solid-js/store').StoreNode
-    export type NotWrappable = import('solid-js/store/types/store').NotWrappable
-    export type OnStoreNodeUpdate = import('solid-js/store/types/store').OnStoreNodeUpdate
+
+  export type CatchError = Omit<Computation, 'fn'> & { fn: undefined }
+
+  export type Root = OwnerBase & {
+    attachedTo?: Owner
+    isDisposed?: true
+    isInternal?: true
+
+    context: null
+    fn?: never
+    state?: never
+    updatedAt?: never
+    sources?: never
+    sourceSlots?: never
+    value?: never
+    pure?: never
   }
+
+  export type Owner = Root | Computation | CatchError
+
+  //
+  // STORE
+  //
+
+  export type StoreNode = import('solid-js/store').StoreNode
+  export type NotWrappable = import('solid-js/store/types/store').NotWrappable
+  export type OnStoreNodeUpdate = import('solid-js/store/types/store').OnStoreNodeUpdate
+  export type Store = SourceMapValue & { value: StoreNode }
 }
 
 declare module 'solid-js/types/reactive/signal' {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  interface SignalState<T> {
-    sdtName?: string
-  }
   interface Owner {
-    sdtName?: string
     sdtType?: NodeType
-    sdtSubRoots?: Solid.Root[] | null
-  }
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  interface Computation<Init, Next> {
-    sdtType?: NodeType
-    onValueUpdate?: Record<symbol, ValueUpdateListener>
+    sdtSubRoots?: Solid.Owner[] | null
   }
 }
 
@@ -58,68 +124,9 @@ declare module 'solid-js/types/reactive/signal' {
 // "Signal___" — owner/signals/etc. objects in the Solid's internal owner graph
 //
 
-export namespace Solid {
-  export interface SignalState {
-    graph?: Owner
-    value: unknown
-    observers?: Computation[] | null
-    onValueUpdate?: Record<symbol, ValueUpdateListener>
-  }
-
-  export interface Signal extends Core.SignalState, SignalState {
-    graph?: Owner
-    value: unknown
-    observers: Computation[] | null
-  }
-
-  export type OnStoreNodeUpdate = Core.Store.OnStoreNodeUpdate & {
-    storePath: readonly (string | number)[]
-    storeSymbol: symbol
-  }
-
-  export interface Store {
-    value: Core.Store.StoreNode
-  }
-
-  export interface Root extends Core.Owner {
-    owned: Computation[] | null
-    owner: Owner | null
-    sourceMap?: Record<string, Signal | Store>
-    // Used by the debugger
-    isDisposed?: boolean
-    // TODO: remove
-    sdtAttached?: Owner
-    isInternal?: true
-    // Computation compatibility
-    value?: undefined
-    sources?: undefined
-    fn?: undefined
-    state?: undefined
-    sourceSlots?: undefined
-    updatedAt?: undefined
-    pure?: undefined
-  }
-
-  export interface Computation extends Core.Computation {
-    name: string
-    value: unknown
-    owned: Computation[] | null
-    owner: Owner | null
-    sourceMap?: Record<string, Signal>
-    sources: Signal[] | null
-  }
-
-  export interface Memo extends Signal, Computation {
-    name: string
-  }
-
-  export interface Component extends Memo {
-    props: Record<string, unknown>
-    componentName: string
-    location?: LocationAttr
-  }
-
-  export type Owner = Computation | Root
+export type OnStoreNodeUpdate = Solid.OnStoreNodeUpdate & {
+  storePath: readonly (string | number)[]
+  storeSymbol: symbol
 }
 
 //
@@ -141,7 +148,7 @@ export namespace Mapped {
 
   export interface Signal {
     type: NodeType.Signal | NodeType.Memo | NodeType.Store
-    name: string
+    name?: string
     id: NodeID
     value: EncodedValue[]
   }
@@ -155,13 +162,13 @@ export namespace Mapped {
 
   export interface OwnerDetails {
     id: NodeID
-    name: string
+    name?: string
     type: NodeType
     props?: Props
     signals: Signal[]
     /** for computations */
     value?: EncodedValue[]
     // component with a location
-    location?: LocationAttr
+    location?: SourceLocation
   }
 }

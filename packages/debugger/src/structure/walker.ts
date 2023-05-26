@@ -1,12 +1,13 @@
 import { untrackedCallback } from '@solid-devtools/shared/primitives'
-import type { ComponentRegisterHandler } from '../main/componentRegistry'
+import type { ComponentRegisterHandler } from '../main/component-registry'
 import { NodeType, TreeWalkerMode } from '../main/constants'
-import { getSdtId, ObjectType } from '../main/id'
+import { ObjectType, getSdtId } from '../main/id'
+import { observeComputationUpdate } from '../main/observe'
 import { Mapped, NodeID, Solid } from '../main/types'
-import { observeComputationUpdate } from '../main/update'
 import {
   getComponentRefreshNode,
-  markOwnerName,
+  getNodeName,
+  isObservableComputation,
   markOwnerType,
   resolveElements,
 } from '../main/utils'
@@ -72,8 +73,7 @@ function mapChildren(owner: Solid.Owner, mappedOwner: Mapped.Owner | null): Mapp
         const mappedChild = mapOwner(child, mappedOwner)
         if (mappedChild) children.push(mappedChild)
       } else {
-        if (type !== NodeType.Context && type !== NodeType.Root)
-          observeComputation(child as Solid.Computation, owner)
+        if (isObservableComputation(child)) observeComputation(child, owner)
         children.push.apply(children, mapChildren(child, mappedOwner))
       }
     }
@@ -150,16 +150,8 @@ function mapOwner(
 ): Mapped.Owner | undefined {
   const id = getSdtId(owner, ObjectType.Owner)
   const type = overwriteType ?? markOwnerType(owner)
-  const name =
-    type === NodeType.Component ||
-    type === NodeType.Memo ||
-    type === NodeType.Effect ||
-    type === NodeType.Computation
-      ? markOwnerName(owner)
-      : undefined
-
-  const mapped = { id, type } as Mapped.Owner
-  if (name) mapped.name = name
+  const name = getNodeName(owner)
+  const mapped = { id, type, name } as Mapped.Owner
 
   let resolvedElements: ReturnType<typeof resolveElements> | undefined
 
@@ -188,7 +180,7 @@ function mapOwner(
     RegisterComponent({
       owner: owner as Solid.Component,
       id,
-      name: name!,
+      name,
       elements: (resolvedElements = resolveElements(owner.value)),
     })
 
@@ -201,8 +193,8 @@ function mapOwner(
     }
   }
   // Computation
-  else if (type !== NodeType.Context && type !== NodeType.Root) {
-    observeComputation(owner as Solid.Computation, owner)
+  else if (isObservableComputation(owner)) {
+    observeComputation(owner, owner)
     if (!owner.sources || owner.sources.length === 0) mapped.frozen = true
   }
 

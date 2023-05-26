@@ -68,7 +68,6 @@ function updateNode(
   return node
 }
 
-// eslint-disable-next-line @typescript-eslint/no-shadow
 function reconcileStructure(
   prevRoots: Structure.Node[],
   { removed, updated, partial }: StructureUpdates,

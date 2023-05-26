@@ -1,14 +1,14 @@
 import { FalsyValue } from '@solid-primitives/utils'
-import { unwrap } from 'solid-js/store'
 import { getSdtId, ObjectType } from '../main/id'
+import SolidAPI from '../main/solid-api'
 import { isStoreNode } from '../main/utils'
 import {
-  Core,
   EncodedValue,
   INFINITY,
   NAN,
   NEGATIVE_INFINITY,
   NodeID,
+  Solid,
   UNDEFINED,
   ValueType,
 } from '../types'
@@ -18,7 +18,7 @@ let Deep: boolean
 let List: EncodedValue[]
 let Seen: Map<unknown, number>
 let InStore: boolean
-let HandleStore: ((node: Core.Store.StoreNode, nodeId: NodeID) => void) | FalsyValue
+let HandleStore: ((node: Solid.StoreNode, nodeId: NodeID) => void) | FalsyValue
 let IgnoreNextSeen: boolean
 
 const encodeNonObject = (value: unknown): EncodedValue => {
@@ -72,7 +72,7 @@ function encode(value: unknown): number {
   // Store Nodes
   else if (!ignoreNextStore && isStoreNode(value)) {
     // might still pass in a proxy
-    const node = unwrap(value)
+    const node = SolidAPI.unwrap(value)
     // set unwrapped as seen as well
     if (node !== value) Seen.set(node, index)
     const id = getSdtId(node, ObjectType.StoreNode)

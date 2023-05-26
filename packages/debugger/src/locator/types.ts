@@ -3,7 +3,13 @@ import type { KbdKey } from '@solid-primitives/keyboard'
 import type { NodeID } from '../main/types'
 import type { TargetIDE, TargetURLFunction } from './findComponent'
 
-export type { LocationAttr, LocatorComponent, TargetIDE, TargetURLFunction } from './findComponent'
+export type {
+  LocationAttr,
+  LocatorComponent,
+  SourceLocation,
+  TargetIDE,
+  TargetURLFunction,
+} from './findComponent'
 
 export type LocatorOptions = {
   /** Choose in which IDE the component source code should be revealed. */
@@ -23,5 +29,3 @@ export type HighlightElementPayload = ToDyscriminatedUnion<{
 // used by the transform
 export const WINDOW_PROJECTPATH_PROPERTY = '$sdt_projectPath'
 export const LOCATION_ATTRIBUTE_NAME = 'data-source-loc'
-export const MARK_COMPONENT = `markComponentLoc`
-export const USE_LOCATOR = `useLocator`

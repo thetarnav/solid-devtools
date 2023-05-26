@@ -118,18 +118,20 @@ const ElementOverlay: Component<ElementOverlayProps> = props => {
         }}
       >
         <div class="border" />
-        <Show when={!!props.name}>
-          <div class={`name-container ${placeOnTop() ? 'top' : 'bottom'}`}>
-            <div class="name-animated-container">
-              <div class="name-background"></div>
-              <div class="name-text">
-                {props.name}: <span>{props.tag}</span>
-              </div>
-              <div class="name-invisible">
-                {props.name}: {props.tag}
+        <Show when={props.name}>
+          {name => (
+            <div class={`name-container ${placeOnTop() ? 'top' : 'bottom'}`}>
+              <div class="name-animated-container">
+                <div class="name-background"></div>
+                <div class="name-text">
+                  {name()}: <span>{props.tag}</span>
+                </div>
+                <div class="name-invisible">
+                  {name()}: {props.tag}
+                </div>
               </div>
             </div>
-          </div>
+          )}
         </Show>
       </div>
     </>
