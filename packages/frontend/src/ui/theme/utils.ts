@@ -101,7 +101,7 @@ export const transition = (
   delay: Property.TransitionDelay = theme.duration[0],
   easing: Property.TransitionTimingFunction = theme.easing.DEFAULT,
 ): StyleRule => ({
-  transitionProperty: property,
+  transitionProperty: Array.isArray(property) ? property.join(', ') : property,
   transitionDuration: duration,
   transitionDelay: delay,
   transitionTimingFunction: easing,

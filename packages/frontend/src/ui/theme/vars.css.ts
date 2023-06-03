@@ -3,9 +3,17 @@ import { color, dark, hexToRgbValue, media, spacing } from './theme.css'
 
 export const vars = {
   panel: {
+    1: createVar(),
+    2: createVar(),
+    3: createVar(),
+    4: createVar(),
+    5: createVar(),
+    6: createVar(),
+    7: createVar(),
+    8: createVar(),
+
     bg: createVar(),
     border: createVar(),
-    lightBorder: createVar(),
     headerHeight: spacing[7],
   },
   grayHighlight: {
@@ -24,9 +32,17 @@ export const vars = {
 
 export const varsStyle = style({
   vars: {
+    [vars.panel[1]]: color.gray[100],
+    [vars.panel[2]]: color.gray[200],
+    [vars.panel[3]]: color.gray[300],
+    [vars.panel[4]]: color.gray[400],
+    [vars.panel[5]]: color.gray[500],
+    [vars.panel[6]]: color.gray[600],
+    [vars.panel[7]]: color.gray[700],
+    [vars.panel[8]]: color.gray[800],
+
     [vars.panel.bg]: color.gray[50],
     [vars.panel.border]: color.gray[300],
-    [vars.panel.lightBorder]: color.gray[200],
 
     [vars.grayHighlight.color]: color.gray[300],
     [vars.grayHighlight.border]: `1px solid ${color.gray[400]}`,
@@ -41,9 +57,17 @@ export const varsStyle = style({
   ...media({
     [dark]: {
       vars: {
+        [vars.panel[1]]: color.gray[800],
+        [vars.panel[2]]: color.gray[700],
+        [vars.panel[3]]: color.gray[600],
+        [vars.panel[4]]: color.gray[500],
+        [vars.panel[5]]: color.gray[400],
+        [vars.panel[6]]: color.gray[300],
+        [vars.panel[7]]: color.gray[200],
+        [vars.panel[8]]: color.gray[100],
+
         [vars.panel.bg]: color.gray[800],
         [vars.panel.border]: color.gray[600],
-        [vars.panel.lightBorder]: color.gray[700],
 
         [vars.grayHighlight.color]: color.gray[600],
         [vars.grayHighlight.border]: `1px solid ${color.gray[500]}`,

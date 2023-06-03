@@ -8,7 +8,7 @@ export const list = style({
 export const tabColor = createVar()
 
 export const item = style({
-  borderRight: borderValue(vars.panel.lightBorder),
+  borderRight: borderValue(vars.panel[2]),
   ':last-child': {
     borderRight: 'unset',
   },

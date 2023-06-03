@@ -71,7 +71,7 @@ export const search = (() => {
   const form = style([
     hoverBgStyle,
     {
-      ...border(vars.panel.lightBorder, 'l', 'r'),
+      ...border(vars.panel[2], 'l', 'r'),
       flexGrow: 1,
       position: 'relative',
       overflow: 'hidden',

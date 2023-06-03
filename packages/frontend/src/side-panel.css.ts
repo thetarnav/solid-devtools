@@ -59,7 +59,7 @@ export const actions = (() => {
 export const tabs = (() => {
   return {
     list: style({
-      ...border(vars.panel.lightBorder, 'l'),
+      ...border(vars.panel[2], 'l'),
       height: '100%',
     }),
   }

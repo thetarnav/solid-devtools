@@ -1,28 +1,18 @@
-import {
-  color,
-  flex,
-  hexToRgb,
-  padding,
-  rounded,
-  spacing,
-  theme,
-  transition,
-  vars,
-} from '@/ui/theme'
+import { color, flex, padding, rounded, spacing, theme, transition, vars } from '@/ui/theme'
 import { createVar, style } from '@vanilla-extract/css'
 
 const gridSize = spacing[10]
 
 export const container = style({
   display: 'flex',
-  background: color.gray[900],
+  background: vars.panel[1],
 })
 
 export const graph = (() => {
   const patternSize = `1px`
-  const patternColor = hexToRgb(color.gray[800], 0.7)
-  const pattern = `${patternColor} 0,
-  ${patternColor} ${patternSize},
+
+  const pattern = `${vars.panel[2]} 0,
+  ${vars.panel[2]} ${patternSize},
   transparent ${patternSize},
   transparent ${gridSize}`
 
@@ -32,43 +22,56 @@ export const graph = (() => {
     padding: `calc(${gridSize} - ${patternSize})`,
     position: 'relative',
     ...flex('column', 'items-start'),
-    background: `repeating-linear-gradient(${pattern}), repeating-linear-gradient(90deg, ${pattern})`,
-    backgroundPosition: `-${patternSize} -${patternSize}`,
+    ':before': {
+      content: '',
+      position: 'absolute',
+      inset: 0,
+      background: `repeating-linear-gradient(${pattern}), repeating-linear-gradient(90deg, ${pattern})`,
+      backgroundPosition: `-${patternSize} -${patternSize}`,
+      opacity: 0.7,
+    },
   })
 })()
 
-const _node = (() => {
+export const { node, depthVar } = (() => {
   const depthVar = createVar('depth')
-
-  const bg = hexToRgb(color.gray[900], 0.8)
   const margin = spacing[2]
 
   return {
     node: style({
+      position: 'relative',
       height: `calc(${gridSize} - ${margin} * 2)`,
       minWidth: `calc(${gridSize} * 2)`,
       transform: `translateX(calc(${depthVar} * ${gridSize}))`,
       margin: margin,
-      ...padding(0, 1.5),
-      ...rounded('md'),
-      backgroundColor: bg,
+      ...padding(0, '0.4rem'), // magic number
       ...flex('items-center'),
-      boxShadow: `0 0 ${margin} ${spacing[1]} ${bg}`,
-      border: `2px solid transparent`,
-      ...transition(['background-color', 'border-color']),
       cursor: 'pointer',
+      ':before': {
+        content: '',
+        position: 'absolute',
+        inset: 0,
+        backgroundColor: vars.panel[1],
+        boxShadow: `0 0 ${margin} ${spacing[1]} ${vars.panel[1]}`,
+        opacity: 0.8,
+        border: `2px solid transparent`,
+        ...rounded('md'),
+        ...transition(['background-color', 'border-color']),
+      },
       selectors: {
         // hovered
-        '&:is(:hover, [data-hovered=true])': {
-          backgroundColor: color.gray[800],
+        '&:is(:hover, [data-hovered=true]):before': {
+          backgroundColor: vars.panel[2],
         },
         // inspected
         '&[data-inspected=true]': {
-          borderColor: color.gray[300],
           cursor: 'default',
         },
+        '&[data-inspected=true]:before': {
+          borderColor: color.gray[300],
+        },
         // not inspected
-        '&:not([data-inspected=true]):active': {
+        '&:not([data-inspected=true]):active:before': {
           borderColor: color.gray[500],
         },
       },
@@ -76,7 +79,6 @@ const _node = (() => {
     depthVar,
   }
 })()
-export const { node, depthVar } = _node
 
 export const lengthVar = createVar('length')
 
