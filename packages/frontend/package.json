@@ -62,13 +62,13 @@
     "clsx": "^1.2.1",
     "csstype": "^3.1.2",
     "solid-headless": "^0.13.1",
-    "solid-js": "^1.7.5",
-    "type-fest": "^3.11.0"
+    "solid-js": "^1.7.6",
+    "type-fest": "^3.11.1"
   },
   "devDependencies": {
     "@vanilla-extract/esbuild-plugin": "^2.2.2",
     "autoprefixer": "^10.4.14",
-    "postcss": "^8.4.23"
+    "postcss": "^8.4.24"
   },
   "peerDependencies": {
     "solid-js": "^1.7.0"

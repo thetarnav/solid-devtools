@@ -80,6 +80,6 @@
     "@solid-primitives/static-store": "^0.0.2",
     "@solid-primitives/styles": "^0.0.108",
     "@solid-primitives/utils": "^6.2.0",
-    "solid-js": "^1.7.5"
+    "solid-js": "^1.7.6"
   }
 }

@@ -61,7 +61,7 @@
     "@solid-devtools/debugger": "workspace:^",
     "@solid-devtools/shared": "workspace:^",
     "@solid-primitives/utils": "^6.2.0",
-    "solid-js": "^1.7.5"
+    "solid-js": "^1.7.6"
   },
   "peerDependencies": {
     "solid-js": "^1.7.0"
