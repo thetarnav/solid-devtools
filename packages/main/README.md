@@ -57,7 +57,11 @@ export default defineConfig({
       /* features options - all disabled by default */
       autoname: true, // e.g. enable autoname
     }),
-    solid(),
+    solid({
+      // currently HMR breaks displaying components
+      // https://github.com/solidjs/solid-refresh/pull/41 will fix this
+      hot: false,
+    }),
   ],
 })
 ```
