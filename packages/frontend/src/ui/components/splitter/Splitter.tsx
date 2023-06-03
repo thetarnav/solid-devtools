@@ -107,4 +107,4 @@ function SplitterRoot(props: { children: JSX.Element }) {
 
 const SplitterPanel = createToken(Parser)
 
-export { SplitterRoot as Root, SplitterPanel as Panel }
+export { SplitterPanel as Panel, SplitterRoot as Root }

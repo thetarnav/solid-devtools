@@ -1,5 +1,4 @@
-export { usePageContext }
-export { PageContextProvider }
+export { PageContextProvider, usePageContext }
 
 import { createContext, useContext, type JSX } from 'solid-js'
 import { type Store } from 'solid-js/store'

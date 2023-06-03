@@ -4,8 +4,7 @@ import { PageLayout } from './PageLayout'
 import logoUrl from './logo.svg'
 import { PageContext } from './types'
 
-export { render }
-export { passToClient }
+export { passToClient, render }
 
 // See https://vite-plugin-ssr.com/data-fetching
 const passToClient = ['pageProps', 'documentProps']
