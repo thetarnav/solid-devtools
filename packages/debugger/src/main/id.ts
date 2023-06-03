@@ -3,7 +3,6 @@ import { NodeID, Solid } from './types'
 
 export const enum ObjectType {
   Owner = 'owner',
-  // eslint-disable-next-line @typescript-eslint/no-shadow
   Element = 'element',
   Signal = 'signal',
   Store = 'store',

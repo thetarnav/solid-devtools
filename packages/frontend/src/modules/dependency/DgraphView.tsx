@@ -84,7 +84,6 @@ function calculateNodeOrder(
   const depthOrder = Array.from(depthGroups.entries()).sort(([a], [b]) => a - b)
   const depthMap: Record<NodeID, number> = {}
   for (let i = 0; i < depthOrder.length; i++) {
-    // eslint-disable-next-line @typescript-eslint/no-shadow
     const ids = depthOrder[i]![1]
     for (const id of ids) depthMap[id] = i
   }

@@ -22,7 +22,6 @@ export const DEFAULT_WALKER_MODE = TreeWalkerMode.Components
 export enum NodeType {
   Root = 'root',
   Component = 'component',
-  // eslint-disable-next-line @typescript-eslint/no-shadow
   Element = 'element',
   Effect = 'effect',
   Render = 'render',

@@ -209,7 +209,6 @@ const DisplayStructureTree: Component = () => {
     )
 
     const nodeList = structure.state().nodeList
-    // eslint-disable-next-line @typescript-eslint/no-shadow
     const collapsedList: Structure.Node[] = []
     const set = collapsed()
 
