@@ -1,5 +1,11 @@
 # @solid-devtools/frontend
 
+## 0.9.1
+
+### Patch Changes
+
+- fd7efbe: Add light-mode styles for the dependency graph view. Closes #242
+
 ## 0.9.0
 
 ### Minor Changes
