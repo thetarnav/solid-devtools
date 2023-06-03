@@ -1,5 +1,12 @@
 # @solid-devtools/overlay
 
+## 0.27.1
+
+### Patch Changes
+
+- Updated dependencies [fd7efbe]
+  - @solid-devtools/frontend@0.9.1
+
 ## 0.27.0
 
 ### Minor Changes
