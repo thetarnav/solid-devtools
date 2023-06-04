@@ -1,5 +1,14 @@
 # @solid-devtools/extension
 
+## 0.27.2
+
+### Patch Changes
+
+- 55f5e3c: Import the debugger using a script tag, instead of a dynamic import,
+  to prevent showing "Failed to load resource: the server responded with a status of 404" errors.
+  Fixes #241
+  - solid-devtools@0.27.2
+
 ## 0.27.1
 
 ### Patch Changes
