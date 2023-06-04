@@ -1,5 +1,6 @@
 /*
 
+A real-world script.
 Debugger Client injected into the inspected page
 
 */

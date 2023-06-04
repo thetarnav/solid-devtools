@@ -1,8 +1,7 @@
 /*
 
-The real-world script will check if solid is on the page,
-notify the content script,
-and then import the debugger script.
+A real-world script that will check if solid is on the page,
+and notify the content script
 
 */
 
@@ -35,5 +34,4 @@ onSolidDevDetect(() => {
 onSolidDevtoolsDetect(() => {
   state.Devtools = true
   postState()
-  import('./debugger')
 })

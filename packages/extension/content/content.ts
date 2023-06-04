@@ -13,6 +13,7 @@ import { error, log } from '@solid-devtools/shared/utils'
 import {
   ConnectionName,
   DETECT_MESSAGE,
+  DetectionState,
   ForwardPayload,
   createPortMessanger,
   forwardMessageToWindow,
@@ -25,7 +26,9 @@ import {
 import.meta.env.DEV && log('Content-Script working.')
 
 // @ts-expect-error ?script&module query ensures output in ES module format and only import the script path
-import realWorld from './real-world?script&module'
+import detectorPath from './detector?script&module'
+// @ts-expect-error ?script&module query ensures output in ES module format and only import the script path
+import debuggerPath from './debugger?script&module'
 
 const extVersion = chrome.runtime.getManifest().version
 
@@ -39,19 +42,33 @@ const toClient = makePostMessage()
 
 const { postPortMessage: toBackground, onPortMessage: fromBackground } = createPortMessanger(port)
 
-{
-  // Evaluate the real-world script to detect if solid is on the page
-  const script = document.createElement('script')
-  script.src = chrome.runtime.getURL(realWorld)
-  script.type = 'module'
-  script.addEventListener('error', err => error('Real world script failed to load.', err))
-  document.head.append(script)
-  window.addEventListener('message', e => {
-    if (e.data && typeof e.data === 'object' && e.data.name === DETECT_MESSAGE) {
-      toBackground('Detected', e.data.state)
-    }
+function loadScriptInRealWorld(path: string): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const script = document.createElement('script')
+    script.src = chrome.runtime.getURL(path)
+    script.type = 'module'
+    script.addEventListener('error', err => reject(err))
+    document.head.append(script)
+    script.addEventListener('load', () => resolve())
   })
 }
+
+loadScriptInRealWorld(detectorPath).catch(() => error('Detector script failed to load.'))
+
+/*
+  Message from ./detector.ts
+*/
+window.addEventListener('message', e => {
+  if (!e.data || typeof e.data !== 'object' || e.data.name !== DETECT_MESSAGE) return
+
+  const state = e.data.state as DetectionState
+
+  toBackground('Detected', state)
+
+  if (state.Devtools) {
+    loadScriptInRealWorld(debuggerPath).catch(() => error('Debugger script failed to load.'))
+  }
+})
 
 fromClient('ClientConnected', versions => {
   // eslint-disable-next-line no-console
