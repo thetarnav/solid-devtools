@@ -127,5 +127,6 @@ const styles = /*css*/ `
 }
 .name-invisible {
   visibility: hidden;
+  width: max-content;
 }
 `
