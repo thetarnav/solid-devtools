@@ -1,7 +1,7 @@
 import type { ToDyscriminatedUnion } from '@solid-devtools/shared/utils'
 import type { KbdKey } from '@solid-primitives/keyboard'
 import type { NodeID } from '../main/types'
-import type { TargetIDE, TargetURLFunction } from './findComponent'
+import type { TargetIDE, TargetURLFunction } from './find-components'
 
 export type {
   LocationAttr,
@@ -9,7 +9,7 @@ export type {
   SourceLocation,
   TargetIDE,
   TargetURLFunction,
-} from './findComponent'
+} from './find-components'
 
 export type LocatorOptions = {
   /** Choose in which IDE the component source code should be revealed. */

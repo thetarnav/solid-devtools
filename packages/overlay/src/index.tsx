@@ -1,13 +1,21 @@
 import '@solid-devtools/debugger/setup'
 
-import { createInternalRoot, useDebugger } from '@solid-devtools/debugger/bundled'
+import { useDebugger } from '@solid-devtools/debugger/bundled'
 import { Icon, MountIcons } from '@solid-devtools/frontend'
 import { useIsMobile, useIsTouch } from '@solid-devtools/shared/primitives'
 import { warn } from '@solid-devtools/shared/utils'
 import { createBodyCursor } from '@solid-primitives/cursor'
 import { makeEventListener } from '@solid-primitives/event-listener'
 import { clamp, tryOnCleanup } from '@solid-primitives/utils'
-import { Component, ComponentProps, Show, batch, createComputed, createSignal } from 'solid-js'
+import {
+  Component,
+  ComponentProps,
+  Show,
+  batch,
+  createComputed,
+  createRoot,
+  createSignal,
+} from 'solid-js'
 import { Dynamic, Portal } from 'solid-js/web'
 import { Devtools } from './controller'
 
@@ -26,11 +34,11 @@ export function attachDevtoolsOverlay(props: ComponentProps<typeof Overlay> = {}
   let dispose: VoidFunction | undefined
 
   setTimeout(() => {
-    createInternalRoot(_dispose => {
+    createRoot(_dispose => {
       dispose = _dispose
       return <Overlay {...props} />
     })
-  })
+  }, 500)
 
   return tryOnCleanup(() => {
     isAlreadyMounted = false

@@ -17,10 +17,9 @@ import {
 import type { Debugger } from '../main'
 import * as registry from '../main/component-registry'
 import { ObjectType, getObjectById } from '../main/id'
-import { createInternalRoot } from '../main/roots'
 import SolidAPI from '../main/solid-api'
 import { NodeID } from '../main/types'
-import { attachElementOverlay } from './ElementOverlay'
+import { createElementsOverlay } from './element-overlay'
 import {
   LocatorComponent,
   SourceCodeData,
@@ -31,10 +30,10 @@ import {
   getProjectPath,
   getSourceCodeData,
   openSourceCode,
-} from './findComponent'
+} from './find-components'
 import { HighlightElementPayload, LocatorOptions } from './types'
 
-export { parseLocationString } from './findComponent'
+export { parseLocationString } from './find-components'
 
 export function createLocator(props: {
   emit: EmitterEmit<Debugger.OutputChannels>
@@ -93,10 +92,7 @@ export function createLocator(props: {
     ),
   )
 
-  // wait a second to let the framework mess with the document before attaching the overlay
-  setTimeout(() => {
-    createInternalRoot(() => attachElementOverlay(highlightedComponents))
-  }, 1000)
+  createElementsOverlay(highlightedComponents)
 
   // notify of component hovered by using the debugger
   createEffect((prev: NodeID | undefined) => {
