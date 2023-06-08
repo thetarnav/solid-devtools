@@ -1,5 +1,13 @@
 # @solid-devtools/logger
 
+## 0.7.1
+
+### Patch Changes
+
+- Updated dependencies [91e34e6]
+- Updated dependencies [74f0614]
+  - @solid-devtools/debugger@0.22.1
+
 ## 0.7.0
 
 ### Minor Changes

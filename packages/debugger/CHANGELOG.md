@@ -1,5 +1,12 @@
 # @solid-devtools/debugger
 
+## 0.22.1
+
+### Patch Changes
+
+- 91e34e6: Fix element-overlay text overflowing
+- 74f0614: Reuse element-overlays between elements to improve performance for large amount of elements.
+
 ## 0.22.0
 
 ### Minor Changes
