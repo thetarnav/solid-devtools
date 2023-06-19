@@ -334,11 +334,7 @@ const DisplayStructureTree: Component = () => {
 
   const keyDownEmitter = createEmitter<Record<string, KeyboardEvent>>()
 
-  function listenToKeyDown(...[key, listener]: Parameters<typeof keyDownEmitter.on>) {
-    return keyDownEmitter.on(key, preventDefault(listener))
-  }
-
-  listenToKeyDown('ArrowDown', () => {
+  keyDownEmitter.on('ArrowDown', () => {
     if (inspectedIndex() >= virtual().nodeList.length - 1) return
     let nodeId: NodeID | undefined
     for (let i = inspectedIndex() + 1; i < virtual().nodeList.length; i++) {
@@ -349,7 +345,7 @@ const DisplayStructureTree: Component = () => {
     if (nodeId) inspector.setInspectedOwner(nodeId)
   })
 
-  listenToKeyDown('ArrowUp', () => {
+  keyDownEmitter.on('ArrowUp', () => {
     if (inspectedIndex() <= 0) return
     let nodeId: NodeID | undefined
     for (let i = inspectedIndex() - 1; i >= 0; i--) {
@@ -360,7 +356,7 @@ const DisplayStructureTree: Component = () => {
     if (nodeId) inspector.setInspectedOwner(nodeId)
   })
 
-  listenToKeyDown('ArrowLeft', () => {
+  keyDownEmitter.on('ArrowLeft', () => {
     setCollapsed(set => {
       const node = virtual().nodeList[inspectedIndex()]!
       if (!set.has(node)) return set.add(virtual().nodeList[inspectedIndex()]!)
@@ -376,7 +372,7 @@ const DisplayStructureTree: Component = () => {
     })
   })
 
-  listenToKeyDown('ArrowRight', () => {
+  keyDownEmitter.on('ArrowRight', () => {
     setCollapsed(set => {
       const node = virtual().nodeList[inspectedIndex()]!
       if (set.delete(node) || node.children.length === 0) return set
@@ -392,7 +388,11 @@ const DisplayStructureTree: Component = () => {
     })
   })
 
-  makeEventListener(document.body, 'keydown', (e: KeyboardEvent) => keyDownEmitter.emit(e.key, e))
+  makeEventListener(
+    document.body,
+    'keydown',
+    preventDefault((e: KeyboardEvent) => keyDownEmitter.emit(e.key, e)),
+  )
 
   let container: HTMLElement
   return (
