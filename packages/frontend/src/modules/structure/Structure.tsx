@@ -1,6 +1,8 @@
 import { useController } from '@/controller'
 import { Icon, Scrollable, ToggleButton, ToggleTabs } from '@/ui'
 import { NodeID, NodeType, TreeWalkerMode } from '@solid-devtools/debugger/types'
+import { createEmitter } from '@solid-primitives/event-bus'
+import { makeEventListener, preventDefault } from '@solid-primitives/event-listener'
 import { createShortcut } from '@solid-primitives/keyboard'
 import { createResizeObserver } from '@solid-primitives/resize-observer'
 import { useRemSize } from '@solid-primitives/styles'
@@ -330,7 +332,13 @@ const DisplayStructureTree: Component = () => {
     })
   })
 
-  ctx.listenToKeyDown('ArrowDown', () => {
+  const keyDownEmitter = createEmitter<Record<string, KeyboardEvent>>()
+
+  function listenToKeyDown(...[key, listener]: Parameters<typeof keyDownEmitter.on>) {
+    return keyDownEmitter.on(key, preventDefault(listener))
+  }
+
+  listenToKeyDown('ArrowDown', () => {
     if (inspectedIndex() >= virtual().nodeList.length - 1) return
     let nodeId: NodeID | undefined
     for (let i = inspectedIndex() + 1; i < virtual().nodeList.length; i++) {
@@ -341,7 +349,7 @@ const DisplayStructureTree: Component = () => {
     if (nodeId) inspector.setInspectedOwner(nodeId)
   })
 
-  ctx.listenToKeyDown('ArrowUp', () => {
+  listenToKeyDown('ArrowUp', () => {
     if (inspectedIndex() <= 0) return
     let nodeId: NodeID | undefined
     for (let i = inspectedIndex() - 1; i >= 0; i--) {
@@ -352,7 +360,7 @@ const DisplayStructureTree: Component = () => {
     if (nodeId) inspector.setInspectedOwner(nodeId)
   })
 
-  ctx.listenToKeyDown('ArrowLeft', () => {
+  listenToKeyDown('ArrowLeft', () => {
     setCollapsed(set => {
       const node = virtual().nodeList[inspectedIndex()]!
       if (!set.has(node)) return set.add(virtual().nodeList[inspectedIndex()]!)
@@ -368,7 +376,7 @@ const DisplayStructureTree: Component = () => {
     })
   })
 
-  ctx.listenToKeyDown('ArrowRight', () => {
+  listenToKeyDown('ArrowRight', () => {
     setCollapsed(set => {
       const node = virtual().nodeList[inspectedIndex()]!
       if (set.delete(node) || node.children.length === 0) return set
@@ -383,6 +391,8 @@ const DisplayStructureTree: Component = () => {
       return set
     })
   })
+
+  makeEventListener(document.body, 'keydown', (e: KeyboardEvent) => keyDownEmitter.emit(e.key, e))
 
   let container: HTMLElement
   return (
