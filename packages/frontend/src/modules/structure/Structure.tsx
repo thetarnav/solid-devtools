@@ -330,6 +330,60 @@ const DisplayStructureTree: Component = () => {
     })
   })
 
+  ctx.listenToKeyDown('ArrowDown', () => {
+    if (inspectedIndex() >= virtual().nodeList.length - 1) return
+    let nodeId: NodeID | undefined
+    for (let i = inspectedIndex() + 1; i < virtual().nodeList.length; i++) {
+      if (virtual().nodeList[i]!.type === NodeType.Element) continue
+      nodeId = virtual().nodeList[i]!.id
+      break
+    }
+    if (nodeId) inspector.setInspectedOwner(nodeId)
+  })
+
+  ctx.listenToKeyDown('ArrowUp', () => {
+    if (inspectedIndex() <= 0) return
+    let nodeId: NodeID | undefined
+    for (let i = inspectedIndex() - 1; i >= 0; i--) {
+      if (virtual().nodeList[i]!.type === NodeType.Element) continue
+      nodeId = virtual().nodeList[i]!.id
+      break
+    }
+    if (nodeId) inspector.setInspectedOwner(nodeId)
+  })
+
+  ctx.listenToKeyDown('ArrowLeft', () => {
+    setCollapsed(set => {
+      const node = virtual().nodeList[inspectedIndex()]!
+      if (!set.has(node)) return set.add(virtual().nodeList[inspectedIndex()]!)
+      let parent = node.parent
+      while (parent) {
+        if (parent.type === NodeType.Element) parent = parent.parent
+        else {
+          inspector.setInspectedOwner(parent.id)
+          break
+        }
+      }
+      return set
+    })
+  })
+
+  ctx.listenToKeyDown('ArrowRight', () => {
+    setCollapsed(set => {
+      const node = virtual().nodeList[inspectedIndex()]!
+      if (set.delete(node) || node.children.length === 0) return set
+      let child = node.children[0]
+      while (child) {
+        if (child.type === NodeType.Element) child = child.children[0]
+        else {
+          inspector.setInspectedOwner(child.id)
+          break
+        }
+      }
+      return set
+    })
+  })
+
   let container: HTMLElement
   return (
     <Scrollable

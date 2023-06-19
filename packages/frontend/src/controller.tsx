@@ -1,7 +1,14 @@
 import { Debugger, DebuggerModule, DevtoolsMainView, NodeID } from '@solid-devtools/debugger/types'
 import { createContextProvider } from '@solid-primitives/context'
 import { SECOND } from '@solid-primitives/date'
-import { EventBus, batchEmits, createEventBus, createEventHub } from '@solid-primitives/event-bus'
+import {
+  EventBus,
+  batchEmits,
+  createEmitter,
+  createEventBus,
+  createEventHub,
+} from '@solid-primitives/event-bus'
+import { makeEventListener, preventDefault } from '@solid-primitives/event-listener'
 import { debounce } from '@solid-primitives/scheduled'
 import { defer } from '@solid-primitives/utils'
 import {
@@ -215,6 +222,10 @@ const [Provider, useControllerCtx] = createContextProvider(
 
     bridge.input.LocatorModeChange.listen(setClientLocatorState)
 
+    const keyDownEmitter = createEmitter<Record<string, KeyboardEvent>>()
+
+    makeEventListener(document.body, 'keydown', (e: KeyboardEvent) => keyDownEmitter.emit(e.key, e))
+
     return {
       locator: {
         locatorEnabled,
@@ -237,6 +248,9 @@ const [Provider, useControllerCtx] = createContextProvider(
       listenToNodeUpdates: nodeUpdates.listen,
       listenToNodeUpdate(id: NodeID, fn: VoidFunction) {
         return nodeUpdates.listen(updatedId => updatedId === id && fn())
+      },
+      listenToKeyDown(...[key, listener]: Parameters<typeof keyDownEmitter.on>) {
+        return keyDownEmitter.on(key, preventDefault(listener))
       },
     }
   },
