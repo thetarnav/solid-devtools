@@ -1,6 +1,7 @@
 import { useController, useDevtoolsOptions } from '@/controller'
 import { Icon, Scrollable, ToggleButton, ToggleTabs } from '@/ui'
 import { NodeID, NodeType, TreeWalkerMode } from '@solid-devtools/debugger/types'
+import { Atom, atom } from '@solid-devtools/shared/primitives'
 import { makeEventListener } from '@solid-primitives/event-listener'
 import { createShortcut } from '@solid-primitives/keyboard'
 import { createResizeObserver } from '@solid-primitives/resize-observer'
@@ -10,7 +11,6 @@ import { assignInlineVars } from '@vanilla-extract/dynamic'
 import {
     Component,
     For,
-    Setter,
     createContext,
     createEffect,
     createMemo,
@@ -141,11 +141,6 @@ const ToggleMode: Component = () => {
     )
 }
 
-type DisplayNode = {
-    node: Structure.Node
-    update: Setter<Structure.Node>
-}
-
 const getFocusedNodeData = (
     list: Structure.Node[],
     start: number,
@@ -234,7 +229,7 @@ const DisplayStructureTree: Component = () => {
         start: number
         end: number
         fullLength: number
-        list: readonly DisplayNode[]
+        list: readonly Atom<Structure.Node>[]
         nodeList: readonly Structure.Node[]
         minLevel: number
     }>((prev = { start: 0, end: 0, fullLength: 0, list: [], nodeList: [], minLevel: 0 }) => {
@@ -244,9 +239,9 @@ const DisplayStructureTree: Component = () => {
 
         if (prev.nodeList === nodeList && prev.start === start && prev.end === end) return prev
 
-        const next: DisplayNode[] = Array(length)
-        const prevMap: Record<NodeID, DisplayNode> = {}
-        for (const node of prev.list) prevMap[node.node.id] = node
+        const next: Atom<Structure.Node>[] = Array(length)
+        const prevMap: Record<NodeID, Atom<Structure.Node>> = {}
+        for (const node of prev.list) prevMap[node.value.id] = node
 
         let minLevel = length ? Infinity : 0
 
@@ -256,15 +251,9 @@ const DisplayStructureTree: Component = () => {
             minLevel = Math.min(minLevel, node.level)
             if (prevDNode) {
                 next[i] = prevDNode
-                prevDNode.update(node)
+                prevDNode.set(node)
             } else {
-                const [getNode, update] = createSignal(node, { equals: false, internal: true })
-                next[i] = {
-                    get node() {
-                        return getNode()
-                    },
-                    update,
-                }
+                next[i] = atom(node)
             }
         }
 
@@ -436,11 +425,11 @@ const DisplayStructureTree: Component = () => {
                 <div class={styles.scrolledInner}>
                     <div class={styles.scrolledInner2}>
                         <For each={virtual().list}>
-                            {data => {
-                                const { id } = data.node
+                            {node => {
+                                const { id } = node.value
                                 return (
                                     <OwnerNode
-                                        owner={data.node}
+                                        owner={node.value}
                                         isHovered={
                                             hovered.isNodeHovered(id) || structure.isSearched(id)
                                         }
@@ -453,7 +442,7 @@ const DisplayStructureTree: Component = () => {
                                         }
                                         onInspectChange={() => inspector.toggleInspectedOwner(id)}
                                         toggleCollapsed={toggleCollapsed}
-                                        isCollapsed={isCollapsed(data.node)}
+                                        isCollapsed={isCollapsed(node.value)}
                                     />
                                 )
                             }}

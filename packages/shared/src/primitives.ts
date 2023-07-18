@@ -1,17 +1,19 @@
 import { makeEventListener } from '@solid-primitives/event-listener'
 import { createMediaQuery } from '@solid-primitives/media'
 import { createSingletonRoot } from '@solid-primitives/rootless'
-import { AnyFunction, PrimitiveValue, tryOnCleanup } from '@solid-primitives/utils'
+import { tryOnCleanup, type AnyFunction, type PrimitiveValue } from '@solid-primitives/utils'
 import {
-    Accessor,
-    MemoOptions,
-    SignalOptions,
     batch,
     createMemo,
     createSignal,
+    equalFn,
     getOwner,
     onCleanup,
     untrack,
+    type Accessor,
+    type MemoOptions,
+    type Setter,
+    type SignalOptions,
 } from 'solid-js'
 
 export type WritableDeep<T> = 0 extends 1 & T
@@ -119,19 +121,41 @@ export function makeHoverElementListener(onHover: (el: HTMLElement | null) => vo
     makeEventListener(document, 'mouseleave', handleHover.bind(void 0, { target: null }))
 }
 
-export type Atom<T> = (<U extends T>(value: (prev: T) => U) => U) &
-    (<U extends T>(value: Exclude<U, Function>) => U) &
-    (<U extends T>(value: Exclude<U, Function> | ((prev: T) => U)) => U) &
-    Accessor<T>
+export type Atom<T> = Accessor<T> & {
+    get value(): T
+    peak(): T
+    set(value: T): T
+    update: Setter<T>
+    mutate(mutator: (value: T) => void): void
+    trigger(): void
+}
 
-export function atom<T>(value: T, options?: SignalOptions<T>): Atom<T>
-export function atom<T>(
-    value?: undefined,
-    options?: SignalOptions<T | undefined>,
-): Atom<T | undefined>
-export function atom<T>(value?: T, options?: SignalOptions<T | undefined>): Atom<T | undefined> {
-    const [state, setState] = createSignal(value, { internal: true, ...options })
-    return (...args: any[]) => (args.length === 1 ? setState(args[0]) : state())
+export function atom<T>(initialValue: T, options?: SignalOptions<T>): Atom<T>
+export function atom(initialValue?: undefined, options?: SignalOptions<undefined>): Atom<undefined>
+export function atom<T>(initialValue: T, options?: SignalOptions<T>): Atom<T> {
+    let mutating = false
+
+    const equals = (options?.equals ?? equalFn) || (() => false)
+    const [atom, setter] = createSignal(initialValue, {
+        ...options,
+        equals: (a, b) => (mutating ? (mutating = false) : equals(a, b)),
+    }) as [Atom<T>, Setter<T>]
+
+    atom.update = setter
+    atom.trigger = () => {
+        mutating = true
+        setter(p => p)
+    }
+    atom.mutate = mutator => {
+        untrack(() => mutator(atom()))
+        atom.trigger()
+    }
+    atom.set = value => setter(() => value)
+    atom.peak = () => untrack(atom)
+
+    Object.defineProperty(atom, 'value', { get: atom })
+
+    return atom
 }
 
 /**
