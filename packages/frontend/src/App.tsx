@@ -31,67 +31,71 @@ import StructureView from './modules/structure/Structure'
 // }
 
 const Options: Component = () => {
-  return (
-    <Popover defaultOpen={false} class={styles.options.container}>
-      {({ isOpen, setState }) => (
-        <>
-          <PopoverButton
-            onKeyDown={(e: KeyboardEvent) => e.key === ' ' && setState(true)}
-            class={styles.options.button}
-          >
-            <Icon.Options class={styles.options.icon} />
-          </PopoverButton>
-          <Show when={isOpen()}>
-            <PopoverPanel
-              class={styles.options.panel}
-              on:keydown={(e: KeyboardEvent) => e.key === 'Escape' && e.stopPropagation()}
-            >
-              <Menu class={styles.options.menu}>
-                <MenuItem
-                  as="a"
-                  href="https://github.com/thetarnav/solid-devtools/issues"
-                  target="_blank"
-                >
-                  Report a bug
-                </MenuItem>
-              </Menu>
-            </PopoverPanel>
-          </Show>
-        </>
-      )}
-    </Popover>
-  )
+    return (
+        <Popover defaultOpen={false} class={styles.options.container}>
+            {({ isOpen, setState }) => (
+                <>
+                    <PopoverButton
+                        onKeyDown={(e: KeyboardEvent) => e.key === ' ' && setState(true)}
+                        class={styles.options.button}
+                    >
+                        <Icon.Options class={styles.options.icon} />
+                    </PopoverButton>
+                    <Show when={isOpen()}>
+                        <PopoverPanel
+                            class={styles.options.panel}
+                            on:keydown={(e: KeyboardEvent) =>
+                                e.key === 'Escape' && e.stopPropagation()
+                            }
+                        >
+                            <Menu class={styles.options.menu}>
+                                <MenuItem
+                                    as="a"
+                                    href="https://github.com/thetarnav/solid-devtools/issues"
+                                    target="_blank"
+                                >
+                                    Report a bug
+                                </MenuItem>
+                            </Menu>
+                        </PopoverPanel>
+                    </Show>
+                </>
+            )}
+        </Popover>
+    )
 }
 
 export const App: Component<{ headerSubtitle?: JSX.Element }> = props => {
-  // side panel is created here to keep the state between renders
-  const sidePanel = createSidePanel()
+    // side panel is created here to keep the state between renders
+    const sidePanel = createSidePanel()
 
-  return (
-    <div class={styles.app}>
-      <header class={styles.header.header}>
-        <div class={styles.header.identity}>
-          <Icon.SolidWhite class={styles.header.logo} />
-          <div>
-            <h3>Solid Developer Tools</h3>
-            {props.headerSubtitle && <p class={styles.header.subtitle}>{props.headerSubtitle}</p>}
-          </div>
+    return (
+        <div class={styles.app}>
+            <header class={styles.header.header}>
+                <div class={styles.header.identity}>
+                    <Icon.SolidWhite class={styles.header.logo} />
+                    <div>
+                        <h3>Solid Developer Tools</h3>
+                        {props.headerSubtitle && (
+                            <p class={styles.header.subtitle}>{props.headerSubtitle}</p>
+                        )}
+                    </div>
+                </div>
+                {/* <MainViewTabs /> */}
+                <Options />
+            </header>
+            <div class={styles.content}>
+                <Splitter.Root>
+                    <Splitter.Panel>
+                        <StructureView />
+                    </Splitter.Panel>
+                    {sidePanel.isOpen() && (
+                        <Splitter.Panel>
+                            <sidePanel.SidePanel />
+                        </Splitter.Panel>
+                    )}
+                </Splitter.Root>
+            </div>
         </div>
-        {/* <MainViewTabs /> */}
-        <Options />
-      </header>
-      <div class={styles.content}>
-        <Splitter.Root>
-          <Splitter.Panel>
-            <StructureView />
-          </Splitter.Panel>
-          {sidePanel.isOpen() && (
-            <Splitter.Panel>
-              <sidePanel.SidePanel />
-            </Splitter.Panel>
-          )}
-        </Splitter.Root>
-      </div>
-    </div>
-  )
+    )
 }

@@ -8,10 +8,10 @@ import { ThemeProvider } from './Theme'
 import 'uno.css'
 
 export const disposeApp = render(
-  () => (
-    <ThemeProvider>
-      <App />
-    </ThemeProvider>
-  ),
-  document.getElementById('root')!,
+    () => (
+        <ThemeProvider>
+            <App />
+        </ThemeProvider>
+    ),
+    document.getElementById('root')!,
 )

@@ -1,36 +1,36 @@
 {
-  "name": "@solid-devtools/extension",
-  "version": "0.27.4",
-  "private": true,
-  "license": "MIT",
-  "author": "Damian Tarnawski <gthetarnav@gmail.com>",
-  "contributors": [],
-  "type": "module",
-  "scripts": {
-    "dev": "vite --port 3333",
-    "build": "npm run clean && vite build && node scripts/zip.cjs",
-    "clean": "rimraf dist dist.zip",
-    "test": "vitest",
-    "typecheck": "tsc --noEmit --paths null"
-  },
-  "devDependencies": {
-    "@crxjs/vite-plugin": "2.0.0-beta.17",
-    "@types/chrome": "^0.0.241",
-    "rimraf": "^5.0.1",
-    "zip-a-folder": "^2.0.0"
-  },
-  "dependencies": {
-    "@solid-devtools/debugger": "workspace:^",
-    "@solid-devtools/frontend": "workspace:^",
-    "@solid-devtools/shared": "workspace:^",
-    "@solid-primitives/utils": "^6.2.0",
-    "solid-devtools": "workspace:^",
-    "solid-js": "^1.7.8"
-  },
-  "overrides": {
-    "@crxjs/vite-plugin": {
-      "vite": "^4"
-    }
-  },
-  "packageManager": "pnpm@8.6.0"
+    "name": "@solid-devtools/extension",
+    "version": "0.27.4",
+    "private": true,
+    "license": "MIT",
+    "author": "Damian Tarnawski <gthetarnav@gmail.com>",
+    "contributors": [],
+    "type": "module",
+    "scripts": {
+        "dev": "vite --port 3333",
+        "build": "npm run clean && vite build && node scripts/zip.cjs",
+        "clean": "rimraf dist dist.zip",
+        "test": "vitest",
+        "typecheck": "tsc --noEmit --paths null"
+    },
+    "devDependencies": {
+        "@crxjs/vite-plugin": "2.0.0-beta.17",
+        "@types/chrome": "^0.0.241",
+        "rimraf": "^5.0.1",
+        "zip-a-folder": "^2.0.0"
+    },
+    "dependencies": {
+        "@solid-devtools/debugger": "workspace:^",
+        "@solid-devtools/frontend": "workspace:^",
+        "@solid-devtools/shared": "workspace:^",
+        "@solid-primitives/utils": "^6.2.0",
+        "solid-devtools": "workspace:^",
+        "solid-js": "^1.7.8"
+    },
+    "overrides": {
+        "@crxjs/vite-plugin": {
+            "vite": "^4"
+        }
+    },
+    "packageManager": "pnpm@8.6.0"
 }

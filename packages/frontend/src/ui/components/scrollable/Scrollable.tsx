@@ -68,27 +68,27 @@ import { ComponentProps, ParentComponent } from 'solid-js'
 import * as styles from './scrollable.css'
 
 export const Scrollable: ParentComponent<
-  ComponentProps<'div'> & { contentProps?: ComponentProps<'div'> }
+    ComponentProps<'div'> & { contentProps?: ComponentProps<'div'> }
 > = props => {
-  const containerProps = combineProps(props, {
-    get class() {
-      return styles.container.normal
-    },
-  })
+    const containerProps = combineProps(props, {
+        get class() {
+            return styles.container.normal
+        },
+    })
 
-  const contentProps = combineProps(() => props.contentProps ?? {}, {
-    get class() {
-      return styles.content
-    },
-    get children() {
-      return props.children
-    },
-  })
+    const contentProps = combineProps(() => props.contentProps ?? {}, {
+        get class() {
+            return styles.content
+        },
+        get children() {
+            return props.children
+        },
+    })
 
-  return (
-    <div {...containerProps}>
-      <div class={styles.overlay.normal}></div>
-      <div {...contentProps} />
-    </div>
-  )
+    return (
+        <div {...containerProps}>
+            <div class={styles.overlay.normal}></div>
+            <div {...contentProps} />
+        </div>
+    )
 }

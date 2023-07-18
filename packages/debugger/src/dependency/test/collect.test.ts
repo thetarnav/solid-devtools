@@ -10,328 +10,328 @@ const { getOwner } = SolidApi
 
 let mockLAST_ID = 0
 beforeEach(() => {
-  mockLAST_ID = 0
+    mockLAST_ID = 0
 })
 vi.mock('../../main/get-id', () => ({ getNewSdtId: () => '#' + mockLAST_ID++ }))
 
 describe('collectDependencyGraph', () => {
-  it('should collect dependency graph', () => {
-    let rootOwner!: Solid.Root
-    let subRootOwner!: Solid.Root
+    it('should collect dependency graph', () => {
+        let rootOwner!: Solid.Root
+        let subRootOwner!: Solid.Root
 
-    const [e] = createSignal(0, { name: 's-e' })
+        const [e] = createSignal(0, { name: 's-e' })
 
-    createRoot(() => {
-      const [a] = createSignal(0, { name: 's-a' })
-      const [b] = createSignal(0, { name: 's-b' })
-      const [c] = createSignal(0, { name: 's-c' })
+        createRoot(() => {
+            const [a] = createSignal(0, { name: 's-a' })
+            const [b] = createSignal(0, { name: 's-b' })
+            const [c] = createSignal(0, { name: 's-c' })
 
-      const memoA = createMemo(() => a() + e(), null, { name: 'm-a' })
+            const memoA = createMemo(() => a() + e(), null, { name: 'm-a' })
 
-      rootOwner = getOwner()! as Solid.Root
+            rootOwner = getOwner()! as Solid.Root
 
-      createRoot(_ => {
-        const [d] = createSignal(0, { name: 's-d' })
-        const memoB = createMemo(() => b() + c(), null, { name: 'm-b' })
+            createRoot(_ => {
+                const [d] = createSignal(0, { name: 's-d' })
+                const memoB = createMemo(() => b() + c(), null, { name: 'm-b' })
 
-        subRootOwner = getOwner()! as Solid.Root
+                subRootOwner = getOwner()! as Solid.Root
 
-        createComputed(
-          () => {
-            memoA()
-            memoB()
-            c()
-            d()
-          },
-          null,
-          { name: 'c' },
+                createComputed(
+                    () => {
+                        memoA()
+                        memoB()
+                        c()
+                        d()
+                    },
+                    null,
+                    { name: 'c' },
+                )
+            })
+        })
+
+        const nodes = (() => {
+            const [signalA, signalB, signalC] = rootOwner.sourceMap as [
+                Solid.Signal,
+                Solid.Signal,
+                Solid.Signal,
+            ]
+            const [memoA] = rootOwner.owned as [Solid.Memo]
+            const [signalD] = subRootOwner.sourceMap as [Solid.Signal]
+            const [memoB, computed] = subRootOwner.owned as [Solid.Memo, Solid.Computation]
+
+            return {
+                rootId: getSdtId(rootOwner, ObjectType.Owner),
+                subRootId: getSdtId(subRootOwner, ObjectType.Owner),
+                signalAId: getSdtId(signalA, ObjectType.Signal),
+                signalBId: getSdtId(signalB, ObjectType.Signal),
+                signalCId: getSdtId(signalC, ObjectType.Signal),
+                signalDId: getSdtId(signalD, ObjectType.Signal),
+                signalEId: getSdtId(memoA.sources![1] as Solid.Signal, ObjectType.Signal),
+                memoA,
+                memoAId: getSdtId(memoA, ObjectType.Owner),
+                memoBId: getSdtId(memoB, ObjectType.Owner),
+                computed,
+                computedId: getSdtId(computed, ObjectType.Owner),
+            }
+        })()
+
+        let result = collectDependencyGraph(nodes.computed, { onNodeUpdate: () => {} })
+
+        expect(result.graph, 'graph of computedOwner').toEqual({
+            [nodes.computedId]: {
+                name: 'c',
+                type: NodeType.Computation,
+                depth: 2,
+                sources: [nodes.memoAId, nodes.memoBId, nodes.signalCId, nodes.signalDId],
+                observers: undefined,
+                graph: undefined,
+            },
+            [nodes.memoAId]: {
+                name: 'm-a',
+                type: NodeType.Memo,
+                depth: 1,
+                sources: [nodes.signalAId, nodes.signalEId],
+                observers: [nodes.computedId],
+                graph: undefined,
+            },
+            [nodes.memoBId]: {
+                name: 'm-b',
+                type: NodeType.Memo,
+                depth: 2,
+                sources: [nodes.signalBId, nodes.signalCId],
+                observers: [nodes.computedId],
+                graph: undefined,
+            },
+            [nodes.signalCId]: {
+                name: 's-c',
+                type: NodeType.Signal,
+                depth: 1,
+                observers: [nodes.memoBId, nodes.computedId],
+                graph: nodes.rootId,
+                sources: undefined,
+            },
+            [nodes.signalDId]: {
+                name: 's-d',
+                type: NodeType.Signal,
+                depth: 2,
+                observers: [nodes.computedId],
+                graph: nodes.subRootId,
+                sources: undefined,
+            },
+            [nodes.signalAId]: {
+                name: 's-a',
+                type: NodeType.Signal,
+                depth: 1,
+                observers: [nodes.memoAId],
+                graph: nodes.rootId,
+                sources: undefined,
+            },
+            [nodes.signalEId]: {
+                name: 's-e',
+                type: NodeType.Signal,
+                depth: 0,
+                observers: [nodes.memoAId],
+                graph: undefined,
+                sources: undefined,
+            },
+            [nodes.signalBId]: {
+                name: 's-b',
+                type: NodeType.Signal,
+                depth: 1,
+                observers: [nodes.memoBId],
+                graph: nodes.rootId,
+                sources: undefined,
+            },
+        } satisfies SerializedDGraph.Graph)
+
+        expect(result.graph, 'is JSON-serializable').toMatchObject(
+            JSON.parse(JSON.stringify(result.graph)) as any,
         )
-      })
+
+        result = collectDependencyGraph(nodes.memoA, { onNodeUpdate: () => {} })
+
+        expect(result.graph).toEqual({
+            [nodes.computedId]: {
+                name: 'c',
+                type: NodeType.Computation,
+                depth: 2,
+                sources: [nodes.memoAId, nodes.memoBId, nodes.signalCId, nodes.signalDId],
+                observers: undefined,
+                graph: undefined,
+            },
+            [nodes.memoAId]: {
+                name: expect.any(String),
+                type: NodeType.Memo,
+                depth: 1,
+                sources: [nodes.signalAId, nodes.signalEId],
+                observers: [nodes.computedId],
+                graph: undefined,
+            },
+            [nodes.signalAId]: {
+                name: expect.any(String),
+                type: NodeType.Signal,
+                depth: 1,
+                observers: [nodes.memoAId],
+                graph: nodes.rootId,
+                sources: undefined,
+            },
+            [nodes.signalEId]: {
+                name: expect.any(String),
+                type: NodeType.Signal,
+                depth: 0,
+                observers: [nodes.memoAId],
+                graph: undefined,
+                sources: undefined,
+            },
+        } satisfies SerializedDGraph.Graph)
+
+        expect(result.graph, 'is JSON-serializable').toMatchObject(
+            JSON.parse(JSON.stringify(result.graph)) as any,
+        )
     })
 
-    const nodes = (() => {
-      const [signalA, signalB, signalC] = rootOwner.sourceMap as [
-        Solid.Signal,
-        Solid.Signal,
-        Solid.Signal,
-      ]
-      const [memoA] = rootOwner.owned as [Solid.Memo]
-      const [signalD] = subRootOwner.sourceMap as [Solid.Signal]
-      const [memoB, computed] = subRootOwner.owned as [Solid.Memo, Solid.Computation]
+    it('listens to visited nodes', () => {
+        const captured: NodeID[] = []
+        const cb = vi.fn(a => captured.push(a))
 
-      return {
-        rootId: getSdtId(rootOwner, ObjectType.Owner),
-        subRootId: getSdtId(subRootOwner, ObjectType.Owner),
-        signalAId: getSdtId(signalA, ObjectType.Signal),
-        signalBId: getSdtId(signalB, ObjectType.Signal),
-        signalCId: getSdtId(signalC, ObjectType.Signal),
-        signalDId: getSdtId(signalD, ObjectType.Signal),
-        signalEId: getSdtId(memoA.sources![1] as Solid.Signal, ObjectType.Signal),
-        memoA,
-        memoAId: getSdtId(memoA, ObjectType.Owner),
-        memoBId: getSdtId(memoB, ObjectType.Owner),
-        computed,
-        computedId: getSdtId(computed, ObjectType.Owner),
-      }
-    })()
+        createRoot(() => {
+            const [a, setA] = createSignal(0, { name: 's-a' })
+            const [b, setB] = createSignal(0, { name: 's-b' })
+            const [c, setC] = createSignal(0, { name: 's-c' })
+            const [d, setD] = createSignal(0, { name: 's-d' })
 
-    let result = collectDependencyGraph(nodes.computed, { onNodeUpdate: () => {} })
+            const mA = createMemo(() => a() + b(), undefined, { name: 'm-a' })
 
-    expect(result.graph, 'graph of computedOwner').toEqual({
-      [nodes.computedId]: {
-        name: 'c',
-        type: NodeType.Computation,
-        depth: 2,
-        sources: [nodes.memoAId, nodes.memoBId, nodes.signalCId, nodes.signalDId],
-        observers: undefined,
-        graph: undefined,
-      },
-      [nodes.memoAId]: {
-        name: 'm-a',
-        type: NodeType.Memo,
-        depth: 1,
-        sources: [nodes.signalAId, nodes.signalEId],
-        observers: [nodes.computedId],
-        graph: undefined,
-      },
-      [nodes.memoBId]: {
-        name: 'm-b',
-        type: NodeType.Memo,
-        depth: 2,
-        sources: [nodes.signalBId, nodes.signalCId],
-        observers: [nodes.computedId],
-        graph: undefined,
-      },
-      [nodes.signalCId]: {
-        name: 's-c',
-        type: NodeType.Signal,
-        depth: 1,
-        observers: [nodes.memoBId, nodes.computedId],
-        graph: nodes.rootId,
-        sources: undefined,
-      },
-      [nodes.signalDId]: {
-        name: 's-d',
-        type: NodeType.Signal,
-        depth: 2,
-        observers: [nodes.computedId],
-        graph: nodes.subRootId,
-        sources: undefined,
-      },
-      [nodes.signalAId]: {
-        name: 's-a',
-        type: NodeType.Signal,
-        depth: 1,
-        observers: [nodes.memoAId],
-        graph: nodes.rootId,
-        sources: undefined,
-      },
-      [nodes.signalEId]: {
-        name: 's-e',
-        type: NodeType.Signal,
-        depth: 0,
-        observers: [nodes.memoAId],
-        graph: undefined,
-        sources: undefined,
-      },
-      [nodes.signalBId]: {
-        name: 's-b',
-        type: NodeType.Signal,
-        depth: 1,
-        observers: [nodes.memoBId],
-        graph: nodes.rootId,
-        sources: undefined,
-      },
-    } satisfies SerializedDGraph.Graph)
+            createComputed(
+                () => {
+                    c()
+                    d()
+                },
+                undefined,
+                { name: 'c-a' },
+            )
 
-    expect(result.graph, 'is JSON-serializable').toMatchObject(
-      JSON.parse(JSON.stringify(result.graph)) as any,
-    )
+            createComputed(
+                () => {
+                    mA()
+                    c()
+                },
+                undefined,
+                { name: 'c-b' },
+            )
 
-    result = collectDependencyGraph(nodes.memoA, { onNodeUpdate: () => {} })
+            const nodes = (() => {
+                const [signalA, signalB, signalC, signalD] = getOwner()!.sourceMap as [
+                    Solid.Signal,
+                    Solid.Signal,
+                    Solid.Signal,
+                    Solid.Signal,
+                ]
+                const [memoA, computedA, computedB] = getOwner()!.owned as [
+                    Solid.Memo,
+                    Solid.Computation,
+                    Solid.Computation,
+                ]
 
-    expect(result.graph).toEqual({
-      [nodes.computedId]: {
-        name: 'c',
-        type: NodeType.Computation,
-        depth: 2,
-        sources: [nodes.memoAId, nodes.memoBId, nodes.signalCId, nodes.signalDId],
-        observers: undefined,
-        graph: undefined,
-      },
-      [nodes.memoAId]: {
-        name: expect.any(String),
-        type: NodeType.Memo,
-        depth: 1,
-        sources: [nodes.signalAId, nodes.signalEId],
-        observers: [nodes.computedId],
-        graph: undefined,
-      },
-      [nodes.signalAId]: {
-        name: expect.any(String),
-        type: NodeType.Signal,
-        depth: 1,
-        observers: [nodes.memoAId],
-        graph: nodes.rootId,
-        sources: undefined,
-      },
-      [nodes.signalEId]: {
-        name: expect.any(String),
-        type: NodeType.Signal,
-        depth: 0,
-        observers: [nodes.memoAId],
-        graph: undefined,
-        sources: undefined,
-      },
-    } satisfies SerializedDGraph.Graph)
+                return {
+                    rootId: getSdtId(getOwner()!, ObjectType.Owner),
+                    signalAId: getSdtId(signalA, ObjectType.Signal),
+                    signalBId: getSdtId(signalB, ObjectType.Signal),
+                    signalCId: getSdtId(signalC, ObjectType.Signal),
+                    signalDId: getSdtId(signalD, ObjectType.Signal),
+                    memoAId: getSdtId(memoA, ObjectType.Owner),
+                    computedAId: getSdtId(computedA, ObjectType.Owner),
+                    computedB,
+                    computedBId: getSdtId(computedB, ObjectType.Owner),
+                }
+            })()
 
-    expect(result.graph, 'is JSON-serializable').toMatchObject(
-      JSON.parse(JSON.stringify(result.graph)) as any,
-    )
-  })
+            const result = collectDependencyGraph(nodes.computedB, { onNodeUpdate: cb })
 
-  it('listens to visited nodes', () => {
-    const captured: NodeID[] = []
-    const cb = vi.fn(a => captured.push(a))
+            expect(result.graph).toEqual({
+                [nodes.computedBId]: {
+                    name: 'c-b',
+                    type: NodeType.Computation,
+                    depth: 1,
+                    sources: [nodes.memoAId, nodes.signalCId],
+                    observers: undefined,
+                    graph: undefined,
+                },
+                [nodes.memoAId]: {
+                    name: 'm-a',
+                    type: NodeType.Memo,
+                    depth: 1,
+                    sources: [nodes.signalAId, nodes.signalBId],
+                    observers: [nodes.computedBId],
+                    graph: undefined,
+                },
+                [nodes.signalCId]: {
+                    name: 's-c',
+                    type: NodeType.Signal,
+                    depth: 1,
+                    observers: [nodes.computedAId, nodes.computedBId],
+                    graph: nodes.rootId,
+                    sources: undefined,
+                },
+                [nodes.signalAId]: {
+                    name: 's-a',
+                    type: NodeType.Signal,
+                    depth: 1,
+                    observers: [nodes.memoAId],
+                    graph: nodes.rootId,
+                    sources: undefined,
+                },
+                [nodes.signalBId]: {
+                    name: 's-b',
+                    type: NodeType.Signal,
+                    depth: 1,
+                    observers: [nodes.memoAId],
+                    graph: nodes.rootId,
+                    sources: undefined,
+                },
+            } satisfies SerializedDGraph.Graph)
 
-    createRoot(() => {
-      const [a, setA] = createSignal(0, { name: 's-a' })
-      const [b, setB] = createSignal(0, { name: 's-b' })
-      const [c, setC] = createSignal(0, { name: 's-c' })
-      const [d, setD] = createSignal(0, { name: 's-d' })
+            expect(cb).toHaveBeenCalledTimes(0)
 
-      const mA = createMemo(() => a() + b(), undefined, { name: 'm-a' })
+            setA(1)
 
-      createComputed(
-        () => {
-          c()
-          d()
-        },
-        undefined,
-        { name: 'c-a' },
-      )
+            expect(captured).toHaveLength(3)
+            expect(captured.includes(nodes.signalAId)).toBeTruthy()
+            expect(captured.includes(nodes.memoAId)).toBeTruthy()
+            expect(captured.includes(nodes.computedBId)).toBeTruthy()
 
-      createComputed(
-        () => {
-          mA()
-          c()
-        },
-        undefined,
-        { name: 'c-b' },
-      )
+            captured.length = 0
+            setB(1)
 
-      const nodes = (() => {
-        const [signalA, signalB, signalC, signalD] = getOwner()!.sourceMap as [
-          Solid.Signal,
-          Solid.Signal,
-          Solid.Signal,
-          Solid.Signal,
-        ]
-        const [memoA, computedA, computedB] = getOwner()!.owned as [
-          Solid.Memo,
-          Solid.Computation,
-          Solid.Computation,
-        ]
+            expect(captured).toHaveLength(3)
+            expect(captured.includes(nodes.signalBId)).toBeTruthy()
+            expect(captured.includes(nodes.memoAId)).toBeTruthy()
+            expect(captured.includes(nodes.computedBId)).toBeTruthy()
 
-        return {
-          rootId: getSdtId(getOwner()!, ObjectType.Owner),
-          signalAId: getSdtId(signalA, ObjectType.Signal),
-          signalBId: getSdtId(signalB, ObjectType.Signal),
-          signalCId: getSdtId(signalC, ObjectType.Signal),
-          signalDId: getSdtId(signalD, ObjectType.Signal),
-          memoAId: getSdtId(memoA, ObjectType.Owner),
-          computedAId: getSdtId(computedA, ObjectType.Owner),
-          computedB,
-          computedBId: getSdtId(computedB, ObjectType.Owner),
-        }
-      })()
+            captured.length = 0
+            setC(1)
 
-      const result = collectDependencyGraph(nodes.computedB, { onNodeUpdate: cb })
+            expect(captured).toHaveLength(2)
+            expect(captured.includes(nodes.signalCId)).toBeTruthy()
+            expect(captured.includes(nodes.computedBId)).toBeTruthy()
 
-      expect(result.graph).toEqual({
-        [nodes.computedBId]: {
-          name: 'c-b',
-          type: NodeType.Computation,
-          depth: 1,
-          sources: [nodes.memoAId, nodes.signalCId],
-          observers: undefined,
-          graph: undefined,
-        },
-        [nodes.memoAId]: {
-          name: 'm-a',
-          type: NodeType.Memo,
-          depth: 1,
-          sources: [nodes.signalAId, nodes.signalBId],
-          observers: [nodes.computedBId],
-          graph: undefined,
-        },
-        [nodes.signalCId]: {
-          name: 's-c',
-          type: NodeType.Signal,
-          depth: 1,
-          observers: [nodes.computedAId, nodes.computedBId],
-          graph: nodes.rootId,
-          sources: undefined,
-        },
-        [nodes.signalAId]: {
-          name: 's-a',
-          type: NodeType.Signal,
-          depth: 1,
-          observers: [nodes.memoAId],
-          graph: nodes.rootId,
-          sources: undefined,
-        },
-        [nodes.signalBId]: {
-          name: 's-b',
-          type: NodeType.Signal,
-          depth: 1,
-          observers: [nodes.memoAId],
-          graph: nodes.rootId,
-          sources: undefined,
-        },
-      } satisfies SerializedDGraph.Graph)
+            captured.length = 0
+            setD(1)
 
-      expect(cb).toHaveBeenCalledTimes(0)
+            expect(captured.length).toBe(0)
 
-      setA(1)
+            batch(() => {
+                setA(2)
+                setB(2)
+                setC(2)
+            })
 
-      expect(captured).toHaveLength(3)
-      expect(captured.includes(nodes.signalAId)).toBeTruthy()
-      expect(captured.includes(nodes.memoAId)).toBeTruthy()
-      expect(captured.includes(nodes.computedBId)).toBeTruthy()
-
-      captured.length = 0
-      setB(1)
-
-      expect(captured).toHaveLength(3)
-      expect(captured.includes(nodes.signalBId)).toBeTruthy()
-      expect(captured.includes(nodes.memoAId)).toBeTruthy()
-      expect(captured.includes(nodes.computedBId)).toBeTruthy()
-
-      captured.length = 0
-      setC(1)
-
-      expect(captured).toHaveLength(2)
-      expect(captured.includes(nodes.signalCId)).toBeTruthy()
-      expect(captured.includes(nodes.computedBId)).toBeTruthy()
-
-      captured.length = 0
-      setD(1)
-
-      expect(captured.length).toBe(0)
-
-      batch(() => {
-        setA(2)
-        setB(2)
-        setC(2)
-      })
-
-      expect(captured).toHaveLength(5)
-      expect(captured.includes(nodes.signalAId)).toBeTruthy()
-      expect(captured.includes(nodes.signalBId)).toBeTruthy()
-      expect(captured.includes(nodes.signalCId)).toBeTruthy()
-      expect(captured.includes(nodes.memoAId)).toBeTruthy()
-      expect(captured.includes(nodes.computedBId)).toBeTruthy()
+            expect(captured).toHaveLength(5)
+            expect(captured.includes(nodes.signalAId)).toBeTruthy()
+            expect(captured.includes(nodes.signalBId)).toBeTruthy()
+            expect(captured.includes(nodes.signalCId)).toBeTruthy()
+            expect(captured.includes(nodes.memoAId)).toBeTruthy()
+            expect(captured.includes(nodes.computedBId)).toBeTruthy()
+        })
     })
-  })
 })

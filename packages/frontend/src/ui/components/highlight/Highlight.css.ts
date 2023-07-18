@@ -7,47 +7,47 @@ const mixin = createHighlightStyles()
 export const container = mixin.container
 
 export const highlighted = style({
-  ...media({
-    [light]: {
-      color: color.black,
-    },
-  }),
+    ...media({
+        [light]: {
+            color: color.black,
+        },
+    }),
 })
 
 export const highlight = style([
-  mixin.highlight,
-  {
-    vars: {
-      [mixin.bgColorVar]: color.cyan[400],
-      [mixin.bgOpacityVar]: '0',
-    },
-    selectors: {
-      [`${highlighted} &`]: {
+    mixin.highlight,
+    {
         vars: {
-          [mixin.bgOpacityVar]: '0.6',
+            [mixin.bgColorVar]: color.cyan[400],
+            [mixin.bgOpacityVar]: '0',
         },
-      },
-      [`&[data-signal=true]`]: {
-        vars: {
-          [mixin.bgColorVar]: color.amber[500],
-        },
-      },
-    },
-    ...media({
-      [dark]: {
         selectors: {
-          [`${highlighted} &`]: {
-            vars: {
-              [mixin.bgOpacityVar]: '0.35',
+            [`${highlighted} &`]: {
+                vars: {
+                    [mixin.bgOpacityVar]: '0.6',
+                },
             },
-          },
-          [`${highlighted} &[data-signal=true]`]: {
-            vars: {
-              [mixin.bgOpacityVar]: '0.25',
+            [`&[data-signal=true]`]: {
+                vars: {
+                    [mixin.bgColorVar]: color.amber[500],
+                },
             },
-          },
         },
-      },
-    }),
-  },
+        ...media({
+            [dark]: {
+                selectors: {
+                    [`${highlighted} &`]: {
+                        vars: {
+                            [mixin.bgOpacityVar]: '0.35',
+                        },
+                    },
+                    [`${highlighted} &[data-signal=true]`]: {
+                        vars: {
+                            [mixin.bgOpacityVar]: '0.25',
+                        },
+                    },
+                },
+            },
+        }),
+    },
 ])

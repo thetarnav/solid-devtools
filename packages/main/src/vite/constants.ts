@@ -1,6 +1,6 @@
 export const enum Module {
-  Main = 'solid-devtools',
-  Setup = `${Main}/setup`,
+    Main = 'solid-devtools',
+    Setup = `${Main}/setup`,
 }
 
 export const SET_COMPONENT_LOC = 'setComponentLocation'

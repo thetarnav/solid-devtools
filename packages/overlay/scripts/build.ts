@@ -18,85 +18,89 @@ const externals = ['@solid-devtools/debugger/setup']
 const entryFile = path.resolve(cwd, `src/index.tsx`)
 
 function customPlugin(output: string): esbuild.Plugin {
-  return {
-    name: 'custom',
-    setup(build) {
-      // minify css during build
-      if (!isDev) {
-        build.onLoad({ filter: /\.css$/ }, async args => {
-          const finename = path.basename(args.path)
-          let time = Date.now()
-          let text = await readFile(args.path, 'utf-8')
-          text = new CleanCSS().minify(text).styles
-          console.log(
-            `${output}.js CSS minify for ${finename} in ${Math.ceil(Date.now() - time)}ms`,
-          )
-          return { loader: 'text', contents: text }
-        })
-      }
+    return {
+        name: 'custom',
+        setup(build) {
+            // minify css during build
+            if (!isDev) {
+                build.onLoad({ filter: /\.css$/ }, async args => {
+                    const finename = path.basename(args.path)
+                    let time = Date.now()
+                    let text = await readFile(args.path, 'utf-8')
+                    text = new CleanCSS().minify(text).styles
+                    console.log(
+                        `${output}.js CSS minify for ${finename} in ${Math.ceil(
+                            Date.now() - time,
+                        )}ms`,
+                    )
+                    return { loader: 'text', contents: text }
+                })
+            }
 
-      let generalTime: number
-      build.onStart(() => {
-        generalTime = Date.now()
-      })
-      build.onEnd(() => {
-        console.log(`${output}.js build complete in ${Math.round(Date.now() - generalTime)}ms`)
-      })
-    },
-  }
+            let generalTime: number
+            build.onStart(() => {
+                generalTime = Date.now()
+            })
+            build.onEnd(() => {
+                console.log(
+                    `${output}.js build complete in ${Math.round(Date.now() - generalTime)}ms`,
+                )
+            })
+        },
+    }
 }
 
 // clear dist before build
 if (!isDev) {
-  fs.rmSync(path.resolve(cwd, `dist`), { recursive: true, force: true })
+    fs.rmSync(path.resolve(cwd, `dist`), { recursive: true, force: true })
 }
 
 // generate type declarations
 {
-  const worker = new Worker(path.resolve(__dirname, `./dts_worker.ts`), {
-    argv: isDev ? ['--watch'] : [],
-  })
-
-  if (isDev) {
-    chokidar.watch(path.resolve(cwd, `src`)).on('change', () => {
-      worker.postMessage('change')
+    const worker = new Worker(path.resolve(__dirname, `./dts_worker.ts`), {
+        argv: isDev ? ['--watch'] : [],
     })
-    worker.postMessage('change')
-  }
+
+    if (isDev) {
+        chokidar.watch(path.resolve(cwd, `src`)).on('change', () => {
+            worker.postMessage('change')
+        })
+        worker.postMessage('change')
+    }
 }
 
 // build entry modules
 
 const commonOptions: esbuild.BuildOptions = {
-  target: 'esnext',
-  format: 'esm',
-  bundle: true,
-  loader: { '.css': 'text' },
-  color: true,
-  external: externals,
-  treeShaking: true,
+    target: 'esnext',
+    format: 'esm',
+    bundle: true,
+    loader: { '.css': 'text' },
+    color: true,
+    external: externals,
+    treeShaking: true,
 }
 
 // dev.js
 esbuild
-  .context({
-    ...commonOptions,
-    entryPoints: [entryFile],
-    outfile: `dist/dev.js`,
-    plugins: [customPlugin('dev'), solidPlugin()],
-  })
-  .then(async ctx => {
-    isDev ? ctx.watch() : ctx.rebuild().then(() => ctx.dispose())
-  })
+    .context({
+        ...commonOptions,
+        entryPoints: [entryFile],
+        outfile: `dist/dev.js`,
+        plugins: [customPlugin('dev'), solidPlugin()],
+    })
+    .then(async ctx => {
+        isDev ? ctx.watch() : ctx.rebuild().then(() => ctx.dispose())
+    })
 
 // prod.js
 esbuild
-  .context({
-    ...commonOptions,
-    entryPoints: [path.relative(cwd, 'src/prod.ts')],
-    outfile: `dist/prod.js`,
-    plugins: [customPlugin('prod')],
-  })
-  .then(async ctx => {
-    isDev ? ctx.watch() : ctx.rebuild().then(() => ctx.dispose())
-  })
+    .context({
+        ...commonOptions,
+        entryPoints: [path.relative(cwd, 'src/prod.ts')],
+        outfile: `dist/prod.js`,
+        plugins: [customPlugin('prod')],
+    })
+    .then(async ctx => {
+        isDev ? ctx.watch() : ctx.rebuild().then(() => ctx.dispose())
+    })

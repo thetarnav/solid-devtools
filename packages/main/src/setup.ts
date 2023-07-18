@@ -1,10 +1,10 @@
 import '@solid-devtools/debugger/setup'
 
 import {
-  setClientVersion,
-  setOwnerLocation,
-  setSolidVersion,
-  useLocator,
+    setClientVersion,
+    setOwnerLocation,
+    setSolidVersion,
+    useLocator,
 } from '@solid-devtools/debugger/setup'
 
 setClientVersion(process.env.CLIENT_VERSION)
@@ -15,8 +15,8 @@ setSolidVersion(process.env.SOLID_VERSION, process.env.EXPECTED_SOLID_VERSION)
  * Used by the `solid-devtools` plugin.
  */
 export function setComponentLocation(location: string) {
-  if (typeof location !== 'string') return
-  setOwnerLocation(location)
+    if (typeof location !== 'string') return
+    setOwnerLocation(location)
 }
 
 export { useLocator as setLocatorOptions }

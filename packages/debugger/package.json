@@ -1,97 +1,97 @@
 {
-  "name": "@solid-devtools/debugger",
-  "version": "0.22.2",
-  "description": "Debugger of the Solid's reactivity graph — a cornerstone of all solid-devtools.",
-  "license": "MIT",
-  "author": "Damian Tarnawski <gthetarnav@gmail.com>",
-  "contributors": [],
-  "homepage": "https://github.com/thetarnav/solid-devtools/tree/main/packages/debugger#readme",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/thetarnav/solid-devtools.git"
-  },
-  "bugs": {
-    "url": "https://github.com/thetarnav/solid-devtools/issues"
-  },
-  "keywords": [
-    "solid",
-    "devtools",
-    "debugger",
-    "reactivity"
-  ],
-  "private": false,
-  "sideEffects": false,
-  "publishConfig": {
-    "access": "public"
-  },
-  "files": [
-    "dist"
-  ],
-  "type": "module",
-  "main": "./dist/index.js",
-  "module": "./dist/index.js",
-  "types": "./dist/index.d.ts",
-  "exports": {
-    ".": {
-      "import": {
-        "types": "./dist/index.d.ts",
-        "default": "./dist/index.js"
-      }
+    "name": "@solid-devtools/debugger",
+    "version": "0.22.2",
+    "description": "Debugger of the Solid's reactivity graph — a cornerstone of all solid-devtools.",
+    "license": "MIT",
+    "author": "Damian Tarnawski <gthetarnav@gmail.com>",
+    "contributors": [],
+    "homepage": "https://github.com/thetarnav/solid-devtools/tree/main/packages/debugger#readme",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/thetarnav/solid-devtools.git"
     },
-    "./bundled": {
-      "import": {
-        "types": "./dist/index.d.ts",
-        "default": "./dist/bundled.js"
-      }
+    "bugs": {
+        "url": "https://github.com/thetarnav/solid-devtools/issues"
     },
-    "./types": {
-      "import": {
-        "types": "./dist/types.d.ts",
-        "default": "./dist/types.js"
-      }
+    "keywords": [
+        "solid",
+        "devtools",
+        "debugger",
+        "reactivity"
+    ],
+    "private": false,
+    "sideEffects": false,
+    "publishConfig": {
+        "access": "public"
     },
-    "./setup": {
-      "import": {
-        "types": "./dist/setup.d.ts",
-        "default": "./dist/setup.js"
-      }
-    }
-  },
-  "typesVersions": {
-    "*": {
-      "bundled": [
-        "./dist/index.d.ts"
-      ],
-      "types": [
-        "./dist/types.d.ts"
-      ],
-      "setup": [
-        "./dist/setup.d.ts"
-      ]
-    }
-  },
-  "scripts": {
-    "dev": "tsup --watch",
-    "build": "tsup",
-    "test": "vitest",
-    "typecheck": "tsc --noEmit --paths null"
-  },
-  "dependencies": {
-    "@solid-devtools/shared": "workspace:^",
-    "@solid-primitives/bounds": "^0.0.114",
-    "@solid-primitives/cursor": "^0.0.111",
-    "@solid-primitives/event-bus": "^1.0.7",
-    "@solid-primitives/event-listener": "^2.2.13",
-    "@solid-primitives/keyboard": "^1.2.3",
-    "@solid-primitives/platform": "^0.0.105",
-    "@solid-primitives/rootless": "^1.4.1",
-    "@solid-primitives/scheduled": "^1.4.0",
-    "@solid-primitives/static-store": "^0.0.4",
-    "@solid-primitives/utils": "^6.2.0",
-    "solid-js": "^1.7.8"
-  },
-  "peerDependencies": {
-    "solid-js": "^1.7.0"
-  },
-  "packageManager": "pnpm@8.6.0"
+    "files": [
+        "dist"
+    ],
+    "type": "module",
+    "main": "./dist/index.js",
+    "module": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "exports": {
+        ".": {
+            "import": {
+                "types": "./dist/index.d.ts",
+                "default": "./dist/index.js"
+            }
+        },
+        "./bundled": {
+            "import": {
+                "types": "./dist/index.d.ts",
+                "default": "./dist/bundled.js"
+            }
+        },
+        "./types": {
+            "import": {
+                "types": "./dist/types.d.ts",
+                "default": "./dist/types.js"
+            }
+        },
+        "./setup": {
+            "import": {
+                "types": "./dist/setup.d.ts",
+                "default": "./dist/setup.js"
+            }
+        }
+    },
+    "typesVersions": {
+        "*": {
+            "bundled": [
+                "./dist/index.d.ts"
+            ],
+            "types": [
+                "./dist/types.d.ts"
+            ],
+            "setup": [
+                "./dist/setup.d.ts"
+            ]
+        }
+    },
+    "scripts": {
+        "dev": "tsup --watch",
+        "build": "tsup",
+        "test": "vitest",
+        "typecheck": "tsc --noEmit --paths null"
+    },
+    "dependencies": {
+        "@solid-devtools/shared": "workspace:^",
+        "@solid-primitives/bounds": "^0.0.114",
+        "@solid-primitives/cursor": "^0.0.111",
+        "@solid-primitives/event-bus": "^1.0.7",
+        "@solid-primitives/event-listener": "^2.2.13",
+        "@solid-primitives/keyboard": "^1.2.3",
+        "@solid-primitives/platform": "^0.0.105",
+        "@solid-primitives/rootless": "^1.4.1",
+        "@solid-primitives/scheduled": "^1.4.0",
+        "@solid-primitives/static-store": "^0.0.4",
+        "@solid-primitives/utils": "^6.2.0",
+        "solid-js": "^1.7.8"
+    },
+    "peerDependencies": {
+        "solid-js": "^1.7.0"
+    },
+    "packageManager": "pnpm@8.6.0"
 }

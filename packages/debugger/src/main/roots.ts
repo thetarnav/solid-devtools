@@ -15,27 +15,27 @@ export const getCurrentRoots = (): Iterable<Solid.Root> => RootMap.values()
 let OnOwnerNeedsUpdate: ((owner: Solid.Owner, rootId: NodeID) => void) | undefined
 /** Listens to owners that have their structure changed, because of roots */
 export function setOnOwnerNeedsUpdate(fn: typeof OnOwnerNeedsUpdate) {
-  OnOwnerNeedsUpdate = fn
+    OnOwnerNeedsUpdate = fn
 }
 let OnRootRemoved: ((rootId: NodeID) => void) | undefined
 /** Listens to roots that were removed */
 export function setOnRootRemoved(fn: typeof OnRootRemoved) {
-  OnRootRemoved = fn
+    OnRootRemoved = fn
 }
 
 export function createTopRoot(owner: Solid.Root): void {
-  const rootId = getSdtId(owner, ObjectType.Owner)
-  RootMap.set(rootId, owner)
-  OnOwnerNeedsUpdate?.(owner, rootId)
+    const rootId = getSdtId(owner, ObjectType.Owner)
+    RootMap.set(rootId, owner)
+    OnOwnerNeedsUpdate?.(owner, rootId)
 }
 
 function cleanupRoot(root: Solid.Root): void {
-  const rootId = getSdtId(root, ObjectType.Owner)
-  root.isDisposed = true
-  changeRootAttachment(root, null)
+    const rootId = getSdtId(root, ObjectType.Owner)
+    root.isDisposed = true
+    changeRootAttachment(root, null)
 
-  const wasTarcked = RootMap.delete(rootId)
-  if (wasTarcked) OnRootRemoved?.(rootId)
+    const wasTarcked = RootMap.delete(rootId)
+    if (wasTarcked) OnRootRemoved?.(rootId)
 }
 
 /**
@@ -43,24 +43,24 @@ function cleanupRoot(root: Solid.Root): void {
  * It'll remove the root from its current owner and attach it to the new owner.
  */
 function changeRootAttachment(root: Solid.Root, newParent: Solid.Owner | null): void {
-  let topRoot: Solid.Root | undefined | null
+    let topRoot: Solid.Root | undefined | null
 
-  if (root.attachedTo) {
-    root.attachedTo.sdtSubRoots!.splice(root.attachedTo.sdtSubRoots!.indexOf(root), 1)
-    topRoot = getTopRoot(root.attachedTo)
-    if (topRoot) OnOwnerNeedsUpdate?.(root.attachedTo, getSdtId(topRoot, ObjectType.Owner))
-  }
+    if (root.attachedTo) {
+        root.attachedTo.sdtSubRoots!.splice(root.attachedTo.sdtSubRoots!.indexOf(root), 1)
+        topRoot = getTopRoot(root.attachedTo)
+        if (topRoot) OnOwnerNeedsUpdate?.(root.attachedTo, getSdtId(topRoot, ObjectType.Owner))
+    }
 
-  if (newParent) {
-    root.attachedTo = newParent
-    if (newParent.sdtSubRoots) newParent.sdtSubRoots.push(root)
-    else newParent.sdtSubRoots = [root]
+    if (newParent) {
+        root.attachedTo = newParent
+        if (newParent.sdtSubRoots) newParent.sdtSubRoots.push(root)
+        else newParent.sdtSubRoots = [root]
 
-    if (topRoot === undefined) topRoot = getTopRoot(newParent)
-    if (topRoot) OnOwnerNeedsUpdate?.(newParent, getSdtId(topRoot, ObjectType.Owner))
-  } else {
-    delete root.attachedTo
-  }
+        if (topRoot === undefined) topRoot = getTopRoot(newParent)
+        if (topRoot) OnOwnerNeedsUpdate?.(newParent, getSdtId(topRoot, ObjectType.Owner))
+    } else {
+        delete root.attachedTo
+    }
 }
 
 let InternalRootCount = 0
@@ -78,63 +78,64 @@ let InternalRootCount = 0
  * });
  */
 export function attachDebugger(owner = SolidAPI.getOwner()): void {
-  if (InternalRootCount) return
+    if (InternalRootCount) return
 
-  if (!owner) return warn('reatachOwner helper should be called synchronously in a reactive owner.')
+    if (!owner)
+        return warn('reatachOwner helper should be called synchronously in a reactive owner.')
 
-  // find all the roots in the owner tree (walking up the tree)
-  const roots: Solid.Root[] = []
-  let isFirstTopLevel = true
-  while (owner) {
-    if (isSolidRoot(owner)) {
-      // INTERNAL | disposed
-      if (owner.isInternal || owner.isDisposed) return
-      // already attached
-      if (RootMap.has(getSdtId(owner, ObjectType.Owner))) {
-        isFirstTopLevel = false
-        break
-      }
-      roots.push(owner)
+    // find all the roots in the owner tree (walking up the tree)
+    const roots: Solid.Root[] = []
+    let isFirstTopLevel = true
+    while (owner) {
+        if (isSolidRoot(owner)) {
+            // INTERNAL | disposed
+            if (owner.isInternal || owner.isDisposed) return
+            // already attached
+            if (RootMap.has(getSdtId(owner, ObjectType.Owner))) {
+                isFirstTopLevel = false
+                break
+            }
+            roots.push(owner)
+        }
+        owner = owner.owner
     }
-    owner = owner.owner
-  }
 
-  // attach roots in reverse order (from top to bottom)
-  for (let i = roots.length - 1; i >= 0; i--) {
-    const root = roots[i]!
-    root.sdtType = NodeType.Root
+    // attach roots in reverse order (from top to bottom)
+    for (let i = roots.length - 1; i >= 0; i--) {
+        const root = roots[i]!
+        root.sdtType = NodeType.Root
 
-    onOwnerCleanup(root, () => cleanupRoot(root), true)
+        onOwnerCleanup(root, () => cleanupRoot(root), true)
 
-    const isTopLevel = isFirstTopLevel && i === 0
+        const isTopLevel = isFirstTopLevel && i === 0
 
-    // root (top-level)
-    if (isTopLevel) {
-      createTopRoot(root)
-      return
+        // root (top-level)
+        if (isTopLevel) {
+            createTopRoot(root)
+            return
+        }
+        // sub-root (nested)
+        let parent = findClosestAliveParent(root)!
+        if (!parent.owner) return warn('Parent owner is missing.')
+        changeRootAttachment(root, parent.owner)
+
+        const onParentCleanup = () => {
+            const newParent = findClosestAliveParent(root)
+            changeRootAttachment(root, newParent.owner)
+            // still a sub-root
+            if (newParent.owner) {
+                parent = newParent
+                onOwnerCleanup(parent.root, onParentCleanup)
+            }
+            // becomes a root
+            else {
+                removeOwnCleanup()
+                createTopRoot(root)
+            }
+        }
+        const removeParentCleanup = onOwnerCleanup(parent.root, onParentCleanup)
+        const removeOwnCleanup = onOwnerCleanup(root, removeParentCleanup)
     }
-    // sub-root (nested)
-    let parent = findClosestAliveParent(root)!
-    if (!parent.owner) return warn('Parent owner is missing.')
-    changeRootAttachment(root, parent.owner)
-
-    const onParentCleanup = () => {
-      const newParent = findClosestAliveParent(root)
-      changeRootAttachment(root, newParent.owner)
-      // still a sub-root
-      if (newParent.owner) {
-        parent = newParent
-        onOwnerCleanup(parent.root, onParentCleanup)
-      }
-      // becomes a root
-      else {
-        removeOwnCleanup()
-        createTopRoot(root)
-      }
-    }
-    const removeParentCleanup = onOwnerCleanup(parent.root, onParentCleanup)
-    const removeOwnCleanup = onOwnerCleanup(root, removeParentCleanup)
-  }
 }
 
 /**
@@ -142,34 +143,34 @@ export function attachDebugger(owner = SolidAPI.getOwner()): void {
  * This is not reversable, and should be used only when you are sure that they won't be used anymore.
  */
 export function unobserveAllRoots(): void {
-  RootMap.forEach(r => cleanupRoot(r))
-  clearComponentRegistry()
+    RootMap.forEach(r => cleanupRoot(r))
+    clearComponentRegistry()
 }
 
 /**
  * Sold's `createRoot` primitive that won't be tracked by the debugger.
  */
 export const createInternalRoot: typeof createRoot = (fn, detachedOwner) => {
-  InternalRootCount++
-  const r = createRoot(dispose => {
-    ;(getOwner() as Solid.Root).isInternal = true
-    return fn(dispose)
-  }, detachedOwner)
-  InternalRootCount--
-  return r
+    InternalRootCount++
+    const r = createRoot(dispose => {
+        ;(getOwner() as Solid.Root).isInternal = true
+        return fn(dispose)
+    }, detachedOwner)
+    InternalRootCount--
+    return r
 }
 
 /**
  * Finds the top-level root owner of a given owner.
  */
 export function getTopRoot(owner: Solid.Owner): Solid.Root | null {
-  let root: Solid.Root | null = null
-  do {
-    if (isSolidRoot(owner) && !owner.isInternal && !owner.isDisposed) root = owner
-    owner = owner.owner!
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-  } while (owner)
-  return root
+    let root: Solid.Root | null = null
+    do {
+        if (isSolidRoot(owner) && !owner.isInternal && !owner.isDisposed) root = owner
+        owner = owner.owner!
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    } while (owner)
+    return root
 }
 
 /**
@@ -179,18 +180,18 @@ export function getTopRoot(owner: Solid.Owner): Solid.Root | null {
  * @returns `{ owner: SolidOwner; root: SolidRoot }`
  */
 export function findClosestAliveParent(
-  owner: Solid.Owner,
+    owner: Solid.Owner,
 ): { owner: Solid.Owner; root: Solid.Root } | { owner: null; root: null } {
-  let disposed: Solid.Root | null = null
-  let closestAliveRoot: Solid.Root | null = null
-  let current = owner
-  while (current.owner && !closestAliveRoot) {
-    current = current.owner
-    if (isSolidRoot(current)) {
-      if (current.isDisposed) disposed = current
-      else closestAliveRoot = current
+    let disposed: Solid.Root | null = null
+    let closestAliveRoot: Solid.Root | null = null
+    let current = owner
+    while (current.owner && !closestAliveRoot) {
+        current = current.owner
+        if (isSolidRoot(current)) {
+            if (current.isDisposed) disposed = current
+            else closestAliveRoot = current
+        }
     }
-  }
-  if (!closestAliveRoot) return { owner: null, root: null }
-  return { owner: (disposed ?? owner).owner!, root: closestAliveRoot }
+    if (!closestAliveRoot) return { owner: null, root: null }
+    return { owner: (disposed ?? owner).owner!, root: closestAliveRoot }
 }
