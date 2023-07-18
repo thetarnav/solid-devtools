@@ -1,5 +1,4 @@
 import { Debugger, DebuggerModule, DevtoolsMainView, NodeID } from '@solid-devtools/debugger/types'
-import { createContextProvider } from '@solid-primitives/context'
 import { SECOND } from '@solid-primitives/date'
 import { EventBus, batchEmits, createEventBus, createEventHub } from '@solid-primitives/event-bus'
 import { debounce } from '@solid-primitives/scheduled'
@@ -7,11 +6,13 @@ import { defer } from '@solid-primitives/utils'
 import {
   JSX,
   batch,
+  createContext,
   createEffect,
   createMemo,
   createSelector,
   createSignal,
   onCleanup,
+  useContext,
 } from 'solid-js'
 import { App } from './App'
 import createInspector from './modules/inspector'
@@ -63,17 +64,43 @@ export type DevtoolsProps = {
   catchWindowErrors?: boolean
 }
 
+/**
+ * devtools options provided to {@link Devtools} component
+ * with their default values
+ */
+export type DevtoolsOptions = {
+  useShortcuts: boolean
+}
+
+const DevtoolsOptionsCtx = createContext<DevtoolsOptions>(
+  'DevtoolsOptionsCtx' as any as DevtoolsOptions,
+)
+
+export const useDevtoolsOptions = () => useContext(DevtoolsOptionsCtx)
+
+export function devtoolsPropsToOptions(props: DevtoolsProps): DevtoolsOptions {
+  return {
+    useShortcuts: props.useShortcuts ?? false,
+  }
+}
+
 export function createDevtools() {
   const bridge = createDebuggerBridge()
 
   return {
     bridge,
     Devtools(props: DevtoolsProps) {
+      const options = devtoolsPropsToOptions(props)
+
+      const controller = createController(bridge, options)
+
       return (
         <ErrorOverlay footer={props.errorOverlayFooter} catchWindowErrors={props.catchWindowErrors}>
-          <Provider bridge={bridge} options={{ useShortcuts: props.useShortcuts ?? false }}>
-            <App headerSubtitle={props.headerSubtitle} />
-          </Provider>
+          <DevtoolsOptionsCtx.Provider value={options}>
+            <ControllerCtx.Provider value={controller}>
+              <App headerSubtitle={props.headerSubtitle} />
+            </ControllerCtx.Provider>
+          </DevtoolsOptionsCtx.Provider>
         </ErrorOverlay>
       )
     },
@@ -120,134 +147,128 @@ function createViewCache() {
   return { set: setCacheGetter, get: getCache }
 }
 
-const [Provider, useControllerCtx] = createContextProvider(
-  ({ bridge, options }: { bridge: DebuggerBridge; options: { useShortcuts: boolean } }) => {
-    //
-    // LOCATOR
-    //
-    const [devtoolsLocatorEnabled, setDevtoolsLocatorState] = createSignal(false)
-    const [clientLocatorEnabled, setClientLocator] = createSignal(false)
-    const locatorEnabled = () => devtoolsLocatorEnabled() || clientLocatorEnabled()
+function createController(bridge: DebuggerBridge, options: DevtoolsOptions) {
+  //
+  // LOCATOR
+  //
+  const [devtoolsLocatorEnabled, setDevtoolsLocatorState] = createSignal(false)
+  const [clientLocatorEnabled, setClientLocator] = createSignal(false)
+  const locatorEnabled = () => devtoolsLocatorEnabled() || clientLocatorEnabled()
 
-    // send devtools locator state
-    createEffect(
-      defer(devtoolsLocatorEnabled, enabled =>
-        bridge.output.ToggleModule.emit({ module: DebuggerModule.Locator, enabled }),
-      ),
-    )
+  // send devtools locator state
+  createEffect(
+    defer(devtoolsLocatorEnabled, enabled =>
+      bridge.output.ToggleModule.emit({ module: DebuggerModule.Locator, enabled }),
+    ),
+  )
 
-    function setClientLocatorState(enabled: boolean) {
-      batch(() => {
-        setClientLocator(enabled)
-        if (!enabled) setClientHoveredNode(null)
-      })
-    }
-
-    //
-    // HOVERED NODE
-    //
-    const [clientHoveredNode, setClientHoveredNode] = createSignal<NodeID | null>(null)
-    const [extHoveredNode, setExtHoveredNode] = createSignal<{
-      type: 'element' | 'node'
-      id: NodeID
-    } | null>(null, { equals: (a, b) => a?.id === b?.id })
-
-    // highlight hovered element
-    createEffect(defer(extHoveredNode, bridge.output.HighlightElementChange.emit))
-
-    const hoveredId = createMemo(() => {
-      const extNode = extHoveredNode()
-      return extNode ? extNode.id : clientHoveredNode()
+  function setClientLocatorState(enabled: boolean) {
+    batch(() => {
+      setClientLocator(enabled)
+      if (!enabled) setClientHoveredNode(null)
     })
-    const isNodeHovered = createSelector<NodeID | null, NodeID>(hoveredId)
-
-    function toggleHoveredNode(id: NodeID, type: 'element' | 'node' = 'node', isHovered?: boolean) {
-      return setExtHoveredNode(p =>
-        p && p.id === id ? (isHovered ? p : null) : isHovered ? { id, type } : p,
-      )
-    }
-    function toggleHoveredElement(id: NodeID, isHovered?: boolean) {
-      return toggleHoveredNode(id, 'element', isHovered)
-    }
-
-    //
-    // OPENED MAIN VIEW
-    //
-    // * there is no need for different views now
-
-    const [openedView, setOpenedView] = createSignal<DevtoolsMainView>(DevtoolsMainView.Structure)
-    const viewCache = createViewCache()
-
-    function openView(view: DevtoolsMainView) {
-      setOpenedView(view)
-    }
-
-    createEffect(defer(openedView, bridge.output.ViewChange.emit))
-
-    //
-    // Node updates - signals and computations updating
-    //
-    const nodeUpdates = createEventBus<NodeID>()
-    bridge.input.NodeUpdates.listen(updated => updated.forEach(id => nodeUpdates.emit(id)))
-
-    //
-    // INSPECTOR
-    //
-    const inspector = createInspector({ bridge })
-
-    //
-    // Client events
-    //
-    bridge.input.ResetPanel.listen(() => {
-      setClientLocatorState(false)
-      setDevtoolsLocatorState(false)
-      inspector.setInspectedOwner(null)
-    })
-
-    bridge.input.HoveredComponent.listen(({ nodeId, state }) => {
-      setClientHoveredNode(p => (state ? nodeId : p && p === nodeId ? null : p))
-    })
-
-    bridge.input.InspectedComponent.listen(node => {
-      inspector.setInspectedOwner(node)
-      setDevtoolsLocatorState(false)
-    })
-
-    bridge.input.LocatorModeChange.listen(setClientLocatorState)
-
-    return {
-      locator: {
-        locatorEnabled,
-        setLocatorState: setDevtoolsLocatorState,
-      },
-      hovered: {
-        isNodeHovered,
-        hoveredId,
-        toggleHoveredNode,
-        toggleHoveredElement,
-      },
-      view: {
-        get: openedView,
-        set: openView,
-      },
-      inspector,
-      options,
-      bridge,
-      viewCache,
-      listenToNodeUpdates: nodeUpdates.listen,
-      listenToNodeUpdate(id: NodeID, fn: VoidFunction) {
-        return nodeUpdates.listen(updatedId => updatedId === id && fn())
-      },
-    }
-  },
-)
-
-export { Provider }
-
-export function useController() {
-  const ctx = useControllerCtx()
-  if (!ctx) {
-    throw new Error('ControllerContext was not provided')
   }
-  return ctx
+
+  //
+  // HOVERED NODE
+  //
+  const [clientHoveredNode, setClientHoveredNode] = createSignal<NodeID | null>(null)
+  const [extHoveredNode, setExtHoveredNode] = createSignal<{
+    type: 'element' | 'node'
+    id: NodeID
+  } | null>(null, { equals: (a, b) => a?.id === b?.id })
+
+  // highlight hovered element
+  createEffect(defer(extHoveredNode, bridge.output.HighlightElementChange.emit))
+
+  const hoveredId = createMemo(() => {
+    const extNode = extHoveredNode()
+    return extNode ? extNode.id : clientHoveredNode()
+  })
+  const isNodeHovered = createSelector<NodeID | null, NodeID>(hoveredId)
+
+  function toggleHoveredNode(id: NodeID, type: 'element' | 'node' = 'node', isHovered?: boolean) {
+    return setExtHoveredNode(p =>
+      p && p.id === id ? (isHovered ? p : null) : isHovered ? { id, type } : p,
+    )
+  }
+  function toggleHoveredElement(id: NodeID, isHovered?: boolean) {
+    return toggleHoveredNode(id, 'element', isHovered)
+  }
+
+  //
+  // OPENED MAIN VIEW
+  //
+  // * there is no need for different views now
+
+  const [openedView, setOpenedView] = createSignal<DevtoolsMainView>(DevtoolsMainView.Structure)
+  const viewCache = createViewCache()
+
+  function openView(view: DevtoolsMainView) {
+    setOpenedView(view)
+  }
+
+  createEffect(defer(openedView, bridge.output.ViewChange.emit))
+
+  //
+  // Node updates - signals and computations updating
+  //
+  const nodeUpdates = createEventBus<NodeID>()
+  bridge.input.NodeUpdates.listen(updated => updated.forEach(id => nodeUpdates.emit(id)))
+
+  //
+  // INSPECTOR
+  //
+  const inspector = createInspector({ bridge })
+
+  //
+  // Client events
+  //
+  bridge.input.ResetPanel.listen(() => {
+    setClientLocatorState(false)
+    setDevtoolsLocatorState(false)
+    inspector.setInspectedOwner(null)
+  })
+
+  bridge.input.HoveredComponent.listen(({ nodeId, state }) => {
+    setClientHoveredNode(p => (state ? nodeId : p && p === nodeId ? null : p))
+  })
+
+  bridge.input.InspectedComponent.listen(node => {
+    inspector.setInspectedOwner(node)
+    setDevtoolsLocatorState(false)
+  })
+
+  bridge.input.LocatorModeChange.listen(setClientLocatorState)
+
+  return {
+    locator: {
+      locatorEnabled,
+      setLocatorState: setDevtoolsLocatorState,
+    },
+    hovered: {
+      isNodeHovered,
+      hoveredId,
+      toggleHoveredNode,
+      toggleHoveredElement,
+    },
+    view: {
+      get: openedView,
+      set: openView,
+    },
+    inspector,
+    options,
+    bridge,
+    viewCache,
+    listenToNodeUpdates: nodeUpdates.listen,
+    listenToNodeUpdate(id: NodeID, fn: VoidFunction) {
+      return nodeUpdates.listen(updatedId => updatedId === id && fn())
+    },
+  }
 }
+
+export type Controller = ReturnType<typeof createController>
+
+const ControllerCtx = createContext<Controller>('ControllerCtx' as any as Controller)
+
+export const useController = () => useContext(ControllerCtx)

@@ -26,6 +26,12 @@ export function error(...args: any[]): undefined {
   return
 }
 
+export const remainder = (a: number, b: number): number => ((a % b) + b) % b
+
+export function wrap<T>(arr: readonly T[], index: number): T | undefined {
+  return arr[remainder(index, arr.length)]
+}
+
 export function formatTime(d: Date = new Date()): string {
   return (
     ('0' + d.getHours()).slice(-2) +

@@ -1,6 +1,7 @@
-import { useController } from '@/controller'
+import { useController, useDevtoolsOptions } from '@/controller'
 import { Icon, Scrollable, ToggleButton, ToggleTabs } from '@/ui'
 import { NodeID, NodeType, TreeWalkerMode } from '@solid-devtools/debugger/types'
+import { makeEventListener } from '@solid-primitives/event-listener'
 import { createShortcut } from '@solid-primitives/keyboard'
 import { createResizeObserver } from '@solid-primitives/resize-observer'
 import { useRemSize } from '@solid-primitives/styles'
@@ -63,7 +64,7 @@ const LocatorButton: Component = () => {
 }
 
 const Search: Component = () => {
-  const { options } = useController()
+  const options = useDevtoolsOptions()
   const structure = useStructure()
 
   const [value, setValue] = createSignal('')
@@ -176,11 +177,14 @@ const DisplayStructureTree: Component = () => {
 
   const [collapsed, setCollapsed] = createSignal(new WeakSet<Structure.Node>(), { equals: false })
 
-  const toggleCollapsed = (node: Structure.Node) =>
+  const isCollapsed = (node: Structure.Node) => collapsed().has(node)
+
+  const toggleCollapsed = (node: Structure.Node) => {
     setCollapsed(set => {
       set.delete(node) || set.add(node)
       return set
     })
+  }
 
   const ctx = useController()
   const { inspector, hovered } = ctx
@@ -330,6 +334,82 @@ const DisplayStructureTree: Component = () => {
     })
   })
 
+  /*
+    Keyboard navigation
+  */
+  if (ctx.options.useShortcuts) {
+    makeEventListener(document.body, 'keydown', e => {
+      if (e.target !== document.body) return
+
+      const { key } = e
+
+      if (key !== 'ArrowDown' && key !== 'ArrowUp' && key !== 'ArrowLeft' && key !== 'ArrowRight')
+        return
+
+      e.preventDefault()
+      e.stopPropagation()
+
+      const idx = inspectedIndex()
+      const nodeList = virtual().nodeList
+
+      switch (key) {
+        case 'ArrowDown':
+        case 'ArrowUp': {
+          const d = key === 'ArrowDown' ? 1 : -1
+          for (
+            let i = idx === -1 ? (key === 'ArrowDown' ? 0 : nodeList.length - 1) : idx + d;
+            i >= 0 && i < nodeList.length;
+            i += d
+          ) {
+            const node = nodeList[i]!
+            if (node.type === NodeType.Element) continue
+            inspector.setInspectedOwner(node.id)
+            break
+          }
+          break
+        }
+
+        case 'ArrowLeft': {
+          const node = nodeList[idx]!
+
+          if (!isCollapsed(node)) {
+            toggleCollapsed(node)
+            break
+          }
+
+          let parent = node.parent
+          while (parent) {
+            if (parent.type === NodeType.Element) parent = parent.parent
+            else {
+              inspector.setInspectedOwner(parent.id)
+              break
+            }
+          }
+          break
+        }
+
+        case 'ArrowRight': {
+          const node = nodeList[idx]!
+
+          if (isCollapsed(node)) {
+            toggleCollapsed(node)
+            break
+          }
+
+          let child = node.children[0]
+          while (child) {
+            if (child.type === NodeType.Element) child = child.children[0]
+            else {
+              inspector.setInspectedOwner(child.id)
+              break
+            }
+          }
+          break
+        }
+      }
+    })
+  }
+
   let container: HTMLElement
   return (
     <Scrollable
@@ -362,7 +442,7 @@ const DisplayStructureTree: Component = () => {
                     onHoverChange={state => hovered.toggleHoveredNode(id, 'node', state)}
                     onInspectChange={() => inspector.toggleInspectedOwner(id)}
                     toggleCollapsed={toggleCollapsed}
-                    isCollapsed={collapsed().has(data.node)}
+                    isCollapsed={isCollapsed(data.node)}
                   />
                 )
               }}
