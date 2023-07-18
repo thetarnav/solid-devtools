@@ -1,5 +1,11 @@
 # solid-devtools-shared
 
+## 0.12.1
+
+### Patch Changes
+
+- e8ae734: Add two utility functions
+
 ## 0.12.0
 
 ### Minor Changes

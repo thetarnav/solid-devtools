@@ -1,5 +1,14 @@
 # @solid-devtools/frontend
 
+## 0.9.3
+
+### Patch Changes
+
+- e8ae734: Add keyboard navigation to the structure view. (#248)
+- Updated dependencies [e8ae734]
+  - @solid-devtools/shared@0.12.1
+  - @solid-devtools/debugger@0.22.2
+
 ## 0.9.2
 
 ### Patch Changes
