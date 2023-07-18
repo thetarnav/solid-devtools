@@ -1,4 +1,4 @@
-import { useController } from '@/controller'
+import { useController, useDevtoolsOptions } from '@/controller'
 import { Icon, Scrollable, ToggleButton, ToggleTabs } from '@/ui'
 import { NodeID, NodeType, TreeWalkerMode } from '@solid-devtools/debugger/types'
 import { createEmitter } from '@solid-primitives/event-bus'
@@ -65,7 +65,7 @@ const LocatorButton: Component = () => {
 }
 
 const Search: Component = () => {
-  const { options } = useController()
+  const options = useDevtoolsOptions()
   const structure = useStructure()
 
   const [value, setValue] = createSignal('')
@@ -388,11 +388,13 @@ const DisplayStructureTree: Component = () => {
     })
   })
 
-  makeEventListener(
-    document.body,
-    'keydown',
-    preventDefault((e: KeyboardEvent) => keyDownEmitter.emit(e.key, e)),
-  )
+  if (ctx.options.useShortcuts) {
+    makeEventListener(
+      document.body,
+      'keydown',
+      preventDefault((e: KeyboardEvent) => keyDownEmitter.emit(e.key, e)),
+    )
+  }
 
   let container: HTMLElement
   return (
