@@ -38,11 +38,10 @@
     "@solid-devtools/debugger": "workspace:^",
     "@solid-devtools/shared": "workspace:^",
     "@solid-primitives/context": "^0.2.1",
-    "@solid-primitives/cursor": "^0.0.109",
-    "@solid-primitives/date": "^2.0.14",
+    "@solid-primitives/cursor": "^0.0.111",
+    "@solid-primitives/date": "^2.0.15",
     "@solid-primitives/event-bus": "^1.0.7",
     "@solid-primitives/event-listener": "^2.2.13",
-    "@solid-primitives/immutable": "^0.1.10",
     "@solid-primitives/jsx-parser": "^0.2.0",
     "@solid-primitives/keyboard": "^1.2.3",
     "@solid-primitives/keyed": "^1.2.0",
@@ -51,24 +50,23 @@
     "@solid-primitives/props": "^3.1.6",
     "@solid-primitives/range": "^0.1.14",
     "@solid-primitives/resize-observer": "^2.0.18",
-    "@solid-primitives/scheduled": "^1.3.2",
-    "@solid-primitives/static-store": "^0.0.2",
-    "@solid-primitives/styles": "^0.0.108",
+    "@solid-primitives/scheduled": "^1.4.0",
+    "@solid-primitives/static-store": "^0.0.4",
+    "@solid-primitives/styles": "^0.0.110",
     "@solid-primitives/timer": "^1.3.7",
     "@solid-primitives/utils": "^6.2.0",
-    "@vanilla-extract/css": "^1.11.0",
+    "@vanilla-extract/css": "^1.12.0",
     "@vanilla-extract/dynamic": "^2.0.3",
     "@vanilla-extract/private": "^1.0.3",
-    "clsx": "^1.2.1",
+    "clsx": "^2.0.0",
     "csstype": "^3.1.2",
     "solid-headless": "^0.13.1",
-    "solid-js": "^1.7.6",
-    "type-fest": "^3.11.1"
+    "solid-js": "^1.7.8"
   },
   "devDependencies": {
     "@vanilla-extract/esbuild-plugin": "^2.2.2",
     "autoprefixer": "^10.4.14",
-    "postcss": "^8.4.24"
+    "postcss": "^8.4.26"
   },
   "peerDependencies": {
     "solid-js": "^1.7.0"

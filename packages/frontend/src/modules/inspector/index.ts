@@ -10,7 +10,6 @@ import {
 } from '@solid-devtools/debugger/types'
 import { handleTupleUpdates } from '@solid-devtools/shared/primitives'
 import { splitOnColon, warn } from '@solid-devtools/shared/utils'
-import { shallowCopy } from '@solid-primitives/immutable'
 import { createStaticStore } from '@solid-primitives/static-store'
 import { defer } from '@solid-primitives/utils'
 import {
@@ -22,7 +21,6 @@ import {
   createSignal,
   mergeProps,
 } from 'solid-js'
-import { Writable } from 'type-fest'
 import type { DebuggerBridge } from '../../controller'
 import {
   DecodedValue,
@@ -34,36 +32,36 @@ import {
 
 export namespace Inspector {
   export type ValueItem = {
-    readonly itemId: ValueItemID
-    readonly extended: boolean
-    readonly setExtended: Setter<boolean>
-    readonly value: DecodedValue
-    readonly setValue: Setter<DecodedValue>
+    itemId: ValueItemID
+    extended: boolean
+    setExtended: Setter<boolean>
+    value: DecodedValue
+    setValue: Setter<DecodedValue>
   }
 
   export type Signal = ValueItem & {
-    readonly type: NodeType.Signal | NodeType.Memo | NodeType.Store
-    readonly name: string | undefined
-    readonly id: NodeID
+    type: NodeType.Signal | NodeType.Memo | NodeType.Store
+    name: string | undefined
+    id: NodeID
   }
 
   export type Prop = ValueItem & {
-    readonly getter: PropGetterState | false
-    readonly setGetter: Setter<PropGetterState>
+    getter: PropGetterState | false
+    setGetter: Setter<PropGetterState>
   }
 
   export type Props = {
-    readonly proxy: boolean
-    readonly record: { readonly [key: string]: Prop }
+    proxy: boolean
+    record: { [key: string]: Prop }
   }
 
   export type State = {
-    readonly name: string | null
-    readonly type: NodeType | null
-    readonly signals: { readonly [key: NodeID]: Signal }
-    readonly value: ValueItem | null
-    readonly props: Props | null
-    readonly location: string | null
+    name: string | null
+    type: NodeType | null
+    signals: { [key: NodeID]: Signal }
+    value: ValueItem | null
+    props: Props | null
+    location: string | null
   }
 
   export type Module = ReturnType<typeof createInspector>
@@ -140,7 +138,7 @@ function updateStore(
   const value = store.value
   if (!value) throw `updateStore: store node (${storeNodeId}) has no value`
 
-  const newValue = shallowCopy(value) as Record<string | number, DecodedValue>
+  const newValue = (Array.isArray(value) ? value.slice() : { ...value }) as { [key: string]: any }
 
   if (newRawValue === null) {
     delete newValue[property]
@@ -246,7 +244,7 @@ export default function createInspector({ bridge }: { bridge: DebuggerBridge }) 
             decodeValue(s.value, null, storeNodeMap),
           )
           return signals
-        }, {} as Writable<Inspector.State['signals']>),
+        }, {} as Inspector.State['signals']),
         value: raw.value
           ? createValueItem(ValueItemType.Value, decodeValue(raw.value, null, storeNodeMap))
           : null,
@@ -260,7 +258,7 @@ export default function createInspector({ bridge }: { bridge: DebuggerBridge }) 
                   p.getter,
                 )
                 return record
-              }, {} as Writable<Inspector.Props['record']>),
+              }, {} as Inspector.Props['record']),
             }
           : null,
       })

@@ -4,7 +4,6 @@ import { NodeID, SerializedDGraph } from '@solid-devtools/debugger/types'
 import { createHover } from '@solid-devtools/shared/primitives'
 import { assignInlineVars } from '@vanilla-extract/dynamic'
 import { Component, createContext, createMemo, For, Show, untrack, useContext } from 'solid-js'
-import { ReadonlyDeep } from 'type-fest'
 import { createDependencyGraph, Dgraph } from './dgraph'
 import * as styles from './graph.css'
 import { depthVar } from './graph.css'
@@ -17,11 +16,16 @@ export const useDgraph = () => {
   return ctx
 }
 
+type NodeOrder = {
+  flowOrder: readonly NodeID[]
+  depthMap: Readonly<Record<NodeID, number>>
+}
+
 function calculateNodeOrder(
   graph: SerializedDGraph.Graph,
   inspectedId: NodeID,
   inspectedNode: SerializedDGraph.Node,
-) {
+): NodeOrder {
   const depthGroups = new Map<number, NodeID[]>([[inspectedNode.depth, [inspectedId]]])
 
   // breadth-first traversal
@@ -126,7 +130,7 @@ const DgraphView: Component = () => {
   const { inspector, hovered } = ctx
   const dgraph = createDependencyGraph()
 
-  const order = createMemo<ReadonlyDeep<ReturnType<typeof calculateNodeOrder>> | null>(
+  const order = createMemo<NodeOrder | null>(
     (p = null) => {
       const graph = dgraph.graph()
       if (!graph) return null

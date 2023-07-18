@@ -9,7 +9,6 @@ import {
 } from '@solid-devtools/debugger/types'
 import { splitOnColon } from '@solid-devtools/shared/utils'
 import { batch, createSignal } from 'solid-js'
-import { Writable } from 'type-fest'
 
 export class StoreNodeMap {
   map = new Map<NodeID, { node: DecodedValue<ValueType.Store>; refs: number }>()
@@ -36,7 +35,7 @@ export class StoreNodeMap {
 }
 
 export type ObjectValueData = {
-  readonly value: Readonly<Record<string | number, DecodedValue>> | DecodedValue[] | null
+  readonly value: Record<string | number, DecodedValue> | DecodedValue[] | null
   readonly length: number
   readonly setValue: (
     newValue: number | Readonly<Record<string | number, DecodedValue>> | DecodedValue[],
@@ -122,7 +121,7 @@ function decode(index: number): DecodedValue {
           : Object.keys(data).length,
       )
       const initValue =
-        typeof data === 'number' ? null : (data.constructor() as Writable<ObjectValueData['value']>)
+        typeof data === 'number' ? null : (data.constructor() as ObjectValueData['value'])
       const [value, setActualValue] = createSignal<ObjectValueData['value']>(initValue)
 
       const valueObject: ObjectValueData = saveToMap(index, {

@@ -15,9 +15,9 @@
   },
   "devDependencies": {
     "@crxjs/vite-plugin": "2.0.0-beta.17",
-    "@types/chrome": "^0.0.228",
-    "rimraf": "^4.4.1",
-    "zip-a-folder": "^1.1.5"
+    "@types/chrome": "^0.0.241",
+    "rimraf": "^5.0.1",
+    "zip-a-folder": "^2.0.0"
   },
   "dependencies": {
     "@solid-devtools/debugger": "workspace:^",
@@ -25,7 +25,7 @@
     "@solid-devtools/shared": "workspace:^",
     "@solid-primitives/utils": "^6.2.0",
     "solid-devtools": "workspace:^",
-    "solid-js": "^1.7.6"
+    "solid-js": "^1.7.8"
   },
   "overrides": {
     "@crxjs/vite-plugin": {

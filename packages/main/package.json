@@ -107,19 +107,19 @@
   },
   "devDependencies": {
     "@babel/core": "^7.18.13",
-    "@babel/generator": "^7.22.3",
-    "@babel/parser": "^7.22.4",
-    "@babel/plugin-syntax-jsx": "^7.21.4",
-    "@babel/traverse": "^7.22.4",
+    "@babel/generator": "^7.22.9",
+    "@babel/parser": "^7.22.7",
+    "@babel/plugin-syntax-jsx": "^7.22.5",
+    "@babel/traverse": "^7.22.8",
     "@types/babel__core": "^7.20.1",
     "@types/babel__generator": "^7.6.4",
     "@types/babel__traverse": "^7.20.1",
     "solid-start": "^0.2.26"
   },
   "dependencies": {
-    "@babel/core": "^7.22.1",
-    "@babel/plugin-syntax-typescript": "^7.21.4",
-    "@babel/types": "^7.22.4",
+    "@babel/core": "^7.22.9",
+    "@babel/plugin-syntax-typescript": "^7.22.5",
+    "@babel/types": "^7.22.5",
     "@solid-devtools/debugger": "workspace:^",
     "@solid-devtools/shared": "workspace:^"
   },

@@ -2,7 +2,7 @@
 // colors: https://github.com/tailwindlabs/tailwindcss/blob/master/src/public/colors.js
 // spacing and other values: https://github.com/tailwindlabs/tailwindcss/blob/master/stubs/defaultConfig.stub.js
 
-import { UnionToIntersection } from 'type-fest'
+import type { UnionToIntersection } from '@solid-primitives/utils'
 
 const cyan = {
   50: '#ecfeff',
@@ -124,12 +124,15 @@ export type Spacing = Prettify<
   >
 >
 
-export const spacing = Object.keys(rawSpacing).reduce((acc, key) => {
-  const value = rawSpacing[key as keyof typeof rawSpacing]
-  acc[key] = value
-  acc[`-${key}`] = `-${value}`
-  return acc
-}, {} as Record<string, string>) as Spacing
+export const spacing = Object.keys(rawSpacing).reduce(
+  (acc, key) => {
+    const value = rawSpacing[key as keyof typeof rawSpacing]
+    acc[key] = value
+    acc[`-${key}`] = `-${value}`
+    return acc
+  },
+  {} as Record<string, string>,
+) as Spacing
 
 export const theme = {
   color: {
