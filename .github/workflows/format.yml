@@ -8,11 +8,13 @@ jobs:
   format:
     runs-on: ubuntu-latest
 
+    permissions:
+      # Give the default GITHUB_TOKEN write permission to commit and push the
+      # added or changed files to the repository.
+      contents: write
+
     steps:
       - uses: actions/checkout@v3
-        with:
-          # Personal access token is required to get around the protected main branch restriction
-          token: ${{ secrets.PAT }}
 
       - uses: pnpm/action-setup@v2.2.4
 
@@ -31,3 +33,5 @@ jobs:
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
           commit_message: 'Format'
+          # should match the file pattern in the format script
+          file_pattern: './{packages,examples}/**/*.{js,ts,json,css,tsx,jsx}'
