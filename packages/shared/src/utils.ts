@@ -26,12 +26,6 @@ export function error(...args: any[]): undefined {
     return
 }
 
-export const remainder = (a: number, b: number): number => ((a % b) + b) % b
-
-export function wrap<T>(arr: readonly T[], index: number): T | undefined {
-    return arr[remainder(index, arr.length)]
-}
-
 export function formatTime(d: Date = new Date()): string {
     return (
         ('0' + d.getHours()).slice(-2) +
@@ -98,33 +92,6 @@ export function pushToArrayProp<K extends PropertyKey, T>(
     return arr
 }
 
-export function mutateFilter<T, S extends T>(
-    array: T[],
-    predicate: (value: T, index: number, array: T[]) => value is S,
-): void
-export function mutateFilter<T>(
-    array: T[],
-    predicate: (value: T, index: number, array: T[]) => unknown,
-): void
-export function mutateFilter<T>(
-    array: T[],
-    predicate: (value: T, index: number, array: T[]) => unknown,
-): void {
-    const temp = array.filter(predicate)
-    array.length = 0
-    array.push.apply(array, temp)
-}
-
-export function mutateRemove<T>(array: T[], item: T): void {
-    array.splice(array.indexOf(item), 1)
-}
-
-export const dedupeArray = <T>(array: readonly T[]) => Array.from(new Set(array))
-
-/** Checks if both arrays contain the same values. Order doesn't matter. */
-export const arrayRefEquals = <T>(a: readonly T[], b: readonly T[]) =>
-    a === b || (a.length === b.length && a.every(e => b.includes(e)))
-
 /** function that trims too long string */
 export function trimString(str: string, maxLength: number): string {
     if (str.length <= maxLength) return str
@@ -163,11 +130,6 @@ export function whileArray<T, U>(
         current = toCheck[index++]!
     }
 }
-
-export const isRecord = (value: unknown): value is Record<string, unknown> =>
-    typeof value === 'object' && value !== null && Object.getPrototypeOf(value) === Object.prototype
-
-export const XOR = (a: unknown, b: unknown) => (a || b) && !(a && b)
 
 export type ToDyscriminatedUnion<
     T extends {},

@@ -1,4 +1,5 @@
 /* eslint-disable no-console */
+import { array } from '@nothing-but/utils'
 import {
     addSolidUpdateListener,
     getOwnerType,
@@ -13,7 +14,6 @@ import {
     removeValueUpdateObserver,
 } from '@solid-devtools/debugger'
 import { NodeType, Solid } from '@solid-devtools/debugger/types'
-import { arrayRefEquals, dedupeArray } from '@solid-devtools/shared/utils'
 import { Many, arrayEquals, asArray } from '@solid-primitives/utils'
 import { $PROXY, Accessor, createEffect, getOwner, on, onCleanup, untrack } from 'solid-js'
 import {
@@ -139,7 +139,7 @@ export function debugComputation(
             value => {
                 const timeElapsed = time()
                 removeValueUpdateObserver(owner, SYMBOL)
-                const sources = owner.sources ? dedupeArray(owner.sources) : []
+                const sources = owner.sources ? array.deduped(owner.sources) : []
 
                 logComputation(getComputationCreatedLabel(typeName, name, timeElapsed), {
                     owner: { type, typeName, name },
@@ -156,7 +156,7 @@ export function debugComputation(
     }
     // if debugComputation after the initial run of the computation
     // sources should be observed immediately
-    else observeSources(owner.sources ? dedupeArray(owner.sources) : [])
+    else observeSources(owner.sources ? array.deduped(owner.sources) : [])
 
     // monkey patch the "fn" callback to intercept every computation function execution
     interceptComputationRerun(owner, (fn, prev) => {
@@ -167,7 +167,7 @@ export function debugComputation(
         const value = fn()
         const elapsedTime = time()
 
-        const sources = owner.sources ? dedupeArray(owner.sources) : []
+        const sources = owner.sources ? array.deduped(owner.sources) : []
         logComputation(getComputationRerunLabel(name, elapsedTime), {
             owner: UNUSED,
             owned: owner.owned ?? [],
@@ -320,7 +320,7 @@ export function debugSignal(
                 state,
                 value,
                 prev,
-                trackObservers ? prevObservers : dedupeArray(signal.observers!),
+                trackObservers ? prevObservers : array.deduped(signal.observers!),
             )
         },
         SYMBOL,
@@ -329,8 +329,8 @@ export function debugSignal(
     if (trackObservers) {
         // Observers Change
         function logObserversChange() {
-            const observers = dedupeArray(actualObservers)
-            if (arrayRefEquals(observers, prevObservers)) return
+            const observers = array.deduped(actualObservers)
+            if (array.includesSameMembers(observers, prevObservers)) return
             logObservers(state.name, observers, prevObservers)
             prevObservers = [...observers]
             actualPrevObservers = [...actualObservers]

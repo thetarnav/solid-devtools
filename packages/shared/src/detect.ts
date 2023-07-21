@@ -1,3 +1,4 @@
+import 'solid-js'
 import { interceptPropertySet } from './utils'
 
 //

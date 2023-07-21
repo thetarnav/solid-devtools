@@ -24,46 +24,46 @@
     },
     "private": false,
     "sideEffects": false,
-    "main": "./dist/index.js",
-    "module": "./dist/index.js",
-    "types": "./dist/index.d.ts",
+    "main": "./dist/index/index.js",
+    "module": "./dist/index/index.js",
+    "types": "./dist/index/index.d.ts",
     "type": "module",
     "exports": {
         ".": {
             "import": {
-                "types": "./dist/index.d.ts",
-                "default": "./dist/index.js"
-            }
-        },
-        "./utils": {
-            "import": {
-                "types": "./dist/utils.d.ts",
-                "default": "./dist/utils.js"
-            }
-        },
-        "./primitives": {
-            "import": {
-                "types": "./dist/primitives.d.ts",
-                "default": "./dist/primitives.js"
+                "types": "./dist/index/index.d.ts",
+                "default": "./dist/index/index.js"
             }
         },
         "./detect": {
             "import": {
-                "types": "./dist/detect.d.ts",
-                "default": "./dist/detect.js"
+                "types": "./dist/detect/index.d.ts",
+                "default": "./dist/detect/index.js"
+            }
+        },
+        "./primitives": {
+            "import": {
+                "types": "./dist/primitives/index.d.ts",
+                "default": "./dist/primitives/index.js"
+            }
+        },
+        "./utils": {
+            "import": {
+                "types": "./dist/utils/index.d.ts",
+                "default": "./dist/utils/index.js"
             }
         }
     },
     "typesVersions": {
         "*": {
-            "utils": [
-                "./dist/utils.d.ts"
+            "detect": [
+                "./dist/detect/index.d.ts"
             ],
             "primitives": [
-                "./dist/primitives.d.ts"
+                "./dist/primitives/index.d.ts"
             ],
-            "detect": [
-                "./dist/detect.d.ts"
+            "utils": [
+                "./dist/utils/index.d.ts"
             ]
         }
     },
@@ -81,5 +81,6 @@
         "@solid-primitives/styles": "^0.0.110",
         "@solid-primitives/utils": "^6.2.0",
         "solid-js": "^1.7.8"
-    }
+    },
+    "browser": {}
 }

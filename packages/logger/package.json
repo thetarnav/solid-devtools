@@ -58,6 +58,7 @@
         "tsup": "^7.1.0"
     },
     "dependencies": {
+        "@nothing-but/utils": "^0.2.2",
         "@solid-devtools/debugger": "workspace:^",
         "@solid-devtools/shared": "workspace:^",
         "@solid-primitives/utils": "^6.2.0",

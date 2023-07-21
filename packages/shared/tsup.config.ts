@@ -1,15 +1,31 @@
+import fs from 'fs'
+import path from 'path'
 import { defineConfig } from 'tsup'
-import pkq from './package.json'
+import * as preset from 'tsup-preset-solid'
+import { CI } from '../../configs/tsup.config'
 
-const entryPaths = Object.keys(pkq.exports).map(path =>
-    path === '.' ? 'src/index.ts' : `src/${path.substring(2)}.ts`,
-)
+const src = path.resolve(__dirname, 'src')
+const entries = fs.readdirSync(src)
 
-export default defineConfig(config => ({
-    clean: config.watch ? false : true,
-    target: 'esnext',
-    platform: 'browser',
-    dts: { entry: entryPaths },
-    format: ['cjs', 'esm'],
-    entryPoints: entryPaths,
-}))
+export default defineConfig(config => {
+    const watching = !!config.watch
+
+    const parsed_options = preset.parsePresetOptions(
+        {
+            entries: entries.map(entry => ({ entry: path.join(src, entry) })),
+            drop_console: true,
+        },
+        watching,
+    )
+
+    if (!watching && !CI) {
+        const package_fields = preset.generatePackageExports(parsed_options)
+
+        /*
+            will update ./package.json with the correct export fields
+        */
+        preset.writePackageJson(package_fields)
+    }
+
+    return preset.generateTsupOptions(parsed_options)
+})

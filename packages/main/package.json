@@ -114,7 +114,7 @@
         "@types/babel__core": "^7.20.1",
         "@types/babel__generator": "^7.6.4",
         "@types/babel__traverse": "^7.20.1",
-        "solid-start": "^0.2.26"
+        "solid-start": "^0.2.27"
     },
     "dependencies": {
         "@babel/core": "^7.22.9",

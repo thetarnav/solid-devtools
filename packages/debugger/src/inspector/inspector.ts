@@ -1,5 +1,5 @@
+import { isPlainObject } from '@nothing-but/utils/misc'
 import { untrackedCallback } from '@solid-devtools/shared/primitives'
-import { isRecord } from '@solid-devtools/shared/utils'
 import { parseLocationString } from '../locator'
 import { NodeType, ValueItemType } from '../main/constants'
 import { ObjectType, getSdtId } from '../main/id'
@@ -253,7 +253,7 @@ function mapProps(props: Solid.Component['props']) {
                     value: encodeValue(desc.value, false),
                 }
                 // non-object props cannot be inspected (won't ever change and aren't deep)
-                if (Array.isArray(desc.value) || isRecord(desc.value))
+                if (Array.isArray(desc.value) || isPlainObject(desc.value))
                     ValueMap.add(id, () => desc.value)
             }
         }
