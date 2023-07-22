@@ -7,13 +7,23 @@ import { readFile } from 'fs/promises'
 import path from 'path'
 import { fileURLToPath } from 'url'
 import { Worker } from 'worker_threads'
+import { dependencies, peerDependencies } from '../package.json'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 const cwd = process.cwd()
 const isDev = process.argv.includes('--watch')
 
-const externals = ['@solid-devtools/debugger/setup']
+// const externals = ['@solid-devtools/debugger/setup']
+
+const externals = Object.keys(
+    (() => {
+        const deps: Record<string, string> = { ...peerDependencies, ...dependencies }
+        // @solid-devtools/frontend will be handled specially by the build plugin
+        delete deps['@solid-devtools/frontend']
+        return deps
+    })(),
+)
 
 const entryFile = path.resolve(cwd, `src/index.tsx`)
 
@@ -21,6 +31,11 @@ function customPlugin(output: string): esbuild.Plugin {
     return {
         name: 'custom',
         setup(build) {
+            // keep the js files from frontend package as external, but inline the .css
+            build.onResolve({ filter: /^@solid-devtools\/frontend/ }, data => {
+                return data.path.endsWith('.css') ? undefined : { external: true }
+            })
+
             // minify css during build
             if (!isDev) {
                 build.onLoad({ filter: /\.css$/ }, async args => {

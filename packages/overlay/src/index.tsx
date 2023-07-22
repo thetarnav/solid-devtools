@@ -1,21 +1,13 @@
 import '@solid-devtools/debugger/setup'
 
-import { useDebugger } from '@solid-devtools/debugger/bundled'
+import { createInternalRoot, useDebugger } from '@solid-devtools/debugger/bundled'
 import { Icon, MountIcons } from '@solid-devtools/frontend'
 import { useIsMobile, useIsTouch } from '@solid-devtools/shared/primitives'
 import { warn } from '@solid-devtools/shared/utils'
 import { createBodyCursor } from '@solid-primitives/cursor'
 import { makeEventListener } from '@solid-primitives/event-listener'
 import { clamp, tryOnCleanup } from '@solid-primitives/utils'
-import {
-    Component,
-    ComponentProps,
-    Show,
-    batch,
-    createComputed,
-    createRoot,
-    createSignal,
-} from 'solid-js'
+import { Component, ComponentProps, JSX, Show, batch, createComputed, createSignal } from 'solid-js'
 import { Dynamic, Portal } from 'solid-js/web'
 import { Devtools } from './controller'
 
@@ -23,27 +15,36 @@ import frontendStyles from '@solid-devtools/frontend/dist/index.css'
 import frontendUnoStyles from '@solid-devtools/frontend/dist/uno.css'
 import overlayStyles from './styles.css'
 
-let isAlreadyMounted = false
+export function DevtoolsOverlay(props: ComponentProps<typeof Overlay> = {}): JSX.Element {
+    attachDevtoolsOverlay(props)
+    return
+}
+
+export default DevtoolsOverlay
+
+declare global {
+    interface Window {
+        $$dispose_devtools_overlay: VoidFunction | undefined
+    }
+}
 
 export function attachDevtoolsOverlay(props: ComponentProps<typeof Overlay> = {}): VoidFunction {
-    if (isAlreadyMounted) {
+    if (window.$$dispose_devtools_overlay) {
         warn('Devtools overlay is already mounted')
-        return () => {}
+        window.$$dispose_devtools_overlay()
+        window.$$dispose_devtools_overlay = undefined
     }
-    isAlreadyMounted = true
-
-    let dispose: VoidFunction | undefined
 
     setTimeout(() => {
-        createRoot(_dispose => {
-            dispose = _dispose
+        createInternalRoot(_dispose => {
+            window.$$dispose_devtools_overlay = _dispose
             return <Overlay {...props} />
         })
     }, 500)
 
     return tryOnCleanup(() => {
-        isAlreadyMounted = false
-        dispose && dispose()
+        window.$$dispose_devtools_overlay?.()
+        window.$$dispose_devtools_overlay = undefined
     })
 }
 

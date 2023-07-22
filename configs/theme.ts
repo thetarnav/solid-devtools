@@ -2,6 +2,7 @@
 // colors: https://github.com/tailwindlabs/tailwindcss/blob/master/src/public/colors.js
 // spacing and other values: https://github.com/tailwindlabs/tailwindcss/blob/master/stubs/defaultConfig.stub.js
 
+import { misc } from '@nothing-but/utils'
 import type { Prettify, UnionToIntersection } from '@nothing-but/utils/types'
 
 const cyan = {
@@ -68,7 +69,7 @@ const lineHeight = {
     '6xl': '1',
 } as const
 
-const rawSpacing = {
+const raw_spacing = {
     px: '1px',
     0: '0',
     0.25: '0.0625rem', // 1px
@@ -108,21 +109,26 @@ const rawSpacing = {
     96: '24rem',
 } as const
 
+const raw_spacing_with_custom = {
+    ...raw_spacing,
+    header_height: raw_spacing[7],
+}
+
 export type Spacing = Prettify<
     UnionToIntersection<
         {
-            [K in keyof typeof rawSpacing]: {
-                [K2 in `-${K}`]: `-${(typeof rawSpacing)[K]}`
+            [K in keyof typeof raw_spacing_with_custom]: {
+                [K2 in `-${K}`]: `-${(typeof raw_spacing_with_custom)[K]}`
             } & {
-                [K2 in K]: (typeof rawSpacing)[K]
+                [K2 in K]: (typeof raw_spacing_with_custom)[K]
             }
-        }[keyof typeof rawSpacing]
+        }[keyof typeof raw_spacing_with_custom]
     >
 >
 
-export const spacing = Object.keys(rawSpacing).reduce(
+export const spacing = misc.keys(raw_spacing_with_custom).reduce(
     (acc, key) => {
-        const value = rawSpacing[key as keyof typeof rawSpacing]
+        const value = raw_spacing_with_custom[key]
         acc[key] = value
         acc[`-${key}`] = `-${value}`
         return acc

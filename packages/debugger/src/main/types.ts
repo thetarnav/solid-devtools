@@ -36,6 +36,7 @@ declare global {
               readonly Web: typeof WebAPI
               readonly DEV: NonNullable<typeof DEV>
               readonly getOwner: typeof getOwner
+              readonly createRoot: typeof SolidAPI.createRoot
               readonly getListener: typeof getListener
               readonly onCleanup: typeof onCleanup
               readonly $PROXY: typeof $PROXY

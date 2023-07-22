@@ -1,17 +1,17 @@
-/* @refresh reload */
-
 import { render } from 'solid-js/web'
-
 import App from './App'
+import { Overlay } from './Overlay'
 import { ThemeProvider } from './Theme'
 
 import 'uno.css'
 
-export const disposeApp = render(
-    () => (
+function Main() {
+    return (
         <ThemeProvider>
             <App />
+            <Overlay />
         </ThemeProvider>
-    ),
-    document.getElementById('root')!,
-)
+    )
+}
+
+render(() => <Main />, document.getElementById('root')!)

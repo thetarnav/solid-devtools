@@ -1,22 +1,6 @@
 import { createVar, style } from '@vanilla-extract/css'
-import { panelHeaderAfterEl } from './modules/structure/structure.css'
 import { createHoverBackground } from './ui/mixins'
 import { border, centerChild, flex, padding, rounded, spacing, transition, vars } from './ui/theme'
-
-export const root = style({
-    height: '100%',
-    display: 'grid',
-    gridTemplateRows: `${vars.panel.headerHeight} 1fr`,
-    gridTemplateColumns: '100%',
-})
-
-export const header = style([
-    panelHeaderAfterEl,
-    {
-        ...padding(0, 0, 0, 4),
-        ...flex('items-center'),
-    },
-])
 
 export const actions = (() => {
     const textOpacity = createVar()

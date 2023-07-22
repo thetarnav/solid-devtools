@@ -1,4 +1,3 @@
-/* @refresh reload */
 import {
     Component,
     createComponent,
@@ -16,7 +15,6 @@ import {
     Suspense,
 } from 'solid-js'
 import { createMutable } from 'solid-js/store'
-import { disposeApp } from './main'
 import Recursive from './Recursive'
 import { ThemeExample } from './Theme'
 import Todos from './Todos'
@@ -183,8 +181,8 @@ const App: Component = () => {
                         }, {})}
                     </Show>
                 </div>
-                <button onClick={() => disposeApp()}>Dispose whole application</button>
-                <br />
+                {/* <button onClick={() => disposeApp()}>Dispose whole application</button>
+                <br /> */}
                 <button onClick={() => setShowBroken(p => !p)}>
                     {showBroken() ? 'Hide' : 'Show'} broken component.
                 </button>

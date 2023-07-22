@@ -1,5 +1,4 @@
 import { warn } from '@solid-devtools/shared/utils'
-import { createRoot, getOwner } from 'solid-js'
 import { clearComponentRegistry } from './component-registry'
 import { NodeType } from './constants'
 import { ObjectType, getSdtId } from './id'
@@ -150,10 +149,10 @@ export function unobserveAllRoots(): void {
 /**
  * Sold's `createRoot` primitive that won't be tracked by the debugger.
  */
-export const createInternalRoot: typeof createRoot = (fn, detachedOwner) => {
+export const createInternalRoot: typeof SolidAPI.createRoot = (fn, detachedOwner) => {
     InternalRootCount++
-    const r = createRoot(dispose => {
-        ;(getOwner() as Solid.Root).isInternal = true
+    const r = SolidAPI.createRoot(dispose => {
+        ;(SolidAPI.getOwner() as Solid.Root).isInternal = true
         return fn(dispose)
     }, detachedOwner)
     InternalRootCount--

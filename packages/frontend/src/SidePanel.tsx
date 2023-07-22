@@ -4,6 +4,10 @@ import { useController } from './controller'
 import DgraphView from './modules/dependency/DgraphView'
 import InspectorView from './modules/inspector/Inspector'
 import * as styles from './side-panel.css'
+import theme from './ui/theme/new-theme'
+
+export const panel_header_el_border =
+    'content-empty absolute z-1 inset-x-0 top-full h-0.6px bg-panel-border'
 
 export const SidePanelCtx = createContext<{
     openPanel: Accessor<'inspector' | 'dgraph'>
@@ -31,8 +35,15 @@ export function createSidePanel() {
     function SidePanel() {
         return (
             <SidePanelCtx.Provider value={{ openPanel, setOpenPanel }}>
-                <div class={styles.root}>
-                    <header class={styles.header}>
+                <div
+                    class="h-full grid"
+                    style={{
+                        'grid-template-rows': `${theme.spacing.header_height} 1fr`,
+                        'grid-template-columns': '100%',
+                    }}
+                >
+                    <header class="relative pl-4 flex items-center">
+                        <div class={panel_header_el_border} />
                         <OwnerName name={state.name} type={state.type} isTitle />
                         <div class={styles.actions.container}>
                             {/* <button class={styles.actions.button}>
