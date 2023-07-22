@@ -20,6 +20,7 @@ import { Dynamic, Portal } from 'solid-js/web'
 import { Devtools } from './controller'
 
 import frontendStyles from '@solid-devtools/frontend/dist/index.css'
+import frontendUnoStyles from '@solid-devtools/frontend/dist/uno.css'
 import overlayStyles from './styles.css'
 
 let isAlreadyMounted = false
@@ -115,6 +116,7 @@ const Overlay: Component<{
             </div>
             <MountIcons />
             <style>{frontendStyles}</style>
+            <style>{frontendUnoStyles}</style>
             <style>{overlayStyles}</style>
         </Portal>
     )

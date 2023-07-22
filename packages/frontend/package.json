@@ -25,12 +25,14 @@
         "dist"
     ],
     "type": "module",
-    "main": "dist/index.cjs",
+    "main": "dist/index.js",
     "module": "dist/index.js",
     "types": "dist/index.d.ts",
     "scripts": {
-        "dev": "tsup --watch",
-        "build": "tsup",
+        "dev": "pnpm run build --watch",
+        "build": "pnpm run --filter frontend --parallel /build:.*/",
+        "build:code": "tsup",
+        "build:css": "unocss \"src/**/*.tsx\" -o dist/uno.css",
         "test": "vitest",
         "typecheck": "tsc --noEmit"
     },
@@ -64,6 +66,7 @@
         "solid-js": "^1.7.8"
     },
     "devDependencies": {
+        "@unocss/cli": "^0.53.6",
         "@vanilla-extract/esbuild-plugin": "^2.2.2",
         "autoprefixer": "^10.4.14",
         "postcss": "^8.4.27"

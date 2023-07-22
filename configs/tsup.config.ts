@@ -41,7 +41,7 @@ export default ({
                 entry: [entry, ...mappedAdditionalEntries],
             },
             target: 'esnext',
-            format: config.watch ? 'esm' : ['cjs', 'esm'],
+            format: 'esm',
             entry: [...baseEntries, ...mappedAdditionalEntries],
             esbuildPlugins:
                 extension === 'tsx' || jsx
