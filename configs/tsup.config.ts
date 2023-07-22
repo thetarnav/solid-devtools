@@ -6,8 +6,8 @@ export const CI =
     process.env['CI'] === 'true' ||
     process.env['CI'] === '"1"' ||
     process.env['GITHUB_ACTIONS'] === 'true' ||
-    process.env['GITHUB_ACTIONS'] === '"1"'
-!!process.env['TURBO_HASH']
+    process.env['GITHUB_ACTIONS'] === '"1"' ||
+    !!process.env['TURBO_HASH']
 
 export default ({
     extension = 'ts',

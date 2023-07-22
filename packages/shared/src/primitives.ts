@@ -126,7 +126,6 @@ export type Atom<T> = Accessor<T> & {
     peak(): T
     set(value: T): T
     update: Setter<T>
-    mutate(mutator: (value: T) => void): void
     trigger(): void
 }
 
@@ -145,10 +144,6 @@ export function atom<T>(initialValue: T, options?: SignalOptions<T>): Atom<T> {
     atom.trigger = () => {
         mutating = true
         setter(p => p)
-    }
-    atom.mutate = mutator => {
-        untrack(() => mutator(atom()))
-        atom.trigger()
     }
     atom.set = value => setter(() => value)
     atom.peak = () => untrack(atom)

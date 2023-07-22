@@ -247,11 +247,12 @@ const DisplayStructureTree: Component = () => {
 
         for (let i = 0; i < length; i++) {
             const node = nodeList[start + i]!
-            const prevDNode = prevMap[node.id]
+            const nodeAtom = prevMap[node.id]
             minLevel = Math.min(minLevel, node.level)
-            if (prevDNode) {
-                next[i] = prevDNode
-                prevDNode.set(node)
+
+            if (nodeAtom) {
+                next[i] = nodeAtom
+                nodeAtom.set(node)
             } else {
                 next[i] = atom(node)
             }
@@ -264,7 +265,7 @@ const DisplayStructureTree: Component = () => {
         equals: (a, b) => a == b || (Math.abs(b - a) < 7 && b != 0),
     })
 
-    // calculate node index in the collapsed list
+    // calculate node indexP in the collapsed list
     const getNodeIndexById = (id: NodeID) => {
         const nodeList = collapsedList()
         for (let i = 0; i < nodeList.length; i++) if (nodeList[i]!.id === id) return i
@@ -326,8 +327,8 @@ const DisplayStructureTree: Component = () => {
     })
 
     /*
-    Keyboard navigation
-  */
+        Keyboard navigation
+    */
     if (ctx.options.useShortcuts) {
         makeEventListener(document.body, 'keydown', e => {
             if (e.target !== document.body) return
