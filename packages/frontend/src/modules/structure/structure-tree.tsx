@@ -1,5 +1,8 @@
+import { hover_background, panel_header_el_border } from '@/SidePanel'
 import { useController, useDevtoolsOptions } from '@/controller'
 import { Icon, Scrollable, ToggleButton, ToggleTabs } from '@/ui'
+import { toggle_tab_color_var } from '@/ui/components/toggle-tabs/ToggleTabs'
+import * as theme from '@/ui/theme/new-theme'
 import { NodeID, NodeType, TreeWalkerMode } from '@solid-devtools/debugger/types'
 import { Atom, atom } from '@solid-devtools/shared/primitives'
 import { makeEventListener } from '@solid-primitives/event-listener'
@@ -7,7 +10,6 @@ import { createShortcut } from '@solid-primitives/keyboard'
 import { createResizeObserver } from '@solid-primitives/resize-observer'
 import { useRemSize } from '@solid-primitives/styles'
 import { defer } from '@solid-primitives/utils'
-import { assignInlineVars } from '@vanilla-extract/dynamic'
 import {
     Component,
     For,
@@ -21,7 +23,6 @@ import type { Structure } from '.'
 import createStructure from '.'
 import { OwnerPath } from './Path'
 import { OwnerNode } from './owner-node'
-import * as styles from './structure.css'
 import { getVirtualVars } from './virtual'
 
 const StructureContext = createContext<Structure.Module>()
@@ -32,13 +33,28 @@ export function useStructure() {
     return ctx
 }
 
+export const path_height = theme.spacing[4.5]
+export const row_height = theme.spacing[4.5]
+export const row_padding = theme.spacing[3.5]
+export const v_margin = theme.spacing[3]
+
+export const row_height_in_rem = theme.remValue(row_height)
+export const v_margin_in_rem = theme.remValue(v_margin)
+
 export default function StructureView() {
     const structure = createStructure()
 
     return (
         <StructureContext.Provider value={structure}>
-            <div class={styles.panelWrapper}>
-                <div class={styles.header}>
+            <div
+                class="relative h-full w-full overflow-hidden grid"
+                style={{
+                    'grid-template-rows': `${theme.spacing.header_height} 1fr ${path_height}`,
+                    'grid-template-columns': '100%',
+                }}
+            >
+                <div class="relative flex items-stretch">
+                    <div class={panel_header_el_border} />
                     <LocatorButton />
                     <Search />
                     <ToggleMode />
@@ -54,11 +70,11 @@ const LocatorButton: Component = () => {
     const { locator } = useController()
     return (
         <ToggleButton
-            class={styles.locatorButton}
+            class="shrink-0 w-7 h-7"
             onToggle={locator.setLocatorState}
             selected={locator.locatorEnabled()}
         >
-            <Icon.Select class={styles.locatorIcon} />
+            <Icon.Select class="w-4 h-4" />
         </ToggleButton>
     )
 }
@@ -74,15 +90,25 @@ const Search: Component = () => {
         structure.search('')
     }
 
+    const edge_container_base = 'edge-container-base absolute inset-y-1 center-child'
+    const icon_base = 'w-3.5 h-3.5 color-disabled'
+
     return (
         <form
-            class={styles.search.form}
+            class={`${hover_background} group border-x border-solid border-panel-2 grow relative overflow-hidden`}
             onSubmit={e => {
                 e.preventDefault()
                 structure.search(value())
             }}
             onReset={() => handleChange('')}
         >
+            <style>{
+                /*css*/ `
+                    .edge-container-base {
+                        height: calc(100% - ${theme.spacing[2]})
+                    }
+                `
+            }</style>
             <input
                 ref={input => {
                     if (options.useShortcuts) {
@@ -93,18 +119,26 @@ const Search: Component = () => {
                         })
                     }
                 }}
-                class={styles.search.input}
+                class="w-full text-lg px-6 transition-padding leading-9 placeholder:text-disabled group-focus-within:pl-2"
+                style={{
+                    height: theme.spacing.header_height,
+                }}
                 type="text"
                 placeholder="Search"
                 onInput={e => handleChange(e.currentTarget.value)}
                 onPaste={e => handleChange(e.currentTarget.value)}
             />
-            <div class={styles.search.iconContainer}>
-                <Icon.Search class={styles.search.icon} />
+            <div
+                class={`${edge_container_base} pointer-events-none left-0 pl-1.5 transition-transform group-focus-within:-translate-x-full`}
+            >
+                <Icon.Search class={icon_base} />
             </div>
             {value() && (
-                <button class={styles.search.clearButton} type="reset">
-                    <Icon.Close class={styles.search.clearIcon} />
+                <button
+                    class={`${hover_background} ${edge_container_base} right-1 px-.5 rounded`}
+                    type="reset"
+                >
+                    <Icon.Close class={icon_base} />
                 </button>
             )}
         </form>
@@ -121,16 +155,33 @@ const ToggleMode: Component = () => {
     }
 
     return (
-        <div class={styles.toggleMode.group}>
+        <div class="ml-auto h-full">
             <ToggleTabs
-                class={styles.toggleMode.list}
+                class="h-full"
                 active={structure.mode()}
                 onSelect={structure.changeTreeViewMode}
             >
                 {Option =>
                     [TreeWalkerMode.Components, TreeWalkerMode.Owners, TreeWalkerMode.DOM].map(
                         mode => (
-                            <Option for={mode} class={styles.toggleMode.tab[mode]}>
+                            <Option
+                                for={mode}
+                                class="group"
+                                style={{
+                                    [toggle_tab_color_var]:
+                                        mode === TreeWalkerMode.Owners
+                                            ? theme.vars.text.DEFAULT
+                                            : mode === TreeWalkerMode.DOM
+                                            ? theme.vars.dom
+                                            : theme.vars.component,
+                                }}
+                            >
+                                <div
+                                    class="w-2 h-2 rounded-full border border-solid opacity-60 transition-opacity group-hover:opacity-100 group-focus:opacity-100 group-[[aria-selected=true]]:opacity-100"
+                                    style={{
+                                        'border-color': `var(${toggle_tab_color_var})`,
+                                    }}
+                                />
                                 {tabsContentMap[mode]}
                             </Option>
                         ),
@@ -162,8 +213,8 @@ const DisplayStructureTree: Component = () => {
     const [containerScroll, setContainerScroll] = createSignal({ top: 0, height: 0 })
 
     const remSize = useRemSize()
-    const getContainerTopMargin = () => remSize() * styles.V_MARGIN_IN_REM
-    const getRowHeight = () => remSize() * styles.ROW_HEIGHT_IN_REM
+    const getContainerTopMargin = () => remSize() * v_margin_in_rem
+    const getRowHeight = () => remSize() * row_height_in_rem
 
     const updateScrollData = (el: HTMLElement) => {
         setContainerScroll({
@@ -416,15 +467,23 @@ const DisplayStructureTree: Component = () => {
             onScroll={e => updateScrollData(e.currentTarget)}
         >
             <div
-                class={styles.scrolledOuter}
-                style={assignInlineVars({
-                    [styles.treeLength]: virtual().fullLength.toString(),
-                    [styles.startIndex]: virtual().start.toString(),
-                    [styles.minLevel]: minLevel().toString(),
-                })}
+                class="box-content"
+                style={{
+                    padding: `${row_height} 0`,
+                    height: `calc(${virtual().fullLength} * ${row_height})`,
+                }}
             >
-                <div class={styles.scrolledInner}>
-                    <div class={styles.scrolledInner2}>
+                <div
+                    style={{
+                        transform: `translateY(calc(${virtual().start} * ${row_height}))`,
+                    }}
+                >
+                    <div
+                        style={{
+                            transition: 'margin-left 300ms',
+                            'margin-left': `calc(${minLevel()} * -${row_padding})`,
+                        }}
+                    >
                         <For each={virtual().list}>
                             {node => {
                                 const { id } = node.value

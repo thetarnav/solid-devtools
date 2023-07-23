@@ -1,5 +1,5 @@
 import { defineConfig, presetUno } from 'unocss'
-import theme from './configs/theme'
+import * as theme from './configs/theme'
 
 export default defineConfig({
     presets: [presetUno({ dark: 'media' })],

@@ -143,6 +143,12 @@ input {
 input[type='checkbox'] {
     margin: 0;
 }
+input[type='text'] {
+    outline: unset;
+    background: unset;
+    border: unset;
+    color: inherit;
+}
 *,
 *::before,
 *::after {

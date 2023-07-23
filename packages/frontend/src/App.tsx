@@ -2,7 +2,7 @@ import { Icon, Splitter } from '@/ui'
 import { Menu, MenuItem, Popover, PopoverButton, PopoverPanel } from 'solid-headless'
 import { Component, JSX, Show } from 'solid-js'
 import { createSidePanel } from './SidePanel'
-import StructureView from './modules/structure/Structure'
+import StructureView from './modules/structure/structure-tree'
 import theme, { toggle_button } from './ui/theme/new-theme'
 import { varsStyle } from './ui/theme/vars.css'
 

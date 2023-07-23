@@ -44,7 +44,7 @@ const gray = {
     900: '#18181b',
 } as const
 
-const fontSize = {
+export const fontSize = {
     xs: '0.5rem',
     sm: '0.625rem',
     base: '0.75rem',
@@ -54,7 +54,7 @@ const fontSize = {
     '3xl': '1.25rem',
 } as const
 
-const lineHeight = {
+export const lineHeight = {
     '3xs': '1rem',
     '2xs': '1rem',
     xs: '1rem',
@@ -136,18 +136,8 @@ export const spacing = misc.keys(raw_spacing_with_custom).reduce(
     {} as Record<string, string>,
 ) as Spacing
 
-export function hexToRgbValue(hex: string) {
-    var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex)
-    if (!result || !result[1] || !result[2] || !result[3]) return hex
-    const r = parseInt(result[1], 16),
-        g = parseInt(result[2], 16),
-        b = parseInt(result[3], 16)
-    return `${r} ${g} ${b}`
-}
-
-export function hexToRgb(hex: string, alpha?: number | string) {
-    const value = hexToRgbValue(hex)
-    return alpha === undefined ? `rgb(${value})` : `rgb(${value} / ${alpha})`
+export function remValue(value: `${number}rem`): number {
+    return +value.substring(0, value.length - 3)
 }
 
 export interface Var {
@@ -190,16 +180,13 @@ export const vars = {
             `1px solid ${gray[500]}`,
         ),
     },
-    disabled: {
-        DEFAULT: cssvar('disabled__color', gray[500], gray[400]),
-        value: cssvar('disabled__color_value', hexToRgbValue(gray[500]), hexToRgbValue(gray[400])),
-    },
+    disabled: cssvar('disabled__color', gray[500], gray[400]),
     text: {
         DEFAULT: cssvar('default-text-color', gray[900], gray[100]),
         light: cssvar('light-text-color', gray[800], gray[200]),
     },
-    component_name_color: cssvar('component_name_color', cyan[600], cyan[400]),
-    dom_color: cssvar('dom_color', amber[600], amber[500]),
+    component: cssvar('component-color', cyan[600], cyan[400]),
+    dom: cssvar('dom-color', amber[600], amber[500]),
 } as const
 
 export function make_var_styles(root_class: string) {
@@ -215,55 +202,54 @@ export function make_var_styles(root_class: string) {
     `
 }
 
-export default {
-    colors: {
-        inherit: 'inherit',
-        current: 'currentColor',
-        transparent: 'transparent',
-        black: '#000000',
-        white: '#ffffff',
-        cyan,
-        amber,
-        gray,
-        green: '#16a34a',
-        red: '#ef4444',
-        ...vars,
-    },
-    spacing,
-    easing: {
-        DEFAULT: 'cubic-bezier(0.4, 0, 0.2, 1)',
-        linear: 'linear',
-        in: 'cubic-bezier(0.4, 0, 1, 1)',
-        out: 'cubic-bezier(0, 0, 0.2, 1)',
-        'in-out': 'cubic-bezier(0.4, 0, 0.2, 1)',
-    },
-    radius: {
-        none: '0px',
-        sm: '0.125rem',
-        DEFAULT: '0.25rem',
-        md: '0.375rem',
-        lg: '0.5rem',
-        xl: '0.75rem',
-        '2xl': '1rem',
-        '3xl': '1.5rem',
-        full: '9999px',
-    },
-    duration: {
-        0: '0ms',
-        75: '75ms',
-        100: '100ms',
-        150: '150ms',
-        200: '200ms',
-        300: '300ms',
-        500: '500ms',
-        700: '700ms',
-        1000: '1000ms',
-    },
-    font: {
-        sans: "ui-sans-serif, -apple-system, BlinkMacSystemFont, Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji', 'Noto Color Emoji'",
-        serif: "ui-serif, Georgia, Cambria, 'Times New Roman', Times, serif",
-        mono: "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace",
-    },
-    fontSize,
-    lineHeight,
-} as const
+export const colors = {
+    inherit: 'inherit',
+    current: 'currentColor',
+    transparent: 'transparent',
+    black: '#000000',
+    white: '#ffffff',
+    cyan,
+    amber,
+    gray,
+    green: '#16a34a',
+    red: '#ef4444',
+    ...vars,
+}
+
+export const easing = {
+    DEFAULT: 'cubic-bezier(0.4, 0, 0.2, 1)',
+    linear: 'linear',
+    in: 'cubic-bezier(0.4, 0, 1, 1)',
+    out: 'cubic-bezier(0, 0, 0.2, 1)',
+    'in-out': 'cubic-bezier(0.4, 0, 0.2, 1)',
+}
+
+export const radius = {
+    none: '0px',
+    sm: '0.125rem',
+    DEFAULT: '0.25rem',
+    md: '0.375rem',
+    lg: '0.5rem',
+    xl: '0.75rem',
+    '2xl': '1rem',
+    '3xl': '1.5rem',
+    full: '9999px',
+}
+
+export const duration = {
+    0: '0ms',
+    75: '75ms',
+    100: '100ms',
+    150: '150ms',
+    200: '200ms',
+    300: '300ms',
+    500: '500ms',
+    700: '700ms',
+    1000: '1000ms',
+}
+
+export const font = {
+    sans: "ui-sans-serif, -apple-system, BlinkMacSystemFont, Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji', 'Noto Color Emoji'",
+    serif: "ui-serif, Georgia, Cambria, 'Times New Roman', Times, serif",
+    mono: "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace",
+}

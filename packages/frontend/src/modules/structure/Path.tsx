@@ -6,8 +6,8 @@ import { createHover } from '@solid-devtools/shared/primitives'
 import { createElementSize } from '@solid-primitives/resize-observer'
 import { useRemSize } from '@solid-primitives/styles'
 import { Component, createMemo } from 'solid-js'
-import { useStructure } from './Structure'
 import * as styles from './path.css'
+import { useStructure } from './structure-tree'
 
 export const OwnerPath: Component = () => {
     const { inspector, hovered } = useController()
