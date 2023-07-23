@@ -1,13 +1,20 @@
 import '@solid-devtools/debugger/setup'
 
-import { createInternalRoot, useDebugger } from '@solid-devtools/debugger/bundled'
+import { math } from '@nothing-but/utils'
+import { useDebugger } from '@solid-devtools/debugger/bundled'
 import { Icon, MountIcons } from '@solid-devtools/frontend'
 import { useIsMobile, useIsTouch } from '@solid-devtools/shared/primitives'
-import { warn } from '@solid-devtools/shared/utils'
 import { createBodyCursor } from '@solid-primitives/cursor'
 import { makeEventListener } from '@solid-primitives/event-listener'
-import { clamp, tryOnCleanup } from '@solid-primitives/utils'
-import { Component, ComponentProps, JSX, Show, batch, createComputed, createSignal } from 'solid-js'
+import {
+    Component,
+    ComponentProps,
+    Show,
+    batch,
+    createComputed,
+    createRoot,
+    createSignal,
+} from 'solid-js'
 import { Dynamic, Portal } from 'solid-js/web'
 import { Devtools } from './controller'
 
@@ -15,37 +22,19 @@ import frontendStyles from '@solid-devtools/frontend/dist/index.css'
 import frontendUnoStyles from '@solid-devtools/frontend/dist/uno.css'
 import overlayStyles from './styles.css'
 
-export function DevtoolsOverlay(props: ComponentProps<typeof Overlay> = {}): JSX.Element {
-    attachDevtoolsOverlay(props)
-    return
-}
-
-export default DevtoolsOverlay
-
-declare global {
-    interface Window {
-        $$dispose_devtools_overlay: VoidFunction | undefined
-    }
-}
-
 export function attachDevtoolsOverlay(props: ComponentProps<typeof Overlay> = {}): VoidFunction {
-    if (window.$$dispose_devtools_overlay) {
-        warn('Devtools overlay is already mounted')
-        window.$$dispose_devtools_overlay()
-        window.$$dispose_devtools_overlay = undefined
-    }
+    let dispose: VoidFunction | undefined
 
     setTimeout(() => {
-        createInternalRoot(_dispose => {
-            window.$$dispose_devtools_overlay = _dispose
+        createRoot(_dispose => {
+            dispose = _dispose
             return <Overlay {...props} />
         })
     }, 500)
 
-    return tryOnCleanup(() => {
-        window.$$dispose_devtools_overlay?.()
-        window.$$dispose_devtools_overlay = undefined
-    })
+    return () => {
+        dispose?.()
+    }
 }
 
 const Overlay: Component<{
@@ -75,7 +64,7 @@ const Overlay: Component<{
     makeEventListener(window, 'pointermove', e => {
         if (!dragging()) return
         const vh = window.innerHeight
-        setProgress(1 - clamp(e.y, 0, vh - 300) / vh)
+        setProgress(1 - math.clamp(e.y, 0, vh - 300) / vh)
     })
     makeEventListener(window, 'pointerup', setDragging.bind(void 0, false))
 

@@ -13,7 +13,6 @@ export default defineConfig(config => {
     const parsed_options = preset.parsePresetOptions(
         {
             entries: entries.map(entry => ({ entry: path.join(src, entry) })),
-            drop_console: true,
         },
         watching,
     )
