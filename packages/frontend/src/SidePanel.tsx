@@ -83,7 +83,7 @@ export function createSidePanel() {
                             </button>
                         </div>
                         <ToggleTabs
-                            class="border-l border-solid border-panel-2 h-full"
+                            class="b-l b-solid b-panel-2 h-full"
                             active={openPanel()}
                             onSelect={setOpenPanel}
                         >

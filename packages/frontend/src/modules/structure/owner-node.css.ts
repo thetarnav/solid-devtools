@@ -14,7 +14,10 @@ import {
 import { createVar, style } from '@vanilla-extract/css'
 import { CSSVarFunction } from '@vanilla-extract/private'
 import { Property } from 'csstype'
-import { rowHeight, rowPadding } from './structure.css'
+// import { rowHeight, rowPadding } from './structure.css'
+
+export const rowHeight = spacing[4.5]
+export const rowPadding = spacing[3.5]
 
 export const levelVar: CSSVarFunction = createVar()
 

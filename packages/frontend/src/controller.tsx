@@ -18,6 +18,8 @@ import { make_var_styles } from '../../../configs/theme'
 import { App } from './App'
 import createInspector from './modules/inspector'
 import type { Structure } from './modules/structure'
+import { highlight_element_style } from './modules/structure/owner-path'
+import { owner_path_styles } from './modules/structure/structure-tree'
 import { ErrorOverlay } from './ui'
 import { toggle_button_styles } from './ui/theme/new-theme'
 
@@ -100,10 +102,12 @@ export function createDevtools() {
             const controller = createController(bridge, options)
 
             return (
-                <div class={devtools_root_class}>
+                <div class={devtools_root_class + ' h-inherit'}>
                     <style>
                         {var_styles}
                         {toggle_button_styles}
+                        {highlight_element_style}
+                        {owner_path_styles}
                     </style>
                     <ErrorOverlay
                         footer={props.errorOverlayFooter}

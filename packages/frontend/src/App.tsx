@@ -44,7 +44,7 @@ const Options: Component = () => {
                     </PopoverButton>
                     <Show when={isOpen()}>
                         <PopoverPanel
-                            class="absolute z-9999 w-max top-0 right-full mr-2 p-2 rounded-md bg-panel-2 border border-solid border-panel-3"
+                            class="absolute z-9999 w-max top-0 right-full mr-2 p-2 rounded-md bg-panel-2 b b-solid b-panel-3"
                             on:keydown={(e: KeyboardEvent) =>
                                 e.key === 'Escape' && e.stopPropagation()
                             }
@@ -78,7 +78,7 @@ export const App: Component<{ headerSubtitle?: JSX.Element }> = props => {
                 'grid-template-rows': `${theme.spacing[10]} 1fr`,
             }}
         >
-            <header class="p-2 flex items-center gap-x-2 bg-panel-bg border-b border-solid border-panel-border text-text">
+            <header class="p-2 flex items-center gap-x-2 bg-panel-bg b-b b-solid b-panel-border text-text">
                 <div class="flex items-center gap-x-2">
                     <Icon.SolidWhite class="w-4 h-4 text-disabled" />
                     <div>

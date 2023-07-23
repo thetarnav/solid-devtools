@@ -21,8 +21,8 @@ import {
 } from 'solid-js'
 import type { Structure } from '.'
 import createStructure from '.'
-import { OwnerPath } from './Path'
 import { OwnerNode } from './owner-node'
+import { OwnerPath } from './owner-path'
 import { getVirtualVars } from './virtual'
 
 const StructureContext = createContext<Structure.Module>()
@@ -38,8 +38,18 @@ export const row_height = theme.spacing[4.5]
 export const row_padding = theme.spacing[3.5]
 export const v_margin = theme.spacing[3]
 
+export const path_height_in_rem = theme.remValue(path_height)
 export const row_height_in_rem = theme.remValue(row_height)
 export const v_margin_in_rem = theme.remValue(v_margin)
+
+export const owner_path_styles = /*css*/ `
+    .h-owner-path-height {
+        height: ${path_height};
+    }
+    .min-h-owner-path-height {
+        min-height: ${path_height};
+    }
+`
 
 export default function StructureView() {
     const structure = createStructure()
@@ -95,7 +105,7 @@ const Search: Component = () => {
 
     return (
         <form
-            class={`${hover_background} group border-x border-solid border-panel-2 grow relative overflow-hidden`}
+            class={`${hover_background} group b-x b-solid b-panel-2 grow relative overflow-hidden`}
             onSubmit={e => {
                 e.preventDefault()
                 structure.search(value())

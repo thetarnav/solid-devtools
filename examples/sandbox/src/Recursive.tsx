@@ -46,7 +46,7 @@ const Node: Component<NodeType> = props => {
     const addNode = useContext(RecursiveContext)
 
     return (
-        <div class="border-2 rounded-lg p-1 space-y-1 m-1">
+        <div class="b-2 rounded-lg p-1 space-y-1 m-1">
             <p>{nodeSignals.url.join(' > ')}</p>
             <For each={childrenProps.children}>
                 {node => {
