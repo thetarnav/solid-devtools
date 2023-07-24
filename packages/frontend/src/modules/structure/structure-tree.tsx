@@ -23,6 +23,7 @@ import type { Structure } from '.'
 import createStructure from '.'
 import { OwnerNode } from './owner-node'
 import { OwnerPath } from './owner-path'
+import { path_height, row_height, row_height_in_rem, row_padding, v_margin_in_rem } from './styles'
 import { getVirtualVars } from './virtual'
 
 const StructureContext = createContext<Structure.Module>()
@@ -32,24 +33,6 @@ export function useStructure() {
     if (!ctx) throw new Error('Structure context not found')
     return ctx
 }
-
-export const path_height = theme.spacing[4.5]
-export const row_height = theme.spacing[4.5]
-export const row_padding = theme.spacing[3.5]
-export const v_margin = theme.spacing[3]
-
-export const path_height_in_rem = theme.remValue(path_height)
-export const row_height_in_rem = theme.remValue(row_height)
-export const v_margin_in_rem = theme.remValue(v_margin)
-
-export const owner_path_styles = /*css*/ `
-    .h-owner-path-height {
-        height: ${path_height};
-    }
-    .min-h-owner-path-height {
-        min-height: ${path_height};
-    }
-`
 
 export default function StructureView() {
     const structure = createStructure()

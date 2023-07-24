@@ -1,4 +1,4 @@
-import { Component, ComponentProps, ParentComponent } from 'solid-js'
+import { Component, ComponentProps, JSX, ParentComponent } from 'solid-js'
 // import { AriaToggleButtonProps, createToggleButton } from "@solid-aria/button"
 import { Icon } from '@/ui'
 import { combineProps } from '@solid-primitives/props'
@@ -25,6 +25,7 @@ export const ToggleButton: ParentComponent<
 
 export const CollapseToggle: Component<{
     class?: string
+    style?: string | JSX.CSSProperties
     iconClass?: string
     isCollapsed: boolean
     onToggle?: (newState: boolean) => void
@@ -35,6 +36,7 @@ export const CollapseToggle: Component<{
             class={clsx(styles.Collapse.button, props.class, {
                 [styles.Collapse.defaultCollapsed]: props.defaultCollapsed,
             })}
+            style={props.style}
             aria-selected={props.isCollapsed}
             onClick={
                 props.onToggle &&

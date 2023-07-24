@@ -172,13 +172,9 @@ export const vars = {
         bg: cssvar('panel__bg', gray[50], gray[800]),
         border: cssvar('panel__border', gray[300], gray[600]),
     },
-    gray_highlight: {
-        color: cssvar('gray_highlight__color', gray[300], gray[600]),
-        border: cssvar(
-            'gray_highlight__border',
-            `1px solid ${gray[400]}`,
-            `1px solid ${gray[500]}`,
-        ),
+    highlight: {
+        bg: cssvar('gray_highlight__color', gray[300], gray[600]),
+        border: cssvar('gray_highlight__border', gray[400], gray[500]),
     },
     disabled: cssvar('disabled__color', gray[500], gray[400]),
     text: {

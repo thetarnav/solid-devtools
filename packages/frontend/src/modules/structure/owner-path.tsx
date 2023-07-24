@@ -7,19 +7,15 @@ import { createHover } from '@solid-devtools/shared/primitives'
 import { createElementSize } from '@solid-primitives/resize-observer'
 import { useRemSize } from '@solid-primitives/styles'
 import { Component, createMemo } from 'solid-js'
-import { path_height_in_rem, useStructure } from './structure-tree'
-
-export const highlight_color_var = '--highlight_color_var'
-export const highlight_opacity_var = '--highlight_opacity_var'
-
-export const highlight_container = 'relative z-1'
-export const highlight_element = `highlight_element absolute -z-1 inset-y-0 -inset-x-1 rounded transition-opacity`
-export const highlight_element_style = /*css*/ `
-    .highlight_element {
-        background-color: var(${highlight_color_var}, ${theme.vars.gray_highlight});
-        opacity: var(${highlight_opacity_var}, 0);
-    }
-`
+import { useStructure } from './structure-tree'
+import {
+    highlight_container,
+    highlight_element,
+    highlight_opacity_var,
+    path_height_class,
+    path_height_in_rem,
+    path_min_height_class,
+} from './styles'
 
 export const OwnerPath: Component = () => {
     const { inspector, hovered } = useController()
@@ -36,13 +32,14 @@ export const OwnerPath: Component = () => {
     })
 
     return (
-        <div class="relative w-full shrink-0 flex h-owner-path-height">
+        <div class={`relative w-full shrink-0 flex ${path_height_class}`}>
             <div
-                class="group
+                class={`group
                 absolute z-1 bottom-0 inset-x-0 w-full py-.25 px-2
                 overflow-hidden box-border flex items-end
                 bg-panel-bg b-t b-solid b-panel-border
-                h-owner-path-height min-h-owner-path-height hover:h-auto hover:pt-.5"
+                ${path_height_class} ${path_min_height_class}
+                hover:h-auto hover:pt-.5`}
             >
                 {expandable() && (
                     <div

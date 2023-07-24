@@ -11,7 +11,7 @@ export type ToggleTabsOptionProps<T> = (T extends string
     for: T
     class?: string
     children: JSX.Element
-    style?: string | JSX.CSSProperties | undefined
+    style?: string | JSX.CSSProperties
 }
 
 export const toggle_tab_color_var = '--toggle-tab-color'

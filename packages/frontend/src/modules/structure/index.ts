@@ -11,6 +11,8 @@ import { defer } from '@solid-primitives/utils'
 import { batch, createEffect, createMemo, createSelector, createSignal, untrack } from 'solid-js'
 import { reconcileStructure } from './reconcile'
 
+export * from './styles'
+
 export namespace Structure {
     export interface Node {
         id: NodeID
