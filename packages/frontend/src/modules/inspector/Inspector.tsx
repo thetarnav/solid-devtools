@@ -8,22 +8,25 @@ import {
     ValueType,
 } from '@solid-devtools/debugger/types'
 import { Entries } from '@solid-primitives/keyed'
-import { Component, For, JSX, Show, batch, createMemo, useContext } from 'solid-js'
+import { For, JSX, Show, batch, createMemo, useContext } from 'solid-js'
 import { ValueNode } from './ValueNode'
-import * as styles from './inspector.css'
+
+function GroupTitle(props: { children: JSX.Element }) {
+    return <h2 class="text-disabled mb-1 capitalize">{props.children}</h2>
+}
 
 function ListSignals<T>(props: { when: T; title: JSX.Element; children: JSX.Element }) {
     return (
         <Show when={props.when}>
             <div>
-                <h2 class={styles.h2}>{props.title}</h2>
+                <GroupTitle>{props.title}</GroupTitle>
                 <ul>{props.children}</ul>
             </div>
         </Show>
     )
 }
 
-const InspectorView: Component = () => {
+export function InspectorView(): JSX.Element {
     const { inspector, hovered } = useController()
     const { state } = inspector
 
@@ -44,7 +47,7 @@ const InspectorView: Component = () => {
 
     return (
         <Scrollable>
-            <div class={styles.content}>
+            <div class="min-w-full w-fit p-4 pb-14 flex flex-col gap-y-4">
                 <ListSignals
                     when={state.props && Object.keys(state.props.record).length}
                     title={<>Props {state.props!.proxy && <Badge>PROXY</Badge>}</>}
@@ -131,9 +134,9 @@ const InspectorView: Component = () => {
                 </ListSignals>
                 <Show when={state.value || state.location}>
                     <div>
-                        <h2 class={styles.h2}>
+                        <GroupTitle>
                             {state.type ? NODE_TYPE_NAMES[state.type] : 'Owner'}
-                        </h2>
+                        </GroupTitle>
                         {state.value && (
                             <ValueNode
                                 name="value"
@@ -166,5 +169,3 @@ const InspectorView: Component = () => {
         </Scrollable>
     )
 }
-
-export default InspectorView

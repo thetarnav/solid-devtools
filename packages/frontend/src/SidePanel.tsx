@@ -3,7 +3,7 @@ import clsx from 'clsx'
 import { Accessor, createContext, createEffect, createSignal, Match, Switch } from 'solid-js'
 import { useController } from './controller'
 import DgraphView from './modules/dependency/DgraphView'
-import InspectorView from './modules/inspector/Inspector'
+import { InspectorView } from './modules/inspector/Inspector'
 import theme from './ui/theme/new-theme'
 
 export const panel_header_el_border =
