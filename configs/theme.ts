@@ -109,9 +109,13 @@ const raw_spacing = {
     96: '24rem',
 } as const
 
+/*
+    Add here any custom spacing values to use in the theme.
+*/
 const raw_spacing_with_custom = {
     ...raw_spacing,
     header_height: raw_spacing[7],
+    inspector_row: raw_spacing[4.5],
 }
 
 export type Spacing = Prettify<

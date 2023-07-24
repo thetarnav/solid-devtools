@@ -2,20 +2,14 @@ import { useController } from '@/controller'
 import { Icon } from '@/ui'
 import { NodeTypeIcon } from '@/ui/components/Owner'
 import theme from '@/ui/theme/new-theme'
+import { highlight_container, highlight_element, highlight_opacity_var } from '@/ui/theme/styles'
 import { NodeType, UNKNOWN } from '@solid-devtools/debugger/types'
 import { createHover } from '@solid-devtools/shared/primitives'
 import { createElementSize } from '@solid-primitives/resize-observer'
 import { useRemSize } from '@solid-primitives/styles'
 import { Component, createMemo } from 'solid-js'
 import { useStructure } from './structure-tree'
-import {
-    highlight_container,
-    highlight_element,
-    highlight_opacity_var,
-    path_height_class,
-    path_height_in_rem,
-    path_min_height_class,
-} from './styles'
+import { path_height_class, path_height_in_rem, path_min_height_class } from './styles'
 
 export const OwnerPath: Component = () => {
     const { inspector, hovered } = useController()

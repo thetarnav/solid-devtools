@@ -5,7 +5,16 @@ export default defineConfig({
     presets: [presetUno({ dark: 'media' })],
     theme: {
         colors: theme.colors,
+
         spacing: theme.spacing,
+        height: theme.spacing,
+        minHeight: theme.spacing,
+        maxHeight: theme.spacing,
+        lineHeight: theme.spacing,
+        width: theme.spacing,
+        minWidth: theme.spacing,
+        maxWidth: theme.spacing,
+
         fontFamily: theme.font,
         fontSize: theme.fontSize,
     },

@@ -1,4 +1,6 @@
 import { CollapseToggle, Highlight, Icon } from '@/ui'
+import theme from '@/ui/theme/new-theme'
+import { highlight_container, highlight_element, highlight_opacity_var } from '@/ui/theme/styles'
 import { NodeID, UNKNOWN, ValueType } from '@solid-devtools/debugger/types'
 import { createHover, createPingedSignal } from '@solid-devtools/shared/primitives'
 import { Entries } from '@solid-primitives/keyed'
@@ -19,6 +21,10 @@ import {
 import * as styles from './ValueNode.css'
 import { DecodedValue, ObjectValueData, isValueNested } from './decode'
 
+const value_base = 'h-inspector_row font-500'
+const value_nullable = value_base + ' color-disabled'
+const value_function = value_base + ' font-italic'
+
 type ToggleElementHover = (elementId: NodeID, hovered?: boolean) => void
 
 const ValueContext = createContext<{ onElementHover?: ToggleElementHover; underStore: boolean }>()
@@ -26,7 +32,7 @@ const ValueContext = createContext<{ onElementHover?: ToggleElementHover; underS
 const CollapsableObjectPreview: Component<{
     value: NonNullable<ObjectValueData['value']>
 }> = props => (
-    <ul class={styles.collapsable.list}>
+    <ul class="w-full flex flex-col gap-.5">
         <Entries of={props.value}>
             {(key, _value) => {
                 const value = createMemo(_value)
@@ -68,12 +74,12 @@ const ObjectValuePreview: Component<{
                 <Show
                     when={props.data.length}
                     children={
-                        <span class={styles.baseValue}>
+                        <span class={value_base}>
                             {getObjectValueName(props.type)} [{props.data.length}]
                         </span>
                     }
                     fallback={
-                        <span class={styles.Nullable}>Empty {getObjectValueName(props.type)}</span>
+                        <span class={value_nullable}>Empty {getObjectValueName(props.type)}</span>
                     }
                 />
             }
@@ -81,51 +87,89 @@ const ObjectValuePreview: Component<{
     )
 }
 
+const string_value_class = 'string_value'
+const string_value = clsx(
+    string_value_class,
+    value_base,
+    'min-h-inspector_row h-fit max-w-fit text-green',
+)
+
+const value_element_container_class = 'value_element_container'
+const value_element_container = clsx(
+    value_element_container_class,
+    value_base,
+    highlight_container,
+    'text-dom',
+)
+
+export const value_node_styles = /*css*/ `
+    .${string_value_class}:before, .${string_value_class}:after {
+        content: '"';
+        color: ${theme.vars.disabled};
+    }
+
+    .${value_element_container_class}:before {
+        content: '<';
+        color: ${theme.vars.disabled};
+    }
+    .${value_element_container_class}:after {
+        content: '>';
+        color: ${theme.vars.disabled};
+    }
+    .${value_element_container_class}:hover {
+        ${highlight_opacity_var}: 0.6;
+    }
+`
+
 const ValuePreview: Component<{ value: DecodedValue; extended?: boolean }> = props => {
     return createMemo(() => {
         const value = props.value
         switch (value.type) {
             case ValueType.String:
-                return <span class={styles.ValueString}>"{value.value}"</span>
+                return <span class={string_value}>{value.value}</span>
             case ValueType.Number:
-                return <span class={styles.ValueNumber}>{value.value}</span>
+                return (
+                    <span class={value_base + ' min-h-inspector_row text-cyan-600'}>
+                        {value.value}
+                    </span>
+                )
             case ValueType.Boolean:
                 return (
                     <input
                         type="checkbox"
-                        class={styles.ValueBoolean}
+                        class={value_base + ' pointer-events-none'}
                         onClick={e => e.preventDefault()}
                         checked={value.value}
                     ></input>
                 )
             case ValueType.Null:
                 return (
-                    <span class={styles.Nullable}>
+                    <span class={value_nullable}>
                         {value.value === null ? 'null' : 'undefined'}
                     </span>
                 )
             case ValueType.Unknown:
-                return <span class={styles.Nullable}>unknown</span>
+                return <span class={value_nullable}>unknown</span>
             case ValueType.Function:
                 return (
-                    <span class={styles.ValueFunction}>
+                    <span class={value_function}>
                         {value.name ? `f ${value.name}()` : 'function()'}
                     </span>
                 )
             case ValueType.Getter:
-                return <span class={styles.ValueFunction}>get {value.name}()</span>
+                return <span class={value_function}>get {value.name}()</span>
             case ValueType.Symbol:
-                return <span class={styles.baseValue}>Symbol({value.name})</span>
+                return <span class={value_base}>Symbol({value.name})</span>
             case ValueType.Instance:
-                return <span class={styles.baseValue}>{value.name}</span>
+                return <span class={value_base}>{value.name}</span>
             case ValueType.Element: {
                 const { onElementHover: onHover } = useContext(ValueContext)!
 
                 const hoverProps = onHover && createHover(hovered => onHover(value.id, hovered))
 
                 return (
-                    <span class={styles.ValueElement.container} {...hoverProps}>
-                        <div class={styles.ValueElement.highlight} />
+                    <span class={value_element_container} {...hoverProps}>
+                        <div class={highlight_element} />
                         {value.name}
                     </span>
                 )
@@ -237,13 +281,18 @@ export const ValueNode: Component<{
                 </div>
             )}
 
-            <div class={styles.name.container} onClick={handleSelect}>
-                <div class={styles.name.name} data-signal={props.isSignal || ctx?.underStore}>
-                    <Highlight
-                        highlight={isUpdated && isUpdated()}
-                        isSignal
-                        class={styles.name.highlight}
-                    >
+            <div
+                class={clsx('flex items-center', isExtendable() && 'cursor-pointer')}
+                onClick={handleSelect}
+            >
+                <div
+                    class={clsx(
+                        'h-inspector_row min-w-5ch mr-2ch select-none truncate font-mono',
+                        props.isSignal || ctx?.underStore ? 'text-dom' : 'text-text-light',
+                        'after:content-[":"] after:color-disabled',
+                    )}
+                >
+                    <Highlight highlight={isUpdated && isUpdated()} isSignal class="inline-block">
                         {props.name || UNKNOWN}
                     </Highlight>
                 </div>

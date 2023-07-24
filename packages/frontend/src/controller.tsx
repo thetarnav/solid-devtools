@@ -17,9 +17,11 @@ import {
 import { make_var_styles } from '../../../configs/theme'
 import { App } from './App'
 import createInspector from './modules/inspector'
-import { highlight_element_style, owner_path_styles, type Structure } from './modules/structure'
+import { value_node_styles } from './modules/inspector/ValueNode'
+import { owner_path_styles, type Structure } from './modules/structure'
 import { ErrorOverlay } from './ui'
 import { toggle_button_styles } from './ui/theme/new-theme'
+import { highlight_styles } from './ui/theme/styles'
 
 // TODO: add to solid-primitives/event-bus
 type ToEventBusChannels<T extends Record<string, any>> = {
@@ -104,8 +106,9 @@ export function createDevtools() {
                     <style>
                         {var_styles}
                         {toggle_button_styles}
-                        {highlight_element_style}
+                        {highlight_styles}
                         {owner_path_styles}
+                        {value_node_styles}
                     </style>
                     <ErrorOverlay
                         footer={props.errorOverlayFooter}
