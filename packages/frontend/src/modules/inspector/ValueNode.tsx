@@ -18,7 +18,6 @@ import {
     untrack,
     useContext,
 } from 'solid-js'
-import * as styles from './ValueNode.css'
 import { DecodedValue, ObjectValueData, isValueNested } from './decode'
 
 const value_base = 'h-inspector_row font-500'
@@ -242,20 +241,40 @@ export const ValueNode: Component<{
 
     return (
         <li
-            class={clsx(styles.row.container, props.class)}
-            aria-current={props.isInspected}
-            data-hovered={isHovered()}
-            data-extended={isExtendable() ? props.isExtended : undefined}
-            data-stale={props.isStale}
+            class={clsx(
+                props.class,
+                highlight_container,
+                'flex flex-wrap items-start pl-2ch',
+                'font-mono leading-inspector_row',
+                props.isStale && 'opacity-60',
+            )}
             {...hoverProps}
         >
-            <div class={styles.row.highlight} />
+            <div
+                class={clsx(
+                    'absolute mt-.25 -inset-y-.25 -inset-x-1 b b-solid b-dom rounded',
+                    props.isInspected ? 'opacity-50' : 'opacity-0',
+                )}
+                style={{ 'mask-image': 'linear-gradient(90deg, black, transparent)' }}
+            />
+            <div
+                class={clsx(
+                    highlight_element,
+                    'b b-solid b-highlight-border',
+                    isHovered() ? 'opacity-30' : 'opacity-0',
+                )}
+            />
 
             {isExtendable() && (
-                <div class={styles.row.toggle.container}>
+                <div class="absolute -left-1 w-inspector_row h-inspector_row center-child">
                     <CollapseToggle
                         onToggle={handleSelect}
-                        class={styles.row.toggle.button}
+                        class={clsx(
+                            'transition-opacity',
+                            (isExtendable() && props.isExtended) || isHovered()
+                                ? 'opacity-100'
+                                : 'opacity-0',
+                        )}
                         isCollapsed={!props.isExtended}
                         defaultCollapsed
                     />
@@ -263,17 +282,26 @@ export const ValueNode: Component<{
             )}
 
             {props.actions && (
-                <div class={styles.actions.container}>
+                <div
+                    class={clsx(
+                        'absolute z-2 top-0 right-2 h-inspector_row',
+                        'flex justify-end items-center',
+                        'transition-opacity',
+                        isHovered()
+                            ? 'opacity-55 hover:opacity-80 active:opacity-100'
+                            : 'opacity-0',
+                    )}
+                >
                     <For each={props.actions}>
                         {action => {
                             const IconComponent = Icon[action.icon]
                             return (
                                 <button
                                     onClick={action.onClick}
-                                    class={styles.actions.button}
+                                    class="center-child"
                                     title={action.title}
                                 >
-                                    <IconComponent class={styles.actions.icon} />
+                                    <IconComponent class="h-4 w-4" />
                                 </button>
                             )
                         }}
