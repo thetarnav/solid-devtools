@@ -1,8 +1,6 @@
 import { useController } from '@/controller'
-import { Icon } from '@/ui'
+import { Icon, styles, theme } from '@/ui'
 import { Node_Type_Icon } from '@/ui/components/owner-name'
-import theme from '@/ui/theme/new-theme'
-import { highlight_container, highlight_element, highlight_opacity_var } from '@/ui/theme/styles'
 import { NodeType, UNKNOWN } from '@solid-devtools/debugger/types'
 import { createHover } from '@solid-devtools/shared/primitives'
 import { createElementSize } from '@solid-primitives/resize-observer'
@@ -58,10 +56,12 @@ export const OwnerPath: Component = () => {
                                     <Icon.CarretRight class="w-2 h-2 mb-[0.15rem] text-disabled" />
                                 </div>
                                 <div
-                                    class={`${highlight_container} h-3 py-0.25 my-0.25
+                                    class={`${styles.highlight_container} h-3 py-0.25 my-0.25
                                     flex items-center gap-x-1 cursor-pointer`}
                                     style={{
-                                        [highlight_opacity_var]: hovered.isNodeHovered(node.id)
+                                        [styles.highlight_opacity_var]: hovered.isNodeHovered(
+                                            node.id,
+                                        )
                                             ? '0.3'
                                             : '0',
                                     }}
@@ -69,7 +69,7 @@ export const OwnerPath: Component = () => {
                                     onClick={() => inspector.setInspectedOwner(node.id)}
                                 >
                                     <div
-                                        class={`${highlight_element} b b-solid b-gray-400 rounded-sm`}
+                                        class={`${styles.highlight_element} b b-solid b-gray-400 rounded-sm`}
                                     />
                                     {node.type === NodeType.Component ||
                                     node.type === NodeType.Element ? (

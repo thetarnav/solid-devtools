@@ -1,5 +1,4 @@
-import { Badge, CollapseToggle, createHighlightedOwnerName } from '@/ui'
-import theme from '@/ui/theme/new-theme'
+import { Badge, CollapseToggle, createHighlightedOwnerName, theme } from '@/ui'
 import { createHover } from '@solid-devtools/shared/primitives'
 import { Component } from 'solid-js'
 import type { Structure } from '.'

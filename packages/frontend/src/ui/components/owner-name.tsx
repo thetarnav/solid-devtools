@@ -1,9 +1,9 @@
+import { styles } from '@/ui'
 import { NodeType, UNKNOWN } from '@solid-devtools/debugger/types'
 import { createPingedSignal } from '@solid-devtools/shared/primitives'
 import clsx from 'clsx'
 import { Component, JSX, createMemo } from 'solid-js'
 import Icon, { IconComponent } from '../icons'
-import { tag_brackets } from '../styles'
 import { Highlight } from './highlight/Highlight'
 
 export function Node_Type_Icon(props: {
@@ -59,10 +59,10 @@ const name_classes = (frozen: boolean): string =>
     clsx(frozen && [strike_through_line, 'text-disabled'])
 
 const component_classes = (frozen: boolean): string =>
-    clsx(name_classes(frozen), tag_brackets, 'text-component')
+    clsx(name_classes(frozen), styles.tag_brackets, 'text-component')
 
 const element_classes = (frozen: boolean): string =>
-    clsx(name_classes(frozen), tag_brackets, 'text-dom')
+    clsx(name_classes(frozen), styles.tag_brackets, 'text-dom')
 
 const signal_classes = (frozen: boolean): string => clsx(name_classes(frozen), 'text-dom')
 

@@ -19,10 +19,7 @@ import { App } from './App'
 import createInspector from './modules/inspector'
 import { value_node_styles } from './modules/inspector/value-node'
 import { owner_path_styles, type Structure } from './modules/structure'
-import { ErrorOverlay } from './ui'
-import { tag_brackets_styles } from './ui/styles'
-import { toggle_button_styles } from './ui/theme/new-theme'
-import { highlight_styles } from './ui/theme/styles'
+import { ErrorOverlay, styles } from './ui'
 
 // TODO: add to solid-primitives/event-bus
 type ToEventBusChannels<T extends Record<string, any>> = {
@@ -106,11 +103,11 @@ export function createDevtools() {
                 <div class={devtools_root_class + ' h-inherit'}>
                     <style>
                         {var_styles}
-                        {toggle_button_styles}
-                        {highlight_styles}
+                        {styles.toggle_button_styles}
+                        {styles.highlight_styles}
                         {owner_path_styles}
                         {value_node_styles}
-                        {tag_brackets_styles}
+                        {styles.tag_brackets_styles}
                     </style>
                     <ErrorOverlay
                         footer={props.errorOverlayFooter}

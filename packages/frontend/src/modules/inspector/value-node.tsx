@@ -1,7 +1,4 @@
-import { CollapseToggle, Highlight, Icon } from '@/ui'
-import { tag_brackets } from '@/ui/styles'
-import theme from '@/ui/theme/new-theme'
-import { highlight_container, highlight_element, highlight_opacity_var } from '@/ui/theme/styles'
+import { CollapseToggle, Highlight, Icon, styles, theme } from '@/ui'
 import { NodeID, UNKNOWN, ValueType } from '@solid-devtools/debugger/types'
 import { createHover, createPingedSignal } from '@solid-devtools/shared/primitives'
 import { Entries } from '@solid-primitives/keyed'
@@ -97,9 +94,9 @@ const string_value = clsx(
 const value_element_container_class = 'value_element_container'
 const value_element_container = clsx(
     value_element_container_class,
-    tag_brackets,
+    styles.tag_brackets,
     value_base,
-    highlight_container,
+    styles.highlight_container,
     'text-dom',
 )
 
@@ -110,7 +107,7 @@ export const value_node_styles = /*css*/ `
     }
 
     .${value_element_container_class}:hover {
-        ${highlight_opacity_var}: 0.6;
+        ${styles.highlight_opacity_var}: 0.6;
     }
 `
 
@@ -162,7 +159,7 @@ const ValuePreview: Component<{ value: DecodedValue; extended?: boolean }> = pro
 
                 return (
                     <span class={value_element_container} {...hoverProps}>
-                        <div class={highlight_element} />
+                        <div class={styles.highlight_element} />
                         {value.name}
                     </span>
                 )
@@ -237,7 +234,7 @@ export const ValueNode: Component<{
         <li
             class={clsx(
                 props.class,
-                highlight_container,
+                styles.highlight_container,
                 'flex flex-wrap items-start pl-2ch',
                 'font-mono leading-inspector_row',
                 props.isStale && 'opacity-60',
@@ -253,7 +250,7 @@ export const ValueNode: Component<{
             />
             <div
                 class={clsx(
-                    highlight_element,
+                    styles.highlight_element,
                     'b b-solid b-highlight-border',
                     isHovered() ? 'opacity-30' : 'opacity-0',
                 )}

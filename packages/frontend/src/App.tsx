@@ -1,9 +1,8 @@
-import { Icon, Splitter } from '@/ui'
+import { Icon, Splitter, styles, theme } from '@/ui'
 import { Menu, MenuItem, Popover, PopoverButton, PopoverPanel } from 'solid-headless'
 import { Component, JSX, Show } from 'solid-js'
 import { createSidePanel } from './SidePanel'
 import StructureView from './modules/structure/structure-tree'
-import theme, { toggle_button } from './ui/theme/new-theme'
 import { varsStyle } from './ui/theme/vars.css'
 
 // const MainViewTabs: Component = () => {
@@ -38,7 +37,7 @@ const Options: Component = () => {
                 <>
                     <PopoverButton
                         onKeyDown={(e: KeyboardEvent) => e.key === ' ' && setState(true)}
-                        class={`${toggle_button} rounded-md ml-auto w-7 h-7`}
+                        class={`${styles.toggle_button} rounded-md ml-auto w-7 h-7`}
                     >
                         <Icon.Options class="w-4.5 h-4.5" />
                     </PopoverButton>

@@ -1,6 +1,5 @@
 import { useController } from '@/controller'
-import { createHighlightedOwnerName, Scrollable } from '@/ui'
-import theme from '@/ui/theme/new-theme'
+import { createHighlightedOwnerName, Scrollable, theme } from '@/ui'
 import { NodeID, SerializedDGraph } from '@solid-devtools/debugger/types'
 import { createHover } from '@solid-devtools/shared/primitives'
 import clsx from 'clsx'

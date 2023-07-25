@@ -1,4 +1,4 @@
-import theme from '@/ui/theme/new-theme'
+import { theme } from '@/ui'
 import { createJSXParser, createToken, resolveTokens } from '@solid-primitives/jsx-parser'
 import { combineStyle } from '@solid-primitives/props'
 import clsx from 'clsx'

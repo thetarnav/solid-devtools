@@ -11,3 +11,6 @@ export * as Splitter from './components/splitter/Splitter'
 export { ToggleTabs } from './components/toggle-tabs/ToggleTabs'
 export { Icon, MountIcons } from './icons'
 export type { IconComponent } from './icons'
+
+export * as theme from '../../../../configs/theme'
+export * as styles from './styles'
