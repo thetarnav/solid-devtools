@@ -9,7 +9,7 @@ import {
 } from '@solid-devtools/debugger/types'
 import { Entries } from '@solid-primitives/keyed'
 import { For, JSX, Show, batch, createMemo, useContext } from 'solid-js'
-import { ValueNode } from './ValueNode'
+import { ValueNode } from './value-node'
 
 function GroupTitle(props: { children: JSX.Element }) {
     return <h2 class="text-disabled mb-1 capitalize">{props.children}</h2>

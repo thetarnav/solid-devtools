@@ -60,7 +60,7 @@ export function createSidePanel() {
                 >
                     <header class="relative pl-4 flex items-center">
                         <div class={panel_header_el_border} />
-                        <OwnerName name={state.name} type={state.type} isTitle />
+                        <OwnerName name={state.name} type={state.type} is_title />
                         <div class="px-1 ml-auto flex items-center gap-x-1">
                             {/* <button class={styles.actions.button}>
                                 <Icon.Eye class={styles.actions.icon} />

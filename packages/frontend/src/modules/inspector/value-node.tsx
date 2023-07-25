@@ -1,4 +1,5 @@
 import { CollapseToggle, Highlight, Icon } from '@/ui'
+import { tag_brackets } from '@/ui/styles'
 import theme from '@/ui/theme/new-theme'
 import { highlight_container, highlight_element, highlight_opacity_var } from '@/ui/theme/styles'
 import { NodeID, UNKNOWN, ValueType } from '@solid-devtools/debugger/types'
@@ -96,6 +97,7 @@ const string_value = clsx(
 const value_element_container_class = 'value_element_container'
 const value_element_container = clsx(
     value_element_container_class,
+    tag_brackets,
     value_base,
     highlight_container,
     'text-dom',
@@ -107,14 +109,6 @@ export const value_node_styles = /*css*/ `
         color: ${theme.vars.disabled};
     }
 
-    .${value_element_container_class}:before {
-        content: '<';
-        color: ${theme.vars.disabled};
-    }
-    .${value_element_container_class}:after {
-        content: '>';
-        color: ${theme.vars.disabled};
-    }
     .${value_element_container_class}:hover {
         ${highlight_opacity_var}: 0.6;
     }

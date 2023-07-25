@@ -17,9 +17,10 @@ import {
 import { make_var_styles } from '../../../configs/theme'
 import { App } from './App'
 import createInspector from './modules/inspector'
-import { value_node_styles } from './modules/inspector/ValueNode'
+import { value_node_styles } from './modules/inspector/value-node'
 import { owner_path_styles, type Structure } from './modules/structure'
 import { ErrorOverlay } from './ui'
+import { tag_brackets_styles } from './ui/styles'
 import { toggle_button_styles } from './ui/theme/new-theme'
 import { highlight_styles } from './ui/theme/styles'
 
@@ -109,6 +110,7 @@ export function createDevtools() {
                         {highlight_styles}
                         {owner_path_styles}
                         {value_node_styles}
+                        {tag_brackets_styles}
                     </style>
                     <ErrorOverlay
                         footer={props.errorOverlayFooter}

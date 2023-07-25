@@ -68,7 +68,7 @@ export const OwnerNode: Component<{
                     onToggle={() => toggleCollapsed(props.owner)}
                     isCollapsed={props.isCollapsed}
                 />
-                <OwnerName name={name} type={type} isFrozen={props.owner.frozen} />
+                <OwnerName name={name} type={type} frozen={props.owner.frozen} />
                 {hmr && <Badge>HMR</Badge>}
             </div>
         </div>

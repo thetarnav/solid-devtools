@@ -1,6 +1,6 @@
 import { useController } from '@/controller'
 import { Icon } from '@/ui'
-import { NodeTypeIcon } from '@/ui/components/Owner'
+import { Node_Type_Icon } from '@/ui/components/owner-name'
 import theme from '@/ui/theme/new-theme'
 import { highlight_container, highlight_element, highlight_opacity_var } from '@/ui/theme/styles'
 import { NodeType, UNKNOWN } from '@solid-devtools/debugger/types'
@@ -83,7 +83,7 @@ export const OwnerPath: Component = () => {
                                             {node.name || UNKNOWN}
                                         </div>
                                     ) : (
-                                        <NodeTypeIcon
+                                        <Node_Type_Icon
                                             type={node.type}
                                             class="w-2.5 h-2.5 text-disabled"
                                         />
