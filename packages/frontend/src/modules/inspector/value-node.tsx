@@ -266,8 +266,8 @@ export const ValueNode: Component<{
                                 ? 'opacity-100'
                                 : 'opacity-0',
                         )}
-                        isCollapsed={!props.isExtended}
-                        defaultCollapsed
+                        collapsed={!props.isExtended}
+                        default_collapsed
                     />
                 </div>
             )}

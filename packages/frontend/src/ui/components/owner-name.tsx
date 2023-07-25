@@ -3,8 +3,8 @@ import { NodeType, UNKNOWN } from '@solid-devtools/debugger/types'
 import { createPingedSignal } from '@solid-devtools/shared/primitives'
 import clsx from 'clsx'
 import { Component, JSX, createMemo } from 'solid-js'
-import Icon, { IconComponent } from '../icons'
 import { Highlight } from './highlight/Highlight'
+import Icon, { IconComponent } from './icons'
 
 export function Node_Type_Icon(props: {
     type: NodeType | undefined | null

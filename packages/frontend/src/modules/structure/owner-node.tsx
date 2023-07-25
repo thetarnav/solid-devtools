@@ -65,7 +65,7 @@ export const OwnerNode: Component<{
                         opacity: props.isHovered || props.isSelected ? 1 : '',
                     }}
                     onToggle={() => toggleCollapsed(props.owner)}
-                    isCollapsed={props.isCollapsed}
+                    collapsed={props.isCollapsed}
                 />
                 <OwnerName name={name} type={type} frozen={props.owner.frozen} />
                 {hmr && <Badge>HMR</Badge>}
