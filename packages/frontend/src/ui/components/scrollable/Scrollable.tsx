@@ -64,19 +64,21 @@
 // }
 
 import { combineProps } from '@solid-primitives/props'
-import { ComponentProps, ParentComponent } from 'solid-js'
+import { ComponentProps, ParentComponent, splitProps } from 'solid-js'
 import * as styles from './scrollable.css'
 
 export const Scrollable: ParentComponent<
     ComponentProps<'div'> & { contentProps?: ComponentProps<'div'> }
 > = props => {
-    const containerProps = combineProps(props, {
+    const container_props = combineProps(props, {
         get class() {
             return styles.container.normal
         },
     })
 
-    const contentProps = combineProps(() => props.contentProps ?? {}, {
+    const [, container_props_without_content] = splitProps(container_props, ['contentProps'])
+
+    const content_props = combineProps(() => props.contentProps ?? {}, {
         get class() {
             return styles.content
         },
@@ -86,9 +88,9 @@ export const Scrollable: ParentComponent<
     })
 
     return (
-        <div {...containerProps}>
+        <div {...container_props_without_content}>
             <div class={styles.overlay.normal}></div>
-            <div {...contentProps} />
+            <div {...content_props} />
         </div>
     )
 }

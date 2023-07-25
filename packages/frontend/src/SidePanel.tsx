@@ -2,7 +2,7 @@ import { createHighlightedOwnerName, Icon, ToggleTabs } from '@/ui'
 import clsx from 'clsx'
 import { Accessor, createContext, createEffect, createSignal, Match, Switch } from 'solid-js'
 import { useController } from './controller'
-import DgraphView from './modules/dependency/DgraphView'
+import * as dgraph from './modules/dependency'
 import { InspectorView } from './modules/inspector/Inspector'
 import theme from './ui/theme/new-theme'
 
@@ -99,7 +99,7 @@ export function createSidePanel() {
                             <InspectorView />
                         </Match>
                         <Match when={openPanel() === 'dgraph'}>
-                            <DgraphView />
+                            <dgraph.Dgraph_View />
                         </Match>
                     </Switch>
                 </div>
