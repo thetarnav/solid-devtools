@@ -4,7 +4,7 @@ export * as theme from '../../../../configs/theme'
 export * as styles from './styles'
 
 export * from './components/badge'
-export * from './components/error-overlay/ErrorOverlay'
+export * from './components/error-overlay/error-overlay'
 export { Highlight } from './components/highlight'
 export { Icon, MountIcons } from './components/icons'
 export type { IconComponent } from './components/icons'
