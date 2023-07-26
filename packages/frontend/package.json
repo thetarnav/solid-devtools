@@ -58,11 +58,11 @@
         "@solid-primitives/timer": "^1.3.7",
         "@solid-primitives/utils": "^6.2.0",
         "clsx": "^2.0.0",
-        "solid-headless": "^0.13.1",
-        "solid-js": "^1.7.8"
+        "solid-headless": "^0.13.1"
     },
     "devDependencies": {
-        "@unocss/cli": "^0.53.6"
+        "@unocss/cli": "^0.53.6",
+        "solid-js": "^1.7.8"
     },
     "peerDependencies": {
         "solid-js": "^1.7.0"

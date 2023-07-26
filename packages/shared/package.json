@@ -79,7 +79,9 @@
         "@solid-primitives/scheduled": "^1.4.0",
         "@solid-primitives/static-store": "^0.0.4",
         "@solid-primitives/styles": "^0.0.110",
-        "@solid-primitives/utils": "^6.2.0",
+        "@solid-primitives/utils": "^6.2.0"
+    },
+    "devDependencies": {
         "solid-js": "^1.7.8"
     },
     "browser": {}
