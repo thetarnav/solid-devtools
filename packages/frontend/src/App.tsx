@@ -3,7 +3,6 @@ import { Menu, MenuItem, Popover, PopoverButton, PopoverPanel } from 'solid-head
 import { Component, JSX, Show } from 'solid-js'
 import { createSidePanel } from './SidePanel'
 import StructureView from './modules/structure/structure-tree'
-import { varsStyle } from './ui/theme/vars.css'
 
 // const MainViewTabs: Component = () => {
 //   const { view } = useController()
@@ -72,10 +71,8 @@ export const App: Component<{ headerSubtitle?: JSX.Element }> = props => {
 
     return (
         <div
-            class={`${varsStyle} h-full w-full overflow-hidden grid text-base font-sans bg-panel-bg text-text`}
-            style={{
-                'grid-template-rows': `${theme.spacing[10]} 1fr`,
-            }}
+            class="h-full w-full overflow-hidden grid text-base font-sans bg-panel-bg text-text"
+            style={{ 'grid-template-rows': `${theme.spacing[10]} 1fr` }}
         >
             <header class="p-2 flex items-center gap-x-2 bg-panel-bg b-b b-solid b-panel-border text-text">
                 <div class="flex items-center gap-x-2">
