@@ -1,5 +1,15 @@
 # @solid-devtools/overlay
 
+## 0.27.6
+
+### Patch Changes
+
+-   7409af5: Move solid-js out of dependencies (to peer)
+-   Updated dependencies [7409af5]
+    -   @solid-devtools/debugger@0.22.4
+    -   @solid-devtools/frontend@0.10.1
+    -   @solid-devtools/shared@0.12.3
+
 ## 0.27.5
 
 ### Patch Changes
