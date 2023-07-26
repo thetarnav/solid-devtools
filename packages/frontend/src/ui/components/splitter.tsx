@@ -1,6 +1,6 @@
 import { createBodyCursor } from '@solid-primitives/cursor'
 import { makeEventListener } from '@solid-primitives/event-listener'
-import { createJSXParser, createToken, resolveTokens } from '@solid-primitives/jsx-parser'
+import { createToken, resolveTokens } from '@solid-primitives/jsx-tokenizer'
 import { createMediaQuery } from '@solid-primitives/media'
 import { getPositionInElement } from '@solid-primitives/mouse'
 import { scheduleIdle } from '@solid-primitives/scheduled'
@@ -11,14 +11,14 @@ import { Index, JSX, batch, createComputed, createMemo, createSignal } from 'sol
 
 export type PanelProps = { children: JSX.Element }
 
-const Parser = createJSXParser<PanelProps>()
+const SplitterPanel = createToken<PanelProps>()
 
 const MIN_SIZE_IN_REM = 8
 const MIN_SIZE = `${MIN_SIZE_IN_REM}rem`
 const SPLIT_SIZE = '1px'
 
 function SplitterRoot(props: { children: JSX.Element }) {
-    const tokens = resolveTokens(Parser, () => props.children)
+    const tokens = resolveTokens(SplitterPanel, () => props.children)
 
     const isMobile = createMediaQuery('(max-width: 640px)')
     const isTouch = createMediaQuery('(hover: none)')
@@ -117,7 +117,5 @@ function SplitterRoot(props: { children: JSX.Element }) {
         </div>
     )
 }
-
-const SplitterPanel = createToken(Parser)
 
 export { SplitterPanel as Panel, SplitterRoot as Root }

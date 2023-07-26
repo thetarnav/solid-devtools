@@ -1,5 +1,5 @@
 import { theme } from '@/ui'
-import { createJSXParser, createToken, resolveTokens } from '@solid-primitives/jsx-parser'
+import { createToken, resolveTokens } from '@solid-primitives/jsx-tokenizer'
 import { combineStyle } from '@solid-primitives/props'
 import clsx from 'clsx'
 import { Component, For, JSX, createSelector } from 'solid-js'
@@ -26,10 +26,9 @@ export function ToggleTabs<T>(props: {
 }): JSX.Element {
     const isSelected = createSelector<T, T>(() => props.active)
 
-    const Parser = createJSXParser<ToggleTabsOptionProps<T>>()
-    const Option = createToken(Parser)
+    const Option = createToken<ToggleTabsOptionProps<T>>()
 
-    const tokens = resolveTokens(Parser, () => props.children(Option))
+    const tokens = resolveTokens(Option, () => props.children(Option))
 
     return (
         <div

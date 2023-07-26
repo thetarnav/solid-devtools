@@ -44,7 +44,7 @@
         "@solid-primitives/date": "^2.0.15",
         "@solid-primitives/event-bus": "^1.0.7",
         "@solid-primitives/event-listener": "^2.2.13",
-        "@solid-primitives/jsx-parser": "^0.2.0",
+        "@solid-primitives/jsx-tokenizer": "^1.0.6",
         "@solid-primitives/keyboard": "^1.2.3",
         "@solid-primitives/keyed": "^1.2.0",
         "@solid-primitives/media": "^2.2.3",

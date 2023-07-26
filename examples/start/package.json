@@ -9,14 +9,14 @@
     "type": "module",
     "main": "./dist/index.js",
     "devDependencies": {
-        "solid-start-node": "^0.2.27"
+        "solid-start-node": "^0.2.29"
     },
     "dependencies": {
         "@solid-devtools/overlay": "workspace:^",
-        "@solidjs/meta": "^0.28.5",
+        "@solidjs/meta": "^0.28.6",
         "@solidjs/router": "^0.8.2",
         "solid-devtools": "workspace:^",
-        "solid-start": "^0.2.27",
+        "solid-start": "^0.2.29",
         "undici": "^5.22.1"
     },
     "engines": {
