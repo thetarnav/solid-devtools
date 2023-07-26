@@ -7,7 +7,7 @@ export { Icon, MountIcons } from './components/icons'
 export type { IconComponent } from './components/icons'
 export { Skeleton } from './components/loading/Skeleton'
 export * from './components/owner-name'
-export { Scrollable } from './components/scrollable/Scrollable'
+export { Scrollable } from './components/scrollable'
 export * as Splitter from './components/splitter'
 
 export { CollapseToggle, ToggleButton } from './components/toggle-button'

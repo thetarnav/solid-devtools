@@ -20,6 +20,7 @@ import createInspector from './modules/inspector'
 import { value_node_styles } from './modules/inspector/value-node'
 import { owner_path_styles, type Structure } from './modules/structure'
 import { ErrorOverlay, styles } from './ui'
+import { custom_scrollbar_styles } from './ui/components/scrollable'
 
 // TODO: add to solid-primitives/event-bus
 type ToEventBusChannels<T extends Record<string, any>> = {
@@ -108,6 +109,7 @@ export function createDevtools() {
                         {owner_path_styles}
                         {value_node_styles}
                         {styles.tag_brackets_styles}
+                        {custom_scrollbar_styles}
                     </style>
                     <ErrorOverlay
                         footer={props.errorOverlayFooter}

@@ -28,6 +28,7 @@ export default defineConfig({
             }
         },
     ],
+    rules: [],
     shortcuts: {
         'center-child': 'flex items-center justify-center',
     },
