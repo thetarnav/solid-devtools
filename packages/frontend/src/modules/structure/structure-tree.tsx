@@ -1,7 +1,7 @@
 import { hover_background, panel_header_el_border } from '@/SidePanel'
 import { useController, useDevtoolsOptions } from '@/controller'
 import { Icon, Scrollable, ToggleButton, ToggleTabs, theme } from '@/ui'
-import { toggle_tab_color_var } from '@/ui/components/toggle-tabs/ToggleTabs'
+import { toggle_tab_color_var } from '@/ui/components/toggle-tabs'
 import { NodeID, NodeType, TreeWalkerMode } from '@solid-devtools/debugger/types'
 import { Atom, atom } from '@solid-devtools/shared/primitives'
 import { makeEventListener } from '@solid-primitives/event-listener'

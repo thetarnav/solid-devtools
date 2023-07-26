@@ -130,6 +130,7 @@ table {
 button {
     padding: 0;
     border: none;
+    border-width: 0;
     background: transparent;
     cursor: pointer;
     color: inherit;

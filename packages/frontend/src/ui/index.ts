@@ -11,7 +11,7 @@ export { Scrollable } from './components/scrollable/Scrollable'
 export * as Splitter from './components/splitter/Splitter'
 
 export { CollapseToggle, ToggleButton } from './components/toggle-button'
-export { ToggleTabs } from './components/toggle-tabs/ToggleTabs'
+export { ToggleTabs } from './components/toggle-tabs'
 
 export * as theme from '../../../../configs/theme'
 export * as styles from './styles'

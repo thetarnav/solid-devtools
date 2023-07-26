@@ -3,7 +3,6 @@ import { createJSXParser, createToken, resolveTokens } from '@solid-primitives/j
 import { combineStyle } from '@solid-primitives/props'
 import clsx from 'clsx'
 import { Component, For, JSX, createSelector } from 'solid-js'
-import * as styles from './toggle-tabs.css'
 
 export type ToggleTabsOptionProps<T> = (T extends string
     ? { title?: string }
@@ -14,6 +13,9 @@ export type ToggleTabsOptionProps<T> = (T extends string
     style?: string | JSX.CSSProperties
 }
 
+/**
+ * Controls the color of the tab background.
+ */
 export const toggle_tab_color_var = '--toggle-tab-color'
 
 export function ToggleTabs<T>(props: {
@@ -30,19 +32,32 @@ export function ToggleTabs<T>(props: {
     const tokens = resolveTokens(Parser, () => props.children(Option))
 
     return (
-        <div class={clsx(props.class, styles.list)} role="group">
+        <div
+            class={clsx(props.class, 'flex items-stretch divide-x divide-solid divide-panel-2')}
+            role="group"
+        >
             <For each={tokens()}>
                 {({ data }) => (
                     <button
-                        title={data.title ?? (data.for as string)}
-                        aria-selected={isSelected(data.for)}
-                        class={clsx(data.class, styles.item)}
+                        title={data.title ?? String(data.for)}
+                        class={clsx(
+                            data.class,
+                            'group relative p-x-2.5 center-child gap-x-1.5 outline-unset transition',
+                            isSelected(data.for) ? 'text-text' : 'text-disabled',
+                        )}
                         onClick={() => props.onSelect(data.for)}
                         style={combineStyle(
                             { [toggle_tab_color_var]: theme.vars.text.DEFAULT },
                             data.style ?? {},
                         )}
                     >
+                        <div
+                            class="absolute inset-0 -z-1 transition
+                            opacity-0 group-hover:opacity-20 group-focus:opacity-20"
+                            style={{
+                                background: `radial-gradient(circle at 50% 130%, var(${toggle_tab_color_var}), transparent 70%)`,
+                            }}
+                        />
                         {data.children}
                     </button>
                 )}
