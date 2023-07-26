@@ -14,13 +14,10 @@ import {
     onCleanup,
     useContext,
 } from 'solid-js'
-import { make_var_styles } from '../../../configs/theme'
 import { App } from './App'
 import createInspector from './modules/inspector'
-import { value_node_styles } from './modules/inspector/value-node'
-import { owner_path_styles, type Structure } from './modules/structure'
+import { type Structure } from './modules/structure'
 import { ErrorOverlay, styles } from './ui'
-import { custom_scrollbar_styles } from './ui/components/scrollable'
 
 // TODO: add to solid-primitives/event-bus
 type ToEventBusChannels<T extends Record<string, any>> = {
@@ -87,9 +84,6 @@ export function devtoolsPropsToOptions(props: DevtoolsProps): DevtoolsOptions {
     }
 }
 
-const devtools_root_class = 'devtools-root'
-const var_styles = make_var_styles(devtools_root_class)
-
 export function createDevtools() {
     const bridge = createDebuggerBridge()
 
@@ -101,16 +95,8 @@ export function createDevtools() {
             const controller = createController(bridge, options)
 
             return (
-                <div class={devtools_root_class + ' h-inherit'}>
-                    <style>
-                        {var_styles}
-                        {styles.toggle_button_styles}
-                        {styles.highlight_styles}
-                        {owner_path_styles}
-                        {value_node_styles}
-                        {styles.tag_brackets_styles}
-                        {custom_scrollbar_styles}
-                    </style>
+                <div class={styles.devtools_root_class + ' h-inherit'}>
+                    <styles.Styles />
                     <ErrorOverlay
                         footer={props.errorOverlayFooter}
                         catchWindowErrors={props.catchWindowErrors}

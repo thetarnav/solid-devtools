@@ -3,7 +3,7 @@ import { NodeType, UNKNOWN } from '@solid-devtools/debugger/types'
 import { createPingedSignal } from '@solid-devtools/shared/primitives'
 import clsx from 'clsx'
 import { Component, JSX, createMemo } from 'solid-js'
-import { Highlight } from './highlight/Highlight'
+import { Highlight } from './highlight'
 import Icon, { IconComponent } from './icons'
 
 export function Node_Type_Icon(props: {

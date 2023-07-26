@@ -1,4 +1,17 @@
+import { value_node_styles } from '@/modules/inspector/value-node'
+import { owner_path_styles } from '@/modules/structure'
 import { theme } from '@/ui'
+import { make_var_styles } from '../../../../configs/theme'
+import { highlight_styles } from './components/highlight'
+import { custom_scrollbar_styles } from './components/scrollable'
+import { toggle_button_styles } from './components/toggle-button'
+
+export {
+    highlight_color_var,
+    highlight_container,
+    highlight_element,
+    highlight_opacity_var,
+} from './components/highlight'
 
 export { toggle_button, toggle_button_styles } from './components/toggle-button'
 
@@ -15,14 +28,20 @@ export const tag_brackets_styles = /*css*/ `
     }
 `
 
-export const highlight_color_var = '--highlight_color_var'
-export const highlight_opacity_var = '--highlight_opacity_var'
+export const devtools_root_class = 'devtools-root'
 
-export const highlight_container = 'relative z-1'
-export const highlight_element = `highlight_element absolute -z-1 inset-y-0 -inset-x-1 rounded transition-opacity`
-export const highlight_styles = /*css*/ `
-    .highlight_element {
-        background-color: var(${highlight_color_var}, ${theme.vars.highlight.bg});
-        opacity: var(${highlight_opacity_var}, 0);
-    }
-`
+export function Styles() {
+    const var_styles = make_var_styles(devtools_root_class)
+
+    return (
+        <style>
+            {var_styles}
+            {toggle_button_styles}
+            {highlight_styles}
+            {owner_path_styles}
+            {value_node_styles}
+            {tag_brackets_styles}
+            {custom_scrollbar_styles}
+        </style>
+    )
+}

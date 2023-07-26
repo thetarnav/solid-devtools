@@ -306,7 +306,7 @@ export const ValueNode: Component<{
             >
                 <div
                     class={clsx(
-                        'h-inspector_row min-w-5ch mr-2ch select-none truncate font-mono',
+                        'h-inspector_row min-w-5ch mr-2ch select-none font-mono',
                         props.isSignal || ctx?.underStore ? 'text-dom' : 'text-text-light',
                         'after:content-[":"] after:color-disabled',
                     )}
