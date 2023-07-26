@@ -1,3 +1,4 @@
+import 'solid-js'
 import { interceptPropertySet } from './utils'
 
 //
@@ -12,49 +13,49 @@ export const SOLID_DEV_GLOBAL = 'Solid$$'
  */
 // code by @aquaductape
 export async function detectSolid(): Promise<boolean> {
-  if (detectSolidDev()) return true
+    if (detectSolidDev()) return true
 
-  const $hy = (window as any)._$HY as unknown
-  if ($hy && typeof $hy === 'object' && 'completed' in $hy && $hy.completed instanceof WeakSet)
-    return true
+    const $hy = (window as any)._$HY as unknown
+    if ($hy && typeof $hy === 'object' && 'completed' in $hy && $hy.completed instanceof WeakSet)
+        return true
 
-  const bodyFirstEl = document.body.firstElementChild
-  if (bodyFirstEl && bodyFirstEl.hasAttribute(DATA_HYDRATION_KEY)) return true
+    const bodyFirstEl = document.body.firstElementChild
+    if (bodyFirstEl && bodyFirstEl.hasAttribute(DATA_HYDRATION_KEY)) return true
 
-  const scripts = document.querySelectorAll('script')
-  const attributeHydrateKeyNameRegex = new RegExp(
-    `(?:has|get)Attribute\\(["']${DATA_HYDRATION_KEY}["']\\)`,
-  )
-
-  for (const script of scripts) {
-    if (script.textContent?.match(attributeHydrateKeyNameRegex)) return true
-    if (
-      script.type !== 'module' ||
-      script.crossOrigin !== 'anonymous' ||
-      script.src.match(/^chrome-extension/)
+    const scripts = document.querySelectorAll('script')
+    const attributeHydrateKeyNameRegex = new RegExp(
+        `(?:has|get)Attribute\\(["']${DATA_HYDRATION_KEY}["']\\)`,
     )
-      continue
 
-    const result = await fetch(script.src)
-    const text = await result.text()
-    if (text.match(/\$DX_DELEGATE/) || text.match(attributeHydrateKeyNameRegex)) return true
-  }
+    for (const script of scripts) {
+        if (script.textContent?.match(attributeHydrateKeyNameRegex)) return true
+        if (
+            script.type !== 'module' ||
+            script.crossOrigin !== 'anonymous' ||
+            script.src.match(/^chrome-extension/)
+        )
+            continue
 
-  return false
+        const result = await fetch(script.src)
+        const text = await result.text()
+        if (text.match(/\$DX_DELEGATE/) || text.match(attributeHydrateKeyNameRegex)) return true
+    }
+
+    return false
 }
 
 export function detectSolidDev(): boolean {
-  return !!window[SOLID_DEV_GLOBAL]
+    return !!window[SOLID_DEV_GLOBAL]
 }
 
 export function onSolidDevDetect(callback: () => void): void {
-  if (detectSolidDev()) queueMicrotask(callback)
-  else
-    interceptPropertySet(
-      window,
-      SOLID_DEV_GLOBAL,
-      value => value === true && queueMicrotask(callback),
-    )
+    if (detectSolidDev()) queueMicrotask(callback)
+    else
+        interceptPropertySet(
+            window,
+            SOLID_DEV_GLOBAL,
+            value => value === true && queueMicrotask(callback),
+        )
 }
 
 //
@@ -64,15 +65,15 @@ export function onSolidDevDetect(callback: () => void): void {
 export const SOLID_DEVTOOLS_GLOBAL = 'SolidDevtools$$'
 
 export function detectSolidDevtools(): boolean {
-  return !!(window as any)[SOLID_DEVTOOLS_GLOBAL]
+    return !!(window as any)[SOLID_DEVTOOLS_GLOBAL]
 }
 
 export function onSolidDevtoolsDetect(callback: () => void): void {
-  if (detectSolidDevtools()) queueMicrotask(callback)
-  else
-    interceptPropertySet(
-      window as any,
-      SOLID_DEVTOOLS_GLOBAL,
-      value => value && queueMicrotask(callback),
-    )
+    if (detectSolidDevtools()) queueMicrotask(callback)
+    else
+        interceptPropertySet(
+            window as any,
+            SOLID_DEVTOOLS_GLOBAL,
+            value => value && queueMicrotask(callback),
+        )
 }

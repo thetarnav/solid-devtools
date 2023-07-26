@@ -1,9 +1,8 @@
-import { Icon, Splitter } from '@/ui'
+import { Icon, Splitter, styles, theme } from '@/ui'
 import { Menu, MenuItem, Popover, PopoverButton, PopoverPanel } from 'solid-headless'
 import { Component, JSX, Show } from 'solid-js'
-import * as styles from './App.css'
 import { createSidePanel } from './SidePanel'
-import StructureView from './modules/structure/Structure'
+import StructureView from './modules/structure/structure-tree'
 
 // const MainViewTabs: Component = () => {
 //   const { view } = useController()
@@ -31,67 +30,75 @@ import StructureView from './modules/structure/Structure'
 // }
 
 const Options: Component = () => {
-  return (
-    <Popover defaultOpen={false} class={styles.options.container}>
-      {({ isOpen, setState }) => (
-        <>
-          <PopoverButton
-            onKeyDown={(e: KeyboardEvent) => e.key === ' ' && setState(true)}
-            class={styles.options.button}
-          >
-            <Icon.Options class={styles.options.icon} />
-          </PopoverButton>
-          <Show when={isOpen()}>
-            <PopoverPanel
-              class={styles.options.panel}
-              on:keydown={(e: KeyboardEvent) => e.key === 'Escape' && e.stopPropagation()}
-            >
-              <Menu class={styles.options.menu}>
-                <MenuItem
-                  as="a"
-                  href="https://github.com/thetarnav/solid-devtools/issues"
-                  target="_blank"
-                >
-                  Report a bug
-                </MenuItem>
-              </Menu>
-            </PopoverPanel>
-          </Show>
-        </>
-      )}
-    </Popover>
-  )
+    return (
+        <Popover defaultOpen={false} class="relative ml-auto">
+            {({ isOpen, setState }) => (
+                <>
+                    <PopoverButton
+                        onKeyDown={(e: KeyboardEvent) => e.key === ' ' && setState(true)}
+                        class={`${styles.toggle_button} rounded-md ml-auto w-7 h-7`}
+                    >
+                        <Icon.Options class="w-4.5 h-4.5" />
+                    </PopoverButton>
+                    <Show when={isOpen()}>
+                        <PopoverPanel
+                            class="absolute z-9999 w-max top-0 right-full mr-2 p-2 rounded-md bg-panel-2 b b-solid b-panel-3"
+                            on:keydown={(e: KeyboardEvent) =>
+                                e.key === 'Escape' && e.stopPropagation()
+                            }
+                        >
+                            <Menu class="flex flex-col items-stretch gap-2">
+                                <MenuItem
+                                    as="a"
+                                    href="https://github.com/thetarnav/solid-devtools/issues"
+                                    target="_blank"
+                                    class="text-text"
+                                >
+                                    Report a bug
+                                </MenuItem>
+                            </Menu>
+                        </PopoverPanel>
+                    </Show>
+                </>
+            )}
+        </Popover>
+    )
 }
 
 export const App: Component<{ headerSubtitle?: JSX.Element }> = props => {
-  // side panel is created here to keep the state between renders
-  const sidePanel = createSidePanel()
+    // side panel is created here to keep the state between renders
+    const sidePanel = createSidePanel()
 
-  return (
-    <div class={styles.app}>
-      <header class={styles.header.header}>
-        <div class={styles.header.identity}>
-          <Icon.SolidWhite class={styles.header.logo} />
-          <div>
-            <h3>Solid Developer Tools</h3>
-            {props.headerSubtitle && <p class={styles.header.subtitle}>{props.headerSubtitle}</p>}
-          </div>
+    return (
+        <div
+            class="h-full w-full overflow-hidden grid text-base font-sans bg-panel-bg text-text"
+            style={{ 'grid-template-rows': `${theme.spacing[10]} 1fr` }}
+        >
+            <header class="p-2 flex items-center gap-x-2 bg-panel-bg b-b b-solid b-panel-border text-text">
+                <div class="flex items-center gap-x-2">
+                    <Icon.SolidWhite class="w-4 h-4 text-disabled" />
+                    <div>
+                        <h3>Solid Developer Tools</h3>
+                        {props.headerSubtitle && (
+                            <p class="text-disabled font-mono text-sm">{props.headerSubtitle}</p>
+                        )}
+                    </div>
+                </div>
+                {/* <MainViewTabs /> */}
+                <Options />
+            </header>
+            <div class="overflow-hidden">
+                <Splitter.Root>
+                    <Splitter.Panel>
+                        <StructureView />
+                    </Splitter.Panel>
+                    {sidePanel.isOpen() && (
+                        <Splitter.Panel>
+                            <sidePanel.SidePanel />
+                        </Splitter.Panel>
+                    )}
+                </Splitter.Root>
+            </div>
         </div>
-        {/* <MainViewTabs /> */}
-        <Options />
-      </header>
-      <div class={styles.content}>
-        <Splitter.Root>
-          <Splitter.Panel>
-            <StructureView />
-          </Splitter.Panel>
-          {sidePanel.isOpen() && (
-            <Splitter.Panel>
-              <sidePanel.SidePanel />
-            </Splitter.Panel>
-          )}
-        </Splitter.Root>
-      </div>
-    </div>
-  )
+    )
 }

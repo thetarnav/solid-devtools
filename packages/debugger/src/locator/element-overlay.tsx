@@ -6,64 +6,64 @@ import { Portal } from 'solid-js/web'
 import { LocatorComponent } from './find-components'
 
 export function createElementsOverlay(selected: Accessor<LocatorComponent[]>) {
-  const useElementOverlay = createRootPool((component: Accessor<LocatorComponent>, active) => (
-    <ElementOverlay component={active() ? component() : null} />
-  ))
-
-  // wait a second to let the framework mess with the document before attaching the overlay
-  const owner = getOwner()!
-  setTimeout(() => {
-    runWithOwner(owner, () => (
-      <Portal useShadow mount={document.documentElement}>
-        <div>{selected().map(useElementOverlay)}</div>
-      </Portal>
+    const useElementOverlay = createRootPool((component: Accessor<LocatorComponent>, active) => (
+        <ElementOverlay component={active() ? component() : null} />
     ))
-  }, 1000)
+
+    // wait a second to let the framework mess with the document before attaching the overlay
+    const owner = getOwner()!
+    setTimeout(() => {
+        runWithOwner(owner, () => (
+            <Portal useShadow mount={document.documentElement}>
+                <div>{selected().map(useElementOverlay)}</div>
+            </Portal>
+        ))
+    }, 1000)
 }
 
 const ElementOverlay: Component<{ component: LocatorComponent | null }> = props => {
-  const element = () => props.component?.element
-  // set pointer cursor to selected component
-  createElementCursor(element, 'pointer')
-  const tag = () => element()?.localName
-  const name = () => props.component?.name
+    const element = () => props.component?.element
+    // set pointer cursor to selected component
+    createElementCursor(element, 'pointer')
+    const tag = () => element()?.localName
+    const name = () => props.component?.name
 
-  const bounds = createElementBounds(element)
-  const left = createMemo<number>(prev => (bounds.left === null ? prev : bounds.left), 0)
-  const top = createMemo<number>(prev => (bounds.top === null ? prev : bounds.top), 0)
-  const width = createMemo<number>(prev => (bounds.width === null ? prev : bounds.width), 0)
-  const height = createMemo<number>(prev => (bounds.height === null ? prev : bounds.height), 0)
-  const transform = createMemo(() => `translate(${Math.round(left())}px, ${Math.round(top())}px)`)
-  const placeOnTop = createMemo(() => top() > window.innerHeight / 2)
+    const bounds = createElementBounds(element)
+    const left = createMemo<number>(prev => (bounds.left === null ? prev : bounds.left), 0)
+    const top = createMemo<number>(prev => (bounds.top === null ? prev : bounds.top), 0)
+    const width = createMemo<number>(prev => (bounds.width === null ? prev : bounds.width), 0)
+    const height = createMemo<number>(prev => (bounds.height === null ? prev : bounds.height), 0)
+    const transform = createMemo(() => `translate(${Math.round(left())}px, ${Math.round(top())}px)`)
+    const placeOnTop = createMemo(() => top() > window.innerHeight / 2)
 
-  return (
-    <>
-      <style>{styles}</style>
-      <div
-        class="element-overlay"
-        style={{
-          transform: transform(),
-          width: width() + 'px',
-          height: height() + 'px',
-        }}
-      >
-        <div class="border" />
-        <Show when={name()}>
-          <div class={`name-container ${placeOnTop() ? 'top' : 'bottom'}`}>
-            <div class="name-animated-container">
-              <div class="name-background"></div>
-              <div class="name-text">
-                {name()}: <span>{tag()}</span>
-              </div>
-              <div class="name-invisible">
-                {name()}: {tag()}
-              </div>
+    return (
+        <>
+            <style>{styles}</style>
+            <div
+                class="element-overlay"
+                style={{
+                    transform: transform(),
+                    width: width() + 'px',
+                    height: height() + 'px',
+                }}
+            >
+                <div class="border" />
+                <Show when={name()}>
+                    <div class={`name-container ${placeOnTop() ? 'top' : 'bottom'}`}>
+                        <div class="name-animated-container">
+                            <div class="name-background"></div>
+                            <div class="name-text">
+                                {name()}: <span>{tag()}</span>
+                            </div>
+                            <div class="name-invisible">
+                                {name()}: {tag()}
+                            </div>
+                        </div>
+                    </div>
+                </Show>
             </div>
-          </div>
-        </Show>
-      </div>
-    </>
-  )
+        </>
+    )
 }
 
 const styles = /*css*/ `

@@ -1,52 +1,52 @@
 /* eslint-disable no-console */
+import { array } from '@nothing-but/utils'
 import {
-  addSolidUpdateListener,
-  getOwnerType,
-  interceptComputationRerun,
-  isSolidComputation,
-  isSolidMemo,
-  isSolidSignal,
-  lookupOwner,
-  makeValueUpdateListener,
-  observeValueUpdate,
-  onParentCleanup,
-  removeValueUpdateObserver,
+    addSolidUpdateListener,
+    getOwnerType,
+    interceptComputationRerun,
+    isSolidComputation,
+    isSolidMemo,
+    isSolidSignal,
+    lookupOwner,
+    makeValueUpdateListener,
+    observeValueUpdate,
+    onParentCleanup,
+    removeValueUpdateObserver,
 } from '@solid-devtools/debugger'
 import { NodeType, Solid } from '@solid-devtools/debugger/types'
-import { arrayRefEquals, dedupeArray } from '@solid-devtools/shared/utils'
 import { Many, arrayEquals, asArray } from '@solid-primitives/utils'
 import { $PROXY, Accessor, createEffect, getOwner, on, onCleanup, untrack } from 'solid-js'
 import {
-  NodeStateWithValue,
-  UNUSED,
-  getComputationCreatedLabel,
-  getComputationRerunLabel,
-  getNodeState,
-  getOwnerDisposedLabel,
-  getPropLabel,
-  getPropsInitLabel,
-  getPropsKeyUpdateLabel,
-  logComputation,
-  logInitialValue,
-  logObservers,
-  logOwned,
-  logSignalValue,
-  logSignalValueUpdate,
-  logSignalsInitialValues,
-  paddedForEach,
+    NodeStateWithValue,
+    UNUSED,
+    getComputationCreatedLabel,
+    getComputationRerunLabel,
+    getNodeState,
+    getOwnerDisposedLabel,
+    getPropLabel,
+    getPropsInitLabel,
+    getPropsKeyUpdateLabel,
+    logComputation,
+    logInitialValue,
+    logObservers,
+    logOwned,
+    logSignalValue,
+    logSignalValueUpdate,
+    logSignalsInitialValues,
+    paddedForEach,
 } from './log'
 import { getDiffMap, getFunctionSources, makeTimeMeter } from './utils'
 
 declare module 'solid-js/types/reactive/signal' {
-  interface Owner {
-    $debug?: boolean
-    $debugSignals?: boolean
-    $debugOwned?: boolean
-  }
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  interface SignalState<T> {
-    $debugSignal?: boolean
-  }
+    interface Owner {
+        $debug?: boolean
+        $debugSignals?: boolean
+        $debugOwned?: boolean
+    }
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    interface SignalState<T> {
+        $debugSignal?: boolean
+    }
 }
 
 const isSolidProxy = (o: any): boolean => !!o[$PROXY]
@@ -55,28 +55,28 @@ const isSolidProxy = (o: any): boolean => !!o[$PROXY]
  * @returns true if the node was marked before
  */
 function markDebugNode(
-  o: Solid.Owner,
-  type: 'computation' | 'signals' | 'owned',
+    o: Solid.Owner,
+    type: 'computation' | 'signals' | 'owned',
 ): true | VoidFunction
 function markDebugNode(o: Solid.Signal): true | VoidFunction
 function markDebugNode(
-  o: Solid.Owner | Solid.Signal,
-  type?: 'computation' | 'signals' | 'owned',
+    o: Solid.Owner | Solid.Signal,
+    type?: 'computation' | 'signals' | 'owned',
 ): true | VoidFunction {
-  let property: '$debug' | '$debugSignals' | '$debugOwned' | '$debugSignal'
-  if (type === 'computation') property = '$debug'
-  else if (type === 'signals') property = '$debugSignals'
-  else if (type === 'owned') property = '$debugOwned'
-  else property = '$debugSignal'
+    let property: '$debug' | '$debugSignals' | '$debugOwned' | '$debugSignal'
+    if (type === 'computation') property = '$debug'
+    else if (type === 'signals') property = '$debugSignals'
+    else if (type === 'owned') property = '$debugOwned'
+    else property = '$debugSignal'
 
-  if ((o as any)[property]) return true
-  ;(o as any)[property] = true
-  return () => ((o as any)[property] = false)
+    if ((o as any)[property]) return true
+    ;(o as any)[property] = true
+    return () => ((o as any)[property] = false)
 }
 
 interface DebugComputationOptions {
-  /** hook called during initial computation run? *(Defaults to `true`)* */
-  initialRun?: boolean
+    /** hook called during initial computation run? *(Defaults to `true`)* */
+    initialRun?: boolean
 }
 
 /**
@@ -99,101 +99,101 @@ interface DebugComputationOptions {
  */
 export function debugComputation(owner?: Solid.Owner, options?: DebugComputationOptions): void
 export function debugComputation(
-  _owner?: Solid.Owner,
-  { initialRun = true }: DebugComputationOptions = {},
+    _owner?: Solid.Owner,
+    { initialRun = true }: DebugComputationOptions = {},
 ): void {
-  const owner = _owner === undefined ? getOwner() : _owner
-  if (!owner || !isSolidComputation(owner)) return console.warn('owner is not a computation')
+    const owner = _owner === undefined ? getOwner() : _owner
+    if (!owner || !isSolidComputation(owner)) return console.warn('owner is not a computation')
 
-  if (markDebugNode(owner, 'computation') === true) return
+    if (markDebugNode(owner, 'computation') === true) return
 
-  const { type, typeName, name } = getNodeState(owner)
-  const SYMBOL = Symbol(name)
-  // log prev value only of the computation callback uses it
-  const usesPrev = !!owner.fn.length
-  const usesValue = usesPrev || type === NodeType.Memo
+    const { type, typeName, name } = getNodeState(owner)
+    const SYMBOL = Symbol(name)
+    // log prev value only of the computation callback uses it
+    const usesPrev = !!owner.fn.length
+    const usesValue = usesPrev || type === NodeType.Memo
 
-  let updateListeners: VoidFunction[] = []
-  let signalUpdates: NodeStateWithValue[] = []
+    let updateListeners: VoidFunction[] = []
+    let signalUpdates: NodeStateWithValue[] = []
 
-  // patches source objects to track their value updates
-  // will unsubscribe from previous sources on each call
-  const observeSources = (sources: (Solid.Computation | Solid.Signal)[]) => {
-    updateListeners.forEach(unsub => unsub())
-    updateListeners = []
-    sources.forEach(source => {
-      observeValueUpdate(
-        source,
-        value => signalUpdates.push({ ...getNodeState(source), value }),
-        SYMBOL,
-      )
-      updateListeners.push(() => removeValueUpdateObserver(source, SYMBOL))
-    })
-  }
+    // patches source objects to track their value updates
+    // will unsubscribe from previous sources on each call
+    const observeSources = (sources: (Solid.Computation | Solid.Signal)[]) => {
+        updateListeners.forEach(unsub => unsub())
+        updateListeners = []
+        sources.forEach(source => {
+            observeValueUpdate(
+                source,
+                value => signalUpdates.push({ ...getNodeState(source), value }),
+                SYMBOL,
+            )
+            updateListeners.push(() => removeValueUpdateObserver(source, SYMBOL))
+        })
+    }
 
-  // this is for logging the initial state after the first callback execution
-  // the "value" property is monkey patched for one function execution
-  if (initialRun) {
-    observeValueUpdate(
-      owner,
-      value => {
-        const timeElapsed = time()
-        removeValueUpdateObserver(owner, SYMBOL)
-        const sources = owner.sources ? dedupeArray(owner.sources) : []
+    // this is for logging the initial state after the first callback execution
+    // the "value" property is monkey patched for one function execution
+    if (initialRun) {
+        observeValueUpdate(
+            owner,
+            value => {
+                const timeElapsed = time()
+                removeValueUpdateObserver(owner, SYMBOL)
+                const sources = owner.sources ? array.deduped(owner.sources) : []
 
-        logComputation(getComputationCreatedLabel(typeName, name, timeElapsed), {
-          owner: { type, typeName, name },
-          owned: owner.owned ?? [],
-          sources,
-          prev: UNUSED,
-          value: usesValue ? value : UNUSED,
-          causedBy: null,
+                logComputation(getComputationCreatedLabel(typeName, name, timeElapsed), {
+                    owner: { type, typeName, name },
+                    owned: owner.owned ?? [],
+                    sources,
+                    prev: UNUSED,
+                    value: usesValue ? value : UNUSED,
+                    causedBy: null,
+                })
+                observeSources(sources)
+            },
+            SYMBOL,
+        )
+    }
+    // if debugComputation after the initial run of the computation
+    // sources should be observed immediately
+    else observeSources(owner.sources ? array.deduped(owner.sources) : [])
+
+    // monkey patch the "fn" callback to intercept every computation function execution
+    interceptComputationRerun(owner, (fn, prev) => {
+        const updates = signalUpdates
+        signalUpdates = []
+
+        time()
+        const value = fn()
+        const elapsedTime = time()
+
+        const sources = owner.sources ? array.deduped(owner.sources) : []
+        logComputation(getComputationRerunLabel(name, elapsedTime), {
+            owner: UNUSED,
+            owned: owner.owned ?? [],
+            sources,
+            prev: usesPrev ? prev : UNUSED,
+            value: usesValue ? value : UNUSED,
+            causedBy: updates,
         })
         observeSources(sources)
-      },
-      SYMBOL,
-    )
-  }
-  // if debugComputation after the initial run of the computation
-  // sources should be observed immediately
-  else observeSources(owner.sources ? dedupeArray(owner.sources) : [])
-
-  // monkey patch the "fn" callback to intercept every computation function execution
-  interceptComputationRerun(owner, (fn, prev) => {
-    const updates = signalUpdates
-    signalUpdates = []
-
-    time()
-    const value = fn()
-    const elapsedTime = time()
-
-    const sources = owner.sources ? dedupeArray(owner.sources) : []
-    logComputation(getComputationRerunLabel(name, elapsedTime), {
-      owner: UNUSED,
-      owned: owner.owned ?? [],
-      sources,
-      prev: usesPrev ? prev : UNUSED,
-      value: usesValue ? value : UNUSED,
-      causedBy: updates,
     })
-    observeSources(sources)
-  })
 
-  // CLEANUP
-  // listen to parent cleanup, instead of own, because for computations onCleanup runs for every re-execution
-  onParentCleanup(
-    owner,
-    () => {
-      console.log(...getOwnerDisposedLabel(name))
-      updateListeners.forEach(unsub => unsub())
-      updateListeners.length = 0
-      signalUpdates.length = 0
-    },
-    // run before other cleanup functions
-    true,
-  )
+    // CLEANUP
+    // listen to parent cleanup, instead of own, because for computations onCleanup runs for every re-execution
+    onParentCleanup(
+        owner,
+        () => {
+            console.log(...getOwnerDisposedLabel(name))
+            updateListeners.forEach(unsub => unsub())
+            updateListeners.length = 0
+            signalUpdates.length = 0
+        },
+        // run before other cleanup functions
+        true,
+    )
 
-  const time = makeTimeMeter()
+    const time = makeTimeMeter()
 }
 
 /**
@@ -217,49 +217,49 @@ export function debugComputation(
  */
 export function debugOwnerComputations(owner?: Solid.Owner): void
 export function debugOwnerComputations(_owner?: Solid.Owner): void {
-  const owner = _owner === undefined ? getOwner() : _owner
-  if (!owner) return console.warn('no owner passed to debugOwnedComputations')
+    const owner = _owner === undefined ? getOwner() : _owner
+    if (!owner) return console.warn('no owner passed to debugOwnedComputations')
 
-  const marked = markDebugNode(owner, 'owned')
-  if (marked === true) return
-  onCleanup(marked)
+    const marked = markDebugNode(owner, 'owned')
+    if (marked === true) return
+    onCleanup(marked)
 
-  // for solid-refresh HMR memos, return the owned component
-  const { type, typeName, name } = getNodeState(
-    lookupOwner(owner, o => getOwnerType(o) !== NodeType.Refresh)!,
-  )
+    // for solid-refresh HMR memos, return the owned component
+    const { type, typeName, name } = getNodeState(
+        lookupOwner(owner, o => getOwnerType(o) !== NodeType.Refresh)!,
+    )
 
-  let prevOwned: Solid.Computation[] = []
+    let prevOwned: Solid.Computation[] = []
 
-  onCleanup(
-    addSolidUpdateListener(() => {
-      const { owned } = owner
-      if (!owned) return
+    onCleanup(
+        addSolidUpdateListener(() => {
+            const { owned } = owner
+            if (!owned) return
 
-      let computations: Solid.Computation[] = []
+            let computations: Solid.Computation[] = []
 
-      let i = prevOwned.length
-      // owned can only be added
-      for (; i < owned.length; i++) {
-        const computation = owned[i]!
-        debugComputation(computation, {
-          initialRun: false,
-        })
-        computations.push(computation)
-      }
-      if (computations.length === 0) return
+            let i = prevOwned.length
+            // owned can only be added
+            for (; i < owned.length; i++) {
+                const computation = owned[i]!
+                debugComputation(computation, {
+                    initialRun: false,
+                })
+                computations.push(computation)
+            }
+            if (computations.length === 0) return
 
-      computations = [...prevOwned, ...computations]
-      // log owned computation changes
-      logOwned({ type, typeName, name }, computations, prevOwned)
-      prevOwned = computations
-    }),
-  )
+            computations = [...prevOwned, ...computations]
+            // log owned computation changes
+            logOwned({ type, typeName, name }, computations, prevOwned)
+            prevOwned = computations
+        }),
+    )
 }
 
 export interface DebugSignalOptions {
-  trackObservers?: boolean
-  logInitialValue?: boolean
+    trackObservers?: boolean
+    logInitialValue?: boolean
 }
 
 /**
@@ -278,75 +278,76 @@ export interface DebugSignalOptions {
  * ```
  */
 export function debugSignal(
-  source: Accessor<unknown> | Solid.Signal,
-  options: DebugSignalOptions = {},
+    source: Accessor<unknown> | Solid.Signal,
+    options: DebugSignalOptions = {},
 ): void {
-  let signal: Solid.Signal
+    let signal: Solid.Signal
 
-  if (typeof source === 'function') {
-    const sources = getFunctionSources(source)
-    if (sources.length === 0) return console.warn('No signal was passed to debugSignal')
-    else if (sources.length > 1)
-      return console.warn('More then one signal was passed to debugSignal')
-    signal = sources[0]!
-  } else {
-    signal = source
-  }
-
-  if (markDebugNode(signal) === true) return
-
-  const { trackObservers = true, logInitialValue: _logInitialValue = true } = options
-
-  const state = getNodeState(signal)
-  const SYMBOL = Symbol(state.name)
-
-  // Initial
-  _logInitialValue && logInitialValue({ ...state, value: signal.value })
-
-  let actualObservers: Solid.Computation[]
-  let prevObservers: Solid.Computation[] = []
-  let actualPrevObservers: Solid.Computation[] = []
-
-  if (!signal.observers) {
-    signal.observers = []
-    signal.observerSlots = []
-  }
-
-  // Value Update
-  makeValueUpdateListener(
-    signal,
-    (value, prev) => {
-      logSignalValueUpdate(
-        state,
-        value,
-        prev,
-        trackObservers ? prevObservers : dedupeArray(signal.observers!),
-      )
-    },
-    SYMBOL,
-  )
-
-  if (trackObservers) {
-    // Observers Change
-    function logObserversChange() {
-      const observers = dedupeArray(actualObservers)
-      if (arrayRefEquals(observers, prevObservers)) return
-      logObservers(state.name, observers, prevObservers)
-      prevObservers = [...observers]
-      actualPrevObservers = [...actualObservers]
+    if (typeof source === 'function') {
+        const sources = getFunctionSources(source)
+        if (sources.length === 0) return console.warn('No signal was passed to debugSignal')
+        else if (sources.length > 1)
+            return console.warn('More then one signal was passed to debugSignal')
+        signal = sources[0]!
+    } else {
+        signal = source
     }
 
-    // Listen to Solid's _$afterUpdate hook to check if observers changed
-    onCleanup(
-      addSolidUpdateListener(() => {
-        actualObservers = signal.observers!
-        if (actualObservers.length !== actualPrevObservers.length) return logObserversChange()
-        for (let i = actualObservers.length; i >= 0; i--) {
-          if (actualObservers[i] !== actualPrevObservers[i]) return logObserversChange()
-        }
-      }),
+    if (markDebugNode(signal) === true) return
+
+    const { trackObservers = true, logInitialValue: _logInitialValue = true } = options
+
+    const state = getNodeState(signal)
+    const SYMBOL = Symbol(state.name)
+
+    // Initial
+    _logInitialValue && logInitialValue({ ...state, value: signal.value })
+
+    let actualObservers: Solid.Computation[]
+    let prevObservers: Solid.Computation[] = []
+    let actualPrevObservers: Solid.Computation[] = []
+
+    if (!signal.observers) {
+        signal.observers = []
+        signal.observerSlots = []
+    }
+
+    // Value Update
+    makeValueUpdateListener(
+        signal,
+        (value, prev) => {
+            logSignalValueUpdate(
+                state,
+                value,
+                prev,
+                trackObservers ? prevObservers : array.deduped(signal.observers!),
+            )
+        },
+        SYMBOL,
     )
-  }
+
+    if (trackObservers) {
+        // Observers Change
+        function logObserversChange() {
+            const observers = array.deduped(actualObservers)
+            if (array.includesSameMembers(observers, prevObservers)) return
+            logObservers(state.name, observers, prevObservers)
+            prevObservers = [...observers]
+            actualPrevObservers = [...actualObservers]
+        }
+
+        // Listen to Solid's _$afterUpdate hook to check if observers changed
+        onCleanup(
+            addSolidUpdateListener(() => {
+                actualObservers = signal.observers!
+                if (actualObservers.length !== actualPrevObservers.length)
+                    return logObserversChange()
+                for (let i = actualObservers.length; i >= 0; i--) {
+                    if (actualObservers[i] !== actualPrevObservers[i]) return logObserversChange()
+                }
+            }),
+        )
+    }
 }
 
 /**
@@ -366,29 +367,29 @@ export function debugSignal(
  * ```
  */
 export function debugSignals(
-  source: Many<Accessor<unknown>> | Solid.Signal[],
-  options: DebugSignalOptions = {},
+    source: Many<Accessor<unknown>> | Solid.Signal[],
+    options: DebugSignalOptions = {},
 ): void {
-  let signals: Solid.Signal[] = []
-  asArray(source).forEach(s => {
-    if (typeof s === 'function') signals.push.apply(signals, getFunctionSources(s))
-    else signals.push(s)
-  })
-  if (signals.length === 0) return console.warn('No signals were passed to debugSignals')
-
-  // filter out already debugged signals
-  signals = signals.filter(s => !s.$debugSignal)
-
-  if (signals.length === 1) return debugSignal(signals[0]!, options)
-
-  if (options.logInitialValue === false) logSignalsInitialValues(signals)
-
-  signals.forEach(signal => {
-    debugSignal(signal, {
-      ...options,
-      logInitialValue: false,
+    let signals: Solid.Signal[] = []
+    asArray(source).forEach(s => {
+        if (typeof s === 'function') signals.push.apply(signals, getFunctionSources(s))
+        else signals.push(s)
     })
-  })
+    if (signals.length === 0) return console.warn('No signals were passed to debugSignals')
+
+    // filter out already debugged signals
+    signals = signals.filter(s => !s.$debugSignal)
+
+    if (signals.length === 1) return debugSignal(signals[0]!, options)
+
+    if (options.logInitialValue === false) logSignalsInitialValues(signals)
+
+    signals.forEach(signal => {
+        debugSignal(signal, {
+            ...options,
+            logInitialValue: false,
+        })
+    })
 }
 
 /**
@@ -411,47 +412,47 @@ export function debugSignals(
  * ```
  */
 export function debugOwnerSignals(owner = getOwner(), options: DebugSignalOptions = {}) {
-  if (!owner) return console.warn('debugOwnerState found no Owner')
+    if (!owner) return console.warn('debugOwnerState found no Owner')
 
-  if (markDebugNode(owner, 'signals') === true) return
+    if (markDebugNode(owner, 'signals') === true) return
 
-  let prevSourceListLength = 0
-  let prevOwnedLength = 0
+    let prevSourceListLength = 0
+    let prevOwnedLength = 0
 
-  onCleanup(
-    addSolidUpdateListener(() => {
-      const signals: Solid.Signal[] = []
+    onCleanup(
+        addSolidUpdateListener(() => {
+            const signals: Solid.Signal[] = []
 
-      let i: number
-      // add owned signals
-      if (owner.sourceMap) {
-        const sourceList = Object.values(owner.sourceMap)
-        // signals can only be added
-        for (i = prevSourceListLength; i < sourceList.length; i++) {
-          const signal = sourceList[i]!
-          if (isSolidSignal(signal)) signals.push(signal)
-        }
-        prevSourceListLength = i
-      }
-      // add owned memos
-      if (owner.owned) {
-        // owned can only be added
-        for (i = prevOwnedLength; i < owner.owned.length; i++) {
-          const childOwner = owner.owned[i]!
-          if (isSolidMemo(childOwner)) signals.push(childOwner)
-        }
-        prevOwnedLength = i
-      }
+            let i: number
+            // add owned signals
+            if (owner.sourceMap) {
+                const sourceList = Object.values(owner.sourceMap)
+                // signals can only be added
+                for (i = prevSourceListLength; i < sourceList.length; i++) {
+                    const signal = sourceList[i]!
+                    if (isSolidSignal(signal)) signals.push(signal)
+                }
+                prevSourceListLength = i
+            }
+            // add owned memos
+            if (owner.owned) {
+                // owned can only be added
+                for (i = prevOwnedLength; i < owner.owned.length; i++) {
+                    const childOwner = owner.owned[i]!
+                    if (isSolidMemo(childOwner)) signals.push(childOwner)
+                }
+                prevOwnedLength = i
+            }
 
-      if (signals.length === 0) return
+            if (signals.length === 0) return
 
-      debugSignals(signals, options)
-    }),
-  )
+            debugSignals(signals, options)
+        }),
+    )
 }
 
 const getPropValue = (props: Record<string, unknown>, desc: PropertyDescriptor): unknown =>
-  untrack(() => (desc.get ? desc.get.call(props) : desc.value))
+    untrack(() => (desc.get ? desc.get.call(props) : desc.value))
 
 /**
  * Debug the provided {@link props} object by logging their state to the console.
@@ -465,76 +466,76 @@ const getPropValue = (props: Record<string, unknown>, desc: PropertyDescriptor):
  * ```
  */
 export function debugProps(props: Record<string, unknown>): void {
-  const owner = getOwner() as Solid.Owner | null
-  if (!owner) return console.warn('debugProps should be used synchronously inside a component')
+    const owner = getOwner() as Solid.Owner | null
+    if (!owner) return console.warn('debugProps should be used synchronously inside a component')
 
-  // for solid-refresh HMR memos, return the owned component
-  const ownerState = getNodeState(lookupOwner(owner, o => getOwnerType(o) !== NodeType.Refresh)!)
-  const isProxy = isSolidProxy(props)
+    // for solid-refresh HMR memos, return the owned component
+    const ownerState = getNodeState(lookupOwner(owner, o => getOwnerType(o) !== NodeType.Refresh)!)
+    const isProxy = isSolidProxy(props)
 
-  const descriptorsList = Object.entries(Object.getOwnPropertyDescriptors(props))
+    const descriptorsList = Object.entries(Object.getOwnPropertyDescriptors(props))
 
-  if (descriptorsList.length === 0) console.log(...getPropsInitLabel(ownerState, isProxy, true))
-  else {
-    console.groupCollapsed(...getPropsInitLabel(ownerState, isProxy, false))
-    paddedForEach(
-      descriptorsList,
-      ([, desc]) => (desc.get ? 'Getter' : 'Value'),
-      (type, [key, desc]) => {
-        const value = getPropValue(props, desc)
-        const signals = type === 'Getter' ? getFunctionSources(() => props[key]) : []
-        const label = getPropLabel(type, key, value, null)
+    if (descriptorsList.length === 0) console.log(...getPropsInitLabel(ownerState, isProxy, true))
+    else {
+        console.groupCollapsed(...getPropsInitLabel(ownerState, isProxy, false))
+        paddedForEach(
+            descriptorsList,
+            ([, desc]) => (desc.get ? 'Getter' : 'Value'),
+            (type, [key, desc]) => {
+                const value = getPropValue(props, desc)
+                const signals = type === 'Getter' ? getFunctionSources(() => props[key]) : []
+                const label = getPropLabel(type, key, value, null)
 
-        if (signals.length > 0) {
-          console.groupCollapsed(...label)
-          signals.forEach(logSignalValue)
-          console.groupEnd()
-        } else console.log(...label)
-      },
-    )
-    console.groupEnd()
-  }
+                if (signals.length > 0) {
+                    console.groupCollapsed(...label)
+                    signals.forEach(logSignalValue)
+                    console.groupEnd()
+                } else console.log(...label)
+            },
+        )
+        console.groupEnd()
+    }
 
-  if (isProxy) {
-    createEffect(
-      on(
-        () => Object.keys(props),
-        (keys, prevKeys) => {
-          if (!prevKeys) return
-          if (arrayEquals(keys, prevKeys)) return
+    if (isProxy) {
+        createEffect(
+            on(
+                () => Object.keys(props),
+                (keys, prevKeys) => {
+                    if (!prevKeys) return
+                    if (arrayEquals(keys, prevKeys)) return
 
-          const descriptors = Object.getOwnPropertyDescriptors(props)
+                    const descriptors = Object.getOwnPropertyDescriptors(props)
 
-          if (Object.entries(descriptors).length === 0) {
-            console.log(...getPropsKeyUpdateLabel(ownerState, true))
-          } else {
-            const [getMark, allKeys] = getDiffMap(prevKeys, keys, Map)
-            console.groupCollapsed(...getPropsKeyUpdateLabel(ownerState, false))
-            allKeys.forEach(key => {
-              const mark = getMark(key)
+                    if (Object.entries(descriptors).length === 0) {
+                        console.log(...getPropsKeyUpdateLabel(ownerState, true))
+                    } else {
+                        const [getMark, allKeys] = getDiffMap(prevKeys, keys, Map)
+                        console.groupCollapsed(...getPropsKeyUpdateLabel(ownerState, false))
+                        allKeys.forEach(key => {
+                            const mark = getMark(key)
 
-              if (mark === 'removed')
-                return console.log(...getPropLabel('Getter', key, null, 'removed'))
+                            if (mark === 'removed')
+                                return console.log(...getPropLabel('Getter', key, null, 'removed'))
 
-              const desc = descriptors[key]!
-              const value = getPropValue(props, desc)
-              const label = getPropLabel('Getter', key, value, mark)
-              const signals = getFunctionSources(() => props[key])
+                            const desc = descriptors[key]!
+                            const value = getPropValue(props, desc)
+                            const label = getPropLabel('Getter', key, value, mark)
+                            const signals = getFunctionSources(() => props[key])
 
-              if (signals.length > 0) {
-                console.groupCollapsed(...label)
-                signals.forEach(logSignalValue)
-                console.groupEnd()
-              } else console.log(...label)
-            })
-            console.groupEnd()
-          }
-        },
-      ),
-      undefined,
-      { name: 'debugProps EFFECT' },
-    )
-  }
+                            if (signals.length > 0) {
+                                console.groupCollapsed(...label)
+                                signals.forEach(logSignalValue)
+                                console.groupEnd()
+                            } else console.log(...label)
+                        })
+                        console.groupEnd()
+                    }
+                },
+            ),
+            undefined,
+            { name: 'debugProps EFFECT' },
+        )
+    }
 }
 
 // export function debugStore(store: object): void {

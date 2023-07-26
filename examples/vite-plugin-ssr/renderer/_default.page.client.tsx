@@ -17,24 +17,24 @@ let rendered = false
 const [pageContextStore, setPageContext] = createStore<PageContextClient>({} as PageContextClient)
 
 async function render(pageContext: PageContextClient) {
-  pageContext = removeUnmergableInternals(pageContext)
+    pageContext = removeUnmergableInternals(pageContext)
 
-  if (!rendered) {
-    // Dispose to prevent duplicate pages when navigating.
-    if (dispose) dispose()
+    if (!rendered) {
+        // Dispose to prevent duplicate pages when navigating.
+        if (dispose) dispose()
 
-    setPageContext(pageContext)
+        setPageContext(pageContext)
 
-    const container = document.getElementById('page-view')!
-    if (pageContext.isHydration) {
-      dispose = hydrate(() => <PageLayout pageContext={pageContextStore} />, container)
+        const container = document.getElementById('page-view')!
+        if (pageContext.isHydration) {
+            dispose = hydrate(() => <PageLayout pageContext={pageContextStore} />, container)
+        } else {
+            dispose = render_(() => <PageLayout pageContext={pageContextStore} />, container)
+        }
+        rendered = true
     } else {
-      dispose = render_(() => <PageLayout pageContext={pageContextStore} />, container)
+        setPageContext(reconcile(pageContext))
     }
-    rendered = true
-  } else {
-    setPageContext(reconcile(pageContext))
-  }
 }
 
 // Avoid reconcile() to throw:
@@ -45,11 +45,11 @@ async function render(pageContext: PageContextClient) {
 // ```
 // TODO/v1-release: remove workaround since _pageFilesAll and _pageFilesLoaded aren't used by the V1 design
 function removeUnmergableInternals<T>(pageContext: T): T {
-  // Remove pageContext properties that cannot be reassigned by reconcile()
-  const pageContextFixed = { ...pageContext }
-  // @ts-ignore
-  delete pageContextFixed._pageFilesAll
-  // @ts-ignore
-  delete pageContextFixed._pageFilesLoaded
-  return pageContextFixed
+    // Remove pageContext properties that cannot be reassigned by reconcile()
+    const pageContextFixed = { ...pageContext }
+    // @ts-ignore
+    delete pageContextFixed._pageFilesAll
+    // @ts-ignore
+    delete pageContextFixed._pageFilesLoaded
+    return pageContextFixed
 }

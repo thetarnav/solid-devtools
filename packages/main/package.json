@@ -1,140 +1,140 @@
 {
-  "name": "solid-devtools",
-  "version": "0.27.4",
-  "description": "Runtime library for hooking up SolidJS application with Solid Devtools Extension",
-  "license": "MIT",
-  "author": "Damian Tarnawski <gthetarnav@gmail.com>",
-  "contributors": [],
-  "homepage": "https://github.com/thetarnav/solid-devtools/tree/main/packages/main#readme",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/thetarnav/solid-devtools.git"
-  },
-  "bugs": {
-    "url": "https://github.com/thetarnav/solid-devtools/issues"
-  },
-  "keywords": [
-    "solid",
-    "devtools",
-    "reactivity",
-    "extension",
-    "chrome"
-  ],
-  "private": false,
-  "sideEffects": true,
-  "publishConfig": {
-    "access": "public"
-  },
-  "files": [
-    "dist"
-  ],
-  "type": "module",
-  "main": "./dist/index.js",
-  "module": "./dist/index.js",
-  "types": "./dist/index.d.ts",
-  "exports": {
-    ".": {
-      "import": {
-        "types": "./dist/index.d.ts",
-        "default": "./dist/index.js"
-      }
+    "name": "solid-devtools",
+    "version": "0.27.4",
+    "description": "Runtime library for hooking up SolidJS application with Solid Devtools Extension",
+    "license": "MIT",
+    "author": "Damian Tarnawski <gthetarnav@gmail.com>",
+    "contributors": [],
+    "homepage": "https://github.com/thetarnav/solid-devtools/tree/main/packages/main#readme",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/thetarnav/solid-devtools.git"
     },
-    "./setup": {
-      "worker": {
-        "import": {
-          "types": "./dist/setup.d.ts",
-          "default": "./dist/setup-noop.js"
-        }
-      },
-      "browser": {
-        "development": {
-          "import": {
-            "types": "./dist/setup.d.ts",
-            "default": "./dist/setup.js"
-          }
+    "bugs": {
+        "url": "https://github.com/thetarnav/solid-devtools/issues"
+    },
+    "keywords": [
+        "solid",
+        "devtools",
+        "reactivity",
+        "extension",
+        "chrome"
+    ],
+    "private": false,
+    "sideEffects": true,
+    "publishConfig": {
+        "access": "public"
+    },
+    "files": [
+        "dist"
+    ],
+    "type": "module",
+    "main": "./dist/index.js",
+    "module": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "exports": {
+        ".": {
+            "import": {
+                "types": "./dist/index.d.ts",
+                "default": "./dist/index.js"
+            }
         },
-        "import": {
-          "types": "./dist/setup.d.ts",
-          "default": "./dist/setup.js"
-        }
-      },
-      "deno": {
-        "import": {
-          "types": "./dist/setup.d.ts",
-          "default": "./dist/setup-noop.js"
-        }
-      },
-      "node": {
-        "import": {
-          "types": "./dist/setup.d.ts",
-          "default": "./dist/setup-noop.js"
-        }
-      },
-      "development": {
-        "import": {
-          "types": "./dist/setup.d.ts",
-          "default": "./dist/setup.js"
-        }
-      },
-      "import": {
-        "types": "./dist/setup.d.ts",
-        "default": "./dist/setup.js"
-      }
+        "./setup": {
+            "worker": {
+                "import": {
+                    "types": "./dist/setup.d.ts",
+                    "default": "./dist/setup-noop.js"
+                }
+            },
+            "browser": {
+                "development": {
+                    "import": {
+                        "types": "./dist/setup.d.ts",
+                        "default": "./dist/setup.js"
+                    }
+                },
+                "import": {
+                    "types": "./dist/setup.d.ts",
+                    "default": "./dist/setup.js"
+                }
+            },
+            "deno": {
+                "import": {
+                    "types": "./dist/setup.d.ts",
+                    "default": "./dist/setup-noop.js"
+                }
+            },
+            "node": {
+                "import": {
+                    "types": "./dist/setup.d.ts",
+                    "default": "./dist/setup-noop.js"
+                }
+            },
+            "development": {
+                "import": {
+                    "types": "./dist/setup.d.ts",
+                    "default": "./dist/setup.js"
+                }
+            },
+            "import": {
+                "types": "./dist/setup.d.ts",
+                "default": "./dist/setup.js"
+            }
+        },
+        "./vite": {
+            "import": {
+                "types": "./dist/vite.d.ts",
+                "default": "./dist/vite.js"
+            }
+        },
+        "./package.json": "./package.json"
     },
-    "./vite": {
-      "import": {
-        "types": "./dist/vite.d.ts",
-        "default": "./dist/vite.js"
-      }
+    "typesVersions": {
+        "*": {
+            "setup": [
+                "./dist/setup.d.ts"
+            ],
+            "vite": [
+                "./dist/vite.d.ts"
+            ]
+        }
     },
-    "./package.json": "./package.json"
-  },
-  "typesVersions": {
-    "*": {
-      "setup": [
-        "./dist/setup.d.ts"
-      ],
-      "vite": [
-        "./dist/vite.d.ts"
-      ]
-    }
-  },
-  "scripts": {
-    "dev": "tsup --watch",
-    "build": "tsup",
-    "test": "vitest",
-    "typecheck": "tsc --noEmit --paths null"
-  },
-  "devDependencies": {
-    "@babel/core": "^7.18.13",
-    "@babel/generator": "^7.22.3",
-    "@babel/parser": "^7.22.4",
-    "@babel/plugin-syntax-jsx": "^7.21.4",
-    "@babel/traverse": "^7.22.4",
-    "@types/babel__core": "^7.20.1",
-    "@types/babel__generator": "^7.6.4",
-    "@types/babel__traverse": "^7.20.1",
-    "solid-start": "^0.2.26"
-  },
-  "dependencies": {
-    "@babel/core": "^7.22.1",
-    "@babel/plugin-syntax-typescript": "^7.21.4",
-    "@babel/types": "^7.22.4",
-    "@solid-devtools/debugger": "workspace:^",
-    "@solid-devtools/shared": "workspace:^"
-  },
-  "peerDependencies": {
-    "solid-js": "^1.7.0",
-    "solid-start": "^0.2.20",
-    "vite": "^2.2.3 || ^3.0.0 || ^4.0.0"
-  },
-  "peerDependenciesMeta": {
-    "solid-start": {
-      "optional": true
+    "scripts": {
+        "dev": "tsup --watch",
+        "build": "tsup",
+        "test": "vitest",
+        "typecheck": "tsc --noEmit --paths null"
     },
-    "vite": {
-      "optional": true
-    }
-  },
-  "packageManager": "pnpm@8.6.0"
+    "devDependencies": {
+        "@babel/core": "^7.18.13",
+        "@babel/generator": "^7.22.9",
+        "@babel/parser": "^7.22.7",
+        "@babel/plugin-syntax-jsx": "^7.22.5",
+        "@babel/traverse": "^7.22.8",
+        "@types/babel__core": "^7.20.1",
+        "@types/babel__generator": "^7.6.4",
+        "@types/babel__traverse": "^7.20.1",
+        "solid-start": "^0.2.27"
+    },
+    "dependencies": {
+        "@babel/core": "^7.22.9",
+        "@babel/plugin-syntax-typescript": "^7.22.5",
+        "@babel/types": "^7.22.5",
+        "@solid-devtools/debugger": "workspace:^",
+        "@solid-devtools/shared": "workspace:^"
+    },
+    "peerDependencies": {
+        "solid-js": "^1.7.0",
+        "solid-start": "^0.2.20",
+        "vite": "^2.2.3 || ^3.0.0 || ^4.0.0"
+    },
+    "peerDependenciesMeta": {
+        "solid-start": {
+            "optional": true
+        },
+        "vite": {
+            "optional": true
+        }
+    },
+    "packageManager": "pnpm@8.6.0"
 }

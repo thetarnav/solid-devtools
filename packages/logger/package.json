@@ -1,70 +1,71 @@
 {
-  "name": "@solid-devtools/logger",
-  "version": "0.7.2",
-  "description": "Solid debugging utilities for logging the state of the reactivity graph to the console.",
-  "license": "MIT",
-  "author": "Damian Tarnawski <gthetarnav@gmail.com>",
-  "contributors": [],
-  "homepage": "https://github.com/thetarnav/solid-devtools/tree/main/packages/logger#readme",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/thetarnav/solid-devtools.git"
-  },
-  "bugs": {
-    "url": "https://github.com/thetarnav/solid-devtools/issues"
-  },
-  "keywords": [
-    "solid",
-    "devtools",
-    "logger",
-    "console",
-    "debugger"
-  ],
-  "private": false,
-  "sideEffects": false,
-  "publishConfig": {
-    "access": "public"
-  },
-  "files": [
-    "dist"
-  ],
-  "type": "module",
-  "main": "./dist/server.cjs",
-  "module": "./dist/server.js",
-  "types": "./dist/index.d.ts",
-  "exports": {
-    "browser": {
-      "development": {
-        "import": "./dist/index.js",
-        "require": "./dist/index.cjs"
-      },
-      "import": "./dist/server.js",
-      "require": "./dist/server.cjs"
+    "name": "@solid-devtools/logger",
+    "version": "0.7.2",
+    "description": "Solid debugging utilities for logging the state of the reactivity graph to the console.",
+    "license": "MIT",
+    "author": "Damian Tarnawski <gthetarnav@gmail.com>",
+    "contributors": [],
+    "homepage": "https://github.com/thetarnav/solid-devtools/tree/main/packages/logger#readme",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/thetarnav/solid-devtools.git"
     },
-    "development": {
-      "import": "./dist/index.js",
-      "require": "./dist/index.cjs"
+    "bugs": {
+        "url": "https://github.com/thetarnav/solid-devtools/issues"
     },
-    "import": "./dist/server.js",
-    "require": "./dist/server.cjs"
-  },
-  "scripts": {
-    "dev": "tsup --watch",
-    "build": "tsup",
-    "test": "echo \"NOOP test\"",
-    "typecheck": "tsc --noEmit --paths null"
-  },
-  "devDependencies": {
-    "tsup": "^6.7.0"
-  },
-  "dependencies": {
-    "@solid-devtools/debugger": "workspace:^",
-    "@solid-devtools/shared": "workspace:^",
-    "@solid-primitives/utils": "^6.2.0",
-    "solid-js": "^1.7.6"
-  },
-  "peerDependencies": {
-    "solid-js": "^1.7.0"
-  },
-  "packageManager": "pnpm@8.6.0"
+    "keywords": [
+        "solid",
+        "devtools",
+        "logger",
+        "console",
+        "debugger"
+    ],
+    "private": false,
+    "sideEffects": false,
+    "publishConfig": {
+        "access": "public"
+    },
+    "files": [
+        "dist"
+    ],
+    "type": "module",
+    "main": "./dist/server.cjs",
+    "module": "./dist/server.js",
+    "types": "./dist/index.d.ts",
+    "exports": {
+        "browser": {
+            "development": {
+                "import": "./dist/index.js",
+                "require": "./dist/index.cjs"
+            },
+            "import": "./dist/server.js",
+            "require": "./dist/server.cjs"
+        },
+        "development": {
+            "import": "./dist/index.js",
+            "require": "./dist/index.cjs"
+        },
+        "import": "./dist/server.js",
+        "require": "./dist/server.cjs"
+    },
+    "scripts": {
+        "dev": "tsup --watch",
+        "build": "tsup",
+        "test": "echo \"NOOP test\"",
+        "typecheck": "tsc --noEmit --paths null"
+    },
+    "devDependencies": {
+        "tsup": "^7.1.0"
+    },
+    "dependencies": {
+        "@nothing-but/utils": "^0.3.2",
+        "@solid-devtools/debugger": "workspace:^",
+        "@solid-devtools/shared": "workspace:^",
+        "@solid-primitives/utils": "^6.2.0",
+        "solid-js": "^1.7.8"
+    },
+    "peerDependencies": {
+        "solid-js": "^1.7.0"
+    },
+    "packageManager": "pnpm@8.6.0"
 }

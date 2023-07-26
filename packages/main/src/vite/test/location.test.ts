@@ -1,8 +1,8 @@
 import { assertTransform, cwd, file } from './setup'
 
 import {
-  LOCATION_ATTRIBUTE_NAME,
-  WINDOW_PROJECTPATH_PROPERTY,
+    LOCATION_ATTRIBUTE_NAME,
+    WINDOW_PROJECTPATH_PROPERTY,
 } from '@solid-devtools/debugger/types'
 import { describe, test } from 'vitest'
 import { Module, SET_COMPONENT_LOC, SET_COMPONENT_LOC_LOCAL } from '../constants'
@@ -11,54 +11,54 @@ import getPlugin from '../location'
 const setLocationImport = `import { ${SET_COMPONENT_LOC} as ${SET_COMPONENT_LOC_LOCAL} } from "${Module.Setup}";`
 
 describe('location', () => {
-  const testData: [
-    name: string,
-    src: string,
-    expected: string,
-    options: Parameters<typeof getPlugin>[0],
-  ][] = [
-    [
-      'function component',
-      `function Button(props) {
+    const testData: [
+        name: string,
+        src: string,
+        expected: string,
+        options: Parameters<typeof getPlugin>[0],
+    ][] = [
+        [
+            'function component',
+            `function Button(props) {
   return <button>Click me</button>
 }`,
-      `${setLocationImport}
+            `${setLocationImport}
 function Button(props) {
   ${SET_COMPONENT_LOC_LOCAL}("${file}:1:0");
   return <button>Click me</button>;
 }
 globalThis.${WINDOW_PROJECTPATH_PROPERTY} = "${cwd}";`,
-      { jsx: false, components: true },
-    ],
-    [
-      'arrow component',
-      `const Button = props => {
+            { jsx: false, components: true },
+        ],
+        [
+            'arrow component',
+            `const Button = props => {
   return <button>Click me</button>
 }`,
-      `${setLocationImport}
+            `${setLocationImport}
 const Button = props => {
   ${SET_COMPONENT_LOC_LOCAL}("${file}:1:6");
   return <button>Click me</button>;
 };
 globalThis.${WINDOW_PROJECTPATH_PROPERTY} = "${cwd}";`,
-      { jsx: false, components: true },
-    ],
-    [
-      'jsx',
-      `function Button(props) {
+            { jsx: false, components: true },
+        ],
+        [
+            'jsx',
+            `function Button(props) {
   return <button>Click me</button>
 }`,
-      `function Button(props) {
+            `function Button(props) {
   return <button ${LOCATION_ATTRIBUTE_NAME}="${file}:2:11">Click me</button>;
 }
 globalThis.${WINDOW_PROJECTPATH_PROPERTY} = "${cwd}";`,
-      { jsx: true, components: false },
-    ],
-  ]
+            { jsx: true, components: false },
+        ],
+    ]
 
-  testData.forEach(([name, src, expected, options]) => {
-    test(name, () => {
-      assertTransform(src, expected, getPlugin(options))
+    testData.forEach(([name, src, expected, options]) => {
+        test(name, () => {
+            assertTransform(src, expected, getPlugin(options))
+        })
     })
-  })
 })

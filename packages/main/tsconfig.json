@@ -1,7 +1,7 @@
 {
-  "extends": "../../tsconfig.json",
-  "compilerOptions": {
-    "types": ["@total-typescript/ts-reset", "node"]
-  },
-  "include": ["src/**/*", "test/**/*", "./env.d.ts"]
+    "extends": "../../tsconfig.json",
+    "compilerOptions": {
+        "types": ["@total-typescript/ts-reset", "node"]
+    },
+    "include": ["src/**/*", "test/**/*", "./env.d.ts"]
 }

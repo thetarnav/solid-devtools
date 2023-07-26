@@ -1,18 +1,18 @@
 {
-  "extends": "../../tsconfig.json",
-  "compilerOptions": {
-    "types": ["vite/client", "@types/chrome"],
-    "paths": {
-      "@solid-devtools/shared/*": ["../shared/src/*"]
-    }
-  },
-  "include": [
-    "src/**/*",
-    "background/**/*",
-    "content/**/*",
-    "devtools/**/*",
-    "shared/**/*",
-    "popup/**/*",
-    "env.d.ts"
-  ]
+    "extends": "../../tsconfig.json",
+    "compilerOptions": {
+        "types": ["vite/client", "@types/chrome"],
+        "paths": {
+            "@solid-devtools/shared/*": ["../shared/src/*"]
+        }
+    },
+    "include": [
+        "src/**/*",
+        "background/**/*",
+        "content/**/*",
+        "devtools/**/*",
+        "shared/**/*",
+        "popup/**/*",
+        "env.d.ts"
+    ]
 }

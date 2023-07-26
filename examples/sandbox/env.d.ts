@@ -1,10 +1,10 @@
 export {}
 
 declare global {
-  namespace NodeJS {
-    interface ProcessEnv {
-      EXT: 'true' | '1' | ''
-      BUILD: 'true' | '1' | ''
+    namespace NodeJS {
+        interface ProcessEnv {
+            EXT: 'true' | '1' | ''
+            BUILD: 'true' | '1' | ''
+        }
     }
-  }
 }

@@ -1,65 +1,65 @@
 {
-  "name": "@solid-devtools/overlay",
-  "version": "0.27.4",
-  "description": "On-page Devtools Overlay for SolidJS Applications.",
-  "license": "MIT",
-  "author": "Damian Tarnawski <gthetarnav@gmail.com>",
-  "contributors": [],
-  "homepage": "https://github.com/thetarnav/solid-devtools/tree/main/packages/overlay#readme",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/thetarnav/solid-devtools.git"
-  },
-  "bugs": {
-    "url": "https://github.com/thetarnav/solid-devtools/issues"
-  },
-  "keywords": [
-    "solid",
-    "devtools"
-  ],
-  "private": false,
-  "publishConfig": {
-    "access": "public"
-  },
-  "sideEffects": false,
-  "files": [
-    "dist"
-  ],
-  "type": "module",
-  "main": "./dist/prod.js",
-  "module": "./dist/prod.js",
-  "types": "./dist/types/index.d.ts",
-  "exports": {
-    "browser": {
-      "development": "./dist/dev.js",
-      "default": "./dist/prod.js"
+    "name": "@solid-devtools/overlay",
+    "version": "0.27.4",
+    "description": "On-page Devtools Overlay for SolidJS Applications.",
+    "license": "MIT",
+    "author": "Damian Tarnawski <gthetarnav@gmail.com>",
+    "contributors": [],
+    "homepage": "https://github.com/thetarnav/solid-devtools/tree/main/packages/overlay#readme",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/thetarnav/solid-devtools.git"
     },
-    "development": "./dist/dev.js",
-    "default": "./dist/prod.js"
-  },
-  "scripts": {
-    "dev": "pnpm run build --watch",
-    "build": "tsx ./scripts/build.ts",
-    "typecheck": "tsc --noEmit --paths null"
-  },
-  "dependencies": {
-    "@solid-devtools/debugger": "workspace:^",
-    "@solid-devtools/frontend": "workspace:^",
-    "@solid-devtools/shared": "workspace:^",
-    "@solid-primitives/cursor": "^0.0.109",
-    "@solid-primitives/event-listener": "^2.2.13",
-    "@solid-primitives/media": "^2.2.3",
-    "@solid-primitives/utils": "^6.2.0",
-    "solid-js": "^1.7.6"
-  },
-  "peerDependencies": {
-    "solid-js": "^1.7.0"
-  },
-  "packageManager": "pnpm@8.6.0",
-  "devDependencies": {
-    "@types/clean-css": "^4.2.6",
-    "chokidar": "^3.5.3",
-    "clean-css": "^5.3.2",
-    "tsx": "^3.12.7"
-  }
+    "bugs": {
+        "url": "https://github.com/thetarnav/solid-devtools/issues"
+    },
+    "keywords": [
+        "solid",
+        "devtools"
+    ],
+    "private": false,
+    "publishConfig": {
+        "access": "public"
+    },
+    "sideEffects": false,
+    "files": [
+        "dist"
+    ],
+    "type": "module",
+    "main": "./dist/prod.js",
+    "module": "./dist/prod.js",
+    "types": "./dist/types/index.d.ts",
+    "exports": {
+        "browser": {
+            "development": "./dist/dev.js",
+            "default": "./dist/prod.js"
+        },
+        "development": "./dist/dev.js",
+        "default": "./dist/prod.js"
+    },
+    "scripts": {
+        "dev": "pnpm run build --watch",
+        "build": "tsx ./scripts/build.ts",
+        "typecheck": "tsc --noEmit --paths null"
+    },
+    "dependencies": {
+        "@solid-devtools/debugger": "workspace:^",
+        "@solid-devtools/frontend": "workspace:^",
+        "@solid-devtools/shared": "workspace:^",
+        "@solid-primitives/cursor": "^0.0.111",
+        "@solid-primitives/event-listener": "^2.2.13",
+        "@solid-primitives/media": "^2.2.3",
+        "@solid-primitives/utils": "^6.2.0",
+        "solid-js": "^1.7.8"
+    },
+    "peerDependencies": {
+        "solid-js": "^1.7.0"
+    },
+    "packageManager": "pnpm@8.6.0",
+    "devDependencies": {
+        "@types/clean-css": "^4.2.6",
+        "chokidar": "^3.5.3",
+        "clean-css": "^5.3.2",
+        "tsx": "^3.12.7"
+    }
 }

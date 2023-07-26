@@ -1,25 +1,25 @@
 {
-  "name": "solid-devtools-example-start",
-  "private": true,
-  "scripts": {
-    "dev": "solid-start dev",
-    "build": "solid-start build",
-    "start": "solid-start start"
-  },
-  "type": "module",
-  "main": "./dist/index.js",
-  "devDependencies": {
-    "solid-start-node": "^0.2.26"
-  },
-  "dependencies": {
-    "@solid-devtools/overlay": "workspace:^",
-    "@solidjs/meta": "^0.28.5",
-    "@solidjs/router": "^0.8.2",
-    "solid-devtools": "workspace:^",
-    "solid-start": "^0.2.26",
-    "undici": "^5.22.1"
-  },
-  "engines": {
-    "node": ">=18"
-  }
+    "name": "solid-devtools-example-start",
+    "private": true,
+    "scripts": {
+        "dev": "solid-start dev",
+        "build": "solid-start build",
+        "start": "solid-start start"
+    },
+    "type": "module",
+    "main": "./dist/index.js",
+    "devDependencies": {
+        "solid-start-node": "^0.2.27"
+    },
+    "dependencies": {
+        "@solid-devtools/overlay": "workspace:^",
+        "@solidjs/meta": "^0.28.5",
+        "@solidjs/router": "^0.8.2",
+        "solid-devtools": "workspace:^",
+        "solid-start": "^0.2.27",
+        "undici": "^5.22.1"
+    },
+    "engines": {
+        "node": ">=18"
+    }
 }

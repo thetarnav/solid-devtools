@@ -4,26 +4,26 @@ import type { NodeID } from '../main/types'
 import type { TargetIDE, TargetURLFunction } from './find-components'
 
 export type {
-  LocationAttr,
-  LocatorComponent,
-  SourceLocation,
-  TargetIDE,
-  TargetURLFunction,
+    LocationAttr,
+    LocatorComponent,
+    SourceLocation,
+    TargetIDE,
+    TargetURLFunction,
 } from './find-components'
 
 export type LocatorOptions = {
-  /** Choose in which IDE the component source code should be revealed. */
-  targetIDE?: false | TargetIDE | TargetURLFunction
-  /**
-   * Holding which key should enable the locator overlay?
-   * @default 'Alt'
-   */
-  key?: false | KbdKey
+    /** Choose in which IDE the component source code should be revealed. */
+    targetIDE?: false | TargetIDE | TargetURLFunction
+    /**
+     * Holding which key should enable the locator overlay?
+     * @default 'Alt'
+     */
+    key?: false | KbdKey
 }
 
 export type HighlightElementPayload = ToDyscriminatedUnion<{
-  node: { id: NodeID }
-  element: { id: NodeID }
+    node: { id: NodeID }
+    element: { id: NodeID }
 }> | null
 
 // used by the transform
