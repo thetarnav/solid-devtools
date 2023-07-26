@@ -1,4 +1,4 @@
-lockfileVersion: '6.1'
+lockfileVersion: '6.0'
 
 settings:
   autoInstallPeers: true
@@ -184,6 +184,7 @@ importers:
       '@solid-primitives/utils':
         specifier: ^6.2.0
         version: 6.2.0(solid-js@1.7.8)
+    devDependencies:
       solid-js:
         specifier: ^1.7.8
         version: 1.7.8
@@ -290,13 +291,13 @@ importers:
       solid-headless:
         specifier: ^0.13.1
         version: 0.13.1(solid-js@1.7.8)
-      solid-js:
-        specifier: ^1.7.8
-        version: 1.7.8
     devDependencies:
       '@unocss/cli':
         specifier: ^0.53.6
         version: 0.53.6
+      solid-js:
+        specifier: ^1.7.8
+        version: 1.7.8
 
   packages/logger:
     dependencies:
@@ -312,10 +313,10 @@ importers:
       '@solid-primitives/utils':
         specifier: ^6.2.0
         version: 6.2.0(solid-js@1.7.8)
+    devDependencies:
       solid-js:
         specifier: ^1.7.8
         version: 1.7.8
-    devDependencies:
       tsup:
         specifier: ^7.1.0
         version: 7.1.0(postcss@8.4.27)(typescript@5.1.6)
@@ -392,9 +393,6 @@ importers:
       '@solid-primitives/utils':
         specifier: ^6.2.0
         version: 6.2.0(solid-js@1.7.8)
-      solid-js:
-        specifier: ^1.7.8
-        version: 1.7.8
     devDependencies:
       '@types/clean-css':
         specifier: ^4.2.6
@@ -405,6 +403,9 @@ importers:
       clean-css:
         specifier: ^5.3.2
         version: 5.3.2
+      solid-js:
+        specifier: ^1.7.8
+        version: 1.7.8
       tsx:
         specifier: ^3.12.7
         version: 3.12.7
@@ -438,6 +439,7 @@ importers:
       '@solid-primitives/utils':
         specifier: ^6.2.0
         version: 6.2.0(solid-js@1.7.8)
+    devDependencies:
       solid-js:
         specifier: ^1.7.8
         version: 1.7.8
