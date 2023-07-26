@@ -18,8 +18,7 @@ import {
 import { Dynamic, Portal } from 'solid-js/web'
 import { Devtools } from './controller'
 
-import frontendStyles from '@solid-devtools/frontend/dist/index.css'
-import frontendUnoStyles from '@solid-devtools/frontend/dist/uno.css'
+import frontendStyles from '@solid-devtools/frontend/dist/styles.css'
 import overlayStyles from './styles.css'
 
 export function attachDevtoolsOverlay(props: ComponentProps<typeof Overlay> = {}): VoidFunction {
@@ -106,7 +105,6 @@ const Overlay: Component<{
             </div>
             <MountIcons />
             <style>{frontendStyles}</style>
-            <style>{frontendUnoStyles}</style>
             <style>{overlayStyles}</style>
         </Portal>
     )

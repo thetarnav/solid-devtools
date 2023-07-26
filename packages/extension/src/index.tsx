@@ -4,7 +4,7 @@ import { createSignal } from 'solid-js'
 import { render } from 'solid-js/web'
 import { ConnectionName, createPortMessanger, once, Versions } from './bridge'
 
-import '@solid-devtools/frontend/dist/index.css'
+import '@solid-devtools/frontend/dist/styles.css'
 
 const port = chrome.runtime.connect({ name: ConnectionName.Panel })
 const { postPortMessage: toBackground, onPortMessage: fromBackground } = createPortMessanger<

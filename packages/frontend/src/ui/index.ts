@@ -1,5 +1,3 @@
-import './reset.css'
-
 export * as theme from '../../../../configs/theme'
 export * as styles from './styles'
 
