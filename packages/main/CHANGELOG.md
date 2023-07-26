@@ -1,5 +1,13 @@
 # solid-devtools
 
+## 0.27.6
+
+### Patch Changes
+
+-   Updated dependencies [7409af5]
+    -   @solid-devtools/debugger@0.22.4
+    -   @solid-devtools/shared@0.12.3
+
 ## 0.27.5
 
 ### Patch Changes

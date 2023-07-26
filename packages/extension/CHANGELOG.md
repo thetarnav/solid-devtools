@@ -1,5 +1,15 @@
 # @solid-devtools/extension
 
+## 0.27.6
+
+### Patch Changes
+
+-   Updated dependencies [7409af5]
+    -   @solid-devtools/debugger@0.22.4
+    -   @solid-devtools/frontend@0.10.1
+    -   @solid-devtools/shared@0.12.3
+    -   solid-devtools@0.27.6
+
 ## 0.27.5
 
 ### Patch Changes

@@ -1,5 +1,11 @@
 # solid-devtools-shared
 
+## 0.12.3
+
+### Patch Changes
+
+-   7409af5: Move solid-js out of dependencies (to peer)
+
 ## 0.12.2
 
 ### Patch Changes
