@@ -47,7 +47,7 @@ export function InspectorView(): JSX.Element {
 
     return (
         <Scrollable>
-            <div class="min-w-full w-fit p-4 pb-14 flex flex-col gap-y-4">
+            <div class="min-w-full w-fit p-4 p-b-14 flex flex-col gap-y-4">
                 <ListSignals
                     when={state.props && Object.keys(state.props.record).length}
                     title={<>Props {state.props!.proxy && <Badge>PROXY</Badge>}</>}

@@ -111,7 +111,7 @@ const Search: Component = () => {
                         })
                     }
                 }}
-                class="w-full text-lg px-6 transition-padding leading-9 placeholder:text-disabled group-focus-within:pl-2"
+                class="w-full text-lg p-x-6 transition-padding leading-9 placeholder:text-disabled group-focus-within:p-l-2"
                 style={{
                     height: theme.spacing.header_height,
                 }}
@@ -121,13 +121,13 @@ const Search: Component = () => {
                 onPaste={e => handleChange(e.currentTarget.value)}
             />
             <div
-                class={`${edge_container_base} pointer-events-none left-0 pl-1.5 transition-transform group-focus-within:-translate-x-full`}
+                class={`${edge_container_base} pointer-events-none left-0 p-l-1.5 transition-transform group-focus-within:-translate-x-full`}
             >
                 <Icon.Search class={icon_base} />
             </div>
             {value() && (
                 <button
-                    class={`${hover_background} ${edge_container_base} right-1 px-.5 rounded`}
+                    class={`${hover_background} ${edge_container_base} right-1 p-x-.5 rounded`}
                     type="reset"
                 >
                     <Icon.Close class={icon_base} />

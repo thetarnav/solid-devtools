@@ -57,10 +57,10 @@ export function createSidePanel() {
                         'grid-template-columns': '100%',
                     }}
                 >
-                    <header class="relative pl-4 flex items-center">
+                    <header class="relative p-l-4 flex items-center">
                         <div class={panel_header_el_border} />
                         <OwnerName name={state.name} type={state.type} is_title />
-                        <div class="px-1 ml-auto flex items-center gap-x-1">
+                        <div class="p-x-1 ml-auto flex items-center gap-x-1">
                             {/* <button class={styles.actions.button}>
                                 <Icon.Eye class={styles.actions.icon} />
                             </button> */}

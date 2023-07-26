@@ -6,12 +6,16 @@ import { getPositionInElement } from '@solid-primitives/mouse'
 import { scheduleIdle } from '@solid-primitives/scheduled'
 import { useRemSize } from '@solid-primitives/styles'
 import { clamp } from '@solid-primitives/utils'
+import clsx from 'clsx'
 import { Index, JSX, batch, createComputed, createMemo, createSignal } from 'solid-js'
-import * as styles from './Splitter.css'
 
 export type PanelProps = { children: JSX.Element }
 
 const Parser = createJSXParser<PanelProps>()
+
+const MIN_SIZE_IN_REM = 8
+const MIN_SIZE = `${MIN_SIZE_IN_REM}rem`
+const SPLIT_SIZE = '1px'
 
 function SplitterRoot(props: { children: JSX.Element }) {
     const tokens = resolveTokens(Parser, () => props.children)
@@ -43,7 +47,7 @@ function SplitterRoot(props: { children: JSX.Element }) {
             const i = dragging()
             if (i === false) return
             const toEl = getPositionInElement(e.pageX, e.pageY, container)
-            const minP = (styles.MIN_SIZE_IN_REM * rem()) / container.clientWidth
+            const minP = (MIN_SIZE_IN_REM * rem()) / container.clientWidth
 
             setProgress(prev => {
                 let p = clamp(
@@ -63,7 +67,7 @@ function SplitterRoot(props: { children: JSX.Element }) {
             })
         }),
     )
-    makeEventListener(window, 'pointerup', setDragging.bind(void 0, false))
+    makeEventListener(window, 'pointerup', () => setDragging(false))
 
     createBodyCursor(() => dragging() !== false && (isMobile() ? 'row-resize' : 'col-resize'))
 
@@ -72,8 +76,8 @@ function SplitterRoot(props: { children: JSX.Element }) {
 
         let t = ''
         for (let i = 0; i < p.length; i++)
-            t += ` minmax(${styles.MIN_SIZE}, ${p[i]! * 100}%) ${styles.SPLIT_SIZE}`
-        t += ` minmax(${styles.MIN_SIZE}, 1fr)`
+            t += ` minmax(${MIN_SIZE}, ${p[i]! * 100}%) ${SPLIT_SIZE}`
+        t += ` minmax(${MIN_SIZE}, 1fr)`
 
         return t
     })
@@ -81,25 +85,30 @@ function SplitterRoot(props: { children: JSX.Element }) {
     let container!: HTMLDivElement
     return (
         <div
-            class={styles.container}
+            class="grid grid-auto-flow-col h-full w-full"
             style={{ [isMobile() ? 'grid-template-rows' : 'grid-template-columns']: template() }}
             ref={container}
         >
             <Index each={tokens()}>
                 {(panel, i) => (
                     <>
-                        <div class={styles.content}>{panel().data.children}</div>
+                        <div class="relative z-1 overflow-hidden">{panel().data.children}</div>
                         {i < tokens().length - 1 && (
-                            <div class={styles.split}>
+                            <div class="relative bg-panel-border">
                                 <div
-                                    class={styles.splitHandle}
-                                    data-dragging={dragging()}
+                                    class={clsx(
+                                        'absolute z-9999 select-none',
+                                        'cursor-row-resize sm:cursor-col-resize',
+                                        '-inset-y-3px inset-x-0 sm:inset-y-0 sm:-inset-x-3px',
+                                        'bg-panel-border transition',
+                                        dragging() === false && 'opacity-0',
+                                    )}
                                     onPointerDown={e => {
                                         if (isTouch()) return
                                         e.preventDefault()
                                         setDragging(i)
                                     }}
-                                ></div>
+                                />
                             </div>
                         )}
                     </>

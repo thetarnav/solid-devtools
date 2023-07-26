@@ -27,7 +27,7 @@ export const OwnerPath: Component = () => {
         <div class={`relative w-full shrink-0 flex ${path_height_class}`}>
             <div
                 class={`group
-                absolute z-1 bottom-0 inset-x-0 w-full py-.25 px-2
+                absolute z-1 bottom-0 inset-x-0 w-full p-y-.25 p-x-2
                 overflow-hidden box-border flex items-end
                 bg-panel-bg b-t b-solid b-panel-border
                 ${path_height_class} ${path_min_height_class}
@@ -35,7 +35,7 @@ export const OwnerPath: Component = () => {
             >
                 {expandable() && (
                     <div
-                        class="absolute z-2 inset-0 pl-3
+                        class="absolute z-2 inset-0 p-l-3
                         flex items-center pointer-events-none
                         group-hover:opacity-0"
                         style={{
@@ -56,7 +56,7 @@ export const OwnerPath: Component = () => {
                                     <Icon.CarretRight class="w-2 h-2 mb-[0.15rem] text-disabled" />
                                 </div>
                                 <div
-                                    class={`${styles.highlight_container} h-3 py-0.25 my-0.25
+                                    class={`${styles.highlight_container} h-3 p-y-.25 my-0.25
                                     flex items-center gap-x-1 cursor-pointer`}
                                     style={{
                                         [styles.highlight_opacity_var]: hovered.isNodeHovered(

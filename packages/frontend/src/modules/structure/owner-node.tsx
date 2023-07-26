@@ -32,7 +32,7 @@ export const OwnerNode: Component<{
 
     return (
         <div
-            class={`${path_height_class} relative flex items-center pr-4 cursor-pointer`}
+            class={`${path_height_class} relative flex items-center p-r-4 cursor-pointer`}
             onClick={() => onInspectChange(!props.isSelected)}
             {...hoverProps}
         >

@@ -61,7 +61,7 @@ const Node: Component<NodeType> = props => {
                 }}
             </For>
             <button
-                class="rounded-full bg-slate-300 px-2"
+                class="rounded-full bg-slate-300 p-x-2"
                 onClick={e => addNode(nodeProps.id, nodeSignals.parents)}
             >
                 Add item

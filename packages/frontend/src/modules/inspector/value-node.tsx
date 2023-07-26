@@ -235,7 +235,7 @@ export const ValueNode: Component<{
             class={clsx(
                 props.class,
                 styles.highlight_container,
-                'flex flex-wrap items-start pl-2ch',
+                'flex flex-wrap items-start p-l-2ch',
                 'font-mono leading-inspector_row',
                 props.isStale && 'opacity-60',
             )}
