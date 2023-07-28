@@ -59,7 +59,7 @@
         "solid-js": "^1.7.8"
     },
     "dependencies": {
-        "@nothing-but/utils": "^0.3.2",
+        "@nothing-but/utils": "~0.3.2",
         "@solid-devtools/debugger": "workspace:^",
         "@solid-devtools/shared": "workspace:^",
         "@solid-primitives/utils": "^6.2.0"
