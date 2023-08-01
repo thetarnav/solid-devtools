@@ -30,8 +30,15 @@
     "module": "./dist/prod.js",
     "types": "./dist/types/index.d.ts",
     "exports": {
+        "browser": {
+            "development": {
+                "types": "./dist/types/index.d.ts",
+                "default": "./dist/dev.js"
+            },
+            "types": "./dist/types/index.d.ts",
+            "default": "./dist/prod.js"
+        },
         "types": "./dist/types/index.d.ts",
-        "development": "./dist/dev.js",
         "default": "./dist/prod.js"
     },
     "scripts": {
