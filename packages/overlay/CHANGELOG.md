@@ -1,5 +1,14 @@
 # @solid-devtools/overlay
 
+## 0.27.7
+
+### Patch Changes
+
+-   ea07d49: Correct overlay module exports
+-   e478a3c: Fix type exports
+-   Updated dependencies [51f1b5a]
+    -   @solid-devtools/frontend@0.10.2
+
 ## 0.27.6
 
 ### Patch Changes
