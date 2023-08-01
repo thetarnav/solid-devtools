@@ -1,6 +1,6 @@
 {
     "name": "@solid-devtools/overlay",
-    "version": "0.27.6",
+    "version": "0.27.7",
     "description": "On-page Devtools Overlay for SolidJS Applications.",
     "license": "MIT",
     "author": "Damian Tarnawski <gthetarnav@gmail.com>",

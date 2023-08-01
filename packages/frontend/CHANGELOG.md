@@ -1,5 +1,11 @@
 # @solid-devtools/frontend
 
+## 0.10.2
+
+### Patch Changes
+
+-   51f1b5a: Update jsx-tokenizer package
+
 ## 0.10.1
 
 ### Patch Changes
