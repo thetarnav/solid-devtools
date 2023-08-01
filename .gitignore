@@ -37,3 +37,7 @@ Thumbs.db
 
 packages/extension/dist.zip
 **/vite.config.ts.timestamp-*.*
+
+/test-results/
+/playwright-report/
+/playwright/.cache/

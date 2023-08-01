@@ -14,6 +14,9 @@ importers:
       '@nothing-but/utils':
         specifier: ~0.3.2
         version: 0.3.2
+      '@playwright/test':
+        specifier: ^1.36.1
+        version: 1.36.1
       '@total-typescript/ts-reset':
         specifier: ^0.4.2
         version: 0.4.2
@@ -102,6 +105,9 @@ importers:
       '@babel/plugin-syntax-typescript':
         specifier: ^7.22.5
         version: 7.22.5(@babel/core@7.22.9)
+      '@unocss/preset-typography':
+        specifier: ^0.54.1
+        version: 0.54.1
       solid-devtools:
         specifier: workspace:^
         version: link:../../packages/main
@@ -2360,6 +2366,17 @@ packages:
     dev: true
     optional: true
 
+  /@playwright/test@1.36.1:
+    resolution: {integrity: sha512-YK7yGWK0N3C2QInPU6iaf/L3N95dlGdbsezLya4n0ZCh3IL7VgPGxC6Gnznh9ApWdOmkJeleT2kMTcWPRZvzqg==}
+    engines: {node: '>=16'}
+    hasBin: true
+    dependencies:
+      '@types/node': 18.16.16
+      playwright-core: 1.36.1
+    optionalDependencies:
+      fsevents: 2.3.2
+    dev: true
+
   /@polka/url@1.0.0-next.21:
     resolution: {integrity: sha512-a5Sab1C4/icpTZVzZc5Ghpz88yQtGOyNqYXcZgOssB2uuAr+wF/MvN6bgtW32q7HHrvBki+BsZ0OuNv6EV3K9g==}
 
@@ -2974,10 +2991,20 @@ packages:
     resolution: {integrity: sha512-wuaLjWCzKUisHUxo4pjIdzcimdSmVa2hMHA3V7wVFBiSFX96/s7l0bvhHGFF/gMjbOnvJ+y+lBl3VKqcj9kwbA==}
     dev: true
 
+  /@unocss/core@0.54.1:
+    resolution: {integrity: sha512-lbwvGD91liMNEZs3jwXxLrIHIn/J4dkJpeKdosRdm1xObqrkg0+Zx1fVn6X+GOX74yvjQlzbu/ODZEXFQC3mGw==}
+    dev: true
+
   /@unocss/extractor-arbitrary-variants@0.53.6:
     resolution: {integrity: sha512-5MQD/9pIflZT5LXFx6qFUgPuVszFj+Pyq97UPI1YH4Lf4prDpfUtR4vKrXeMQv0XFvXqKluIWovgG9c6nrpg9w==}
     dependencies:
       '@unocss/core': 0.53.6
+    dev: true
+
+  /@unocss/extractor-arbitrary-variants@0.54.1:
+    resolution: {integrity: sha512-4bV0DbDxECihtUbP1UUIXkzSqOkDQ4vJG4VVmKcWbhSMXoRhuOCRkF7j+b9yaDJQtwTfnYgQws0kZFx6jlCVjg==}
+    dependencies:
+      '@unocss/core': 0.54.1
     dev: true
 
   /@unocss/inspector@0.53.6:
@@ -3024,6 +3051,13 @@ packages:
       '@unocss/extractor-arbitrary-variants': 0.53.6
     dev: true
 
+  /@unocss/preset-mini@0.54.1:
+    resolution: {integrity: sha512-hsoTkLk1WWS8cxteD7XR7yx3gaDUnTkrIdg9SAIseMeU2VPgzEem2iGpYMmEzJHGOGUREb8wGHyifKtOH+9LbA==}
+    dependencies:
+      '@unocss/core': 0.54.1
+      '@unocss/extractor-arbitrary-variants': 0.54.1
+    dev: true
+
   /@unocss/preset-tagify@0.53.6:
     resolution: {integrity: sha512-RZUvXIaxJviu7CCbGIaizT08exMSaoCcmhLEotrY1vLcmgne6q6IMK9m4hCFlFuaidrFxPqLd1FjsDTSaNWQvw==}
     dependencies:
@@ -3035,6 +3069,13 @@ packages:
     dependencies:
       '@unocss/core': 0.53.6
       '@unocss/preset-mini': 0.53.6
+    dev: true
+
+  /@unocss/preset-typography@0.54.1:
+    resolution: {integrity: sha512-wTPs+8XtIjnRy4m6X3n0C6Wem0vVxB1amamDG055SfGvqqvfVf5o6IOQ5mgsVXWAi4jsp0pLSMbtuVvaV4cVWQ==}
+    dependencies:
+      '@unocss/core': 0.54.1
+      '@unocss/preset-mini': 0.54.1
     dev: true
 
   /@unocss/preset-uno@0.53.6:
@@ -5920,6 +5961,12 @@ packages:
       jsonc-parser: 3.2.0
       mlly: 1.4.0
       pathe: 1.1.1
+    dev: true
+
+  /playwright-core@1.36.1:
+    resolution: {integrity: sha512-7+tmPuMcEW4xeCL9cp9KxmYpQYHKkyjwoXRnoeTowaeNat8PoBMk/HwCYhqkH2fRkshfKEOiVus/IhID2Pg8kg==}
+    engines: {node: '>=16'}
+    hasBin: true
     dev: true
 
   /polka@1.0.0-next.22:

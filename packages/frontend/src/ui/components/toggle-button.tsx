@@ -71,6 +71,7 @@ export const CollapseToggle: Component<{
     collapsed: boolean
     onToggle?: (newState: boolean) => void
     default_collapsed?: boolean
+    name?: string
 }> = props => {
     const { onToggle } = props
 
@@ -86,6 +87,7 @@ export const CollapseToggle: Component<{
                     onToggle(!props.collapsed)
                 })
             }
+            {...(props.name && { 'aria-label': `Expand or collapse ${props.name}` })}
         >
             <Icon.Triangle
                 class={clsx(
