@@ -76,6 +76,7 @@ const Overlay: Component<{
                 classList={{ 'no-padding': noPadding }}
                 data-open={isOpen()}
                 style={{ '--progress': progress() }}
+                data-testid="solid-devtools-overlay"
             >
                 <div class="overlay__container__fixed">
                     {!alwaysOpen && (

@@ -40,6 +40,7 @@ const Todo: Component<{
                 type="checkbox"
                 checked={props.done}
                 onChange={e => props.onCheck(e.currentTarget.checked)}
+                aria-label={props.title}
             />
             <input
                 type="text"

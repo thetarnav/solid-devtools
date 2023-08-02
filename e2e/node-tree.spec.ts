@@ -29,12 +29,12 @@ test('Picking node using locator', async ({ sdtFrame, page }) => {
 test('Reflected signal in Inspector', async ({ sdtFrame, page }) => {
     await sdtFrame.getByText('App').click()
 
-    const countSignal = sdtFrame.getByLabel('count signal')
+    const count = sdtFrame.getByLabel('count', { exact: true })
     const countButton = page.getByText('Count: 0').first()
 
-    await expect(countSignal).toHaveText(/count0/)
+    await expect(count).toHaveText(/0/)
     await countButton.click()
-    await expect(countSignal).toHaveText(/count1/)
+    await expect(count).toHaveText(/1/)
 })
 
 test('Reflected memos in Inspector', async ({ sdtFrame, page, search }) => {
@@ -65,6 +65,9 @@ test('Reflected memos in Inspector', async ({ sdtFrame, page, search }) => {
 
     await expect(title).toHaveText(/Buy groceries/)
     await expect(done).toBeChecked({ checked: false })
-    await page.getByRole('checkbox').check()
+    await page
+        .getByRole('checkbox')
+        .and(page.getByLabel(/Buy groceries/))
+        .check()
     await expect(done).toBeChecked()
 })
