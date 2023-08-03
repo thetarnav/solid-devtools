@@ -66,10 +66,10 @@ test.use({
         const pathToExtension = path.resolve(__dirname, '../packages/extension/dist/')
         const context = await chromium.launchPersistentContext('', {
             args: [
+                '--headless=new',
                 `--disable-extensions-except=${pathToExtension}`,
                 `--load-extension=${pathToExtension}`,
             ],
-            headless: false,
             devtools: true, // will open devtools when new tab is opened
             baseURL,
         })

@@ -41,7 +41,7 @@ jobs:
           CI: true
 
       - name: Run Playwright tests
-        run: xvfb-run pnpm test:e2e
+        run: pnpm test:e2e
 
       - uses: actions/upload-artifact@v3
         if: always()
