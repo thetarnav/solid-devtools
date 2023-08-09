@@ -46,10 +46,11 @@ export const test = base.extend<{
         const pagePromise = context.waitForEvent('page')
         await page.getByText('open new tab').click()
         const newPage = await pagePromise
-        await newPage.waitForLoadState()
+        // wait for the new page to be interactive
+        await newPage.getByRole('button').first().click({ trial: true })
 
-        await page.close()
         await devtoolsPanel.close()
+        await page.close()
 
         await use(context)
 
