@@ -1,5 +1,5 @@
 ---
-'solid-devtools': patch
+'@solid-devtools/frontend': patch
 ---
 
-Add E2E tests
+Add missing aria-label attributes (#261)
