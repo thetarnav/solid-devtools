@@ -2,6 +2,7 @@ import devtools from 'solid-devtools/vite'
 import { defineConfig } from 'vite'
 import solid from 'vite-plugin-solid'
 import ssr from 'vite-plugin-ssr/plugin'
+import inspect from 'vite-plugin-inspect'
 
 export default defineConfig({
     plugins: [
@@ -10,5 +11,6 @@ export default defineConfig({
         }),
         solid({ ssr: true }),
         ssr(),
+        inspect(),
     ],
 })

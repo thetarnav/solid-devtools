@@ -151,6 +151,10 @@ importers:
       vite-plugin-ssr:
         specifier: 0.4.133
         version: 0.4.133(vite@4.4.7)
+    devDependencies:
+      vite-plugin-inspect:
+        specifier: ^0.7.33
+        version: 0.7.33(rollup@3.26.3)(vite@4.4.7)
 
   packages/debugger:
     dependencies:

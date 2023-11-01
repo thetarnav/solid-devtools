@@ -113,10 +113,13 @@ export const devtoolsPlugin = (_options: DevtoolsPluginOptions = {}): PluginOpti
                 root: projectRoot,
                 filename: id,
                 sourceFileName: id,
+                sourceMaps: true,
                 plugins,
             })
 
-            return { code: result?.code ?? source }
+            if (result) {
+                return { code: result.code!, map: result.map! }
+            }
         },
     }
 }
