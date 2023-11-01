@@ -1,4 +1,5 @@
 import devtools from 'solid-devtools/vite'
+import { presetTypography } from 'unocss'
 import Unocss from 'unocss/vite'
 import { defineConfig } from 'vite'
 import Inspect from 'vite-plugin-inspect'
@@ -20,7 +21,9 @@ export default defineConfig(mode => {
                 },
             }),
             solid({ hot: true, dev: true }),
-            Unocss(),
+            Unocss({
+                presets: [presetTypography()],
+            }),
             Inspect(),
         ],
         define: {

@@ -65,6 +65,7 @@ const LocatorButton: Component = () => {
             class="shrink-0 w-7 h-7"
             onToggle={locator.setLocatorState}
             selected={locator.locatorEnabled()}
+            title="Select an element in the page to inspect it"
         >
             <Icon.Select class="w-4 h-4" />
         </ToggleButton>

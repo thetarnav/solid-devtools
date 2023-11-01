@@ -34,6 +34,8 @@ export const OwnerNode: Component<{
         <div
             class={`${path_height_class} relative flex items-center p-r-4 cursor-pointer`}
             onClick={() => onInspectChange(!props.isSelected)}
+            role="treeitem"
+            aria-selected={props.isSelected}
             {...hoverProps}
         >
             <div
