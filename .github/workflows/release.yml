@@ -38,8 +38,8 @@ jobs:
         id: changesets
         uses: changesets/action@v1
         with:
-          version: pnpm run changeset version && pnpm i --no-frozen-lockfile && git add .
-          publish: pnpm run build && pnpm run changeset publish
+          version: pnpm run version
+          publish: pnpm run publish
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
