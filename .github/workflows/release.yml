@@ -12,16 +12,27 @@ jobs:
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
 
       - uses: pnpm/action-setup@v2.2.4
 
       - name: Setup Node.js 18.x
         uses: actions/setup-node@v3
         with:
-          node-version: 18.x
+          node-version: 18
+          cache: pnpm
 
       - name: Install Dependencies
         run: pnpm install --no-frozen-lockfile --ignore-scripts
+
+      - name: Cache turbo build setup
+        uses: actions/cache@v3
+        with:
+          path: node_modules/.cache/turbo
+          key: turbo-${{ github.sha }}
+          restore-keys: |
+            turbo-
 
       - name: Create Release Pull Request or Publish to npm
         id: changesets

@@ -14,21 +14,29 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v3
         with:
-          fetch-depth: 2
+          fetch-depth: 0
 
       - uses: pnpm/action-setup@v2.2.4
 
       - name: Setup Node.js environment 18.x
         uses: actions/setup-node@v3
         with:
-          node-version: 18.x
+          node-version: 18
           cache: pnpm
 
       - name: Install dependencies
         run: pnpm install --no-frozen-lockfile --ignore-scripts
 
+      - name: Cache turbo build setup
+        uses: actions/cache@v3
+        with:
+          path: node_modules/.cache/turbo
+          key: turbo-${{ github.sha }}
+          restore-keys: |
+            turbo-
+
       - name: Install Playwright browser and dependencies
-        run: npx playwright install --with-deps chromium
+        run: pnpm dlx playwright install --with-deps chromium
 
       - name: Lint
         run: pnpm test:lint
