@@ -9,9 +9,9 @@
     },
     "dependencies": {
         "solid-devtools": "workspace:^",
-        "vite-plugin-ssr": "0.4.133"
+        "vite-plugin-ssr": "0.4.142"
     },
     "devDependencies": {
-        "vite-plugin-inspect": "^0.7.33"
+        "vite-plugin-inspect": "^0.7.41"
     }
 }
