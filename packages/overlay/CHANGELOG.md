@@ -1,5 +1,12 @@
 # @solid-devtools/overlay
 
+## 0.27.9
+
+### Patch Changes
+
+-   Updated dependencies [2dcde04e]
+    -   @solid-devtools/frontend@0.10.3
+
 ## 0.27.8
 
 ## 0.27.7
