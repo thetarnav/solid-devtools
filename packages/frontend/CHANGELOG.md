@@ -1,5 +1,11 @@
 # @solid-devtools/frontend
 
+## 0.10.3
+
+### Patch Changes
+
+-   2dcde04e: Add missing aria-label attributes (#261)
+
 ## 0.10.2
 
 ### Patch Changes
