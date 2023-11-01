@@ -1,5 +1,11 @@
 # solid-devtools
 
+## 0.27.8
+
+### Patch Changes
+
+-   0bc8d67: Output source map from vite plugin
+
 ## 0.27.7
 
 ## 0.27.6

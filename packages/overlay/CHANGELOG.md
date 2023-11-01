@@ -1,5 +1,7 @@
 # @solid-devtools/overlay
 
+## 0.27.8
+
 ## 0.27.7
 
 ### Patch Changes
