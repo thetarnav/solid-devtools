@@ -44,7 +44,7 @@
     "scripts": {
         "dev": "pnpm run build --watch",
         "build": "tsx ./scripts/build.ts",
-        "typecheck": "tsc --noEmit --paths null"
+        "test:types": "tsc --noEmit --paths null"
     },
     "dependencies": {
         "@solid-devtools/debugger": "workspace:^",

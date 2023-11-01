@@ -13,13 +13,6 @@
     "bugs": {
         "url": "https://github.com/thetarnav/solid-devtools/issues"
     },
-    "keywords": [
-        "solid",
-        "devtools",
-        "reactivity",
-        "extension",
-        "chrome"
-    ],
     "private": false,
     "sideEffects": true,
     "publishConfig": {
@@ -102,8 +95,8 @@
     "scripts": {
         "dev": "tsup --watch",
         "build": "tsup",
-        "test": "vitest",
-        "typecheck": "tsc --noEmit --paths null"
+        "test:unit": "vitest",
+        "test:types": "tsc --noEmit --paths null"
     },
     "devDependencies": {
         "@babel/core": "^7.18.13",
@@ -136,5 +129,12 @@
             "optional": true
         }
     },
-    "packageManager": "pnpm@8.6.0"
+    "packageManager": "pnpm@8.6.0",
+    "keywords": [
+        "solid",
+        "devtools",
+        "reactivity",
+        "extension",
+        "chrome"
+    ]
 }

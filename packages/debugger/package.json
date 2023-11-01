@@ -13,12 +13,6 @@
     "bugs": {
         "url": "https://github.com/thetarnav/solid-devtools/issues"
     },
-    "keywords": [
-        "solid",
-        "devtools",
-        "debugger",
-        "reactivity"
-    ],
     "private": false,
     "sideEffects": false,
     "publishConfig": {
@@ -73,8 +67,8 @@
     "scripts": {
         "dev": "tsup --watch",
         "build": "tsup",
-        "test": "vitest",
-        "typecheck": "tsc --noEmit --paths null"
+        "test:unit": "vitest",
+        "test:types": "tsc --noEmit --paths null"
     },
     "dependencies": {
         "@nothing-but/utils": "~0.3.2",
@@ -96,5 +90,11 @@
     "devDependencies": {
         "solid-js": "^1.7.8"
     },
-    "packageManager": "pnpm@8.6.0"
+    "packageManager": "pnpm@8.6.0",
+    "keywords": [
+        "solid",
+        "devtools",
+        "debugger",
+        "reactivity"
+    ]
 }

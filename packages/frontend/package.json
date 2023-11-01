@@ -33,8 +33,8 @@
         "build": "pnpm run --filter frontend --parallel /build:.*/",
         "build:code": "tsup",
         "build:css": "unocss \"src/**/*.tsx\" -o dist/styles.css",
-        "test": "vitest",
-        "typecheck": "tsc --noEmit"
+        "test:unit": "vitest",
+        "test:types": "tsc --noEmit"
     },
     "dependencies": {
         "@solid-devtools/debugger": "workspace:^",

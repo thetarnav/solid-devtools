@@ -10,8 +10,8 @@
         "dev": "vite --port 3333",
         "build": "npm run clean && vite build && node scripts/zip.cjs",
         "clean": "rimraf dist dist.zip",
-        "test": "vitest",
-        "typecheck": "tsc --noEmit --paths null"
+        "test:unit": "vitest",
+        "test:types": "tsc --noEmit --paths null"
     },
     "devDependencies": {
         "@crxjs/vite-plugin": "2.0.0-beta.17",

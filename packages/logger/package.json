@@ -13,13 +13,6 @@
     "bugs": {
         "url": "https://github.com/thetarnav/solid-devtools/issues"
     },
-    "keywords": [
-        "solid",
-        "devtools",
-        "logger",
-        "console",
-        "debugger"
-    ],
     "private": false,
     "sideEffects": false,
     "publishConfig": {
@@ -51,8 +44,8 @@
     "scripts": {
         "dev": "tsup --watch",
         "build": "tsup",
-        "test": "echo \"NOOP test\"",
-        "typecheck": "tsc --noEmit --paths null"
+        "test:unit": "echo \"NOOP test\"",
+        "test:types": "tsc --noEmit --paths null"
     },
     "devDependencies": {
         "tsup": "^7.1.0",
@@ -67,5 +60,12 @@
     "peerDependencies": {
         "solid-js": "^1.7.0"
     },
-    "packageManager": "pnpm@8.6.0"
+    "packageManager": "pnpm@8.6.0",
+    "keywords": [
+        "solid",
+        "devtools",
+        "logger",
+        "console",
+        "debugger"
+    ]
 }
