@@ -31,12 +31,11 @@ jobs:
         run: npx playwright install --with-deps chromium
 
       - name: Lint
-        run: pnpm lint
+        run: pnpm test:lint
 
       - name: Run Build and Tests
-        # Will run the step even if lint step failed
-        if: success() || failure()
-        run: pnpm run build-test
+        if: always()
+        run: pnpm run build-test:packages
         env:
           CI: true
 
