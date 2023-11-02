@@ -1,11 +1,10 @@
 import path from 'path'
 import solid from 'vite-plugin-solid'
-import { InlineConfig } from 'vitest'
-import { defineConfig, UserConfig } from 'vitest/config'
+import * as vi from 'vitest/config'
 
 const cwd = process.cwd()
 
-export const testConfig: InlineConfig = {
+export const testConfig: vi.UserConfig['test'] = {
     passWithNoTests: true,
     watch: false,
     globals: true,
@@ -23,11 +22,11 @@ export const resolveConfig = {
         'solid-js/store': path.resolve(cwd, 'node_modules/solid-js/store/dist/dev.js'),
         'solid-js': path.resolve(cwd, 'node_modules/solid-js/dist/dev.js'),
     },
-} satisfies UserConfig['resolve']
+} satisfies vi.UserConfig['resolve']
 
-export const vitestFullConfig = (patch?: (config: UserConfig) => void) =>
-    defineConfig(() => {
-        const config: UserConfig = {
+export const vitestFullConfig = (patch?: (config: vi.UserConfig) => void) =>
+    vi.defineConfig(() => {
+        const config: vi.UserConfig = {
             plugins: [solid()],
             test: testConfig,
             resolve: resolveConfig,

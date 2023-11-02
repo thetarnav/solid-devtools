@@ -1,11 +1,11 @@
 import { theme } from '@/ui'
-import { color } from '@nothing-but/utils'
+import { Color } from '@nothing-but/utils'
 import { combineProps } from '@solid-primitives/props'
 import clsx from 'clsx'
-import { ComponentProps, ParentComponent, splitProps } from 'solid-js'
+import * as s from 'solid-js'
 
 const thumb_color = (opacity: number) =>
-    color.rgb_to_rgba(color.hex_to_rgb(theme.colors.gray[500]), opacity).toString()
+    Color.rgb_to_rgba(Color.hex_to_rgb(theme.colors.gray[500]), opacity).toString()
 
 export const custom_scrollbar = 'custom_scrollbar'
 export const custom_scrollbar_styles = /*css*/ `
@@ -36,8 +36,8 @@ export const custom_scrollbar_styles = /*css*/ `
 }
 `
 
-export const Scrollable: ParentComponent<
-    ComponentProps<'div'> & { contentProps?: ComponentProps<'div'> }
+export const Scrollable: s.ParentComponent<
+    s.ComponentProps<'div'> & { contentProps?: s.ComponentProps<'div'> }
 > = props => {
     const container_props = combineProps(props, {
         class: clsx(
@@ -46,7 +46,7 @@ export const Scrollable: ParentComponent<
         ),
     })
 
-    const [, container_props_without_content] = splitProps(container_props, ['contentProps'])
+    const [, container_props_without_content] = s.splitProps(container_props, ['contentProps'])
 
     const content_props = combineProps(() => props.contentProps ?? {}, {
         class: 'relative min-w-full min-h-full w-max h-max overflow-hidden',
