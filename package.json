@@ -9,7 +9,7 @@
         "----------------------DEV----------------------": "",
         "dev:ext": "pnpm -dir packages/extension run dev",
         "dev:transform": "pnpm -dir packages/transform run dev",
-        "dev": "pnpm run --parallel --filter ./packages/* --filter !./packages/extension dev",
+        "dev": "pnpm run --parallel --filter=./packages/* --filter=!./packages/extension dev",
         "sandbox": "pnpm -dir examples/sandbox run dev",
         "sandbox:ext": "pnpm -dir examples/sandbox run dev:ext",
         "----------------------BUILD----------------------": "",
