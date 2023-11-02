@@ -1,5 +1,19 @@
 # @solid-devtools/extension
 
+## 0.28.0
+
+### Minor Changes
+
+-   86f74ea9: Update to Solid 1.8
+
+### Patch Changes
+
+-   Updated dependencies [86f74ea9]
+    -   @solid-devtools/frontend@0.11.0
+    -   @solid-devtools/debugger@0.23.0
+    -   solid-devtools@0.28.0
+    -   @solid-devtools/shared@0.13.0
+
 ## 0.27.9
 
 ### Patch Changes
