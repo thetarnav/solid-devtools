@@ -290,12 +290,12 @@ export const collectOwnerDetails = /*#__PURE__*/ untrackedCallback(function (
         sourceMap = undefined
         owned = null
         const symbols = Object.getOwnPropertySymbols(owner.context)
-        if (symbols.length !== 1) {
-            throw new Error('Context field has more than one symbol. This is not expected.')
-        } else {
-            const contextValue = owner.context[symbols[0]!]
-            getValue = () => contextValue
-        }
+        /*
+            since 1.8 context keys from parent are cloned to child context
+            the last key should be the added value
+        */
+        const context_value = owner.context[symbols[symbols.length - 1]!]
+        getValue = () => context_value
     }
 
     let checkProxyProps: ReturnType<typeof mapProps>['checkProxyProps']
