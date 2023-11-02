@@ -1,5 +1,11 @@
 # solid-devtools-shared
 
+## 0.13.0
+
+### Minor Changes
+
+-   86f74ea9: Update to Solid 1.8
+
 ## 0.12.3
 
 ### Patch Changes
