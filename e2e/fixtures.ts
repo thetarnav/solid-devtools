@@ -1,37 +1,40 @@
-import { FrameLocator, Locator, Page, test as base, chromium } from '@playwright/test'
+import * as pw from '@playwright/test'
 import assert from 'assert'
 import path from 'path'
 
-export const test = base.extend<{
-    page: Page
-    sdtFrame: FrameLocator | Locator
-    search: Locator
+export const test = pw.test.extend<{
+    page: pw.Page
+    sdt_frame: pw.FrameLocator | pw.Locator
+    search: pw.Locator
 }>({
+    baseURL: async ({}, use, testInfo) => {
+        await use(testInfo.project.use.baseURL)
+    },
     context: async ({ baseURL }, use, testInfo) => {
         if (testInfo.project.name.includes('Overlay')) {
-            const context = await chromium.launchPersistentContext('', { baseURL })
+            const context = await pw.chromium.launchPersistentContext('', { baseURL: baseURL })
             await use(context)
             await context.close()
             return
         }
 
-        const pathToExtension = path.resolve(__dirname, '../packages/extension/dist/')
-        const context = await chromium.launchPersistentContext('', {
+        const path_to_extension = path.resolve(__dirname, '../packages/extension/dist/')
+        const context = await pw.chromium.launchPersistentContext('', {
             args: [
                 '--headless=new',
-                `--disable-extensions-except=${pathToExtension}`,
-                `--load-extension=${pathToExtension}`,
+                `--disable-extensions-except=${path_to_extension}`,
+                `--load-extension=${path_to_extension}`,
             ],
             devtools: true, // will open devtools when new tab is opened
-            baseURL,
+            baseURL: baseURL,
         })
 
         const page = context.pages().find(page => page.url().includes('about:blank'))
         assert(page)
-        const devtoolsPanel = context
+        const devtools_panel = context
             .pages()
             .find(page => page.url().includes('devtools://devtools/bundled/devtools_app.html'))
-        assert(devtoolsPanel)
+        assert(devtools_panel)
 
         // Since we can only initiate DevTools by opening a new tab, we need to go to
         // the sandbox in a new tab by clicking a link.
@@ -43,21 +46,18 @@ export const test = base.extend<{
             document.body.appendChild(a)
         }, baseURL!)
 
-        const pagePromise = context.waitForEvent('page')
+        const page_promise = context.waitForEvent('page')
         await page.getByText('open new tab').click()
-        const newPage = await pagePromise
+        const new_page = await page_promise
         // wait for the new page to be interactive
-        await newPage.getByRole('button').first().click({ trial: true })
+        await new_page.getByRole('button').first().click({ trial: true })
 
-        await devtoolsPanel.close()
+        await devtools_panel.close()
         await page.close()
 
         await use(context)
 
         await context.close()
-    },
-    baseURL: async ({}, use, testInfo) => {
-        await use(testInfo.project.use.baseURL)
     },
     page: async ({ context, baseURL }, use, testInfo) => {
         if (testInfo.project.name.includes('Overlay')) {
@@ -71,34 +71,36 @@ export const test = base.extend<{
         assert(page)
         await use(page)
     },
-    sdtFrame: async ({ context, page }, use, testInfo) => {
-        let sdtFrame: FrameLocator | Locator
+    sdt_frame: async ({ context, page }, use, testInfo) => {
+        let sdt_frame: pw.FrameLocator | pw.Locator
 
         if (testInfo.project.name.includes('Overlay')) {
-            sdtFrame = page.getByTestId('solid-devtools-overlay')
+            sdt_frame = page.getByTestId('solid-devtools-overlay')
         } else {
-            const devtoolsPanel = context
+            const devtools_panel = context
                 .pages()
                 .find(page => page.url().includes('devtools://devtools/bundled/devtools_app.html'))
-            assert(devtoolsPanel)
+            assert(devtools_panel)
 
             // Undock the devtools into a separate window so we can see the `solid` tab.
-            await devtoolsPanel.getByLabel('Customize and control DevTools').click()
-            await devtoolsPanel.getByLabel('Undock into separate window').click()
-            await devtoolsPanel.getByText('Solid').click()
+            await devtools_panel.getByLabel('Customize and control DevTools').click()
+            await devtools_panel.getByLabel('Undock into separate window').click()
+            await devtools_panel.getByText('Solid').click()
 
             // Somehow the window is not sized properly, causes half of the viewport
             // to be hidden. Interacting with elements outside the window area
             // wouldn't work.
-            await devtoolsPanel.setViewportSize({ width: 640, height: 660 })
+            await devtools_panel.setViewportSize({ width: 640, height: 660 })
 
-            sdtFrame = devtoolsPanel.frameLocator('[src^="chrome-extension://"][src$="index.html"]')
+            sdt_frame = devtools_panel.frameLocator(
+                '[src^="chrome-extension://"][src$="index.html"]',
+            )
         }
 
-        await sdtFrame.getByText('Root').first().waitFor() // Wait for all tree nodes to be visible
-        await use(sdtFrame)
+        await sdt_frame.getByText('Root').first().waitFor() // Wait for all tree nodes to be visible
+        await use(sdt_frame)
     },
-    search: async ({ sdtFrame }, use) => {
-        await use(sdtFrame.getByPlaceholder('Search'))
+    search: async ({ sdt_frame }, use) => {
+        await use(sdt_frame.getByPlaceholder('Search'))
     },
 })

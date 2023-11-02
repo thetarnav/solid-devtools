@@ -23,11 +23,13 @@ export default defineConfig({
             command: 'pnpm run sandbox:ext',
             url: 'http://localhost:3000',
             timeout: 120_000,
+            reuseExistingServer: !is_ci,
         },
         {
             command: 'pnpm run sandbox',
             url: 'http://localhost:3001',
             timeout: 120_000,
+            reuseExistingServer: !is_ci,
         },
     ],
     use: {
