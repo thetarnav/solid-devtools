@@ -1,18 +1,18 @@
 import fs from 'fs'
 import path from 'path'
-import { defineConfig } from 'tsup'
+import * as tsup from 'tsup'
 import * as preset from 'tsup-preset-solid'
 import { CI } from '../../configs/tsup.config'
 
 const src = path.resolve(__dirname, 'src')
 const entries = fs.readdirSync(src)
 
-export default defineConfig(config => {
+export default tsup.defineConfig(config => {
     const watching = !!config.watch
 
     const parsed_options = preset.parsePresetOptions(
         {
-            entries: entries.map(entry => ({ entry: path.join(src, entry) })),
+            entries: entries.map(entry => ({ entry: path.join('src', entry) })),
         },
         watching,
     )

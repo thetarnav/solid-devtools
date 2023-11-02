@@ -2,7 +2,7 @@
 // colors: https://github.com/tailwindlabs/tailwindcss/blob/master/src/public/colors.js
 // spacing and other values: https://github.com/tailwindlabs/tailwindcss/blob/master/stubs/defaultConfig.stub.js
 
-import { misc } from '@nothing-but/utils'
+import { Misc } from '@nothing-but/utils'
 import type { Prettify, UnionToIntersection } from '@nothing-but/utils/types'
 
 const cyan = {
@@ -130,7 +130,7 @@ export type Spacing = Prettify<
     >
 >
 
-export const spacing = misc.keys(raw_spacing_with_custom).reduce(
+export const spacing = Misc.keys(raw_spacing_with_custom).reduce(
     (acc, key) => {
         const value = raw_spacing_with_custom[key]
         acc[key] = value

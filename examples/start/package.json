@@ -9,15 +9,15 @@
     "type": "module",
     "main": "./dist/index.js",
     "devDependencies": {
-        "solid-start-node": "^0.2.29"
+        "solid-start-node": "^0.3.9"
     },
     "dependencies": {
         "@solid-devtools/overlay": "workspace:^",
-        "@solidjs/meta": "^0.28.6",
-        "@solidjs/router": "^0.8.2",
+        "@solidjs/meta": "^0.29.1",
+        "@solidjs/router": "^0.8.3",
         "solid-devtools": "workspace:^",
-        "solid-start": "^0.2.29",
-        "undici": "^5.22.1"
+        "solid-start": "^0.3.9",
+        "undici": "^5.27.0"
     },
     "engines": {
         "node": ">=18"
