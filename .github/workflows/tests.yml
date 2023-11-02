@@ -49,6 +49,8 @@ jobs:
 
       - name: Run Playwright tests
         run: pnpm test:e2e
+        env:
+          CI: true
 
       - uses: actions/upload-artifact@v3
         if: always()
