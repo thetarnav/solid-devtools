@@ -1,5 +1,15 @@
 # @solid-devtools/logger
 
+## 0.8.1
+
+### Patch Changes
+
+-   778774f2: Correct solid-js peer dep version
+-   Updated dependencies [778774f2]
+-   Updated dependencies [778774f2]
+    -   @solid-devtools/debugger@0.23.1
+    -   @solid-devtools/shared@0.13.1
+
 ## 0.8.0
 
 ### Minor Changes

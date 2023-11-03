@@ -1,5 +1,11 @@
 # solid-devtools-shared
 
+## 0.13.1
+
+### Patch Changes
+
+-   778774f2: Correct solid-js peer dep version
+
 ## 0.13.0
 
 ### Minor Changes
