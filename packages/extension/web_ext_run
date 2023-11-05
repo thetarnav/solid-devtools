@@ -1,0 +1,7 @@
+#!/bin/bash
+
+# # Load environment variables
+# source .env.local
+
+# Run the web extension
+web-ext run -s dist -p dev "$@"

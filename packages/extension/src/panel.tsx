@@ -1,8 +1,12 @@
+/*
+    Devtools panel entry point
+*/
+
 import { Debugger } from '@solid-devtools/debugger/types'
 import { createDevtools, MountIcons } from '@solid-devtools/frontend'
 import { createSignal } from 'solid-js'
 import { render } from 'solid-js/web'
-import { ConnectionName, createPortMessanger, once, Versions } from './bridge'
+import { ConnectionName, createPortMessanger, once, Versions } from '../shared/bridge'
 
 import '@solid-devtools/frontend/dist/styles.css'
 

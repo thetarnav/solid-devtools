@@ -21,7 +21,7 @@ import {
     makeMessageListener,
     makePostMessage,
     startListeningWindowMessages,
-} from '../src/bridge'
+} from '../shared/bridge'
 
 import.meta.env.DEV && log('Content-Script working.')
 

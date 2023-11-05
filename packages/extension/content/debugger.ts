@@ -8,7 +8,11 @@ Debugger Client injected into the inspected page
 import { useDebugger } from '@solid-devtools/debugger'
 import { Debugger } from '@solid-devtools/debugger/types'
 import { log, warn } from '@solid-devtools/shared/utils'
-import { makeMessageListener, makePostMessage, startListeningWindowMessages } from '../src/bridge'
+import {
+    makeMessageListener,
+    makePostMessage,
+    startListeningWindowMessages,
+} from '../shared/bridge'
 
 import.meta.env.DEV && log('Debugger-Client loaded')
 

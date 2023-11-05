@@ -221,8 +221,8 @@ importers:
         version: 1.8.5
     devDependencies:
       '@crxjs/vite-plugin':
-        specifier: 2.0.0-beta.17
-        version: 2.0.0-beta.17
+        specifier: 2.0.0-beta.21
+        version: 2.0.0-beta.21
       '@types/chrome':
         specifier: ^0.0.248
         version: 0.0.248
@@ -1781,8 +1781,8 @@ packages:
       prettier: 2.8.8
     dev: true
 
-  /@crxjs/vite-plugin@2.0.0-beta.17:
-    resolution: {integrity: sha512-44CavnsY01jvF2uHfRdqA3j6bg6IcVc+ZrSayYS+H7eqb6BHWh619A2jJ3Y0eHVh9H65041ob4g6I1VMxWx4qw==}
+  /@crxjs/vite-plugin@2.0.0-beta.21:
+    resolution: {integrity: sha512-kSXgHHqCXASqJ8NmY94+KLGVwdtkJ0E7KsRQ+vbMpRliJ5ze0xnSk0l41p4txlUysmEoqaeo4Xb7rEFdcU2zjQ==}
     dependencies:
       '@rollup/pluginutils': 4.2.1
       '@webcomponents/custom-elements': 1.6.0

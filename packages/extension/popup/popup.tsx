@@ -2,7 +2,13 @@
 
 import { Accessor, Component, JSX, Show, createSignal } from 'solid-js'
 import { render } from 'solid-js/web'
-import { ConnectionName, DetectionState, Versions, createPortMessanger, once } from '../src/bridge'
+import {
+    ConnectionName,
+    DetectionState,
+    Versions,
+    createPortMessanger,
+    once,
+} from '../shared/bridge'
 
 import './popup.css'
 

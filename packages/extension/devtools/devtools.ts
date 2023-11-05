@@ -8,8 +8,8 @@ It connects to the background script.
 */
 
 import { error, log } from '@solid-devtools/shared/utils'
-import { ConnectionName, createPortMessanger, once } from '../src/bridge'
-import icons from '../src/icons'
+import { ConnectionName, createPortMessanger, once } from '../shared/bridge'
+import { icons } from '../shared/icons'
 
 log('Devtools-Script working.')
 
@@ -35,8 +35,14 @@ once(fromBackground, 'Versions', async () => {
 
 const createPanel = () =>
     new Promise<chrome.devtools.panels.ExtensionPanel>((resolve, reject) => {
-        chrome.devtools.panels.create('Solid', icons.normal[32], 'index.html', newPanel => {
-            if (chrome.runtime.lastError) reject(chrome.runtime.lastError)
-            else resolve(newPanel)
-        })
+        chrome.devtools.panels.create(
+            'Solid',
+            /* firefox requires absolute paths */
+            '/' + icons.disabled[32],
+            '/index.html',
+            newPanel => {
+                if (chrome.runtime.lastError) reject(chrome.runtime.lastError)
+                else resolve(newPanel)
+            },
+        )
     })
