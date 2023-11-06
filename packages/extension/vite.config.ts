@@ -2,22 +2,21 @@ import * as crx from '@crxjs/vite-plugin'
 import fs from 'node:fs'
 import module from 'node:module'
 import path from 'node:path'
+import * as vite from 'vite'
 import solidPlugin from 'vite-plugin-solid'
-import * as vi from 'vitest/config'
-import { testConfig } from '../../configs/vitest.config'
 import ext_pkg from './package.json'
-import { icons } from './shared/icons'
+import { icons } from './shared/icons.js'
 
 const require = module.createRequire(import.meta.url)
 const cwd = process.cwd()
 
-const BROWSER = process.env.BROWSER
-if (BROWSER !== 'chrome' && BROWSER !== 'firefox') {
-    throw new Error('BROWSER env must be "chrome" or "firefox"')
+const browser = process.env['BROWSER'] ?? 'chrome'
+if (browser !== 'chrome' && browser !== 'firefox') {
+    throw new Error('browser arg must be "chrome" or "firefox", was ' + browser)
 }
-const is_chrome = BROWSER === 'chrome'
+const is_chrome = browser === 'chrome'
 
-const manifest = crx.defineManifest(env => {
+const manifest_version = (() => {
     // Convert from Semver (example: 0.1.0-beta6)
     const [major, minor, patch, label = '0'] = ext_pkg.version
         // can only contain digits, dots, or dash
@@ -25,43 +24,45 @@ const manifest = crx.defineManifest(env => {
         // split into version parts
         .split(/[.-]/)
 
-    return {
-        manifest_version: 3,
-        name: `${env.mode === 'production' ? '' : '[DEV] '}Solid Devtools`,
-        description: 'Chrome Developer Tools extension for debugging SolidJS applications.',
-        homepage_url: 'https://github.com/thetarnav/solid-devtools',
-        version: `${major}.${minor}.${patch}.${label}`,
-        version_name: is_chrome ? ext_pkg.version : undefined,
-        author: 'Damian Tarnawski',
-        minimum_chrome_version: '94',
-        devtools_page: 'devtools/devtools.html',
-        content_scripts: [
-            {
-                matches: ['*://*/*'],
-                js: ['content/content.ts'],
-                run_at: 'document_start',
-            },
-        ],
-        background: is_chrome
-            ? {
-                  service_worker: 'background/background.ts',
-                  type: 'module',
-              }
-            : {
-                  scripts: ['background/background.ts'],
-                  type: 'module',
-              },
-        permissions: [],
-        action: {
-            default_icon: icons.disabled,
-            default_title: 'Solid Devtools',
-            default_popup: 'popup/popup.html',
-        },
-        icons: icons.normal,
-    }
-})
+    return `${major}.${minor}.${patch}.${label}`
+})()
 
-export default vi.defineConfig(config => {
+const manifest = crx.defineManifest(env => ({
+    manifest_version: 3,
+    name: `${env.mode === 'development' ? '[DEV] ' : ''}Solid Devtools`,
+    description: 'Chrome Developer Tools extension for debugging SolidJS applications.',
+    homepage_url: 'https://github.com/thetarnav/solid-devtools',
+    version: manifest_version,
+    version_name: is_chrome ? ext_pkg.version : undefined,
+    author: 'Damian Tarnawski',
+    minimum_chrome_version: '94',
+    devtools_page: 'devtools/devtools.html',
+    content_scripts: [
+        {
+            matches: ['*://*/*'],
+            js: ['content/content.ts'],
+            run_at: 'document_start',
+        },
+    ],
+    background: is_chrome
+        ? {
+              service_worker: 'background/background.ts',
+              type: 'module',
+          }
+        : {
+              scripts: ['background/background.ts'],
+              type: 'module',
+          },
+    permissions: [],
+    action: {
+        default_icon: icons.disabled,
+        default_title: 'Solid Devtools',
+        default_popup: 'popup/popup.html',
+    },
+    icons: icons.normal,
+}))
+
+export default vite.defineConfig(config => {
     const is_dev = config.mode === 'development'
 
     const sdt_pkg = JSON.parse(
@@ -83,7 +84,7 @@ export default vi.defineConfig(config => {
             solidPlugin({ dev: false, hot: false }),
             crx.crx({
                 manifest: manifest,
-                browser: BROWSER,
+                browser: browser,
             }),
             {
                 name: 'replace-version',
@@ -97,15 +98,15 @@ export default vi.defineConfig(config => {
             },
         ],
         define: {
-            'import.meta.env.BROWSER': JSON.stringify(BROWSER),
+            'import.meta.env.BROWSER': JSON.stringify(browser),
         },
         build: {
             emptyOutDir: !is_dev,
+            outDir: 'dist' + (is_dev ? '' : `/${browser}`),
             rollupOptions: {
                 input: { panel: 'index.html' },
             },
             target: 'esnext',
         },
-        test: testConfig,
     }
 })

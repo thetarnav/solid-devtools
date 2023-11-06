@@ -14,5 +14,6 @@
         "shared/**/*",
         "popup/**/*",
         "env.d.ts"
-    ]
+    ],
+    "references": [{ "path": "./tsconfig.build.json" }]
 }

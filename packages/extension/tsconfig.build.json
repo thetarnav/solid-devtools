@@ -1,0 +1,16 @@
+{
+    "extends": "../../tsconfig.json",
+    "compilerOptions": {
+        "composite": true,
+        "types": ["@types/node"],
+        "module": "NodeNext",
+        "moduleResolution": "NodeNext"
+    },
+    "include": [
+        "./build.ts",
+        "./vite.config.ts",
+        "./package.json",
+        "../../configs/vitest.config.ts",
+        "./shared/**/*"
+    ]
+}

@@ -16,7 +16,7 @@
         "build": "turbo run build --filter=./packages/*",
         "----------------------TEST----------------------": "",
         "test:unit": "turbo run test --filter=./packages/*",
-        "test:types": "turbo run typecheck --filter=./packages/*",
+        "test:types": "turbo run test:types --filter=./packages/*",
         "test:lint": "eslint --ignore-path .gitignore --max-warnings 0 packages/**/*.{js,ts,tsx,jsx} --rule \"@typescript-eslint/no-unnecessary-type-assertion: off\"",
         "test:e2e": "cross-env PW_CHROMIUM_ATTACH_TO_OTHER=1 playwright test -c playwright.config.ts",
         "----------------------UTILS----------------------": "",
@@ -48,6 +48,7 @@
         "solid-js": "^1.8.5",
         "tsup": "^7.2.0",
         "tsup-preset-solid": "^2.1.0",
+        "tsx": "^3.14.0",
         "turbo": "^1.10.16",
         "typescript": "^5.2.2",
         "unocss": "^0.57.1",
@@ -59,5 +60,10 @@
     "engines": {
         "node": ">=18",
         "pnpm": ">=8.6.0"
+    },
+    "pnpm": {
+        "patchedDependencies": {
+            "solid-js@1.8.5": "patches/solid-js@1.8.5.patch"
+        }
     }
 }

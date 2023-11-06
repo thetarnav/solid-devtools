@@ -7,8 +7,9 @@
     "type": "module",
     "scripts": {
         "dev": "vite",
-        "build:chrome": "npm run clean && BROWSER=chrome vite build && node scripts/zip.cjs",
-        "build:firefox": "npm run clean && BROWSER=firefox vite build && node scripts/zip.cjs",
+        "build:chrome": "tsx build.ts --browser=chrome",
+        "build:firefox": "tsx build.ts --browser=firefox",
+        "build": "tsx build.ts --browser=firefox --browser=chrome",
         "clean": "rimraf dist dist.zip",
         "test:unit": "vitest",
         "test:types": "tsc --noEmit --paths null"
