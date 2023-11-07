@@ -60,10 +60,5 @@
     "engines": {
         "node": ">=18",
         "pnpm": ">=8.6.0"
-    },
-    "pnpm": {
-        "patchedDependencies": {
-            "solid-js@1.8.5": "patches/solid-js@1.8.5.patch"
-        }
     }
 }
