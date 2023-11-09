@@ -1,4 +1,4 @@
-export * as theme from '../../../../configs/theme'
+export * as theme from '@solid-devtools/theme'
 export * as styles from './styles'
 
 export * from './components/badge'

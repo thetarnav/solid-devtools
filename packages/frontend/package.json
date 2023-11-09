@@ -37,6 +37,7 @@
         "test:types": "tsc --noEmit"
     },
     "dependencies": {
+        "@solid-devtools/theme": "workspace:^",
         "@solid-devtools/debugger": "workspace:^",
         "@solid-devtools/shared": "workspace:^",
         "@solid-primitives/context": "^0.2.1",

@@ -1,7 +1,7 @@
 import { value_node_styles } from '@/modules/inspector/value-node'
 import { owner_path_styles } from '@/modules/structure'
 import { theme } from '@/ui'
-import { make_var_styles } from '../../../../configs/theme'
+import { make_var_styles } from '@solid-devtools/theme'
 import { highlight_styles } from './components/highlight'
 import { custom_scrollbar_styles } from './components/scrollable'
 import { toggle_button_styles } from './components/toggle-button'
