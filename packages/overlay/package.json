@@ -47,6 +47,7 @@
         "test:types": "tsc --noEmit --paths null"
     },
     "dependencies": {
+        "@nothing-but/utils": "~0.11.1",
         "@solid-devtools/debugger": "workspace:^",
         "@solid-devtools/frontend": "workspace:^",
         "@solid-devtools/shared": "workspace:^",

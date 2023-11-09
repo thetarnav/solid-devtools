@@ -11,7 +11,7 @@
         "build:firefox": "tsx build.ts --browser=firefox",
         "build": "tsx build.ts --browser=firefox --browser=chrome",
         "clean": "rimraf dist dist.zip",
-        "test:unit": "vitest",
+        "test:unit": "echo \"No unit tests\"",
         "test:types": "tsc --noEmit --paths null"
     },
     "devDependencies": {
