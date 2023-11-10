@@ -40,5 +40,5 @@ for (const browser of browsers) {
     process.env['BROWSER'] = browser
     await vite.build()
 
-    child_process.exec(`zip -r ${package_dist}/${browser}.zip ${dist}/*`)
+    child_process.exec(`cd ./dist && zip -r ../package/${browser}.zip .`)
 }

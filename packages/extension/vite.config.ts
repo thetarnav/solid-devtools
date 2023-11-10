@@ -27,40 +27,51 @@ const manifest_version = (() => {
     return `${major}.${minor}.${patch}.${label}`
 })()
 
-const manifest = crx.defineManifest(env => ({
-    manifest_version: 3,
-    name: `${env.mode === 'development' ? '[DEV] ' : ''}Solid Devtools`,
-    description: 'Chrome Developer Tools extension for debugging SolidJS applications.',
-    homepage_url: 'https://github.com/thetarnav/solid-devtools',
-    version: manifest_version,
-    version_name: is_chrome ? ext_pkg.version : undefined,
-    author: 'Damian Tarnawski',
-    minimum_chrome_version: '94',
-    devtools_page: 'devtools/devtools.html',
-    content_scripts: [
-        {
-            matches: ['*://*/*'],
-            js: ['content/content.ts'],
-            run_at: 'document_start',
+const manifest = crx.defineManifest(env => {
+    type Manifest = Exclude<crx.ManifestV3Export, Promise<any> | ((...a: any[]) => any)> & {
+        browser_specific_settings?: Record<string, Record<string, string>>
+    }
+
+    const manifest: Manifest = {
+        manifest_version: 3,
+        name: `${env.mode === 'development' ? '[DEV] ' : ''}Solid Devtools`,
+        description: 'Chrome Developer Tools extension for debugging SolidJS applications.',
+        homepage_url: 'https://github.com/thetarnav/solid-devtools',
+        version: manifest_version,
+        version_name: is_chrome ? ext_pkg.version : undefined,
+        browser_specific_settings: is_chrome
+            ? undefined
+            : { gecko: { id: '{abfd162e-9948-403a-a75c-6e61184e1d47}' } },
+        author: 'Damian Tarnawski',
+        minimum_chrome_version: '94',
+        devtools_page: 'devtools/devtools.html',
+        content_scripts: [
+            {
+                matches: ['*://*/*'],
+                js: ['content/content.ts'],
+                run_at: 'document_start',
+            },
+        ],
+        background: is_chrome
+            ? {
+                  service_worker: 'background/background.ts',
+                  type: 'module',
+              }
+            : {
+                  scripts: ['background/background.ts'],
+                  type: 'module',
+              },
+        permissions: [],
+        action: {
+            default_icon: icons.disabled,
+            default_title: 'Solid Devtools',
+            default_popup: 'popup/popup.html',
         },
-    ],
-    background: is_chrome
-        ? {
-              service_worker: 'background/background.ts',
-              type: 'module',
-          }
-        : {
-              scripts: ['background/background.ts'],
-              type: 'module',
-          },
-    permissions: [],
-    action: {
-        default_icon: icons.disabled,
-        default_title: 'Solid Devtools',
-        default_popup: 'popup/popup.html',
-    },
-    icons: icons.normal,
-}))
+        icons: icons.normal,
+    }
+
+    return manifest as any
+})
 
 export default vite.defineConfig(config => {
     const is_dev = config.mode === 'development'
