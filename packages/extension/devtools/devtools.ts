@@ -35,14 +35,20 @@ once(fromBackground, 'Versions', async () => {
 
 const createPanel = () =>
     new Promise<chrome.devtools.panels.ExtensionPanel>((resolve, reject) => {
-        chrome.devtools.panels.create(
-            'Solid',
-            /* firefox requires absolute paths */
-            '/' + icons.disabled[32],
-            '/index.html',
-            newPanel => {
-                if (chrome.runtime.lastError) reject(chrome.runtime.lastError)
-                else resolve(newPanel)
-            },
-        )
+        const onCreate = (newPanel: chrome.devtools.panels.ExtensionPanel) => {
+            if (chrome.runtime.lastError) reject(chrome.runtime.lastError)
+            else resolve(newPanel)
+        }
+
+        if (import.meta.env.BROWSER === 'firefox') {
+            chrome.devtools.panels.create(
+                'Solid',
+                /* firefox requires absolute paths */
+                '/' + icons.disabled[32],
+                '/index.html',
+                onCreate,
+            )
+        } else {
+            chrome.devtools.panels.create('Solid', icons.disabled[32], 'index.html', onCreate)
+        }
     })

@@ -101,8 +101,9 @@ export default vite.defineConfig(config => {
             'import.meta.env.BROWSER': JSON.stringify(browser),
         },
         build: {
+            minify: false,
             emptyOutDir: !is_dev,
-            outDir: 'dist' + (is_dev ? '' : `/${browser}`),
+            outDir: 'dist',
             rollupOptions: {
                 input: { panel: 'index.html' },
             },

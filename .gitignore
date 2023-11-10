@@ -32,10 +32,12 @@ tsup.config.bundled*.*
 .DS_Store
 Thumbs.db
 
-# chrome extension private key file
+# chrome extension
+# private key file
 *.pem
-
+packages/extension/package
 packages/extension/dist.zip
+
 **/vite.config.ts.timestamp-*.*
 
 /test-results/

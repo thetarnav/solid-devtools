@@ -26,8 +26,8 @@ export type DetectEvent = {
     state: DetectionState
 }
 
-// const LOG_MESSAGES = import.meta.env.DEV
-const LOG_MESSAGES: boolean = true
+const LOG_MESSAGES = import.meta.env.DEV
+// const LOG_MESSAGES: boolean = true
 
 export function createPortMessanger<
     IM extends { [K in string]: any } = {},

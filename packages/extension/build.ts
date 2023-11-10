@@ -33,9 +33,12 @@ if (fs.existsSync(dist)) fs.rmSync(dist, { recursive: true })
 /*
 Build and zip
 */
+const package_dist = `${cwd}/package`
+if (!fs.existsSync(package_dist)) fs.mkdirSync(package_dist)
+
 for (const browser of browsers) {
     process.env['BROWSER'] = browser
     await vite.build()
 
-    child_process.exec(`zip -r ${dist}/${browser}.zip ${dist}/*`)
+    child_process.exec(`zip -r ${package_dist}/${browser}.zip ${dist}/*`)
 }
