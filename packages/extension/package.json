@@ -10,15 +10,12 @@
         "build:chrome": "tsx build.ts --browser=chrome",
         "build:firefox": "tsx build.ts --browser=firefox",
         "build": "tsx build.ts --browser=firefox --browser=chrome",
-        "clean": "rimraf dist dist.zip",
         "test:unit": "echo \"No unit tests\"",
         "test:types": "tsc --noEmit --paths null"
     },
     "devDependencies": {
         "@crxjs/vite-plugin": "2.0.0-beta.21",
-        "@types/chrome": "^0.0.248",
-        "rimraf": "^5.0.5",
-        "zip-a-folder": "^3.1.3"
+        "@types/chrome": "^0.0.248"
     },
     "dependencies": {
         "@solid-devtools/debugger": "workspace:^",
