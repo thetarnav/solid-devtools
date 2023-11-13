@@ -120,5 +120,8 @@ export default vite.defineConfig(config => {
             },
             target: 'esnext',
         },
+        optimizeDeps: {
+            exclude: ['@solid-devtools/debugger'],
+        },
     }
 })

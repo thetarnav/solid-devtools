@@ -16,9 +16,6 @@ const { postPortMessage: toBackground, onPortMessage: fromBackground } = createP
     Debugger.InputChannels
 >(port)
 
-// Force debugger to send state on connect
-toBackground('ResetState')
-
 function App() {
     const [versions, setVersions] = createSignal<Versions>({
         solid: '',
