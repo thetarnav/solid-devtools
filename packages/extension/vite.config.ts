@@ -114,7 +114,7 @@ export default vite.defineConfig(config => {
         build: {
             minify: false,
             emptyOutDir: !is_dev,
-            outDir: 'dist',
+            outDir: 'dist/' + browser,
             rollupOptions: {
                 input: { panel: 'index.html' },
             },

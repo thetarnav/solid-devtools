@@ -25,20 +25,17 @@ if (browsers.length === 0) {
 }
 
 /*
-Clear dist folder
-*/
-const dist = `${cwd}/dist`
-if (fs.existsSync(dist)) fs.rmSync(dist, { recursive: true })
-
-/*
 Build and zip
 */
-const package_dist = `${cwd}/package`
-if (!fs.existsSync(package_dist)) fs.mkdirSync(package_dist)
+const dist = `${cwd}/dist`
 
 for (const browser of browsers) {
+    const dist_dir = `${dist}/${browser}`
+    const dist_zip = `${dist}/${browser}.zip`
+
     process.env['BROWSER'] = browser
     await vite.build()
 
-    child_process.exec(`cd ./dist && zip -r ../package/${browser}.zip .`)
+    if (fs.existsSync(dist_zip)) fs.rmSync(dist_zip)
+    child_process.exec(`cd ${dist_dir} && zip -r ${dist_zip} .`)
 }

@@ -18,7 +18,7 @@
         "test:unit": "turbo run test --filter=./packages/*",
         "test:types": "turbo run test:types --filter=./packages/*",
         "test:lint": "eslint --ignore-path .gitignore --max-warnings 0 packages/**/*.{js,ts,tsx,jsx} --rule \"@typescript-eslint/no-unnecessary-type-assertion: off\"",
-        "test:e2e": "cross-env PW_CHROMIUM_ATTACH_TO_OTHER=1 playwright test -c playwright.config.ts",
+        "test:e2e": "cross-env PW_CHROMIUM_ATTACH_TO_OTHER=1 playwright test -c e2e/playwright.config.ts",
         "----------------------UTILS----------------------": "",
         "build-test:packages": "turbo run build test:unit test:types --filter=./packages/*",
         "build-test": "pnpm run build-test:packages && pnpm run test:lint && pnpm run test:e2e",
