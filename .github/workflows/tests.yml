@@ -38,14 +38,13 @@ jobs:
       - name: Install Playwright browser and dependencies
         run: pnpm dlx playwright install --with-deps chromium
 
-      - name: Lint
-        run: pnpm test:lint
-
       - name: Run Build and Tests
-        if: always()
         run: pnpm run build-test:packages
         env:
           CI: true
+
+      - name: Lint
+        run: pnpm test:lint
 
       - name: Run Playwright tests
         run: pnpm test:e2e
