@@ -1,5 +1,17 @@
 # @solid-devtools/extension
 
+## 0.29.0
+
+### Minor Changes
+
+-   b3ab38e8: Support firefox (minor changes to background script)
+
+### Patch Changes
+
+-   Updated dependencies [b3ab38e8]
+    -   @solid-devtools/frontend@0.11.2
+    -   solid-devtools@0.29.0
+
 ## 0.28.1
 
 ### Patch Changes
