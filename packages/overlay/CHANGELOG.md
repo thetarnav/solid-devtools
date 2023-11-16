@@ -1,5 +1,13 @@
 # @solid-devtools/overlay
 
+## 0.29.0
+
+### Patch Changes
+
+-   b3ab38e8: Add missing dependencies
+-   Updated dependencies [b3ab38e8]
+    -   @solid-devtools/frontend@0.11.2
+
 ## 0.28.1
 
 ### Patch Changes

@@ -1,5 +1,11 @@
 # @solid-devtools/frontend
 
+## 0.11.2
+
+### Patch Changes
+
+-   b3ab38e8: Add missing dependencies
+
 ## 0.11.1
 
 ### Patch Changes
