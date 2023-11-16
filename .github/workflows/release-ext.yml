@@ -40,7 +40,7 @@ jobs:
       - name: Upload & release Extension
         uses: mnao305/chrome-extension-upload@v4.0.1
         with:
-          file-path: packages/extension/dist.zip
+          file-path: packages/extension/dist/chrome.zip
           extension-id: kmcfjchnmmaeeagadbhoofajiopoceel
           client-id: ${{ secrets.CLIENT_ID }}
           client-secret: ${{ secrets.CLIENT_SECRET }}
