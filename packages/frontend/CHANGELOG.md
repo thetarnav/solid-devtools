@@ -1,5 +1,14 @@
 # @solid-devtools/frontend
 
+## 0.11.3
+
+### Patch Changes
+
+-   d558e37b: Update dependencies. Fixes #276
+-   Updated dependencies [d558e37b]
+    -   @solid-devtools/debugger@0.23.2
+    -   @solid-devtools/theme@0.0.1
+
 ## 0.11.2
 
 ### Patch Changes

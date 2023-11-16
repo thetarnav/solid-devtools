@@ -1,5 +1,14 @@
 # @solid-devtools/overlay
 
+## 0.29.1
+
+### Patch Changes
+
+-   d558e37b: Update dependencies. Fixes #276
+-   Updated dependencies [d558e37b]
+    -   @solid-devtools/debugger@0.23.2
+    -   @solid-devtools/frontend@0.11.3
+
 ## 0.29.0
 
 ### Patch Changes

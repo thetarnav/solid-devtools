@@ -1,5 +1,11 @@
 # @solid-devtools/debugger
 
+## 0.23.2
+
+### Patch Changes
+
+-   d558e37b: Update dependencies. Fixes #276
+
 ## 0.23.1
 
 ### Patch Changes
