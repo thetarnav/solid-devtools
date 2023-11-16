@@ -2,13 +2,13 @@
  * Some icons taken from https://phosphoricons.com
  */
 
-import { Component } from 'solid-js'
+import {Component} from 'solid-js'
 
-export type ProxyIconComponent<ID extends keyof typeof embedIconComponents> = Component<{ id: ID }>
+export type ProxyIconComponent<ID extends keyof typeof embedIconComponents> = Component<{id: ID}>
 
-export type IconComponent = Component<{ class?: string }>
+export type IconComponent = Component<{class?: string}>
 
-const ArrowRight: ProxyIconComponent<'ArrowRight'> = ({ id }) => (
+const ArrowRight: ProxyIconComponent<'ArrowRight'> = ({id}) => (
     <svg id={`sdt_icon_${id}`} fill="none" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
         <path
             stroke="currentColor"
@@ -27,7 +27,7 @@ const ArrowRight: ProxyIconComponent<'ArrowRight'> = ({ id }) => (
     </svg>
 )
 
-const ArrowLeft: ProxyIconComponent<'ArrowLeft'> = ({ id }) => (
+const ArrowLeft: ProxyIconComponent<'ArrowLeft'> = ({id}) => (
     <svg id={`sdt_icon_${id}`} fill="none" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
         <path
             stroke="currentColor"
@@ -46,7 +46,7 @@ const ArrowLeft: ProxyIconComponent<'ArrowLeft'> = ({ id }) => (
     </svg>
 )
 
-const CarretRight: ProxyIconComponent<'CarretRight'> = ({ id }) => (
+const CarretRight: ProxyIconComponent<'CarretRight'> = ({id}) => (
     <svg id={`sdt_icon_${id}`} fill="none" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
         <path
             fill="none"
@@ -59,7 +59,7 @@ const CarretRight: ProxyIconComponent<'CarretRight'> = ({ id }) => (
     </svg>
 )
 
-const Eye: ProxyIconComponent<'Eye'> = ({ id }) => (
+const Eye: ProxyIconComponent<'Eye'> = ({id}) => (
     <svg id={`sdt_icon_${id}`} fill="none" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
         <path
             d="M128 56c-80 0-112 72-112 72s32 72 112 72 112-72 112-72-32-72-112-72zm0 112a40 40 0 1 1 40-40 40 40 0 0 1-40 40z"
@@ -85,7 +85,7 @@ const Eye: ProxyIconComponent<'Eye'> = ({ id }) => (
     </svg>
 )
 
-const EyeSlash: ProxyIconComponent<'EyeSlash'> = ({ id }) => (
+const EyeSlash: ProxyIconComponent<'EyeSlash'> = ({id}) => (
     <svg id={`sdt_icon_${id}`} fill="none" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
         <path
             d="M128 56c-80 0-112 72-112 72s32 72 112 72 112-72 112-72-32-72-112-72zm0 112a40 40 0 1 1 40-40 40 40 0 0 1-40 40z"
@@ -130,7 +130,7 @@ const EyeSlash: ProxyIconComponent<'EyeSlash'> = ({ id }) => (
     </svg>
 )
 
-const Refresh: ProxyIconComponent<'Refresh'> = ({ id }) => (
+const Refresh: ProxyIconComponent<'Refresh'> = ({id}) => (
     <svg id={`sdt_icon_${id}`} fill="none" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
         <path
             stroke="currentColor"
@@ -149,7 +149,7 @@ const Refresh: ProxyIconComponent<'Refresh'> = ({ id }) => (
     </svg>
 )
 
-const Select: ProxyIconComponent<'Select'> = ({ id }) => (
+const Select: ProxyIconComponent<'Select'> = ({id}) => (
     <svg id={`sdt_icon_${id}`} fill="none" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
         <circle cx="128" cy="128" r="32" opacity="0.2" fill="currentColor" />
         <circle
@@ -201,7 +201,7 @@ const Select: ProxyIconComponent<'Select'> = ({ id }) => (
     </svg>
 )
 
-const Options: ProxyIconComponent<'Options'> = ({ id }) => (
+const Options: ProxyIconComponent<'Options'> = ({id}) => (
     <svg id={`sdt_icon_${id}`} fill="none" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
         <circle cx="128" cy="128" opacity="0.2" fill="currentColor" />
         <circle cx="128" cy="48" opacity="0.2" fill="currentColor" />
@@ -233,7 +233,7 @@ const Options: ProxyIconComponent<'Options'> = ({ id }) => (
     </svg>
 )
 
-const Close: ProxyIconComponent<'Close'> = ({ id }) => (
+const Close: ProxyIconComponent<'Close'> = ({id}) => (
     <svg id={`sdt_icon_${id}`} fill="none" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
         <path
             stroke="currentColor"
@@ -252,7 +252,7 @@ const Close: ProxyIconComponent<'Close'> = ({ id }) => (
     </svg>
 )
 
-const Triangle: ProxyIconComponent<'Triangle'> = ({ id }) => (
+const Triangle: ProxyIconComponent<'Triangle'> = ({id}) => (
     <svg id={`sdt_icon_${id}`} fill="none" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
         <path
             fill="currentColor"
@@ -261,7 +261,7 @@ const Triangle: ProxyIconComponent<'Triangle'> = ({ id }) => (
     </svg>
 )
 
-const Signal: ProxyIconComponent<'Signal'> = ({ id }) => (
+const Signal: ProxyIconComponent<'Signal'> = ({id}) => (
     <svg id={`sdt_icon_${id}`} viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
         <circle cx="128" cy="128" r="96" fill="currentColor" opacity=".2"></circle>
         <circle
@@ -277,7 +277,7 @@ const Signal: ProxyIconComponent<'Signal'> = ({ id }) => (
     </svg>
 )
 
-const Root: ProxyIconComponent<'Root'> = ({ id }) => (
+const Root: ProxyIconComponent<'Root'> = ({id}) => (
     <svg id={`sdt_icon_${id}`} fill="none" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
         <path
             d="M213.4 109.6l-80-72.7a8 8 0 0 0-10.8 0l-80 72.7a8.3 8.3 0 0 0-2.6 5.9V208a8 8 0 0 0 8 8h160a8 8 0 0 0 8-8v-92.5a8.3 8.3 0 0 0-2.6-5.9z"
@@ -295,7 +295,7 @@ const Root: ProxyIconComponent<'Root'> = ({ id }) => (
     </svg>
 )
 
-const Memo: ProxyIconComponent<'Memo'> = ({ id }) => (
+const Memo: ProxyIconComponent<'Memo'> = ({id}) => (
     <svg id={`sdt_icon_${id}`} fill="none" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
         <path
             d="M10 27V19C10 18.7348 10.1054 18.4804 10.2929 18.2929C10.4804 18.1054 10.7348 18 11 18H21C21.2652 18 21.5196 18.1054 21.7071 18.2929C21.8946 18.4804 22 18.7348 22 19V27H26C26.2652 27 26.5196 26.8946 26.7071 26.7071C26.8946 26.5196 27 26.2652 27 26V11.4125C27.0005 11.2827 26.9753 11.154 26.926 11.0339C26.8766 10.9138 26.8041 10.8046 26.7125 10.7125L21.2875 5.28751C21.1955 5.19591 21.0862 5.12338 20.9661 5.07404C20.846 5.02471 20.7174 4.99955 20.5875 5.00001H6C5.73478 5.00001 5.48043 5.10536 5.29289 5.2929C5.10536 5.48044 5 5.73479 5 6.00001V26C5 26.2652 5.10536 26.5196 5.29289 26.7071C5.48043 26.8946 5.73478 27 6 27H10Z"
@@ -326,7 +326,7 @@ const Memo: ProxyIconComponent<'Memo'> = ({ id }) => (
     </svg>
 )
 
-const Effect: ProxyIconComponent<'Effect'> = ({ id }) => (
+const Effect: ProxyIconComponent<'Effect'> = ({id}) => (
     <svg id={`sdt_icon_${id}`} fill="none" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
         <ellipse
             cx="128"
@@ -365,7 +365,7 @@ const Effect: ProxyIconComponent<'Effect'> = ({ id }) => (
     </svg>
 )
 
-const RenderEffect: ProxyIconComponent<'RenderEffect'> = ({ id }) => (
+const RenderEffect: ProxyIconComponent<'RenderEffect'> = ({id}) => (
     <svg id={`sdt_icon_${id}`} fill="none" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
         <path
             d="M215.9 73.7l-84-47.5a7.8 7.8 0 0 0-7.8 0l-84 47.5a8.1 8.1 0 0 0-4.1 7v94.6a8.1 8.1 0 0 0 4.1 7l84 47.5a7.8 7.8 0 0 0 7.8 0l84-47.5a8.1 8.1 0 0 0 4.1-7V80.7a8.1 8.1 0 0 0-4.1-7zM128 164a36 36 0 1 1 36-36 36 36 0 0 1-36 36z"
@@ -393,7 +393,7 @@ const RenderEffect: ProxyIconComponent<'RenderEffect'> = ({ id }) => (
     </svg>
 )
 
-const Computation: ProxyIconComponent<'Computation'> = ({ id }) => (
+const Computation: ProxyIconComponent<'Computation'> = ({id}) => (
     <svg id={`sdt_icon_${id}`} fill="none" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
         <path
             d="M229.6 106l-25.9-14.4a73.6 73.6 0 0 0-6.3-10.9l.5-29.7a102.6 102.6 0 0 0-38.2-22l-25.4 15.2a88.3 88.3 0 0 0-12.6 0L96.2 28.9A104 104 0 0 0 58.1 51l.5 29.7a73.6 73.6 0 0 0-6.3 10.9l-26 14.4a103.6 103.6 0 0 0 .1 44l25.9 14.4a80.1 80.1 0 0 0 6.3 11l-.5 29.6a102.6 102.6 0 0 0 38.2 22l25.4-15.2a88.3 88.3 0 0 0 12.6 0l25.5 15.3a104 104 0 0 0 38.1-22.1l-.5-29.7a73.6 73.6 0 0 0 6.3-10.9l26-14.4a102 102 0 0 0-.1-44zM128 176a48 48 0 1 1 48-48 48 48 0 0 1-48 48z"
@@ -421,7 +421,7 @@ const Computation: ProxyIconComponent<'Computation'> = ({ id }) => (
     </svg>
 )
 
-const Context: ProxyIconComponent<'Context'> = ({ id }) => (
+const Context: ProxyIconComponent<'Context'> = ({id}) => (
     <svg id={`sdt_icon_${id}`} fill="none" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
         <g fill="currentColor">
             <rect x="24" y="100" width="56" height="56" rx="8" opacity="0.2" />
@@ -483,7 +483,7 @@ const Context: ProxyIconComponent<'Context'> = ({ id }) => (
     </svg>
 )
 
-const Code: ProxyIconComponent<'Code'> = ({ id }) => (
+const Code: ProxyIconComponent<'Code'> = ({id}) => (
     <svg id={`sdt_icon_${id}`} fill="none" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
         <path opacity=".2" d="M152 32v56h56l-56-56z" />
         <path
@@ -517,7 +517,7 @@ const Code: ProxyIconComponent<'Code'> = ({ id }) => (
     </svg>
 )
 
-const Graph: ProxyIconComponent<'Graph'> = ({ id }) => (
+const Graph: ProxyIconComponent<'Graph'> = ({id}) => (
     <svg id={`sdt_icon_${id}`} fill="none" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
         <circle cx="128" cy="128" r="24" opacity=".2" />
         <circle
@@ -605,7 +605,7 @@ const Graph: ProxyIconComponent<'Graph'> = ({ id }) => (
     </svg>
 )
 
-const Search: ProxyIconComponent<'Search'> = ({ id }) => (
+const Search: ProxyIconComponent<'Search'> = ({id}) => (
     <svg id={`sdt_icon_${id}`} fill="none" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
         <circle
             cx="116"
@@ -786,7 +786,7 @@ export const Icon: {
 } = {} as any
 
 for (const name in embedIconComponents) {
-    ;(Icon as any)[name] = (props: { class?: string }) => (
+    ;(Icon as any)[name] = (props: {class?: string}) => (
         <svg class={props.class}>
             <use href={`#sdt_icon_${name.toString()}`} />
         </svg>

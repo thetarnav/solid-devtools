@@ -1,10 +1,10 @@
-import { theme } from '@/ui'
-import { color } from '@nothing-but/utils'
-import { combineProps } from '@solid-primitives/props'
+import {theme} from '@/ui'
+import {color} from '@nothing-but/utils'
+import {combineProps} from '@solid-primitives/props'
 import clsx from 'clsx'
 import * as s from 'solid-js'
 
-const thumb_color = (opacity: number) =>
+const thumb_color = (opacity: number): string =>
     color.rgb_to_rgba(color.hex_to_rgb(theme.colors.gray[500]), opacity).toString()
 
 export const custom_scrollbar = 'custom_scrollbar'
@@ -37,7 +37,7 @@ export const custom_scrollbar_styles = /*css*/ `
 `
 
 export const Scrollable: s.ParentComponent<
-    s.ComponentProps<'div'> & { contentProps?: s.ComponentProps<'div'> }
+    s.ComponentProps<'div'> & {contentProps?: s.ComponentProps<'div'>}
 > = props => {
     const container_props = combineProps(props, {
         class: clsx(

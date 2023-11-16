@@ -7,16 +7,16 @@ It connects to the background script.
 
 */
 
-import { error, log } from '@solid-devtools/shared/utils'
-import { ConnectionName, createPortMessanger, once } from '../shared/bridge'
-import { icons } from '../shared/icons'
+import {error, log} from '@solid-devtools/shared/utils'
+import {ConnectionName, createPortMessanger, once} from '../shared/bridge'
+import {icons} from '../shared/icons'
 
 log('Devtools-Script working.')
 
 // Create a connection to the background page
-const port = chrome.runtime.connect({ name: ConnectionName.Devtools })
+const port = chrome.runtime.connect({name: ConnectionName.Devtools})
 
-const { onPortMessage: fromBackground } = createPortMessanger(port)
+const {onPortMessage: fromBackground} = createPortMessanger(port)
 
 let panel: chrome.devtools.panels.ExtensionPanel | undefined
 

@@ -1,10 +1,10 @@
-import { warn } from '@solid-devtools/shared/utils'
-import { clearComponentRegistry } from './component-registry'
-import { NodeType } from './constants'
-import { ObjectType, getSdtId } from './id'
+import {warn} from '@solid-devtools/shared/utils'
+import {clearComponentRegistry} from './component-registry'
+import {NodeType} from './constants'
+import {ObjectType, getSdtId} from './id'
 import SolidAPI from './solid-api'
-import { NodeID, Solid } from './types'
-import { isSolidRoot, onOwnerCleanup } from './utils'
+import {NodeID, Solid} from './types'
+import {isSolidRoot, onOwnerCleanup} from './utils'
 
 // ROOTS
 // map of all top-roots
@@ -180,7 +180,7 @@ export function getTopRoot(owner: Solid.Owner): Solid.Root | null {
  */
 export function findClosestAliveParent(
     owner: Solid.Owner,
-): { owner: Solid.Owner; root: Solid.Root } | { owner: null; root: null } {
+): {owner: Solid.Owner; root: Solid.Root} | {owner: null; root: null} {
     let disposed: Solid.Root | null = null
     let closestAliveRoot: Solid.Root | null = null
     let current = owner
@@ -191,6 +191,6 @@ export function findClosestAliveParent(
             else closestAliveRoot = current
         }
     }
-    if (!closestAliveRoot) return { owner: null, root: null }
-    return { owner: (disposed ?? owner).owner!, root: closestAliveRoot }
+    if (!closestAliveRoot) return {owner: null, root: null}
+    return {owner: (disposed ?? owner).owner!, root: closestAliveRoot}
 }

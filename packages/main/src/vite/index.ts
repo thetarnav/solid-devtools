@@ -1,8 +1,8 @@
-import type { PluginOption } from 'vite'
+import type {PluginOption} from 'vite'
 
-import { PluginItem, transformAsync } from '@babel/core'
-import { LocatorOptions, TargetURLFunction } from '@solid-devtools/debugger/types'
-import { Module } from './constants'
+import {PluginItem, transformAsync} from '@babel/core'
+import {LocatorOptions, TargetURLFunction} from '@solid-devtools/debugger/types'
+import {Module} from './constants'
 import jsxLocationPlugin from './location'
 import namePlugin from './name'
 
@@ -102,10 +102,10 @@ export const devtoolsPlugin = (_options: DevtoolsPluginOptions = {}): PluginOpti
                 plugins.push(namePlugin)
             }
 
-            if (plugins.length === 0) return { code: source }
+            if (plugins.length === 0) return {code: source}
 
             // babel doesn't work with typescript by default
-            plugins.splice(0, 0, ['@babel/plugin-syntax-typescript', { isTSX: isJSX }])
+            plugins.splice(0, 0, ['@babel/plugin-syntax-typescript', {isTSX: isJSX}])
 
             const result = await transformAsync(source, {
                 babelrc: false,
@@ -118,7 +118,7 @@ export const devtoolsPlugin = (_options: DevtoolsPluginOptions = {}): PluginOpti
             })
 
             if (result) {
-                return { code: result.code!, map: result.map! }
+                return {code: result.code!, map: result.map!}
             }
         },
     }

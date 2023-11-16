@@ -2,8 +2,8 @@
 // colors: https://github.com/tailwindlabs/tailwindcss/blob/master/src/public/colors.js
 // spacing and other values: https://github.com/tailwindlabs/tailwindcss/blob/master/stubs/defaultConfig.stub.js
 
-import { misc } from '@nothing-but/utils'
-import type { Prettify, UnionToIntersection } from '@nothing-but/utils/types'
+import {misc} from '@nothing-but/utils'
+import type {Prettify, UnionToIntersection} from '@nothing-but/utils/types'
 
 const cyan = {
     50: '#ecfeff',
@@ -189,7 +189,7 @@ export const vars = {
     dom: cssvar('dom-color', amber[600], amber[500]),
 } as const
 
-export function make_var_styles(root_class: string) {
+export function make_var_styles(root_class: string): string {
     return /*css*/ `
         .${root_class} {
             ${css_vars.map(css_var => `${css_var.name}: ${css_var.light};`).join('')}

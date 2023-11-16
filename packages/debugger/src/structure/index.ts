@@ -1,12 +1,12 @@
-import { Listen } from '@solid-primitives/event-bus'
-import { throttle } from '@solid-primitives/scheduled'
+import {Listen} from '@solid-primitives/event-bus'
+import {throttle} from '@solid-primitives/scheduled'
 import * as registry from '../main/component-registry'
-import { DEFAULT_WALKER_MODE, DevtoolsMainView, NodeType, TreeWalkerMode } from '../main/constants'
-import { ObjectType, getSdtId } from '../main/id'
+import {DEFAULT_WALKER_MODE, DevtoolsMainView, NodeType, TreeWalkerMode} from '../main/constants'
+import {ObjectType, getSdtId} from '../main/id'
 import * as roots from '../main/roots'
-import { Mapped, NodeID, Solid } from '../main/types'
-import { isDisposed, markOwnerType } from '../main/utils'
-import { ComputationUpdateHandler, walkSolidTree } from './walker'
+import {Mapped, NodeID, Solid} from '../main/types'
+import {isDisposed, markOwnerType} from '../main/utils'
+import {ComputationUpdateHandler, walkSolidTree} from './walker'
 
 export type StructureUpdates = {
     /** Partial means that the updates are based on the previous structure state */
@@ -96,10 +96,10 @@ export function createStructure(props: {
                 })
                 const map = updated[rootId]
                 if (map) map[tree.id] = tree
-                else updated[rootId] = { [tree.id]: tree }
+                else updated[rootId] = {[tree.id]: tree}
             }
 
-            props.onStructureUpdate({ partial, updated, removed: [...removedRoots] })
+            props.onStructureUpdate({partial, updated, removed: [...removedRoots]})
         }
         updateQueue.clear()
         flushRootUpdateQueue.clear()

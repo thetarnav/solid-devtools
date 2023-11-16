@@ -1,9 +1,9 @@
-import { createHighlightedOwnerName, Icon, theme, ToggleTabs } from '@/ui'
+import {createHighlightedOwnerName, Icon, theme, ToggleTabs} from '@/ui'
 import clsx from 'clsx'
-import { Accessor, createContext, createEffect, createSignal, Match, Switch } from 'solid-js'
-import { useController } from './controller'
+import {Accessor, createContext, createEffect, createSignal, Match, Switch} from 'solid-js'
+import {useController} from './controller'
 import * as dgraph from './modules/dependency'
-import { InspectorView } from './modules/inspector/Inspector'
+import {InspectorView} from './modules/inspector/Inspector'
 
 export const panel_header_el_border =
     'content-empty absolute z-1 inset-x-0 top-full h-0.6px bg-panel-border'
@@ -31,8 +31,8 @@ export const action_icon = 'w-4 h-4'
 
 export function createSidePanel() {
     const ctx = useController()
-    const { inspector } = ctx
-    const { state, openComponentLocation, setInspectedOwner } = inspector
+    const {inspector} = ctx
+    const {state, openComponentLocation, setInspectedOwner} = inspector
 
     const tabsTitleMap = {
         inspector: 'Inspector',
@@ -41,7 +41,7 @@ export function createSidePanel() {
 
     const [openPanel, setOpenPanel] = createSignal<keyof typeof tabsTitleMap>('inspector')
 
-    const { OwnerName, pingUpdated } = createHighlightedOwnerName()
+    const {OwnerName, pingUpdated} = createHighlightedOwnerName()
     createEffect(() => {
         const id = inspector.inspected.ownerId
         id && ctx.listenToNodeUpdate(id, pingUpdated)
@@ -49,7 +49,7 @@ export function createSidePanel() {
 
     function SidePanel() {
         return (
-            <SidePanelCtx.Provider value={{ openPanel, setOpenPanel }}>
+            <SidePanelCtx.Provider value={{openPanel, setOpenPanel}}>
                 <div
                     class="h-full grid"
                     style={{

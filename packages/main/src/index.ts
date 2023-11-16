@@ -1,4 +1,4 @@
-import { warn } from '@solid-devtools/shared/utils'
+import {warn} from '@solid-devtools/shared/utils'
 import './setup'
 
 warn(`\`import "solid-devtools";\` is an entry point for the vite plugin.

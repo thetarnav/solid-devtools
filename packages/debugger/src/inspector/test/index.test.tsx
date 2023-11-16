@@ -6,24 +6,24 @@ import {
     createSignal,
     JSX,
 } from 'solid-js'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { getObjectById, getSdtId, ObjectType } from '../../main/id'
+import {beforeEach, describe, expect, it, vi} from 'vitest'
+import {getObjectById, getSdtId, ObjectType} from '../../main/id'
 import SolidApi from '../../main/solid-api'
-import { Mapped, NodeType, PropGetterState, Solid, ValueType } from '../../types'
-import { collectOwnerDetails } from '../inspector'
+import {Mapped, NodeType, PropGetterState, Solid, ValueType} from '../../types'
+import {collectOwnerDetails} from '../inspector'
 
-const { getOwner } = SolidApi
+const {getOwner} = SolidApi
 
 let mockLAST_ID = 0
 beforeEach(() => {
     mockLAST_ID = 0
 })
-vi.mock('../../main/get-id', () => ({ getNewSdtId: () => '#' + mockLAST_ID++ }))
+vi.mock('../../main/get-id', () => ({getNewSdtId: () => '#' + mockLAST_ID++}))
 
 describe('collectOwnerDetails', () => {
     it('collects focused owner details', () => {
         createRoot(dispose => {
-            const [s] = createSignal(0, { name: 'source' })
+            const [s] = createSignal(0, {name: 'source'})
 
             let memo!: Solid.Owner
             const div = document.createElement('div')
@@ -34,27 +34,31 @@ describe('collectOwnerDetails', () => {
                         () => {
                             memo = getOwner()!
                             s()
-                            createSignal(div, { name: 'element' })
-                            const m = createMemo(() => 0, undefined, { name: 'memo' })
-                            createRenderEffect(m, undefined, { name: 'render' })
+                            createSignal(div, {name: 'element'})
+                            const m = createMemo(() => 0, undefined, {name: 'memo'})
+                            createRenderEffect(m, undefined, {name: 'render'})
                             return 'value'
                         },
                         undefined,
-                        { name: 'focused' },
+                        {name: 'focused'},
                     )
                     focused()
                 },
                 undefined,
-                { name: 'WRAPPER' },
+                {name: 'WRAPPER'},
             )
 
             const [signalB] = memo.sourceMap as [Solid.Signal]
             const [innerMemo] = memo.owned as [Solid.Memo, Solid.Computation]
 
-            const { details, valueMap } = collectOwnerDetails(memo, {
+            const {details, valueMap} = collectOwnerDetails(memo, {
                 observedPropsMap: new WeakMap(),
-                onPropStateChange: () => {},
-                onValueUpdate: () => {},
+                onPropStateChange: () => {
+                    /**/
+                },
+                onValueUpdate: () => {
+                    /**/
+                },
             })
 
             expect(details).toEqual({
@@ -93,21 +97,25 @@ describe('collectOwnerDetails', () => {
             const TestComponent = (props: {
                 count: number
                 children: JSX.Element
-                nested: { foo: number; bar: string }
+                nested: {foo: number; bar: string}
             }) => {
                 owner = getOwner()!
                 return <div>{props.children}</div>
             }
             createRenderEffect(() => (
-                <TestComponent count={123} nested={{ foo: 1, bar: '2' }}>
+                <TestComponent count={123} nested={{foo: 1, bar: '2'}}>
                     <button>Click me</button>
                 </TestComponent>
             ))
 
-            const { details } = collectOwnerDetails(owner, {
+            const {details} = collectOwnerDetails(owner, {
                 observedPropsMap: new WeakMap(),
-                onPropStateChange: () => {},
-                onValueUpdate: () => {},
+                onPropStateChange: () => {
+                    /**/
+                },
+                onValueUpdate: () => {
+                    /**/
+                },
             })
 
             dispose()
@@ -149,14 +157,24 @@ describe('collectOwnerDetails', () => {
                 return <button {...props}>Click me</button>
             }
             createRenderEffect(() => {
-                const props = () => ({ onClick: () => {}, role: 'button' }) as const
+                const props = () =>
+                    ({
+                        onClick: () => {
+                            /**/
+                        },
+                        role: 'button',
+                    }) as const
                 return <Button {...props()} />
             })
 
-            const { details } = collectOwnerDetails(owner, {
+            const {details} = collectOwnerDetails(owner, {
                 observedPropsMap: new WeakMap(),
-                onPropStateChange: () => {},
-                onValueUpdate: () => {},
+                onPropStateChange: () => {
+                    /**/
+                },
+                onValueUpdate: () => {
+                    /**/
+                },
             })
 
             expect(details).toEqual({
@@ -199,7 +217,9 @@ describe('collectOwnerDetails', () => {
             const onValueUpdate = vi.fn()
             collectOwnerDetails(owner, {
                 observedPropsMap: new WeakMap(),
-                onPropStateChange: () => {},
+                onPropStateChange: () => {
+                    /**/
+                },
                 onValueUpdate: onValueUpdate,
             })
 
@@ -229,7 +249,9 @@ describe('collectOwnerDetails', () => {
             const onValueUpdate = vi.fn()
             collectOwnerDetails(owner, {
                 observedPropsMap: new WeakMap(),
-                onPropStateChange: () => {},
+                onPropStateChange: () => {
+                    /**/
+                },
                 onValueUpdate: onValueUpdate,
             })
 

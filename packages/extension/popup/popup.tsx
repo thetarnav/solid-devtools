@@ -1,20 +1,14 @@
 /** @refresh reload */
 
-import { Accessor, Component, JSX, Show, createSignal } from 'solid-js'
-import { render } from 'solid-js/web'
-import {
-    ConnectionName,
-    DetectionState,
-    Versions,
-    createPortMessanger,
-    once,
-} from '../shared/bridge'
+import {Accessor, Component, JSX, Show, createSignal} from 'solid-js'
+import {render} from 'solid-js/web'
+import {ConnectionName, DetectionState, Versions, createPortMessanger, once} from '../shared/bridge'
 
 import './popup.css'
 
 // Create a connection to the background page
-const port = chrome.runtime.connect({ name: ConnectionName.Popup })
-const { onPortMessage: fromBackground } = createPortMessanger(port)
+const port = chrome.runtime.connect({name: ConnectionName.Popup})
+const {onPortMessage: fromBackground} = createPortMessanger(port)
 
 const [versions, setVersions] = createSignal<Versions | null>(null)
 const [detectionState, setDetectionState] = createSignal<DetectionState>({

@@ -1,10 +1,10 @@
-import { useController } from '@/controller'
-import { createHighlightedOwnerName, Scrollable, theme } from '@/ui'
-import { NodeID, SerializedDGraph } from '@solid-devtools/debugger/types'
-import { createHover } from '@solid-devtools/shared/primitives'
+import {useController} from '@/controller'
+import {createHighlightedOwnerName, Scrollable, theme} from '@/ui'
+import {NodeID, SerializedDGraph} from '@solid-devtools/debugger/types'
+import {createHover} from '@solid-devtools/shared/primitives'
 import clsx from 'clsx'
-import { Component, createMemo, For, JSX, Show, untrack } from 'solid-js'
-import { createDependencyGraph } from './dgraph'
+import {Component, createMemo, For, JSX, Show, untrack} from 'solid-js'
+import {createDependencyGraph} from './dgraph'
 
 type NodeOrder = {
     flowOrder: readonly NodeID[]
@@ -87,7 +87,7 @@ function calculateNodeOrder(
         for (const id of ids) depthMap[id] = i
     }
 
-    return { flowOrder, depthMap }
+    return {flowOrder, depthMap}
 }
 
 const grid_size = theme.spacing[10]
@@ -102,10 +102,10 @@ const GraphNode: Component<{
     onHoverChange: (hovered: boolean) => void
     listenToUpdate(cb: VoidFunction): VoidFunction
 }> = props => {
-    const { name, type } = props.node
+    const {name, type} = props.node
     const hoverProps = createHover(props.onHoverChange)
 
-    const { pingUpdated, OwnerName } = createHighlightedOwnerName()
+    const {pingUpdated, OwnerName} = createHighlightedOwnerName()
     props.listenToUpdate(pingUpdated)
 
     const margin = theme.spacing[2]
@@ -133,7 +133,7 @@ const GraphNode: Component<{
                     props.isHovered ? 'bg-panel-2' : 'bg-transparent group-hover:bg-panel-2',
                     props.isInspected ? 'b-panel-6' : 'b-transparent group-active:b-panel-4',
                 )}
-                style={{ 'box-shadow': `0 0 ${margin} ${theme.spacing[1]} ${theme.vars.panel[1]}` }}
+                style={{'box-shadow': `0 0 ${margin} ${theme.spacing[1]} ${theme.vars.panel[1]}`}}
             />
             <OwnerName name={name} type={type} />
         </div>
@@ -156,7 +156,7 @@ function Line(props: {
         const y1 = props.flow_index / l
         const y2 = props.source_flow_index / l
         const d = Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
-        return { x1, x2, y1, y2, d }
+        return {x1, x2, y1, y2, d}
     })
 
     return (
@@ -179,7 +179,7 @@ function Line(props: {
 
 export function Dgraph_View(): JSX.Element {
     const ctx = useController()
-    const { inspector, hovered } = ctx
+    const {inspector, hovered} = ctx
     const dgraph = createDependencyGraph()
 
     const order = createMemo<NodeOrder | null>((p = null) => {
@@ -204,10 +204,10 @@ export function Dgraph_View(): JSX.Element {
         transparent ${grid_size}`
 
     return (
-        <Scrollable contentProps={{ class: 'flex bg-panel-1' }}>
+        <Scrollable contentProps={{class: 'flex bg-panel-1'}}>
             <div
                 class="relative min-h-full min-w-full flex flex-col items-start"
-                style={{ padding: `calc(${grid_size} - ${pattern_size})` }}
+                style={{padding: `calc(${grid_size} - ${pattern_size})`}}
             >
                 <div
                     class="absolute inset-0 opacity-70"

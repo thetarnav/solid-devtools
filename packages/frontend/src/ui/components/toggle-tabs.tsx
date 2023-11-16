@@ -1,12 +1,10 @@
-import { theme } from '@/ui'
-import { createToken, resolveTokens } from '@solid-primitives/jsx-tokenizer'
-import { combineStyle } from '@solid-primitives/props'
+import {theme} from '@/ui'
+import {createToken, resolveTokens} from '@solid-primitives/jsx-tokenizer'
+import {combineStyle} from '@solid-primitives/props'
 import clsx from 'clsx'
-import { Component, For, JSX, createSelector } from 'solid-js'
+import {Component, For, JSX, createSelector} from 'solid-js'
 
-export type ToggleTabsOptionProps<T> = (T extends string
-    ? { title?: string }
-    : { title: string }) & {
+export type ToggleTabsOptionProps<T> = (T extends string ? {title?: string} : {title: string}) & {
     for: T
     class?: string
     children: JSX.Element
@@ -36,7 +34,7 @@ export function ToggleTabs<T>(props: {
             role="group"
         >
             <For each={tokens()}>
-                {({ data }) => (
+                {({data}) => (
                     <button
                         title={data.title ?? String(data.for)}
                         class={clsx(
@@ -46,7 +44,7 @@ export function ToggleTabs<T>(props: {
                         )}
                         onClick={() => props.onSelect(data.for)}
                         style={combineStyle(
-                            { [toggle_tab_color_var]: theme.vars.text.DEFAULT },
+                            {[toggle_tab_color_var]: theme.vars.text.DEFAULT},
                             data.style ?? {},
                         )}
                     >

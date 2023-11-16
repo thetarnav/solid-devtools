@@ -1,5 +1,5 @@
-import { getNewSdtId } from './get-id'
-import { NodeID, Solid } from './types'
+import {getNewSdtId} from './get-id'
+import {NodeID, Solid} from './types'
 
 export const enum ObjectType {
     Owner = 'owner',
@@ -29,7 +29,7 @@ const RefMapMap: {
     [ObjectType.StoreNode]: new Map(),
 }
 
-const CleanupRegistry = new FinalizationRegistry((data: { map: ObjectType; id: NodeID }) => {
+const CleanupRegistry = new FinalizationRegistry((data: {map: ObjectType; id: NodeID}) => {
     RefMapMap[data.map].delete(data.id)
 })
 
@@ -39,7 +39,7 @@ export function getSdtId<T extends ObjectType>(obj: ValueMap[T], objType: T): No
         id = getNewSdtId()
         WeakIdMap.set(obj, id)
         RefMapMap[objType].set(id, new WeakRef(obj))
-        CleanupRegistry.register(obj, { map: objType, id })
+        CleanupRegistry.register(obj, {map: objType, id})
     }
     return id
 }

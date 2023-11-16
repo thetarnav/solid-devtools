@@ -6,13 +6,13 @@ import {
     createRenderEffect,
     createRoot,
 } from 'solid-js'
-import { describe, expect, it } from 'vitest'
-import { NodeType } from '../constants'
+import {describe, expect, it} from 'vitest'
+import {NodeType} from '../constants'
 import solidApi from '../solid-api'
-import { Solid } from '../types'
-import { getOwnerType } from '../utils'
+import {Solid} from '../types'
+import {getOwnerType} from '../utils'
 
-const { getOwner } = solidApi
+const {getOwner} = solidApi
 
 describe('getOwnerType', () => {
     it('identifies Component', () => {

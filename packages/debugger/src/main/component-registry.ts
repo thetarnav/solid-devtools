@@ -1,5 +1,5 @@
-import { NodeID, Solid } from './types'
-import { onOwnerCleanup } from './utils'
+import {NodeID, Solid} from './types'
+import {onOwnerCleanup} from './utils'
 
 const $CLEANUP = Symbol('component-registry-cleanup')
 
@@ -16,7 +16,7 @@ type ComponentData = {
 const ComponentMap = new Map<NodeID, ComponentData>()
 
 // Map of element nodes to component nodes
-const ElementNodeMap = new Map<NodeID, { el: HTMLElement; component: ComponentData }>()
+const ElementNodeMap = new Map<NodeID, {el: HTMLElement; component: ComponentData}>()
 
 function cleanupComponent(nodeID: NodeID) {
     const component = ComponentMap.get(nodeID)
@@ -45,16 +45,16 @@ export function registerComponent(
 ): void {
     // Add new element node to existing component node
     if ('elementId' in data) {
-        const { componentId, elementId, element } = data
+        const {componentId, elementId, element} = data
         const component = ComponentMap.get(componentId)
         if (!component) return
 
         component.elementNodes.add(elementId)
-        ElementNodeMap.set(elementId, { el: element, component })
+        ElementNodeMap.set(elementId, {el: element, component})
     }
     // Add new component node
     else {
-        const { owner, id, name, elements: elementsList } = data
+        const {owner, id, name, elements: elementsList} = data
         if (!elementsList) return cleanupComponent(id)
 
         const set = new Set(elementsList)
@@ -86,16 +86,16 @@ export function clearComponentRegistry() {
 
 export function getComponent(
     id: NodeID,
-): { name: string | undefined; id: NodeID; elements: HTMLElement[] } | null {
+): {name: string | undefined; id: NodeID; elements: HTMLElement[]} | null {
     // provided if might be of an element node (in DOM mode) or component node
     // both need to be checked
 
     const component = ComponentMap.get(id)
-    if (component) return { name: component.name, elements: [...component.elements], id }
+    if (component) return {name: component.name, elements: [...component.elements], id}
 
     const elData = ElementNodeMap.get(id)
     return elData
-        ? { name: elData.component.name, id: elData.component.id, elements: [elData.el] }
+        ? {name: elData.component.name, id: elData.component.id, elements: [elData.el]}
         : null
 }
 
@@ -108,13 +108,13 @@ export function getComponent(
  */
 export function getComponentElement(
     elementId: NodeID,
-): { name: string | undefined; id: NodeID; element: HTMLElement } | undefined {
+): {name: string | undefined; id: NodeID; element: HTMLElement} | undefined {
     const elData = ElementNodeMap.get(elementId)
-    return elData && { name: elData.component.name, id: elData.component.id, element: elData.el }
+    return elData && {name: elData.component.name, id: elData.component.id, element: elData.el}
 }
 
 // TODO could use some optimization (caching)
-export function findComponent(el: HTMLElement): { name: string; id: NodeID } | null {
+export function findComponent(el: HTMLElement): {name: string; id: NodeID} | null {
     const including = new Map<Solid.Owner, ComponentData>()
 
     let currEl: HTMLElement | null = el
@@ -139,6 +139,6 @@ export function findComponent(el: HTMLElement): { name: string; id: NodeID } | n
     }
 
     if (including.size === 0) return null
-    const { name, id } = including.values().next().value
-    return { name, id }
+    const {name, id} = including.values().next().value
+    return {name, id}
 }

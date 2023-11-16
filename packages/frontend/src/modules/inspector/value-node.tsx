@@ -1,22 +1,11 @@
-import { CollapseToggle, Highlight, Icon, styles, theme } from '@/ui'
-import { NodeID, UNKNOWN, ValueType } from '@solid-devtools/debugger/types'
-import { createHover, createPingedSignal } from '@solid-devtools/shared/primitives'
-import { Entries } from '@solid-primitives/keyed'
-import { defer } from '@solid-primitives/utils'
+import {CollapseToggle, Highlight, Icon, styles, theme} from '@/ui'
+import {NodeID, UNKNOWN, ValueType} from '@solid-devtools/debugger/types'
+import {createHover, createPingedSignal} from '@solid-devtools/shared/primitives'
+import {Entries} from '@solid-primitives/keyed'
+import {defer} from '@solid-primitives/utils'
 import clsx from 'clsx'
-import {
-    Component,
-    For,
-    JSX,
-    Show,
-    createContext,
-    createEffect,
-    createMemo,
-    createSignal,
-    untrack,
-    useContext,
-} from 'solid-js'
-import { DecodedValue, ObjectValueData, isValueNested } from './decode'
+import * as s from 'solid-js'
+import {DecodedValue, ObjectValueData, isValueNested} from './decode'
 
 const value_base = 'h-inspector_row font-500'
 const value_nullable = value_base + ' color-disabled'
@@ -24,20 +13,20 @@ const value_function = value_base + ' font-italic'
 
 type ToggleElementHover = (elementId: NodeID, hovered?: boolean) => void
 
-const ValueContext = createContext<{ onElementHover?: ToggleElementHover; underStore: boolean }>()
+const ValueContext = s.createContext<{onElementHover?: ToggleElementHover; underStore: boolean}>()
 
-const CollapsableObjectPreview: Component<{
+const CollapsableObjectPreview: s.Component<{
     value: NonNullable<ObjectValueData['value']>
 }> = props => (
     <ul class="w-full flex flex-col gap-.5">
         <Entries of={props.value}>
             {(key, _value) => {
-                const value = createMemo(_value)
+                const value = s.createMemo(_value)
                 return (
-                    <Show
+                    <s.Show
                         when={isValueNested(value())}
-                        children={untrack(() => {
-                            const [extended, setExtended] = createSignal(false)
+                        children={s.untrack(() => {
+                            const [extended, setExtended] = s.createSignal(false)
                             return (
                                 <ValueNode
                                     name={key}
@@ -55,21 +44,21 @@ const CollapsableObjectPreview: Component<{
     </ul>
 )
 
-const getObjectValueName = (type: ValueType.Array | ValueType.Object) =>
+const getObjectValueName = (type: ValueType.Array | ValueType.Object): string =>
     type === ValueType.Array ? 'Array' : 'Object'
 
-const ObjectValuePreview: Component<{
+const ObjectValuePreview: s.Component<{
     type: ValueType.Array | ValueType.Object
     data: ObjectValueData
     extended?: boolean
     label?: string
 }> = props => {
     return (
-        <Show
+        <s.Show
             when={props.data.value && props.data.length && props.extended}
             children={<CollapsableObjectPreview value={props.data.value!} />}
             fallback={
-                <Show
+                <s.Show
                     when={props.data.length}
                     children={
                         <span class={value_base} aria-label={props.label}>
@@ -114,12 +103,12 @@ export const value_node_styles = /*css*/ `
     }
 `
 
-const ValuePreview: Component<{
+const ValuePreview: s.Component<{
     value: DecodedValue
     extended?: boolean
     label?: string
 }> = props => {
-    return createMemo(() => {
+    return s.createMemo(() => {
         const value = props.value
         switch (value.type) {
             case ValueType.String:
@@ -184,7 +173,7 @@ const ValuePreview: Component<{
                     </span>
                 )
             case ValueType.Element: {
-                const { onElementHover: onHover } = useContext(ValueContext)!
+                const {onElementHover: onHover} = s.useContext(ValueContext)!
 
                 const hoverProps = onHover && createHover(hovered => onHover(value.id, hovered))
 
@@ -214,11 +203,16 @@ const ValuePreview: Component<{
                     />
                 )
         }
-    }) as unknown as JSX.Element
+    }) as unknown as s.JSX.Element
 }
 
-function createNestedHover() {
-    const [isHovered, setIsHovered] = createSignal(false)
+type NestedHover = {
+    isHovered: s.Accessor<boolean>
+    hoverProps: s.JSX.HTMLAttributes<any>
+}
+
+function createNestedHover(): NestedHover {
+    const [isHovered, setIsHovered] = s.createSignal(false)
     return {
         isHovered,
         hoverProps: {
@@ -234,7 +228,7 @@ function createNestedHover() {
     }
 }
 
-export const ValueNode: Component<{
+export const ValueNode: s.Component<{
     value: DecodedValue
     name: string | undefined
     /** signals can be inspected to be viewed in the dependency graph */
@@ -247,25 +241,25 @@ export const ValueNode: Component<{
     isStale?: boolean
     onClick?: VoidFunction
     onElementHover?: ToggleElementHover
-    actions?: { icon: keyof typeof Icon; title?: string; onClick: VoidFunction }[]
+    actions?: {icon: keyof typeof Icon; title?: string; onClick: VoidFunction}[]
     class?: string
 }> = props => {
-    const ctx = useContext(ValueContext)
+    const ctx = s.useContext(ValueContext)
 
     const isUpdated =
         (props.isSignal || ctx?.underStore) &&
         (() => {
             const [_isUpdated, pingUpdated] = createPingedSignal()
-            createEffect(defer(() => props.value, pingUpdated))
+            s.createEffect(defer(() => props.value, pingUpdated))
             return _isUpdated
         })()
 
-    const handleSelect = () => {
+    const handleSelect = (): void => {
         if (props.onClick && isValueNested(props.value)) props.onClick()
     }
 
-    const { isHovered, hoverProps } = createNestedHover()
-    const isExtendable = createMemo(() => isValueNested(props.value))
+    const {isHovered, hoverProps} = createNestedHover()
+    const isExtendable = s.createMemo(() => isValueNested(props.value))
 
     return (
         <li
@@ -276,7 +270,7 @@ export const ValueNode: Component<{
                 'font-mono leading-inspector_row',
                 props.isStale && 'opacity-60',
             )}
-            {...(props.name && { 'aria-label': `${props.name} signal` })}
+            {...(props.name && {'aria-label': `${props.name} signal`})}
             {...hoverProps}
         >
             <div
@@ -284,7 +278,7 @@ export const ValueNode: Component<{
                     'absolute mt-.25 -inset-y-.25 -inset-x-1 b b-solid b-dom rounded',
                     props.isInspected ? 'opacity-50' : 'opacity-0',
                 )}
-                style={{ 'mask-image': 'linear-gradient(90deg, black, transparent)' }}
+                style={{'mask-image': 'linear-gradient(90deg, black, transparent)'}}
             />
             <div
                 class={clsx(
@@ -322,7 +316,7 @@ export const ValueNode: Component<{
                             : 'opacity-0',
                     )}
                 >
-                    <For each={props.actions}>
+                    <s.For each={props.actions}>
                         {action => {
                             const IconComponent = Icon[action.icon]
                             return (
@@ -335,7 +329,7 @@ export const ValueNode: Component<{
                                 </button>
                             )
                         }}
-                    </For>
+                    </s.For>
                 </div>
             )}
 
@@ -358,7 +352,7 @@ export const ValueNode: Component<{
 
             {/* provide context if one isn't already provided or if the value is a store
       (so that the ctx.underStore could be overwritten) */}
-            <Show
+            <s.Show
                 when={ctx && props.value.type !== ValueType.Store}
                 children={
                     <ValuePreview

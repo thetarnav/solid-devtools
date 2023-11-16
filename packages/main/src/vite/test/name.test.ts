@@ -1,6 +1,6 @@
-import { describe, test } from 'vitest'
+import {describe, test} from 'vitest'
 import plugin from '../name'
-import { assertTransform, testTransform } from './setup'
+import {assertTransform, testTransform} from './setup'
 
 describe('returning primitives', () => {
     // Positive tests

@@ -1,13 +1,13 @@
-import solidPkg from 'solid-js/package.json' assert { type: 'json' }
-import { defineConfig } from 'tsup'
-import { version as clientVersion, peerDependencies } from './package.json'
+import solidPkg from 'solid-js/package.json' assert {type: 'json'}
+import {defineConfig} from 'tsup'
+import {version as clientVersion, peerDependencies} from './package.json'
 
 const solidVersion = solidPkg.version
 
 export default defineConfig([
     {
         entryPoints: ['src/index.ts', 'src/setup-noop.ts', 'src/setup.ts'],
-        dts: { entry: ['src/index.ts', 'src/setup.ts'] },
+        dts: {entry: ['src/index.ts', 'src/setup.ts']},
         format: 'esm',
         target: 'esnext',
         platform: 'browser',

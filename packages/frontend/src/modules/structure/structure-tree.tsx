@@ -1,39 +1,31 @@
-import { hover_background, panel_header_el_border } from '@/SidePanel'
-import { useController, useDevtoolsOptions } from '@/controller'
-import { Icon, Scrollable, ToggleButton, ToggleTabs, theme } from '@/ui'
-import { toggle_tab_color_var } from '@/ui/components/toggle-tabs'
-import { NodeID, NodeType, TreeWalkerMode } from '@solid-devtools/debugger/types'
-import { Atom, atom } from '@solid-devtools/shared/primitives'
-import { makeEventListener } from '@solid-primitives/event-listener'
-import { createShortcut } from '@solid-primitives/keyboard'
-import { createResizeObserver } from '@solid-primitives/resize-observer'
-import { useRemSize } from '@solid-primitives/styles'
-import { defer } from '@solid-primitives/utils'
-import {
-    Component,
-    For,
-    createContext,
-    createEffect,
-    createMemo,
-    createSignal,
-    useContext,
-} from 'solid-js'
-import type { Structure } from '.'
+import {hover_background, panel_header_el_border} from '@/SidePanel'
+import {useController, useDevtoolsOptions} from '@/controller'
+import {Icon, Scrollable, ToggleButton, ToggleTabs, theme} from '@/ui'
+import {toggle_tab_color_var} from '@/ui/components/toggle-tabs'
+import {NodeID, NodeType, TreeWalkerMode} from '@solid-devtools/debugger/types'
+import {Atom, atom} from '@solid-devtools/shared/primitives'
+import {makeEventListener} from '@solid-primitives/event-listener'
+import {createShortcut} from '@solid-primitives/keyboard'
+import {createResizeObserver} from '@solid-primitives/resize-observer'
+import {useRemSize} from '@solid-primitives/styles'
+import {defer} from '@solid-primitives/utils'
+import * as s from 'solid-js'
+import type {Structure} from '.'
 import createStructure from '.'
-import { OwnerNode } from './owner-node'
-import { OwnerPath } from './owner-path'
-import { path_height, row_height, row_height_in_rem, row_padding, v_margin_in_rem } from './styles'
-import { getVirtualVars } from './virtual'
+import {OwnerNode} from './owner-node'
+import {OwnerPath} from './owner-path'
+import {path_height, row_height, row_height_in_rem, row_padding, v_margin_in_rem} from './styles'
+import {getVirtualVars} from './virtual'
 
-const StructureContext = createContext<Structure.Module>()
+const StructureContext = s.createContext<Structure.Module>()
 
-export function useStructure() {
-    const ctx = useContext(StructureContext)
+export function useStructure(): Structure.Module {
+    const ctx = s.useContext(StructureContext)
     if (!ctx) throw new Error('Structure context not found')
     return ctx
 }
 
-export default function StructureView() {
+export default function StructureView(): s.JSXElement {
     const structure = createStructure()
 
     return (
@@ -58,8 +50,8 @@ export default function StructureView() {
     )
 }
 
-const LocatorButton: Component = () => {
-    const { locator } = useController()
+const LocatorButton: s.Component = () => {
+    const {locator} = useController()
     return (
         <ToggleButton
             class="shrink-0 w-7 h-7"
@@ -72,13 +64,13 @@ const LocatorButton: Component = () => {
     )
 }
 
-const Search: Component = () => {
+const Search: s.Component = () => {
     const options = useDevtoolsOptions()
     const structure = useStructure()
 
-    const [value, setValue] = createSignal('')
+    const [value, setValue] = s.createSignal('')
 
-    const handleChange = (v: string) => {
+    const handleChange = (v: string): void => {
         setValue(v)
         structure.search('')
     }
@@ -138,7 +130,7 @@ const Search: Component = () => {
     )
 }
 
-const ToggleMode: Component = () => {
+const ToggleMode: s.Component = () => {
     const structure = useStructure()
 
     const tabsContentMap: Readonly<Record<TreeWalkerMode, string>> = {
@@ -165,8 +157,8 @@ const ToggleMode: Component = () => {
                                         mode === TreeWalkerMode.Owners
                                             ? theme.vars.text.DEFAULT
                                             : mode === TreeWalkerMode.DOM
-                                            ? theme.vars.dom
-                                            : theme.vars.component,
+                                              ? theme.vars.dom
+                                              : theme.vars.component,
                                 }}
                             >
                                 <div
@@ -202,25 +194,25 @@ const getFocusedNodeData = (
     }
 }
 
-const DisplayStructureTree: Component = () => {
-    const [containerScroll, setContainerScroll] = createSignal({ top: 0, height: 0 })
+const DisplayStructureTree: s.Component = () => {
+    const [containerScroll, setContainerScroll] = s.createSignal({top: 0, height: 0})
 
     const remSize = useRemSize()
-    const getContainerTopMargin = () => remSize() * v_margin_in_rem
-    const getRowHeight = () => remSize() * row_height_in_rem
+    const getContainerTopMargin = (): number => remSize() * v_margin_in_rem
+    const getRowHeight = (): number => remSize() * row_height_in_rem
 
-    const updateScrollData = (el: HTMLElement) => {
+    const updateScrollData = (el: HTMLElement): void => {
         setContainerScroll({
             top: Math.max(el.scrollTop - getContainerTopMargin(), 0),
             height: el.clientHeight,
         })
     }
 
-    const [collapsed, setCollapsed] = createSignal(new WeakSet<Structure.Node>(), { equals: false })
+    const [collapsed, setCollapsed] = s.createSignal(new WeakSet<Structure.Node>(), {equals: false})
 
-    const isCollapsed = (node: Structure.Node) => collapsed().has(node)
+    const isCollapsed = (node: Structure.Node): boolean => collapsed().has(node)
 
-    const toggleCollapsed = (node: Structure.Node) => {
+    const toggleCollapsed = (node: Structure.Node): void => {
         setCollapsed(set => {
             set.delete(node) || set.add(node)
             return set
@@ -228,7 +220,7 @@ const DisplayStructureTree: Component = () => {
     }
 
     const ctx = useController()
-    const { inspector, hovered } = ctx
+    const {inspector, hovered} = ctx
     const structure = useStructure()
 
     let lastVirtualStart = 0
@@ -236,12 +228,12 @@ const DisplayStructureTree: Component = () => {
     let lastInspectedIndex = 0
     let lastFocusedNodeData: ReturnType<typeof getFocusedNodeData>
 
-    createEffect(() => {
-        ;({ start: lastVirtualStart, end: lastVirtualEnd } = virtual())
+    s.createEffect(() => {
+        ;({start: lastVirtualStart, end: lastVirtualEnd} = virtual())
         lastInspectedIndex = inspectedIndex()
     })
 
-    const collapsedList = createMemo((prev: Structure.Node[] = []) => {
+    const collapsedList = s.createMemo((prev: Structure.Node[] = []) => {
         // position of focused component needs to be calculated right before the collapsed list is recalculated
         // to be compated with it after the changes
         // `list data` has to be updated in an effect, so that this memo can run before it, instead of reading it here
@@ -275,17 +267,17 @@ const DisplayStructureTree: Component = () => {
         return collapsed_list
     })
 
-    const virtual = createMemo<{
+    const virtual = s.createMemo<{
         start: number
         end: number
         fullLength: number
         list: readonly Atom<Structure.Node>[]
         nodeList: readonly Structure.Node[]
         minLevel: number
-    }>((prev = { start: 0, end: 0, fullLength: 0, list: [], nodeList: [], minLevel: 0 }) => {
+    }>((prev = {start: 0, end: 0, fullLength: 0, list: [], nodeList: [], minLevel: 0}) => {
         const nodeList = collapsedList()
-        const { top, height } = containerScroll()
-        const { start, end, length } = getVirtualVars(nodeList.length, top, height, getRowHeight())
+        const {top, height} = containerScroll()
+        const {start, end, length} = getVirtualVars(nodeList.length, top, height, getRowHeight())
 
         if (prev.nodeList === nodeList && prev.start === start && prev.end === end) return prev
 
@@ -308,28 +300,28 @@ const DisplayStructureTree: Component = () => {
             }
         }
 
-        return { list: next, start, end, nodeList, fullLength: nodeList.length, minLevel }
+        return {list: next, start, end, nodeList, fullLength: nodeList.length, minLevel}
     })
 
-    const minLevel = createMemo(() => Math.max(virtual().minLevel - 7, 0), 0, {
+    const minLevel = s.createMemo(() => Math.max(virtual().minLevel - 7, 0), 0, {
         equals: (a, b) => a == b || (Math.abs(b - a) < 7 && b != 0),
     })
 
     // calculate node indexP in the collapsed list
-    const getNodeIndexById = (id: NodeID) => {
+    const getNodeIndexById = (id: NodeID): number => {
         const nodeList = collapsedList()
         for (let i = 0; i < nodeList.length; i++) if (nodeList[i]!.id === id) return i
         return -1
     }
 
     // Index of the inspected node in the collapsed list
-    const inspectedIndex = createMemo(() => {
+    const inspectedIndex = s.createMemo(() => {
         const id = inspector.inspected.treeWalkerOwnerId
         return id ? getNodeIndexById(id) : -1
     })
 
     // Seep the inspected or central node in view when the list is changing
-    createEffect(
+    s.createEffect(
         defer(collapsedList, () => {
             if (!lastFocusedNodeData) return
             const [nodeId, lastPosition] = lastFocusedNodeData
@@ -342,7 +334,7 @@ const DisplayStructureTree: Component = () => {
 
     // Scroll to selected node when it changes
     // listen to inspected ID, instead of node, because node reference can change
-    createEffect(() => {
+    s.createEffect(() => {
         if (!inspector.inspected.treeWalkerOwnerId) return
         // Run in next tick to ensure the scroll data is updated and virtual list recalculated
         // inspect node -> open inspector -> container changes height -> scroll data changes -> virtual list changes -> scroll to node
@@ -365,7 +357,7 @@ const DisplayStructureTree: Component = () => {
                 } else return
             }
 
-            const { start, end } = virtual()
+            const {start, end} = virtual()
             const rowHeight = getRowHeight()
             let top: number
             if (index <= start) top = (index - 1) * rowHeight
@@ -383,7 +375,7 @@ const DisplayStructureTree: Component = () => {
         makeEventListener(document.body, 'keydown', e => {
             if (e.target !== document.body) return
 
-            const { key } = e
+            const {key} = e
 
             if (
                 key !== 'ArrowDown' &&
@@ -483,9 +475,9 @@ const DisplayStructureTree: Component = () => {
                             'margin-left': `calc(${minLevel()} * -${row_padding})`,
                         }}
                     >
-                        <For each={virtual().list}>
+                        <s.For each={virtual().list}>
                             {node => {
-                                const { id } = node.value
+                                const {id} = node.value
                                 return (
                                     <OwnerNode
                                         owner={node.value}
@@ -505,7 +497,7 @@ const DisplayStructureTree: Component = () => {
                                     />
                                 )
                             }}
-                        </For>
+                        </s.For>
                     </div>
                 </div>
             </div>

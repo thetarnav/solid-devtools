@@ -1,13 +1,13 @@
-import { getSdtId, ObjectType } from '../main/id'
+import {getSdtId, ObjectType} from '../main/id'
 import {
     observeComputationUpdate,
     observeValueUpdate,
     removeComputationUpdateObserver,
     removeValueUpdateObserver,
 } from '../main/observe'
-import { NodeID, Solid } from '../main/types'
-import { getNodeName, getNodeType, getOwnerType, isSolidOwner } from '../main/utils'
-import { NodeType } from '../types'
+import {NodeID, Solid} from '../main/types'
+import {getNodeName, getNodeType, getOwnerType, isSolidOwner} from '../main/utils'
+import {NodeType} from '../types'
 
 export namespace SerializedDGraph {
     export type Node = {
@@ -123,7 +123,7 @@ function lookupDepth(node: Solid.Owner | Solid.Signal): number {
 
 export function collectDependencyGraph(
     node: Solid.Computation | Solid.Memo | Solid.Signal,
-    config: { onNodeUpdate: OnNodeUpdate },
+    config: {onNodeUpdate: OnNodeUpdate},
 ): {
     graph: SerializedDGraph.Graph
     clearListeners: VoidFunction
@@ -147,5 +147,5 @@ export function collectDependencyGraph(
 
     Graph = VisitedObservers = VisitedSources = DepthMap = OnNodeUpdate = undefined!
 
-    return { graph, clearListeners }
+    return {graph, clearListeners}
 }

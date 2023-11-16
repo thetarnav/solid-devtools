@@ -1,11 +1,11 @@
 import type * as SolidAPI from 'solid-js'
-import type { $PROXY, DEV, getListener, getOwner, onCleanup, untrack } from 'solid-js'
+import type {$PROXY, DEV, getListener, getOwner, onCleanup, untrack} from 'solid-js'
 import type * as StoreAPI from 'solid-js/store'
-import type { DEV as STORE_DEV, unwrap } from 'solid-js/store'
+import type {DEV as STORE_DEV, unwrap} from 'solid-js/store'
 import type * as WebAPI from 'solid-js/web'
-import type { EncodedValue, PropGetterState } from '../inspector/types'
-import type { LocatorOptions, SourceLocation } from '../locator/types'
-import { NodeType, ValueItemType } from './constants'
+import type {EncodedValue, PropGetterState} from '../inspector/types'
+import type {LocatorOptions, SourceLocation} from '../locator/types'
+import {NodeType, ValueItemType} from './constants'
 
 //
 // EXPOSED SOLID API
@@ -86,7 +86,7 @@ export namespace Solid {
         [key: string]: unknown
     }>
 
-    export type CatchError = Omit<Computation, 'fn'> & { fn: undefined }
+    export type CatchError = Omit<Computation, 'fn'> & {fn: undefined}
 
     export type Root = OwnerBase & {
         attachedTo?: Owner
@@ -112,7 +112,7 @@ export namespace Solid {
     export type StoreNode = import('solid-js/store').StoreNode
     export type NotWrappable = import('solid-js/store').NotWrappable
     export type OnStoreNodeUpdate = import('solid-js/store/types/store.d.ts').OnStoreNodeUpdate
-    export type Store = SourceMapValue & { value: StoreNode }
+    export type Store = SourceMapValue & {value: StoreNode}
 }
 
 declare module 'solid-js/types/reactive/signal.d.ts' {
@@ -158,7 +158,7 @@ export namespace Mapped {
     export type Props = {
         proxy: boolean
         record: {
-            [key: string]: { getter: false | PropGetterState; value: EncodedValue[] | null }
+            [key: string]: {getter: false | PropGetterState; value: EncodedValue[] | null}
         }
     }
 

@@ -1,4 +1,4 @@
-import { PluginObj } from '@babel/core'
+import {PluginObj} from '@babel/core'
 import * as t from '@babel/types'
 
 const nameId = t.identifier('name')
@@ -27,7 +27,7 @@ function addNameToOptions(
     node: t.CallExpression,
     argIndex: number,
     getNameProperty: () => t.ObjectProperty | undefined,
-) {
+): void {
     // fill in-between arguments with undefined
     while (node.arguments.length < argIndex) {
         node.arguments.push(undefinedId)
@@ -131,6 +131,7 @@ const namePlugin: PluginObj<any> = {
             if (!targets) return
 
             for (const s of node.specifiers) {
+                // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
                 switch (s.type) {
                     // import * as local from "solid-js"
                     case 'ImportNamespaceSpecifier':
@@ -172,6 +173,7 @@ const namePlugin: PluginObj<any> = {
                     // Check declaration is either identifier or [identifier, ...]
                     const id = declaration.id
                     const name = (() => {
+                        // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
                         switch (id.type) {
                             case 'Identifier':
                                 return id.name

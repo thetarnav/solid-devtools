@@ -1,4 +1,4 @@
-export { useDebugger, useLocator } from './main'
+export {useDebugger, useLocator} from './main'
 export {
     addSolidUpdateListener,
     interceptComputationRerun,
@@ -6,7 +6,7 @@ export {
     observeValueUpdate,
     removeValueUpdateObserver,
 } from './main/observe'
-export { attachDebugger, createInternalRoot, unobserveAllRoots } from './main/roots'
+export {attachDebugger, createInternalRoot, unobserveAllRoots} from './main/roots'
 export {
     getNodeName,
     getNodeType,

@@ -1,7 +1,7 @@
-import { NodeID, NodeType, StructureUpdates } from '@solid-devtools/debugger/types'
-import { describe, expect, test } from 'vitest'
-import type { Structure } from '..'
-import { reconcileStructure } from '../reconcile'
+import {NodeID, NodeType, StructureUpdates} from '@solid-devtools/debugger/types'
+import {describe, expect, test} from 'vitest'
+import type {Structure} from '..'
+import {reconcileStructure} from '../reconcile'
 
 describe('reconcileStructure', () => {
     let updated: StructureUpdates['updated'] = {
@@ -10,13 +10,13 @@ describe('reconcileStructure', () => {
                 id: '#1',
                 type: NodeType.Root,
                 children: [
-                    { id: '#2', name: 'child', type: NodeType.Component, children: [] },
+                    {id: '#2', name: 'child', type: NodeType.Component, children: []},
                     {
                         id: '#3',
                         name: 'child2',
                         type: NodeType.Effect,
                         children: [
-                            { id: '#4', name: 'child3', type: NodeType.Component, children: [] },
+                            {id: '#4', name: 'child3', type: NodeType.Component, children: []},
                             {
                                 id: '#5',
                                 type: NodeType.Root,
@@ -40,7 +40,7 @@ describe('reconcileStructure', () => {
     let prevRoots: Structure.Node[] = []
 
     test('initial', () => {
-        const { roots, nodeList } = reconcileStructure(prevRoots, {
+        const {roots, nodeList} = reconcileStructure(prevRoots, {
             updated,
             removed,
             partial: false,
@@ -48,20 +48,20 @@ describe('reconcileStructure', () => {
         prevRoots = roots
 
         expect(nodeList).toMatchObject([
-            { id: '#1', parent: null, level: 0, children: [{ id: '#2' }, { id: '#3' }] },
-            { id: '#2', parent: { id: '#1' }, level: 1, children: [] },
+            {id: '#1', parent: null, level: 0, children: [{id: '#2'}, {id: '#3'}]},
+            {id: '#2', parent: {id: '#1'}, level: 1, children: []},
             {
                 id: '#3',
-                parent: { id: '#1' },
+                parent: {id: '#1'},
                 level: 1,
-                children: [{ id: '#4' }, { id: '#5' }],
+                children: [{id: '#4'}, {id: '#5'}],
             },
-            { id: '#4', parent: { id: '#3' }, level: 2, children: [] },
-            { id: '#5', parent: { id: '#3' }, level: 2, children: [{ id: '#6' }] },
-            { id: '#6', parent: { id: '#5' }, level: 3, children: [] },
+            {id: '#4', parent: {id: '#3'}, level: 2, children: []},
+            {id: '#5', parent: {id: '#3'}, level: 2, children: [{id: '#6'}]},
+            {id: '#6', parent: {id: '#5'}, level: 3, children: []},
         ])
 
-        expect(roots).toMatchObject([{ id: '#1' }])
+        expect(roots).toMatchObject([{id: '#1'}])
     })
 
     test('update', () => {
@@ -105,7 +105,7 @@ describe('reconcileStructure', () => {
             },
         }
 
-        const { roots, nodeList } = reconcileStructure(prevRoots, {
+        const {roots, nodeList} = reconcileStructure(prevRoots, {
             updated,
             removed,
             partial: true,
@@ -114,20 +114,20 @@ describe('reconcileStructure', () => {
 
         expect(nodeList).toHaveLength(5)
         expect(nodeList).toMatchObject([
-            { id: '#1', parent: null, level: 0, children: [{ id: '#3' }] },
+            {id: '#1', parent: null, level: 0, children: [{id: '#3'}]},
             {
                 id: '#3',
-                parent: { id: '#1' },
+                parent: {id: '#1'},
                 level: 1,
-                children: [{ id: '#4' }, { id: '#5' }],
+                children: [{id: '#4'}, {id: '#5'}],
                 frozen: true,
             },
-            { id: '#4', parent: { id: '#3' }, level: 2, children: [] },
-            { id: '#5', parent: { id: '#3' }, level: 2, children: [] },
-            { id: '#10', parent: null, level: 0, children: [] },
+            {id: '#4', parent: {id: '#3'}, level: 2, children: []},
+            {id: '#5', parent: {id: '#3'}, level: 2, children: []},
+            {id: '#10', parent: null, level: 0, children: []},
         ])
 
-        expect(roots).toMatchObject([{ id: '#1' }, { id: '#10' }])
+        expect(roots).toMatchObject([{id: '#1'}, {id: '#10'}])
     })
 
     test('attach to a different node', () => {
@@ -140,7 +140,7 @@ describe('reconcileStructure', () => {
                     type: NodeType.Effect,
                     frozen: true,
                     children: [
-                        { id: '#4', name: 'child3', type: NodeType.Component, children: [] },
+                        {id: '#4', name: 'child3', type: NodeType.Component, children: []},
                         // removed attachment (5)
                     ],
                 },
@@ -151,7 +151,7 @@ describe('reconcileStructure', () => {
                     id: '#8',
                     type: NodeType.Root,
                     children: [
-                        { id: '#9', name: 'child6', type: NodeType.Component, children: [] },
+                        {id: '#9', name: 'child6', type: NodeType.Component, children: []},
                         {
                             // changed attachment from 3 to 8
                             id: '#5',
@@ -164,7 +164,7 @@ describe('reconcileStructure', () => {
                                     type: NodeType.Component,
                                     children: [],
                                 },
-                                { id: '#7', name: 'child5', type: NodeType.Effect, children: [] },
+                                {id: '#7', name: 'child5', type: NodeType.Effect, children: []},
                             ],
                         },
                     ],
@@ -174,7 +174,7 @@ describe('reconcileStructure', () => {
 
         removed = ['#10']
 
-        const { roots, nodeList } = reconcileStructure(prevRoots, {
+        const {roots, nodeList} = reconcileStructure(prevRoots, {
             updated,
             removed,
             partial: true,
@@ -183,14 +183,14 @@ describe('reconcileStructure', () => {
 
         expect(nodeList).toHaveLength(8)
         expect(nodeList).toMatchObject([
-            { id: '#1', parent: null, level: 0, children: [{ id: '#3' }] },
-            { id: '#3', parent: { id: '#1' }, level: 1, children: [{ id: '#4' }] },
-            { id: '#4', parent: { id: '#3' }, level: 2, children: [] },
-            { id: '#8', parent: null, level: 0, children: [{ id: '#9' }, { id: '#5' }] },
-            { id: '#9', parent: { id: '#8' }, level: 1, children: [] },
-            { id: '#5', parent: { id: '#8' }, level: 1, children: [{ id: '#6' }, { id: '#7' }] },
-            { id: '#6', parent: { id: '#5' }, level: 2, children: [] },
-            { id: '#7', parent: { id: '#5' }, level: 2, children: [] },
+            {id: '#1', parent: null, level: 0, children: [{id: '#3'}]},
+            {id: '#3', parent: {id: '#1'}, level: 1, children: [{id: '#4'}]},
+            {id: '#4', parent: {id: '#3'}, level: 2, children: []},
+            {id: '#8', parent: null, level: 0, children: [{id: '#9'}, {id: '#5'}]},
+            {id: '#9', parent: {id: '#8'}, level: 1, children: []},
+            {id: '#5', parent: {id: '#8'}, level: 1, children: [{id: '#6'}, {id: '#7'}]},
+            {id: '#6', parent: {id: '#5'}, level: 2, children: []},
+            {id: '#7', parent: {id: '#5'}, level: 2, children: []},
         ])
 
         expect(roots).toHaveLength(2)
@@ -230,7 +230,7 @@ describe('reconcileStructure', () => {
                     id: '#5',
                     type: NodeType.Root,
                     children: [
-                        { id: '#6', name: 'child4', type: NodeType.Component, children: [] },
+                        {id: '#6', name: 'child4', type: NodeType.Component, children: []},
                         {
                             id: '#7',
                             name: 'child5',
@@ -250,7 +250,7 @@ describe('reconcileStructure', () => {
             },
         }
 
-        const { roots, nodeList } = reconcileStructure(prevRoots, {
+        const {roots, nodeList} = reconcileStructure(prevRoots, {
             updated,
             removed,
             partial: true,
@@ -259,13 +259,13 @@ describe('reconcileStructure', () => {
 
         expect(nodeList).toHaveLength(7)
         expect(nodeList).toMatchObject([
-            { id: '#8', parent: null, level: 0, children: [{ id: '#9' }] },
-            { id: '#9', parent: { id: '#8' }, level: 1, children: [{ id: '#12' }] },
-            { id: '#12', parent: { id: '#9' }, level: 2, children: [] },
-            { id: '#5', parent: null, level: 0, children: [{ id: '#6' }, { id: '#7' }] },
-            { id: '#6', parent: { id: '#5' }, level: 1, children: [] },
-            { id: '#7', parent: { id: '#5' }, level: 1, children: [{ id: '#11' }] },
-            { id: '#11', parent: { id: '#7' }, level: 2, children: [] },
+            {id: '#8', parent: null, level: 0, children: [{id: '#9'}]},
+            {id: '#9', parent: {id: '#8'}, level: 1, children: [{id: '#12'}]},
+            {id: '#12', parent: {id: '#9'}, level: 2, children: []},
+            {id: '#5', parent: null, level: 0, children: [{id: '#6'}, {id: '#7'}]},
+            {id: '#6', parent: {id: '#5'}, level: 1, children: []},
+            {id: '#7', parent: {id: '#5'}, level: 1, children: [{id: '#11'}]},
+            {id: '#11', parent: {id: '#7'}, level: 2, children: []},
         ])
 
         expect(roots).toHaveLength(2)
@@ -288,7 +288,7 @@ describe('reconcileStructure', () => {
             },
         }
 
-        const { roots, nodeList } = reconcileStructure(prevRoots, {
+        const {roots, nodeList} = reconcileStructure(prevRoots, {
             updated,
             removed,
             partial: true,
@@ -297,12 +297,12 @@ describe('reconcileStructure', () => {
 
         expect(nodeList).toHaveLength(6)
         expect(nodeList).toMatchObject([
-            { id: '#8', parent: null, level: 0, children: [{ id: '#9' }] },
-            { id: '#9', parent: { id: '#8' }, level: 1, children: [] },
-            { id: '#5', parent: null, level: 0, children: [{ id: '#6' }, { id: '#7' }] },
-            { id: '#6', parent: { id: '#5' }, level: 1, children: [] },
-            { id: '#7', parent: { id: '#5' }, level: 1, children: [{ id: '#11' }] },
-            { id: '#11', parent: { id: '#7' }, level: 2, children: [] },
+            {id: '#8', parent: null, level: 0, children: [{id: '#9'}]},
+            {id: '#9', parent: {id: '#8'}, level: 1, children: []},
+            {id: '#5', parent: null, level: 0, children: [{id: '#6'}, {id: '#7'}]},
+            {id: '#6', parent: {id: '#5'}, level: 1, children: []},
+            {id: '#7', parent: {id: '#5'}, level: 1, children: [{id: '#11'}]},
+            {id: '#11', parent: {id: '#7'}, level: 2, children: []},
         ])
 
         expect(roots).toHaveLength(2)

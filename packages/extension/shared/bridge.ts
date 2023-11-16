@@ -4,7 +4,7 @@ File for utilities, constants and types related to the communication between the
 
 */
 
-import { log } from '@solid-devtools/shared/utils'
+import {log} from '@solid-devtools/shared/utils'
 
 export const DEVTOOLS_ID_PREFIX = '[solid-devtools]_'
 
@@ -30,8 +30,8 @@ const LOG_MESSAGES = import.meta.env.DEV
 // const LOG_MESSAGES: boolean = true
 
 export function createPortMessanger<
-    IM extends { [K in string]: any } = {},
-    OM extends { [K in string]: any } = {},
+    IM extends {[K in string]: any},
+    OM extends {[K in string]: any},
 >(
     port: chrome.runtime.Port,
 ): {
@@ -60,22 +60,25 @@ export function createPortMessanger<
         const arr = listeners[e['name']]
         if (arr) arr.forEach(fn => fn(e['details']))
         const arr2 = listeners['*']
-        if (arr2) arr2.forEach(fn => fn({ name: e['name'], details: e['details'] }))
+        if (arr2) arr2.forEach(fn => fn({name: e['name'], details: e['details']}))
         else if (forwardHandler)
-            forwardHandler({ name: e['name'], details: e['details'], forwarding: true })
+            forwardHandler({name: e['name'], details: e['details'], forwarding: true})
     }
     port.onMessage.addListener(onMessage)
 
     return {
         postPortMessage: (name, details?: any) => {
             if (!connected) return
-            port.postMessage({ name, details })
+            port.postMessage({name, details})
         },
         onPortMessage: (...args: [any, any] | [any]) => {
             const name = typeof args[0] === 'string' ? args[0] : '*'
             const handler = typeof args[0] === 'string' ? args[1] : args[0]
 
-            if (!connected) return () => {}
+            if (!connected)
+                return () => {
+                    /**/
+                }
             let arr = listeners[name]
             if (!arr) arr = listeners[name] = []
             arr.push(handler)
@@ -112,7 +115,7 @@ export interface GeneralMessages {
     ResetPanel: void
 }
 
-export type PostMessageFn<M extends Record<string, any> = {}> = <
+export type PostMessageFn<M extends Record<string, any> = Record<never, never>> = <
     K extends keyof (GeneralMessages & M),
 >(
     type: K,
@@ -121,19 +124,19 @@ export type PostMessageFn<M extends Record<string, any> = {}> = <
         : [payload: (GeneralMessages & M)[K]]
 ) => void
 
-export type OnMessageFn<M extends Record<string, any> = {}> = {
+export type OnMessageFn<M extends Record<string, any> = Record<never, never>> = {
     <K extends keyof (GeneralMessages & M)>(
         name: K,
         handler: (payload: (GeneralMessages & M)[K]) => void,
     ): VoidFunction
     <K extends keyof (GeneralMessages & M)>(
-        handler: (e: { name: K; details: (GeneralMessages & M)[K] }) => void,
+        handler: (e: {name: K; details: (GeneralMessages & M)[K]}) => void,
     ): VoidFunction
 }
 
 export const makePostMessage: <M extends Record<string, any>>() => PostMessageFn<M> =
     () => (name, details?: any) =>
-        postMessage({ name, details }, '*')
+        postMessage({name, details}, '*')
 
 const listeners: {
     [K in any]?: ((payload: any) => void)[]
@@ -150,7 +153,7 @@ export function startListeningWindowMessages() {
         const arr = listeners[name]
         if (arr) arr.forEach(f => f(event.data.details as never))
         const arr2 = listeners['*']
-        if (arr2) arr2.forEach(f => f({ name, details: event.data.details }))
+        if (arr2) arr2.forEach(f => f({name, details: event.data.details}))
     })
 }
 
@@ -165,13 +168,13 @@ export function makeMessageListener<M extends Record<string, any>>(): OnMessageF
     }
 }
 
-export type ForwardPayload = { forwarding: true; name: string; details: any }
+export type ForwardPayload = {forwarding: true; name: string; details: any}
 
 export const isForwardMessage = (data: any): data is ForwardPayload =>
     typeof data === 'object' && data !== null && data.forwarding === true && 'name' in data
 
 export const forwardMessageToWindow = (message: ForwardPayload) => {
-    postMessage({ name: message.name, details: message.details }, '*')
+    postMessage({name: message.name, details: message.details}, '*')
 }
 
 export function once<M extends Record<string, any>, K extends keyof (GeneralMessages & M)>(

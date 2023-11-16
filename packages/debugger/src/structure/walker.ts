@@ -1,9 +1,9 @@
-import { untrackedCallback } from '@solid-devtools/shared/primitives'
-import type { ComponentRegisterHandler } from '../main/component-registry'
-import { NodeType, TreeWalkerMode } from '../main/constants'
-import { ObjectType, getSdtId } from '../main/id'
-import { observeComputationUpdate } from '../main/observe'
-import { Mapped, NodeID, Solid } from '../main/types'
+import {untrackedCallback} from '@solid-devtools/shared/primitives'
+import type {ComponentRegisterHandler} from '../main/component-registry'
+import {NodeType, TreeWalkerMode} from '../main/constants'
+import {ObjectType, getSdtId} from '../main/id'
+import {observeComputationUpdate} from '../main/observe'
+import {Mapped, NodeID, Solid} from '../main/types'
 import {
     getComponentRefreshNode,
     getNodeName,
@@ -25,7 +25,7 @@ let RootId: NodeID
 let OnComputationUpdate: ComputationUpdateHandler
 let RegisterComponent: ComponentRegisterHandler
 
-const ElementsMap = new Map<Mapped.Owner, { el: HTMLElement; component: Mapped.Owner }>()
+const ElementsMap = new Map<Mapped.Owner, {el: HTMLElement; component: Mapped.Owner}>()
 
 const $WALKER = Symbol('tree-walker')
 
@@ -135,7 +135,7 @@ function mapElements(
             children: [],
         }
         r.push(mappedEl)
-        ElementsMap.set(mappedEl, { el, component: MappedOwnerNode })
+        ElementsMap.set(mappedEl, {el, component: MappedOwnerNode})
 
         if (el.children.length) mappedEl.children = mapElements(el.children, parentChildren)
     }
@@ -151,7 +151,7 @@ function mapOwner(
     const id = getSdtId(owner, ObjectType.Owner)
     const type = overwriteType ?? markOwnerType(owner)
     const name = getNodeName(owner)
-    const mapped = { id, type, name } as Mapped.Owner
+    const mapped = {id, type, name} as Mapped.Owner
 
     let resolvedElements: ReturnType<typeof resolveElements> | undefined
 
@@ -247,7 +247,7 @@ export const walkSolidTree = /*#__PURE__*/ untrackedCallback(function (
 
     if (Mode === TreeWalkerMode.DOM) {
         // Register all mapped element nodes to their components
-        for (const [elNode, { el, component }] of ElementsMap) {
+        for (const [elNode, {el, component}] of ElementsMap) {
             RegisterComponent({
                 element: el,
                 componentId: component.id,

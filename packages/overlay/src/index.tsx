@@ -1,11 +1,11 @@
 import '@solid-devtools/debugger/setup'
 
-import { num } from '@nothing-but/utils'
-import { useDebugger } from '@solid-devtools/debugger/bundled'
-import { Icon, MountIcons } from '@solid-devtools/frontend'
-import { useIsMobile, useIsTouch } from '@solid-devtools/shared/primitives'
-import { createBodyCursor } from '@solid-primitives/cursor'
-import { makeEventListener } from '@solid-primitives/event-listener'
+import {num} from '@nothing-but/utils'
+import {useDebugger} from '@solid-devtools/debugger/bundled'
+import {Icon, MountIcons} from '@solid-devtools/frontend'
+import {useIsMobile, useIsTouch} from '@solid-devtools/shared/primitives'
+import {createBodyCursor} from '@solid-primitives/cursor'
+import {makeEventListener} from '@solid-primitives/event-listener'
 import {
     Component,
     ComponentProps,
@@ -15,8 +15,8 @@ import {
     createRoot,
     createSignal,
 } from 'solid-js'
-import { Dynamic, Portal } from 'solid-js/web'
-import { Devtools } from './controller'
+import {Dynamic, Portal} from 'solid-js/web'
+import {Devtools} from './controller'
 
 import frontendStyles from '@solid-devtools/frontend/dist/styles.css'
 import overlayStyles from './styles.css'
@@ -40,12 +40,14 @@ const Overlay: Component<{
     defaultOpen?: boolean
     alwaysOpen?: boolean
     noPadding?: boolean
-}> = ({ defaultOpen, alwaysOpen, noPadding }) => {
+}> = ({defaultOpen, alwaysOpen, noPadding}) => {
     const debug = useDebugger()
     if (defaultOpen || alwaysOpen) debug.toggleEnabled(true)
     const [isOpen, _setOpen] = createSignal(alwaysOpen || debug.enabled())
     const setOpen = alwaysOpen
-        ? () => {}
+        ? () => {
+              /**/
+          }
         : (enabled: boolean) => {
               batch(() => {
                   debug.toggleEnabled(enabled)
@@ -73,9 +75,9 @@ const Overlay: Component<{
         <Portal useShadow mount={document.documentElement}>
             <div
                 class="overlay__container"
-                classList={{ 'no-padding': noPadding }}
+                classList={{'no-padding': noPadding}}
                 data-open={isOpen()}
-                style={{ '--progress': progress() }}
+                style={{'--progress': progress()}}
                 data-testid="solid-devtools-overlay"
             >
                 <div class="overlay__container__fixed">

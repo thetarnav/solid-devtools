@@ -1,8 +1,8 @@
-import { getSdtId, ObjectType } from '../main/id'
+import {getSdtId, ObjectType} from '../main/id'
 import SolidAPI from '../main/solid-api'
-import type { NodeID, Solid } from '../types'
+import type {NodeID, Solid} from '../types'
 
-const { isWrappable } = SolidAPI.STORE_DEV
+const {isWrappable} = SolidAPI.STORE_DEV
 
 export type StoreNodeProperty = `${NodeID}:${string}`
 /**
@@ -10,7 +10,7 @@ export type StoreNodeProperty = `${NodeID}:${string}`
  * - `{ value: unknown }` - property updated/added;
  * - `number` - array length updated;
  */
-export type StoreUpdateData = { value: unknown } | number | undefined
+export type StoreUpdateData = {value: unknown} | number | undefined
 
 type ParentProperty = StoreNodeProperty | symbol
 /**
@@ -46,7 +46,7 @@ SolidAPI.STORE_DEV.hooks.onStoreNodeUpdate = (node, property, value, prev) =>
         }
         // Update/Set property
         else {
-            OnNodeUpdate(storeProperty, { value })
+            OnNodeUpdate(storeProperty, {value})
             isWrappable(value) && trackStore(value, storeProperty)
         }
     })
@@ -92,7 +92,7 @@ function forEachStoreProp(
         }
     } else {
         for (const key in node) {
-            const { value, get } = Object.getOwnPropertyDescriptor(node, key)!
+            const {value, get} = Object.getOwnPropertyDescriptor(node, key)!
             if (!get && isWrappable(value)) fn(key, value)
         }
     }

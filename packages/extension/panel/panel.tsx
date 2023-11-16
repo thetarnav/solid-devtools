@@ -2,16 +2,16 @@
     Devtools panel entry point
 */
 
-import { Debugger } from '@solid-devtools/debugger/types'
-import { createDevtools, MountIcons } from '@solid-devtools/frontend'
-import { createSignal } from 'solid-js'
-import { render } from 'solid-js/web'
-import { ConnectionName, createPortMessanger, once, Versions } from '../shared/bridge'
+import {Debugger} from '@solid-devtools/debugger/types'
+import {createDevtools, MountIcons} from '@solid-devtools/frontend'
+import {createSignal} from 'solid-js'
+import {render} from 'solid-js/web'
+import {ConnectionName, createPortMessanger, once, Versions} from '../shared/bridge'
 
 import '@solid-devtools/frontend/dist/styles.css'
 
-const port = chrome.runtime.connect({ name: ConnectionName.Panel })
-const { postPortMessage: toBackground, onPortMessage: fromBackground } = createPortMessanger<
+const port = chrome.runtime.connect({name: ConnectionName.Panel})
+const {postPortMessage: toBackground, onPortMessage: fromBackground} = createPortMessanger<
     Debugger.OutputChannels,
     Debugger.InputChannels
 >(port)
@@ -26,7 +26,7 @@ function App() {
 
     once(fromBackground, 'Versions', setVersions)
 
-    const { bridge, Devtools } = createDevtools()
+    const {bridge, Devtools} = createDevtools()
 
     bridge.output.listen(e => toBackground(e.name, e.details))
 

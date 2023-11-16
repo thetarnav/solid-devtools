@@ -1,25 +1,20 @@
-import { warn } from '@solid-devtools/shared/utils'
-import { EmitterEmit } from '@solid-primitives/event-bus'
-import { scheduleIdle, throttle } from '@solid-primitives/scheduled'
-import { Accessor, createEffect, onCleanup } from 'solid-js'
-import type { Debugger } from '../main'
-import { ObjectType, getObjectById } from '../main/id'
-import { addSolidUpdateListener } from '../main/observe'
-import { Mapped, NodeID, Solid, ValueItemID } from '../main/types'
-import { onOwnerDispose } from '../main/utils'
-import {
-    ObservedPropsMap,
-    ValueNodeMap,
-    clearOwnerObservers,
-    collectOwnerDetails,
-} from './inspector'
-import { encodeValue } from './serialize'
-import { StoreNodeProperty, StoreUpdateData, observeStoreNode, setOnStoreNodeUpdate } from './store'
-import { InspectorUpdate, InspectorUpdateMap, PropGetterState } from './types'
+import {warn} from '@solid-devtools/shared/utils'
+import {EmitterEmit} from '@solid-primitives/event-bus'
+import {scheduleIdle, throttle} from '@solid-primitives/scheduled'
+import {Accessor, createEffect, onCleanup} from 'solid-js'
+import type {Debugger} from '../main'
+import {ObjectType, getObjectById} from '../main/id'
+import {addSolidUpdateListener} from '../main/observe'
+import {Mapped, NodeID, Solid, ValueItemID} from '../main/types'
+import {onOwnerDispose} from '../main/utils'
+import {ObservedPropsMap, ValueNodeMap, clearOwnerObservers, collectOwnerDetails} from './inspector'
+import {encodeValue} from './serialize'
+import {StoreNodeProperty, StoreUpdateData, observeStoreNode, setOnStoreNodeUpdate} from './store'
+import {InspectorUpdate, InspectorUpdateMap, PropGetterState} from './types'
 
 export * from './types'
 
-export type ToggleInspectedValueData = { id: ValueItemID; selected: boolean }
+export type ToggleInspectedValueData = {id: ValueItemID; selected: boolean}
 
 /**
  * Plugin module
@@ -39,7 +34,7 @@ export function createInspector(props: {
 
     // Batch and dedupe inspector updates
     // these will include updates to signals, stores, props, and node value
-    const { pushPropState, pushValueUpdate, pushInspectToggle, triggerPropsCheck, clearUpdates } =
+    const {pushPropState, pushValueUpdate, pushInspectToggle, triggerPropsCheck, clearUpdates} =
         (() => {
             const valueUpdates = new Map<ValueItemID, boolean | null>()
             let storeUpdates: [storeProperty: StoreNodeProperty, data: StoreUpdateData][] = []
@@ -184,7 +179,7 @@ export function createInspector(props: {
 
     return {
         getLastDetails: () => lastDetails,
-        toggleValueNode({ id, selected }: ToggleInspectedValueData): void {
+        toggleValueNode({id, selected}: ToggleInspectedValueData): void {
             const node = valueMap.get(id)
             if (!node) return warn('Could not find value node:', id)
             node.setSelected(selected)

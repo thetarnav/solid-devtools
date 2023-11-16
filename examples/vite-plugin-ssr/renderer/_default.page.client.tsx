@@ -1,11 +1,11 @@
 export const clientRouting = true
-export { render }
+export {render}
 
-import { createStore, reconcile } from 'solid-js/store'
-import { hydrate, render as render_ } from 'solid-js/web'
-import type { PageContextBuiltInClientWithClientRouting as PageContextBuiltInClient } from 'vite-plugin-ssr/types'
-import { PageLayout } from './PageLayout'
-import type { PageContext } from './types'
+import {createStore, reconcile} from 'solid-js/store'
+import {hydrate, render as render_} from 'solid-js/web'
+import type {PageContextBuiltInClientWithClientRouting as PageContextBuiltInClient} from 'vite-plugin-ssr/types'
+import {PageLayout} from './PageLayout'
+import type {PageContext} from './types'
 
 import 'solid-devtools'
 
@@ -46,7 +46,7 @@ async function render(pageContext: PageContextClient) {
 // TODO/v1-release: remove workaround since _pageFilesAll and _pageFilesLoaded aren't used by the V1 design
 function removeUnmergableInternals<T>(pageContext: T): T {
     // Remove pageContext properties that cannot be reassigned by reconcile()
-    const pageContextFixed = { ...pageContext }
+    const pageContextFixed = {...pageContext}
     // @ts-ignore
     delete pageContextFixed._pageFilesAll
     // @ts-ignore

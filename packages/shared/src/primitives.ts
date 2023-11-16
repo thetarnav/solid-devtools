@@ -1,7 +1,7 @@
-import { makeEventListener } from '@solid-primitives/event-listener'
-import { createMediaQuery } from '@solid-primitives/media'
-import { createSingletonRoot } from '@solid-primitives/rootless'
-import { tryOnCleanup, type AnyFunction, type PrimitiveValue } from '@solid-primitives/utils'
+import {makeEventListener} from '@solid-primitives/event-listener'
+import {createMediaQuery} from '@solid-primitives/media'
+import {createSingletonRoot} from '@solid-primitives/rootless'
+import {tryOnCleanup, type AnyFunction, type PrimitiveValue} from '@solid-primitives/utils'
 import {
     batch,
     createMemo,
@@ -19,10 +19,10 @@ import {
 export type WritableDeep<T> = 0 extends 1 & T
     ? T
     : T extends PrimitiveValue
-    ? T
-    : unknown extends T
-    ? T
-    : { -readonly [K in keyof T]: WritableDeep<T[K]> }
+      ? T
+      : unknown extends T
+        ? T
+        : {-readonly [K in keyof T]: WritableDeep<T[K]>}
 
 export const untrackedCallback = <Fn extends AnyFunction>(fn: Fn): Fn =>
     ((...a: Parameters<Fn>) => untrack<ReturnType<Fn>>(fn.bind(void 0, ...a))) as any
@@ -38,14 +38,14 @@ export function createHover(handle: (hovering: boolean) => void): {
     let mounted = true
     const mql = window.matchMedia('(hover: none)')
     let isTouch = mql.matches
-    makeEventListener(mql, 'change', ({ matches }) => {
+    makeEventListener(mql, 'change', ({matches}) => {
         if ((isTouch = matches)) handle((state = false))
     })
     onCleanup(() => {
         mounted = false
         if (state) handle((state = false))
     })
-    const onChange = (newState: boolean) => {
+    const onChange = (newState: boolean): void => {
         if (isTouch || !mounted) return
         state !== newState && handle((state = newState))
     }
@@ -63,7 +63,7 @@ export function createHover(handle: (hovering: boolean) => void): {
 export function createConsumers(
     initial: readonly Accessor<boolean>[] = [],
 ): [needed: Accessor<boolean>, addConsumer: (consumer: Accessor<boolean>) => void] {
-    const [consumers, setConsumers] = createSignal([...initial], { name: 'consumers' })
+    const [consumers, setConsumers] = createSignal([...initial], {name: 'consumers'})
     const enabled = createMemo(() => consumers().some(consumer => consumer()))
     return [
         enabled,
@@ -112,13 +112,13 @@ export function createDerivedSignal<T>(fallback?: T, options?: MemoOptions<T>): 
 
 export function makeHoverElementListener(onHover: (el: HTMLElement | null) => void): void {
     let last: HTMLElement | null = null
-    const handleHover = (e: { target: unknown }) => {
-        const { target } = e
+    const handleHover = (e: {target: unknown}): void => {
+        const {target} = e
         if (target === last || (!(target instanceof HTMLElement) && target !== null)) return
         onHover((last = target))
     }
     makeEventListener(window, 'mouseover', handleHover)
-    makeEventListener(document, 'mouseleave', handleHover.bind(void 0, { target: null }))
+    makeEventListener(document, 'mouseleave', handleHover.bind(void 0, {target: null}))
 }
 
 export type Atom<T> = Accessor<T> & {
@@ -148,7 +148,7 @@ export function atom<T>(initialValue: T, options?: SignalOptions<T>): Atom<T> {
     atom.set = value => setter(() => value)
     atom.peak = () => untrack(atom)
 
-    Object.defineProperty(atom, 'value', { get: atom })
+    Object.defineProperty(atom, 'value', {get: atom})
 
     return atom
 }
@@ -162,7 +162,7 @@ export function createPingedSignal(
     const [isUpdated, setIsUpdated] = createSignal(false)
 
     let timeoutId: ReturnType<typeof setTimeout> | undefined
-    const ping = () => {
+    const ping = (): void => {
         setIsUpdated(true)
         clearTimeout(timeoutId)
         timeoutId = setTimeout(() => setIsUpdated(false), timeout)
@@ -174,16 +174,16 @@ export function createPingedSignal(
 
 export function handleTupleUpdate<
     T extends readonly [PropertyKey, any],
-    O = { readonly [K in T as K[0]]: (value: K[1]) => void },
+    O = {readonly [K in T as K[0]]: (value: K[1]) => void},
 >(handlers: O): (update: T) => void {
     return update => (handlers as any)[update[0]](update[1])
 }
 
 export function handleTupleUpdates<
     T extends readonly [PropertyKey, any],
-    O = { readonly [K in T as K[0]]: (value: K[1]) => void },
+    O = {readonly [K in T as K[0]]: (value: K[1]) => void},
 >(handlers: O): (updates: T[]) => void {
-    function runUpdates(updates: T[]) {
+    function runUpdates(updates: T[]): void {
         for (const [key, value] of updates) (handlers as any)[key](value)
     }
     return updates => batch(runUpdates.bind(void 0, updates))

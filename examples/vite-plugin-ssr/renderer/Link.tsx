@@ -1,6 +1,6 @@
-import { usePageContext } from './usePageContext'
+import {usePageContext} from './usePageContext'
 
-export function Link(props: { href: string; children: string }) {
+export function Link(props: {href: string; children: string}) {
     const pageContext = usePageContext()
     const isActive = () =>
         props.href === '/'

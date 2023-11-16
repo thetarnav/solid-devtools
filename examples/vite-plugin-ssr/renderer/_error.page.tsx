@@ -1,8 +1,8 @@
-export { Page }
+export {Page}
 
-import type { Component } from 'solid-js'
+import type {Component} from 'solid-js'
 
-const Page: Component<{ is404: boolean }> = ({ is404 }) => {
+const Page: Component<{is404: boolean}> = ({is404}) => {
     if (is404) {
         return (
             <>

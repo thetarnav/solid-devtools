@@ -1,7 +1,7 @@
 import path from 'path'
 import ts from 'typescript'
-import { parentPort } from 'worker_threads'
-import { emitDts, getTscOptions } from './dts'
+import {parentPort} from 'worker_threads'
+import {emitDts, getTscOptions} from './dts'
 
 const isDev = process.argv.includes('--watch')
 const entryFile = path.resolve(process.cwd(), `src/index.tsx`)

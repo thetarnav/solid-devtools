@@ -1,13 +1,13 @@
-import type { Component, JSX } from 'solid-js'
-import type { Store } from 'solid-js/store'
-import { Dynamic } from 'solid-js/web'
-import { Link } from './Link'
+import type {Component, JSX} from 'solid-js'
+import type {Store} from 'solid-js/store'
+import {Dynamic} from 'solid-js/web'
+import {Link} from './Link'
 import './PageLayout.css'
 import logo from './logo.svg'
-import type { PageContext } from './types'
-import { PageContextProvider, usePageContext } from './usePageContext'
+import type {PageContext} from './types'
+import {PageContextProvider, usePageContext} from './usePageContext'
 
-export { PageLayout }
+export {PageLayout}
 
 interface Props {
     pageContext: Store<PageContext>

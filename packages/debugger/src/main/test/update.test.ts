@@ -1,5 +1,5 @@
-import { createComputed, createRoot, createSignal, onCleanup } from 'solid-js'
-import { describe, expect, it } from 'vitest'
+import {createComputed, createRoot, createSignal, onCleanup} from 'solid-js'
+import {describe, expect, it} from 'vitest'
 import {
     addSolidUpdateListener,
     interceptComputationRerun,
@@ -8,7 +8,7 @@ import {
 } from '../observe'
 import solidApi from '../solid-api'
 
-const { getOwner } = solidApi
+const {getOwner} = solidApi
 
 describe('addSolidUpdateListener', () => {
     it('listens to solid updates', () =>
@@ -73,7 +73,7 @@ describe('interceptComputationRerun', () => {
 describe('observeValueUpdate', () => {
     it('patches signal', () =>
         createRoot(dispose => {
-            const [, setCount] = createSignal(0, { name: 's1' })
+            const [, setCount] = createSignal(0, {name: 's1'})
             const signal = getOwner()!.sourceMap![0]!
             const symbol = Symbol()
             let last_prev: unknown

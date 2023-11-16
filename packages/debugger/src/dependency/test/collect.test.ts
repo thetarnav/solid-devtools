@@ -1,38 +1,38 @@
-import { batch, createComputed, createMemo, createRoot, createSignal } from 'solid-js'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { NodeType } from '../../main/constants'
-import { ObjectType, getSdtId } from '../../main/id'
+import {batch, createComputed, createMemo, createRoot, createSignal} from 'solid-js'
+import {beforeEach, describe, expect, it, vi} from 'vitest'
+import {NodeType} from '../../main/constants'
+import {ObjectType, getSdtId} from '../../main/id'
 import SolidApi from '../../main/solid-api'
-import type { NodeID, Solid } from '../../main/types'
-import { SerializedDGraph, collectDependencyGraph } from '../collect'
+import type {NodeID, Solid} from '../../main/types'
+import {SerializedDGraph, collectDependencyGraph} from '../collect'
 
-const { getOwner } = SolidApi
+const {getOwner} = SolidApi
 
 let mockLAST_ID = 0
 beforeEach(() => {
     mockLAST_ID = 0
 })
-vi.mock('../../main/get-id', () => ({ getNewSdtId: () => '#' + mockLAST_ID++ }))
+vi.mock('../../main/get-id', () => ({getNewSdtId: () => '#' + mockLAST_ID++}))
 
 describe('collectDependencyGraph', () => {
     it('should collect dependency graph', () => {
         let rootOwner!: Solid.Root
         let subRootOwner!: Solid.Root
 
-        const [e] = createSignal(0, { name: 's-e' })
+        const [e] = createSignal(0, {name: 's-e'})
 
         createRoot(() => {
-            const [a] = createSignal(0, { name: 's-a' })
-            const [b] = createSignal(0, { name: 's-b' })
-            const [c] = createSignal(0, { name: 's-c' })
+            const [a] = createSignal(0, {name: 's-a'})
+            const [b] = createSignal(0, {name: 's-b'})
+            const [c] = createSignal(0, {name: 's-c'})
 
-            const memoA = createMemo(() => a() + e(), null, { name: 'm-a' })
+            const memoA = createMemo(() => a() + e(), null, {name: 'm-a'})
 
             rootOwner = getOwner()! as Solid.Root
 
             createRoot(_ => {
-                const [d] = createSignal(0, { name: 's-d' })
-                const memoB = createMemo(() => b() + c(), null, { name: 'm-b' })
+                const [d] = createSignal(0, {name: 's-d'})
+                const memoB = createMemo(() => b() + c(), null, {name: 'm-b'})
 
                 subRootOwner = getOwner()! as Solid.Root
 
@@ -44,7 +44,7 @@ describe('collectDependencyGraph', () => {
                         d()
                     },
                     null,
-                    { name: 'c' },
+                    {name: 'c'},
                 )
             })
         })
@@ -75,7 +75,11 @@ describe('collectDependencyGraph', () => {
             }
         })()
 
-        let result = collectDependencyGraph(nodes.computed, { onNodeUpdate: () => {} })
+        let result = collectDependencyGraph(nodes.computed, {
+            onNodeUpdate: () => {
+                /**/
+            },
+        })
 
         expect(result.graph, 'graph of computedOwner').toEqual({
             [nodes.computedId]: {
@@ -148,7 +152,11 @@ describe('collectDependencyGraph', () => {
             JSON.parse(JSON.stringify(result.graph)) as any,
         )
 
-        result = collectDependencyGraph(nodes.memoA, { onNodeUpdate: () => {} })
+        result = collectDependencyGraph(nodes.memoA, {
+            onNodeUpdate: () => {
+                /**/
+            },
+        })
 
         expect(result.graph).toEqual({
             [nodes.computedId]: {
@@ -195,12 +203,12 @@ describe('collectDependencyGraph', () => {
         const cb = vi.fn(a => captured.push(a))
 
         createRoot(() => {
-            const [a, setA] = createSignal(0, { name: 's-a' })
-            const [b, setB] = createSignal(0, { name: 's-b' })
-            const [c, setC] = createSignal(0, { name: 's-c' })
-            const [d, setD] = createSignal(0, { name: 's-d' })
+            const [a, setA] = createSignal(0, {name: 's-a'})
+            const [b, setB] = createSignal(0, {name: 's-b'})
+            const [c, setC] = createSignal(0, {name: 's-c'})
+            const [d, setD] = createSignal(0, {name: 's-d'})
 
-            const mA = createMemo(() => a() + b(), undefined, { name: 'm-a' })
+            const mA = createMemo(() => a() + b(), undefined, {name: 'm-a'})
 
             createComputed(
                 () => {
@@ -208,7 +216,7 @@ describe('collectDependencyGraph', () => {
                     d()
                 },
                 undefined,
-                { name: 'c-a' },
+                {name: 'c-a'},
             )
 
             createComputed(
@@ -217,7 +225,7 @@ describe('collectDependencyGraph', () => {
                     c()
                 },
                 undefined,
-                { name: 'c-b' },
+                {name: 'c-b'},
             )
 
             const nodes = (() => {
@@ -246,7 +254,7 @@ describe('collectDependencyGraph', () => {
                 }
             })()
 
-            const result = collectDependencyGraph(nodes.computedB, { onNodeUpdate: cb })
+            const result = collectDependencyGraph(nodes.computedB, {onNodeUpdate: cb})
 
             expect(result.graph).toEqual({
                 [nodes.computedBId]: {

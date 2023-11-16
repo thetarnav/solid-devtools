@@ -1,4 +1,4 @@
-import { useController } from '@/controller'
+import {useController} from '@/controller'
 import {
     DEFAULT_WALKER_MODE,
     DevtoolsMainView,
@@ -7,9 +7,9 @@ import {
     StructureUpdates,
     type TreeWalkerMode,
 } from '@solid-devtools/debugger/types'
-import { defer } from '@solid-primitives/utils'
-import { batch, createEffect, createMemo, createSelector, createSignal, untrack } from 'solid-js'
-import { reconcileStructure } from './reconcile'
+import {defer} from '@solid-primitives/utils'
+import {batch, createEffect, createMemo, createSelector, createSignal, untrack} from 'solid-js'
+import {reconcileStructure} from './reconcile'
 
 export * from './styles'
 
@@ -31,10 +31,10 @@ export namespace Structure {
         type: NodeType.Root
     }
 
-    export type State = { roots: Node[]; nodeList: Node[] }
+    export type State = {roots: Node[]; nodeList: Node[]}
 
     // State to be stored in the controller cache
-    export type Cache = { short: State; long: { mode: TreeWalkerMode } }
+    export type Cache = {short: State; long: {mode: TreeWalkerMode}}
 
     export type Module = ReturnType<typeof createStructure>
 }
@@ -73,7 +73,7 @@ export function getNodePath(node: Structure.Node): Structure.Node[] {
 
 export default function createStructure() {
     const ctx = useController()
-    const { inspector, bridge } = ctx
+    const {inspector, bridge} = ctx
     const cachedInitialState = ctx.viewCache.get(DevtoolsMainView.Structure)
 
     const [mode, setMode] = createSignal<TreeWalkerMode>(
@@ -89,11 +89,11 @@ export default function createStructure() {
     }
 
     const [state, setState] = createSignal<Structure.State>(
-        cachedInitialState.short || { nodeList: [], roots: [] },
+        cachedInitialState.short || {nodeList: [], roots: []},
     )
     ctx.viewCache.set(DevtoolsMainView.Structure, () => ({
         short: state(),
-        long: { mode: mode() },
+        long: {mode: mode()},
     }))
 
     const inspectedNode = createMemo(() => {
@@ -103,7 +103,7 @@ export default function createStructure() {
 
     function updateStructure(update: StructureUpdates | null): void {
         setState(prev =>
-            update ? reconcileStructure(prev.roots, update) : { nodeList: [], roots: [] },
+            update ? reconcileStructure(prev.roots, update) : {nodeList: [], roots: []},
         )
     }
 

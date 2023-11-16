@@ -6,9 +6,9 @@ It has to coordinate the communication between the different scripts based on th
 
 */
 
-import { error, log } from '@solid-devtools/shared/utils'
+import {error, log} from '@solid-devtools/shared/utils'
 import * as bridge from '../shared/bridge'
-import { icons } from '../shared/icons'
+import {icons} from '../shared/icons'
 
 log('Background script working.')
 
@@ -19,7 +19,7 @@ type TabDataConfig = {
     forwardToClient: TabData['forwardToClient']
 }
 
-type PostMessanger = { post: bridge.PostMessageFn; on: bridge.OnMessageFn }
+type PostMessanger = {post: bridge.PostMessageFn; on: bridge.OnMessageFn}
 
 class EventBus<T> extends Set<(payload: T) => void> {
     emit(..._: void extends T ? [payload?: T] : [payload: T]): void
@@ -54,10 +54,10 @@ class TabData {
     untilContentScriptConnect(): Promise<PostMessanger> {
         return new Promise(resolve => {
             if (this.connected) {
-                resolve({ post: this.toContent.bind(this), on: this.fromContent.bind(this) })
+                resolve({post: this.toContent.bind(this), on: this.fromContent.bind(this)})
             } else {
                 this.connectListeners.add((toContent, fromContent) => {
-                    resolve({ post: toContent, on: fromContent })
+                    resolve({post: toContent, on: fromContent})
                 })
             }
         })
@@ -83,8 +83,12 @@ class TabData {
         this.connected = false
         this.disconnectBus.emit()
         this.disconnectBus.clear()
-        this.forwardToClient = () => {}
-        this.forwardToDevtools = () => {}
+        this.forwardToClient = () => {
+            /**/
+        }
+        this.forwardToDevtools = () => {
+            /**/
+        }
     }
 
     #versions: bridge.Versions | undefined
@@ -115,7 +119,7 @@ class TabData {
     }
 }
 
-const ACTIVE_TAB_QUERY = { active: true, currentWindow: true } as const
+const ACTIVE_TAB_QUERY = {active: true, currentWindow: true} as const
 const queryActiveTabId = async (): Promise<number | Error> => {
     try {
         const tabs = await chrome.tabs.query(ACTIVE_TAB_QUERY)
@@ -197,7 +201,7 @@ chrome.runtime.onConnect.addListener(async port => {
                 data.setVersions(v)
 
                 // Change the popup icon to indicate that Solid is present on the page
-                chrome.action.setIcon({ tabId: tab_id, path: icons.normal })
+                chrome.action.setIcon({tabId: tab_id, path: icons.normal})
             })
 
             // "DetectSolid" from content-script (realWorld)

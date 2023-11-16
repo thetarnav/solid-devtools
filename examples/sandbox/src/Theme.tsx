@@ -1,5 +1,5 @@
-import { Component, createContext, ParentComponent, useContext } from 'solid-js'
-import { createStore } from 'solid-js/store'
+import {Component, createContext, ParentComponent, useContext} from 'solid-js'
+import {createStore} from 'solid-js/store'
 
 export type ThemeContextState = {
     readonly color: string
@@ -39,7 +39,7 @@ export const ThemeProvider: ParentComponent<{
     const changeTitle = (title: string) => setTheme('title', title)
 
     return (
-        <ThemeContext.Provider value={[theme, { changeColor, changeTitle }]}>
+        <ThemeContext.Provider value={[theme, {changeColor, changeTitle}]}>
             {props.children}
         </ThemeContext.Provider>
     )
@@ -48,7 +48,7 @@ export const ThemeProvider: ParentComponent<{
 export const useTheme = () => useContext(ThemeContext)
 
 export const ThemeExample: Component = props => {
-    const [theme, { changeColor }] = useTheme()
+    const [theme, {changeColor}] = useTheme()
 
     return (
         <>

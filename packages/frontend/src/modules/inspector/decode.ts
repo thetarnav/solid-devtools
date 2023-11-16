@@ -7,18 +7,18 @@ import {
     UNDEFINED,
     ValueType,
 } from '@solid-devtools/debugger/types'
-import { splitOnColon } from '@solid-devtools/shared/utils'
-import { batch, createSignal } from 'solid-js'
+import {splitOnColon} from '@solid-devtools/shared/utils'
+import {batch, createSignal} from 'solid-js'
 
 export class StoreNodeMap {
-    map = new Map<NodeID, { node: DecodedValue<ValueType.Store>; refs: number }>()
+    map = new Map<NodeID, {node: DecodedValue<ValueType.Store>; refs: number}>()
     get(id: NodeID): DecodedValue<ValueType.Store> | null {
         return this.map.get(id)?.node || null
     }
     addRef(id: NodeID, node: DecodedValue<ValueType.Store>) {
         const entry = this.map.get(id)
         if (entry) entry.refs++
-        else this.map.set(id, { node, refs: 1 })
+        else this.map.set(id, {node, refs: 1})
     }
     removeRef(id: NodeID) {
         const entry = this.map.get(id)
@@ -43,25 +43,26 @@ export type ObjectValueData = {
 }
 
 type DecodedDataMap = {
-    [ValueType.String]: { readonly value: string }
-    [ValueType.Number]: { readonly value: number }
-    [ValueType.Boolean]: { readonly value: boolean }
-    [ValueType.Null]: { readonly value: null | undefined }
-    [ValueType.Symbol]: { readonly name: string }
-    [ValueType.Instance]: { readonly name: string }
-    [ValueType.Function]: { readonly name: string }
-    [ValueType.Element]: { readonly name: string; readonly id: NodeID }
-    [ValueType.Getter]: { readonly name: string }
+    [ValueType.String]: {readonly value: string}
+    [ValueType.Number]: {readonly value: number}
+    [ValueType.Boolean]: {readonly value: boolean}
+    [ValueType.Null]: {readonly value: null | undefined}
+    [ValueType.Symbol]: {readonly name: string}
+    [ValueType.Instance]: {readonly name: string}
+    [ValueType.Function]: {readonly name: string}
+    [ValueType.Element]: {readonly name: string; readonly id: NodeID}
+    [ValueType.Getter]: {readonly name: string}
     [ValueType.Array]: ObjectValueData
     [ValueType.Object]: ObjectValueData
     [ValueType.Store]: ObjectValueData & {
         readonly id: NodeID
         readonly valueType: ValueType.Array | ValueType.Object
     }
+    // eslint-disable-next-line @typescript-eslint/ban-types
     [ValueType.Unknown]: {}
 }
 type DecodedValueMap = {
-    [K in ValueType]: DecodedDataMap[K] & { readonly type: K }
+    [K in ValueType]: DecodedDataMap[K] & {readonly type: K}
 }
 
 export type DecodedValue<T extends ValueType = ValueType> = DecodedValueMap[T]
@@ -84,30 +85,30 @@ function decode(index: number): DecodedValue {
     switch (encoded[0]) {
         case ValueType.String:
         case ValueType.Boolean:
-            return { type: encoded[0], value: encoded[1] as any }
+            return {type: encoded[0], value: encoded[1] as any}
         case ValueType.Null:
-            return { type: ValueType.Null, value: encoded[1] === UNDEFINED ? undefined : null }
+            return {type: ValueType.Null, value: encoded[1] === UNDEFINED ? undefined : null}
         case ValueType.Number: {
             const [, data] = encoded
             const value =
                 data === INFINITY
                     ? Infinity
                     : data === NEGATIVE_INFINITY
-                    ? -Infinity
-                    : data === NAN
-                    ? NaN
-                    : data
-            return { type: ValueType.Number, value }
+                      ? -Infinity
+                      : data === NAN
+                        ? NaN
+                        : data
+            return {type: ValueType.Number, value}
         }
         case ValueType.Symbol:
-            return { type: ValueType.Symbol, name: encoded[1] }
+            return {type: ValueType.Symbol, name: encoded[1]}
         case ValueType.Instance:
         case ValueType.Function:
         case ValueType.Getter:
-            return saveToMap(index, { type: encoded[0], name: encoded[1] })
+            return saveToMap(index, {type: encoded[0], name: encoded[1]})
         case ValueType.Element: {
             const [id, name] = splitOnColon(encoded[1])
-            return saveToMap(index, { type: ValueType.Element, id, name })
+            return saveToMap(index, {type: ValueType.Element, id, name})
         }
         case ValueType.Array:
         case ValueType.Object: {
@@ -117,8 +118,8 @@ function decode(index: number): DecodedValue {
                 typeof data === 'number'
                     ? data
                     : Array.isArray(data)
-                    ? data.length
-                    : Object.keys(data).length,
+                      ? data.length
+                      : Object.keys(data).length,
             )
             const initValue =
                 typeof data === 'number' ? null : (data.constructor() as ObjectValueData['value'])
@@ -152,7 +153,7 @@ function decode(index: number): DecodedValue {
             if (initValue) {
                 for (const [key, child] of Object.entries(data)) {
                     initValue[key as any] =
-                        child === -1 ? { type: ValueType.Getter, name: key } : decode(child)
+                        child === -1 ? {type: ValueType.Getter, name: key} : decode(child)
                 }
             }
 
@@ -179,7 +180,7 @@ function decode(index: number): DecodedValue {
             return store
         }
         case ValueType.Unknown:
-            return { type: ValueType.Unknown }
+            return {type: ValueType.Unknown}
     }
 }
 
@@ -192,7 +193,7 @@ let Seen = new Set<DecodedValue>()
 export const isObjectType = (
     value: DecodedValue,
 ): value is DecodedValue<ValueType.Array | ValueType.Object | ValueType.Store> => {
-    const { type } = value
+    const {type} = value
     return type === ValueType.Array || type === ValueType.Object || type === ValueType.Store
 }
 
@@ -268,7 +269,7 @@ export function updateCollapsedValue(
     else if (!data.value && typeof head !== 'number') {
         const newValue: Record<string | number, DecodedValue> = head.constructor()
         for (const [key, index] of Object.entries(head)) {
-            newValue[key] = index === -1 ? { type: ValueType.Getter, name: key } : decode(index)
+            newValue[key] = index === -1 ? {type: ValueType.Getter, name: key} : decode(index)
         }
         data.setValue(newValue)
     }

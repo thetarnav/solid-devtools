@@ -1,4 +1,4 @@
-import { noop } from '@solid-primitives/utils'
+import {noop} from '@solid-primitives/utils'
 import type * as API from '.'
 
 export const debugComputation: typeof API.debugComputation = noop

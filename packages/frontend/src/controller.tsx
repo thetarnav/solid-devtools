@@ -1,8 +1,8 @@
-import { Debugger, DebuggerModule, DevtoolsMainView, NodeID } from '@solid-devtools/debugger/types'
-import { SECOND } from '@solid-primitives/date'
-import { EventBus, batchEmits, createEventBus, createEventHub } from '@solid-primitives/event-bus'
-import { debounce } from '@solid-primitives/scheduled'
-import { defer } from '@solid-primitives/utils'
+import {Debugger, DebuggerModule, DevtoolsMainView, NodeID} from '@solid-devtools/debugger/types'
+import {SECOND} from '@solid-primitives/date'
+import {EventBus, batchEmits, createEventBus, createEventHub} from '@solid-primitives/event-bus'
+import {debounce} from '@solid-primitives/scheduled'
+import {defer} from '@solid-primitives/utils'
 import {
     JSX,
     batch,
@@ -14,10 +14,10 @@ import {
     onCleanup,
     useContext,
 } from 'solid-js'
-import { App } from './App'
+import {App} from './App'
 import createInspector from './modules/inspector'
-import { type Structure } from './modules/structure'
-import { ErrorOverlay, styles } from './ui'
+import {type Structure} from './modules/structure'
+import {ErrorOverlay, styles} from './ui'
 
 // TODO: add to solid-primitives/event-bus
 type ToEventBusChannels<T extends Record<string, any>> = {
@@ -52,7 +52,7 @@ function createDebuggerBridge() {
         DgraphUpdate: batchEmits($()),
     }))
 
-    return { input, output }
+    return {input, output}
 }
 
 export type DebuggerBridge = ReturnType<typeof createDebuggerBridge>
@@ -134,23 +134,23 @@ function createViewCache() {
     function setCacheGetter<T extends DevtoolsMainView>(view: T, getter: () => CacheDataMap[T]) {
         onCleanup(() => {
             const data = getter()
-            nextShortCache = { view: view as any, data: data.short }
+            nextShortCache = {view: view as any, data: data.short}
             longCache.set(view, data.long)
             clearShortCache()
         })
     }
     function getCache<T extends DevtoolsMainView>(
         view: T,
-    ): { [K in 'short' | 'long']: CacheDataMap[T][K] | null } {
+    ): {[K in 'short' | 'long']: CacheDataMap[T][K] | null} {
         const short = shortCache && shortCache.view === view ? shortCache.data : null
         shortCache = nextShortCache
         nextShortCache = null
         const long = longCache.get(view)
         longCache.delete(view)
-        return { short, long }
+        return {short, long}
     }
 
-    return { set: setCacheGetter, get: getCache }
+    return {set: setCacheGetter, get: getCache}
 }
 
 function createController(bridge: DebuggerBridge, options: DevtoolsOptions) {
@@ -164,7 +164,7 @@ function createController(bridge: DebuggerBridge, options: DevtoolsOptions) {
     // send devtools locator state
     createEffect(
         defer(devtoolsLocatorEnabled, enabled =>
-            bridge.output.ToggleModule.emit({ module: DebuggerModule.Locator, enabled }),
+            bridge.output.ToggleModule.emit({module: DebuggerModule.Locator, enabled}),
         ),
     )
 
@@ -182,7 +182,7 @@ function createController(bridge: DebuggerBridge, options: DevtoolsOptions) {
     const [extHoveredNode, setExtHoveredNode] = createSignal<{
         type: 'element' | 'node'
         id: NodeID
-    } | null>(null, { equals: (a, b) => a?.id === b?.id })
+    } | null>(null, {equals: (a, b) => a?.id === b?.id})
 
     // highlight hovered element
     createEffect(defer(extHoveredNode, bridge.output.HighlightElementChange.emit))
@@ -195,7 +195,7 @@ function createController(bridge: DebuggerBridge, options: DevtoolsOptions) {
 
     function toggleHoveredNode(id: NodeID, type: 'element' | 'node' = 'node', isHovered?: boolean) {
         return setExtHoveredNode(p =>
-            p && p.id === id ? (isHovered ? p : null) : isHovered ? { id, type } : p,
+            p && p.id === id ? (isHovered ? p : null) : isHovered ? {id, type} : p,
         )
     }
     function toggleHoveredElement(id: NodeID, isHovered?: boolean) {
@@ -225,7 +225,7 @@ function createController(bridge: DebuggerBridge, options: DevtoolsOptions) {
     //
     // INSPECTOR
     //
-    const inspector = createInspector({ bridge })
+    const inspector = createInspector({bridge})
 
     //
     // Client events
@@ -236,7 +236,7 @@ function createController(bridge: DebuggerBridge, options: DevtoolsOptions) {
         inspector.setInspectedOwner(null)
     })
 
-    bridge.input.HoveredComponent.listen(({ nodeId, state }) => {
+    bridge.input.HoveredComponent.listen(({nodeId, state}) => {
         setClientHoveredNode(p => (state ? nodeId : p && p === nodeId ? null : p))
     })
 

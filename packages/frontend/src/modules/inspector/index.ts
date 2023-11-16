@@ -1,10 +1,10 @@
 import * as debug from '@solid-devtools/debugger/types'
-import { handleTupleUpdates } from '@solid-devtools/shared/primitives'
-import { splitOnColon, warn } from '@solid-devtools/shared/utils'
-import { createStaticStore } from '@solid-primitives/static-store'
-import { defer } from '@solid-primitives/utils'
+import {handleTupleUpdates} from '@solid-devtools/shared/primitives'
+import {splitOnColon, warn} from '@solid-devtools/shared/utils'
+import {createStaticStore} from '@solid-primitives/static-store'
+import {defer} from '@solid-primitives/utils'
 import * as s from 'solid-js'
-import type { DebuggerBridge } from '../../controller'
+import type {DebuggerBridge} from '../../controller'
 import * as decode from './decode'
 
 export namespace Inspector {
@@ -29,13 +29,13 @@ export namespace Inspector {
 
     export type Props = {
         proxy: boolean
-        record: { [key: string]: Prop }
+        record: {[key: string]: Prop}
     }
 
     export type State = {
         name: string | null
         type: debug.NodeType | null
-        signals: { [key: debug.NodeID]: Signal }
+        signals: {[key: debug.NodeID]: Signal}
         value: ValueItem | null
         props: Props | null
         location: string | null
@@ -70,7 +70,7 @@ function createSignalItem(
     initValue: decode.DecodedValue,
 ): Inspector.Signal {
     const valueItem = createValueItem(`${debug.ValueItemType.Signal}:${id}`, initValue)
-    return s.mergeProps(valueItem, { type, name, id })
+    return s.mergeProps(valueItem, {type, name, id})
 }
 
 function createPropItem(
@@ -98,16 +98,16 @@ function updateProxyProps({
     return previous => {
         if (!previous) return null
 
-        const record = { ...previous.record }
+        const record = {...previous.record}
         for (const key of added)
             record[key] = createPropItem(
                 key,
-                { type: debug.ValueType.Unknown },
+                {type: debug.ValueType.Unknown},
                 debug.PropGetterState.Stale,
             )
         for (const key of removed) delete record[key]
 
-        return { record, proxy: true }
+        return {record, proxy: true}
     }
 }
 
@@ -122,7 +122,7 @@ function updateStore(
     const value = store.value
     if (!value) throw `updateStore: store node (${storeNodeId}) has no value`
 
-    const newValue = (Array.isArray(value) ? value.slice() : { ...value }) as { [key: string]: any }
+    const newValue = (Array.isArray(value) ? value.slice() : {...value}) as {[key: string]: any}
 
     if (newRawValue === null) {
         delete newValue[property]
@@ -150,14 +150,14 @@ const NULL_INSPECTED_NODE = {
     treeWalkerOwnerId: null,
 } as const satisfies debug.Debugger.InspectedState
 
-export default function createInspector({ bridge }: { bridge: DebuggerBridge }) {
+export default function createInspector({bridge}: {bridge: DebuggerBridge}) {
     //
     // Inspected owner/signal
     //
 
     const [inspected, setInspected] =
         createStaticStore<debug.Debugger.InspectedState>(NULL_INSPECTED_NODE)
-    const inspectedNode = s.createMemo(() => ({ ...inspected }), void 0, {
+    const inspectedNode = s.createMemo(() => ({...inspected}), void 0, {
         equals: (a, b) => a.ownerId === b.ownerId && a.signalId === b.signalId,
     })
     const isSomeNodeInspected = s.createMemo(
@@ -171,24 +171,24 @@ export default function createInspector({ bridge }: { bridge: DebuggerBridge }) 
         () => inspected.treeWalkerOwnerId,
     )
 
-    function setInspectedNode(ownerId: debug.NodeID | null, signalId: debug.NodeID | null) {
+    function setInspectedNode(ownerId: debug.NodeID | null, signalId: debug.NodeID | null): void {
         s.batch(() => {
             const prev = inspected.ownerId
-            setInspected({ ownerId, signalId })
+            setInspected({ownerId, signalId})
             if (!prev || ownerId !== prev) {
                 storeNodeMap.clear()
-                setState({ ...NULL_STATE })
+                setState({...NULL_STATE})
             }
         })
     }
-    function setInspectedOwner(id: debug.NodeID | null) {
+    function setInspectedOwner(id: debug.NodeID | null): void {
         setInspectedNode(id, null)
     }
-    function toggleInspectedOwner(id: debug.NodeID) {
+    function toggleInspectedOwner(id: debug.NodeID): void {
         setInspectedNode(inspected.ownerId === id ? null : id, null)
     }
-    function setInspectedSignal(id: debug.NodeID | null) {
-        setInspected(prev => ({ ownerId: prev.ownerId, signalId: id }))
+    function setInspectedSignal(id: debug.NodeID | null): void {
+        setInspected(prev => ({ownerId: prev.ownerId, signalId: id}))
     }
 
     // sync inspected node with the debugger
@@ -198,7 +198,7 @@ export default function createInspector({ bridge }: { bridge: DebuggerBridge }) 
     // Inspector state
     //
 
-    const [state, setState] = createStaticStore<Inspector.State>({ ...NULL_STATE })
+    const [state, setState] = createStaticStore<Inspector.State>({...NULL_STATE})
 
     const storeNodeMap = new decode.StoreNodeMap()
 
@@ -206,7 +206,7 @@ export default function createInspector({ bridge }: { bridge: DebuggerBridge }) 
         s.batch(() => {
             const prev = inspected.ownerId
             setInspected(newState)
-            if (newState.ownerId !== prev) setState({ ...NULL_STATE })
+            if (newState.ownerId !== prev) setState({...NULL_STATE})
         })
     })
 
@@ -248,7 +248,7 @@ export default function createInspector({ bridge }: { bridge: DebuggerBridge }) 
                                       key,
                                       p.value
                                           ? decode.decodeValue(p.value, null, storeNodeMap)
-                                          : { type: debug.ValueType.Unknown },
+                                          : {type: debug.ValueType.Unknown},
                                       p.getter,
                                   )
                                   return record
@@ -309,13 +309,13 @@ export default function createInspector({ bridge }: { bridge: DebuggerBridge }) 
     function inspectValueItem(item: Inspector.ValueItem, selected?: boolean): void {
         if (selected !== undefined && item.extended === selected) return
         selected = item.setExtended(p => selected ?? !p)
-        bridge.output.InspectValue.emit({ id: item.itemId, selected })
+        bridge.output.InspectValue.emit({id: item.itemId, selected})
     }
 
     //
     // LOCATION
     //
-    function openComponentLocation() {
+    function openComponentLocation(): void {
         bridge.output.OpenLocation.emit()
     }
 

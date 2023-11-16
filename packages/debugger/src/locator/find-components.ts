@@ -1,5 +1,5 @@
-import { isWindows } from '@solid-primitives/platform'
-import { LOCATION_ATTRIBUTE_NAME, NodeID, WINDOW_PROJECTPATH_PROPERTY } from '../types'
+import {isWindows} from '@solid-primitives/platform'
+import {LOCATION_ATTRIBUTE_NAME, NodeID, WINDOW_PROJECTPATH_PROPERTY} from '../types'
 
 export type LocationAttr = `${string}:${number}:${number}`
 
@@ -38,13 +38,13 @@ export function getLocationAttr(element: Element): LocationAttr | undefined {
 }
 
 const targetIDEMap: Record<TargetIDE, (data: SourceCodeData) => string> = {
-    vscode: ({ projectPath, file, line, column }) =>
+    vscode: ({projectPath, file, line, column}) =>
         `vscode://file/${projectPath}/${file}:${line}:${column}`,
-    'vscode-insiders': ({ projectPath, file: filePath, line, column }) =>
+    'vscode-insiders': ({projectPath, file: filePath, line, column}) =>
         `vscode-insiders://file/${projectPath}/${filePath}:${line}:${column}`,
-    atom: ({ projectPath, file: filePath, line, column }) =>
+    atom: ({projectPath, file: filePath, line, column}) =>
         `atom://core/open/file?filename=${projectPath}/${filePath}&line=${line}&column=${column}`,
-    webstorm: ({ projectPath, file: filePath, line, column }) =>
+    webstorm: ({projectPath, file: filePath, line, column}) =>
         `webstorm://open?file=${projectPath}/${filePath}&line=${line}&column=${column}`,
 }
 
@@ -63,7 +63,7 @@ export function getSourceCodeData(
     if (!projectPath) return
     const parsed = parseLocationString(location)
     if (!parsed) return
-    return { ...parsed, projectPath, element }
+    return {...parsed, projectPath, element}
 }
 
 /**
@@ -80,7 +80,7 @@ export function parseLocationString(location: string): SourceLocation | undefine
         !isNaN((line = Number(line))) &&
         !isNaN((column = Number(column)))
     ) {
-        return { file: filePath, line, column }
+        return {file: filePath, line, column}
     }
 }
 

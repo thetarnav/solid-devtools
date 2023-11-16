@@ -1,12 +1,12 @@
 import chokidar from 'chokidar'
 import CleanCSS from 'clean-css'
 import esbuild from 'esbuild'
-import { solidPlugin } from 'esbuild-plugin-solid'
+import {solidPlugin} from 'esbuild-plugin-solid'
 import fs from 'fs'
-import { readFile } from 'fs/promises'
+import {readFile} from 'fs/promises'
 import path from 'path'
-import { fileURLToPath } from 'url'
-import { Worker } from 'worker_threads'
+import {fileURLToPath} from 'url'
+import {Worker} from 'worker_threads'
 // import { dependencies, peerDependencies } from '../package.json'
 
 const __filename = fileURLToPath(import.meta.url)
@@ -46,7 +46,7 @@ function customPlugin(output: string): esbuild.Plugin {
 
             // minify css during build
             if (!isDev) {
-                build.onLoad({ filter: /\.css$/ }, async args => {
+                build.onLoad({filter: /\.css$/}, async args => {
                     const finename = path.basename(args.path)
                     let time = Date.now()
                     let text = await readFile(args.path, 'utf-8')
@@ -56,7 +56,7 @@ function customPlugin(output: string): esbuild.Plugin {
                             Date.now() - time,
                         )}ms`,
                     )
-                    return { loader: 'text', contents: text }
+                    return {loader: 'text', contents: text}
                 })
             }
 
@@ -75,7 +75,7 @@ function customPlugin(output: string): esbuild.Plugin {
 
 // clear dist before build
 if (!isDev) {
-    fs.rmSync(path.resolve(cwd, `dist`), { recursive: true, force: true })
+    fs.rmSync(path.resolve(cwd, `dist`), {recursive: true, force: true})
 }
 
 // generate type declarations
@@ -98,7 +98,7 @@ const commonOptions: esbuild.BuildOptions = {
     target: 'esnext',
     format: 'esm',
     bundle: true,
-    loader: { '.css': 'text' },
+    loader: {'.css': 'text'},
     color: true,
     external: externals,
     treeShaking: true,

@@ -1,6 +1,6 @@
-import { theme } from '@/ui'
+import {theme} from '@/ui'
 import clsx from 'clsx'
-import { ParentComponent } from 'solid-js'
+import {ParentComponent} from 'solid-js'
 
 export const highlight_color_var = '--highlight_color_var'
 export const highlight_opacity_var = '--highlight_opacity_var'

@@ -1,18 +1,18 @@
-import { createEventBus, createGlobalEmitter, GlobalEmitter } from '@solid-primitives/event-bus'
-import { createStaticStore } from '@solid-primitives/static-store'
-import { defer } from '@solid-primitives/utils'
-import { batch, createComputed, createEffect, createMemo, createSignal } from 'solid-js'
-import { createDependencyGraph, DGraphUpdate } from '../dependency'
-import { createInspector, InspectorUpdate, ToggleInspectedValueData } from '../inspector'
-import { createLocator } from '../locator'
-import { HighlightElementPayload } from '../locator/types'
-import { createStructure, StructureUpdates } from '../structure'
-import { DebuggerModule, DEFAULT_MAIN_VIEW, DevtoolsMainView, TreeWalkerMode } from './constants'
-import { getObjectById, getSdtId, ObjectType } from './id'
-import { createInternalRoot } from './roots'
+import {createEventBus, createGlobalEmitter, GlobalEmitter} from '@solid-primitives/event-bus'
+import {createStaticStore} from '@solid-primitives/static-store'
+import {defer} from '@solid-primitives/utils'
+import {batch, createComputed, createEffect, createMemo, createSignal} from 'solid-js'
+import {createDependencyGraph, DGraphUpdate} from '../dependency'
+import {createInspector, InspectorUpdate, ToggleInspectedValueData} from '../inspector'
+import {createLocator} from '../locator'
+import {HighlightElementPayload} from '../locator/types'
+import {createStructure, StructureUpdates} from '../structure'
+import {DebuggerModule, DEFAULT_MAIN_VIEW, DevtoolsMainView, TreeWalkerMode} from './constants'
+import {getObjectById, getSdtId, ObjectType} from './id'
+import {createInternalRoot} from './roots'
 import SolidApi from './solid-api'
-import { Mapped, NodeID } from './types'
-import { createBatchedUpdateEmitter } from './utils'
+import {Mapped, NodeID} from './types'
+import {createBatchedUpdateEmitter} from './utils'
 
 export namespace Debugger {
     export type InspectedState = {
@@ -31,20 +31,20 @@ export namespace Debugger {
         NodeUpdates: NodeID[]
         InspectorUpdate: InspectorUpdate[]
         LocatorModeChange: boolean
-        HoveredComponent: { nodeId: NodeID; state: boolean }
+        HoveredComponent: {nodeId: NodeID; state: boolean}
         InspectedComponent: NodeID
         DgraphUpdate: DGraphUpdate
     }
 
     export type InputChannels = {
         ResetState: void
-        InspectNode: { ownerId: NodeID | null; signalId: NodeID | null } | null
+        InspectNode: {ownerId: NodeID | null; signalId: NodeID | null} | null
         InspectValue: ToggleInspectedValueData
         HighlightElementChange: HighlightElementPayload
         OpenLocation: void
         TreeViewModeChange: TreeWalkerMode
         ViewChange: DevtoolsMainView
-        ToggleModule: { module: DebuggerModule; enabled: boolean }
+        ToggleModule: {module: DebuggerModule; enabled: boolean}
     }
 }
 
@@ -128,7 +128,7 @@ const plugin = createInternalRoot(() => {
 
     const [inspectedState, setInspectedState] = createSignal<
         Debugger.OutputChannels['InspectedState']
-    >(INITIAL_INSPECTED_STATE, { equals: false })
+    >(INITIAL_INSPECTED_STATE, {equals: false})
     const inspectedOwnerId = createMemo(() => inspectedState().ownerId)
 
     createEffect(() => hub.output.emit('InspectedState', inspectedState()))
@@ -152,7 +152,7 @@ const plugin = createInternalRoot(() => {
     }
 
     function setInspectedNode(data: Debugger.InputChannels['InspectNode']): void {
-        let { ownerId, signalId } = data ?? { ownerId: null, signalId: null }
+        let {ownerId, signalId} = data ?? {ownerId: null, signalId: null}
         if (ownerId && !getObjectById(ownerId, ObjectType.Owner)) ownerId = null
         if (signalId && !getObjectById(signalId, ObjectType.Signal)) signalId = null
         setInspectedState({
@@ -281,4 +281,4 @@ const plugin = createInternalRoot(() => {
     }
 })
 
-export const { useDebugger, useLocator } = plugin
+export const {useDebugger, useLocator} = plugin

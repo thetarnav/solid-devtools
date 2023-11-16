@@ -14,13 +14,13 @@ import {
     Show,
     Suspense,
 } from 'solid-js'
-import { createMutable } from 'solid-js/store'
+import {createMutable} from 'solid-js/store'
 import Recursive from './Recursive'
-import { ThemeExample } from './Theme'
+import {ThemeExample} from './Theme'
 import Todos from './Todos'
 
 const doMediumCalc = () => {
-    Array.from({ length: 1000000 }, (_, i) => i).sort(() => Math.random() - 5)
+    Array.from({length: 1000000}, (_, i) => i).sort(() => Math.random() - 5)
 }
 
 let setRootCount: Setter<number>
@@ -48,7 +48,7 @@ createRoot(dispose => {
     }, undefined)
 })
 
-const Button = (props: { text: string; onClick: VoidFunction }) => {
+const Button = (props: {text: string; onClick: VoidFunction}) => {
     const text = createMemo(() => <span>{props.text}</span>)
     return (
         <button aria-label={props.text} onClick={props.onClick}>
@@ -62,7 +62,7 @@ const PassChildren: ParentComponent = props => props.children
 const Article: Component = () => {
     const state = createMutable({
         count: 0,
-        other: { name: 'article' },
+        other: {name: 'article'},
         content: {
             title: 'A cool headline for testing :)',
             body: 'Lorem ipsum dolor sit amet, consectetur adipisicing elit. Dolorem odio culpa vel vitae? Quis deleniti soluta rem velit necessitatibus? ',
@@ -76,7 +76,7 @@ const Article: Component = () => {
             await new Promise(r => setTimeout(r, 1000))
             return `Article ${c}`
         },
-        { name: 'resource' },
+        {name: 'resource'},
     )
 
     return (
@@ -106,11 +106,11 @@ const DynamicSpreadParent = () => {
         a: 1,
         b: 2,
         c: 3,
-        style: { width: '160px', height: '30px', background: '#fcb', color: 'black' },
+        style: {width: '160px', height: '30px', background: '#fcb', color: 'black'},
         textContent: 'Before Change',
         onclick: () =>
             setProps({
-                style: { width: '160px', height: '30px', background: '#eba', color: 'black' },
+                style: {width: '160px', height: '30px', background: '#eba', color: 'black'},
                 textContent: 'After Change',
                 d: 4,
                 e: 5,
@@ -127,7 +127,7 @@ const Broken: Component = () => {
 const App: Component = () => {
     const [count, setCount] = createSignal(0)
     const [showEven, setShowEven] = createSignal(false)
-    const fnSig = createSignal({ fn: () => {} }, { equals: (a, b) => a.fn === b.fn })
+    const fnSig = createSignal({fn: () => {}}, {equals: (a, b) => a.fn === b.fn})
     const nullSig = createSignal(null)
     const symbolSig = createSignal(Symbol('hello-symbol'))
     const [header, setHeader] = createSignal(
@@ -155,10 +155,10 @@ const App: Component = () => {
             return count()
         },
         undefined,
-        { name: 'very-long-name-that-will-definitely-not-have-enough-space-to-render' },
+        {name: 'very-long-name-that-will-definitely-not-have-enough-space-to-render'},
     )
 
-    createComputed(() => {}, undefined, { name: 'frozen' })
+    createComputed(() => {}, undefined, {name: 'frozen'})
     createRenderEffect(() => {})
 
     const Bold: ParentComponent = props => <b>{props.children}</b>
@@ -174,7 +174,7 @@ const App: Component = () => {
                     <Button onClick={() => setCount(p => ++p)} text={`Count: ${count()}`} />
                     <Button onClick={() => setCount(p => ++p)} text={`Count: ${count()}`} />
                 </header>
-                <div style={{ height: '1rem', 'margin-top': '1rem' }}>
+                <div style={{height: '1rem', 'margin-top': '1rem'}}>
                     <Show when={showEven()}>
                         {createComponent(() => {
                             return <Bold>{count()} is even!</Bold>
@@ -213,10 +213,10 @@ const App: Component = () => {
             <button onClick={() => disposeOuterRoot()}>Dispose OUTSIDE_ROOT</button>
             <Article />
             <Todos />
-            <div style={{ margin: '24px' }}>
+            <div style={{margin: '24px'}}>
                 <CountingComponent />
             </div>
-            <div style={{ margin: '24px' }}>
+            <div style={{margin: '24px'}}>
                 <ThemeExample />
             </div>
             <Recursive />

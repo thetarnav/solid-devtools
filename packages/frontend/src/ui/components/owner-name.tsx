@@ -1,20 +1,21 @@
-import { styles } from '@/ui'
-import { NodeType, UNKNOWN } from '@solid-devtools/debugger/types'
-import { createPingedSignal } from '@solid-devtools/shared/primitives'
+import {styles} from '@/ui'
+import {NodeType, UNKNOWN} from '@solid-devtools/debugger/types'
+import {createPingedSignal} from '@solid-devtools/shared/primitives'
 import clsx from 'clsx'
-import { Component, JSX, createMemo } from 'solid-js'
-import { Highlight } from './highlight'
-import Icon, { IconComponent } from './icons'
+import * as s from 'solid-js'
+import {Highlight} from './highlight'
+import Icon, {IconComponent} from './icons'
 
 export function Node_Type_Icon(props: {
     type: NodeType | undefined | null
     class?: string
-}): JSX.Element {
+}): s.JSX.Element {
     let prev_icon: IconComponent | undefined
-    let prev_rendered: JSX.Element | undefined
+    let prev_rendered: s.JSX.Element | undefined
 
-    const fn = () => {
+    const fn = (): s.JSX.Element => {
         let IconComp: IconComponent | undefined
+        // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
         switch (props.type) {
             case NodeType.Memo:
                 IconComp = Icon.Memo
@@ -46,7 +47,7 @@ export function Node_Type_Icon(props: {
         prev_rendered = IconComp ? <IconComp class={props.class} /> : null
         return prev_rendered
     }
-    return fn as any as JSX.Element
+    return fn as any as s.JSX.Element
 }
 
 const strike_through_line =
@@ -66,13 +67,13 @@ const element_classes = (frozen: boolean): string =>
 
 const signal_classes = (frozen: boolean): string => clsx(name_classes(frozen), 'text-dom')
 
-export const Node_Name: Component<{
+export const Node_Name: s.Component<{
     name: string | undefined | null
     type: NodeType | undefined | null
     frozen: boolean
 }> = props => {
-    const name = () => props.name || UNKNOWN
-    return createMemo(() => {
+    const name = (): string => props.name || UNKNOWN
+    return s.createMemo(() => {
         switch (props.type) {
             case NodeType.Root:
                 return <span class={node_type_classes(props.frozen)}>Root</span>
@@ -89,10 +90,10 @@ export const Node_Name: Component<{
             default:
                 return <span class={name_classes(props.frozen)}>{name()}</span>
         }
-    }) as unknown as JSX.Element
+    }) as unknown as s.JSX.Element
 }
 
-export const Owner_Name: Component<{
+export const Owner_Name: s.Component<{
     name: string | undefined | null
     type: NodeType | undefined | null
     is_title?: boolean
@@ -106,7 +107,13 @@ export const Owner_Name: Component<{
     )
 }
 
-export function createHighlightedOwnerName() {
+export type HighlightedOwnerName = {
+    isUpdated: s.Accessor<boolean>
+    pingUpdated: VoidFunction
+    OwnerName: typeof Owner_Name
+}
+
+export function createHighlightedOwnerName(): HighlightedOwnerName {
     const [isUpdated, pingUpdated] = createPingedSignal()
     return {
         isUpdated,

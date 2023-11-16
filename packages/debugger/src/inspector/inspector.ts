@@ -1,11 +1,11 @@
-import { misc } from '@nothing-but/utils'
-import { untrackedCallback } from '@solid-devtools/shared/primitives'
-import { parseLocationString } from '../locator'
-import { NodeType, ValueItemType } from '../main/constants'
-import { ObjectType, getSdtId } from '../main/id'
-import { observeValueUpdate, removeValueUpdateObserver } from '../main/observe'
+import {misc} from '@nothing-but/utils'
+import {untrackedCallback} from '@solid-devtools/shared/primitives'
+import {parseLocationString} from '../locator'
+import {NodeType, ValueItemType} from '../main/constants'
+import {ObjectType, getSdtId} from '../main/id'
+import {observeValueUpdate, removeValueUpdateObserver} from '../main/observe'
 import SolidAPI from '../main/solid-api'
-import type { Mapped, NodeID, Solid, ValueItemID } from '../main/types'
+import type {Mapped, NodeID, Solid, ValueItemID} from '../main/types'
 import {
     getComponentRefreshNode,
     getNodeName,
@@ -16,8 +16,8 @@ import {
     isSolidStore,
     markOwnerType,
 } from '../main/utils'
-import { encodeValue } from './serialize'
-import { InspectorUpdateMap, PropGetterState } from './types'
+import {encodeValue} from './serialize'
+import {InspectorUpdateMap, PropGetterState} from './types'
 
 export class ValueNode {
     private trackedStores: VoidFunction[] = []
@@ -75,7 +75,7 @@ export class ObservedProps {
 
     private onPropStateChange?: Inspector.OnPropStateChange | undefined
     private onValueUpdate?: Inspector.OnValueUpdate | undefined
-    private observedGetters = {} as Record<string, { v: unknown | typeof $NOT_SET; n: number }>
+    private observedGetters = {} as Record<string, {v: unknown | typeof $NOT_SET; n: number}>
 
     observe(
         onPropStateChange: Inspector.OnPropStateChange,
@@ -93,10 +93,10 @@ export class ObservedProps {
         key: string,
         id: ValueItemID,
         get: () => unknown,
-    ): { getValue: () => unknown | typeof $NOT_SET; isStale: boolean } {
+    ): {getValue: () => unknown | typeof $NOT_SET; isStale: boolean} {
         if (this.observedGetters[key]) {
             const o = this.observedGetters[key]!
-            return { getValue: () => o.v, isStale: o.n === 0 }
+            return {getValue: () => o.v, isStale: o.n === 0}
         }
 
         const self = this
@@ -122,7 +122,7 @@ export class ObservedProps {
             enumerable: true,
         })
 
-        return { getValue: () => o.v, isStale: true }
+        return {getValue: () => o.v, isStale: true}
     }
 }
 
@@ -141,7 +141,7 @@ const compareProxyPropKeys = (
         }
     }
     if (!changed && !added.size) return null
-    return { added: Array.from(added), removed }
+    return {added: Array.from(added), removed}
 }
 
 /**
@@ -187,14 +187,14 @@ function mapSourceValue(
     const type = isMemo
         ? NodeType.Memo
         : isSolidStore(node)
-        ? NodeType.Store
-        : isSolidSignal(node)
-        ? NodeType.Signal
-        : null
+          ? NodeType.Store
+          : isSolidSignal(node)
+            ? NodeType.Signal
+            : null
 
     if (!type) return null
 
-    const { value } = node,
+    const {value} = node,
         id = getSdtId(node, typeToObjectTypeMap[type])
 
     ValueMap.add(`${ValueItemType.Signal}:${id}`, () => node.value)
@@ -220,7 +220,7 @@ function mapProps(props: Solid.Component['props']) {
     if (isProxy) {
         let propsKeys = Object.keys(props)
 
-        for (const key of propsKeys) record[key] = { getter: PropGetterState.Stale, value: null }
+        for (const key of propsKeys) record[key] = {getter: PropGetterState.Stale, value: null}
 
         checkProxyProps = () => {
             const _oldKeys = propsKeys
@@ -238,7 +238,7 @@ function mapProps(props: Solid.Component['props']) {
             const id: ValueItemID = `prop:${key}`
             // GETTER
             if (desc.get) {
-                const { getValue, isStale } = observed.observeProp(key, id, desc.get)
+                const {getValue, isStale} = observed.observeProp(key, id, desc.get)
                 ValueMap.add(id, getValue)
                 const lastValue = getValue()
                 record[key] = {
@@ -259,7 +259,7 @@ function mapProps(props: Solid.Component['props']) {
         }
     }
 
-    return { props: { proxy: isProxy, record }, checkProxyProps }
+    return {props: {proxy: isProxy, record}, checkProxyProps}
 }
 
 export const collectOwnerDetails = /*#__PURE__*/ untrackedCallback(function (
@@ -270,7 +270,7 @@ export const collectOwnerDetails = /*#__PURE__*/ untrackedCallback(function (
         observedPropsMap: ObservedPropsMap
     },
 ) {
-    const { onValueUpdate } = config
+    const {onValueUpdate} = config
 
     // Set globals
     ValueMap = new ValueNodeMap()
@@ -280,10 +280,10 @@ export const collectOwnerDetails = /*#__PURE__*/ untrackedCallback(function (
 
     const id = getSdtId(owner, ObjectType.Owner)
     const type = markOwnerType(owner)
-    let { sourceMap, owned } = owner
+    let {sourceMap, owned} = owner
     let getValue = () => owner.value
 
-    const details = { id, name: getNodeName(owner), type, signals: [] } as Mapped.OwnerDetails
+    const details = {id, name: getNodeName(owner), type, signals: []} as Mapped.OwnerDetails
 
     // handle context node specially
     if (type === NodeType.Context) {
@@ -311,7 +311,7 @@ export const collectOwnerDetails = /*#__PURE__*/ untrackedCallback(function (
                 getValue = () => refresh.value
             }
 
-            ;({ checkProxyProps, props: details.props } = mapProps(owner.props))
+            ;({checkProxyProps, props: details.props} = mapProps(owner.props))
 
             let location = (owner.component as any).location
             if (

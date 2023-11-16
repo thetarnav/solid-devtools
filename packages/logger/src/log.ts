@@ -2,10 +2,10 @@
 // see https://developer.chrome.com/docs/devtools/console/format-style/
 // to gen a overview of how to style console messages
 
-import { array } from '@nothing-but/utils'
-import { getNodeName, getNodeType, getOwnerType, isSolidMemo } from '@solid-devtools/debugger'
-import { NODE_TYPE_NAMES, NodeType, Solid, UNKNOWN } from '@solid-devtools/debugger/types'
-import { getDiffMap, getStackDiffMap } from './utils'
+import {array} from '@nothing-but/utils'
+import {getNodeName, getNodeType, getOwnerType, isSolidMemo} from '@solid-devtools/debugger'
+import {NODE_TYPE_NAMES, NodeType, Solid, UNKNOWN} from '@solid-devtools/debugger/types'
+import {getDiffMap, getStackDiffMap} from './utils'
 
 export type NodeState = {
     type: NodeType
@@ -13,7 +13,7 @@ export type NodeState = {
     name: string
 }
 
-export type NodeStateWithValue = NodeState & { value: unknown }
+export type NodeStateWithValue = NodeState & {value: unknown}
 
 export const UNUSED = Symbol('unused')
 
@@ -35,13 +35,13 @@ export const STYLES = {
     new: 'color: orange; font-style: italic',
 }
 
-export const inGray = (text: unknown) => `\x1B[90m${text}\x1B[m`
-export const styleTime = (time: number) => `\x1B[90;3m${time} ms\x1B[m`
+export const inGray = (text: unknown): string => `\x1B[90m${text}\x1B[m`
+export const styleTime = (time: number): string => `\x1B[90;3m${time} ms\x1B[m`
 
 export const getNameStyle = (type: NodeType): string =>
     type === NodeType.Signal ? STYLES.signalUnderline : STYLES.grayBackground
 
-export function getValueSpecifier(v: unknown) {
+export function getValueSpecifier(v: unknown): string {
     if (typeof v === 'object') return ' %o'
     if (typeof v === 'function') return ' %O'
     return ''
@@ -125,13 +125,13 @@ export const logComputationDetails = ({
     sources,
     prev,
     value,
-}: Readonly<ComputationState>) => {
+}: Readonly<ComputationState>): void => {
     // Owner
     if (owner !== UNUSED) {
         const label = inGray('Owner:')
         if (!owner) console.log(label, null)
         else {
-            const { name } = getNodeState(owner)
+            const {name} = getNodeState(owner)
             console.log(`${label} %c${name}`, STYLES.grayBackground)
         }
     }
@@ -169,7 +169,7 @@ export const logComputationDetails = ({
     if (sources.length) {
         console.groupCollapsed(inGray('Sources:'), sources.length)
         sources.forEach(source => {
-            const { type, name } = getNodeState(source)
+            const {type, name} = getNodeState(source)
             console.log(`%c${name}%c ${inGray('=')}`, getNameStyle(type), '', source.value)
         })
         console.groupEnd()
@@ -187,7 +187,7 @@ export const logComputationDetails = ({
     }
 }
 
-export const logComputation = (groupLabel: string[], state: Readonly<ComputationState>) => {
+export const logComputation = (groupLabel: string[], state: Readonly<ComputationState>): void => {
     console.groupCollapsed(...groupLabel)
     logComputationDetails(state)
     console.groupEnd()
@@ -197,7 +197,7 @@ export function logOwned(
     ownerState: NodeState,
     owned: Readonly<Solid.Computation[]>,
     prevOwned: Readonly<Solid.Computation[]>,
-) {
+): void {
     console.groupCollapsed(
         `Owned by the %c${ownerState.name}%c ${ownerState.typeName}:`,
         STYLES.ownerName,
@@ -222,14 +222,14 @@ export function logOwned(
     console.groupEnd()
 }
 
-export function logSignalsInitialValues(signals: Solid.Signal[]) {
+export function logSignalsInitialValues(signals: Solid.Signal[]): void {
     console.groupCollapsed('Signals initial values:')
     signals.forEach(logSignalValue)
     console.groupEnd()
 }
 
 export function logInitialValue(node: Solid.Signal | NodeStateWithValue): void {
-    const { type, typeName, value, name } = getNodeStateWithValue(node)
+    const {type, typeName, value, name} = getNodeStateWithValue(node)
     console.log(
         `%c${typeName} %c${name}%c initial value ${inGray('=')}${getValueSpecifier(value)}`,
         '',
@@ -240,7 +240,7 @@ export function logInitialValue(node: Solid.Signal | NodeStateWithValue): void {
 }
 
 export function logSignalValue(signal: Solid.Signal | NodeStateWithValue): void {
-    const { type, typeName, name, value } = getNodeStateWithValue(signal)
+    const {type, typeName, name, value} = getNodeStateWithValue(signal)
     console.log(
         `${inGray(typeName)} %c${name}%c ${inGray('=')}${getValueSpecifier(value)}`,
         `${getNameStyle(type)}`,
@@ -250,7 +250,7 @@ export function logSignalValue(signal: Solid.Signal | NodeStateWithValue): void 
 }
 
 export function logSignalValueUpdate(
-    { name, type }: NodeState,
+    {name, type}: NodeState,
     value: unknown,
     prev: unknown,
     observers?: Solid.Computation[],
@@ -346,7 +346,7 @@ export function logOwnerList<T extends Solid.Owner>(
 //
 
 export function getPropsInitLabel(state: NodeState, proxy: boolean, empty: boolean): string[] {
-    const { type, typeName, name } = state
+    const {type, typeName, name} = state
     return [
         `%c${typeName} %c${name}%c created with ${empty ? 'empty' : ''}${
             proxy ? 'dynamic ' : ''
@@ -357,7 +357,7 @@ export function getPropsInitLabel(state: NodeState, proxy: boolean, empty: boole
     ]
 }
 
-export function getPropsKeyUpdateLabel({ name, type }: NodeState, empty: boolean): any[] {
+export function getPropsKeyUpdateLabel({name, type}: NodeState, empty: boolean): any[] {
     return [
         `Dynamic props of %c${name}%c ${empty ? 'are empty now' : 'updated keys:'}`,
         getNameStyle(type),

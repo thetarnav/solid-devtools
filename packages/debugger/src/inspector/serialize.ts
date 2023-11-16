@@ -1,7 +1,7 @@
-import { FalsyValue } from '@solid-primitives/utils'
-import { getSdtId, ObjectType } from '../main/id'
+import {FalsyValue} from '@solid-primitives/utils'
+import {getSdtId, ObjectType} from '../main/id'
 import SolidAPI from '../main/solid-api'
-import { isStoreNode } from '../main/utils'
+import {isStoreNode} from '../main/utils'
 import {
     EncodedValue,
     INFINITY,

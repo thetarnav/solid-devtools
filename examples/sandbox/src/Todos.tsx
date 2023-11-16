@@ -8,7 +8,7 @@ import {
     For,
     Show,
 } from 'solid-js'
-import { createStore, produce, SetStoreFunction, Store, unwrap } from 'solid-js/store'
+import {createStore, produce, SetStoreFunction, Store, unwrap} from 'solid-js/store'
 
 export function createLocalStore<T extends object>(
     name: string,
@@ -16,7 +16,7 @@ export function createLocalStore<T extends object>(
 ): [Store<T>, SetStoreFunction<T>] {
     const localState = localStorage.getItem(name)
     // const localState = undefined
-    const [state, setState] = createStore<T>(localState ? JSON.parse(localState) : init, { name })
+    const [state, setState] = createStore<T>(localState ? JSON.parse(localState) : init, {name})
     createEffect(() => localStorage.setItem(name, JSON.stringify(state)))
     return [state, setState]
 }
@@ -25,7 +25,7 @@ export function removeIndex<T>(array: readonly T[], index: number): T[] {
     return [...array.slice(0, index), ...array.slice(index + 1)]
 }
 
-type TodoItem = { title: string; done: boolean }
+type TodoItem = {title: string; done: boolean}
 
 const Todo: Component<{
     done: boolean
@@ -59,7 +59,7 @@ const Todos: Component = () => {
         other: {
             name: 'todos',
             get newTitle() {
-                return { value: newTitle() }
+                return {value: newTitle()}
             },
             countOuter: {
                 countInner: {
@@ -69,7 +69,7 @@ const Todos: Component = () => {
         },
     })
 
-    const valuesInASignal = createMemo(() => ({ values: todos.values }))
+    const valuesInASignal = createMemo(() => ({values: todos.values}))
 
     // @ts-ignore
     setTodos('other', 'else', unwrap(todos.values))
@@ -103,7 +103,7 @@ const Todos: Component = () => {
             <Show when={true} keyed>
                 {v => {
                     createRoot(d => {
-                        createEffect(newTitle, undefined, { name: 'newTitle effect' })
+                        createEffect(newTitle, undefined, {name: 'newTitle effect'})
                     })
                     return (
                         <form onSubmit={addTodo}>
@@ -120,7 +120,7 @@ const Todos: Component = () => {
             </Show>
             <For each={todos.values}>
                 {(todo, i) => {
-                    createEffect(i, undefined, { name: 'todo index' })
+                    createEffect(i, undefined, {name: 'todo index'})
                     return (
                         <Todo
                             {...todo}

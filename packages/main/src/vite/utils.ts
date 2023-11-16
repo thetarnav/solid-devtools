@@ -1,4 +1,4 @@
-import { NodePath } from '@babel/traverse'
+import {NodePath} from '@babel/traverse'
 import * as t from '@babel/types'
 
 export function getProgram(path: NodePath): NodePath<t.Program> {

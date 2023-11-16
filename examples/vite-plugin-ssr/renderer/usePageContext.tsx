@@ -1,12 +1,12 @@
-export { PageContextProvider, usePageContext }
+export {PageContextProvider, usePageContext}
 
-import { createContext, useContext, type JSX } from 'solid-js'
-import { type Store } from 'solid-js/store'
-import type { PageContext } from './types'
+import {createContext, useContext, type JSX} from 'solid-js'
+import {type Store} from 'solid-js/store'
+import type {PageContext} from './types'
 
 const Context = createContext<Store<PageContext>>()
 
-function PageContextProvider(props: { pageContext: Store<PageContext>; children: JSX.Element }) {
+function PageContextProvider(props: {pageContext: Store<PageContext>; children: JSX.Element}) {
     if (!props.pageContext) throw new Error('Argument pageContext missing')
     return <Context.Provider value={props.pageContext}>{props.children}</Context.Provider>
 }

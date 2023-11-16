@@ -1,6 +1,6 @@
-import { useDebugger } from '@solid-devtools/debugger/bundled'
-import { createDevtools, DevtoolsProps } from '@solid-devtools/frontend'
-import { onCleanup } from 'solid-js'
+import {useDebugger} from '@solid-devtools/debugger/bundled'
+import {createDevtools, DevtoolsProps} from '@solid-devtools/frontend'
+import * as solid from 'solid-js'
 
 function clone<T>(data: T): T {
     return typeof data === 'object' ? (JSON.parse(JSON.stringify(data)) as T) : data
@@ -12,14 +12,14 @@ function separate<T>(data: T, callback: (value: T) => void): void {
     })
 }
 
-export function Devtools(props: DevtoolsProps) {
+export function Devtools(props: DevtoolsProps): solid.JSX.Element {
     const debug = useDebugger()
 
     debug.emit('ResetState')
 
-    onCleanup(() => debug.emit('InspectNode', null))
+    solid.onCleanup(() => debug.emit('InspectNode', null))
 
-    const { bridge, Devtools: Frontend } = createDevtools()
+    const {bridge, Devtools: Frontend} = createDevtools()
 
     bridge.output.listen(e => {
         separate(e.details, details => debug.emit(e.name, details as never))

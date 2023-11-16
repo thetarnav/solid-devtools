@@ -1,9 +1,9 @@
-import { createElementBounds } from '@solid-primitives/bounds'
-import { createElementCursor } from '@solid-primitives/cursor'
-import { createRootPool } from '@solid-primitives/rootless'
-import { Accessor, Component, createMemo, getOwner, runWithOwner, Show } from 'solid-js'
-import { Portal } from 'solid-js/web'
-import { LocatorComponent } from './find-components'
+import {createElementBounds} from '@solid-primitives/bounds'
+import {createElementCursor} from '@solid-primitives/cursor'
+import {createRootPool} from '@solid-primitives/rootless'
+import {Accessor, Component, createMemo, getOwner, runWithOwner, Show} from 'solid-js'
+import {Portal} from 'solid-js/web'
+import {LocatorComponent} from './find-components'
 
 export function createElementsOverlay(selected: Accessor<LocatorComponent[]>) {
     const useElementOverlay = createRootPool((component: Accessor<LocatorComponent>, active) => (
@@ -21,7 +21,7 @@ export function createElementsOverlay(selected: Accessor<LocatorComponent[]>) {
     }, 1000)
 }
 
-const ElementOverlay: Component<{ component: LocatorComponent | null }> = props => {
+const ElementOverlay: Component<{component: LocatorComponent | null}> = props => {
     const element = () => props.component?.element
     // set pointer cursor to selected component
     createElementCursor(element, 'pointer')

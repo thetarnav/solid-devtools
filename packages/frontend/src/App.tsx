@@ -1,7 +1,7 @@
-import { Icon, Splitter, styles, theme } from '@/ui'
-import { Menu, MenuItem, Popover, PopoverButton, PopoverPanel } from 'solid-headless'
-import { Component, JSX, Show } from 'solid-js'
-import { createSidePanel } from './SidePanel'
+import {Icon, Splitter, styles, theme} from '@/ui'
+import {Menu, MenuItem, Popover, PopoverButton, PopoverPanel} from 'solid-headless'
+import {Component, JSX, Show} from 'solid-js'
+import {createSidePanel} from './SidePanel'
 import StructureView from './modules/structure/structure-tree'
 
 // const MainViewTabs: Component = () => {
@@ -32,7 +32,7 @@ import StructureView from './modules/structure/structure-tree'
 const Options: Component = () => {
     return (
         <Popover defaultOpen={false} class="relative ml-auto">
-            {({ isOpen, setState }) => (
+            {({isOpen, setState}) => (
                 <>
                     <PopoverButton
                         onKeyDown={(e: KeyboardEvent) => e.key === ' ' && setState(true)}
@@ -65,14 +65,14 @@ const Options: Component = () => {
     )
 }
 
-export const App: Component<{ headerSubtitle?: JSX.Element }> = props => {
+export const App: Component<{headerSubtitle?: JSX.Element}> = props => {
     // side panel is created here to keep the state between renders
     const sidePanel = createSidePanel()
 
     return (
         <div
             class="h-full w-full overflow-hidden grid text-base font-sans bg-panel-bg text-text"
-            style={{ 'grid-template-rows': `${theme.spacing[10]} 1fr` }}
+            style={{'grid-template-rows': `${theme.spacing[10]} 1fr`}}
         >
             <header class="p-2 flex items-center gap-x-2 bg-panel-bg b-b b-solid b-panel-border text-text">
                 <div class="flex items-center gap-x-2">

@@ -14,9 +14,9 @@ setSolidVersion(process.env.SOLID_VERSION, process.env.EXPECTED_SOLID_VERSION)
  * Set debugger locator module options.
  * Used by the `solid-devtools` plugin.
  */
-export function setComponentLocation(location: string) {
+export function setComponentLocation(location: string): void {
     if (typeof location !== 'string') return
     setOwnerLocation(location)
 }
 
-export { useLocator as setLocatorOptions }
+export {useLocator as setLocatorOptions}

@@ -1,10 +1,11 @@
-import { value_node_styles } from '@/modules/inspector/value-node'
-import { owner_path_styles } from '@/modules/structure'
-import { theme } from '@/ui'
-import { make_var_styles } from '@solid-devtools/theme'
-import { highlight_styles } from './components/highlight'
-import { custom_scrollbar_styles } from './components/scrollable'
-import { toggle_button_styles } from './components/toggle-button'
+import {value_node_styles} from '@/modules/inspector/value-node'
+import {owner_path_styles} from '@/modules/structure'
+import {theme} from '@/ui'
+import {make_var_styles} from '@solid-devtools/theme'
+import * as solid from 'solid-js'
+import {highlight_styles} from './components/highlight'
+import {custom_scrollbar_styles} from './components/scrollable'
+import {toggle_button_styles} from './components/toggle-button'
 
 export {
     highlight_color_var,
@@ -13,7 +14,7 @@ export {
     highlight_opacity_var,
 } from './components/highlight'
 
-export { toggle_button, toggle_button_styles } from './components/toggle-button'
+export {toggle_button, toggle_button_styles} from './components/toggle-button'
 
 export const tag_brackets = 'tag_brackets'
 
@@ -30,7 +31,7 @@ export const tag_brackets_styles = /*css*/ `
 
 export const devtools_root_class = 'devtools-root'
 
-export function Styles() {
+export function Styles(): solid.JSXElement {
     const var_styles = make_var_styles(devtools_root_class)
 
     return (

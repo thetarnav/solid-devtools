@@ -5,7 +5,7 @@ import path from 'node:path'
 import * as vite from 'vite'
 import solidPlugin from 'vite-plugin-solid'
 import ext_pkg from './package.json'
-import { icons } from './shared/icons.js'
+import {icons} from './shared/icons.js'
 
 const require = module.createRequire(import.meta.url)
 const cwd = process.cwd()
@@ -41,7 +41,7 @@ const manifest = crx.defineManifest(env => {
         version_name: is_chrome ? ext_pkg.version : undefined,
         browser_specific_settings: is_chrome
             ? undefined
-            : { gecko: { id: '{abfd162e-9948-403a-a75c-6e61184e1d47}' } },
+            : {gecko: {id: '{abfd162e-9948-403a-a75c-6e61184e1d47}'}},
         author: 'Damian Tarnawski',
         minimum_chrome_version: '94',
         devtools_page: 'devtools/devtools.html',
@@ -78,12 +78,12 @@ export default vite.defineConfig(config => {
 
     const sdt_pkg = JSON.parse(
         fs.readFileSync(require.resolve('solid-devtools/package.json'), 'utf-8'),
-    ) as { version: string }
+    ) as {version: string}
 
     const sdt_version = JSON.stringify(sdt_pkg.version.match(/\d+.\d+.\d+/)![0])
 
     return {
-        server: { port: 3333 },
+        server: {port: 3333},
         resolve: {
             alias: {
                 'solid-js/web': path.resolve(cwd, 'node_modules/solid-js/web/dist/web.js'),
@@ -92,7 +92,7 @@ export default vite.defineConfig(config => {
             },
         },
         plugins: [
-            solidPlugin({ dev: false, hot: false }),
+            solidPlugin({dev: false, hot: false}),
             crx.crx({
                 manifest: manifest,
                 browser: browser,
@@ -116,7 +116,7 @@ export default vite.defineConfig(config => {
             emptyOutDir: !is_dev,
             outDir: 'dist/' + browser,
             rollupOptions: {
-                input: { panel: 'index.html' },
+                input: {panel: 'index.html'},
             },
             target: 'esnext',
         },

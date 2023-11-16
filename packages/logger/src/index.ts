@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-import { array } from '@nothing-but/utils'
+import {array} from '@nothing-but/utils'
 import {
     addSolidUpdateListener,
     getOwnerType,
@@ -13,9 +13,9 @@ import {
     onParentCleanup,
     removeValueUpdateObserver,
 } from '@solid-devtools/debugger'
-import { NodeType, Solid } from '@solid-devtools/debugger/types'
-import { Many, arrayEquals, asArray } from '@solid-primitives/utils'
-import { $PROXY, Accessor, createEffect, getOwner, on, onCleanup, untrack } from 'solid-js'
+import {NodeType, Solid} from '@solid-devtools/debugger/types'
+import {Many, arrayEquals, asArray} from '@solid-primitives/utils'
+import {$PROXY, Accessor, createEffect, getOwner, on, onCleanup, untrack} from 'solid-js'
 import {
     NodeStateWithValue,
     UNUSED,
@@ -35,7 +35,7 @@ import {
     logSignalsInitialValues,
     paddedForEach,
 } from './log'
-import { getDiffMap, getFunctionSources, makeTimeMeter } from './utils'
+import {getDiffMap, getFunctionSources, makeTimeMeter} from './utils'
 
 declare module 'solid-js/types/reactive/signal' {
     interface Owner {
@@ -100,14 +100,14 @@ interface DebugComputationOptions {
 export function debugComputation(owner?: Solid.Owner, options?: DebugComputationOptions): void
 export function debugComputation(
     _owner?: Solid.Owner,
-    { initialRun = true }: DebugComputationOptions = {},
+    {initialRun = true}: DebugComputationOptions = {},
 ): void {
     const owner = _owner === undefined ? getOwner() : _owner
     if (!owner || !isSolidComputation(owner)) return console.warn('owner is not a computation')
 
     if (markDebugNode(owner, 'computation') === true) return
 
-    const { type, typeName, name } = getNodeState(owner)
+    const {type, typeName, name} = getNodeState(owner)
     const SYMBOL = Symbol(name)
     // log prev value only of the computation callback uses it
     const usesPrev = !!owner.fn.length
@@ -118,13 +118,13 @@ export function debugComputation(
 
     // patches source objects to track their value updates
     // will unsubscribe from previous sources on each call
-    const observeSources = (sources: (Solid.Computation | Solid.Signal)[]) => {
+    const observeSources = (sources: (Solid.Computation | Solid.Signal)[]): void => {
         updateListeners.forEach(unsub => unsub())
         updateListeners = []
         sources.forEach(source => {
             observeValueUpdate(
                 source,
-                value => signalUpdates.push({ ...getNodeState(source), value }),
+                value => signalUpdates.push({...getNodeState(source), value}),
                 SYMBOL,
             )
             updateListeners.push(() => removeValueUpdateObserver(source, SYMBOL))
@@ -142,7 +142,7 @@ export function debugComputation(
                 const sources = owner.sources ? array.deduped(owner.sources) : []
 
                 logComputation(getComputationCreatedLabel(typeName, name, timeElapsed), {
-                    owner: { type, typeName, name },
+                    owner: {type, typeName, name},
                     owned: owner.owned ?? [],
                     sources,
                     prev: UNUSED,
@@ -225,7 +225,7 @@ export function debugOwnerComputations(_owner?: Solid.Owner): void {
     onCleanup(marked)
 
     // for solid-refresh HMR memos, return the owned component
-    const { type, typeName, name } = getNodeState(
+    const {type, typeName, name} = getNodeState(
         lookupOwner(owner, o => getOwnerType(o) !== NodeType.Refresh)!,
     )
 
@@ -233,7 +233,7 @@ export function debugOwnerComputations(_owner?: Solid.Owner): void {
 
     onCleanup(
         addSolidUpdateListener(() => {
-            const { owned } = owner
+            const {owned} = owner
             if (!owned) return
 
             let computations: Solid.Computation[] = []
@@ -251,7 +251,7 @@ export function debugOwnerComputations(_owner?: Solid.Owner): void {
 
             computations = [...prevOwned, ...computations]
             // log owned computation changes
-            logOwned({ type, typeName, name }, computations, prevOwned)
+            logOwned({type, typeName, name}, computations, prevOwned)
             prevOwned = computations
         }),
     )
@@ -295,13 +295,13 @@ export function debugSignal(
 
     if (markDebugNode(signal) === true) return
 
-    const { trackObservers = true, logInitialValue: _logInitialValue = true } = options
+    const {trackObservers = true, logInitialValue: _logInitialValue = true} = options
 
     const state = getNodeState(signal)
     const SYMBOL = Symbol(state.name)
 
     // Initial
-    _logInitialValue && logInitialValue({ ...state, value: signal.value })
+    _logInitialValue && logInitialValue({...state, value: signal.value})
 
     let actualObservers: Solid.Computation[]
     let prevObservers: Solid.Computation[] = []
@@ -328,7 +328,7 @@ export function debugSignal(
 
     if (trackObservers) {
         // Observers Change
-        function logObserversChange() {
+        function logObserversChange(): void {
             const observers = array.deduped(actualObservers)
             if (array.includes_same_members(observers, prevObservers)) return
             logObservers(state.name, observers, prevObservers)
@@ -411,7 +411,7 @@ export function debugSignals(
  * }
  * ```
  */
-export function debugOwnerSignals(owner = getOwner(), options: DebugSignalOptions = {}) {
+export function debugOwnerSignals(owner = getOwner(), options: DebugSignalOptions = {}): void {
     if (!owner) return console.warn('debugOwnerState found no Owner')
 
     if (markDebugNode(owner, 'signals') === true) return
@@ -533,7 +533,7 @@ export function debugProps(props: Record<string, unknown>): void {
                 },
             ),
             undefined,
-            { name: 'debugProps EFFECT' },
+            {name: 'debugProps EFFECT'},
         )
     }
 }

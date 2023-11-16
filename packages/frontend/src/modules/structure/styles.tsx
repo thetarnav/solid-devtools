@@ -1,4 +1,4 @@
-import { theme } from '@/ui'
+import {theme} from '@/ui'
 
 export const path_height = theme.spacing[4.5]
 export const row_height = theme.spacing[4.5]

@@ -1,15 +1,15 @@
-import { createBodyCursor } from '@solid-primitives/cursor'
-import { makeEventListener } from '@solid-primitives/event-listener'
-import { createToken, resolveTokens } from '@solid-primitives/jsx-tokenizer'
-import { createMediaQuery } from '@solid-primitives/media'
-import { getPositionInElement } from '@solid-primitives/mouse'
-import { scheduleIdle } from '@solid-primitives/scheduled'
-import { useRemSize } from '@solid-primitives/styles'
-import { clamp } from '@solid-primitives/utils'
+import {createBodyCursor} from '@solid-primitives/cursor'
+import {makeEventListener} from '@solid-primitives/event-listener'
+import {createToken, resolveTokens} from '@solid-primitives/jsx-tokenizer'
+import {createMediaQuery} from '@solid-primitives/media'
+import {getPositionInElement} from '@solid-primitives/mouse'
+import {scheduleIdle} from '@solid-primitives/scheduled'
+import {useRemSize} from '@solid-primitives/styles'
+import {clamp} from '@solid-primitives/utils'
 import clsx from 'clsx'
-import { Index, JSX, batch, createComputed, createMemo, createSignal } from 'solid-js'
+import * as s from 'solid-js'
 
-export type PanelProps = { children: JSX.Element }
+export type PanelProps = {children: s.JSX.Element}
 
 const SplitterPanel = createToken<PanelProps>()
 
@@ -17,21 +17,21 @@ const MIN_SIZE_IN_REM = 8
 const MIN_SIZE = `${MIN_SIZE_IN_REM}rem`
 const SPLIT_SIZE = '1px'
 
-function SplitterRoot(props: { children: JSX.Element }) {
+function SplitterRoot(props: {children: s.JSX.Element}): s.JSX.Element {
     const tokens = resolveTokens(SplitterPanel, () => props.children)
 
     const isMobile = createMediaQuery('(max-width: 640px)')
     const isTouch = createMediaQuery('(hover: none)')
 
-    const [progress, setProgress] = createSignal<number[]>([])
-    const [dragging, setDragging] = createSignal<false | number>(false)
+    const [progress, setProgress] = s.createSignal<number[]>([])
+    const [dragging, setDragging] = s.createSignal<false | number>(false)
 
-    createComputed((p: ReturnType<typeof tokens> = []) => {
+    s.createComputed((p: ReturnType<typeof tokens> = []) => {
         const panels = tokens()
         // stop dragging if the number of panels changes
         if (panels.length !== p.length) {
-            batch(() => {
-                setProgress(Array.from({ length: panels.length - 1 }, () => 1 / panels.length))
+            s.batch(() => {
+                setProgress(Array.from({length: panels.length - 1}, () => 1 / panels.length))
                 setDragging(false)
             })
         }
@@ -71,7 +71,7 @@ function SplitterRoot(props: { children: JSX.Element }) {
 
     createBodyCursor(() => dragging() !== false && (isMobile() ? 'row-resize' : 'col-resize'))
 
-    const template = createMemo(() => {
+    const template = s.createMemo(() => {
         const p = progress()
 
         let t = ''
@@ -86,10 +86,10 @@ function SplitterRoot(props: { children: JSX.Element }) {
     return (
         <div
             class="grid grid-auto-flow-col h-full w-full"
-            style={{ [isMobile() ? 'grid-template-rows' : 'grid-template-columns']: template() }}
+            style={{[isMobile() ? 'grid-template-rows' : 'grid-template-columns']: template()}}
             ref={container}
         >
-            <Index each={tokens()}>
+            <s.Index each={tokens()}>
                 {(panel, i) => (
                     <>
                         <div class="relative z-1 overflow-hidden">{panel().data.children}</div>
@@ -113,9 +113,9 @@ function SplitterRoot(props: { children: JSX.Element }) {
                         )}
                     </>
                 )}
-            </Index>
+            </s.Index>
         </div>
     )
 }
 
-export { SplitterPanel as Panel, SplitterRoot as Root }
+export {SplitterPanel as Panel, SplitterRoot as Root}

@@ -1,6 +1,6 @@
-import { Icon } from '@/ui'
-import { Component, JSX, ParentComponent } from 'solid-js'
-import { HeadlessErrorOverlay, HeadlessErrorOverlayRenderProps } from './error-overlay-headless'
+import {Icon} from '@/ui'
+import {Component, JSX, ParentComponent} from 'solid-js'
+import {HeadlessErrorOverlay, HeadlessErrorOverlayRenderProps} from './error-overlay-headless'
 
 const button =
     'w-8 h-8 center-child rounded-md bg-panel-8 hover:bg-panel-7 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-panel-7 active:bg-panel-6 active:ring-offset-0 active:ring-0'
@@ -8,7 +8,7 @@ const button =
 const icon = 'w-4 h-4 text-current'
 
 const RenderErrorOverlay: Component<
-    HeadlessErrorOverlayRenderProps & { footer?: JSX.Element }
+    HeadlessErrorOverlayRenderProps & {footer?: JSX.Element}
 > = props => (
     <div class="fixed inset-0 z-9999 overflow-y-auto overscroll-none">
         <div class="min-h-full p-y-4 p-x-8 center-child bg-black/50">

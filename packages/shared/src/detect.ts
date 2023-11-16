@@ -1,5 +1,5 @@
 import 'solid-js'
-import { interceptPropertySet } from './utils'
+import {interceptPropertySet} from './utils'
 
 //
 // SolidJS detection
@@ -49,13 +49,13 @@ export function detectSolidDev(): boolean {
 }
 
 export function onSolidDevDetect(callback: () => void): void {
-    if (detectSolidDev()) queueMicrotask(callback)
-    else
-        interceptPropertySet(
-            window,
-            SOLID_DEV_GLOBAL,
-            value => value === true && queueMicrotask(callback),
-        )
+    if (detectSolidDev()) {
+        queueMicrotask(callback)
+    } else {
+        interceptPropertySet(window, SOLID_DEV_GLOBAL, value => {
+            value && queueMicrotask(callback)
+        })
+    }
 }
 
 //

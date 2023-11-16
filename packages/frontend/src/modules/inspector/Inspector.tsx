@@ -1,21 +1,16 @@
-import { SidePanelCtx } from '@/SidePanel'
-import { useController } from '@/controller'
-import { Badge, Scrollable } from '@/ui'
-import {
-    NODE_TYPE_NAMES,
-    NodeType,
-    PropGetterState,
-    ValueType,
-} from '@solid-devtools/debugger/types'
-import { Entries } from '@solid-primitives/keyed'
-import { For, JSX, Show, batch, createMemo, useContext } from 'solid-js'
-import { ValueNode } from './value-node'
+import {SidePanelCtx} from '@/SidePanel'
+import {useController} from '@/controller'
+import {Badge, Scrollable} from '@/ui'
+import {NODE_TYPE_NAMES, NodeType, PropGetterState, ValueType} from '@solid-devtools/debugger/types'
+import {Entries} from '@solid-primitives/keyed'
+import {For, JSX, Show, batch, createMemo, useContext} from 'solid-js'
+import {ValueNode} from './value-node'
 
-function GroupTitle(props: { children: JSX.Element }) {
+function GroupTitle(props: {children: JSX.Element}) {
     return <h2 class="text-disabled mb-1 capitalize">{props.children}</h2>
 }
 
-function ListSignals<T>(props: { when: T; title: JSX.Element; children: JSX.Element }) {
+function ListSignals<T>(props: {when: T; title: JSX.Element; children: JSX.Element}) {
     return (
         <Show when={props.when}>
             <div>
@@ -27,10 +22,10 @@ function ListSignals<T>(props: { when: T; title: JSX.Element; children: JSX.Elem
 }
 
 export function InspectorView(): JSX.Element {
-    const { inspector, hovered } = useController()
-    const { state } = inspector
+    const {inspector, hovered} = useController()
+    const {state} = inspector
 
-    const { setOpenPanel } = useContext(SidePanelCtx)!
+    const {setOpenPanel} = useContext(SidePanelCtx)!
 
     const valueItems = createMemo(() => {
         const list = Object.values(state.signals)
@@ -42,7 +37,7 @@ export function InspectorView(): JSX.Element {
             else if (signal.type === NodeType.Signal) signals.push(signal)
             else if (signal.type === NodeType.Store) stores.push(signal)
         }
-        return { memos, signals, stores }
+        return {memos, signals, stores}
     })
 
     return (

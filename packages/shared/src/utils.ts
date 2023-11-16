@@ -1,4 +1,4 @@
-const getLogLabel = () => [
+const getLogLabel = (): string[] => [
     `%csolid-devtools`,
     'color: #fff; background: #2c4f7c; padding: 1px 4px;',
 ]
@@ -55,7 +55,7 @@ export function interceptPropertySet<TObject extends object, TKey extends keyof 
         })
         return
     }
-    const { set } = descriptor
+    const {set} = descriptor
     if (!set) return
     Object.defineProperty(obj, key, {
         set(value) {
@@ -76,13 +76,13 @@ export function callArrayProp<
     K extends PropertyKey,
     T extends (...args: Args) => void,
     Args extends unknown[],
->(object: { [_ in K]?: T[] }, key: K, ...args: Args): void {
+>(object: {[_ in K]?: T[]}, key: K, ...args: Args): void {
     const arr = object[key]
     if (arr) for (const cb of arr) cb(...args)
 }
 
 export function pushToArrayProp<K extends PropertyKey, T>(
-    object: { [_ in K]?: T[] },
+    object: {[_ in K]?: T[]},
     key: K,
     value: T,
 ): T[] {
@@ -98,12 +98,12 @@ export function trimString(str: string, maxLength: number): string {
     return str.slice(0, maxLength) + '…'
 }
 
-export function findIndexById<T extends { id: string }>(array: T[], id: string): number {
+export function findIndexById<T extends {id: string}>(array: T[], id: string): number {
     for (let i = 0; i < array.length; i++) if (array[i]!.id === id) return i
     return -1
 }
 
-export function findItemById<T extends { id: string }>(array: T[], id: string): T | undefined {
+export function findItemById<T extends {id: string}>(array: T[], id: string): T | undefined {
     for (let i = 0; i < array.length; i++) {
         const item = array[i]!
         if (item.id === id) return item
@@ -132,14 +132,15 @@ export function whileArray<T, U>(
 }
 
 export type ToDyscriminatedUnion<
+    // eslint-disable-next-line @typescript-eslint/ban-types
     T extends {},
     TK extends PropertyKey = 'type',
     DK extends void | PropertyKey = void,
 > = {
-    [K in keyof T]: { [k in TK]: K } & (DK extends PropertyKey ? { [k in DK]: T[K] } : T[K])
+    [K in keyof T]: {[k in TK]: K} & (DK extends PropertyKey ? {[k in DK]: T[K]} : T[K])
 }[keyof T]
 
-export function dedupeArrayById<T extends { id: unknown }>(input: T[]): T[] {
+export function dedupeArrayById<T extends {id: unknown}>(input: T[]): T[] {
     const ids = new Set<unknown>()
     const deduped: T[] = []
     for (let i = input.length - 1; i >= 0; i--) {

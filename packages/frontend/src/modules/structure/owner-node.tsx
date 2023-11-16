@@ -1,7 +1,7 @@
-import { Badge, CollapseToggle, createHighlightedOwnerName, theme } from '@/ui'
-import { createHover } from '@solid-devtools/shared/primitives'
-import { Component } from 'solid-js'
-import type { Structure } from '.'
+import {Badge, CollapseToggle, createHighlightedOwnerName, theme} from '@/ui'
+import {createHover} from '@solid-devtools/shared/primitives'
+import {Component} from 'solid-js'
+import type {Structure} from '.'
 import {
     background_gradient,
     padding_mask,
@@ -20,12 +20,12 @@ export const OwnerNode: Component<{
     listenToUpdate(cb: VoidFunction): VoidFunction
     toggleCollapsed(node: Structure.Node): void
 }> = props => {
-    const { onHoverChange, listenToUpdate, onInspectChange } = props
-    const { name, type, hmr } = props.owner
+    const {onHoverChange, listenToUpdate, onInspectChange} = props
+    const {name, type, hmr} = props.owner
 
-    const { toggleCollapsed } = props
+    const {toggleCollapsed} = props
 
-    const { pingUpdated, OwnerName } = createHighlightedOwnerName()
+    const {pingUpdated, OwnerName} = createHighlightedOwnerName()
     listenToUpdate(pingUpdated)
 
     const hoverProps = createHover(onHoverChange)

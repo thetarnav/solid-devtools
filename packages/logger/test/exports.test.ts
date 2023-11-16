@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import {describe, expect, it} from 'vitest'
 import * as API from '../src/index'
 import * as noopAPI from '../src/server'
 

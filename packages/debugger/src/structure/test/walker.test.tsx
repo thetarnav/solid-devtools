@@ -6,34 +6,34 @@ import {
     createRoot,
     createSignal,
 } from 'solid-js'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { NodeType, TreeWalkerMode } from '../../main/constants'
-import { $setSdtId, ObjectType, getSdtId } from '../../main/id'
+import {beforeEach, describe, expect, it, vi} from 'vitest'
+import {NodeType, TreeWalkerMode} from '../../main/constants'
+import {$setSdtId, ObjectType, getSdtId} from '../../main/id'
 import SolidApi from '../../main/solid-api'
-import { Mapped, Solid } from '../../main/types'
-import { getNodeName } from '../../main/utils'
-import { ComputationUpdateHandler, walkSolidTree } from '../walker'
+import {Mapped, Solid} from '../../main/types'
+import {getNodeName} from '../../main/utils'
+import {ComputationUpdateHandler, walkSolidTree} from '../walker'
 
-const { getOwner } = SolidApi
+const {getOwner} = SolidApi
 
 let mockLAST_ID = 0
 beforeEach(() => {
     mockLAST_ID = 0
 })
-vi.mock('../../main/get-id', () => ({ getNewSdtId: () => '#' + mockLAST_ID++ }))
+vi.mock('../../main/get-id', () => ({getNewSdtId: () => '#' + mockLAST_ID++}))
 
 const mockTree = () => {
-    const [s] = createSignal('foo', { name: 's0' })
-    createSignal('hello', { name: 's1' })
+    const [s] = createSignal('foo', {name: 's0'})
+    createSignal('hello', {name: 's1'})
 
     createEffect(
         () => {
-            createSignal({ bar: 'baz' }, { name: 's2' })
-            createComputed(s, undefined, { name: 'c0' })
-            createComputed(() => createSignal(0, { name: 's3' }), undefined, { name: 'c1' })
+            createSignal({bar: 'baz'}, {name: 's2'})
+            createComputed(s, undefined, {name: 'c0'})
+            createComputed(() => createSignal(0, {name: 's3'}), undefined, {name: 'c1'})
         },
         undefined,
-        { name: 'e0' },
+        {name: 'e0'},
     )
 }
 
@@ -46,9 +46,13 @@ describe('TreeWalkerMode.Owners', () => {
             })
 
             const tree = walkSolidTree(owner, {
-                onComputationUpdate: () => {},
+                onComputationUpdate: () => {
+                    /**/
+                },
                 rootId: $setSdtId(owner, '#ff'),
-                registerComponent: () => {},
+                registerComponent: () => {
+                    /**/
+                },
                 mode: TreeWalkerMode.Owners,
             })
 
@@ -86,7 +90,7 @@ describe('TreeWalkerMode.Owners', () => {
 
         {
             createRoot(dispose => {
-                const [s] = createSignal(0, { name: 'source' })
+                const [s] = createSignal(0, {name: 'source'})
 
                 const div = document.createElement('div')
 
@@ -95,25 +99,29 @@ describe('TreeWalkerMode.Owners', () => {
                         const focused = createMemo(
                             () => {
                                 s()
-                                createSignal(div, { name: 'element' })
-                                const memo = createMemo(() => 0, undefined, { name: 'memo' })
-                                createRenderEffect(memo, undefined, { name: 'render' })
+                                createSignal(div, {name: 'element'})
+                                const memo = createMemo(() => 0, undefined, {name: 'memo'})
+                                createRenderEffect(memo, undefined, {name: 'render'})
                                 return 'value'
                             },
                             undefined,
-                            { name: 'focused' },
+                            {name: 'focused'},
                         )
                         focused()
                     },
                     undefined,
-                    { name: 'WRAPPER' },
+                    {name: 'WRAPPER'},
                 )
 
                 const rootOwner = getOwner()! as Solid.Root
                 const tree = walkSolidTree(rootOwner, {
                     rootId: $setSdtId(rootOwner, '#0'),
-                    onComputationUpdate: () => {},
-                    registerComponent: () => {},
+                    onComputationUpdate: () => {
+                        /**/
+                    },
+                    registerComponent: () => {
+                        /**/
+                    },
                     mode: TreeWalkerMode.Owners,
                 })
 
@@ -173,7 +181,9 @@ describe('TreeWalkerMode.Owners', () => {
                 onComputationUpdate: (...args) => capturedComputationUpdates.push(args),
                 rootId: $setSdtId(owner, '#ff'),
                 mode: TreeWalkerMode.Owners,
-                registerComponent: () => {},
+                registerComponent: () => {
+                    /**/
+                },
             })
 
             expect(capturedComputationUpdates.length).toBe(0)
@@ -194,7 +204,7 @@ describe('TreeWalkerMode.Owners', () => {
 
     it('gathers components', () => {
         createRoot(dispose => {
-            const TestComponent = (props: { n: number }) => {
+            const TestComponent = (props: {n: number}) => {
                 const [a] = createSignal(0)
                 createComputed(a)
                 return <div>{props.n === 0 ? 'end' : <TestComponent n={props.n - 1} />}</div>
@@ -217,7 +227,9 @@ describe('TreeWalkerMode.Owners', () => {
             const components: string[] = []
 
             walkSolidTree(owner, {
-                onComputationUpdate: () => {},
+                onComputationUpdate: () => {
+                    /**/
+                },
                 rootId: $setSdtId(owner, '#ff'),
                 mode: TreeWalkerMode.Owners,
                 registerComponent: c => {
@@ -249,10 +261,10 @@ describe('TreeWalkerMode.Components', () => {
         const testComponents: Solid.Component[] = []
 
         createRoot(dispose => {
-            const Wrapper = (props: { children: any }) => {
+            const Wrapper = (props: {children: any}) => {
                 return <div>{props.children}</div>
             }
-            const TestComponent = (props: { n: number }) => {
+            const TestComponent = (props: {n: number}) => {
                 const [a, set] = createSignal(0)
                 createComputed(a)
                 toTrigger.push(() => set(1))
@@ -284,7 +296,9 @@ describe('TreeWalkerMode.Components', () => {
                 onComputationUpdate: (...a) => computationUpdates.push(a),
                 rootId: $setSdtId(owner, '#ff'),
                 mode: TreeWalkerMode.Components,
-                registerComponent: () => {},
+                registerComponent: () => {
+                    /**/
+                },
             })
 
             expect(tree).toMatchObject({
@@ -353,10 +367,10 @@ describe('TreeWalkerMode.DOM', () => {
         const testComponents: Solid.Component[] = []
 
         createRoot(dispose => {
-            const Wrapper = (props: { children: any }) => {
+            const Wrapper = (props: {children: any}) => {
                 return <div>{props.children}</div>
             }
-            const TestComponent = (props: { n: number }) => {
+            const TestComponent = (props: {n: number}) => {
                 const [a, set] = createSignal(0)
                 createComputed(a)
                 toTrigger.push(() => set(1))
@@ -391,7 +405,9 @@ describe('TreeWalkerMode.DOM', () => {
                 onComputationUpdate: (...a) => computationUpdates.push(a),
                 rootId: $setSdtId(owner, '#ff'),
                 mode: TreeWalkerMode.DOM,
-                registerComponent: () => {},
+                registerComponent: () => {
+                    /**/
+                },
             })
 
             expect(tree).toMatchObject({

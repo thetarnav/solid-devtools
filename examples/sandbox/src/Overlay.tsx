@@ -1,4 +1,4 @@
-import { Show, lazy } from 'solid-js'
+import {Show, lazy} from 'solid-js'
 const DevtoolsOverlay = lazy(() => import('./DevtoolsOverlay'))
 
 export function Overlay() {

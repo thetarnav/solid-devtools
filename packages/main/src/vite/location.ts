@@ -1,5 +1,5 @@
-import { PluginObj, template } from '@babel/core'
-import { NodePath } from '@babel/traverse'
+import {PluginObj, template} from '@babel/core'
+import {NodePath} from '@babel/traverse'
 import * as t from '@babel/types'
 import {
     LOCATION_ATTRIBUTE_NAME,
@@ -7,8 +7,8 @@ import {
     WINDOW_PROJECTPATH_PROPERTY,
 } from '@solid-devtools/debugger/types'
 import p from 'path'
-import { SET_COMPONENT_LOC, SET_COMPONENT_LOC_LOCAL } from './constants'
-import { importFromRuntime } from './utils'
+import {SET_COMPONENT_LOC, SET_COMPONENT_LOC_LOCAL} from './constants'
+import {importFromRuntime} from './utils'
 
 const cwd = process.cwd()
 
@@ -20,14 +20,14 @@ const buildMarkComponent = template(`${SET_COMPONENT_LOC_LOCAL}(%%loc%%);`) as (
     ...args: Parameters<ReturnType<typeof template>>
 ) => t.Statement
 
-const isUpperCase = (s: string) => /^[A-Z]/.test(s)
+const isUpperCase = (s: string): boolean => /^[A-Z]/.test(s)
 
 const getLocationAttribute = (filePath: string, line: number, column: number): LocationAttr =>
     `${filePath}:${line}:${column}`
 
 function getNodeLocationAttribute(
     node: t.Node,
-    state: { filename?: unknown },
+    state: {filename?: unknown},
     isJSX = false,
 ): string | undefined {
     if (!node.loc || typeof state.filename !== 'string') return
@@ -42,7 +42,7 @@ function getNodeLocationAttribute(
 let transformCurrentFile = false
 let importedRuntime = false
 
-function importComponentSetter(path: NodePath) {
+function importComponentSetter(path: NodePath): void {
     if (importedRuntime) return
     importFromRuntime(path, SET_COMPONENT_LOC, SET_COMPONENT_LOC_LOCAL)
     importedRuntime = true
@@ -66,7 +66,7 @@ const jsxLocationPlugin: (config: {
         },
         ...(config.jsx && {
             JSXOpeningElement(path, state) {
-                const { openingElement } = path.container as t.JSXElement
+                const {openingElement} = path.container as t.JSXElement
                 if (!transformCurrentFile || openingElement.name.type !== 'JSXIdentifier') return
 
                 // Filter native elements
@@ -93,10 +93,10 @@ const jsxLocationPlugin: (config: {
 
                 importComponentSetter(path)
 
-                path.node.body.body.unshift(buildMarkComponent({ loc: t.stringLiteral(location) }))
+                path.node.body.body.unshift(buildMarkComponent({loc: t.stringLiteral(location)}))
             },
             VariableDeclarator(path, state) {
-                const { init, id } = path.node
+                const {init, id} = path.node
                 if (
                     !transformCurrentFile ||
                     !('name' in id) ||
@@ -113,7 +113,7 @@ const jsxLocationPlugin: (config: {
 
                 importComponentSetter(path)
 
-                init.body.body.unshift(buildMarkComponent({ loc: t.stringLiteral(location) }))
+                init.body.body.unshift(buildMarkComponent({loc: t.stringLiteral(location)}))
             },
         }),
     },

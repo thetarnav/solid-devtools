@@ -1,8 +1,8 @@
-import { Component, createResource, For, Show } from 'solid-js'
-import { A, RouteDataArgs, useRouteData } from 'solid-start'
+import {Component, createResource, For, Show} from 'solid-js'
+import {A, RouteDataArgs, useRouteData} from 'solid-start'
 import Story from '~/components/story'
 import fetchAPI from '~/lib/api'
-import { IStory } from '~/types'
+import {IStory} from '~/types'
 
 const mapStories = {
     top: 'news',
@@ -12,7 +12,7 @@ const mapStories = {
     job: 'jobs',
 } as const
 
-export const routeData = ({ location, params }: RouteDataArgs) => {
+export const routeData = ({location, params}: RouteDataArgs) => {
     const page = () => +location.query.page || 1
     const type = () => params.stories || 'top'
 
@@ -21,11 +21,11 @@ export const routeData = ({ location, params }: RouteDataArgs) => {
         fetchAPI,
     )
 
-    return { type, stories, page }
+    return {type, stories, page}
 }
 
 const Stories: Component = () => {
-    const { page, type, stories } = useRouteData<typeof routeData>()
+    const {page, type, stories} = useRouteData<typeof routeData>()
     return (
         <div class="news-view">
             <div class="news-list-nav">

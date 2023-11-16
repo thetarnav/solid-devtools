@@ -1,7 +1,7 @@
-import type { ToDyscriminatedUnion } from '@solid-devtools/shared/utils'
-import type { KbdKey } from '@solid-primitives/keyboard'
-import type { NodeID } from '../main/types'
-import type { TargetIDE, TargetURLFunction } from './find-components'
+import type {ToDyscriminatedUnion} from '@solid-devtools/shared/utils'
+import type {KbdKey} from '@solid-primitives/keyboard'
+import type {NodeID} from '../main/types'
+import type {TargetIDE, TargetURLFunction} from './find-components'
 
 export type {
     LocationAttr,
@@ -22,8 +22,8 @@ export type LocatorOptions = {
 }
 
 export type HighlightElementPayload = ToDyscriminatedUnion<{
-    node: { id: NodeID }
-    element: { id: NodeID }
+    node: {id: NodeID}
+    element: {id: NodeID}
 }> | null
 
 // used by the transform

@@ -1,11 +1,8 @@
-import { assertTransform, cwd, file } from './setup'
+import {assertTransform, cwd, file} from './setup'
 
-import {
-    LOCATION_ATTRIBUTE_NAME,
-    WINDOW_PROJECTPATH_PROPERTY,
-} from '@solid-devtools/debugger/types'
-import { describe, test } from 'vitest'
-import { Module, SET_COMPONENT_LOC, SET_COMPONENT_LOC_LOCAL } from '../constants'
+import {LOCATION_ATTRIBUTE_NAME, WINDOW_PROJECTPATH_PROPERTY} from '@solid-devtools/debugger/types'
+import {describe, test} from 'vitest'
+import {Module, SET_COMPONENT_LOC, SET_COMPONENT_LOC_LOCAL} from '../constants'
 import getPlugin from '../location'
 
 const setLocationImport = `import { ${SET_COMPONENT_LOC} as ${SET_COMPONENT_LOC_LOCAL} } from "${Module.Setup}";`
@@ -28,7 +25,7 @@ function Button(props) {
   return <button>Click me</button>;
 }
 globalThis.${WINDOW_PROJECTPATH_PROPERTY} = "${cwd}";`,
-            { jsx: false, components: true },
+            {jsx: false, components: true},
         ],
         [
             'arrow component',
@@ -41,7 +38,7 @@ const Button = props => {
   return <button>Click me</button>;
 };
 globalThis.${WINDOW_PROJECTPATH_PROPERTY} = "${cwd}";`,
-            { jsx: false, components: true },
+            {jsx: false, components: true},
         ],
         [
             'jsx',
@@ -52,7 +49,7 @@ globalThis.${WINDOW_PROJECTPATH_PROPERTY} = "${cwd}";`,
   return <button ${LOCATION_ATTRIBUTE_NAME}="${file}:2:11">Click me</button>;
 }
 globalThis.${WINDOW_PROJECTPATH_PROPERTY} = "${cwd}";`,
-            { jsx: true, components: false },
+            {jsx: true, components: false},
         ],
     ]
 

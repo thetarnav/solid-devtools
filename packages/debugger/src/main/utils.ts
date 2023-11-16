@@ -1,10 +1,10 @@
-import { trimString } from '@solid-devtools/shared/utils'
-import { Emit } from '@solid-primitives/event-bus'
-import { throttle } from '@solid-primitives/scheduled'
-import { $PROXY } from 'solid-js'
-import { NodeType } from './constants'
+import {trimString} from '@solid-devtools/shared/utils'
+import {Emit} from '@solid-primitives/event-bus'
+import {throttle} from '@solid-primitives/scheduled'
+import {$PROXY} from 'solid-js'
+import {NodeType} from './constants'
 import SolidAPI from './solid-api'
-import { Solid } from './types'
+import {Solid} from './types'
 
 const $NODE = SolidAPI.STORE_DEV.$NODE
 
@@ -53,7 +53,8 @@ export const getOwnerType = (o: Readonly<Solid.Owner>): NodeType => {
     // memo
     if ('comparator' in o) {
         if (
-            (o.owner as { component?: Function } | null)?.component?.name.startsWith(
+            // eslint-disable-next-line @typescript-eslint/ban-types
+            (o.owner as {component?: Function} | null)?.component?.name.startsWith(
                 SOLID_REFRESH_PREFIX,
             )
         ) {
@@ -62,7 +63,7 @@ export const getOwnerType = (o: Readonly<Solid.Owner>): NodeType => {
         return NodeType.Memo
     }
     // Effect
-    if (o.pure === false) {
+    if (!o.pure) {
         if (o.user === true) return NodeType.Effect
         if (o.context !== null) return NodeType.Context
         return NodeType.Render
@@ -70,7 +71,7 @@ export const getOwnerType = (o: Readonly<Solid.Owner>): NodeType => {
     return NodeType.Computation
 }
 
-export const getNodeName = (o: { name?: string }): string | undefined => {
+export const getNodeName = (o: {name?: string}): string | undefined => {
     if (!o.name) return
     let name = o.name
     if (name.startsWith(SOLID_REFRESH_PREFIX)) name = name.slice(SOLID_REFRESH_PREFIX.length)
@@ -92,7 +93,7 @@ export function isDisposed(o: Readonly<Solid.Owner>): boolean {
 }
 
 export function getComponentRefreshNode(owner: Readonly<Solid.Component>): Solid.Memo | null {
-    const { owned } = owner
+    const {owned} = owner
     let refresh: Solid.Owner
     if (owned && owned.length === 1 && markOwnerType((refresh = owned[0]!)) === NodeType.Refresh) {
         return refresh as Solid.Memo

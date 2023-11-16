@@ -1,6 +1,6 @@
-import { Mapped, NodeID, NodeType, StructureUpdates } from '@solid-devtools/debugger/types'
-import { entries } from '@solid-primitives/utils'
-import type { Structure } from '.'
+import {Mapped, NodeID, NodeType, StructureUpdates} from '@solid-devtools/debugger/types'
+import {entries} from '@solid-primitives/utils'
+import type {Structure} from '.'
 
 let Updated: StructureUpdates['updated']
 let NewNodeList: Structure.Node[]
@@ -10,10 +10,10 @@ function createNode(
     parent: Structure.Node | null,
     level: number,
 ): Structure.Node {
-    const { id, name, type, children: rawChildren } = raw
+    const {id, name, type, children: rawChildren} = raw
 
     const children: Structure.Node[] = []
-    const node: Structure.Node = { id, type, children, parent, level }
+    const node: Structure.Node = {id, type, children, parent, level}
 
     if (name) node.name = name
     if (type === NodeType.Component && raw.hmr) node.hmr = raw.hmr
@@ -33,7 +33,7 @@ function updateNode(
     raw: Mapped.Owner | undefined,
     level: number,
 ): Structure.Node {
-    const { id, children } = node
+    const {id, children} = node
     NewNodeList.push(node)
     node.level = level
 
@@ -43,7 +43,7 @@ function updateNode(
         // update frozen computations
         if ('frozen' in raw && raw.frozen) node.frozen = true
 
-        const { children: rawChildren } = raw
+        const {children: rawChildren} = raw
         const newChildren: Structure.Node[] = (node.children = [])
 
         if (rawChildren.length) {
@@ -70,7 +70,7 @@ function updateNode(
 
 function reconcileStructure(
     prevRoots: Structure.Node[],
-    { removed, updated, partial }: StructureUpdates,
+    {removed, updated, partial}: StructureUpdates,
 ): Structure.State {
     Updated = updated
     NewNodeList = []
@@ -78,7 +78,7 @@ function reconcileStructure(
 
     const upatedTopLevelRoots = new Set<NodeID>()
     for (const root of prevRoots) {
-        const { id } = root
+        const {id} = root
         // skip removed roots for partial updates
         // and for full updates skip roots that were not sent
         if (partial ? removed.includes(id) : !(id in Updated)) continue
@@ -92,7 +92,7 @@ function reconcileStructure(
         nextRoots.push(createNode(root, null, 0))
     }
 
-    return { roots: nextRoots, nodeList: NewNodeList }
+    return {roots: nextRoots, nodeList: NewNodeList}
 }
 
-export { reconcileStructure }
+export {reconcileStructure}

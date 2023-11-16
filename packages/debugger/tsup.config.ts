@@ -1,8 +1,8 @@
-import { solidPlugin } from 'esbuild-plugin-solid'
-import { defineConfig, Options } from 'tsup'
-import { dependencies, peerDependencies } from './package.json'
+import {solidPlugin} from 'esbuild-plugin-solid'
+import {defineConfig, Options} from 'tsup'
+import {dependencies, peerDependencies} from './package.json'
 
-const external = Object.keys({ ...peerDependencies, ...dependencies })
+const external = Object.keys({...peerDependencies, ...dependencies})
 
 export default defineConfig(config => {
     const watch = !!config.watch
@@ -31,13 +31,13 @@ export default defineConfig(config => {
         {
             ...common,
             dts: false,
-            entry: { bundled: 'src/index.ts' },
+            entry: {bundled: 'src/index.ts'},
             esbuildPlugins: [solidPlugin()],
             noExternal: external,
         },
         {
             ...common,
-            entry: { setup: 'src/setup.ts' },
+            entry: {setup: 'src/setup.ts'},
         },
     ]
     return options

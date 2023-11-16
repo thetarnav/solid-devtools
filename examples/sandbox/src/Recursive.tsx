@@ -1,5 +1,5 @@
-import { Component, createContext, For, mergeProps, splitProps, useContext } from 'solid-js'
-import { createStore } from 'solid-js/store'
+import {Component, createContext, For, mergeProps, splitProps, useContext} from 'solid-js'
+import {createStore} from 'solid-js/store'
 
 type NodeType = {
     id: number
@@ -14,7 +14,7 @@ interface genNodePathInterface {
     parentsPath?: Array<number>
     accessKey?: string
 }
-function genNodePath({ nodeId, parentsPath = [], accessKey = 'children' }: genNodePathInterface) {
+function genNodePath({nodeId, parentsPath = [], accessKey = 'children'}: genNodePathInterface) {
     let path = parentsPath.concat(nodeId)
     let nodePath: Array<Function | string> = []
     path.forEach(id => {
@@ -77,8 +77,8 @@ const Recursive: Component = props => {
         {
             id: 0,
             children: [
-                { id: 1, children: [{ id: 2, children: [] }] },
-                { id: 3, children: [] },
+                {id: 1, children: [{id: 2, children: []}]},
+                {id: 3, children: []},
             ],
         },
     ])
@@ -86,8 +86,8 @@ const Recursive: Component = props => {
     const addNode = (nodeId: number, parentsPath: number[]) => {
         setData(
             // @ts-ignore
-            ...genNodePath({ nodeId, parentsPath }),
-            (children: any) => [...children, { id: ++id, children: [] }],
+            ...genNodePath({nodeId, parentsPath}),
+            (children: any) => [...children, {id: ++id, children: []}],
         )
     }
 

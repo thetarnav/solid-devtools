@@ -9,7 +9,7 @@ This script is injected into every page and is responsible for:
 
 */
 
-import { error, log } from '@solid-devtools/shared/utils'
+import {error, log} from '@solid-devtools/shared/utils'
 import {
     ConnectionName,
     DETECT_MESSAGE,
@@ -32,7 +32,7 @@ import debuggerPath from './debugger?script&module'
 
 const extVersion = chrome.runtime.getManifest().version
 
-const port = chrome.runtime.connect({ name: ConnectionName.Content })
+const port = chrome.runtime.connect({name: ConnectionName.Content})
 
 let devtoolsOpened = false
 
@@ -40,7 +40,7 @@ startListeningWindowMessages()
 const fromClient = makeMessageListener()
 const toClient = makePostMessage()
 
-const { postPortMessage: toBackground, onPortMessage: fromBackground } = createPortMessanger(port)
+const {postPortMessage: toBackground, onPortMessage: fromBackground} = createPortMessanger(port)
 
 function loadScriptInRealWorld(path: string): Promise<void> {
     return new Promise((resolve, reject) => {
@@ -101,7 +101,7 @@ fromBackground('DevtoolsClosed', () => toClient('DevtoolsClosed'))
 
 fromClient(e => {
     // forward all client messages to the background script in
-    const payload: ForwardPayload = { forwarding: true, name: e.name, details: e.details }
+    const payload: ForwardPayload = {forwarding: true, name: e.name, details: e.details}
     port.postMessage(payload)
 })
 

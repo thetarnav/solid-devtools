@@ -1,8 +1,8 @@
-import { color } from '@nothing-but/utils'
-import { combineProps } from '@solid-primitives/props'
+import {color} from '@nothing-but/utils'
+import {combineProps} from '@solid-primitives/props'
 import clsx from 'clsx'
 import * as s from 'solid-js'
-import { theme } from '..'
+import {theme} from '..'
 import Icon from './icons'
 
 export const toggle_button = 'toggle-button'
@@ -47,7 +47,7 @@ export const toggle_button_styles = /*css*/ `
 `
 
 export const ToggleButton: s.ParentComponent<
-    s.ComponentProps<'button'> & { onToggle: (selected: boolean) => void; selected: boolean }
+    s.ComponentProps<'button'> & {onToggle: (selected: boolean) => void; selected: boolean}
 > = props => {
     props = combineProps(props, {
         class: toggle_button,
@@ -73,7 +73,7 @@ export const CollapseToggle: s.Component<{
     default_collapsed?: boolean
     name?: string
 }> = props => {
-    const { onToggle } = props
+    const {onToggle} = props
 
     return (
         <button
@@ -87,7 +87,7 @@ export const CollapseToggle: s.Component<{
                     onToggle(!props.collapsed)
                 })
             }
-            {...(props.name && { 'aria-label': `Expand or collapse ${props.name}` })}
+            {...(props.name && {'aria-label': `Expand or collapse ${props.name}`})}
         >
             <Icon.Triangle
                 class={clsx(

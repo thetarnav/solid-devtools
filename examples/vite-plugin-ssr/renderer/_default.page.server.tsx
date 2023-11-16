@@ -1,20 +1,20 @@
-import { generateHydrationScript, renderToStream } from 'solid-js/web'
-import { dangerouslySkipEscape, escapeInject, stampPipe } from 'vite-plugin-ssr/server'
-import { PageLayout } from './PageLayout'
+import {generateHydrationScript, renderToStream} from 'solid-js/web'
+import {dangerouslySkipEscape, escapeInject, stampPipe} from 'vite-plugin-ssr/server'
+import {PageLayout} from './PageLayout'
 import logoUrl from './logo.svg'
-import { PageContext } from './types'
+import {PageContext} from './types'
 
-export { passToClient, render }
+export {passToClient, render}
 
 // See https://vite-plugin-ssr.com/data-fetching
 const passToClient = ['pageProps', 'documentProps']
 
 function render(pageContext: PageContext) {
-    const { pipe } = renderToStream(() => <PageLayout pageContext={pageContext} />)
+    const {pipe} = renderToStream(() => <PageLayout pageContext={pageContext} />)
     stampPipe(pipe, 'node-stream')
 
     // See https://vite-plugin-ssr.com/head
-    const { documentProps } = pageContext
+    const {documentProps} = pageContext
     const title = (documentProps && documentProps.title) || 'Vite SSR app'
     const description =
         (documentProps && documentProps.description) || 'App using Vite + vite-plugin-ssr'

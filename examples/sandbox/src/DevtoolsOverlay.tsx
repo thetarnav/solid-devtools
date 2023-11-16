@@ -1,4 +1,4 @@
-import { attachDevtoolsOverlay } from '@solid-devtools/overlay'
+import {attachDevtoolsOverlay} from '@solid-devtools/overlay'
 
 declare global {
     interface Window {

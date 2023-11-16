@@ -1,15 +1,15 @@
-import { EmitterEmit, Listen } from '@solid-primitives/event-bus'
-import { throttle } from '@solid-primitives/scheduled'
-import { defer } from '@solid-primitives/utils'
-import { Accessor, createEffect, createMemo } from 'solid-js'
-import type { Debugger } from '../main'
-import { DevtoolsMainView, NodeType } from '../main/constants'
-import { ObjectType, getObjectById } from '../main/id'
-import { NodeID, Solid } from '../main/types'
-import { getNodeType } from '../main/utils'
-import { OnNodeUpdate, SerializedDGraph, collectDependencyGraph } from './collect'
+import {EmitterEmit, Listen} from '@solid-primitives/event-bus'
+import {throttle} from '@solid-primitives/scheduled'
+import {defer} from '@solid-primitives/utils'
+import {Accessor, createEffect, createMemo} from 'solid-js'
+import type {Debugger} from '../main'
+import {DevtoolsMainView, NodeType} from '../main/constants'
+import {ObjectType, getObjectById} from '../main/id'
+import {NodeID, Solid} from '../main/types'
+import {getNodeType} from '../main/utils'
+import {OnNodeUpdate, SerializedDGraph, collectDependencyGraph} from './collect'
 
-export { SerializedDGraph } from './collect'
+export {SerializedDGraph} from './collect'
 
 export type DGraphUpdate = SerializedDGraph.Graph | null
 

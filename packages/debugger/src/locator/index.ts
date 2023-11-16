@@ -1,10 +1,10 @@
-import { makeHoverElementListener } from '@solid-devtools/shared/primitives'
-import { warn } from '@solid-devtools/shared/utils'
-import { EmitterEmit } from '@solid-primitives/event-bus'
-import { makeEventListener } from '@solid-primitives/event-listener'
-import { createKeyHold } from '@solid-primitives/keyboard'
-import { scheduleIdle } from '@solid-primitives/scheduled'
-import { defer } from '@solid-primitives/utils'
+import {makeHoverElementListener} from '@solid-devtools/shared/primitives'
+import {warn} from '@solid-devtools/shared/utils'
+import {EmitterEmit} from '@solid-primitives/event-bus'
+import {makeEventListener} from '@solid-primitives/event-listener'
+import {createKeyHold} from '@solid-primitives/keyboard'
+import {scheduleIdle} from '@solid-primitives/scheduled'
+import {defer} from '@solid-primitives/utils'
 import {
     Accessor,
     createEffect,
@@ -14,12 +14,12 @@ import {
     onCleanup,
     runWithOwner,
 } from 'solid-js'
-import type { Debugger } from '../main'
+import type {Debugger} from '../main'
 import * as registry from '../main/component-registry'
-import { ObjectType, getObjectById } from '../main/id'
+import {ObjectType, getObjectById} from '../main/id'
 import SolidAPI from '../main/solid-api'
-import { NodeID } from '../main/types'
-import { createElementsOverlay } from './element-overlay'
+import {NodeID} from '../main/types'
+import {createElementsOverlay} from './element-overlay'
 import {
     LocatorComponent,
     SourceCodeData,
@@ -31,9 +31,9 @@ import {
     getSourceCodeData,
     openSourceCode,
 } from './find-components'
-import { HighlightElementPayload, LocatorOptions } from './types'
+import {HighlightElementPayload, LocatorOptions} from './types'
 
-export { parseLocationString } from './find-components'
+export {parseLocationString} from './find-components'
 
 export function createLocator(props: {
     emit: EmitterEmit<Debugger.OutputChannels>
@@ -100,10 +100,10 @@ export function createLocator(props: {
     createEffect((prev: NodeID | undefined) => {
         const target = hoverTarget()
         const comp = target && registry.findComponent(target)
-        if (prev) props.emit('HoveredComponent', { nodeId: prev, state: false })
+        if (prev) props.emit('HoveredComponent', {nodeId: prev, state: false})
         if (comp) {
-            const { id } = comp
-            props.emit('HoveredComponent', { nodeId: id, state: true })
+            const {id} = comp
+            props.emit('HoveredComponent', {nodeId: id, state: true})
             return id
         }
     })
@@ -122,11 +122,11 @@ export function createLocator(props: {
             window,
             'click',
             e => {
-                const { target } = e
+                const {target} = e
                 if (!(target instanceof HTMLElement)) return
                 const highlighted = highlightedComponents()
                 const comp =
-                    highlighted.find(({ element }) => target.contains(element)) ?? highlighted[0]
+                    highlighted.find(({element}) => target.contains(element)) ?? highlighted[0]
                 if (!comp) return
                 const sourceCodeData =
                     comp.location && getSourceCodeData(comp.location, comp.element)
@@ -158,7 +158,7 @@ export function createLocator(props: {
             locatorUsed = true
             if (options.targetIDE) targetIDE = options.targetIDE
             if (options.key !== false) {
-                const isHoldingKey = createKeyHold(options.key ?? 'Alt', { preventDefault: true })
+                const isHoldingKey = createKeyHold(options.key ?? 'Alt', {preventDefault: true})
                 setEnabledByPressingSignal(() => isHoldingKey)
             }
         })

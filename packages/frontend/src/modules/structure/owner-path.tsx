@@ -1,22 +1,22 @@
-import { useController } from '@/controller'
-import { Icon, styles, theme } from '@/ui'
-import { Node_Type_Icon } from '@/ui/components/owner-name'
-import { NodeType, UNKNOWN } from '@solid-devtools/debugger/types'
-import { createHover } from '@solid-devtools/shared/primitives'
-import { createElementSize } from '@solid-primitives/resize-observer'
-import { useRemSize } from '@solid-primitives/styles'
-import { Component, createMemo } from 'solid-js'
-import { useStructure } from './structure-tree'
-import { path_height_class, path_height_in_rem, path_min_height_class } from './styles'
+import {useController} from '@/controller'
+import {Icon, styles, theme} from '@/ui'
+import {Node_Type_Icon} from '@/ui/components/owner-name'
+import {NodeType, UNKNOWN} from '@solid-devtools/debugger/types'
+import {createHover} from '@solid-devtools/shared/primitives'
+import {createElementSize} from '@solid-primitives/resize-observer'
+import {useRemSize} from '@solid-primitives/styles'
+import {Component, createMemo} from 'solid-js'
+import {useStructure} from './structure-tree'
+import {path_height_class, path_height_in_rem, path_min_height_class} from './styles'
 
 export const OwnerPath: Component = () => {
-    const { inspector, hovered } = useController()
+    const {inspector, hovered} = useController()
     const structure = useStructure()
 
     let container!: HTMLDivElement
     const rem = useRemSize()
     const containerSize = createElementSize(() => container)
-    const expandable = () => (containerSize.height ?? 0) > rem() * path_height_in_rem
+    const expandable = (): boolean => (containerSize.height ?? 0) > rem() * path_height_in_rem
 
     const path = createMemo(() => {
         const node = structure.inspectedNode()

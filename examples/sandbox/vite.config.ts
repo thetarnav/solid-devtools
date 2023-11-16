@@ -1,7 +1,7 @@
 import devtools from 'solid-devtools/vite'
-import { presetTypography } from 'unocss'
+import {presetTypography} from 'unocss'
 import Unocss from 'unocss/vite'
-import { defineConfig } from 'vite'
+import {defineConfig} from 'vite'
 import Inspect from 'vite-plugin-inspect'
 import solid from 'vite-plugin-solid'
 
@@ -20,7 +20,7 @@ export default defineConfig(mode => {
                     componentLocation: true,
                 },
             }),
-            solid({ hot: true, dev: true }),
+            solid({hot: true, dev: true}),
             Unocss({
                 presets: [presetTypography()],
             }),

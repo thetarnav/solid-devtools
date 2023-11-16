@@ -1,18 +1,5 @@
-import { makeEventListener } from '@solid-primitives/event-listener'
-import {
-    batch,
-    ComponentProps,
-    createComputed,
-    createMemo,
-    createSignal,
-    ErrorBoundary,
-    JSX,
-    mergeProps,
-    onError,
-    ParentComponent,
-    Show,
-    untrack,
-} from 'solid-js'
+import {makeEventListener} from '@solid-primitives/event-listener'
+import * as s from 'solid-js'
 
 export type HeadlessErrorOverlayRenderProps = {
     error: unknown
@@ -24,16 +11,16 @@ export type HeadlessErrorOverlayRenderProps = {
 }
 
 function ErrorOverlayInternal(props: {
-    render: JSX.Element | ((props: HeadlessErrorOverlayRenderProps) => JSX.Element)
+    render: s.JSX.Element | ((props: HeadlessErrorOverlayRenderProps) => s.JSX.Element)
     errors: unknown[]
     resetError: () => void
-}): JSX.Element {
-    const [currentPage, setCurrentPage] = createSignal(1)
+}): s.JSX.Element {
+    const [currentPage, setCurrentPage] = s.createSignal(1)
 
-    const length = createMemo(() => props.errors.length)
-    const currentError = createMemo(() => props.errors[currentPage() - 1])
+    const length = s.createMemo(() => props.errors.length)
+    const currentError = s.createMemo(() => props.errors[currentPage() - 1])
 
-    createComputed((currentLength: number) => {
+    s.createComputed((currentLength: number) => {
         const newLength = length()
         if (currentLength < newLength) {
             setCurrentPage(current => current + 1)
@@ -41,7 +28,7 @@ function ErrorOverlayInternal(props: {
         return newLength
     }, length())
 
-    function goPrev() {
+    function goPrev(): void {
         setCurrentPage(c => {
             if (c > 1) {
                 return c - 1
@@ -49,7 +36,7 @@ function ErrorOverlayInternal(props: {
             return length()
         })
     }
-    function goNext() {
+    function goNext(): void {
         setCurrentPage(c => {
             if (c < length()) {
                 return c + 1
@@ -58,10 +45,10 @@ function ErrorOverlayInternal(props: {
         })
     }
 
-    const { render } = props
+    const {render} = props
 
     if (typeof render === 'function') {
-        return untrack(() =>
+        return s.untrack(() =>
             render({
                 goPrev,
                 goNext,
@@ -82,28 +69,28 @@ function ErrorOverlayInternal(props: {
     return render
 }
 
-export const HeadlessErrorOverlay: ParentComponent<{
-    render?: JSX.Element | ((props: HeadlessErrorOverlayRenderProps) => JSX.Element)
+export const HeadlessErrorOverlay: s.ParentComponent<{
+    render?: s.JSX.Element | ((props: HeadlessErrorOverlayRenderProps) => s.JSX.Element)
     onError?: (error: unknown) => void
     catchWindowErrors?: boolean
 }> = props => {
-    const [errors, setErrors] = createSignal<unknown[]>([])
-    const [fallback, setFallback] = createSignal(false)
+    const [errors, setErrors] = s.createSignal<unknown[]>([])
+    const [fallback, setFallback] = s.createSignal(false)
 
-    function resetError() {
+    function resetError(): void {
         setErrors([])
         setFallback(false)
     }
 
-    function pushError(error: unknown) {
+    function pushError(error: unknown): void {
         props.onError?.(error)
         setErrors(current => [error, ...current])
     }
 
     props.catchWindowErrors && makeEventListener(window, 'error', pushError)
-    onError(pushError)
+    s.onError(pushError)
 
-    const errorOverlayInternalProps: ComponentProps<typeof ErrorOverlayInternal> = {
+    const errorOverlayInternalProps: s.ComponentProps<typeof ErrorOverlayInternal> = {
         get errors() {
             return errors()
         },
@@ -114,18 +101,18 @@ export const HeadlessErrorOverlay: ParentComponent<{
     }
 
     return [
-        ErrorBoundary({
+        s.ErrorBoundary({
             fallback(err, reset) {
-                batch(() => {
+                s.batch(() => {
                     setFallback(true)
                     pushError(err)
                 })
 
-                return untrack(() =>
+                return s.untrack(() =>
                     ErrorOverlayInternal(
-                        mergeProps(errorOverlayInternalProps, {
+                        s.mergeProps(errorOverlayInternalProps, {
                             resetError() {
-                                batch(() => {
+                                s.batch(() => {
                                     resetError()
                                     reset()
                                 })
@@ -138,12 +125,12 @@ export const HeadlessErrorOverlay: ParentComponent<{
                 return props.children
             },
         }),
-        Show({
+        s.Show({
             get when() {
                 return !fallback() && errors().length
             },
             get children() {
-                return untrack(() => ErrorOverlayInternal(errorOverlayInternalProps))
+                return s.untrack(() => ErrorOverlayInternal(errorOverlayInternalProps))
             },
         }),
     ]

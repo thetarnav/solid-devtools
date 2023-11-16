@@ -6,14 +6,14 @@ It also starts listening to Solid DEV events and stores them to be sent to the d
 
 */
 
-import { error } from '@solid-devtools/shared/utils'
+import {error} from '@solid-devtools/shared/utils'
 import * as SolidAPI from 'solid-js'
-import { $PROXY, DEV, createRoot, getListener, getOwner, onCleanup, untrack } from 'solid-js'
+import {$PROXY, DEV, createRoot, getListener, getOwner, onCleanup, untrack} from 'solid-js'
 import * as StoreAPI from 'solid-js/store'
-import { DEV as STORE_DEV, unwrap } from 'solid-js/store'
+import {DEV as STORE_DEV, unwrap} from 'solid-js/store'
 import * as WebAPI from 'solid-js/web'
-import type { LocatorOptions } from './locator/types'
-import { DevEventType, type Solid, type StoredDevEvent } from './main/types'
+import type {LocatorOptions} from './locator/types'
+import {DevEventType, type Solid, type StoredDevEvent} from './main/types'
 
 const OwnerLocationMap = new WeakMap<Solid.Owner, string>()
 
