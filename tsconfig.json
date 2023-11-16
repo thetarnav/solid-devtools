@@ -1,11 +1,12 @@
 {
-  "extends": "./configs/tsconfig.base.json",
-  "compilerOptions": {
-    "lib": ["DOM", "DOM.Iterable", "ESNext"],
-    "jsx": "preserve",
-    "jsxImportSource": "solid-js",
-    "declarationMap": true,
-    "declaration": true
-  },
-  "exclude": ["node_modules", "**/dist/**/*"]
+    "extends": "./configs/tsconfig.base.json",
+    "compilerOptions": {
+        "lib": ["DOM", "DOM.Iterable", "ESNext"],
+        "jsx": "preserve",
+        "jsxImportSource": "solid-js",
+        "declarationMap": true,
+        "declaration": true,
+        "rootDir": "."
+    },
+    "exclude": ["node_modules", "**/dist/**/*"]
 }

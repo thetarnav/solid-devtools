@@ -74,7 +74,7 @@ This project uses [changesets](https://github.com/changesets/changesets) to mana
 
 ![image](https://user-images.githubusercontent.com/24491503/191084587-e53b1743-39ac-40e0-b3a6-cf6bcaca9d5d.png)
 
-4. Click on the "Load unpacked" button and select the `packages/extension/dist` folder
+4. Click on the "Load unpacked" button and select the `packages/extension/dist/chrome` directory (or `packages/extension/dist/firefox` if you are using firefox)
 
 ![image](https://user-images.githubusercontent.com/24491503/191084770-84577eb0-1c90-44a7-afa2-a2d03f728a66.png)
 

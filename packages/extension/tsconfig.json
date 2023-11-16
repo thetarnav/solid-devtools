@@ -7,7 +7,7 @@
         }
     },
     "include": [
-        "src/**/*",
+        "panel/**/*",
         "background/**/*",
         "content/**/*",
         "devtools/**/*",

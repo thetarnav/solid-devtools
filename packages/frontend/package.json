@@ -37,6 +37,8 @@
         "test:types": "tsc --noEmit"
     },
     "dependencies": {
+        "@nothing-but/utils": "~0.11.1",
+        "@solid-devtools/theme": "workspace:^",
         "@solid-devtools/debugger": "workspace:^",
         "@solid-devtools/shared": "workspace:^",
         "@solid-primitives/context": "^0.2.1",
@@ -67,5 +69,5 @@
     "peerDependencies": {
         "solid-js": "^1.8.0"
     },
-    "packageManager": "pnpm@8.6.0"
+    "packageManager": "pnpm@8.9.0"
 }

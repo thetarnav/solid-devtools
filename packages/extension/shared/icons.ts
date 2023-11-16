@@ -12,5 +12,3 @@ export const icons = {
         128: 'assets/icons/solid-gray-128.png',
     },
 } as const
-
-export default icons

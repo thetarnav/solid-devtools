@@ -253,20 +253,26 @@ const DisplayStructureTree: Component = () => {
             lastInspectedIndex,
         )
 
-        const nodeList = structure.state().nodeList
-        const collapsedList: Structure.Node[] = []
+        const all_nodes_list = structure.state().nodeList
+        const collapsed_list: Structure.Node[] = []
         const set = collapsed()
 
-        let skip = 0
-        for (const node of nodeList) {
-            const skipped = skip > 0
-            if (skipped) skip--
-            else collapsedList.push(node)
+        /*
+            Go over the list of all nodes
+            skip the ones that are in collapsed set
+            by increasing the skip counter by the number of children
+        */
+        let skip_n = 0
+        for (const node of all_nodes_list) {
+            const is_skipped = skip_n > 0
 
-            if (skipped || set.has(node)) skip += node.children.length
+            if (is_skipped) skip_n--
+            else collapsed_list.push(node)
+
+            if (is_skipped || set.has(node)) skip_n += node.children.length
         }
 
-        return collapsedList
+        return collapsed_list
     })
 
     const virtual = createMemo<{

@@ -11,12 +11,12 @@ importers:
       '@changesets/cli':
         specifier: ^2.26.2
         version: 2.26.2
-      '@nothing-but/utils':
-        specifier: ~0.11.1
-        version: 0.11.1
       '@playwright/test':
         specifier: ^1.39.0
         version: 1.39.0
+      '@solid-devtools/theme':
+        specifier: file:packages/theme
+        version: file:packages/theme
       '@total-typescript/ts-reset':
         specifier: ^0.5.1
         version: 0.5.1
@@ -68,6 +68,9 @@ importers:
       tsup-preset-solid:
         specifier: ^2.1.0
         version: 2.1.0(esbuild@0.19.5)(solid-js@1.8.5)(tsup@7.2.0)
+      tsx:
+        specifier: ^3.14.0
+        version: 3.14.0
       turbo:
         specifier: ^1.10.16
         version: 1.10.16
@@ -221,8 +224,8 @@ importers:
         version: 1.8.5
     devDependencies:
       '@crxjs/vite-plugin':
-        specifier: 2.0.0-beta.17
-        version: 2.0.0-beta.17
+        specifier: 2.0.0-beta.21
+        version: 2.0.0-beta.21
       '@types/chrome':
         specifier: ^0.0.248
         version: 0.0.248
@@ -235,12 +238,18 @@ importers:
 
   packages/frontend:
     dependencies:
+      '@nothing-but/utils':
+        specifier: ~0.11.1
+        version: 0.11.1
       '@solid-devtools/debugger':
         specifier: workspace:^
         version: link:../debugger
       '@solid-devtools/shared':
         specifier: workspace:^
         version: link:../shared
+      '@solid-devtools/theme':
+        specifier: workspace:^
+        version: link:../theme
       '@solid-primitives/context':
         specifier: ^0.2.1
         version: 0.2.1(solid-js@1.8.5)
@@ -382,6 +391,9 @@ importers:
 
   packages/overlay:
     dependencies:
+      '@nothing-but/utils':
+        specifier: ~0.11.1
+        version: 0.11.1
       '@solid-devtools/debugger':
         specifier: workspace:^
         version: link:../debugger
@@ -453,6 +465,12 @@ importers:
       solid-js:
         specifier: ^1.8.5
         version: 1.8.5
+
+  packages/theme:
+    dependencies:
+      '@nothing-but/utils':
+        specifier: ~0.11.1
+        version: 0.11.1
 
 packages:
 
@@ -1781,8 +1799,8 @@ packages:
       prettier: 2.8.8
     dev: true
 
-  /@crxjs/vite-plugin@2.0.0-beta.17:
-    resolution: {integrity: sha512-44CavnsY01jvF2uHfRdqA3j6bg6IcVc+ZrSayYS+H7eqb6BHWh619A2jJ3Y0eHVh9H65041ob4g6I1VMxWx4qw==}
+  /@crxjs/vite-plugin@2.0.0-beta.21:
+    resolution: {integrity: sha512-kSXgHHqCXASqJ8NmY94+KLGVwdtkJ0E7KsRQ+vbMpRliJ5ze0xnSk0l41p4txlUysmEoqaeo4Xb7rEFdcU2zjQ==}
     dependencies:
       '@rollup/pluginutils': 4.2.1
       '@webcomponents/custom-elements': 1.6.0
@@ -7990,4 +8008,11 @@ packages:
       archiver-utils: 4.0.1
       compress-commons: 5.0.1
       readable-stream: 3.6.2
+    dev: true
+
+  file:packages/theme:
+    resolution: {directory: packages/theme, type: directory}
+    name: '@solid-devtools/theme'
+    dependencies:
+      '@nothing-but/utils': 0.11.1
     dev: true

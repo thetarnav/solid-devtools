@@ -26,6 +26,9 @@ export type DetectEvent = {
     state: DetectionState
 }
 
+const LOG_MESSAGES = import.meta.env.DEV
+// const LOG_MESSAGES: boolean = true
+
 export function createPortMessanger<
     IM extends { [K in string]: any } = {},
     OM extends { [K in string]: any } = {},
@@ -42,10 +45,9 @@ export function createPortMessanger<
     } = {}
 
     let connected = true
-    import.meta.env.DEV && log(`${port.name.replace(DEVTOOLS_ID_PREFIX, '')} port connected.`)
+    LOG_MESSAGES && log(`${port.name.replace(DEVTOOLS_ID_PREFIX, '')} port connected.`)
     port.onDisconnect.addListener(() => {
-        import.meta.env.DEV &&
-            log(`${port.name.replace(DEVTOOLS_ID_PREFIX, '')} port disconnected.`)
+        LOG_MESSAGES && log(`${port.name.replace(DEVTOOLS_ID_PREFIX, '')} port disconnected.`)
         connected = false
         listeners = {}
         port.onMessage.removeListener(onMessage)

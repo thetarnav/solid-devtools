@@ -5,10 +5,10 @@ import { defineConfig } from 'vite'
 import Inspect from 'vite-plugin-inspect'
 import solid from 'vite-plugin-solid'
 
-const usingExtension = process.env['EXT'] === 'true' || process.env['EXT'] === '1'
+const is_ext = process.env['EXT'] === 'true' || process.env['EXT'] === '1'
 
 export default defineConfig(mode => {
-    const isBuild = mode.command === 'build'
+    const is_build = mode.command === 'build'
 
     return {
         plugins: [
@@ -27,8 +27,8 @@ export default defineConfig(mode => {
             Inspect(),
         ],
         define: {
-            'process.env.EXT': JSON.stringify(usingExtension),
-            'process.env.BUILD': JSON.stringify(isBuild),
+            'process.env.EXT': JSON.stringify(is_ext),
+            'process.env.BUILD': JSON.stringify(is_build),
         },
         mode: 'development',
         build: {

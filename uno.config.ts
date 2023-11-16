@@ -1,8 +1,8 @@
-import { defineConfig, presetUno } from 'unocss'
-import * as theme from './configs/theme'
+import * as theme from '@solid-devtools/theme'
+import * as uno from 'unocss'
 
-export default defineConfig({
-    presets: [presetUno({ dark: 'media' })],
+export default uno.defineConfig({
+    presets: [uno.presetUno({ dark: 'media' })],
     theme: {
         colors: theme.colors,
 
