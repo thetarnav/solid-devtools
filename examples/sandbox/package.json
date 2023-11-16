@@ -11,11 +11,11 @@
         "preview": "vite preview"
     },
     "devDependencies": {
-        "@babel/plugin-syntax-typescript": "^7.22.5",
-        "@unocss/preset-typography": "^0.57.1",
+        "@babel/plugin-syntax-typescript": "^7.23.3",
+        "@unocss/preset-typography": "^0.57.4",
         "solid-devtools": "workspace:^",
-        "unocss": "^0.57.1",
-        "vite-plugin-inspect": "^0.7.41"
+        "unocss": "^0.57.4",
+        "vite-plugin-inspect": "^0.7.42"
     },
     "dependencies": {
         "@solid-devtools/debugger": "workspace:^",

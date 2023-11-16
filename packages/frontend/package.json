@@ -37,10 +37,10 @@
         "test:types": "tsc --noEmit"
     },
     "dependencies": {
-        "@nothing-but/utils": "~0.11.1",
-        "@solid-devtools/theme": "workspace:^",
+        "@nothing-but/utils": "~0.12.0",
         "@solid-devtools/debugger": "workspace:^",
         "@solid-devtools/shared": "workspace:^",
+        "@solid-devtools/theme": "workspace:^",
         "@solid-primitives/context": "^0.2.1",
         "@solid-primitives/cursor": "^0.0.112",
         "@solid-primitives/date": "^2.0.18",
@@ -63,7 +63,7 @@
         "solid-headless": "^0.13.1"
     },
     "devDependencies": {
-        "@unocss/cli": "^0.57.1",
+        "@unocss/cli": "^0.57.4",
         "solid-js": "^1.8.5"
     },
     "peerDependencies": {

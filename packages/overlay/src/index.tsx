@@ -1,6 +1,6 @@
 import '@solid-devtools/debugger/setup'
 
-import { Num } from '@nothing-but/utils'
+import { num } from '@nothing-but/utils'
 import { useDebugger } from '@solid-devtools/debugger/bundled'
 import { Icon, MountIcons } from '@solid-devtools/frontend'
 import { useIsMobile, useIsTouch } from '@solid-devtools/shared/primitives'
@@ -63,7 +63,7 @@ const Overlay: Component<{
     makeEventListener(window, 'pointermove', e => {
         if (!dragging()) return
         const vh = window.innerHeight
-        setProgress(1 - Num.clamp(e.y, 0, vh - 300) / vh)
+        setProgress(1 - num.clamp(e.y, 0, vh - 300) / vh)
     })
     makeEventListener(window, 'pointerup', setDragging.bind(void 0, false))
 

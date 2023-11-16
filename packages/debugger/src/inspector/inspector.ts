@@ -1,4 +1,4 @@
-import { Misc } from '@nothing-but/utils'
+import { misc } from '@nothing-but/utils'
 import { untrackedCallback } from '@solid-devtools/shared/primitives'
 import { parseLocationString } from '../locator'
 import { NodeType, ValueItemType } from '../main/constants'
@@ -253,7 +253,7 @@ function mapProps(props: Solid.Component['props']) {
                     value: encodeValue(desc.value, false),
                 }
                 // non-object props cannot be inspected (won't ever change and aren't deep)
-                if (Array.isArray(desc.value) || Misc.is_plain_object(desc.value))
+                if (Array.isArray(desc.value) || misc.is_plain_object(desc.value))
                     ValueMap.add(id, () => desc.value)
             }
         }

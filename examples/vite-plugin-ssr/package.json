@@ -12,6 +12,6 @@
         "vite-plugin-ssr": "0.4.142"
     },
     "devDependencies": {
-        "vite-plugin-inspect": "^0.7.41"
+        "vite-plugin-inspect": "^0.7.42"
     }
 }

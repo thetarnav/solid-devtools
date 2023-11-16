@@ -1,11 +1,11 @@
 import { theme } from '@/ui'
-import { Color } from '@nothing-but/utils'
+import { color } from '@nothing-but/utils'
 import { combineProps } from '@solid-primitives/props'
 import clsx from 'clsx'
 import * as s from 'solid-js'
 
 const thumb_color = (opacity: number) =>
-    Color.rgb_to_rgba(Color.hex_to_rgb(theme.colors.gray[500]), opacity).toString()
+    color.rgb_to_rgba(color.hex_to_rgb(theme.colors.gray[500]), opacity).toString()
 
 export const custom_scrollbar = 'custom_scrollbar'
 export const custom_scrollbar_styles = /*css*/ `

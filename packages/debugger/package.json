@@ -71,7 +71,7 @@
         "test:types": "tsc --noEmit --paths null"
     },
     "dependencies": {
-        "@nothing-but/utils": "~0.11.1",
+        "@nothing-but/utils": "~0.12.0",
         "@solid-devtools/shared": "workspace:^",
         "@solid-primitives/bounds": "^0.0.118",
         "@solid-primitives/cursor": "^0.0.112",

@@ -15,7 +15,7 @@
     },
     "devDependencies": {
         "@crxjs/vite-plugin": "2.0.0-beta.21",
-        "@types/chrome": "^0.0.248"
+        "@types/chrome": "^0.0.251"
     },
     "dependencies": {
         "@solid-devtools/debugger": "workspace:^",

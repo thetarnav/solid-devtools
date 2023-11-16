@@ -2,7 +2,7 @@
 // see https://developer.chrome.com/docs/devtools/console/format-style/
 // to gen a overview of how to style console messages
 
-import { Arr } from '@nothing-but/utils'
+import { array } from '@nothing-but/utils'
 import { getNodeName, getNodeType, getOwnerType, isSolidMemo } from '@solid-devtools/debugger'
 import { NODE_TYPE_NAMES, NodeType, Solid, UNKNOWN } from '@solid-devtools/debugger/types'
 import { getDiffMap, getStackDiffMap } from './utils'
@@ -206,7 +206,7 @@ export function logOwned(
     )
 
     logOwnersDiff(prevOwned, owned, 'stack', owner => {
-        const sources = owner.sources ? Arr.deduped(owner.sources) : []
+        const sources = owner.sources ? array.deduped(owner.sources) : []
         const usesPrev = !!owner.fn.length
         const usesValue = usesPrev || isSolidMemo(owner)
         logComputationDetails({

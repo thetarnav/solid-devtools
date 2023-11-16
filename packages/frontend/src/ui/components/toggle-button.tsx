@@ -1,4 +1,4 @@
-import { Color } from '@nothing-but/utils'
+import { color } from '@nothing-but/utils'
 import { combineProps } from '@solid-primitives/props'
 import clsx from 'clsx'
 import * as s from 'solid-js'
@@ -12,7 +12,7 @@ export const toggle_button_styles = /*css*/ `
         display: flex;
         align-items: center;
         justify-content: center;
-        --toggle-button-color: ${Color.rgb_value(Color.hex_to_rgb(theme.colors.gray[600]))};
+        --toggle-button-color: ${color.rgb_value(color.hex_to_rgb(theme.colors.gray[600]))};
         --toggle-button-color-opacity: 1;
         --toggle-button-bg-opacity: 0;
         --toggle-button-border-opacity: 0;
@@ -33,15 +33,15 @@ export const toggle_button_styles = /*css*/ `
         --toggle-button-bg-opacity: 0.05;
     }
     .toggle-button:is([aria-selected="true"], [aria-expanded="true"]) {
-        --toggle-button-color: ${Color.rgb_value(Color.hex_to_rgb(theme.colors.cyan[600]))};
+        --toggle-button-color: ${color.rgb_value(color.hex_to_rgb(theme.colors.cyan[600]))};
         --toggle-button-bg-opacity: 0.05;
     }
     @media (prefers-color-scheme: dark) {
         .toggle-button {
-            --toggle-button-color: ${Color.rgb_value(Color.hex_to_rgb(theme.colors.gray[400]))};
+            --toggle-button-color: ${color.rgb_value(color.hex_to_rgb(theme.colors.gray[400]))};
         }
         .toggle-button:is([aria-selected="true"], [aria-expanded="true"]) {
-            --toggle-button-color: ${Color.rgb_value(Color.hex_to_rgb(theme.colors.cyan[400]))};
+            --toggle-button-color: ${color.rgb_value(color.hex_to_rgb(theme.colors.cyan[400]))};
         }
     }
 `
