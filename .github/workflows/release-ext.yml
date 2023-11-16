@@ -37,7 +37,7 @@ jobs:
         env:
           CI: true
 
-      - name: Upload & release Extension
+      - name: Submit Chrome Extension
         uses: mnao305/chrome-extension-upload@v4.0.1
         with:
           file-path: packages/extension/dist/chrome.zip
@@ -45,3 +45,6 @@ jobs:
           client-id: ${{ secrets.CLIENT_ID }}
           client-secret: ${{ secrets.CLIENT_SECRET }}
           refresh-token: ${{ secrets.REFRESH_TOKEN }}
+
+      - name: Submit Firefox Extension
+        run: cd packages/extension && pnpm dlx web-ext sign -s dist/firefox --api-key=${{ secrets.FIREFOX_API_KEY }} --api-secret=${{ secrets.FIREFOX_API_SECRET }}
