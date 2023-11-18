@@ -65,7 +65,12 @@ export const getOwnerType = (o: Readonly<Solid.Owner>): NodeType => {
     // Effect
     if (!o.pure) {
         if (o.user === true) return NodeType.Effect
-        if (o.context !== null) return NodeType.Context
+        /*
+        after solid 1.8 context is being copied to children owners
+        so need to check if the reference is the same
+        */
+        if (o.context !== null && (!o.owner || o.owner.context !== o.context))
+            return NodeType.Context
         return NodeType.Render
     }
     return NodeType.Computation
