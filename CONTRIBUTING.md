@@ -16,7 +16,7 @@ You should reinstall the dependencies and rebuild the packages whenever you pull
 
 The code is formatted with prettier. You can use it if you want, or not, it's up to you because the code get's formatted automatically by a github action. If you want to use it, you can run `pnpm format` to format the code.
 
-If you want to run the E2E tests, you need to install the dependencies by running `pnpm dlx playwright install --with-deps chromium` _(or `npx playwright install --with-deps chromium`)_, then run `pnpm test:e2e`.
+If you want to run the E2E tests, you need to install the dependencies by running `pnpm exec playwright install --with-deps chromium` _(or `npx playwright install --with-deps chromium`)_, then run `pnpm test:e2e`.
 
 ## Operating System
 
