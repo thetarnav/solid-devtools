@@ -1,5 +1,11 @@
 # @solid-devtools/debugger
 
+## 0.23.3
+
+### Patch Changes
+
+-   4772a364: Correct detecting context nodes after solid 1.8
+
 ## 0.23.2
 
 ### Patch Changes
