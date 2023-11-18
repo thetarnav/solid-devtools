@@ -36,7 +36,7 @@ jobs:
             turbo-
 
       - name: Install Playwright browser and dependencies
-        run: pnpm dlx playwright install --with-deps chromium
+        run: pnpm exec playwright install --with-deps chromium
 
       - name: Run Build and Tests
         run: pnpm run build-test:packages
