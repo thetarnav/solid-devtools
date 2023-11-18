@@ -1,5 +1,12 @@
 # @solid-devtools/frontend
 
+## 0.11.4
+
+### Patch Changes
+
+-   Updated dependencies [4772a364]
+    -   @solid-devtools/debugger@0.23.3
+
 ## 0.11.3
 
 ### Patch Changes
