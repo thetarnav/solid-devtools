@@ -1,5 +1,11 @@
 # solid-devtools
 
+## 0.29.3
+
+### Patch Changes
+
+-   d6ec5bda: Allow usage with Vite 5
+
 ## 0.29.2
 
 ### Patch Changes
