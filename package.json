@@ -54,7 +54,7 @@
         "typescript": "^5.2.2",
         "unocss": "^0.57.4",
         "vite": "4.5.0",
-        "vite-plugin-solid": "^2.7.2",
+        "vite-plugin-solid": "^2.8.0",
         "vitest": "^0.34.6"
     },
     "packageManager": "pnpm@8.14.0",
