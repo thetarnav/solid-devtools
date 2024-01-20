@@ -1,21 +1,21 @@
 {
-  "cSpell.words": [
-    "Carniato",
-    "codeql",
-    "crxjs",
-    "Demaine",
-    "dgraph",
-    "otonashixav",
-    "outin",
-    "sarif",
-    "stefanzweifel",
-    "taze",
-    "todomvc",
-    "twind",
-    "undici"
-  ],
-  "typescript.tsdk": "node_modules/typescript/lib",
-  "editor.codeActionsOnSave": {
-    "source.fixAll.eslint": false
-  }
+    "cSpell.words": [
+        "Carniato",
+        "codeql",
+        "crxjs",
+        "Demaine",
+        "dgraph",
+        "otonashixav",
+        "outin",
+        "sarif",
+        "stefanzweifel",
+        "taze",
+        "todomvc",
+        "twind",
+        "undici"
+    ],
+    "typescript.tsdk": "node_modules/typescript/lib",
+    "editor.codeActionsOnSave": {
+        "source.fixAll.eslint": "never"
+    }
 }

@@ -5,8 +5,7 @@
         "jsx": "preserve",
         "jsxImportSource": "solid-js",
         "declarationMap": true,
-        "declaration": true,
-        "rootDir": "."
+        "declaration": true
     },
     "exclude": ["node_modules", "**/dist/**/*"]
 }

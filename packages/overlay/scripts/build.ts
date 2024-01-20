@@ -80,9 +80,8 @@ if (!isDev) {
 
 // generate type declarations
 {
-    const worker = new Worker(path.resolve(__dirname, `./dts_worker.ts`), {
-        argv: isDev ? ['--watch'] : [],
-    })
+    const filepath = path.resolve(__dirname, `dts_worker.js`)
+    const worker = new Worker(filepath, {argv: isDev ? ['--watch'] : []})
 
     if (isDev) {
         chokidar.watch(path.resolve(cwd, `src`)).on('change', () => {
