@@ -24,7 +24,7 @@ pnpm add -D solid-devtools
 
 ## Using the browser extension
 
-For the usage guide of the Solid Devtools chrome extension, please refer to the [extension documentation](../extension#Getting-started).
+For the usage guide of the Solid Devtools chrome extension, please refer to the [extension documentation](https://github.com/thetarnav/solid-devtools/tree/main/packages/extension#Getting-started).
 
 ## Type Module
 
@@ -81,7 +81,7 @@ devtools({
 })
 ```
 
-[**>> Follow this locator guide to know more**](../debugger#using-component-locator)
+[**>> Follow this locator guide to know more**](https://github.com/thetarnav/solid-devtools/tree/main/packages/debugger#using-component-locator)
 
 ### Import the devtools runtime
 
@@ -143,7 +143,7 @@ This option adds automatic name to signals, memos, stores, and mutables. Those n
 
 #### `locator`
 
-This option enables the [locator](../debugger#Using-component-locator) feature. The `key` and `targetIDE` are going to pe passed to `useLocator` function call.
+This option enables the [locator](https://github.com/thetarnav/solid-devtools/tree/main/packages/debugger#Using-component-locator) feature. The `key` and `targetIDE` are going to pe passed to `useLocator` function call.
 
 #### `locator.componentLocation`
 
