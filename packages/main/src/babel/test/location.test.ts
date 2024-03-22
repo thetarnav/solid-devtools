@@ -2,10 +2,10 @@ import {assertTransform, cwd, file} from './setup'
 
 import {LOCATION_ATTRIBUTE_NAME, WINDOW_PROJECTPATH_PROPERTY} from '@solid-devtools/debugger/types'
 import {describe, test} from 'vitest'
-import {Module, SET_COMPONENT_LOC, SET_COMPONENT_LOC_LOCAL} from '../constants'
+import {DevtoolsModuleNames, SET_COMPONENT_LOC, SET_COMPONENT_LOC_LOCAL} from '../constants'
 import getPlugin from '../location'
 
-const setLocationImport = `import { ${SET_COMPONENT_LOC} as ${SET_COMPONENT_LOC_LOCAL} } from "${Module.Setup}";`
+const setLocationImport = `import { ${SET_COMPONENT_LOC} as ${SET_COMPONENT_LOC_LOCAL} } from "${DevtoolsModuleNames.Setup}";`
 
 describe('location', () => {
     const testData: [

@@ -1,4 +1,4 @@
-export const enum Module {
+export const enum DevtoolsModuleNames {
     Main = 'solid-devtools',
     Setup = `${Main}/setup`,
 }
