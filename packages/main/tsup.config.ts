@@ -18,7 +18,7 @@ export default defineConfig([
         },
     },
     {
-        entryPoints: ['src/vite.ts'],
+        entryPoints: ['src/vite.ts', 'src/babel.ts'],
         format: 'esm',
         dts: true,
     },
