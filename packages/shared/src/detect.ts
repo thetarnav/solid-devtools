@@ -19,8 +19,8 @@ export async function detectSolid(): Promise<boolean> {
     if ($hy && typeof $hy === 'object' && 'completed' in $hy && $hy.completed instanceof WeakSet)
         return true
 
-    const bodyFirstEl = document.body.firstElementChild
-    if (bodyFirstEl && bodyFirstEl.hasAttribute(DATA_HYDRATION_KEY)) return true
+    if (document.querySelector('[' + DATA_HYDRATION_KEY + ']'))
+        return true
 
     const scripts = document.querySelectorAll('script')
     const attributeHydrateKeyNameRegex = new RegExp(
