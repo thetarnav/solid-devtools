@@ -1,4 +1,5 @@
 // @ts-check
+/* eslint-disable no-console */
 
 import path from 'path'
 import ts from 'typescript'

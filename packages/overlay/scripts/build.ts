@@ -1,3 +1,5 @@
+/* eslint-disable no-console */
+
 import chokidar from 'chokidar'
 import CleanCSS from 'clean-css'
 import esbuild from 'esbuild'
@@ -48,7 +50,7 @@ function customPlugin(output: string): esbuild.Plugin {
             if (!isDev) {
                 build.onLoad({filter: /\.css$/}, async args => {
                     const finename = path.basename(args.path)
-                    let time = Date.now()
+                    const time = Date.now()
                     let text = await readFile(args.path, 'utf-8')
                     text = new CleanCSS().minify(text).styles
                     console.log(
@@ -111,7 +113,7 @@ esbuild
         outfile: `dist/dev.js`,
         plugins: [customPlugin('dev'), solidPlugin()],
     })
-    .then(async ctx => {
+    .then(ctx => {
         isDev ? ctx.watch() : ctx.rebuild().then(() => ctx.dispose())
     })
 
@@ -123,6 +125,6 @@ esbuild
         outfile: `dist/prod.js`,
         plugins: [customPlugin('prod')],
     })
-    .then(async ctx => {
+    .then(ctx => {
         isDev ? ctx.watch() : ctx.rebuild().then(() => ctx.dispose())
     })
