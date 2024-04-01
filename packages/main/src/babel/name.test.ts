@@ -1,6 +1,6 @@
 import {describe, test} from 'vitest'
-import plugin from '../name'
-import {assertTransform, testTransform} from './setup'
+import {namePlugin} from './name'
+import {assertTransform, testTransform} from './setup_test'
 
 describe('returning primitives', () => {
     // Positive tests
@@ -26,7 +26,7 @@ describe('returning primitives', () => {
   const signal = ${creator}(undefined, ${extraArg}{
     name: "signal"
   });`,
-                        plugin,
+                        namePlugin,
                         true,
                     )
 
@@ -38,7 +38,7 @@ describe('returning primitives', () => {
   const signal = ${creator}(5, ${extraArg}{
     name: "signal"
   });`,
-                        plugin,
+                        namePlugin,
                         true,
                     )
 
@@ -54,7 +54,7 @@ describe('returning primitives', () => {
             name: "signal"
           });`,
 
-                        plugin,
+                        namePlugin,
                         true,
                     )
 
@@ -72,7 +72,7 @@ describe('returning primitives', () => {
     ...rest
   });`,
 
-                        plugin,
+                        namePlugin,
                         true,
                     )
 
@@ -90,7 +90,7 @@ describe('returning primitives', () => {
     ...rest
   });`,
 
-                        plugin,
+                        namePlugin,
                         true,
                     )
 
@@ -104,7 +104,7 @@ describe('returning primitives', () => {
     name: "signal"
   });`,
 
-                        plugin,
+                        namePlugin,
                         true,
                     )
 
@@ -118,7 +118,7 @@ describe('returning primitives', () => {
     name: "signal"
   });`,
 
-                        plugin,
+                        namePlugin,
                         true,
                     )
                 })
@@ -137,14 +137,14 @@ describe('returning primitives', () => {
             test(`no import`, () => {
                 const src = `const signal = ${create}();`
 
-                assertTransform(src, src, plugin, true)
+                assertTransform(src, src, namePlugin, true)
             })
 
             test(`incorrect import`, () => {
                 const src = `import { ${create} } from "${module}";
   const signal = ${create}();`
 
-                assertTransform(src, src, plugin, true)
+                assertTransform(src, src, namePlugin, true)
             })
         })
     }
@@ -174,7 +174,7 @@ describe('effect primitives', () => {
                 name: "in_${fnName}"
               });
             }`,
-                        plugin,
+                        namePlugin,
                         true,
                     )
                 })
@@ -191,7 +191,7 @@ describe('effect primitives', () => {
               name: "in_${fnName}"
             });
           };`,
-                    plugin,
+                    namePlugin,
                     true,
                 )
 
@@ -207,7 +207,7 @@ describe('effect primitives', () => {
               name: "in_${fnName}"
             });
           };`,
-                    plugin,
+                    namePlugin,
                     true,
                 )
 
@@ -223,7 +223,7 @@ describe('effect primitives', () => {
                 name: "to_${fnName}"
               });
             });`,
-                    plugin,
+                    namePlugin,
                     true,
                 )
             }
@@ -238,7 +238,7 @@ describe('effect primitives', () => {
           ${create}(() => {});
         }`
 
-                assertTransform(src, src, plugin, true)
+                assertTransform(src, src, namePlugin, true)
             })
         })
     }

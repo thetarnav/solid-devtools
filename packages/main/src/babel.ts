@@ -1,3 +1,3 @@
-export {DevtoolsModuleNames} from './babel/constants'
-export {default as devtoolsJsxLocationPlugin} from './babel/location'
-export {default as devtoolsNamePlugin} from './babel/name'
+export {DevtoolsModule} from './babel/shared.js'
+export {jsxLocationPlugin, JsxLocationPluginConfig} from './babel/location.js'
+export {namePlugin} from './babel/name.js'

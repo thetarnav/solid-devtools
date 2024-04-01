@@ -2,7 +2,7 @@ import type {PluginOption} from 'vite'
 
 import {PluginItem, transformAsync} from '@babel/core'
 import {LocatorOptions, TargetURLFunction} from '@solid-devtools/debugger/types'
-import {DevtoolsModuleNames, devtoolsJsxLocationPlugin, devtoolsNamePlugin} from '../babel'
+import * as babel from '../babel'
 
 export type DevtoolsPluginOptions = {
     /** Add automatic name when creating signals, memos, stores, or mutables */
@@ -61,16 +61,16 @@ export const devtoolsPlugin = (_options: DevtoolsPluginOptions = {}): PluginOpti
             enablePlugin = config.command === 'serve' && config.mode !== 'production'
         },
         resolveId(id) {
-            if (enablePlugin && id === DevtoolsModuleNames.Main) return DevtoolsModuleNames.Main
+            if (enablePlugin && id === babel.DevtoolsModule.Main) return babel.DevtoolsModule.Main
         },
         load(id) {
             // Inject runtime debugger script
-            if (!enablePlugin || id !== DevtoolsModuleNames.Main) return
+            if (!enablePlugin || id !== babel.DevtoolsModule.Main) return
 
-            let code = `import "${DevtoolsModuleNames.Setup}";`
+            let code = `import "${babel.DevtoolsModule.Setup}";`
 
             if (options.locator) {
-                code += `\nimport { setLocatorOptions } from "${DevtoolsModuleNames.Setup}";
+                code += `\nimport { setLocatorOptions } from "${babel.DevtoolsModule.Setup}";
         setLocatorOptions(${JSON.stringify(options.locator)});`
             }
 
@@ -90,14 +90,14 @@ export const devtoolsPlugin = (_options: DevtoolsPluginOptions = {}): PluginOpti
             // plugins that should only run on .tsx/.jsx files in development
             if ((enabledJsxLocation || enabledComponentLocation) && isJSX) {
                 plugins.push(
-                    devtoolsJsxLocationPlugin({
+                    babel.jsxLocationPlugin({
                         jsx: enabledJsxLocation,
                         components: enabledComponentLocation,
                     }),
                 )
             }
             if (options.autoname) {
-                plugins.push(devtoolsNamePlugin)
+                plugins.push(babel.namePlugin)
             }
 
             if (plugins.length === 0) return {code: source}
