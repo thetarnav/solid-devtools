@@ -9,11 +9,11 @@
         "----------------------DEV----------------------": "",
         "dev:ext": "pnpm -dir packages/extension run dev",
         "dev:transform": "pnpm -dir packages/transform run dev",
-        "dev": "pnpm run --parallel --filter=\"./packages/*\" --filter=!./packages/extension dev",
+        "dev": "pnpm run --parallel --filter=\"./packages/*\" --filter=\"!./packages/extension\" dev",
         "sandbox": "pnpm -dir examples/sandbox run dev",
         "sandbox:ext": "pnpm -dir examples/sandbox run dev:ext",
         "----------------------BUILD----------------------": "",
-        "build": "turbo run build --filter=./packages/*",
+        "build": "turbo run build --filter=\"./packages/*\"",
         "----------------------TEST----------------------": "",
         "test:unit": "turbo run test:unit --filter=\"./packages/*\"",
         "test:types": "turbo run test:types --filter=\"./packages/*\"",
@@ -22,7 +22,7 @@
         "----------------------UTILS----------------------": "",
         "build-test:packages": "turbo run build test:unit test:types --filter=\"./packages/*\"",
         "build-test": "pnpm run build-test:packages && pnpm run test:lint && pnpm run test:e2e",
-        "format": "prettier -w \"./{packages,examples}/**/*.{js,ts,json,css,tsx,jsx}\" --ignore-path .gitignore",
+        "format": "prettier -w \"**/*.{js,ts,json,css,tsx,jsx}\" --ignore-path .gitignore",
         "changeset": "changeset",
         "version": "pnpm run changeset version && pnpm i --no-frozen-lockfile && git add .",
         "publish": "pnpm run build && pnpm run changeset publish"
@@ -57,7 +57,7 @@
         "vite-plugin-solid": "^2.8.0",
         "vitest": "^0.34.6"
     },
-    "packageManager": "pnpm@8.14.0",
+    "packageManager": "pnpm@8.15.5+sha256.4b4efa12490e5055d59b9b9fc9438b7d581a6b7af3b5675eb5c5f447cee1a589",
     "engines": {
         "node": ">=18",
         "pnpm": ">=8.14.0"
