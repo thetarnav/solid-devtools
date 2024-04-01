@@ -1,5 +1,18 @@
 # solid-devtools
 
+## 0.30.0
+
+### Minor Changes
+
+-   9ff0993d: Expose the babel plugins currently used by vite: `devtoolsJsxLocationPlugin` and `devtoolsNamePlugin`
+-   6da4cb6e: exposed babel plugins
+
+### Patch Changes
+
+-   Updated dependencies [d909b584]
+    -   @solid-devtools/shared@0.13.2
+    -   @solid-devtools/debugger@0.23.4
+
 ## 0.29.3
 
 ### Patch Changes
