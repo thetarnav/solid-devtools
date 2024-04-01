@@ -107,7 +107,7 @@ function getTarget(
 let Sources: Record<Source, Comparable[]>
 let FileWithImports: boolean = false
 
-const namePlugin: PluginObj<any> = {
+export const namePlugin: PluginObj<any> = {
     name: '@solid-devtools/name',
     visitor: {
         Program() {
@@ -230,5 +230,3 @@ const namePlugin: PluginObj<any> = {
         },
     },
 }
-
-export default namePlugin

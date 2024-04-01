@@ -1,18 +1,23 @@
-import {assertTransform, cwd, file} from './setup'
+import {assertTransform, cwd, file} from './setup_test'
 
 import {LOCATION_ATTRIBUTE_NAME, WINDOW_PROJECTPATH_PROPERTY} from '@solid-devtools/debugger/types'
 import {describe, test} from 'vitest'
-import {Module, SET_COMPONENT_LOC, SET_COMPONENT_LOC_LOCAL} from '../constants'
-import getPlugin from '../location'
+import {DevtoolsModule} from './shared'
+import {
+    jsxLocationPlugin,
+    JsxLocationPluginConfig,
+    SET_COMPONENT_LOC,
+    SET_COMPONENT_LOC_LOCAL,
+} from './location'
 
-const setLocationImport = `import { ${SET_COMPONENT_LOC} as ${SET_COMPONENT_LOC_LOCAL} } from "${Module.Setup}";`
+const setLocationImport = `import { ${SET_COMPONENT_LOC} as ${SET_COMPONENT_LOC_LOCAL} } from "${DevtoolsModule.Setup}";`
 
 describe('location', () => {
     const testData: [
         name: string,
         src: string,
         expected: string,
-        options: Parameters<typeof getPlugin>[0],
+        options: JsxLocationPluginConfig,
     ][] = [
         [
             'function component',
@@ -55,7 +60,7 @@ globalThis.${WINDOW_PROJECTPATH_PROPERTY} = "${cwd}";`,
 
     testData.forEach(([name, src, expected, options]) => {
         test(name, () => {
-            assertTransform(src, expected, getPlugin(options))
+            assertTransform(src, expected, jsxLocationPlugin(options))
         })
     })
 })
