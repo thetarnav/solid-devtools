@@ -1,5 +1,11 @@
 # solid-devtools-shared
 
+## 0.13.2
+
+### Patch Changes
+
+-   d909b584: Improve solid detector to work with solid-start 1
+
 ## 0.13.1
 
 ### Patch Changes
