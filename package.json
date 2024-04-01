@@ -17,7 +17,7 @@
         "----------------------TEST----------------------": "",
         "test:unit": "turbo run test:unit --filter=./packages/*",
         "test:types": "turbo run test:types --filter=./packages/*",
-        "test:lint": "eslint --ignore-path .gitignore --max-warnings 0 packages/**/*.{js,ts,tsx,jsx}",
+        "test:lint": "eslint **/*.{js,ts,tsx,jsx} --ignore-path .gitignore --max-warnings 0",
         "test:e2e": "cross-env PW_CHROMIUM_ATTACH_TO_OTHER=1 playwright test -c e2e/playwright.config.ts",
         "----------------------UTILS----------------------": "",
         "build-test:packages": "turbo run build test:unit test:types --filter=./packages/*",

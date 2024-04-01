@@ -11,6 +11,8 @@
         "forceConsistentCasingInFileNames": true,
         "noPropertyAccessFromIndexSignature": true,
         "noUncheckedIndexedAccess": true,
+        "allowJs": true,
+        "outDir": "types",
         "types": ["@total-typescript/ts-reset"]
     }
 }
