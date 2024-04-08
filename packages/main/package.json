@@ -1,6 +1,6 @@
 {
     "name": "solid-devtools",
-    "version": "0.30.0",
+    "version": "0.30.1",
     "description": "Runtime library for hooking up SolidJS application with Solid Devtools Extension",
     "license": "MIT",
     "author": "Damian Tarnawski <gthetarnav@gmail.com>",
@@ -27,18 +27,24 @@
     "types": "./dist/index.d.ts",
     "exports": {
         ".": {
+            "browser": {
+                "development": {
+                    "import": {
+                        "types": "./dist/index.d.ts",
+                        "default": "./dist/index.js"
+                    }
+                },
+                "import": {
+                    "types": "./dist/index.d.ts",
+                    "default": "./dist/index_noop.js"
+                }
+            },
             "import": {
                 "types": "./dist/index.d.ts",
-                "default": "./dist/index.js"
+                "default": "./dist/index_noop.js"
             }
         },
         "./setup": {
-            "worker": {
-                "import": {
-                    "types": "./dist/setup.d.ts",
-                    "default": "./dist/setup-noop.js"
-                }
-            },
             "browser": {
                 "development": {
                     "import": {
@@ -48,30 +54,12 @@
                 },
                 "import": {
                     "types": "./dist/setup.d.ts",
-                    "default": "./dist/setup.js"
-                }
-            },
-            "deno": {
-                "import": {
-                    "types": "./dist/setup.d.ts",
-                    "default": "./dist/setup-noop.js"
-                }
-            },
-            "node": {
-                "import": {
-                    "types": "./dist/setup.d.ts",
-                    "default": "./dist/setup-noop.js"
-                }
-            },
-            "development": {
-                "import": {
-                    "types": "./dist/setup.d.ts",
-                    "default": "./dist/setup.js"
+                    "default": "./dist/setup_noop.js"
                 }
             },
             "import": {
                 "types": "./dist/setup.d.ts",
-                "default": "./dist/setup.js"
+                "default": "./dist/setup_noop.js"
             }
         },
         "./vite": {
