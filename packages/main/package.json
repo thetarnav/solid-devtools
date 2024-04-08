@@ -27,10 +27,16 @@
     "types": "./dist/index.d.ts",
     "exports": {
         ".": {
-            "development": {
+            "browser": {
+                "development": {
+                    "import": {
+                        "types": "./dist/index.d.ts",
+                        "default": "./dist/index.js"
+                    }
+                },
                 "import": {
                     "types": "./dist/index.d.ts",
-                    "default": "./dist/index.js"
+                    "default": "./dist/index_noop.js"
                 }
             },
             "import": {
@@ -39,10 +45,16 @@
             }
         },
         "./setup": {
-            "development": {
+            "browser": {
+                "development": {
+                    "import": {
+                        "types": "./dist/setup.d.ts",
+                        "default": "./dist/setup.js"
+                    }
+                },
                 "import": {
                     "types": "./dist/setup.d.ts",
-                    "default": "./dist/setup.js"
+                    "default": "./dist/setup_noop.js"
                 }
             },
             "import": {
