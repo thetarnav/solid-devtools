@@ -1,5 +1,12 @@
 # @solid-devtools/extension
 
+## 0.30.1
+
+### Patch Changes
+
+-   Updated dependencies [3e93dba8]
+    -   solid-devtools@0.30.1
+
 ## 0.30.0
 
 ### Patch Changes

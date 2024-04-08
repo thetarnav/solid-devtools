@@ -1,5 +1,11 @@
 # solid-devtools
 
+## 0.30.1
+
+### Patch Changes
+
+-   3e93dba8: Add a noop index file to the main package exports
+
 ## 0.30.0
 
 ### Minor Changes
