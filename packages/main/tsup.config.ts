@@ -6,7 +6,7 @@ const solidVersion = solidPkg.version
 
 export default defineConfig([
     {
-        entryPoints: ['src/index.ts', 'src/setup-noop.ts', 'src/setup.ts'],
+        entryPoints: ['src/index.ts', 'src/index_noop.ts', 'src/setup_noop.ts', 'src/setup.ts'],
         dts: {entry: ['src/index.ts', 'src/setup.ts']},
         format: 'esm',
         target: 'esnext',
