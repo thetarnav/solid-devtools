@@ -27,42 +27,18 @@
     "types": "./dist/index.d.ts",
     "exports": {
         ".": {
+            "development": {
+                "import": {
+                    "types": "./dist/index.d.ts",
+                    "default": "./dist/index.js"
+                }
+            },
             "import": {
                 "types": "./dist/index.d.ts",
-                "default": "./dist/index.js"
+                "default": "./dist/index_noop.js"
             }
         },
         "./setup": {
-            "worker": {
-                "import": {
-                    "types": "./dist/setup.d.ts",
-                    "default": "./dist/setup-noop.js"
-                }
-            },
-            "browser": {
-                "development": {
-                    "import": {
-                        "types": "./dist/setup.d.ts",
-                        "default": "./dist/setup.js"
-                    }
-                },
-                "import": {
-                    "types": "./dist/setup.d.ts",
-                    "default": "./dist/setup.js"
-                }
-            },
-            "deno": {
-                "import": {
-                    "types": "./dist/setup.d.ts",
-                    "default": "./dist/setup-noop.js"
-                }
-            },
-            "node": {
-                "import": {
-                    "types": "./dist/setup.d.ts",
-                    "default": "./dist/setup-noop.js"
-                }
-            },
             "development": {
                 "import": {
                     "types": "./dist/setup.d.ts",
@@ -71,7 +47,7 @@
             },
             "import": {
                 "types": "./dist/setup.d.ts",
-                "default": "./dist/setup.js"
+                "default": "./dist/setup_noop.js"
             }
         },
         "./vite": {
