@@ -1,5 +1,7 @@
 import {isWindows} from '@solid-primitives/platform'
-import {LOCATION_ATTRIBUTE_NAME, NodeID, WINDOW_PROJECTPATH_PROPERTY} from '../types'
+import {LOCATION_ATTRIBUTE_NAME, NodeID, WINDOW_PROJECTPATH_PROPERTY} from '../../types'
+import {SourceElementType, SourceLocation} from '../types'
+import {parseLocationString} from '../utils'
 
 export type LocationAttr = `${string}:${number}:${number}`
 
@@ -12,15 +14,9 @@ export type LocatorComponent = {
 
 export type TargetIDE = 'vscode' | 'webstorm' | 'atom' | 'vscode-insiders'
 
-export type SourceLocation = {
-    file: string
-    line: number
-    column: number
-}
-
 export type SourceCodeData = SourceLocation & {
     projectPath: string
-    element: HTMLElement | string | undefined
+    element: SourceElementType<HTMLElement>
 }
 
 export type TargetURLFunction = (data: SourceCodeData) => string | void
@@ -64,24 +60,6 @@ export function getSourceCodeData(
     const parsed = parseLocationString(location)
     if (!parsed) return
     return {...parsed, projectPath, element}
-}
-
-/**
- * Validates and parses a location string to a {@link SourceLocation} object
- */
-export function parseLocationString(location: string): SourceLocation | undefined {
-    // eslint-disable-next-line prefer-const
-    let [filePath, line, column] = location.split(':') as [string, string | number, string | number]
-    if (
-        filePath &&
-        line &&
-        column &&
-        typeof filePath === 'string' &&
-        !isNaN((line = Number(line))) &&
-        !isNaN((column = Number(column)))
-    ) {
-        return {file: filePath, line, column}
-    }
 }
 
 export function openSourceCode(target: TargetIDE | TargetURLFunction, data: SourceCodeData): void {
