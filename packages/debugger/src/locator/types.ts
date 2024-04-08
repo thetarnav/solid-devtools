@@ -1,31 +1,35 @@
-import type {ToDyscriminatedUnion} from '@solid-devtools/shared/utils'
-import type {KbdKey} from '@solid-primitives/keyboard'
-import type {NodeID} from '../main/types'
-import type {TargetIDE, TargetURLFunction} from './find-components'
+import {ToDyscriminatedUnion} from '@solid-devtools/shared/utils'
+import {EmitterEmit} from '@solid-primitives/event-bus'
+import {Accessor} from 'solid-js'
+import {Debugger, NodeID} from '../types'
 
-export type {
-    LocationAttr,
-    LocatorComponent,
-    SourceLocation,
-    TargetIDE,
-    TargetURLFunction,
-} from './find-components'
-
-export type LocatorOptions = {
-    /** Choose in which IDE the component source code should be revealed. */
-    targetIDE?: false | TargetIDE | TargetURLFunction
-    /**
-     * Holding which key should enable the locator overlay?
-     * @default 'Alt'
-     */
-    key?: false | KbdKey
+export type SourceLocation = {
+    file: string
+    line: number
+    column: number
 }
+
+export type SourceElementType<ElementType> = ElementType | string | undefined
 
 export type HighlightElementPayload = ToDyscriminatedUnion<{
     node: {id: NodeID}
     element: {id: NodeID}
 }> | null
 
-// used by the transform
-export const WINDOW_PROJECTPATH_PROPERTY = '$sdt_projectPath'
-export const LOCATION_ATTRIBUTE_NAME = 'data-source-loc'
+export interface Locator<ElementType> {
+    setDevtoolsHighlightTarget(target: HighlightElementPayload): void
+    openElementSourceCode(location: SourceLocation, element: SourceElementType<ElementType>): void
+}
+
+export interface CreateLocatorProps {
+    emit: EmitterEmit<Debugger.OutputChannels>
+    locatorEnabled: Accessor<boolean>
+    setLocatorEnabledSignal(signal: Accessor<boolean>): void
+    onComponentClick(componentId: NodeID, next: VoidFunction): void
+}
+
+export type LocatorFactory<ElementType> = (props: CreateLocatorProps) => Locator<ElementType>
+
+// TODO: rename or remove?
+// this is used externally so any change is a change in API
+export type {LocatorOptions} from './DOMLocator/types'
