@@ -139,6 +139,9 @@ export function findComponent(el: HTMLElement): {name: string; id: NodeID} | nul
     }
 
     if (including.size === 0) return null
-    const {name, id} = including.values().next().value
-    return {name, id}
+    const value = including.values().next().value
+    if (value && value.name) {
+        return {name: value.name, id: value.id}
+    }
+    return null
 }

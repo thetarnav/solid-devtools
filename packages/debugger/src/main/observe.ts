@@ -101,7 +101,7 @@ export function observeComputationUpdate(
     map[symbol] = onRun
     interceptComputationRerun(owner, fn => {
         fn()
-        for (const sym of Object.getOwnPropertySymbols(map)) map![sym]!()
+        for (const sym of Object.getOwnPropertySymbols(map)) map[sym]!()
     })
 }
 

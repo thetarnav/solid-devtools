@@ -14,7 +14,6 @@
         "@babel/plugin-syntax-typescript": "^7.23.3",
         "@unocss/preset-typography": "0.65.0-beta.3",
         "solid-devtools": "workspace:^",
-        "unocss": "0.65.0-beta.3",
         "vite-plugin-inspect": "^0.7.42"
     },
     "dependencies": {
