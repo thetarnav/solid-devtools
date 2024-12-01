@@ -48,8 +48,7 @@
         "test:types": "tsc --noEmit --paths null"
     },
     "devDependencies": {
-        "solid-js": "^1.8.5",
-        "tsup": "^7.2.0"
+        "solid-js": "^1.8.5"
     },
     "dependencies": {
         "@nothing-but/utils": "~0.12.0",

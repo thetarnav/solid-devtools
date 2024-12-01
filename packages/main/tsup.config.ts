@@ -1,4 +1,4 @@
-import solidPkg from 'solid-js/package.json' assert {type: 'json'}
+import solidPkg from 'solid-js/package.json' with {type: 'json'}
 import {defineConfig} from 'tsup'
 import {version as clientVersion, peerDependencies} from './package.json'
 

@@ -82,7 +82,7 @@ export function createPortMessanger<
             let arr = listeners[name]
             if (!arr) arr = listeners[name] = []
             arr.push(handler)
-            return () => (listeners[name] = arr!.filter(l => l !== handler) as any)
+            return () => (listeners[name] = arr.filter(l => l !== handler) as any)
         },
         onForwardMessage(handler) {
             forwardHandler = handler
@@ -164,7 +164,7 @@ export function makeMessageListener<M extends Record<string, any>>(): OnMessageF
         let arr = listeners[name]
         if (!arr) arr = listeners[name] = []
         arr.push(handler)
-        return () => (listeners[name] = arr!.filter(l => l !== handler) as any)
+        return () => (listeners[name] = arr.filter(l => l !== handler) as any)
     }
 }
 
