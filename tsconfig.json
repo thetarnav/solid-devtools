@@ -5,7 +5,8 @@
         "jsx": "preserve",
         "jsxImportSource": "solid-js",
         "declarationMap": true,
-        "declaration": true
+        "declaration": true,
+        "moduleResolution": "bundler"
     },
     "exclude": ["node_modules", "**/dist/**/*"]
 }
