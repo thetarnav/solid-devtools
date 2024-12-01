@@ -63,7 +63,6 @@
         "solid-headless": "^0.13.1"
     },
     "devDependencies": {
-        "@unocss/cli": "^0.57.4",
         "solid-js": "^1.8.5"
     },
     "peerDependencies": {
