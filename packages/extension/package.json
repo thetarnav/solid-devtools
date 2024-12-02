@@ -7,9 +7,9 @@
     "type": "module",
     "scripts": {
         "dev": "vite",
-        "build:chrome": "tsx build.ts --browser=chrome",
-        "build:firefox": "tsx build.ts --browser=firefox",
-        "build": "tsx build.ts --browser=firefox --browser=chrome",
+        "build:chrome": "node --experimental-transform-types ./build.ts --browser=chrome",
+        "build:firefox": "node --experimental-transform-types ./build.ts --browser=firefox",
+        "build": "node --experimental-transform-types ./build.ts --browser=firefox --browser=chrome",
         "test:unit": "echo \"No unit tests\"",
         "test:types": "tsc --noEmit --paths null"
     },
