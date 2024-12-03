@@ -1,5 +1,6 @@
 export type {DGraphUpdate, SerializedDGraph} from './dependency'
 export * from './inspector/types'
+export * from './locator/DOMLocator/types'
 export * from './locator/types'
 export type {Debugger} from './main'
 export * from './main/constants'

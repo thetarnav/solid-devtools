@@ -1,12 +1,22 @@
+import {warn} from '@solid-devtools/shared/utils'
 import {createEventBus, createGlobalEmitter, GlobalEmitter} from '@solid-primitives/event-bus'
 import {createStaticStore} from '@solid-primitives/static-store'
 import {defer} from '@solid-primitives/utils'
-import {batch, createComputed, createEffect, createMemo, createSignal} from 'solid-js'
+import {
+    batch,
+    createComputed,
+    createEffect,
+    createMemo,
+    createSignal,
+    getOwner,
+    runWithOwner,
+} from 'solid-js'
 import {createDependencyGraph, DGraphUpdate} from '../dependency'
 import {createInspector, InspectorUpdate, ToggleInspectedValueData} from '../inspector'
-import {createLocator} from '../locator'
-import {HighlightElementPayload} from '../locator/types'
+import {createDOMLocatorFactory} from '../locator/DOMLocator'
+import {HighlightElementPayload, Locator, LocatorFactory} from '../locator/types'
 import {createStructure, StructureUpdates} from '../structure'
+import {LocatorOptions} from '../types'
 import {DebuggerModule, DEFAULT_MAIN_VIEW, DevtoolsMainView, TreeWalkerMode} from './constants'
 import {getObjectById, getSdtId, ObjectType} from './id'
 import {createInternalRoot} from './roots'
@@ -207,28 +217,12 @@ const plugin = createInternalRoot(() => {
         inspectedState,
     })
 
-    //
-    // Locator
-    //
-    const locator = createLocator({
-        emit: hub.output.emit,
-        locatorEnabled,
-        setLocatorEnabledSignal: signal => toggleModules('locatorKeyPressSignal', () => signal),
-        onComponentClick(componentId, next) {
-            modules.debugger ? hub.output.emit('InspectedComponent', componentId) : next()
-        },
-    })
-
+    let locator: Locator<unknown> | undefined
     // Opens the source code of the inspected component
     function openInspectedNodeLocation() {
         const details = inspector.getLastDetails()
-        details?.location && locator.openElementSourceCode(details.location, details.name)
+        details?.location && locator?.openElementSourceCode(details.location, details.name)
     }
-
-    // send the state of the client locator mode
-    createEffect(
-        defer(modules.locatorKeyPressSignal, state => hub.output.emit('LocatorModeChange', state)),
-    )
 
     hub.input.listen(e => {
         switch (e.name) {
@@ -238,12 +232,12 @@ const plugin = createInternalRoot(() => {
                     resetInspectedNode()
                     currentView = DEFAULT_MAIN_VIEW
                     structure.resetTreeWalkerMode()
-                    locator.setDevtoolsHighlightTarget(null)
+                    locator?.setDevtoolsHighlightTarget(null)
                 })
                 break
             }
             case 'HighlightElementChange':
-                return locator.setDevtoolsHighlightTarget(e.details)
+                return locator?.setDevtoolsHighlightTarget(e.details)
             case 'InspectNode':
                 return setInspectedNode(e.details)
             case 'InspectValue':
@@ -275,10 +269,62 @@ const plugin = createInternalRoot(() => {
         }
     }
 
+    let locatorUsed = false
+    const owner = getOwner()!
+
+    /**
+     * User function to create custom locators. If you're targeting solid-js/web, use `useLocator()` instead.
+     *
+     * Can be used only once.
+     * Automatically called if locatorOptions were provided by vite.
+     *
+     * @param createLocator {@link LocatorFactory} factory function for the locator object.
+     */
+    function useCustomLocator<ElementType>(createLocator: LocatorFactory<ElementType>) {
+        runWithOwner(owner, () => {
+            if (locatorUsed) return warn('useLocator can be called only once.')
+            locatorUsed = true
+
+            locator = createLocator({
+                emit: hub.output.emit,
+                locatorEnabled,
+                setLocatorEnabledSignal: signal =>
+                    toggleModules('locatorKeyPressSignal', () => signal),
+                onComponentClick(componentId, next) {
+                    modules.debugger ? hub.output.emit('InspectedComponent', componentId) : next()
+                },
+            })
+            // send the state of the client locator mode
+            createEffect(
+                defer(modules.locatorKeyPressSignal, state =>
+                    hub.output.emit('LocatorModeChange', state),
+                ),
+            )
+        })
+    }
+
+    /**
+     * User function to enable user locator features. Such as element hover and go to source.
+     *
+     * Can be used only once.
+     * Automatically called if locatorOptions were provided by vite.
+     *
+     * @param options {@link LocatorOptions} for the locator.
+     */
+    function useLocator(locatorOptions: LocatorOptions) {
+        useCustomLocator(createDOMLocatorFactory(locatorOptions))
+    }
+
+    // Enable the locator when the options were passed by the vite plugin
+    if (SolidApi.locatorOptions) {
+        useLocator(SolidApi.locatorOptions)
+    }
+
     return {
         useDebugger,
-        useLocator: locator.useLocator,
+        useLocator,
+        useCustomLocator,
     }
 })
 
-export const {useDebugger, useLocator} = plugin
+export const {useDebugger, useLocator, useCustomLocator} = plugin

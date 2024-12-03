@@ -8,7 +8,7 @@ vi.mock('@solid-primitives/platform', () => ({
     },
 }))
 
-const fetchFunction = async () => (await import('../find-components')).parseLocationString
+const fetchFunction = async () => (await import('../../utils')).parseLocationString
 
 describe('locator attribute pasting', () => {
     beforeEach(() => {
