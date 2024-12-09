@@ -1,12 +1,12 @@
-export {useDebugger, useLocator} from './main'
+export {useDebugger, useLocator} from './main/index.ts'
 export {
     addSolidUpdateListener,
     interceptComputationRerun,
     makeValueUpdateListener,
     observeValueUpdate,
     removeValueUpdateObserver,
-} from './main/observe'
-export {attachDebugger, createInternalRoot, unobserveAllRoots} from './main/roots'
+} from './main/observe.ts'
+export {attachDebugger, createInternalRoot, unobserveAllRoots} from './main/roots.ts'
 export {
     getNodeName,
     getNodeType,
@@ -20,4 +20,4 @@ export {
     lookupOwner,
     onOwnerCleanup,
     onParentCleanup,
-} from './main/utils'
+} from './main/utils.ts'

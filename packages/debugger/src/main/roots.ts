@@ -1,10 +1,10 @@
 import {warn} from '@solid-devtools/shared/utils'
-import {clearComponentRegistry} from './component-registry'
-import {NodeType} from './constants'
-import {ObjectType, getSdtId} from './id'
-import SolidAPI from './solid-api'
-import {NodeID, Solid} from './types'
-import {isSolidRoot, onOwnerCleanup} from './utils'
+import {clearComponentRegistry} from './component-registry.ts'
+import {NodeType} from './constants.ts'
+import {ObjectType, getSdtId} from './id.ts'
+import SolidAPI from './solid-api.ts'
+import {type NodeID, type Solid} from './types.ts'
+import {isSolidRoot, onOwnerCleanup} from './utils.ts'
 
 // ROOTS
 // map of all top-roots

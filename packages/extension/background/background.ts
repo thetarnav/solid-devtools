@@ -7,8 +7,8 @@ It has to coordinate the communication between the different scripts based on th
 */
 
 import {error, log} from '@solid-devtools/shared/utils'
-import * as bridge from '../shared/bridge'
-import {icons} from '../shared/icons'
+import * as bridge from '../shared/bridge.ts'
+import {icons} from '../shared/icons.ts'
 
 log('Background script working.')
 

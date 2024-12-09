@@ -5,8 +5,8 @@ import {
     interceptComputationRerun,
     observeValueUpdate,
     removeValueUpdateObserver,
-} from '../observe'
-import solidApi from '../solid-api'
+} from '../observe.ts'
+import solidApi from '../solid-api.ts'
 
 const {getOwner} = solidApi
 

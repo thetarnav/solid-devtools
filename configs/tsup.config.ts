@@ -1,6 +1,6 @@
-import { Plugin } from 'esbuild'
+import { type Plugin } from 'esbuild'
 import { solidPlugin } from 'esbuild-plugin-solid'
-import { defineConfig, Options } from 'tsup'
+import { defineConfig, type Options } from 'tsup'
 
 export const CI =
     process.env['CI'] === 'true' ||

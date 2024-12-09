@@ -1,6 +1,6 @@
-import {getSdtId, ObjectType} from '../main/id'
-import SolidAPI from '../main/solid-api'
-import type {NodeID, Solid} from '../types'
+import {getSdtId, ObjectType} from '../main/id.ts'
+import SolidAPI from '../main/solid-api.ts'
+import type {NodeID, Solid} from '../types.ts'
 
 const {isWrappable} = SolidAPI.STORE_DEV
 

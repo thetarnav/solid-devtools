@@ -1,10 +1,10 @@
 import {trimString} from '@solid-devtools/shared/utils'
-import {Emit} from '@solid-primitives/event-bus'
+import {type Emit} from '@solid-primitives/event-bus'
 import {throttle} from '@solid-primitives/scheduled'
 import {$PROXY} from 'solid-js'
-import {NodeType} from './constants'
-import SolidAPI from './solid-api'
-import {Solid} from './types'
+import {NodeType} from './constants.ts'
+import SolidAPI from './solid-api.ts'
+import {type Solid} from './types.ts'
 
 const $NODE = SolidAPI.STORE_DEV.$NODE
 

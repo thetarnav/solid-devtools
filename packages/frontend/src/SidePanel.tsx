@@ -1,15 +1,15 @@
-import {createHighlightedOwnerName, Icon, theme, ToggleTabs} from '@/ui'
 import clsx from 'clsx'
-import {Accessor, createContext, createEffect, createSignal, Match, Switch} from 'solid-js'
-import {useController} from './controller'
-import * as dgraph from './modules/dependency'
-import {InspectorView} from './modules/inspector/Inspector'
+import * as s from 'solid-js'
+import {useController} from './controller.tsx'
+import * as dgraph from './dgraph.tsx'
+import {InspectorView} from './inspector.tsx'
+import * as ui from './ui/index.ts'
 
 export const panel_header_el_border =
     'content-empty absolute z-1 inset-x-0 top-full h-0.6px bg-panel-border'
 
-export const SidePanelCtx = createContext<{
-    openPanel: Accessor<'inspector' | 'dgraph'>
+export const SidePanelCtx = s.createContext<{
+    openPanel: s.Accessor<'inspector' | 'dgraph'>
     setOpenPanel: (panel: 'inspector' | 'dgraph') => void
 }>()
 
@@ -39,10 +39,10 @@ export function createSidePanel() {
         dgraph: 'Graph',
     } as const
 
-    const [openPanel, setOpenPanel] = createSignal<keyof typeof tabsTitleMap>('inspector')
+    const [openPanel, setOpenPanel] = s.createSignal<keyof typeof tabsTitleMap>('inspector')
 
-    const {OwnerName, pingUpdated} = createHighlightedOwnerName()
-    createEffect(() => {
+    const {OwnerName, pingUpdated} = ui.createHighlightedOwnerName()
+    s.createEffect(() => {
         const id = inspector.inspected.ownerId
         id && ctx.listenToNodeUpdate(id, pingUpdated)
     })
@@ -53,7 +53,7 @@ export function createSidePanel() {
                 <div
                     class="h-full grid"
                     style={{
-                        'grid-template-rows': `${theme.spacing.header_height} 1fr`,
+                        'grid-template-rows': `${ui.spacing.header_height} 1fr`,
                         'grid-template-columns': '100%',
                     }}
                 >
@@ -70,7 +70,7 @@ export function createSidePanel() {
                                     class={action_button}
                                     onClick={openComponentLocation}
                                 >
-                                    <Icon.Code class={action_icon} />
+                                    <ui.Icon.Code class={action_icon} />
                                 </button>
                             )}
                             <button
@@ -78,10 +78,10 @@ export function createSidePanel() {
                                 class={action_button}
                                 onClick={() => setInspectedOwner(null)}
                             >
-                                <Icon.Close class={action_icon} />
+                                <ui.Icon.Close class={action_icon} />
                             </button>
                         </div>
-                        <ToggleTabs
+                        <ui.ToggleTabs
                             class="b-l b-solid b-panel-2 h-full"
                             active={openPanel()}
                             onSelect={setOpenPanel}
@@ -91,16 +91,16 @@ export function createSidePanel() {
                                     <Option for={panel}>{tabsTitleMap[panel]}</Option>
                                 ))
                             }
-                        </ToggleTabs>
+                        </ui.ToggleTabs>
                     </header>
-                    <Switch>
-                        <Match when={openPanel() === 'inspector'}>
+                    <s.Switch>
+                        <s.Match when={openPanel() === 'inspector'}>
                             <InspectorView />
-                        </Match>
-                        <Match when={openPanel() === 'dgraph'}>
+                        </s.Match>
+                        <s.Match when={openPanel() === 'dgraph'}>
                             <dgraph.Dgraph_View />
-                        </Match>
-                    </Switch>
+                        </s.Match>
+                    </s.Switch>
                 </div>
             </SidePanelCtx.Provider>
         )

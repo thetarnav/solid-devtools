@@ -4,8 +4,8 @@
 
 import {array} from '@nothing-but/utils'
 import {getNodeName, getNodeType, getOwnerType, isSolidMemo} from '@solid-devtools/debugger'
-import {NODE_TYPE_NAMES, NodeType, Solid, UNKNOWN} from '@solid-devtools/debugger/types'
-import {getDiffMap, getStackDiffMap} from './utils'
+import {NODE_TYPE_NAMES, NodeType, type Solid, UNKNOWN} from '@solid-devtools/debugger/types'
+import {getDiffMap, getStackDiffMap} from './utils.ts'
 
 export type NodeState = {
     type: NodeType

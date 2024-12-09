@@ -1,4 +1,4 @@
-import {NodePath} from '@babel/traverse'
+import type {NodePath} from '@babel/core'
 import * as t from '@babel/types'
 
 export const enum DevtoolsModule {

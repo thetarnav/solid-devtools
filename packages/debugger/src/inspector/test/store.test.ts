@@ -1,11 +1,11 @@
 import {createRoot} from 'solid-js'
 import {createMutable, createStore, modifyMutable, produce, reconcile, unwrap} from 'solid-js/store'
 import {beforeEach, describe, expect, it, vi} from 'vitest'
-import {ObjectType, getSdtId} from '../../main/id'
-import SolidApi from '../../main/solid-api'
-import {isSolidStore} from '../../main/utils'
-import {Solid} from '../../types'
-import {OnNodeUpdate, StoreNodeProperty, observeStoreNode, setOnStoreNodeUpdate} from '../store'
+import {ObjectType, getSdtId} from '../../main/id.ts'
+import SolidApi from '../../main/solid-api.ts'
+import {isSolidStore} from '../../main/utils.ts'
+import {type Solid} from '../../types.ts'
+import {type OnNodeUpdate, type StoreNodeProperty, observeStoreNode, setOnStoreNodeUpdate} from '../store.ts'
 
 const {getOwner} = SolidApi
 
@@ -34,7 +34,7 @@ describe('observeStoreNode2', () => {
         createRoot(dispose => {
             const [state, setState] = createStore<any>({count: 0})
             const store = getOwnerStore()
-            const cb = vi.fn<UpdateParams, void>()
+            const cb = vi.fn<OnNodeUpdate>()
             setOnStoreNodeUpdate(cb)
             const unsub = observeStoreNode(store)
             expect(cb).not.toBeCalled()
@@ -93,7 +93,7 @@ describe('observeStoreNode2', () => {
         createRoot(dispose => {
             const state = createMutable<any>({count: 0})
             const store = getOwnerStore()
-            const cb = vi.fn<UpdateParams, void>()
+            const cb = vi.fn<OnNodeUpdate>()
             setOnStoreNodeUpdate(cb)
             const unsub = observeStoreNode(store)
             expect(cb).not.toBeCalled()
@@ -140,7 +140,7 @@ describe('observeStoreNode2', () => {
         createRoot(dispose => {
             const state = createMutable<any>({a: {foo: 123, bar: [1, 2, 3]}})
 
-            const cb = vi.fn<UpdateParams, void>()
+            const cb = vi.fn<OnNodeUpdate>()
             setOnStoreNodeUpdate(cb)
             const unsub = observeStoreNode(getOwnerStore())
 

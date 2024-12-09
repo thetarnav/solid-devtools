@@ -1,13 +1,12 @@
-import {PluginObj, template} from '@babel/core'
-import {NodePath} from '@babel/traverse'
+import {type PluginObj, template, type NodePath} from '@babel/core'
 import * as t from '@babel/types'
 import {
     LOCATION_ATTRIBUTE_NAME,
-    LocationAttr,
+    type LocationAttr,
     WINDOW_PROJECTPATH_PROPERTY,
 } from '@solid-devtools/debugger/types'
 import p from 'path'
-import {importFromRuntime} from './shared'
+import {importFromRuntime} from './shared.ts'
 
 const cwd = process.cwd()
 

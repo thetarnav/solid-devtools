@@ -1,9 +1,9 @@
 import * as s from 'solid-js'
 import * as vi from 'vitest'
-import {NodeType} from '../constants'
-import api from '../solid-api'
-import {Solid} from '../types'
-import {getOwnerType} from '../utils'
+import {NodeType} from '../constants.ts'
+import api from '../solid-api.ts'
+import {type Solid} from '../types.ts'
+import {getOwnerType} from '../utils.ts'
 
 vi.describe('getOwnerType', () => {
     const tests = {

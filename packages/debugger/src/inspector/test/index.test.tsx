@@ -7,10 +7,10 @@ import {
     JSX,
 } from 'solid-js'
 import {beforeEach, describe, expect, it, vi} from 'vitest'
-import {getObjectById, getSdtId, ObjectType} from '../../main/id'
-import SolidApi from '../../main/solid-api'
-import {Mapped, NodeType, PropGetterState, Solid, ValueType} from '../../types'
-import {collectOwnerDetails} from '../inspector'
+import {getObjectById, getSdtId, ObjectType} from '../../main/id.ts'
+import SolidApi from '../../main/solid-api.ts'
+import {type Mapped, NodeType, PropGetterState, type Solid, ValueType} from '../../types.ts'
+import {collectOwnerDetails} from '../inspector.ts'
 
 const {getOwner} = SolidApi
 

@@ -1,11 +1,11 @@
 import {misc} from '@nothing-but/utils'
 import {untrackedCallback} from '@solid-devtools/shared/primitives'
-import {parseLocationString} from '../locator'
-import {NodeType, ValueItemType} from '../main/constants'
-import {ObjectType, getSdtId} from '../main/id'
-import {observeValueUpdate, removeValueUpdateObserver} from '../main/observe'
-import SolidAPI from '../main/solid-api'
-import type {Mapped, NodeID, Solid, ValueItemID} from '../main/types'
+import {parseLocationString} from '../locator/index.ts'
+import {NodeType, ValueItemType} from '../main/constants.ts'
+import {ObjectType, getSdtId} from '../main/id.ts'
+import {observeValueUpdate, removeValueUpdateObserver} from '../main/observe.ts'
+import SolidAPI from '../main/solid-api.ts'
+import type {Mapped, NodeID, Solid, ValueItemID} from '../main/types.ts'
 import {
     getComponentRefreshNode,
     getNodeName,
@@ -15,9 +15,9 @@ import {
     isSolidSignal,
     isSolidStore,
     markOwnerType,
-} from '../main/utils'
-import {encodeValue} from './serialize'
-import {InspectorUpdateMap, PropGetterState} from './types'
+} from '../main/utils.ts'
+import {encodeValue} from './serialize.ts'
+import {type InspectorUpdateMap, PropGetterState} from './types.ts'
 
 export class ValueNode {
     private trackedStores: VoidFunction[] = []

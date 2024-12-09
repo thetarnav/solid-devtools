@@ -6,16 +6,16 @@ Debugger Client injected into the inspected page
 */
 
 import {useDebugger} from '@solid-devtools/debugger'
-import {Debugger} from '@solid-devtools/debugger/types'
+import {type Debugger} from '@solid-devtools/debugger/types'
 import {log, warn} from '@solid-devtools/shared/utils'
-import {makeMessageListener, makePostMessage, startListeningWindowMessages} from '../shared/bridge'
+import * as bridge from '../shared/bridge.ts'
 
 import.meta.env.DEV && log('Debugger-Client loaded')
 
-startListeningWindowMessages()
+bridge.startListeningWindowMessages()
 
-const fromContent = makeMessageListener<Debugger.InputChannels>()
-const toContent = makePostMessage<Debugger.OutputChannels>()
+const fromContent = bridge.makeMessageListener<Debugger.InputChannels>()
+const toContent = bridge.makePostMessage<Debugger.OutputChannels>()
 
 const toVersionTuple = (version: string) =>
     version.split('.').map(Number) as [number, number, number]

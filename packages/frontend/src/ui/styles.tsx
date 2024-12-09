@@ -1,37 +1,37 @@
-import {value_node_styles} from '@/modules/inspector/value-node'
-import {owner_path_styles} from '@/modules/structure'
-import {theme} from '@/ui'
+import * as s from 'solid-js'
 import {make_var_styles} from '@solid-devtools/theme'
-import * as solid from 'solid-js'
-import {highlight_styles} from './components/highlight'
-import {custom_scrollbar_styles} from './components/scrollable'
-import {toggle_button_styles} from './components/toggle-button'
+import {value_node_styles} from '../inspector.tsx'
+import {owner_path_styles} from '../structure.tsx'
+import * as ui from '../ui/index.ts'
+import {highlight_styles} from './highlight.tsx'
+import {custom_scrollbar_styles} from './scrollable.tsx'
+import {toggle_button_styles} from './toggle-button.tsx'
 
 export {
     highlight_color_var,
     highlight_container,
     highlight_element,
     highlight_opacity_var,
-} from './components/highlight'
+} from './highlight.tsx'
 
-export {toggle_button, toggle_button_styles} from './components/toggle-button'
+export {toggle_button, toggle_button_styles} from './toggle-button.tsx'
 
 export const tag_brackets = 'tag_brackets'
 
 export const tag_brackets_styles = /*css*/ `
     .${tag_brackets}:before {
         content: '\<';
-        color: ${theme.vars.disabled};
+        color: ${ui.vars.disabled};
     }
     .${tag_brackets}:after {
         content: '>';
-        color: ${theme.vars.disabled};
+        color: ${ui.vars.disabled};
     }
 `
 
 export const devtools_root_class = 'devtools-root'
 
-export function Styles(): solid.JSXElement {
+export function Styles(): s.JSXElement {
     const var_styles = make_var_styles(devtools_root_class)
 
     return (

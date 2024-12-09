@@ -1,10 +1,10 @@
 import {batch, createComputed, createMemo, createRoot, createSignal} from 'solid-js'
 import {beforeEach, describe, expect, it, vi} from 'vitest'
-import {NodeType} from '../../main/constants'
-import {ObjectType, getSdtId} from '../../main/id'
-import SolidApi from '../../main/solid-api'
-import type {NodeID, Solid} from '../../main/types'
-import {SerializedDGraph, collectDependencyGraph} from '../collect'
+import {NodeType} from '../../main/constants.ts'
+import {ObjectType, getSdtId} from '../../main/id.ts'
+import SolidApi from '../../main/solid-api.ts'
+import type {NodeID, Solid} from '../../main/types.ts'
+import {type SerializedDGraph, collectDependencyGraph} from '../collect.ts'
 
 const {getOwner} = SolidApi
 

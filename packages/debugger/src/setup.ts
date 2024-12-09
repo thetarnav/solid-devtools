@@ -12,8 +12,8 @@ import {$PROXY, DEV, createRoot, getListener, getOwner, onCleanup, untrack} from
 import * as StoreAPI from 'solid-js/store'
 import {DEV as STORE_DEV, unwrap} from 'solid-js/store'
 import * as WebAPI from 'solid-js/web'
-import type {LocatorOptions} from './locator/types'
-import {DevEventType, type Solid, type StoredDevEvent} from './main/types'
+import type {LocatorOptions} from './locator/types.ts'
+import {DevEventType, type Solid, type StoredDevEvent} from './main/types.ts'
 
 const OwnerLocationMap = new WeakMap<Solid.Owner, string>()
 

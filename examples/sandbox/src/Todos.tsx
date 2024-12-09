@@ -1,6 +1,6 @@
 import {
     batch,
-    Component,
+    type Component,
     createEffect,
     createMemo,
     createRoot,
@@ -8,7 +8,7 @@ import {
     For,
     Show,
 } from 'solid-js'
-import {createStore, produce, SetStoreFunction, Store, unwrap} from 'solid-js/store'
+import {createStore, produce, type SetStoreFunction, type Store, unwrap} from 'solid-js/store'
 
 export function createLocalStore<T extends object>(
     name: string,

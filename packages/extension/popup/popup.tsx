@@ -1,8 +1,8 @@
 /** @refresh reload */
 
-import {Accessor, Component, JSX, Show, createSignal} from 'solid-js'
+import * as s from 'solid-js'
 import {render} from 'solid-js/web'
-import {ConnectionName, DetectionState, Versions, createPortMessanger, once} from '../shared/bridge'
+import {ConnectionName, type DetectionState, type Versions, createPortMessanger, once} from '../shared/bridge.ts'
 
 import './popup.css'
 
@@ -10,8 +10,8 @@ import './popup.css'
 const port = chrome.runtime.connect({name: ConnectionName.Popup})
 const {onPortMessage: fromBackground} = createPortMessanger(port)
 
-const [versions, setVersions] = createSignal<Versions | null>(null)
-const [detectionState, setDetectionState] = createSignal<DetectionState>({
+const [versions, setVersions] = s.createSignal<Versions | null>(null)
+const [detectionState, setDetectionState] = s.createSignal<DetectionState>({
     Solid: false,
     SolidDev: false,
     Devtools: false,
@@ -26,10 +26,10 @@ const DETECTED_TITLES: Record<keyof DetectionState, string> = {
     Devtools: 'Solid Devtools setup',
 }
 
-const Detected: Component<{
+const Detected: s.Component<{
     name: keyof DetectionState
-    details?: (detected: Accessor<boolean>) => JSX.Element
-    children?: JSX.Element
+    details?: (detected: s.Accessor<boolean>) => s.JSX.Element
+    children?: s.JSX.Element
 }> = props => {
     const isDetected = () => detectionState()[props.name]
     return (
@@ -45,14 +45,14 @@ const Detected: Component<{
     )
 }
 
-const App: Component = () => {
+const App: s.Component = () => {
     return (
         <Detected name="Solid">
             <Detected name="SolidDev">
                 <Detected
                     name="Devtools"
                     details={detected => (
-                        <Show when={!detected()}>
+                        <s.Show when={!detected()}>
                             <p>
                                 Devtools extension requires a runtime client to be installed.
                                 <br />
@@ -65,11 +65,11 @@ const App: Component = () => {
                                 </a>
                                 .
                             </p>
-                        </Show>
+                        </s.Show>
                     )}
                 />
             </Detected>
-            <Show when={versions()} keyed>
+            <s.Show when={versions()} keyed>
                 {v => (
                     <div class="versions">
                         <p>Versions:</p>
@@ -81,7 +81,7 @@ const App: Component = () => {
                         </ul>
                     </div>
                 )}
-            </Show>
+            </s.Show>
         </Detected>
     )
 }

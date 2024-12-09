@@ -7,12 +7,12 @@ import {
     createSignal,
 } from 'solid-js'
 import {beforeEach, describe, expect, it, vi} from 'vitest'
-import {NodeType, TreeWalkerMode} from '../../main/constants'
-import {$setSdtId, ObjectType, getSdtId} from '../../main/id'
-import SolidApi from '../../main/solid-api'
-import {Mapped, Solid} from '../../main/types'
-import {getNodeName} from '../../main/utils'
-import {ComputationUpdateHandler, walkSolidTree} from '../walker'
+import {NodeType, TreeWalkerMode} from '../../main/constants.ts'
+import {$setSdtId, ObjectType, getSdtId} from '../../main/id.ts'
+import SolidApi from '../../main/solid-api.ts'
+import {type Mapped, type Solid} from '../../main/types.ts'
+import {getNodeName} from '../../main/utils.ts'
+import {type ComputationUpdateHandler, walkSolidTree} from '../walker.ts'
 
 const {getOwner} = SolidApi
 

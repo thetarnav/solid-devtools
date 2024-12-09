@@ -2,7 +2,6 @@ import devtools from 'solid-devtools/vite'
 import {presetTypography} from 'unocss'
 import Unocss from 'unocss/vite'
 import {defineConfig} from 'vite'
-import Inspect from 'vite-plugin-inspect'
 import solid from 'vite-plugin-solid'
 
 const is_ext = process.env['EXT'] === 'true' || process.env['EXT'] === '1'
@@ -24,7 +23,6 @@ export default defineConfig(mode => {
             Unocss({
                 presets: [presetTypography()],
             }),
-            Inspect(),
         ],
         define: {
             'process.env.EXT': JSON.stringify(is_ext),

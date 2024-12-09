@@ -60,7 +60,7 @@ export default [{
 	files: ['**/*.{js,mjs,jsx,ts,tsx}'],
 
 	plugins: {
-		'@typescript-eslint': ts_eslint,
+		'@typescript-eslint': /** @type {*} */(ts_eslint),
 		'@no-only-tests':     no_only_tests,
 		'@eslint-comments':   eslint_comments,
 		'@nothing-but':       /** @type {*} */(nb_eslint),
@@ -83,7 +83,7 @@ export default [{
 		*/
 		'no-console'                       : 'warn',
 		'no-debugger'                      : 'warn',
-		'prefer-const'                     : 'warn',
+		// 'prefer-const'                     : 'warn',
 		'require-await'                    : 'warn',
 		'no-empty'                         : 'warn',
 		'@typescript-eslint/no-unused-vars': ['warn', {

@@ -5,6 +5,6 @@ async function main() {
         await import('@solid-devtools/debugger/bundled')
     }
 
-    import('./main')
+    import('./main.tsx')
 }
 main()

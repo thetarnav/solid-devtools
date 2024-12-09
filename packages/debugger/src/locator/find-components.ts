@@ -1,5 +1,5 @@
 import {isWindows} from '@solid-primitives/platform'
-import {LOCATION_ATTRIBUTE_NAME, NodeID, WINDOW_PROJECTPATH_PROPERTY} from '../types'
+import {LOCATION_ATTRIBUTE_NAME, type NodeID, WINDOW_PROJECTPATH_PROPERTY} from '../types.ts'
 
 export type LocationAttr = `${string}:${number}:${number}`
 
@@ -70,17 +70,14 @@ export function getSourceCodeData(
  * Validates and parses a location string to a {@link SourceLocation} object
  */
 export function parseLocationString(location: string): SourceLocation | undefined {
-    // eslint-disable-next-line prefer-const
-    let [filePath, line, column] = location.split(':') as [string, string | number, string | number]
+    let [file, line, column] = location.split(':') as [string, string | number, string | number]
     if (
-        filePath &&
-        line &&
-        column &&
-        typeof filePath === 'string' &&
-        !isNaN((line = Number(line))) &&
-        !isNaN((column = Number(column)))
+        file && line && column &&
+        typeof file === 'string' &&
+        !isNaN((line   = +line)) &&
+        !isNaN((column = +column))
     ) {
-        return {file: filePath, line, column}
+        return {file, line, column}
     }
 }
 
