@@ -6,11 +6,49 @@ import no_only_tests   from 'eslint-plugin-no-only-tests'
 import eslint_comments from '@eslint-community/eslint-plugin-eslint-comments'
 import nb_eslint       from '@nothing-but/eslint-plugin'
 
-const git_ignored_paths = fs
-    .readFileSync('.gitignore', 'utf-8')
-    .split('\n')
-    .map(line => line.trim())
-    .filter(line => line && !line.startsWith('#'))
+/**
+@param   {string} gitignore
+@returns {string[]} */
+function gitignore_to_glob_patterns(gitignore) {
+
+	const patterns = []
+
+	for (let pattern of gitignore.split('\n')) {
+
+		pattern = pattern.trim()
+
+		if (pattern === '' || pattern.startsWith('#')) {
+			continue
+		}
+
+		let negated = false
+		if (pattern[0] === '!') {
+			negated = true
+			pattern = pattern.slice(1)
+		}
+
+		if (pattern[0] === '/') {
+			pattern = pattern.slice(1)
+		} else {
+			pattern = '**/'+pattern
+		}
+
+        if (negated) {
+            pattern = '!'+pattern
+        }
+
+		if (pattern.endsWith('/') || pattern.endsWith('/**') || pattern.endsWith('/**/*')) {
+            patterns.push(pattern)
+        } else {
+			patterns.push(pattern)
+			patterns.push(pattern+'/**')
+        }
+	}
+
+    return patterns
+}
+
+const git_ignored_paths = gitignore_to_glob_patterns(fs.readFileSync('.gitignore', 'utf-8'))
 
 /** @type {import('eslint').Linter.Config[]} */
 export default [{
