@@ -1,5 +1,5 @@
-import {getNewSdtId} from './get-id'
-import {NodeID, Solid} from './types'
+import {getNewSdtId} from './get-id.ts'
+import {type NodeID, type Solid} from './types.ts'
 
 export const enum ObjectType {
     Owner = 'owner',

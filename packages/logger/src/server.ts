@@ -1,5 +1,5 @@
 import {noop} from '@solid-primitives/utils'
-import type * as API from '.'
+import type * as API from './index.ts'
 
 export const debugComputation: typeof API.debugComputation = noop
 export const debugOwnerComputations: typeof API.debugOwnerComputations = noop

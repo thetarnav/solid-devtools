@@ -1,16 +1,16 @@
 import {untrackedCallback} from '@solid-devtools/shared/primitives'
-import type {ComponentRegisterHandler} from '../main/component-registry'
-import {NodeType, TreeWalkerMode} from '../main/constants'
-import {ObjectType, getSdtId} from '../main/id'
-import {observeComputationUpdate} from '../main/observe'
-import {Mapped, NodeID, Solid} from '../main/types'
+import type {ComponentRegisterHandler} from '../main/component-registry.ts'
+import {NodeType, TreeWalkerMode} from '../main/constants.ts'
+import {ObjectType, getSdtId} from '../main/id.ts'
+import {observeComputationUpdate} from '../main/observe.ts'
+import {type Mapped, type NodeID, type Solid} from '../main/types.ts'
 import {
     getComponentRefreshNode,
     getNodeName,
     isObservableComputation,
     markOwnerType,
     resolveElements,
-} from '../main/utils'
+} from '../main/utils.ts'
 
 export type ComputationUpdateHandler = (
     rootId: NodeID,

@@ -13,11 +13,11 @@ import {
     onParentCleanup,
     removeValueUpdateObserver,
 } from '@solid-devtools/debugger'
-import {NodeType, Solid} from '@solid-devtools/debugger/types'
-import {Many, arrayEquals, asArray} from '@solid-primitives/utils'
-import {$PROXY, Accessor, createEffect, getOwner, on, onCleanup, untrack} from 'solid-js'
+import {NodeType, type Solid} from '@solid-devtools/debugger/types'
+import {type Many, arrayEquals, asArray} from '@solid-primitives/utils'
+import {$PROXY, type Accessor, createEffect, getOwner, on, onCleanup, untrack} from 'solid-js'
 import {
-    NodeStateWithValue,
+    type NodeStateWithValue,
     UNUSED,
     getComputationCreatedLabel,
     getComputationRerunLabel,
@@ -34,10 +34,10 @@ import {
     logSignalValueUpdate,
     logSignalsInitialValues,
     paddedForEach,
-} from './log'
-import {getDiffMap, getFunctionSources, makeTimeMeter} from './utils'
+} from './log.ts'
+import {getDiffMap, getFunctionSources, makeTimeMeter} from './utils.ts'
 
-declare module 'solid-js/types/reactive/signal' {
+declare module 'solid-js/types/reactive/signal.js' {
     interface Owner {
         $debug?: boolean
         $debugSignals?: boolean

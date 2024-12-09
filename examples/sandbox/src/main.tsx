@@ -1,7 +1,7 @@
 import {render} from 'solid-js/web'
-import App from './App'
-import {Overlay} from './Overlay'
-import {ThemeProvider} from './Theme'
+import App from './App.tsx'
+import {Overlay} from './Overlay.tsx'
+import {ThemeProvider} from './Theme.tsx'
 
 import 'uno.css'
 

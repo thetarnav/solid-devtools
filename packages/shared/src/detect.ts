@@ -1,5 +1,5 @@
 import 'solid-js'
-import {interceptPropertySet} from './utils'
+import {interceptPropertySet} from './utils.ts'
 
 //
 // SolidJS detection

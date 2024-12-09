@@ -14,20 +14,20 @@
         "test:types": "tsc --noEmit --paths null"
     },
     "devDependencies": {
-        "@crxjs/vite-plugin": "2.0.0-beta.21",
-        "@types/chrome": "^0.0.251"
+        "@crxjs/vite-plugin": "2.0.0-beta.28",
+        "@types/chrome": "^0.0.287"
     },
     "dependencies": {
         "@solid-devtools/debugger": "workspace:^",
         "@solid-devtools/frontend": "workspace:^",
         "@solid-devtools/shared": "workspace:^",
-        "@solid-primitives/utils": "^6.2.1",
+        "@solid-primitives/utils": "^6.2.3",
         "solid-devtools": "workspace:^",
-        "solid-js": "^1.8.5"
+        "solid-js": "^1.9.3"
     },
     "overrides": {
         "@crxjs/vite-plugin": {
-            "vite": "^4"
+            "vite": "^6"
         }
     },
     "packageManager": "pnpm@9.14.4"

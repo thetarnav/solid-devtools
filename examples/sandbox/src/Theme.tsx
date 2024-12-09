@@ -1,4 +1,4 @@
-import {Component, createContext, ParentComponent, useContext} from 'solid-js'
+import {type Component, createContext, type ParentComponent, useContext} from 'solid-js'
 import {createStore} from 'solid-js/store'
 
 export type ThemeContextState = {

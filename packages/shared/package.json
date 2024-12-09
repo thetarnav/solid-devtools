@@ -68,21 +68,21 @@
         }
     },
     "peerDependencies": {
-        "solid-js": "^1.8.0"
+        "solid-js": "^1.9.0"
     },
     "dependencies": {
-        "@solid-primitives/event-bus": "^1.0.8",
-        "@solid-primitives/event-listener": "^2.3.0",
-        "@solid-primitives/media": "^2.2.5",
-        "@solid-primitives/refs": "^1.0.5",
-        "@solid-primitives/rootless": "^1.4.2",
-        "@solid-primitives/scheduled": "^1.4.1",
-        "@solid-primitives/static-store": "^0.0.5",
-        "@solid-primitives/styles": "^0.0.111",
-        "@solid-primitives/utils": "^6.2.1"
+        "@solid-primitives/event-bus": "^1.0.11",
+        "@solid-primitives/event-listener": "^2.3.3",
+        "@solid-primitives/media": "^2.2.9",
+        "@solid-primitives/refs": "^1.0.8",
+        "@solid-primitives/rootless": "^1.4.5",
+        "@solid-primitives/scheduled": "^1.4.4",
+        "@solid-primitives/static-store": "^0.0.8",
+        "@solid-primitives/styles": "^0.0.114",
+        "@solid-primitives/utils": "^6.2.3"
     },
     "devDependencies": {
-        "solid-js": "^1.8.5"
+        "solid-js": "^1.9.3"
     },
     "browser": {}
 }

@@ -6,26 +6,18 @@ import {Icon, MountIcons} from '@solid-devtools/frontend'
 import {useIsMobile, useIsTouch} from '@solid-devtools/shared/primitives'
 import {createBodyCursor} from '@solid-primitives/cursor'
 import {makeEventListener} from '@solid-primitives/event-listener'
-import {
-    Component,
-    ComponentProps,
-    Show,
-    batch,
-    createComputed,
-    createRoot,
-    createSignal,
-} from 'solid-js'
+import * as s from 'solid-js'
 import {Dynamic, Portal} from 'solid-js/web'
-import {Devtools} from './controller'
+import {Devtools} from './controller.tsx'
 
 import frontendStyles from '@solid-devtools/frontend/dist/styles.css'
 import overlayStyles from './styles.css'
 
-export function attachDevtoolsOverlay(props: ComponentProps<typeof Overlay> = {}): VoidFunction {
+export function attachDevtoolsOverlay(props: s.ComponentProps<typeof Overlay> = {}): VoidFunction {
     let dispose: VoidFunction | undefined
 
     setTimeout(() => {
-        createRoot(_dispose => {
+        s.createRoot(_dispose => {
             dispose = _dispose
             return <Overlay {...props} />
         })
@@ -36,20 +28,20 @@ export function attachDevtoolsOverlay(props: ComponentProps<typeof Overlay> = {}
     }
 }
 
-const Overlay: Component<{
+const Overlay: s.Component<{
     defaultOpen?: boolean
     alwaysOpen?: boolean
     noPadding?: boolean
 }> = ({defaultOpen, alwaysOpen, noPadding}) => {
     const debug = useDebugger()
     if (defaultOpen || alwaysOpen) debug.toggleEnabled(true)
-    const [isOpen, _setOpen] = createSignal(alwaysOpen || debug.enabled())
+    const [isOpen, _setOpen] = s.createSignal(alwaysOpen || debug.enabled())
     const setOpen = alwaysOpen
         ? () => {
               /**/
           }
         : (enabled: boolean) => {
-              batch(() => {
+              s.batch(() => {
                   debug.toggleEnabled(enabled)
                   _setOpen(enabled)
               })
@@ -58,9 +50,9 @@ const Overlay: Component<{
     const isMobile = useIsMobile()
     const isTouch = useIsTouch()
 
-    const [progress, setProgress] = createSignal(0.5)
-    const [dragging, setDragging] = createSignal(false)
-    createComputed(() => setProgress(isMobile() ? 0.8 : 0.5))
+    const [progress, setProgress] = s.createSignal(0.5)
+    const [dragging, setDragging] = s.createSignal(false)
+    s.createComputed(() => setProgress(isMobile() ? 0.8 : 0.5))
 
     makeEventListener(window, 'pointermove', e => {
         if (!dragging()) return
@@ -90,7 +82,7 @@ const Overlay: Component<{
                             />
                         </button>
                     )}
-                    <Show when={!isTouch()}>
+                    <s.Show when={!isTouch()}>
                         <div
                             class="overlay__container__resizer"
                             onPointerDown={e => {
@@ -98,11 +90,11 @@ const Overlay: Component<{
                                 setDragging(true)
                             }}
                         />
-                    </Show>
+                    </s.Show>
                     <div class="overlay__container__inner">
-                        <Show when={isOpen()}>
+                        <s.Show when={isOpen()}>
                             <Devtools headerSubtitle="overlay" />
-                        </Show>
+                        </s.Show>
                     </div>
                 </div>
             </div>

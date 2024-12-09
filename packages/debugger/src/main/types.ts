@@ -3,9 +3,9 @@ import type {$PROXY, DEV, getListener, getOwner, onCleanup, untrack} from 'solid
 import type * as StoreAPI from 'solid-js/store'
 import type {DEV as STORE_DEV, unwrap} from 'solid-js/store'
 import type * as WebAPI from 'solid-js/web'
-import type {EncodedValue, PropGetterState} from '../inspector/types'
-import type {LocatorOptions, SourceLocation} from '../locator/types'
-import {NodeType, ValueItemType} from './constants'
+import type {EncodedValue, PropGetterState} from '../inspector/types.ts'
+import type {LocatorOptions, SourceLocation} from '../locator/types.ts'
+import {NodeType, ValueItemType} from './constants.ts'
 
 //
 // EXPOSED SOLID API

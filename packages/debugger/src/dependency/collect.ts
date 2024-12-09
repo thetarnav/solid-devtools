@@ -1,13 +1,13 @@
-import {getSdtId, ObjectType} from '../main/id'
+import {getSdtId, ObjectType} from '../main/id.ts'
 import {
     observeComputationUpdate,
     observeValueUpdate,
     removeComputationUpdateObserver,
     removeValueUpdateObserver,
-} from '../main/observe'
-import {NodeID, Solid} from '../main/types'
-import {getNodeName, getNodeType, getOwnerType, isSolidOwner} from '../main/utils'
-import {NodeType} from '../types'
+} from '../main/observe.ts'
+import {type NodeID, type Solid} from '../main/types.ts'
+import {getNodeName, getNodeType, getOwnerType, isSolidOwner} from '../main/utils.ts'
+import {NodeType} from '../types.ts'
 
 export namespace SerializedDGraph {
     export type Node = {

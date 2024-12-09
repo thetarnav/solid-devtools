@@ -1,4 +1,4 @@
-import {PluginObj} from '@babel/core'
+import {type PluginObj} from '@babel/core'
 import * as t from '@babel/types'
 
 const nameId = t.identifier('name')

@@ -10,18 +10,7 @@ This script is injected into every page and is responsible for:
 */
 
 import {error, log} from '@solid-devtools/shared/utils'
-import {
-    ConnectionName,
-    DETECT_MESSAGE,
-    DetectionState,
-    ForwardPayload,
-    createPortMessanger,
-    forwardMessageToWindow,
-    isForwardMessage,
-    makeMessageListener,
-    makePostMessage,
-    startListeningWindowMessages,
-} from '../shared/bridge'
+import * as bridge from '../shared/bridge.ts'
 
 import.meta.env.DEV && log('Content-Script working.')
 
@@ -32,15 +21,15 @@ import debuggerPath from './debugger?script&module'
 
 const extVersion = chrome.runtime.getManifest().version
 
-const port = chrome.runtime.connect({name: ConnectionName.Content})
+const port = chrome.runtime.connect({name: bridge.ConnectionName.Content})
 
 let devtoolsOpened = false
 
-startListeningWindowMessages()
-const fromClient = makeMessageListener()
-const toClient = makePostMessage()
+bridge.startListeningWindowMessages()
+const fromClient = bridge.makeMessageListener()
+const toClient = bridge.makePostMessage()
 
-const {postPortMessage: toBackground, onPortMessage: fromBackground} = createPortMessanger(port)
+const {postPortMessage: toBackground, onPortMessage: fromBackground} = bridge.createPortMessanger(port)
 
 function loadScriptInRealWorld(path: string): Promise<void> {
     return new Promise((resolve, reject) => {
@@ -59,9 +48,9 @@ loadScriptInRealWorld(detectorPath).catch(() => error('Detector script failed to
   Message from ./detector.ts
 */
 window.addEventListener('message', e => {
-    if (!e.data || typeof e.data !== 'object' || e.data.name !== DETECT_MESSAGE) return
+    if (!e.data || typeof e.data !== 'object' || e.data.name !== bridge.DETECT_MESSAGE) return
 
-    const state = e.data.state as DetectionState
+    const state = e.data.state as bridge.DetectionState
 
     toBackground('Detected', state)
 
@@ -101,11 +90,11 @@ fromBackground('DevtoolsClosed', () => toClient('DevtoolsClosed'))
 
 fromClient(e => {
     // forward all client messages to the background script in
-    const payload: ForwardPayload = {forwarding: true, name: e.name, details: e.details}
+    const payload: bridge.ForwardPayload = {forwarding: true, name: e.name, details: e.details}
     port.postMessage(payload)
 })
 
 port.onMessage.addListener(data => {
     // forward all devtools messages (from background) to the client
-    if (isForwardMessage(data)) forwardMessageToWindow(data)
+    if (bridge.isForwardMessage(data)) bridge.forwardMessageToWindow(data)
 })
