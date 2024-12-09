@@ -43,7 +43,7 @@
     },
     "scripts": {
         "dev": "pnpm run build --watch",
-        "build": "tsx ./scripts/build.ts",
+        "build": "node --experimental-transform-types ./scripts/build.ts",
         "test:types": "tsc --noEmit --paths null"
     },
     "dependencies": {

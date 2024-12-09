@@ -1,4 +1,4 @@
-import { defineConfig } from '@playwright/test'
+import {defineConfig} from '@playwright/test'
 
 const is_ci = !!process.env['CI']
 
@@ -18,33 +18,19 @@ export default defineConfig({
     /* Reporter to use. See https://playwright.dev/docs/test-reporters */
     reporter: 'html',
     /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
-    webServer: [
-        {
-            command: 'pnpm run sandbox:ext',
-            url: 'http://localhost:3000',
-            timeout: 120_000,
-            reuseExistingServer: !is_ci,
-        },
-        {
-            command: 'pnpm run sandbox',
-            url: 'http://localhost:3001',
-            timeout: 120_000,
-            reuseExistingServer: !is_ci,
-        },
-    ],
+    webServer: [{
+        command: 'pnpm run sandbox',
+        url: 'http://localhost:3000',
+        timeout: 120_000,
+        reuseExistingServer: !is_ci,
+    }],
     use: {
         /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
         trace: 'on-first-retry',
     },
 
-    projects: [
-        {
-            name: 'Chromium Extension',
-            use: { baseURL: 'http://localhost:3000' },
-        },
-        {
-            name: 'Chromium Overlay',
-            use: { baseURL: 'http://localhost:3001' },
-        },
-    ],
+    projects: [{
+        name: 'Chromium Overlay',
+        use: { baseURL: 'http://localhost:3000' },
+    }],
 })

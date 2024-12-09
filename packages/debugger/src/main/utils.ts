@@ -53,7 +53,7 @@ export const getOwnerType = (o: Readonly<Solid.Owner>): NodeType => {
     // memo
     if ('comparator' in o) {
         if (
-            // eslint-disable-next-line @typescript-eslint/ban-types
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
             (o.owner as {component?: Function} | null)?.component?.name.startsWith(
                 SOLID_REFRESH_PREFIX,
             )

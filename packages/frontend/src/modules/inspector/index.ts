@@ -130,7 +130,7 @@ function updateStore(
         if (Array.isArray(value)) value.length = newRawValue
         else throw `updateStore: store node (${storeNodeId}) is not an array`
     } else {
-        newValue[property] = decode.decodeValue(newRawValue, newValue[property]!, storeNodeMap)
+        newValue[property] = decode.decodeValue(newRawValue, newValue[property], storeNodeMap)
     }
     store.setValue(newValue)
 }

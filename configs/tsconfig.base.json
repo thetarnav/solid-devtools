@@ -12,6 +12,7 @@
         "noPropertyAccessFromIndexSignature": true,
         "noUncheckedIndexedAccess": true,
         "allowJs": true,
+        "checkJs": true,
         "outDir": "types",
         "types": ["@total-typescript/ts-reset"]
     }

@@ -74,21 +74,15 @@ export const Node_Name: s.Component<{
 }> = props => {
     const name = (): string => props.name || UNKNOWN
     return s.createMemo(() => {
+        // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
         switch (props.type) {
-            case NodeType.Root:
-                return <span class={node_type_classes(props.frozen)}>Root</span>
-            case NodeType.Context:
-                return <span class={node_type_classes(props.frozen)}>Context</span>
-            case NodeType.Render:
-                return <span class={node_type_classes(props.frozen)}>Render Effect</span>
-            case NodeType.Component:
-                return <span class={component_classes(props.frozen)}>{name()}</span>
-            case NodeType.Element:
-                return <span class={element_classes(props.frozen)}>{name()}</span>
-            case NodeType.Signal:
-                return <span class={signal_classes(props.frozen)}>{name()}</span>
-            default:
-                return <span class={name_classes(props.frozen)}>{name()}</span>
+        case NodeType.Root:      return <span class={node_type_classes(props.frozen)}>Root</span>
+        case NodeType.Context:   return <span class={node_type_classes(props.frozen)}>Context</span>
+        case NodeType.Render:    return <span class={node_type_classes(props.frozen)}>Render Effect</span>
+        case NodeType.Component: return <span class={component_classes(props.frozen)}>{name()}</span>
+        case NodeType.Element:   return <span class={element_classes(props.frozen)}>{name()}</span>
+        case NodeType.Signal:    return <span class={signal_classes(props.frozen)}>{name()}</span>
+        default:                 return <span class={name_classes(props.frozen)}>{name()}</span>
         }
     }) as unknown as s.JSX.Element
 }

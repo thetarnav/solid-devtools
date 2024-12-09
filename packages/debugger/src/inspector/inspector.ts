@@ -95,7 +95,7 @@ export class ObservedProps {
         get: () => unknown,
     ): {getValue: () => unknown | typeof $NOT_SET; isStale: boolean} {
         if (this.observedGetters[key]) {
-            const o = this.observedGetters[key]!
+            const o = this.observedGetters[key]
             return {getValue: () => o.v, isStale: o.n === 0}
         }
 

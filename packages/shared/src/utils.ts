@@ -132,7 +132,7 @@ export function whileArray<T, U>(
 }
 
 export type ToDyscriminatedUnion<
-    // eslint-disable-next-line @typescript-eslint/ban-types
+    // eslint-disable-next-line @typescript-eslint/no-empty-object-type
     T extends {},
     TK extends PropertyKey = 'type',
     DK extends void | PropertyKey = void,

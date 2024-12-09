@@ -137,6 +137,8 @@ export function InspectorView(): JSX.Element {
                                 name="value"
                                 value={state.value.value}
                                 isExtended={state.value.extended}
+                                // ts-eslint issue
+                                // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
                                 onClick={() => inspector.inspectValueItem(state.value!)}
                                 onElementHover={hovered.toggleHoveredElement}
                                 isSignal

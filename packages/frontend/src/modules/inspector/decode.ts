@@ -58,7 +58,7 @@ type DecodedDataMap = {
         readonly id: NodeID
         readonly valueType: ValueType.Array | ValueType.Object
     }
-    // eslint-disable-next-line @typescript-eslint/ban-types
+    // eslint-disable-next-line @typescript-eslint/no-empty-object-type
     [ValueType.Unknown]: {}
 }
 type DecodedValueMap = {

@@ -111,97 +111,98 @@ const ValuePreview: s.Component<{
     return s.createMemo(() => {
         const value = props.value
         switch (value.type) {
-            case ValueType.String:
-                return (
-                    <span class={string_value} aria-label={props.label}>
-                        {value.value}
-                    </span>
-                )
-            case ValueType.Number:
-                return (
-                    <span
-                        class={value_base + ' min-h-inspector_row text-cyan-600'}
-                        aria-label={props.label}
-                    >
-                        {value.value}
-                    </span>
-                )
-            case ValueType.Boolean:
-                return (
-                    <input
-                        type="checkbox"
-                        class={value_base + ' pointer-events-none'}
-                        onClick={e => e.preventDefault()}
-                        checked={value.value}
-                        aria-label={props.label}
-                    />
-                )
-            case ValueType.Null:
-                return (
-                    <span class={value_nullable} aria-label={props.label}>
-                        {value.value === null ? 'null' : 'undefined'}
-                    </span>
-                )
-            case ValueType.Unknown:
-                return (
-                    <span class={value_nullable} aria-label={props.label}>
-                        unknown
-                    </span>
-                )
-            case ValueType.Function:
-                return (
-                    <span class={value_function} aria-label={props.label}>
-                        {value.name ? `f ${value.name}()` : 'function()'}
-                    </span>
-                )
-            case ValueType.Getter:
-                return (
-                    <span class={value_function} aria-label={props.label}>
-                        get {value.name}()
-                    </span>
-                )
-            case ValueType.Symbol:
-                return (
-                    <span class={value_base} aria-label={props.label}>
-                        Symbol({value.name})
-                    </span>
-                )
-            case ValueType.Instance:
-                return (
-                    <span class={value_base} aria-label={props.label}>
-                        {value.name}
-                    </span>
-                )
-            case ValueType.Element: {
-                const {onElementHover: onHover} = s.useContext(ValueContext)!
+        case ValueType.String:
+            return (
+                <span class={string_value} aria-label={props.label}>
+                    {value.value}
+                </span>
+            )
+        case ValueType.Number:
+            return (
+                <span
+                    class={value_base + ' min-h-inspector_row text-cyan-600'}
+                    aria-label={props.label}
+                >
+                    {value.value}
+                </span>
+            )
+        case ValueType.Boolean:
+            return (
+                <input
+                    type="checkbox"
+                    class={value_base + ' pointer-events-none'}
+                    onClick={e => e.preventDefault()}
+                    checked={value.value}
+                    aria-label={props.label}
+                />
+            )
+        case ValueType.Null:
+            return (
+                <span class={value_nullable} aria-label={props.label}>
+                    {value.value === null ? 'null' : 'undefined'}
+                </span>
+            )
+        case ValueType.Unknown:
+            return (
+                <span class={value_nullable} aria-label={props.label}>
+                    unknown
+                </span>
+            )
+        case ValueType.Function:
+            return (
+                <span class={value_function} aria-label={props.label}>
+                    {value.name ? `f ${value.name}()` : 'function()'}
+                </span>
+            )
+        case ValueType.Getter:
+            return (
+                <span class={value_function} aria-label={props.label}>
+                    get {value.name}()
+                </span>
+            )
+        case ValueType.Symbol:
+            return (
+                <span class={value_base} aria-label={props.label}>
+                    Symbol({value.name})
+                </span>
+            )
+        case ValueType.Instance:
+            return (
+                <span class={value_base} aria-label={props.label}>
+                    {value.name}
+                </span>
+            )
+        case ValueType.Element: {
+            const {onElementHover: onHover} = s.useContext(ValueContext)!
 
-                const hoverProps = onHover && createHover(hovered => onHover(value.id, hovered))
+            const hoverProps = onHover && createHover(hovered => onHover(value.id, hovered))
 
-                return (
-                    <span class={value_element_container} aria-label={props.label} {...hoverProps}>
-                        <div class={styles.highlight_element} />
-                        {value.name}
-                    </span>
-                )
-            }
-            case ValueType.Store:
-                return (
-                    <ObjectValuePreview
-                        type={value.valueType}
-                        data={value}
-                        extended={props.extended}
-                        label={props.label}
-                    />
-                )
-            default:
-                return (
-                    <ObjectValuePreview
-                        type={value.type}
-                        data={value}
-                        extended={props.extended}
-                        label={props.label}
-                    />
-                )
+            return (
+                <span class={value_element_container} aria-label={props.label} {...hoverProps}>
+                    <div class={styles.highlight_element} />
+                    {value.name}
+                </span>
+            )
+        }
+        case ValueType.Store:
+            return (
+                <ObjectValuePreview
+                    type={value.valueType}
+                    data={value}
+                    extended={props.extended}
+                    label={props.label}
+                />
+            )
+        case ValueType.Array:
+        case ValueType.Object:
+            return (
+                <ObjectValuePreview
+                    type={value.type}
+                    data={value}
+                    extended={props.extended}
+                    label={props.label}
+                />
+            )
         }
     }) as unknown as s.JSX.Element
 }

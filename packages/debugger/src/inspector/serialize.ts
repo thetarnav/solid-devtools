@@ -38,7 +38,8 @@ const encodeNonObject = (value: unknown): EncodedValue => {
             return [ValueType.Function, value.name]
         case 'object':
             return [ValueType.Null, null]
-        default:
+        case 'bigint':
+        case 'undefined':
             return [ValueType.Null, UNDEFINED]
     }
 }

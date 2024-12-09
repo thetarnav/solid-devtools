@@ -114,7 +114,7 @@ export function attachDebugger(owner = SolidAPI.getOwner()): void {
             return
         }
         // sub-root (nested)
-        let parent = findClosestAliveParent(root)!
+        let parent = findClosestAliveParent(root)
         if (!parent.owner) return warn('Parent owner is missing.')
         changeRootAttachment(root, parent.owner)
 

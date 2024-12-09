@@ -7,19 +7,18 @@ const undefinedId = t.identifier('undefined')
 type Comparable = t.Identifier | t.V8IntrinsicIdentifier | t.PrivateName | t.Expression
 function equal(a: Comparable, b: Comparable): boolean {
     if (a.type !== b.type) return false
+    // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
     switch (a.type) {
-        case 'Identifier':
-        case 'V8IntrinsicIdentifier':
-            return a.name === (b as t.Identifier).name
-        case 'PrivateName':
-            return a.id === (b as t.PrivateName).id
-        case 'MemberExpression':
-            return (
-                equal(a.object, (b as t.MemberExpression).object) &&
-                equal(a.property, (b as t.MemberExpression).property)
-            )
-        default: // other type of Expression
-            return false
+    case 'Identifier':
+    case 'V8IntrinsicIdentifier':
+        return a.name === (b as t.Identifier).name
+    case 'PrivateName':
+        return a.id === (b as t.PrivateName).id
+    case 'MemberExpression':
+        return equal(a.object,   (b as t.MemberExpression).object) &&
+               equal(a.property, (b as t.MemberExpression).property)
+    default: // other type of Expression
+        return false
     }
 }
 
