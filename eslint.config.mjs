@@ -29,7 +29,7 @@ function gitignore_to_glob_patterns(gitignore) {
 
 		if (pattern[0] === '/') {
 			pattern = pattern.slice(1)
-		} else {
+		} else if (!pattern.startsWith('**/')) {
 			pattern = '**/'+pattern
 		}
 
@@ -37,11 +37,15 @@ function gitignore_to_glob_patterns(gitignore) {
             pattern = '!'+pattern
         }
 
-		if (pattern.endsWith('/') || pattern.endsWith('/**') || pattern.endsWith('/**/*')) {
+		if (pattern.indexOf('.') > 0) {
             patterns.push(pattern)
         } else {
 			patterns.push(pattern)
-			patterns.push(pattern+'/**')
+            if (pattern.endsWith('/')) {
+    			patterns.push(pattern+'**/*')
+            } else {
+    			patterns.push(pattern+'/**/*')
+            }
         }
 	}
 
@@ -133,5 +137,5 @@ export default [{
 }, {
     // ignores need to be in a separate config for some reason
     // https://github.com/eslint/eslint/issues/17400
-	ignores: ['**/{dist,node_modules,__snapshots__}/**/*', 'examples/**/*', ...git_ignored_paths],
+	ignores: ['examples/**/*', ...git_ignored_paths],
 }]
