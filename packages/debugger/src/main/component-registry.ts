@@ -1,5 +1,5 @@
-import {NodeID, Solid} from './types'
-import {onOwnerCleanup} from './utils'
+import {type NodeID, type Solid} from './types.ts'
+import {onOwnerCleanup} from './utils.ts'
 
 const $CLEANUP = Symbol('component-registry-cleanup')
 

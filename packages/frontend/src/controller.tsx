@@ -1,6 +1,6 @@
-import {Debugger, DebuggerModule, DevtoolsMainView, NodeID} from '@solid-devtools/debugger/types'
+import {type Debugger, DebuggerModule, DevtoolsMainView, type NodeID} from '@solid-devtools/debugger/types'
 import {SECOND} from '@solid-primitives/date'
-import {EventBus, batchEmits, createEventBus, createEventHub} from '@solid-primitives/event-bus'
+import {type EventBus, batchEmits, createEventBus, createEventHub} from '@solid-primitives/event-bus'
 import {debounce} from '@solid-primitives/scheduled'
 import {defer} from '@solid-primitives/utils'
 import {
@@ -14,10 +14,10 @@ import {
     onCleanup,
     useContext,
 } from 'solid-js'
-import {App} from './App'
-import createInspector from './modules/inspector'
-import {type Structure} from './modules/structure'
-import {ErrorOverlay, styles} from './ui'
+import {App} from './App.tsx'
+import createInspector from './inspector.tsx'
+import {type Structure} from './structure.tsx'
+import * as ui from './ui/index.ts'
 
 // TODO: add to solid-primitives/event-bus
 type ToEventBusChannels<T extends Record<string, any>> = {
@@ -95,9 +95,9 @@ export function createDevtools() {
             const controller = createController(bridge, options)
 
             return (
-                <div class={styles.devtools_root_class + ' h-inherit'}>
-                    <styles.Styles />
-                    <ErrorOverlay
+                <div class={ui.devtools_root_class + ' h-inherit'}>
+                    <ui.Styles />
+                    <ui.ErrorOverlay
                         footer={props.errorOverlayFooter}
                         catchWindowErrors={props.catchWindowErrors}
                     >
@@ -106,7 +106,7 @@ export function createDevtools() {
                                 <App headerSubtitle={props.headerSubtitle} />
                             </ControllerCtx.Provider>
                         </DevtoolsOptionsCtx.Provider>
-                    </ErrorOverlay>
+                    </ui.ErrorOverlay>
                 </div>
             )
         },

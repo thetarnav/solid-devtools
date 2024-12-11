@@ -1,12 +1,12 @@
 import {makeHoverElementListener} from '@solid-devtools/shared/primitives'
 import {warn} from '@solid-devtools/shared/utils'
-import {EmitterEmit} from '@solid-primitives/event-bus'
+import {type EmitterEmit} from '@solid-primitives/event-bus'
 import {makeEventListener} from '@solid-primitives/event-listener'
 import {createKeyHold} from '@solid-primitives/keyboard'
 import {scheduleIdle} from '@solid-primitives/scheduled'
 import {defer} from '@solid-primitives/utils'
 import {
-    Accessor,
+    type Accessor,
     createEffect,
     createMemo,
     createSignal,
@@ -14,26 +14,26 @@ import {
     onCleanup,
     runWithOwner,
 } from 'solid-js'
-import type {Debugger} from '../main'
-import * as registry from '../main/component-registry'
-import {ObjectType, getObjectById} from '../main/id'
-import SolidAPI from '../main/solid-api'
-import {NodeID} from '../main/types'
-import {createElementsOverlay} from './element-overlay'
+import type {Debugger} from '../main/index.ts'
+import * as registry from '../main/component-registry.ts'
+import {ObjectType, getObjectById} from '../main/id.ts'
+import SolidAPI from '../main/solid-api.ts'
+import {type NodeID} from '../main/types.ts'
+import {createElementsOverlay} from './element-overlay.tsx'
 import {
-    LocatorComponent,
-    SourceCodeData,
-    SourceLocation,
-    TargetIDE,
-    TargetURLFunction,
+    type LocatorComponent,
+    type SourceCodeData,
+    type SourceLocation,
+    type TargetIDE,
+    type TargetURLFunction,
     getLocationAttr,
     getProjectPath,
     getSourceCodeData,
     openSourceCode,
-} from './find-components'
-import {HighlightElementPayload, LocatorOptions} from './types'
+} from './find-components.ts'
+import {type HighlightElementPayload, type LocatorOptions} from './types.ts'
 
-export {parseLocationString} from './find-components'
+export {parseLocationString} from './find-components.ts'
 
 export function createLocator(props: {
     emit: EmitterEmit<Debugger.OutputChannels>

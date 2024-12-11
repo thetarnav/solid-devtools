@@ -1,5 +1,5 @@
 import {
-    Component,
+    type Component,
     createComponent,
     createComputed,
     createEffect,
@@ -9,15 +9,15 @@ import {
     createRoot,
     createSignal,
     ErrorBoundary,
-    ParentComponent,
-    Setter,
+    type ParentComponent,
+    type Setter,
     Show,
     Suspense,
 } from 'solid-js'
 import {createMutable} from 'solid-js/store'
-import Recursive from './Recursive'
-import {ThemeExample} from './Theme'
-import Todos from './Todos'
+import Recursive from './Recursive.tsx'
+import {ThemeExample} from './Theme.tsx'
+import Todos from './Todos.tsx'
 
 const doMediumCalc = () => {
     Array.from({length: 1000000}, (_, i) => i).sort(() => Math.random() - 5)

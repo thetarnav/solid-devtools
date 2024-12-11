@@ -1,12 +1,12 @@
-import {Listen} from '@solid-primitives/event-bus'
+import {type Listen} from '@solid-primitives/event-bus'
 import {throttle} from '@solid-primitives/scheduled'
-import * as registry from '../main/component-registry'
-import {DEFAULT_WALKER_MODE, DevtoolsMainView, NodeType, TreeWalkerMode} from '../main/constants'
-import {ObjectType, getSdtId} from '../main/id'
-import * as roots from '../main/roots'
-import {Mapped, NodeID, Solid} from '../main/types'
-import {isDisposed, markOwnerType} from '../main/utils'
-import {ComputationUpdateHandler, walkSolidTree} from './walker'
+import * as registry from '../main/component-registry.ts'
+import {DEFAULT_WALKER_MODE, DevtoolsMainView, NodeType, TreeWalkerMode} from '../main/constants.ts'
+import {ObjectType, getSdtId} from '../main/id.ts'
+import * as roots from '../main/roots.ts'
+import {type Mapped, type NodeID, type Solid} from '../main/types.ts'
+import {isDisposed, markOwnerType} from '../main/utils.ts'
+import {type ComputationUpdateHandler, walkSolidTree} from './walker.ts'
 
 export type StructureUpdates = {
     /** Partial means that the updates are based on the previous structure state */

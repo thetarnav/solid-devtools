@@ -1,8 +1,10 @@
-import {Icon, Splitter, styles, theme} from '@/ui'
+import * as s from 'solid-js'
+import * as ui from './ui/index.ts'
+import {createSidePanel} from './SidePanel.tsx'
+import {StructureView} from './structure.tsx'
+// TODO: replace solid-headless
+// @ts-expect-error
 import {Menu, MenuItem, Popover, PopoverButton, PopoverPanel} from 'solid-headless'
-import {Component, JSX, Show} from 'solid-js'
-import {createSidePanel} from './SidePanel'
-import StructureView from './modules/structure/structure-tree'
 
 // const MainViewTabs: Component = () => {
 //   const { view } = useController()
@@ -29,18 +31,18 @@ import StructureView from './modules/structure/structure-tree'
 //   )
 // }
 
-const Options: Component = () => {
+const Options: s.Component = () => {
     return (
         <Popover defaultOpen={false} class="relative ml-auto">
-            {({isOpen, setState}) => (
+            {(popover: any) => (
                 <>
                     <PopoverButton
-                        onKeyDown={(e: KeyboardEvent) => e.key === ' ' && setState(true)}
-                        class={`${styles.toggle_button} rounded-md ml-auto w-7 h-7`}
+                        onKeyDown={(e: KeyboardEvent) => e.key === ' ' && popover.setState(true)}
+                        class={`${ui.toggle_button} rounded-md ml-auto w-7 h-7`}
                     >
-                        <Icon.Options class="w-4.5 h-4.5" />
+                        <ui.Icon.Options class="w-4.5 h-4.5" />
                     </PopoverButton>
-                    <Show when={isOpen()}>
+                    <s.Show when={popover.isOpen()}>
                         <PopoverPanel
                             class="absolute z-9999 w-max top-0 right-full mr-2 p-2 rounded-md bg-panel-2 b b-solid b-panel-3"
                             on:keydown={(e: KeyboardEvent) =>
@@ -58,25 +60,25 @@ const Options: Component = () => {
                                 </MenuItem>
                             </Menu>
                         </PopoverPanel>
-                    </Show>
+                    </s.Show>
                 </>
             )}
         </Popover>
     )
 }
 
-export const App: Component<{headerSubtitle?: JSX.Element}> = props => {
+export const App: s.Component<{headerSubtitle?: s.JSX.Element}> = props => {
     // side panel is created here to keep the state between renders
     const sidePanel = createSidePanel()
 
     return (
         <div
             class="h-full w-full overflow-hidden grid text-base font-sans bg-panel-bg text-text"
-            style={{'grid-template-rows': `${theme.spacing[10]} 1fr`}}
+            style={{'grid-template-rows': `${ui.spacing[10]} 1fr`}}
         >
             <header class="p-2 flex items-center gap-x-2 bg-panel-bg b-b b-solid b-panel-border text-text">
                 <div class="flex items-center gap-x-2">
-                    <Icon.SolidWhite class="w-4 h-4 text-disabled" />
+                    <ui.Icon.SolidWhite class="w-4 h-4 text-disabled" />
                     <div>
                         <h3>Solid Developer Tools</h3>
                         {props.headerSubtitle && (
@@ -88,16 +90,16 @@ export const App: Component<{headerSubtitle?: JSX.Element}> = props => {
                 <Options />
             </header>
             <div class="overflow-hidden">
-                <Splitter.Root>
-                    <Splitter.Panel>
+                <ui.Splitter.Root>
+                    <ui.Splitter.Panel>
                         <StructureView />
-                    </Splitter.Panel>
+                    </ui.Splitter.Panel>
                     {sidePanel.isOpen() && (
-                        <Splitter.Panel>
+                        <ui.Splitter.Panel>
                             <sidePanel.SidePanel />
-                        </Splitter.Panel>
+                        </ui.Splitter.Panel>
                     )}
-                </Splitter.Root>
+                </ui.Splitter.Root>
             </div>
         </div>
     )

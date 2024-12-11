@@ -1,14 +1,14 @@
-import {assertTransform, cwd, file} from './setup_test'
+import {assertTransform, cwd, file} from './setup_test.ts'
 
 import {LOCATION_ATTRIBUTE_NAME, WINDOW_PROJECTPATH_PROPERTY} from '@solid-devtools/debugger/types'
 import {describe, test} from 'vitest'
-import {DevtoolsModule} from './shared'
+import {DevtoolsModule} from './shared.ts'
 import {
     jsxLocationPlugin,
-    JsxLocationPluginConfig,
+    type JsxLocationPluginConfig,
     SET_COMPONENT_LOC,
     SET_COMPONENT_LOC_LOCAL,
-} from './location'
+} from './location.ts'
 
 const setLocationImport = `import { ${SET_COMPONENT_LOC} as ${SET_COMPONENT_LOC_LOCAL} } from "${DevtoolsModule.Setup}";`
 

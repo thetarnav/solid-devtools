@@ -8,8 +8,8 @@ It connects to the background script.
 */
 
 import {error, log} from '@solid-devtools/shared/utils'
-import {ConnectionName, createPortMessanger, once} from '../shared/bridge'
-import {icons} from '../shared/icons'
+import {ConnectionName, createPortMessanger, once} from '../shared/bridge.ts'
+import {icons} from '../shared/icons.ts'
 
 log('Devtools-Script working.')
 

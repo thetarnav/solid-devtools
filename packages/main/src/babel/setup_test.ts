@@ -1,5 +1,5 @@
-import {PluginObj, traverse} from '@babel/core'
-import generate from '@babel/generator'
+import {type PluginObj, traverse} from '@babel/core'
+import * as generator from '@babel/generator'
 import {parse} from '@babel/parser'
 import {expect, test} from 'vitest'
 
@@ -23,7 +23,7 @@ export function assertTransform(
     })
 
     traverse(ast, plugin.visitor, undefined, {filename: `${cwd}/${file}`})
-    const res = generate(ast)
+    const res = new generator.CodeGenerator(ast).generate()
     const output = trim ? removeExtraSpaces(res.code) : res.code
     const expectedOutput = trim ? removeExtraSpaces(expected) : expected
 

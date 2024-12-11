@@ -1,6 +1,6 @@
+import * as s from 'solid-js'
 import {useDebugger} from '@solid-devtools/debugger/bundled'
-import {createDevtools, DevtoolsProps} from '@solid-devtools/frontend'
-import * as solid from 'solid-js'
+import {createDevtools, type DevtoolsProps} from '@solid-devtools/frontend'
 
 function clone<T>(data: T): T {
     return typeof data === 'object' ? (JSON.parse(JSON.stringify(data)) as T) : data
@@ -12,12 +12,12 @@ function separate<T>(data: T, callback: (value: T) => void): void {
     })
 }
 
-export function Devtools(props: DevtoolsProps): solid.JSX.Element {
+export function Devtools(props: DevtoolsProps): s.JSX.Element {
     const debug = useDebugger()
 
     debug.emit('ResetState')
 
-    solid.onCleanup(() => debug.emit('InspectNode', null))
+    s.onCleanup(() => debug.emit('InspectNode', null))
 
     const {bridge, Devtools: Frontend} = createDevtools()
 

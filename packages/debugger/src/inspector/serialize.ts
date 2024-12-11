@@ -1,17 +1,17 @@
-import {FalsyValue} from '@solid-primitives/utils'
-import {getSdtId, ObjectType} from '../main/id'
-import SolidAPI from '../main/solid-api'
-import {isStoreNode} from '../main/utils'
+import {type FalsyValue} from '@solid-primitives/utils'
+import {getSdtId, ObjectType} from '../main/id.ts'
+import SolidAPI from '../main/solid-api.ts'
+import {isStoreNode} from '../main/utils.ts'
 import {
-    EncodedValue,
+    type EncodedValue,
     INFINITY,
     NAN,
     NEGATIVE_INFINITY,
-    NodeID,
-    Solid,
+    type NodeID,
+    type Solid,
     UNDEFINED,
     ValueType,
-} from '../types'
+} from '../types.ts'
 
 // globals
 let Deep: boolean

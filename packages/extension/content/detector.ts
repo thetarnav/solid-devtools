@@ -7,16 +7,16 @@ and notify the content script
 
 import '@solid-devtools/debugger/types'
 import {detectSolid, onSolidDevDetect, onSolidDevtoolsDetect} from '@solid-devtools/shared/detect'
-import {DETECT_MESSAGE, DetectEvent, DetectionState} from '../shared/bridge'
+import * as bridge from '../shared/bridge.ts'
 
-const state: DetectionState = {
+const state: bridge.DetectionState = {
     Solid: false,
     SolidDev: false,
     Devtools: false,
 }
 
 function postState() {
-    postMessage({name: DETECT_MESSAGE, state} satisfies DetectEvent, '*')
+    postMessage({name: bridge.DETECT_MESSAGE, state} satisfies bridge.DetectEvent, '*')
 }
 
 detectSolid().then(hasSolid => {

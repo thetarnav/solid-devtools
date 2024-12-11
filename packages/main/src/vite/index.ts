@@ -1,8 +1,8 @@
 import type {PluginOption} from 'vite'
 
-import {PluginItem, transformAsync} from '@babel/core'
-import {LocatorOptions, TargetURLFunction} from '@solid-devtools/debugger/types'
-import * as babel from '../babel'
+import {type PluginItem, transformAsync} from '@babel/core'
+import {type LocatorOptions, type TargetURLFunction} from '@solid-devtools/debugger/types'
+import * as babel from '../babel.ts'
 
 export type DevtoolsPluginOptions = {
     /** Add automatic name when creating signals, memos, stores, or mutables */

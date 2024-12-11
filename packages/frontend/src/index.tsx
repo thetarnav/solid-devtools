@@ -1,4 +1,4 @@
-export {createDevtools} from './controller'
-export type {DebuggerBridge, DevtoolsProps} from './controller'
-export {Icon, MountIcons} from './ui'
-export type {IconComponent} from './ui'
+export {createDevtools} from './controller.tsx'
+export type {DebuggerBridge, DevtoolsProps} from './controller.tsx'
+export {Icon, MountIcons} from './ui/index.ts'
+export type {IconComponent} from './ui/index.ts'

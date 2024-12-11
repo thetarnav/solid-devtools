@@ -5,10 +5,10 @@ Dev hooks and observing reactive graph nodes
 */
 
 import {chain, tryOnCleanup} from '@solid-primitives/utils'
-import {attachDebugger} from './roots'
-import SolidAPI from './solid-api'
-import {Solid, ValueUpdateListener} from './types'
-import {isSolidRoot} from './utils'
+import {attachDebugger} from './roots.ts'
+import SolidAPI from './solid-api.ts'
+import {type Solid, type ValueUpdateListener} from './types.ts'
+import {isSolidRoot} from './utils.ts'
 
 for (const e of SolidAPI.getDevEvents()) {
     attachDebugger(e.data)

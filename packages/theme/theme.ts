@@ -190,7 +190,7 @@ export const vars = {
 } as const
 
 export function make_var_styles(root_class: string): string {
-    return /*css*/ `
+    return `
         .${root_class} {
             ${css_vars.map(css_var => `${css_var.name}: ${css_var.light};`).join('')}
         }
