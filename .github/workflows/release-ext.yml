@@ -38,7 +38,7 @@ jobs:
           CI: true
 
       - name: Submit Chrome Extension
-        uses: mnao305/chrome-extension-upload@v5
+        uses: mnao305/chrome-extension-upload@v5.0.0
         with:
           file-path: packages/extension/dist/chrome.zip
           extension-id: kmcfjchnmmaeeagadbhoofajiopoceel
