@@ -13,10 +13,10 @@ import {icons} from '../shared/icons.ts'
 log('Background script working.')
 
 type TabDataConfig = {
-    toContent: TabData['toContent']
-    fromContent: TabData['fromContent']
+    toContent:         TabData['toContent']
+    fromContent:       TabData['fromContent']
     forwardToDevtools: TabData['forwardToDevtools']
-    forwardToClient: TabData['forwardToClient']
+    forwardToClient:   TabData['forwardToClient']
 }
 
 type PostMessanger = {post: bridge.PostMessageFn; on: bridge.OnMessageFn}
