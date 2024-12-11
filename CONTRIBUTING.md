@@ -6,7 +6,7 @@ The following document is a _(work in progress)_ guide for contributing to Solid
 
 ## Tooling
 
-[`pnpm`](https://pnpm.io/), [`prettier`](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode) and [`eslint`](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint) — that's it.
+[`pnpm`](https://pnpm.io/ and [`eslint`](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint) — that's it.
 
 This project uses [pnpm](https://pnpm.io/) for package management. If you don't have it installed, you can install it with `npm install -g pnpm`.
 
@@ -20,7 +20,7 @@ If you want to run the E2E tests, you need to install the dependencies by runnin
 
 ## Operating System
 
-I _([thetarnav](https://github.com/thetarnav))_ am working from a Windows PC, but it everything should theoretically work on macOS and Linux as well. If you find any issues, please open an issue.
+I'm working on a linux machine right now, but everything should be wokking the same way regardless of OS. Please make an issue if it's not.
 
 Alternatively, if something is off, I recommend using [Gitpod](https://gitpod.io) or [Codeflow](https://stackblitz.com/codeflow) for development. Both of them are free for oss projects like this one and will give you a stable development environment.
 
