@@ -2,88 +2,71 @@
 
 import * as s from 'solid-js'
 import {render} from 'solid-js/web'
-import {ConnectionName, type DetectionState, type Versions, createPortMessanger, once} from '../shared/bridge.ts'
+import * as bridge from '../shared/bridge.ts'
 
 import './popup.css'
 
 // Create a connection to the background page
-const port = chrome.runtime.connect({name: ConnectionName.Popup})
-const {onPortMessage: fromBackground} = createPortMessanger(port)
+const port = chrome.runtime.connect({name: bridge.ConnectionName.Popup})
+const {onPortMessage: fromBackground} = bridge.createPortMessanger(port)
 
-const [versions, setVersions] = s.createSignal<Versions | null>(null)
-const [detectionState, setDetectionState] = s.createSignal<DetectionState>({
-    Solid: false,
+const [versions, setVersions] = s.createSignal<bridge.Versions | null>(null)
+const [detectionState, setDetectionState] = s.createSignal<bridge.DetectionState>({
+    Solid:    false,
     SolidDev: false,
-    Devtools: false,
+    Debugger: false,
 })
 
 fromBackground('Detected', setDetectionState)
-once(fromBackground, 'Versions', setVersions)
-
-const DETECTED_TITLES: Record<keyof DetectionState, string> = {
-    Solid: 'Solid',
-    SolidDev: 'Solid development mode',
-    Devtools: 'Solid Devtools setup',
-}
-
-const Detected: s.Component<{
-    name: keyof DetectionState
-    details?: (detected: s.Accessor<boolean>) => s.JSX.Element
-    children?: s.JSX.Element
-}> = props => {
-    const isDetected = () => detectionState()[props.name]
-    return (
-        <>
-            <div>
-                <p data-detected={isDetected()}>
-                    {DETECTED_TITLES[props.name]} {isDetected() ? 'detected' : 'not detected'}
-                </p>
-                {props.details && <div class="details">{props.details(isDetected)}</div>}
-            </div>
-            {isDetected() && props.children}
-        </>
-    )
-}
+bridge.once(fromBackground, 'Versions', setVersions)
 
 const App: s.Component = () => {
-    return (
-        <Detected name="Solid">
-            <Detected name="SolidDev">
-                <Detected
-                    name="Devtools"
-                    details={detected => (
-                        <s.Show when={!detected()}>
-                            <p>
-                                Devtools extension requires a runtime client to be installed.
-                                <br />
-                                Please follow the{' '}
-                                <a
-                                    href="https://github.com/thetarnav/solid-devtools/tree/main/packages/extension#getting-started"
-                                    target="_blank"
-                                >
-                                    installation instructions
-                                </a>
-                                .
-                            </p>
-                        </s.Show>
-                    )}
-                />
-            </Detected>
-            <s.Show when={versions()} keyed>
-                {v => (
-                    <div class="versions">
-                        <p>Versions:</p>
-                        <ul>
-                            <li>Solid: {v.solid || 'unknown'}</li>
-                            <li>Extension: {v.extension}</li>
-                            <li>Client: {v.client || 'unknown'}</li>
-                            <li>Expected client: {v.expectedClient}</li>
-                        </ul>
-                    </div>
-                )}
+    return <>
+        <div>
+            <p data-detected={detectionState().Solid}>
+                Solid {detectionState().Solid ? 'detected' : 'not detected'}
+            </p>
+        </div>
+        <div>
+            <p data-detected={detectionState().SolidDev}>
+                Solid Dev Mode {detectionState().SolidDev ? 'detected' : 'not detected'}
+            </p>
+        </div>
+        <div>
+            <p data-detected={detectionState().Debugger}>
+                Debugger {detectionState().Debugger ? 'detected' : 'not detected'}
+            </p>
+            <s.Show when={detectionState().SolidDev && !detectionState().Debugger}>
+                <div class="details">
+                    <p>
+                        Devtools extension requires a runtime client to be installed.
+                        <br />
+                        Please follow the{' '}
+                        <a
+                            href="https://github.com/thetarnav/solid-devtools/tree/main/packages/extension#getting-started"
+                            target="_blank"
+                        >
+                            installation instructions
+                        </a>
+                        .
+                    </p>
+                </div>
             </s.Show>
-        </Detected>
-    )
+        </div>
+        <s.Show when={versions()} keyed>
+        {v => (
+            <div class="versions">
+                <p>Versions:</p>
+                <ul>
+                    <li>Solid ___________ {v.solid || 'unknown'}</li>
+                    <li>Extension _______ {v.extension}</li>
+                    <li>Client found ____ {v.client || 'unknown'}</li>
+                    <li>Client expected _ {v.expectedClient}</li>
+                </ul>
+            </div>
+        )}
+        </s.Show>
+    </>
 }
 
 render(() => <App />, document.getElementById('root')!)

@@ -12,29 +12,30 @@ This script is injected into every page and is responsible for:
 import {error, log} from '@solid-devtools/shared/utils'
 import * as bridge from '../shared/bridge.ts'
 
-import.meta.env.DEV && log('Content-Script working.')
-
 // @ts-expect-error ?script&module query ensures output in ES module format and only import the script path
 import detectorPath from './detector?script&module'
 // @ts-expect-error ?script&module query ensures output in ES module format and only import the script path
 import debuggerPath from './debugger?script&module'
 
-const extVersion = chrome.runtime.getManifest().version
+if (import.meta.env.DEV) log('Content_Script loaded.')
+
+const extension_version = chrome.runtime.getManifest().version
 
 const port = chrome.runtime.connect({name: bridge.ConnectionName.Content})
 
-let devtoolsOpened = false
+let devtools_opened = false
 
 bridge.startListeningWindowMessages()
+
 const fromClient = bridge.makeMessageListener()
-const toClient = bridge.makePostMessage()
+const toClient   = bridge.makePostMessage()
 
 const {postPortMessage: toBackground, onPortMessage: fromBackground} = bridge.createPortMessanger(port)
 
 function loadScriptInRealWorld(path: string): Promise<void> {
     return new Promise((resolve, reject) => {
         const script = document.createElement('script')
-        script.src = chrome.runtime.getURL(path)
+        script.src  = chrome.runtime.getURL(path)
         script.type = 'module'
         script.addEventListener('error', err => reject(err))
         document.head.append(script)
@@ -42,7 +43,8 @@ function loadScriptInRealWorld(path: string): Promise<void> {
     })
 }
 
-loadScriptInRealWorld(detectorPath).catch(() => error('Detector script failed to load.'))
+loadScriptInRealWorld(detectorPath)
+    .catch(err => error(`Detector_Real_World (${detectorPath}) failed to load.`, err))
 
 /*
   Message from ./detector.ts
@@ -54,8 +56,9 @@ window.addEventListener('message', e => {
 
     toBackground('Detected', state)
 
-    if (state.Devtools) {
-        loadScriptInRealWorld(debuggerPath).catch(() => error('Debugger script failed to load.'))
+    if (state.Debugger) {
+        loadScriptInRealWorld(debuggerPath)
+            .catch(err => error(`Debugger_Real_World (${debuggerPath}) failed to load.`, err))
     }
 })
 
@@ -68,22 +71,22 @@ fromClient('ClientConnected', versions => {
     )
 
     toBackground('Versions', {
-        client: versions.client,
-        solid: versions.solid,
-        extension: extVersion,
+        client:         versions.client,
+        solid:          versions.solid,
+        extension:      extension_version,
         expectedClient: import.meta.env.EXPECTED_CLIENT,
     })
 
     fromClient('ResetPanel', () => toBackground('ResetPanel'))
 
-    if (devtoolsOpened) toClient('DevtoolsOpened')
+    if (devtools_opened) toClient('DevtoolsOpened')
 })
 
 // After page reload, the content script is reloaded but the background script is not.
 // This means that 'DevtoolsOpened' message will come after the Client is setup.
 // We need to send it after it connects.
 fromBackground('DevtoolsOpened', () => {
-    devtoolsOpened = true
+    devtools_opened = true
     toClient('DevtoolsOpened')
 })
 fromBackground('DevtoolsClosed', () => toClient('DevtoolsClosed'))

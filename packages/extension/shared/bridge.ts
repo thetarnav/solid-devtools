@@ -9,16 +9,16 @@ import {log} from '@solid-devtools/shared/utils'
 export const DEVTOOLS_ID_PREFIX = '[solid-devtools]_'
 
 export const enum ConnectionName {
-    Content = `${DEVTOOLS_ID_PREFIX}Content-Script`,
-    Devtools = `${DEVTOOLS_ID_PREFIX}Devtools-Script`,
-    Popup = `${DEVTOOLS_ID_PREFIX}Popup`,
-    Panel = `${DEVTOOLS_ID_PREFIX}Devtools-Panel`,
+    Content =  `${DEVTOOLS_ID_PREFIX}Content_Script`,
+    Devtools = `${DEVTOOLS_ID_PREFIX}Devtools_Script`,
+    Popup =    `${DEVTOOLS_ID_PREFIX}Popup`,
+    Panel =    `${DEVTOOLS_ID_PREFIX}Devtools_Panel`,
 }
 
 export type DetectionState = {
-    Solid: boolean
+    Solid:    boolean
     SolidDev: boolean
-    Devtools: boolean
+    Debugger: boolean
 }
 export const DETECT_MESSAGE = `${DEVTOOLS_ID_PREFIX}DETECT`
 export type DetectEvent = {
@@ -35,8 +35,8 @@ export function createPortMessanger<
 >(
     port: chrome.runtime.Port,
 ): {
-    postPortMessage: PostMessageFn<OM>
-    onPortMessage: OnMessageFn<IM>
+    postPortMessage:  PostMessageFn<OM>
+    onPortMessage:    OnMessageFn<IM>
     onForwardMessage: (handler: (event: ForwardPayload) => void) => void
 } {
     let forwardHandler: ((event: ForwardPayload) => void) | undefined
@@ -103,7 +103,7 @@ export interface GeneralMessages {
 
     // the `string` payload is the main version
     ClientConnected: {
-        solid: string | null
+        solid:  string | null
         client: string | null
     }
     Versions: Versions

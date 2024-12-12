@@ -5,33 +5,49 @@ and notify the content script
 
 */
 
-import '@solid-devtools/debugger/types'
 import {detectSolid, onSolidDevDetect, onSolidDevtoolsDetect} from '@solid-devtools/shared/detect'
+import {log} from '@solid-devtools/shared/utils'
 import * as bridge from '../shared/bridge.ts'
 
+if (import.meta.env.DEV) log('Detector_Real_World loaded.')
+
 const state: bridge.DetectionState = {
-    Solid: false,
+    Solid:    false,
     SolidDev: false,
-    Devtools: false,
+    Debugger: false,
 }
 
 function postState() {
-    postMessage({name: bridge.DETECT_MESSAGE, state} satisfies bridge.DetectEvent, '*')
+    let data: bridge.DetectEvent = {
+        name:  bridge.DETECT_MESSAGE,
+        state: state,
+    }
+    postMessage(data, '*')
 }
 
-detectSolid().then(hasSolid => {
-    if (!hasSolid || state.Solid) return
-    state.Solid = true
-    postState()
+detectSolid().then(detected => {
+    if (import.meta.env.DEV) {
+        log(detected ? 'Solid detected.' : 'Solid NOT detected.')
+    }
+    if (detected && !state.Solid) {
+        state.Solid = true
+        postState()
+    }
 })
 
 onSolidDevDetect(() => {
+    if (import.meta.env.DEV) {
+        log('Solid_Dev_Mode detected.')
+    }
     state.SolidDev = true
-    state.Solid = true
+    state.Solid    = true
     postState()
 })
 
 onSolidDevtoolsDetect(() => {
-    state.Devtools = true
+    if (import.meta.env.DEV) {
+        log('Devtools_Client detected.')
+    }
+    state.Debugger = true
     postState()
 })

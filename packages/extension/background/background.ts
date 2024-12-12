@@ -104,9 +104,9 @@ class TabData {
     }
 
     #detected: bridge.DetectionState = {
-        Solid: false,
+        Solid:    false,
         SolidDev: false,
-        Devtools: false,
+        Debugger: false,
     }
     #detectedListeners = new EventBus<bridge.DetectionState>()
     onDetected(fn: (state: bridge.DetectionState) => void) {
