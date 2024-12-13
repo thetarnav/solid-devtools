@@ -64,8 +64,8 @@ const plugin = createInternalRoot(() => {
     //
     const [modules, toggleModules] = createStaticStore({
         debugger: false,
-        locator: false,
-        dgraph: false,
+        locator:  false,
+        dgraph:   false,
         locatorKeyPressSignal: (): boolean => false,
     })
 

@@ -51,22 +51,9 @@
             }
         }
     },
-    "typesVersions": {
-        "*": {
-            "bundled": [
-                "./dist/index.d.ts"
-            ],
-            "types": [
-                "./dist/types.d.ts"
-            ],
-            "setup": [
-                "./dist/setup.d.ts"
-            ]
-        }
-    },
     "scripts": {
-        "dev": "tsup --watch",
-        "build": "tsup",
+        "dev": "pnpm build --watch",
+        "build": "node --experimental-transform-types ./build.ts",
         "test:unit": "vitest",
         "test:types": "tsc --noEmit --paths null"
     },

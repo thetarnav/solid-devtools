@@ -2,18 +2,18 @@ import {getNewSdtId} from './get-id.ts'
 import {type NodeID, type Solid} from './types.ts'
 
 export const enum ObjectType {
-    Owner = 'owner',
-    Element = 'element',
-    Signal = 'signal',
-    Store = 'store',
+    Owner     = 'owner',
+    Element   = 'element',
+    Signal    = 'signal',
+    Store     = 'store',
     StoreNode = 'store-node',
 }
 
 type ValueMap = {
-    [ObjectType.Owner]: Solid.Owner
-    [ObjectType.Element]: Element
-    [ObjectType.Signal]: Solid.Signal
-    [ObjectType.Store]: Solid.Store
+    [ObjectType.Owner]:     Solid.Owner
+    [ObjectType.Element]:   Element
+    [ObjectType.Signal]:    Solid.Signal
+    [ObjectType.Store]:     Solid.Store
     [ObjectType.StoreNode]: Solid.StoreNode
 }
 
