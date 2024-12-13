@@ -8,10 +8,13 @@ import {interceptPropertySet} from './utils.ts'
 export const DATA_HYDRATION_KEY = 'data-hk'
 export const SOLID_DEV_GLOBAL = 'Solid$$'
 
+const ATTRIBUTE_HYDRATE_KEY_NAME_REGEX =
+    new RegExp(`(?:has|get)Attribute\\(["']${DATA_HYDRATION_KEY}["']\\)`)
+
 /**
- * Detects if SolidJS is present on the page. In either development or production mode.
- */
-// code by @aquaductape
+Detects if SolidJS is present on the page. In either development or production mode.
+*/
+// initial version by @aquaductape
 export async function detectSolid(): Promise<boolean> {
     if (detectSolidDev()) return true
 
@@ -23,22 +26,24 @@ export async function detectSolid(): Promise<boolean> {
         return true
 
     const scripts = document.querySelectorAll('script')
-    const attributeHydrateKeyNameRegex = new RegExp(
-        `(?:has|get)Attribute\\(["']${DATA_HYDRATION_KEY}["']\\)`,
-    )
 
     for (const script of scripts) {
-        if (script.textContent?.match(attributeHydrateKeyNameRegex)) return true
-        if (
-            script.type !== 'module' ||
+        if (script.textContent?.match(ATTRIBUTE_HYDRATE_KEY_NAME_REGEX)) {
+            return true
+        }
+
+        if (script.type !== 'module' ||
             script.crossOrigin !== 'anonymous' ||
             script.src.match(/^chrome-extension/)
-        )
+        ) {
             continue
+        }
 
         const result = await fetch(script.src)
         const text = await result.text()
-        if (text.match(/\$DX_DELEGATE/) || text.match(attributeHydrateKeyNameRegex)) return true
+        if (text.match(/\$DX_DELEGATE/) || text.match(ATTRIBUTE_HYDRATE_KEY_NAME_REGEX)) {
+            return true
+        }
     }
 
     return false
@@ -69,11 +74,13 @@ export function detectSolidDevtools(): boolean {
 }
 
 export function onSolidDevtoolsDetect(callback: () => void): void {
-    if (detectSolidDevtools()) queueMicrotask(callback)
-    else
+    if (detectSolidDevtools()) {
+        queueMicrotask(callback)
+    } else {
         interceptPropertySet(
             window as any,
             SOLID_DEVTOOLS_GLOBAL,
             value => value && queueMicrotask(callback),
         )
+    }
 }
