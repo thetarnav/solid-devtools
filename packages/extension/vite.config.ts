@@ -42,7 +42,7 @@ const manifest: crx.ManifestV3Export & Manifest_Additional_Fields = {
     browser_specific_settings: is_chrome
         ? undefined
         : {gecko: {id: '{abfd162e-9948-403a-a75c-6e61184e1d47}'}},
-    author: {email: 'gthetarnav@gmail.com'},
+    author: is_chrome ? {email: 'gthetarnav@gmail.com'} : 'Damian Tarnawski' as any,
     minimum_chrome_version: '94',
     devtools_page: 'devtools/devtools.html',
     /*

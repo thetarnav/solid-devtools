@@ -47,4 +47,4 @@ jobs:
           refresh-token: ${{ secrets.REFRESH_TOKEN }}
 
       - name: Submit Firefox Extension
-        run: cd packages/extension && pnpm dlx web-ext sign -s dist/firefox --api-key=${{ secrets.FIREFOX_API_KEY }} --api-secret=${{ secrets.FIREFOX_API_SECRET }}
+        run: cd packages/extension && pnpm dlx web-ext sign -s dist/firefox --api-key=${{ secrets.FIREFOX_API_KEY }} --api-secret=${{ secrets.FIREFOX_API_SECRET }} --channel=listed

@@ -34,6 +34,8 @@ Thumbs.db
 
 # chrome extension private key file
 *.pem
+# web-ext artifacts
+web-ext-artifacts
 
 **/vite.config.ts.timestamp-*.*
 
