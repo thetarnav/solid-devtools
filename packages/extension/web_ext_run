@@ -1,3 +1,0 @@
-#!/bin/bash
-
-web-ext run -s dist/firefox -p dev "$@"
