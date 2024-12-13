@@ -1,5 +1,14 @@
 # solid-devtools-shared
 
+## 0.15.0
+
+### Minor Changes
+
+- f40cfa2: Improve solid detection.
+  Check for Symbol("solid-track") in scripts.
+  Wait for document load before checking.
+  Check all scripts, even ones loaded with esm import (not added to html).
+
 ## 0.14.0
 
 ### Minor Changes

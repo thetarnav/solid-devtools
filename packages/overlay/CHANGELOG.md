@@ -1,5 +1,14 @@
 # @solid-devtools/overlay
 
+## 0.31.1
+
+### Patch Changes
+
+- Updated dependencies [f40cfa2]
+  - @solid-devtools/shared@0.15.0
+  - @solid-devtools/debugger@0.24.1
+  - @solid-devtools/frontend@0.12.1
+
 ## 0.31.0
 
 ### Minor Changes
