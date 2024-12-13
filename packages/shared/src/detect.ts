@@ -1,4 +1,3 @@
-import 'solid-js'
 import {interceptPropertySet} from './utils.ts'
 
 //
@@ -6,43 +5,57 @@ import {interceptPropertySet} from './utils.ts'
 //
 
 export const DATA_HYDRATION_KEY = 'data-hk'
-export const SOLID_DEV_GLOBAL = 'Solid$$'
+export const SOLID_DEV_GLOBAL   = 'Solid$$'
 
-const ATTRIBUTE_HYDRATE_KEY_NAME_REGEX =
-    new RegExp(`(?:has|get)Attribute\\(["']${DATA_HYDRATION_KEY}["']\\)`)
+function script_text_detect_solid(src: string): boolean {
+    return src.includes(`$DX_DELEGATE`)
+        || src.includes(`getAttribute("data-hk")`)
+        || src.includes(`getAttribute('data-hk')`)
+        || src.includes(`hasAttribute("data-hk")`)
+        || src.includes(`hasAttribute('data-hk')`)
+        || src.includes(`Symbol("solid-track")`)
+        || src.includes(`Symbol('solid-track')`)
+}
 
 /**
 Detects if SolidJS is present on the page. In either development or production mode.
 */
+
+export function detectSolid(): Promise<boolean> {
+    if (document.readyState === 'complete') {
+        return check_for_solid()
+    } else {
+        return new Promise((resolve) => {
+            window.addEventListener('load', () => {
+                check_for_solid().then(resolve)
+            })
+        })
+    }
+}
+
 // initial version by @aquaductape
-export async function detectSolid(): Promise<boolean> {
+export async function check_for_solid(): Promise<boolean> {
+
     if (detectSolidDev()) return true
 
     const $hy = (window as any)._$HY as unknown
     if ($hy && typeof $hy === 'object' && 'completed' in $hy && $hy.completed instanceof WeakSet)
         return true
 
-    if (document.querySelector('[' + DATA_HYDRATION_KEY + ']'))
+    if (document.querySelector('[data-hk]'))
         return true
 
-    const scripts = document.querySelectorAll('script')
+    const resources = performance.getEntriesByType('resource') as PerformanceResourceTiming[]
 
-    for (const script of scripts) {
-        if (script.textContent?.match(ATTRIBUTE_HYDRATE_KEY_NAME_REGEX)) {
-            return true
-        }
-
-        if (script.type !== 'module' ||
-            script.crossOrigin !== 'anonymous' ||
-            script.src.match(/^chrome-extension/)
-        ) {
-            continue
-        }
-
-        const result = await fetch(script.src)
-        const text = await result.text()
-        if (text.match(/\$DX_DELEGATE/) || text.match(ATTRIBUTE_HYDRATE_KEY_NAME_REGEX)) {
-            return true
+    for (const resource of resources) {
+        if (resource.initiatorType === 'script' && resource.name.startsWith(location.origin)) {
+            try {
+                const response = await fetch(resource.name)
+                const text = await response.text()
+                if (script_text_detect_solid(text)) {
+                    return true
+                }
+            } catch (_) {/**/}
         }
     }
 
@@ -57,9 +70,9 @@ export function onSolidDevDetect(callback: () => void): void {
     if (detectSolidDev()) {
         queueMicrotask(callback)
     } else {
-        interceptPropertySet(window, SOLID_DEV_GLOBAL, value => {
-            value && queueMicrotask(callback)
-        })
+        interceptPropertySet(window,
+            SOLID_DEV_GLOBAL,
+            value => value && queueMicrotask(callback))
     }
 }
 
@@ -77,10 +90,8 @@ export function onSolidDevtoolsDetect(callback: () => void): void {
     if (detectSolidDevtools()) {
         queueMicrotask(callback)
     } else {
-        interceptPropertySet(
-            window as any,
+        interceptPropertySet(window as any,
             SOLID_DEVTOOLS_GLOBAL,
-            value => value && queueMicrotask(callback),
-        )
+            value => value && queueMicrotask(callback))
     }
 }
