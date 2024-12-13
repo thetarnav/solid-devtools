@@ -34,7 +34,7 @@ function version_from_string(str: string): [Version, boolean] {
     v.patch = Number(parts[2])
 
     let ok = !isNaN(v.major) && v.major >= 0 &&
-             !isNaN(v.minor) && v.minor >= 0 && 
+             !isNaN(v.minor) && v.minor >= 0 &&
              !isNaN(v.patch) && v.patch >= 0
 
     return [v, ok]
@@ -83,7 +83,7 @@ warn_on_version_mismatch(debug.meta.versions.solid, debug.meta.versions.expected
 
 // in case of navigation/page reload, reset the locator mode state in the extension
 toContent('ResetPanel')
-toContent('ClientConnected', debug.meta.versions)
+toContent('Debugger_Connected', debug.meta.versions)
 
 fromContent('DevtoolsOpened', () => debug.toggleEnabled(true))
 fromContent('DevtoolsClosed', () => debug.toggleEnabled(false))

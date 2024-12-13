@@ -38,17 +38,26 @@ function loadScriptInRealWorld(path: string): Promise<void> {
         script.src  = chrome.runtime.getURL(path)
         script.type = 'module'
         script.addEventListener('error', err => reject(err))
-        document.head.append(script)
         script.addEventListener('load', () => resolve())
+        document.head.append(script)
     })
 }
+
+
+/*
+ Load Detect_Real_World script
+   ↳ Debugger_Setup detected
+       ↳ Load Debugger_Real_World
+           ↳ 'Debugger_Connected' message
+*/
 
 loadScriptInRealWorld(detectorPath)
     .catch(err => error(`Detector_Real_World (${detectorPath}) failed to load.`, err))
 
-/*
-  Message from ./detector.ts
-*/
+// prevent the script to be added multiple times if detected before solid
+let debugger_real_world_added = false
+
+/* from Detector_Real_World */
 window.addEventListener('message', e => {
     if (!e.data || typeof e.data !== 'object' || e.data.name !== bridge.DETECT_MESSAGE) return
 
@@ -56,13 +65,17 @@ window.addEventListener('message', e => {
 
     toBackground('Detected', state)
 
-    if (state.Debugger) {
+    /* Load Debugger_Real_World */
+    if (state.Debugger && !debugger_real_world_added) {
+        debugger_real_world_added = true
+
         loadScriptInRealWorld(debuggerPath)
             .catch(err => error(`Debugger_Real_World (${debuggerPath}) failed to load.`, err))
     }
 })
 
-fromClient('ClientConnected', versions => {
+fromClient('Debugger_Connected', versions => {
+    
     // eslint-disable-next-line no-console
     console.log(
         '🚧 %csolid-devtools%c is in early development! 🚧\nPlease report any bugs to https://github.com/thetarnav/solid-devtools/issues',

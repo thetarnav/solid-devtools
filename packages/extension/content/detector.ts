@@ -6,7 +6,7 @@ and notify the content script
 */
 
 import {detectSolid, onSolidDevDetect, onSolidDevtoolsDetect} from '@solid-devtools/shared/detect'
-import {log} from '@solid-devtools/shared/utils'
+import {log, warn} from '@solid-devtools/shared/utils'
 import * as bridge from '../shared/bridge.ts'
 
 if (import.meta.env.DEV) log('Detector_Real_World loaded.')
@@ -27,7 +27,11 @@ function postState() {
 
 detectSolid().then(detected => {
     if (import.meta.env.DEV) {
-        log(detected ? 'Solid detected.' : 'Solid NOT detected.')
+        if (detected) {
+            log('Solid detected.')
+        } else {
+            warn('Solid NOT detected.')
+        }
     }
     if (detected && !state.Solid) {
         state.Solid = true

@@ -11,44 +11,29 @@ import {error, log} from '@solid-devtools/shared/utils'
 import {ConnectionName, createPortMessanger, once} from '../shared/bridge.ts'
 import {icons} from '../shared/icons.ts'
 
-log('Devtools-Script working.')
+log('Devtools_Script loaded.')
 
 // Create a connection to the background page
 const port = chrome.runtime.connect({name: ConnectionName.Devtools})
 
 const {onPortMessage: fromBackground} = createPortMessanger(port)
 
-let panel: chrome.devtools.panels.ExtensionPanel | undefined
-
 // "Versions" mean that devtools client is on the page
-once(fromBackground, 'Versions', async () => {
-    if (panel) return log('Panel already exists.')
+once(fromBackground, 'Versions', () => {
 
-    log('Solid on page – creating panel...')
-    try {
-        panel = await createPanel()
-        log('Panel created.')
-    } catch (err) {
-        error(err)
-    }
+    log('Debugger connected -> Creating Devtools_Panel...')
+
+    chrome.devtools.panels.create(
+        'Solid',
+        // Firefox requires absolute path
+        (import.meta.env.BROWSER === 'firefox' ? '/' : '') + icons.disabled[32],
+        'index.html',
+        () => {
+            if (chrome.runtime.lastError) {
+                error('Creating Devtools_Panel Failed', chrome.runtime.lastError)
+            } else {
+                log('Devtools_Panel created.')
+            }
+        },
+    )
 })
-
-const createPanel = () =>
-    new Promise<chrome.devtools.panels.ExtensionPanel>((resolve, reject) => {
-        const onCreate = (newPanel: chrome.devtools.panels.ExtensionPanel) => {
-            if (chrome.runtime.lastError) reject(chrome.runtime.lastError)
-            else resolve(newPanel)
-        }
-
-        if (import.meta.env.BROWSER === 'firefox') {
-            chrome.devtools.panels.create(
-                'Solid',
-                /* firefox requires absolute paths */
-                '/' + icons.disabled[32],
-                '/index.html',
-                onCreate,
-            )
-        } else {
-            chrome.devtools.panels.create('Solid', icons.disabled[32], 'index.html', onCreate)
-        }
-    })

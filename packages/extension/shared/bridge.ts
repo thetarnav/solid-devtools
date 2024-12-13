@@ -102,7 +102,7 @@ export interface GeneralMessages {
     Detected: DetectionState
 
     // the `string` payload is the main version
-    ClientConnected: {
+    Debugger_Connected: {
         solid:  string | null
         client: string | null
     }

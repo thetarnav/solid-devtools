@@ -166,137 +166,137 @@ let last_disconnected_tab_id: number | undefined
 
 chrome.runtime.onConnect.addListener(async port => {
     switch (port.name) {
-        case bridge.ConnectionName.Content: {
-            const tab_id = port.sender?.tab?.id
-            if (typeof tab_id !== 'number') break
+    case bridge.ConnectionName.Content: {
+        const tab_id = port.sender?.tab?.id
+        if (typeof tab_id !== 'number') break
 
-            const content_messanger = bridge.createPortMessanger(port)
+        const content_messanger = bridge.createPortMessanger(port)
 
-            let forwardHandler: ((message: bridge.ForwardPayload) => void) | undefined
-            let data: TabData
+        let forwardHandler: ((message: bridge.ForwardPayload) => void) | undefined
+        let data: TabData
 
-            const config: TabDataConfig = {
-                toContent: content_messanger.postPortMessage,
-                fromContent: content_messanger.onPortMessage,
-                forwardToDevtools: fn => (forwardHandler = fn),
-                forwardToClient: message => port.postMessage(message),
-            }
-
-            // Page was reloaded, so we need to reinitialize the tab data
-            if (tab_id === last_disconnected_tab_id) {
-                data = last_disconnected_tab_data!
-                data.reconnected(config)
-            }
-            // A fresh page
-            else {
-                data = new TabData(tab_id, config)
-            }
-
-            last_disconnected_tab_id = undefined
-            last_disconnected_tab_id = undefined
-            tab_data_map.set(tab_id, data)
-
-            // "Versions" from content-script
-            bridge.once(content_messanger.onPortMessage, 'Versions', v => {
-                data.setVersions(v)
-
-                // Change the popup icon to indicate that Solid is present on the page
-                chrome.action.setIcon({tabId: tab_id, path: icons.normal})
-            })
-
-            // "DetectSolid" from content-script (realWorld)
-            content_messanger.onPortMessage('Detected', state => data.detected(state))
-
-            port.onDisconnect.addListener(() => {
-                data.disconnected()
-                tab_data_map.delete(tab_id)
-                last_disconnected_tab_data = data
-                last_disconnected_tab_id = tab_id
-            })
-
-            port.onMessage.addListener((message: bridge.ForwardPayload | any) => {
-                // HANDLE FORWARDED MESSAGES FROM CLIENT (content-script)
-                forwardHandler && bridge.isForwardMessage(message) && forwardHandler(message)
-            })
-
-            break
+        const config: TabDataConfig = {
+            toContent: content_messanger.postPortMessage,
+            fromContent: content_messanger.onPortMessage,
+            forwardToDevtools: fn => (forwardHandler = fn),
+            forwardToClient: message => port.postMessage(message),
         }
 
-        case bridge.ConnectionName.Devtools: {
-            const data = await getActiveTabData()
-            if (data instanceof Error) {
-                error(data)
-                break
-            }
-            const devtools_messanger = bridge.createPortMessanger(port)
-
-            const content_messanger = await data.untilContentScriptConnect()
-
-            // "Versions" means the devtools client is present
-            data.onVersions(v => devtools_messanger.postPortMessage('Versions', v))
-
-            port.onDisconnect.addListener(() => content_messanger.post('DevtoolsClosed'))
-
-            break
+        // Page was reloaded, so we need to reinitialize the tab data
+        if (tab_id === last_disconnected_tab_id) {
+            data = last_disconnected_tab_data!
+            data.reconnected(config)
+        }
+        // A fresh page
+        else {
+            data = new TabData(tab_id, config)
         }
 
-        case bridge.ConnectionName.Panel: {
-            const data = await getActiveTabData()
-            if (data instanceof Error) {
-                error(data)
-                break
-            }
-            const panel_messanger = bridge.createPortMessanger(port)
+        last_disconnected_tab_id = undefined
+        last_disconnected_tab_id = undefined
+        tab_data_map.set(tab_id, data)
 
-            const content_messanger = await data.untilContentScriptConnect()
+        // "Versions" from content-script
+        bridge.once(content_messanger.onPortMessage, 'Versions', v => {
+            data.setVersions(v)
 
-            data.onVersions(v => {
-                panel_messanger.postPortMessage('Versions', v)
-                // notify the content script that the devtools panel is ready
-                content_messanger.post('DevtoolsOpened')
-            })
+            // Change the popup icon to indicate that Solid is present on the page
+            chrome.action.setIcon({tabId: tab_id, path: icons.normal})
+        })
 
-            content_messanger.on('ResetPanel', () => {
-                panel_messanger.postPortMessage('ResetPanel')
-            })
-            data.onContentScriptDisconnect(() => {
-                panel_messanger.postPortMessage('ResetPanel')
-            })
+        // "DetectSolid" from content-script (realWorld)
+        content_messanger.onPortMessage('Detected', state => data.detected(state))
 
-            /* Force debugger to send state when panel conects */
-            data.forwardToClient({
-                name: 'ResetState',
-                details: undefined,
-                forwarding: true, // TODO: this shouldn't be a "forward", but not sure how to typesafe send a post to debugger from here
-            })
+        port.onDisconnect.addListener(() => {
+            data.disconnected()
+            tab_data_map.delete(tab_id)
+            last_disconnected_tab_data = data
+            last_disconnected_tab_id = tab_id
+        })
 
-            // FORWARD MESSAGES FROM and TO CLIENT
-            data.forwardToDevtools(message => {
-                port.postMessage(message)
-            })
-            panel_messanger.onForwardMessage(message => {
-                data.forwardToClient(message)
-            })
+        port.onMessage.addListener((message: bridge.ForwardPayload | any) => {
+            // HANDLE FORWARDED MESSAGES FROM CLIENT (content-script)
+            forwardHandler && bridge.isForwardMessage(message) && forwardHandler(message)
+        })
 
+        break
+    }
+
+    case bridge.ConnectionName.Devtools: {
+        const data = await getActiveTabData()
+        if (data instanceof Error) {
+            error(data)
             break
         }
+        const devtools_messanger = bridge.createPortMessanger(port)
 
-        case bridge.ConnectionName.Popup: {
-            const data = await getActiveTabData()
-            if (data instanceof Error) {
-                error(data)
-                break
-            }
-            const popup_messanger = bridge.createPortMessanger(port)
+        const content_messanger = await data.untilContentScriptConnect()
 
-            data.onVersions(v => {
-                popup_messanger.postPortMessage('Versions', v)
-            })
-            data.onDetected(state => {
-                popup_messanger.postPortMessage('Detected', state)
-            })
+        // "Versions" means the devtools client is present
+        data.onVersions(v => devtools_messanger.postPortMessage('Versions', v))
 
+        port.onDisconnect.addListener(() => content_messanger.post('DevtoolsClosed'))
+
+        break
+    }
+
+    case bridge.ConnectionName.Panel: {
+        const data = await getActiveTabData()
+        if (data instanceof Error) {
+            error(data)
             break
         }
+        const panel_messanger = bridge.createPortMessanger(port)
+
+        const content_messanger = await data.untilContentScriptConnect()
+
+        data.onVersions(v => {
+            panel_messanger.postPortMessage('Versions', v)
+            // notify the content script that the devtools panel is ready
+            content_messanger.post('DevtoolsOpened')
+        })
+
+        content_messanger.on('ResetPanel', () => {
+            panel_messanger.postPortMessage('ResetPanel')
+        })
+        data.onContentScriptDisconnect(() => {
+            panel_messanger.postPortMessage('ResetPanel')
+        })
+
+        /* Force debugger to send state when panel conects */
+        data.forwardToClient({
+            name:       'ResetState',
+            details:    undefined,
+            forwarding: true, // TODO: this shouldn't be a "forward", but not sure how to typesafe send a post to debugger from here
+        })
+
+        // FORWARD MESSAGES FROM and TO CLIENT
+        data.forwardToDevtools(message => {
+            port.postMessage(message)
+        })
+        panel_messanger.onForwardMessage(message => {
+            data.forwardToClient(message)
+        })
+
+        break
+    }
+
+    case bridge.ConnectionName.Popup: {
+        const data = await getActiveTabData()
+        if (data instanceof Error) {
+            error(data)
+            break
+        }
+        const popup_messanger = bridge.createPortMessanger(port)
+
+        data.onVersions(v => {
+            popup_messanger.postPortMessage('Versions', v)
+        })
+        data.onDetected(state => {
+            popup_messanger.postPortMessage('Detected', state)
+        })
+
+        break
+    }
     }
 })
