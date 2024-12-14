@@ -3,5 +3,5 @@
     "compilerOptions": {
         "types": ["@total-typescript/ts-reset", "node"]
     },
-    "include": ["src/**/*", "test/**/*", "./env.d.ts"]
+    "include": ["src/**/*", "test/**/*"]
 }

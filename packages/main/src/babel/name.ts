@@ -1,8 +1,8 @@
 import {type PluginObj} from '@babel/core'
 import * as t from '@babel/types'
 
-const NAME_ID      = t.identifier('name')
-const UNDEFINED_ID = t.identifier('undefined')
+const NAME_ID      = /* @__PURE__ */ t.identifier('name')
+const UNDEFINED_ID = /* @__PURE__ */ t.identifier('undefined')
 
 type Comparable = t.Identifier | t.V8IntrinsicIdentifier | t.PrivateName | t.Expression
 function equal(a: Comparable, b: Comparable): boolean {

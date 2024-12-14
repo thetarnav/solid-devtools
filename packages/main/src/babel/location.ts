@@ -8,16 +8,16 @@ import {
 import p from 'path'
 import {importFromRuntime} from './shared.ts'
 
-const cwd = process.cwd()
+const cwd = /* @__PURE__ */ process.cwd()
 
 export const SET_COMPONENT_LOC = 'setComponentLocation'
 export const SET_COMPONENT_LOC_LOCAL = `_$${SET_COMPONENT_LOC}`
 
-const projectPathAst = template(`globalThis.${WINDOW_PROJECTPATH_PROPERTY} = %%loc%%;`)({
+const projectPathAst = /* @__PURE__ */ template(`globalThis.${WINDOW_PROJECTPATH_PROPERTY} = %%loc%%;`)({
     loc: t.stringLiteral(cwd),
 }) as t.Statement
 
-const buildMarkComponent = template(`${SET_COMPONENT_LOC_LOCAL}(%%loc%%);`) as (
+const buildMarkComponent = /* @__PURE__ */ template(`${SET_COMPONENT_LOC_LOCAL}(%%loc%%);`) as (
     ...args: Parameters<ReturnType<typeof template>>
 ) => t.Statement
 
@@ -41,7 +41,7 @@ function getNodeLocationAttribute(
 }
 
 let transformCurrentFile = false
-let importedRuntime = false
+let importedRuntime      = false
 
 function importComponentSetter(path: NodePath): void {
     if (importedRuntime) return

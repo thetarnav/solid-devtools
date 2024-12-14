@@ -76,22 +76,9 @@
         },
         "./package.json": "./package.json"
     },
-    "typesVersions": {
-        "*": {
-            "setup": [
-                "./dist/setup.d.ts"
-            ],
-            "vite": [
-                "./dist/vite.d.ts"
-            ],
-            "babel": [
-                "./dist/babel.d.ts"
-            ]
-        }
-    },
     "scripts": {
-        "dev": "tsup --watch",
-        "build": "tsup",
+        "dev": "pnpm build --watch",
+        "build": "node --experimental-transform-types ./build.ts",
         "test:unit": "vitest",
         "test:types": "tsc --noEmit --paths null"
     },

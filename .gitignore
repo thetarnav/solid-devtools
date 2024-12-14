@@ -20,15 +20,14 @@ lerna-debug.log
 # solid
 .solid
 
-# tsup
-tsup.config.bundled*.*
-
+# IDEs
 /.idea
 .project
 .classpath
 *.launch
 .settings/
 
+# OS
 .DS_Store
 Thumbs.db
 
@@ -39,6 +38,7 @@ web-ext-artifacts
 
 **/vite.config.ts.timestamp-*.*
 
+# Playwright artifacts
 /test-results/
 /playwright-report/
 /playwright/.cache/
