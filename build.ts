@@ -22,11 +22,10 @@ export const DEFAULT_EXTERNAL_DEPS: string[] = [
 ]
 
 export function get_external_deps_from_pkg(pkg_filename: string): string[] {
-	let pkg = JSON.parse(fs.readFileSync(pkg_filename, 'utf-8')) as any
-	return [
-        ...DEFAULT_EXTERNAL_DEPS,
-        ...Object.keys({...pkg?.peerDependencies, ...pkg?.dependencies}),
-    ]
+	let pkg = JSON.parse(fs.readFileSync(pkg_filename) as any) as any
+    let deps = Object.keys({...pkg?.peerDependencies, ...pkg?.dependencies})
+    deps.push(...DEFAULT_EXTERNAL_DEPS)
+	return deps
 }
 
 export function get_is_dev_from_args(): boolean {

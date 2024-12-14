@@ -17,54 +17,41 @@
         "devtools"
     ],
     "scripts": {
-        "dev": "tsup --watch",
-        "build": "tsup",
-        "test:unit": "vitest",
+        "dev": "pnpm build --watch",
+        "build": "node --experimental-transform-types ./build.ts",
+        "test:unit": "echo \"no tests here\"",
         "test:types": "tsc --noEmit --paths null"
     },
     "private": false,
     "sideEffects": false,
-    "main": "./dist/index/index.js",
-    "module": "./dist/index/index.js",
-    "types": "./dist/index/index.d.ts",
+    "main": "./dist/index.js",
+    "module": "./dist/index.js",
+    "types": "./dist/index.d.ts",
     "type": "module",
     "exports": {
         ".": {
             "import": {
-                "types": "./dist/index/index.d.ts",
-                "default": "./dist/index/index.js"
+                "types": "./dist/index.d.ts",
+                "default": "./dist/index.js"
             }
         },
         "./detect": {
             "import": {
-                "types": "./dist/detect/index.d.ts",
-                "default": "./dist/detect/index.js"
+                "types": "./dist/detect.d.ts",
+                "default": "./dist/detect.js"
             }
         },
         "./primitives": {
             "import": {
-                "types": "./dist/primitives/index.d.ts",
-                "default": "./dist/primitives/index.js"
+                "types": "./dist/primitives.d.ts",
+                "default": "./dist/primitives.js"
             }
         },
         "./utils": {
             "import": {
-                "types": "./dist/utils/index.d.ts",
-                "default": "./dist/utils/index.js"
+                "types": "./dist/utils.d.ts",
+                "default": "./dist/utils.js"
             }
-        }
-    },
-    "typesVersions": {
-        "*": {
-            "detect": [
-                "./dist/detect/index.d.ts"
-            ],
-            "primitives": [
-                "./dist/primitives/index.d.ts"
-            ],
-            "utils": [
-                "./dist/utils/index.d.ts"
-            ]
         }
     },
     "peerDependencies": {
