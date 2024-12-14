@@ -3,4 +3,3 @@ declare module '*.css' {
     export default exportString
 }
 
-declare const process: {env: Record<string, string>}

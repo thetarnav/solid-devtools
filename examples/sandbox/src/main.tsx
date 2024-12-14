@@ -3,7 +3,7 @@ import App from './App.tsx'
 import {Overlay} from './Overlay.tsx'
 import {ThemeProvider} from './Theme.tsx'
 
-import 'uno.css'
+import "./styles.css"
 
 function Main() {
     return (

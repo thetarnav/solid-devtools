@@ -46,25 +46,34 @@ const Node: Component<NodeType> = props => {
     const addNode = useContext(RecursiveContext)
 
     return (
-        <div class="b-2 rounded-lg p-1 space-y-1 m-1">
+        <div style={{
+            "border": "1px solid #1e293b",
+            "border-radius": "8px",
+            "padding": "0.5rem",
+            "margin": "1rem",
+            "gap": "0.5rem"
+        }}>
             <p>{nodeSignals.url.join(' > ')}</p>
             <For each={childrenProps.children}>
-                {node => {
-                    const childProps = mergeProps(
-                        {
-                            parents: [...nodeSignals.parents, nodeProps.id],
-                            url: nodeSignals.url,
-                        },
-                        node,
-                    )
-                    return <Node {...childProps} />
-                }}
+            {node => {
+                const childProps = mergeProps(
+                {
+                    parents: [...nodeSignals.parents, nodeProps.id],
+                    url: nodeSignals.url,
+                },
+                node,
+                )
+                return <Node {...childProps} />
+            }}
             </For>
             <button
-                class="rounded-full bg-slate-300 p-x-2"
-                onClick={e => addNode(nodeProps.id, nodeSignals.parents)}
+            style={{
+                "border-radius": "9999px",
+                "background-color": "#1e293b"
+            }}
+            onClick={e => addNode(nodeProps.id, nodeSignals.parents)}
             >
-                Add item
+            Add item
             </button>
         </div>
     )

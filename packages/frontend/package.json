@@ -29,10 +29,8 @@
     "module": "dist/index.js",
     "types": "dist/index.d.ts",
     "scripts": {
-        "dev": "pnpm run build --watch",
-        "build": "pnpm run --filter frontend --parallel /build:.*/",
-        "build:code": "tsup",
-        "build:css": "unocss \"src/**/*.tsx\" -o dist/styles.css",
+        "dev": "pnpm build --watch",
+        "build": "node --experimental-transform-types ./build.ts",
         "test:unit": "vitest",
         "test:types": "tsc --noEmit"
     },

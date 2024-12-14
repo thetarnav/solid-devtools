@@ -48,8 +48,8 @@
         "tsup-preset-solid": "^2.2.0",
         "turbo": "^1.10.16",
         "typescript": "^5.7.2",
-        "unocss": "0.65.1",
-        "@unocss/cli": "0.65.1",
+        "@unocss/core": "0.65.1",
+        "@unocss/preset-uno": "0.65.1",
         "vite": "6.0.3",
         "vite-plugin-solid": "^2.11.0",
         "vitest": "^2.1.8"

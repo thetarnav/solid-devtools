@@ -1,6 +1,4 @@
 import devtools from 'solid-devtools/vite'
-import {presetTypography} from 'unocss'
-import Unocss from 'unocss/vite'
 import {defineConfig} from 'vite'
 import solid from 'vite-plugin-solid'
 
@@ -20,9 +18,6 @@ export default defineConfig(mode => {
                 },
             }),
             solid({hot: true, dev: true}),
-            Unocss({
-                presets: [presetTypography()],
-            }),
         ],
         define: {
             'process.env.EXT': JSON.stringify(is_ext),

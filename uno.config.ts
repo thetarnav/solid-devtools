@@ -1,8 +1,9 @@
-import * as theme from '@solid-devtools/theme'
-import * as uno from 'unocss'
+import * as theme  from '@solid-devtools/theme'
+import * as unocss from '@unocss/core'
+import presetUno   from '@unocss/preset-uno'
 
-export default uno.defineConfig({
-    presets: [uno.presetUno({ dark: 'media' })],
+const uno_config: unocss.UserConfig = {
+    presets: [presetUno({ dark: 'media' })],
     theme: {
         colors: theme.colors,
 
@@ -33,7 +34,9 @@ export default uno.defineConfig({
         'center-child': 'flex items-center justify-center',
     },
     preflights: [{ getCSS: () => reset }],
-}) as any
+}
+
+export default uno_config
 
 /* http://meyerweb.com/eric/tools/css/reset/
    v2.0 | 20110126
