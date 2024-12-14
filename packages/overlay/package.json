@@ -26,24 +26,24 @@
         "dist"
     ],
     "type": "module",
-    "main": "./dist/prod.js",
-    "module": "./dist/prod.js",
+    "main": "./dist/index_noop.js",
+    "module": "./dist/index_noop.js",
     "types": "./dist/types/index.d.ts",
     "exports": {
         "browser": {
             "development": {
                 "types": "./dist/types/index.d.ts",
-                "default": "./dist/dev.js"
+                "default": "./dist/index.js"
             },
             "types": "./dist/types/index.d.ts",
-            "default": "./dist/prod.js"
+            "default": "./dist/index_noop.js"
         },
         "types": "./dist/types/index.d.ts",
-        "default": "./dist/prod.js"
+        "default": "./dist/index_noop.js"
     },
     "scripts": {
-        "dev": "pnpm run build --watch",
-        "build": "node --experimental-transform-types ./scripts/build.ts",
+        "dev": "pnpm build --watch",
+        "build": "node --experimental-transform-types ./build.ts",
         "test:types": "tsc --noEmit --paths null"
     },
     "dependencies": {
@@ -60,9 +60,6 @@
         "solid-js": "^1.9.0"
     },
     "devDependencies": {
-        "@types/clean-css": "^4.2.11",
-        "chokidar": "^4.0.1",
-        "clean-css": "^5.3.3",
         "solid-js": "^1.9.3"
     }
 }

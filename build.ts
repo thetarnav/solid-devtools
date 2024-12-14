@@ -43,6 +43,7 @@ export function get_common_esbuild_options(is_dev: boolean, dist_dirname: string
         splitting:   true,
         treeShaking: !is_dev,
         logLevel:    is_dev ? 'debug' : 'warning',
+        color:       true,
     }
 }
 
@@ -127,15 +128,15 @@ const format_host: ts.FormatDiagnosticsHost = {
 
 function report_diagnostic(diagnostic: ts.Diagnostic) {
 	// eslint-disable-next-line no-console
-	console.error(ts.formatDiagnostic(diagnostic, format_host))
+	console.error(ts.formatDiagnosticsWithColorAndContext([diagnostic], format_host))
 }
 function report_diagnostics(diagnostics: ts.Diagnostic[]) {
 	// eslint-disable-next-line no-console
-	console.error(ts.formatDiagnostics(diagnostics, format_host))
+	console.error(ts.formatDiagnosticsWithColorAndContext(diagnostics, format_host))
 }
 function report_watch_status_changed(diagnostic: ts.Diagnostic) {
 	// eslint-disable-next-line no-console
-	console.info(ts.formatDiagnostic(diagnostic, format_host))
+	console.info(ts.formatDiagnosticsWithColorAndContext([diagnostic], format_host))
 }
 
 export function get_tsc_options(dist_dirname: string): ts.CompilerOptions {
