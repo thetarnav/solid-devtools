@@ -19,7 +19,7 @@ const entry_setup_filename      = path.join(src_dirname, `setup.ts`)
 const entry_index_noop_filename = path.join(src_dirname, `index_noop.ts`)
 const entry_setup_noop_filename = path.join(src_dirname, `setup_noop.ts`)
 const entry_vite_filename       = path.join(src_dirname, `vite.ts`)
-const entry_babel_filename      = path.join(src_dirname, `setup.ts`)
+const entry_babel_filename      = path.join(src_dirname, `babel.ts`)
 
 const pkg_filename = path.join(dirname, 'package.json')
 
