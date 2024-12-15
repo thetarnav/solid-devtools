@@ -28,6 +28,7 @@
     },
     "devDependencies": {
         "@changesets/cli": "^2.27.10",
+        "@eslint-community/eslint-plugin-eslint-comments": "^4.4.1",
         "@nothing-but/eslint-plugin": "^0.2.3",
         "@playwright/test": "^1.49.0",
         "@solid-devtools/shared": "file:packages/shared",
@@ -35,18 +36,17 @@
         "@types/node": "^22.10.1",
         "@typescript-eslint/eslint-plugin": "^8.17.0",
         "@typescript-eslint/parser": "^8.17.0",
+        "@unocss/core": "0.65.1",
+        "@unocss/preset-uno": "0.65.1",
         "cross-env": "^7.0.3",
         "esbuild": "^0.24.0",
         "esbuild-plugin-solid": "^0.6.0",
         "eslint": "^9.16.0",
-        "@eslint-community/eslint-plugin-eslint-comments": "^4.4.1",
         "eslint-plugin-no-only-tests": "^3.3.0",
         "jsdom": "^25.0.1",
         "solid-js": "^1.9.3",
         "turbo": "^1.10.16",
         "typescript": "^5.7.2",
-        "@unocss/core": "0.65.1",
-        "@unocss/preset-uno": "0.65.1",
         "vite": "6.0.3",
         "vite-plugin-solid": "^2.11.0",
         "vitest": "^2.1.8"
@@ -55,5 +55,10 @@
     "engines": {
         "node": ">=22",
         "pnpm": ">=9.14.0"
+    },
+    "pnpm": {
+        "patchedDependencies": {
+            "solid-js": "patches/solid-js.patch"
+        }
     }
 }

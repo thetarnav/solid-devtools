@@ -26,40 +26,37 @@ export function setOnStoreNodeUpdate(fn: OnNodeUpdate): void {
 }
 
 // path solid global dev hook
-SolidAPI.STORE_DEV.hooks.onStoreNodeUpdate = (node, property, value, prev) =>
-    SolidAPI.untrack(() => {
-        if (!OnNodeUpdate || !Nodes.has(node) || typeof property === 'symbol') return
+SolidAPI.STORE_DEV.hooks.onStoreNodeUpdate = (node, property, value, prev) => {
+    if (!OnNodeUpdate || !Nodes.has(node) || typeof property === 'symbol') return
 
-        property = property.toString()
-        const storeProperty: StoreNodeProperty = `${getSdtId(
-            node,
-            ObjectType.StoreNode,
-        )}:${property}`
-        // Update array length
-        if (property === 'length' && typeof value === 'number' && Array.isArray(node)) {
-            return OnNodeUpdate(storeProperty, value)
-        }
-        isWrappable(prev) && untrackStore(prev, storeProperty)
-        // Delete property
-        if (value === undefined) {
-            OnNodeUpdate(storeProperty, undefined)
-        }
-        // Update/Set property
-        else {
-            OnNodeUpdate(storeProperty, {value})
-            isWrappable(value) && trackStore(value, storeProperty)
-        }
-    })
+    property = property.toString()
+    const storeProperty: StoreNodeProperty = `${getSdtId(
+        node,
+        ObjectType.StoreNode,
+    )}:${property}`
+    // Update array length
+    if (property === 'length' && typeof value === 'number' && Array.isArray(node)) {
+        return OnNodeUpdate(storeProperty, value)
+    }
+    isWrappable(prev) && untrackStore(prev, storeProperty)
+    // Delete property
+    if (value === undefined) {
+        OnNodeUpdate(storeProperty, undefined)
+    }
+    // Update/Set property
+    else {
+        OnNodeUpdate(storeProperty, {value})
+        isWrappable(value) && trackStore(value, storeProperty)
+    }
+}
 
 export function observeStoreNode(rootNode: Solid.StoreNode): VoidFunction {
     // might still pass in a proxy
     rootNode = SolidAPI.unwrap(rootNode)
     const symbol = Symbol('inspect-store')
 
-    return SolidAPI.untrack(() => {
-        trackStore(rootNode, symbol)
-        return () => untrackStore(rootNode, symbol)
-    })
+    trackStore(rootNode, symbol)
+    return () => untrackStore(rootNode, symbol)
 }
 
 function trackStore(node: Solid.StoreNode, parent: ParentProperty): void {

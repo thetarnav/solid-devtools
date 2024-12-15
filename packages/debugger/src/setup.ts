@@ -35,8 +35,8 @@ export function useLocator(options: LocatorOptions) {
     PassedLocatorOptions = options
 }
 
-let ClientVersion: string | null = null
-let SolidVersion: string | null = null
+let ClientVersion:        string | null = null
+let SolidVersion:         string | null = null
 let ExpectedSolidVersion: string | null = null
 
 export function setClientVersion(version: string) {
