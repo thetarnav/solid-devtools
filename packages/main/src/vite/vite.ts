@@ -1,27 +1,26 @@
-import type {PluginOption} from 'vite'
-
+import * as vite from 'vite'
 import {type PluginItem, transformAsync} from '@babel/core'
-import {type LocatorOptions, type TargetURLFunction} from '@solid-devtools/debugger/types'
+import * as debug from '@solid-devtools/debugger/types'
 import * as babel from '../babel.ts'
+
+export type LocatorPluginOptions = {
+    /** Choose in which IDE the component source code should be revealed. */
+    targetIDE?: Exclude<debug.LocatorOptions['targetIDE'], debug.TargetURLFunction>
+    /**
+     * Holding which key should enable the locator overlay?
+     * @default 'Alt'
+     */
+    key?: debug.LocatorOptions['key']
+    /** Inject location attributes to jsx templates */
+    jsxLocation?: boolean
+    /** Inject location information to component declarations */
+    componentLocation?: boolean
+}
 
 export type DevtoolsPluginOptions = {
     /** Add automatic name when creating signals, memos, stores, or mutables */
     autoname?: boolean
-    locator?:
-        | boolean
-        | {
-              /** Choose in which IDE the component source code should be revealed. */
-              targetIDE?: Exclude<LocatorOptions['targetIDE'], TargetURLFunction>
-              /**
-               * Holding which key should enable the locator overlay?
-               * @default 'Alt'
-               */
-              key?: LocatorOptions['key']
-              /** Inject location attributes to jsx templates */
-              jsxLocation?: boolean
-              /** Inject location information to component declarations */
-              componentLocation?: boolean
-          }
+    locator?: boolean | LocatorPluginOptions
     // /** For debugger development, do not enable! */
     // SDT_DEV?: boolean
 }
@@ -34,7 +33,7 @@ function getFileExtension(filename: string): string {
 }
 
 // This export is used for configuration.
-export const devtoolsPlugin = (_options: DevtoolsPluginOptions = {}): PluginOption => {
+export const devtoolsPlugin = (_options: DevtoolsPluginOptions = {}): vite.PluginOption => {
     const options = {
         autoname: _options.autoname ?? false,
         locator: _options.locator

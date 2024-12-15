@@ -1,5 +1,30 @@
-import {type PluginObj} from '@babel/core'
-import * as t from '@babel/types'
+import * as babel from '@babel/core'
+import * as t     from '@babel/types'
+import * as debug from '@solid-devtools/debugger/types'
+import * as path  from 'node:path'
+
+export const enum DevtoolsModule {
+    Main  = 'solid-devtools',
+    Setup = 'solid-devtools/setup',
+}
+
+export function getProgram(path: babel.NodePath): babel.NodePath<t.Program> {
+    while (!path.isProgram()) {
+        path = path.parentPath!
+    }
+    return path
+}
+
+export function importFromRuntime(path: babel.NodePath, name: string, as: string): void {
+    const program = getProgram(path)
+    program.unshiftContainer('body', [
+        t.importDeclaration(
+            [t.importSpecifier(t.identifier(as), t.identifier(name))],
+            t.stringLiteral('solid-devtools/setup'),
+        ),
+    ])
+}
+
 
 const NAME_ID      = /* @__PURE__ */ t.identifier('name')
 const UNDEFINED_ID = /* @__PURE__ */ t.identifier('undefined')
@@ -108,7 +133,7 @@ function getTarget(
 let Sources: Record<Source, Comparable[]>
 let FileWithImports: boolean = false
 
-export const namePlugin: PluginObj<any> = {
+export const namePlugin: babel.PluginObj<any> = {
     name: '@solid-devtools/autoname',
     visitor: {
         Program() {
@@ -222,4 +247,123 @@ export const namePlugin: PluginObj<any> = {
             }
         },
     },
+}
+
+export const SET_COMPONENT_LOC = 'setComponentLocation'
+export const SET_COMPONENT_LOC_LOCAL = `_$${SET_COMPONENT_LOC}`
+
+const isUpperCase = (s: string): boolean => /^[A-Z]/.test(s)
+
+const getLocationAttribute = (filePath: string, line: number, column: number): debug.LocationAttr =>
+    `${filePath}:${line}:${column}`
+
+function getNodeLocationAttribute(
+    node: t.Node,
+    state: {filename?: unknown},
+    isJSX = false,
+): string | undefined {
+    if (!node.loc || typeof state.filename !== 'string') return
+    return getLocationAttribute(
+        path.relative(process.cwd(), state.filename),
+        node.loc.start.line,
+        // 2 is added to place the caret after the "<" character
+        node.loc.start.column + (isJSX ? 2 : 0),
+    )
+}
+
+let transformCurrentFile = false
+let importedRuntime      = false
+
+function importComponentSetter(path: babel.NodePath): void {
+    if (importedRuntime) return
+    importFromRuntime(path, SET_COMPONENT_LOC, SET_COMPONENT_LOC_LOCAL)
+    importedRuntime = true
+}
+
+export type JsxLocationPluginConfig = {
+    jsx: boolean
+    components: boolean
+}
+
+export function jsxLocationPlugin(config: JsxLocationPluginConfig): babel.PluginObj<any> {
+
+    const projectPathAst = babel.template(
+        `globalThis.${debug.WINDOW_PROJECTPATH_PROPERTY} = %%loc%%;`)({
+            loc: t.stringLiteral(process.cwd()),
+        }
+    ) as t.Statement
+
+    const buildMarkComponent = babel.template(
+        `${SET_COMPONENT_LOC_LOCAL}(%%loc%%);`
+    ) as (...args: Parameters<ReturnType<typeof babel.template>>) => t.Statement
+
+    return {
+        name: '@solid-devtools/location',
+        visitor: {
+            Program(path, state) {
+                transformCurrentFile = false
+                importedRuntime = false
+                // target only project files
+                if (typeof state.filename !== 'string' || !state.filename.includes(process.cwd())) return
+                transformCurrentFile = true
+    
+                // inject projectPath variable
+                path.node.body.push(projectPathAst)
+            },
+            ...(config.jsx && {
+                JSXOpeningElement(path, state) {
+                    const {openingElement} = path.container as t.JSXElement
+                    if (!transformCurrentFile || openingElement.name.type !== 'JSXIdentifier') return
+    
+                    // Filter native elements
+                    if (isUpperCase(openingElement.name.name)) return
+    
+                    const location = getNodeLocationAttribute(openingElement, state, true)
+                    if (!location) return
+    
+                    openingElement.attributes.push(
+                        t.jsxAttribute(
+                            t.jsxIdentifier(debug.LOCATION_ATTRIBUTE_NAME),
+                            t.stringLiteral(location),
+                        ),
+                    )
+                },
+            }),
+            ...(config.components && {
+                FunctionDeclaration(path, state) {
+                    if (!transformCurrentFile || !path.node.id || !isUpperCase(path.node.id.name))
+                        return
+    
+                    const location = getNodeLocationAttribute(path.node, state)
+                    if (!location) return
+    
+                    importComponentSetter(path)
+    
+                    path.node.body.body.unshift(buildMarkComponent({loc: t.stringLiteral(location)}))
+                },
+                VariableDeclarator(path, state) {
+
+                    const {init, id} = path.node
+
+                    if (!(
+                        transformCurrentFile &&
+                        'name' in id && isUpperCase(id.name) &&
+                        init &&
+                        (init.type === 'FunctionExpression' ||
+                         init.type === 'ArrowFunctionExpression') &&
+                        init.body.type === 'BlockStatement'
+                    )) {
+                        return
+                    }
+    
+                    const location = getNodeLocationAttribute(path.node, state)
+                    if (!location) return
+    
+                    importComponentSetter(path)
+    
+                    init.body.body.unshift(buildMarkComponent({loc: t.stringLiteral(location)}))
+                },
+            }),
+        }
+    }
 }
