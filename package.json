@@ -30,7 +30,7 @@
         "@changesets/cli": "^2.27.10",
         "@nothing-but/eslint-plugin": "^0.2.3",
         "@playwright/test": "^1.49.0",
-        "@solid-devtools/theme": "file:packages/theme",
+        "@solid-devtools/shared": "file:packages/shared",
         "@total-typescript/ts-reset": "^0.6.1",
         "@types/node": "^22.10.1",
         "@typescript-eslint/eslint-plugin": "^8.17.0",

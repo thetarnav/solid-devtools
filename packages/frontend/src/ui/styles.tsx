@@ -1,5 +1,5 @@
 import * as s from 'solid-js'
-import {make_var_styles} from '@solid-devtools/theme'
+import {make_var_styles} from '@solid-devtools/shared/theme'
 import {value_node_styles} from '../inspector.tsx'
 import {owner_path_styles} from '../structure.tsx'
 import * as ui from '../ui/index.ts'

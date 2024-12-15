@@ -1,4 +1,4 @@
-export * from '@solid-devtools/theme'
+export * from '@solid-devtools/shared/theme'
 export * from './styles.tsx'
 
 export * from './badge.tsx'

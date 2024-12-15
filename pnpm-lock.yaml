@@ -20,9 +20,9 @@ importers:
       '@playwright/test':
         specifier: ^1.49.0
         version: 1.49.1
-      '@solid-devtools/theme':
-        specifier: file:packages/theme
-        version: link:packages/theme
+      '@solid-devtools/shared':
+        specifier: file:packages/shared
+        version: link:packages/shared
       '@total-typescript/ts-reset':
         specifier: ^0.6.1
         version: 0.6.1
@@ -179,9 +179,6 @@ importers:
       '@solid-devtools/shared':
         specifier: workspace:^
         version: link:../shared
-      '@solid-devtools/theme':
-        specifier: workspace:^
-        version: link:../theme
       '@solid-primitives/context':
         specifier: ^0.2.3
         version: 0.2.3(solid-js@1.9.3)
@@ -339,6 +336,9 @@ importers:
 
   packages/shared:
     dependencies:
+      '@nothing-but/utils':
+        specifier: ~0.17.0
+        version: 0.17.0
       '@solid-primitives/event-bus':
         specifier: ^1.0.11
         version: 1.0.11(solid-js@1.9.3)
@@ -370,12 +370,6 @@ importers:
       solid-js:
         specifier: ^1.9.3
         version: 1.9.3
-
-  packages/theme:
-    dependencies:
-      '@nothing-but/utils':
-        specifier: ~0.17.0
-        version: 0.17.0
 
 packages:
 

@@ -1,4 +1,4 @@
-import * as theme  from '@solid-devtools/theme'
+import * as theme  from '@solid-devtools/shared/theme'
 import * as unocss from '@unocss/core'
 import presetUno   from '@unocss/preset-uno'
 

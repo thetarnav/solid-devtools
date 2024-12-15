@@ -38,7 +38,6 @@
         "@nothing-but/utils": "~0.17.0",
         "@solid-devtools/debugger": "workspace:^",
         "@solid-devtools/shared": "workspace:^",
-        "@solid-devtools/theme": "workspace:^",
         "@solid-primitives/context": "^0.2.3",
         "@solid-primitives/cursor": "^0.0.115",
         "@solid-primitives/date": "^2.0.24",

@@ -52,6 +52,12 @@
                 "types": "./dist/utils.d.ts",
                 "default": "./dist/utils.js"
             }
+        },
+        "./theme": {
+            "import": {
+                "types": "./dist/theme.d.ts",
+                "default": "./dist/theme.js"
+            }
         }
     },
     "peerDependencies": {
@@ -66,10 +72,10 @@
         "@solid-primitives/scheduled": "^1.4.4",
         "@solid-primitives/static-store": "^0.0.8",
         "@solid-primitives/styles": "^0.0.114",
-        "@solid-primitives/utils": "^6.2.3"
+        "@solid-primitives/utils": "^6.2.3",
+        "@nothing-but/utils": "~0.17.0"
     },
     "devDependencies": {
         "solid-js": "^1.9.3"
-    },
-    "browser": {}
+    }
 }
