@@ -1,5 +1,11 @@
 # solid-devtools-shared
 
+## 0.16.0
+
+### Minor Changes
+
+- d41c4a7: Move theme to shared package
+
 ## 0.15.0
 
 ### Minor Changes

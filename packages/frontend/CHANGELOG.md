@@ -1,5 +1,14 @@
 # @solid-devtools/frontend
 
+## 0.12.2
+
+### Patch Changes
+
+- d41c4a7: Move theme to shared package
+- Updated dependencies [d41c4a7]
+  - @solid-devtools/shared@0.16.0
+  - @solid-devtools/debugger@0.24.2
+
 ## 0.12.1
 
 ### Patch Changes
