@@ -1,17 +1,17 @@
 import * as s from 'solid-js'
 import clsx from 'clsx'
 import {combineProps} from '@solid-primitives/props'
-import * as ui from '../ui/index.ts'
+import * as theme from '@solid-devtools/shared/theme'
 import * as color from './color.ts'
 
 const thumb_color = (opacity: number): string =>
-    color.rgb_to_rgba(color.hex_to_rgb(ui.colors.gray[500]), opacity).toString()
+    color.rgb_to_rgba(color.hex_to_rgb(theme.colors.gray[500]), opacity).toString()
 
 export const custom_scrollbar = 'custom_scrollbar'
 export const custom_scrollbar_styles = /*css*/`
 .${custom_scrollbar}::-webkit-scrollbar {
     display: block;
-    width: ${ui.spacing[4]};
+    width: ${theme.spacing[4]};
 }
 .${custom_scrollbar}::-webkit-scrollbar-button {
     display: none;

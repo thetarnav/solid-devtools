@@ -69,7 +69,8 @@ const Node: Component<NodeType> = props => {
             <button
             style={{
                 "border-radius": "9999px",
-                "background-color": "#1e293b"
+                "background-color": "#1e293b",
+                "color": "white",
             }}
             onClick={e => addNode(nodeProps.id, nodeSignals.parents)}
             >

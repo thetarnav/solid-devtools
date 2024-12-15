@@ -6,6 +6,7 @@ import {createElementSize, createResizeObserver} from '@solid-primitives/resize-
 import {useRemSize} from '@solid-primitives/styles'
 
 import {type Atom, atom, createHover} from '@solid-devtools/shared/primitives'
+import * as theme from '@solid-devtools/shared/theme'
 import * as debug from '@solid-devtools/debugger/types'
 import {hover_background, panel_header_el_border} from './SidePanel.tsx'
 import {useController, useDevtoolsOptions} from './controller.tsx'
@@ -268,14 +269,14 @@ export function reconcileStructure(
     return {roots: nextRoots, nodeList: NewNodeList}
 }
 
-export const path_height = ui.spacing[4.5]
-export const row_height = ui.spacing[4.5]
-export const row_padding = ui.spacing[3.5]
-export const v_margin = ui.spacing[3]
+export const path_height = theme.spacing[4.5]
+export const row_height = theme.spacing[4.5]
+export const row_padding = theme.spacing[3.5]
+export const v_margin = theme.spacing[3]
 
-export const path_height_in_rem = ui.remValue(path_height)
-export const row_height_in_rem = ui.remValue(row_height)
-export const v_margin_in_rem = ui.remValue(v_margin)
+export const path_height_in_rem = theme.remValue(path_height)
+export const row_height_in_rem = theme.remValue(row_height)
+export const v_margin_in_rem = theme.remValue(v_margin)
 
 export const path_height_class = 'h-owner-path-height'
 export const path_min_height_class = 'min-h-owner-path-height'
@@ -290,9 +291,9 @@ export const owner_path_styles = /*css*/ `
 `
 
 export const row_padding_minus_px = `calc(${row_padding} - 0.95px)`
-export const lines_color = ui.vars.panel[3]
+export const lines_color = theme.vars.panel[3]
 export const background_gradient = `repeating-linear-gradient(to right, transparent, transparent ${row_padding_minus_px}, ${lines_color} ${row_padding_minus_px}, ${lines_color} ${row_padding})`
-export const padding_mask = `linear-gradient(to right, rgba(0,0,0, 0.4), black ${ui.spacing[48]})`
+export const padding_mask = `linear-gradient(to right, rgba(0,0,0, 0.4), black ${theme.spacing[48]})`
 
 export function getVirtualVars(
     listLength: number,
@@ -328,7 +329,7 @@ export function StructureView(): s.JSXElement {
             <div
                 class="relative h-full w-full overflow-hidden grid"
                 style={{
-                    'grid-template-rows': `${ui.spacing.header_height} 1fr ${path_height}`,
+                    'grid-template-rows': `${theme.spacing.header_height} 1fr ${path_height}`,
                     'grid-template-columns': '100%',
                 }}
             >
@@ -385,7 +386,7 @@ const Search: s.Component = () => {
             <style>{
                 /*css*/ `
                     .edge-container-base {
-                        height: calc(100% - ${ui.spacing[2]})
+                        height: calc(100% - ${theme.spacing[2]})
                     }
                 `
             }</style>
@@ -401,7 +402,7 @@ const Search: s.Component = () => {
                 }}
                 class="w-full text-lg p-x-6 transition-padding leading-9 placeholder:text-disabled group-focus-within:p-l-2"
                 style={{
-                    height: ui.spacing.header_height,
+                    height: theme.spacing.header_height,
                 }}
                 type="text"
                 placeholder="Search"
@@ -450,10 +451,10 @@ const ToggleMode: s.Component = () => {
                                 style={{
                                     [ui.toggle_tab_color_var]:
                                         mode === debug.TreeWalkerMode.Owners
-                                            ? ui.vars.text.DEFAULT
+                                            ? theme.vars.text.DEFAULT
                                             : mode === debug.TreeWalkerMode.DOM
-                                              ? ui.vars.dom
-                                              : ui.vars.component,
+                                              ? theme.vars.dom
+                                              : theme.vars.component,
                                 }}
                             >
                                 <div
@@ -831,7 +832,7 @@ export const OwnerPath: s.Component = () => {
                         flex items-center pointer-events-none
                         group-hover:opacity-0"
                         style={{
-                            'background-image': `linear-gradient(to right, ${ui.vars.panel.bg} ${ui.spacing[8]}, transparent ${ui.spacing[32]})`,
+                            'background-image': `linear-gradient(to right, ${theme.vars.panel.bg} ${theme.spacing[8]}, transparent ${theme.spacing[32]})`,
                         }}
                     >
                         <ui.Icon.Options class="w-3 h3 text-disabled" />
@@ -925,7 +926,7 @@ export const OwnerNode: s.Component<{
             <div
                 class="relative -z-2 ml-3.5"
                 style={{
-                    width: `calc(${props.owner.level} * ${row_padding} + ${ui.spacing[2]})`,
+                    width: `calc(${props.owner.level} * ${row_padding} + ${theme.spacing[2]})`,
                     height: `calc(${row_height} + 0.95px)`,
                     background: background_gradient,
                     'mask-image': padding_mask,

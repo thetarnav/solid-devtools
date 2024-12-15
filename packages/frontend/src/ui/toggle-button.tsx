@@ -1,7 +1,7 @@
-import {combineProps} from '@solid-primitives/props'
 import clsx from 'clsx'
 import * as s from 'solid-js'
-import * as ui from './index.ts'
+import {combineProps} from '@solid-primitives/props'
+import * as theme from '@solid-devtools/shared/theme'
 import Icon from './icons.tsx'
 import * as color from './color.ts'
 
@@ -12,7 +12,7 @@ export const toggle_button_styles = /*css*/ `
         display: flex;
         align-items: center;
         justify-content: center;
-        --toggle-button-color: ${color.rgb_value(color.hex_to_rgb(ui.colors.gray[600]))};
+        --toggle-button-color: ${color.rgb_value(color.hex_to_rgb(theme.colors.gray[600]))};
         --toggle-button-color-opacity: 1;
         --toggle-button-bg-opacity: 0;
         --toggle-button-border-opacity: 0;
@@ -21,7 +21,7 @@ export const toggle_button_styles = /*css*/ `
         border: 1px solid rgb(var(--toggle-button-color) / var(--toggle-button-border-opacity));
         outline: unset;
         transition-property: color, background-color, border-color;
-        transition-duration: ${ui.duration[200]};
+        transition-duration: ${theme.duration[200]};
     }
     .toggle-button:is(:hover, :active:hover) {
         --toggle-button-bg-opacity: 0.1;
@@ -33,15 +33,15 @@ export const toggle_button_styles = /*css*/ `
         --toggle-button-bg-opacity: 0.05;
     }
     .toggle-button:is([aria-selected="true"], [aria-expanded="true"]) {
-        --toggle-button-color: ${color.rgb_value(color.hex_to_rgb(ui.colors.cyan[600]))};
+        --toggle-button-color: ${color.rgb_value(color.hex_to_rgb(theme.colors.cyan[600]))};
         --toggle-button-bg-opacity: 0.05;
     }
     @media (prefers-color-scheme: dark) {
         .toggle-button {
-            --toggle-button-color: ${color.rgb_value(color.hex_to_rgb(ui.colors.gray[400]))};
+            --toggle-button-color: ${color.rgb_value(color.hex_to_rgb(theme.colors.gray[400]))};
         }
         .toggle-button:is([aria-selected="true"], [aria-expanded="true"]) {
-            --toggle-button-color: ${color.rgb_value(color.hex_to_rgb(ui.colors.cyan[400]))};
+            --toggle-button-color: ${color.rgb_value(color.hex_to_rgb(theme.colors.cyan[400]))};
         }
     }
 `

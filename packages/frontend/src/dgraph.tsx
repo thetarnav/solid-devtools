@@ -2,6 +2,7 @@ import clsx from 'clsx'
 import * as s from 'solid-js'
 import * as debug from '@solid-devtools/debugger/types'
 import {createHover} from '@solid-devtools/shared/primitives'
+import * as theme from '@solid-devtools/shared/theme'
 import {useController} from './controller.tsx'
 import * as ui from './ui/index.ts'
 
@@ -117,7 +118,7 @@ function calculateNodeOrder(
     return {flowOrder, depthMap}
 }
 
-const grid_size = ui.spacing[10]
+const grid_size = theme.spacing[10]
 
 const GraphNode: s.Component<{
     id: debug.NodeID
@@ -135,7 +136,7 @@ const GraphNode: s.Component<{
     const {pingUpdated, OwnerName} = ui.createHighlightedOwnerName()
     props.listenToUpdate(pingUpdated)
 
-    const margin = ui.spacing[2]
+    const margin = theme.spacing[2]
 
     return (
         <div
@@ -160,7 +161,7 @@ const GraphNode: s.Component<{
                     props.isHovered ? 'bg-panel-2' : 'bg-transparent group-hover:bg-panel-2',
                     props.isInspected ? 'b-panel-6' : 'b-transparent group-active:b-panel-4',
                 )}
-                style={{'box-shadow': `0 0 ${margin} ${ui.spacing[1]} ${ui.vars.panel[1]}`}}
+                style={{'box-shadow': `0 0 ${margin} ${theme.spacing[1]} ${theme.vars.panel[1]}`}}
             />
             <OwnerName name={name} type={type} />
         </div>
@@ -227,8 +228,8 @@ export function Dgraph_View(): s.JSX.Element {
     const thereIsAHoveredNode = s.createMemo(() => !!hovered.hoveredId())
 
     const pattern_size = '1px'
-    const pattern = `${ui.vars.panel[2]} 0,
-        ${ui.vars.panel[2]} ${pattern_size},
+    const pattern = `${theme.vars.panel[2]} 0,
+        ${theme.vars.panel[2]} ${pattern_size},
         transparent ${pattern_size},
         transparent ${grid_size}`
 

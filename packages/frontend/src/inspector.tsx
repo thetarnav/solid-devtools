@@ -6,6 +6,7 @@ import {defer} from '@solid-primitives/utils'
 import {handleTupleUpdates, createHover, createPingedSignal} from '@solid-devtools/shared/primitives'
 import {splitOnColon, warn} from '@solid-devtools/shared/utils'
 import * as debug from '@solid-devtools/debugger/types'
+import * as theme from '@solid-devtools/shared/theme'
 import {SidePanelCtx} from './SidePanel.tsx'
 import {useController, type DebuggerBridge} from './controller.tsx'
 import * as ui from './ui/index.ts'
@@ -590,7 +591,7 @@ const value_element_container = clsx(
 export const value_node_styles = /*css*/ `
     .${string_value_class}:before, .${string_value_class}:after {
         content: '"';
-        color: ${ui.vars.disabled};
+        color: ${theme.vars.disabled};
     }
 
     .${value_element_container_class}:hover {

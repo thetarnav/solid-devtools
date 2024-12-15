@@ -2,7 +2,7 @@ import clsx from 'clsx'
 import * as s from 'solid-js'
 import {createToken, resolveTokens} from '@solid-primitives/jsx-tokenizer'
 import {combineStyle} from '@solid-primitives/props'
-import * as ui from '../ui/index.ts'
+import * as theme from '@solid-devtools/shared/theme'
 
 export type ToggleTabsOptionProps<T> = (T extends string ? {title?: string} : {title: string}) & {
     for: T
@@ -44,7 +44,7 @@ export function ToggleTabs<T>(props: {
                         )}
                         onClick={() => props.onSelect(data.for)}
                         style={combineStyle(
-                            {[toggle_tab_color_var]: ui.vars.text.DEFAULT},
+                            {[toggle_tab_color_var]: theme.vars.text.DEFAULT},
                             data.style ?? {},
                         )}
                     >

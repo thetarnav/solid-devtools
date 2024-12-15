@@ -1,4 +1,5 @@
 import * as s from 'solid-js'
+import * as theme from '@solid-devtools/shared/theme'
 import * as ui from './ui/index.ts'
 import {createSidePanel} from './SidePanel.tsx'
 import {StructureView} from './structure.tsx'
@@ -74,7 +75,7 @@ export const App: s.Component<{headerSubtitle?: s.JSX.Element}> = props => {
     return (
         <div
             class="h-full w-full overflow-hidden grid text-base font-sans bg-panel-bg text-text"
-            style={{'grid-template-rows': `${ui.spacing[10]} 1fr`}}
+            style={{'grid-template-rows': `${theme.spacing[10]} 1fr`}}
         >
             <header class="p-2 flex items-center gap-x-2 bg-panel-bg b-b b-solid b-panel-border text-text">
                 <div class="flex items-center gap-x-2">
@@ -90,16 +91,16 @@ export const App: s.Component<{headerSubtitle?: s.JSX.Element}> = props => {
                 <Options />
             </header>
             <div class="overflow-hidden">
-                <ui.Splitter.Root>
-                    <ui.Splitter.Panel>
+                <ui.SplitterRoot>
+                    <ui.SplitterPanel>
                         <StructureView />
-                    </ui.Splitter.Panel>
+                    </ui.SplitterPanel>
                     {sidePanel.isOpen() && (
-                        <ui.Splitter.Panel>
+                        <ui.SplitterPanel>
                             <sidePanel.SidePanel />
-                        </ui.Splitter.Panel>
+                        </ui.SplitterPanel>
                     )}
-                </ui.Splitter.Root>
+                </ui.SplitterRoot>
             </div>
         </div>
     )

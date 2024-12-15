@@ -1,8 +1,7 @@
 import * as s from 'solid-js'
-import {make_var_styles} from '@solid-devtools/shared/theme'
+import * as theme from '@solid-devtools/shared/theme'
 import {value_node_styles} from '../inspector.tsx'
 import {owner_path_styles} from '../structure.tsx'
-import * as ui from '../ui/index.ts'
 import {highlight_styles} from './highlight.tsx'
 import {custom_scrollbar_styles} from './scrollable.tsx'
 import {toggle_button_styles} from './toggle-button.tsx'
@@ -21,18 +20,18 @@ export const tag_brackets = 'tag_brackets'
 export const tag_brackets_styles = /*css*/ `
     .${tag_brackets}:before {
         content: '\<';
-        color: ${ui.vars.disabled};
+        color: ${theme.vars.disabled};
     }
     .${tag_brackets}:after {
         content: '>';
-        color: ${ui.vars.disabled};
+        color: ${theme.vars.disabled};
     }
 `
 
 export const devtools_root_class = 'devtools-root'
 
 export function Styles(): s.JSXElement {
-    const var_styles = make_var_styles(devtools_root_class)
+    const var_styles = theme.make_var_styles(devtools_root_class)
 
     return (
         <style>

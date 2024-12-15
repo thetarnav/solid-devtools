@@ -9,15 +9,15 @@ import {scheduleIdle} from '@solid-primitives/scheduled'
 import {useRemSize} from '@solid-primitives/styles'
 import {clamp} from '@solid-primitives/utils'
 
-export type PanelProps = {children: s.JSX.Element}
+export type SplitterPanelProps = {children: s.JSX.Element}
 
-const SplitterPanel = createToken<PanelProps>()
+export const SplitterPanel = createToken<SplitterPanelProps>()
 
 const MIN_SIZE_IN_REM = 8
 const MIN_SIZE = `${MIN_SIZE_IN_REM}rem`
 const SPLIT_SIZE = '1px'
 
-function SplitterRoot(props: {children: s.JSX.Element}): s.JSX.Element {
+export function SplitterRoot(props: {children: s.JSX.Element}): s.JSX.Element {
     const tokens = resolveTokens(SplitterPanel, () => props.children)
 
     const isMobile = createMediaQuery('(max-width: 640px)')
@@ -117,5 +117,3 @@ function SplitterRoot(props: {children: s.JSX.Element}): s.JSX.Element {
         </div>
     )
 }
-
-export {SplitterPanel as Panel, SplitterRoot as Root}

@@ -1,5 +1,6 @@
 import clsx from 'clsx'
 import * as s from 'solid-js'
+import * as theme from '@solid-devtools/shared/theme'
 import {useController} from './controller.tsx'
 import * as dgraph from './dgraph.tsx'
 import {InspectorView} from './inspector.tsx'
@@ -53,7 +54,7 @@ export function createSidePanel() {
                 <div
                     class="h-full grid"
                     style={{
-                        'grid-template-rows': `${ui.spacing.header_height} 1fr`,
+                        'grid-template-rows': `${theme.spacing.header_height} 1fr`,
                         'grid-template-columns': '100%',
                     }}
                 >
