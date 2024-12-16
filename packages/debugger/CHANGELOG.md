@@ -1,5 +1,11 @@
 # @solid-devtools/debugger
 
+## 0.24.3
+
+### Patch Changes
+
+- 40ace37: Remove createInternalRoot, cleanup setup script and api
+
 ## 0.24.2
 
 ### Patch Changes
