@@ -6,7 +6,7 @@ export {
     observeValueUpdate,
     removeValueUpdateObserver,
 } from './main/observe.ts'
-export {attachDebugger, createInternalRoot, unobserveAllRoots} from './main/roots.ts'
+export {attachDebugger, unobserveAllRoots} from './main/roots.ts'
 export {
     getNodeName,
     getNodeType,

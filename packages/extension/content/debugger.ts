@@ -78,12 +78,15 @@ Expected version: ${title}@${expected_str}`)
 const debug = useDebugger()
 
 /* Check versions */
-warn_on_version_mismatch(debug.meta.versions.client, import.meta.env.EXPECTED_CLIENT, 'solid-devtools')
-warn_on_version_mismatch(debug.meta.versions.solid, debug.meta.versions.expectedSolid, 'solid-js')
+warn_on_version_mismatch(debug.meta.versions.get_client(), import.meta.env.EXPECTED_CLIENT, 'solid-devtools')
+warn_on_version_mismatch(debug.meta.versions.get_solid(), debug.meta.versions.get_expected_solid(), 'solid-js')
 
 // in case of navigation/page reload, reset the locator mode state in the extension
 toContent('ResetPanel')
-toContent('Debugger_Connected', debug.meta.versions)
+toContent('Debugger_Connected', {
+    client: debug.meta.versions.get_client(),
+    solid:  debug.meta.versions.get_solid(),
+})
 
 fromContent('DevtoolsOpened', () => debug.toggleEnabled(true))
 fromContent('DevtoolsClosed', () => debug.toggleEnabled(false))

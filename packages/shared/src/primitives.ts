@@ -146,7 +146,7 @@ export function atom<T>(initialValue: T, options?: SignalOptions<T>): Atom<T> {
         setter(p => p)
     }
     atom.set = value => setter(() => value)
-    atom.peak = () => untrack(atom)
+    atom.peak = untrack.bind(void 0, atom) as any
 
     Object.defineProperty(atom, 'value', {get: atom})
 

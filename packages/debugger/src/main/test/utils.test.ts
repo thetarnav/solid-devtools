@@ -1,41 +1,40 @@
 import * as s from 'solid-js'
 import * as vi from 'vitest'
 import {NodeType} from '../constants.ts'
-import api from '../solid-api.ts'
 import {type Solid} from '../types.ts'
-import {getOwnerType} from '../utils.ts'
+import {getOwnerType, onCleanup} from '../utils.ts'
 
 vi.describe('getOwnerType', () => {
     const tests = {
         Component: () => {
             let owner!: Solid.Owner
             s.createComponent(() => {
-                owner = api.getOwner()!
+                owner = Solid$$!.getOwner()!
                 return ''
             }, {})
             vi.expect(getOwnerType(owner)).toBe(NodeType.Component)
         },
         Effect: () => {
             s.createEffect(() => {
-                vi.expect(getOwnerType(api.getOwner()!)).toBe(NodeType.Effect)
+                vi.expect(getOwnerType(Solid$$!.getOwner()!)).toBe(NodeType.Effect)
             })
         },
         Memo: () => {
-            s.createMemo(() => vi.expect(getOwnerType(api.getOwner()!)).toBe(NodeType.Memo))
+            s.createMemo(() => vi.expect(getOwnerType(Solid$$!.getOwner()!)).toBe(NodeType.Memo))
         },
         Computation: () => {
             s.createComputed(() =>
-                vi.expect(getOwnerType(api.getOwner()!)).toBe(NodeType.Computation),
+                vi.expect(getOwnerType(Solid$$!.getOwner()!)).toBe(NodeType.Computation),
             )
         },
         Render: () => {
             s.createRenderEffect(() =>
-                vi.expect(getOwnerType(api.getOwner()!)).toBe(NodeType.Render),
+                vi.expect(getOwnerType(Solid$$!.getOwner()!)).toBe(NodeType.Render),
             )
         },
         Root: () => {
             s.createRoot(dispose => {
-                vi.expect(getOwnerType(api.getOwner()!)).toBe(NodeType.Root)
+                vi.expect(getOwnerType(Solid$$!.getOwner()!)).toBe(NodeType.Root)
                 dispose()
             })
         },
@@ -45,7 +44,7 @@ vi.describe('getOwnerType', () => {
             Ctx.Provider({
                 value: 1,
                 get children() {
-                    memo = api.getOwner()!
+                    memo = Solid$$!.getOwner()!
                     return ''
                 },
             })
@@ -65,7 +64,7 @@ vi.describe('getOwnerType', () => {
                 dispose = d
                 cb()
             })
-            api.onCleanup(dispose)
+            onCleanup(dispose)
         },
         memo: s.createMemo,
         effect: s.createEffect,

@@ -6,31 +6,26 @@ Dev hooks and observing reactive graph nodes
 
 import {chain, tryOnCleanup} from '@solid-primitives/utils'
 import {attachDebugger} from './roots.ts'
-import SolidAPI from './solid-api.ts'
 import {type Solid, type ValueUpdateListener} from './types.ts'
 import {isSolidRoot} from './utils.ts'
 
-for (const e of SolidAPI.getDevEvents()) {
-    attachDebugger(e.data)
-}
-
-//
-// AFTER CREATE OWNER
-//
-
-SolidAPI.DEV.hooks.afterCreateOwner = function (owner) {
-    if (isSolidRoot(owner)) {
-        attachDebugger(owner)
-    }
-}
-
-//
-// AFTER UPDATE
-//
 
 const GraphUpdateListeners = new Set<VoidFunction>()
 
-SolidAPI.DEV.hooks.afterUpdate = chain(GraphUpdateListeners)
+export function startObserve() {
+
+    for (const owner of SolidDevtools$$!.get_created_owners()) {
+        attachDebugger(owner)
+    }
+
+    Solid$$!.hooks.afterCreateOwner = function (owner) {
+        if (isSolidRoot(owner)) {
+            attachDebugger(owner)
+        }
+    }
+
+    Solid$$!.hooks.afterUpdate = chain(GraphUpdateListeners)
+}
 
 /**
  * Runs the callback on every Solid Graph Update – whenever computations update because of a signal change.

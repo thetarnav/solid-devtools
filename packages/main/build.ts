@@ -1,11 +1,10 @@
-import * as path      from 'node:path'
-import * as url       from 'node:url'
-import * as esb       from 'esbuild'
+import * as path  from 'node:path'
+import * as url   from 'node:url'
+import * as esb   from 'esbuild'
 
-import      pkg       from './package.json' with {type: 'json'}
-import      solid_pkg from 'solid-js/package.json' with {type: 'json'}
+import      pkg   from './package.json' with {type: 'json'}
 
-import * as build     from '../../build.ts'
+import * as build from '../../build.ts'
 
 
 const filename = url.fileURLToPath(import.meta.url)
@@ -42,7 +41,6 @@ async function main() {
         external:    external,
         define:      {
             'process.env.CLIENT_VERSION':         JSON.stringify(pkg.version),
-            'process.env.SOLID_VERSION':          JSON.stringify(solid_pkg.version),
             'process.env.EXPECTED_SOLID_VERSION': JSON.stringify(pkg.peerDependencies['solid-js'].match(/\d+.\d+.\d+/)![0]),
         },
     }, {

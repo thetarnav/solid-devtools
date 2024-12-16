@@ -8,11 +8,8 @@ import {
 } from 'solid-js'
 import {beforeEach, describe, expect, it, vi} from 'vitest'
 import {getObjectById, getSdtId, ObjectType} from '../../main/id.ts'
-import SolidApi from '../../main/solid-api.ts'
 import {type Mapped, NodeType, PropGetterState, type Solid, ValueType} from '../../types.ts'
 import {collectOwnerDetails} from '../inspector.ts'
-
-const {getOwner} = SolidApi
 
 let mockLAST_ID = 0
 beforeEach(() => {
@@ -32,7 +29,7 @@ describe('collectOwnerDetails', () => {
                 () => {
                     const focused = createMemo(
                         () => {
-                            memo = getOwner()!
+                            memo = Solid$$!.getOwner()!
                             s()
                             createSignal(div, {name: 'element'})
                             const m = createMemo(() => 0, undefined, {name: 'memo'})
@@ -99,7 +96,7 @@ describe('collectOwnerDetails', () => {
                 children: JSX.Element
                 nested: {foo: number; bar: string}
             }) => {
-                owner = getOwner()!
+                owner = Solid$$!.getOwner()!
                 return <div>{props.children}</div>
             }
             createRenderEffect(() => (
@@ -153,7 +150,7 @@ describe('collectOwnerDetails', () => {
         createRoot(dispose => {
             let owner!: Solid.Owner
             const Button = (props: JSX.ButtonHTMLAttributes<HTMLButtonElement>) => {
-                owner = getOwner()!
+                owner = Solid$$!.getOwner()!
                 return <button {...props}>Click me</button>
             }
             createRenderEffect(() => {
@@ -210,7 +207,7 @@ describe('collectOwnerDetails', () => {
 
             const [count, setCount] = createSignal(0)
             createMemo(() => {
-                owner = getOwner()!
+                owner = Solid$$!.getOwner()!
                 return count()
             })
 
@@ -242,7 +239,7 @@ describe('collectOwnerDetails', () => {
 
     it('listens to signal updates', () => {
         createRoot(dispose => {
-            const owner = getOwner()!
+            const owner = Solid$$!.getOwner()!
             const [, setCount] = createSignal(0) // id: "0"
             const [, setCount2] = createSignal(0) // id: "1"
 

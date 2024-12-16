@@ -1,18 +1,19 @@
+import {batch, createComputed, createEffect, createMemo, createSignal} from 'solid-js'
 import {createEventBus, createGlobalEmitter, type GlobalEmitter} from '@solid-primitives/event-bus'
 import {createStaticStore} from '@solid-primitives/static-store'
 import {defer} from '@solid-primitives/utils'
-import {batch, createComputed, createEffect, createMemo, createSignal} from 'solid-js'
+import {error} from '@solid-devtools/shared/utils'
 import {createDependencyGraph, type DGraphUpdate} from '../dependency/index.ts'
 import {createInspector, type InspectorUpdate, type ToggleInspectedValueData} from '../inspector/index.ts'
 import {createLocator} from '../locator/index.ts'
-import {type HighlightElementPayload} from '../locator/types.ts'
+import {type HighlightElementPayload, type LocatorOptions} from '../locator/types.ts'
 import {createStructure, type StructureUpdates} from '../structure/index.ts'
 import {DebuggerModule, DEFAULT_MAIN_VIEW, DevtoolsMainView, TreeWalkerMode} from './constants.ts'
 import {getObjectById, getSdtId, ObjectType} from './id.ts'
-import {createInternalRoot} from './roots.ts'
-import SolidApi from './solid-api.ts'
 import {type Mapped, type NodeID} from './types.ts'
 import {createBatchedUpdateEmitter} from './utils.ts'
+import {startObserve} from './observe.ts'
+import {startObservingStores} from '../inspector/store.ts'
 
 export namespace Debugger {
     export type InspectedState = {
@@ -53,7 +54,17 @@ export type DebuggerEmitter = {
     input: GlobalEmitter<Debugger.InputChannels>
 }
 
-const plugin = createInternalRoot(() => {
+let debugger_instance: undefined | ReturnType<typeof createDebugger>
+
+function createDebugger() {
+
+    if (!globalThis.SolidDevtools$$) {
+        error(`Debugger hasn't found the exposed Solid Devtools API. Did you import the setup script?`)
+    }
+
+    startObserve()
+    startObservingStores()
+
     const hub: DebuggerEmitter = {
         output: createGlobalEmitter(),
         input: createGlobalEmitter(),
@@ -259,26 +270,28 @@ const plugin = createInternalRoot(() => {
         }
     })
 
-    /**
-     * Used for connecting debugger to devtools
-     */
-    function useDebugger() {
-        return {
-            meta: {
-                versions: SolidApi.versions,
-            },
-            enabled: debuggerEnabled,
-            toggleEnabled: (enabled: boolean) => void toggleModules('debugger', enabled),
-            on: hub.output.on,
-            listen: hub.output.listen,
-            emit: hub.input.emit,
-        }
-    }
-
     return {
-        useDebugger,
-        useLocator: locator.useLocator,
+        meta: {
+            versions: SolidDevtools$$!.versions,
+        },
+        enabled: debuggerEnabled,
+        toggleEnabled: (enabled: boolean) => void toggleModules('debugger', enabled),
+        on:     hub.output.on,
+        listen: hub.output.listen,
+        emit:   hub.input.emit,
+        locator,
     }
-})
+}
 
-export const {useDebugger, useLocator} = plugin
+
+/**
+ * Used for connecting debugger to devtools
+ */
+export function useDebugger() {
+    debugger_instance ??= createDebugger()
+    return debugger_instance
+}
+
+export function useLocator(options: LocatorOptions) {
+    return useDebugger().locator.useLocator(options)
+}

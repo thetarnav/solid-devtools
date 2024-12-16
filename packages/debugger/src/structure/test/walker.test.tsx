@@ -9,12 +9,9 @@ import {
 import {beforeEach, describe, expect, it, vi} from 'vitest'
 import {NodeType, TreeWalkerMode} from '../../main/constants.ts'
 import {$setSdtId, ObjectType, getSdtId} from '../../main/id.ts'
-import SolidApi from '../../main/solid-api.ts'
 import {type Mapped, type Solid} from '../../main/types.ts'
 import {getNodeName} from '../../main/utils.ts'
 import {type ComputationUpdateHandler, walkSolidTree} from '../walker.ts'
-
-const {getOwner} = SolidApi
 
 let mockLAST_ID = 0
 beforeEach(() => {
@@ -42,7 +39,7 @@ describe('TreeWalkerMode.Owners', () => {
         {
             const [dispose, owner] = createRoot(_dispose => {
                 mockTree()
-                return [_dispose, getOwner()! as Solid.Root]
+                return [_dispose, Solid$$!.getOwner()! as Solid.Root]
             })
 
             const tree = walkSolidTree(owner, {
@@ -113,7 +110,7 @@ describe('TreeWalkerMode.Owners', () => {
                     {name: 'WRAPPER'},
                 )
 
-                const rootOwner = getOwner()! as Solid.Root
+                const rootOwner = Solid$$!.getOwner()! as Solid.Root
                 const tree = walkSolidTree(rootOwner, {
                     rootId: $setSdtId(rootOwner, '#0'),
                     onComputationUpdate: () => {
@@ -172,11 +169,11 @@ describe('TreeWalkerMode.Owners', () => {
             let computedOwner!: Solid.Owner
             const [a, setA] = createSignal(0)
             createComputed(() => {
-                computedOwner = getOwner()!
+                computedOwner = Solid$$!.getOwner()!
                 a()
             })
 
-            const owner = getOwner()! as Solid.Root
+            const owner = Solid$$!.getOwner()! as Solid.Root
             walkSolidTree(owner, {
                 onComputationUpdate: (...args) => capturedComputationUpdates.push(args),
                 rootId: $setSdtId(owner, '#ff'),
@@ -222,7 +219,7 @@ describe('TreeWalkerMode.Owners', () => {
                 )
             })
 
-            const owner = getOwner()! as Solid.Root
+            const owner = Solid$$!.getOwner()! as Solid.Root
 
             const components: string[] = []
 
@@ -268,7 +265,7 @@ describe('TreeWalkerMode.Components', () => {
                 const [a, set] = createSignal(0)
                 createComputed(a)
                 toTrigger.push(() => set(1))
-                testComponents.push(getOwner()! as Solid.Component)
+                testComponents.push(Solid$$!.getOwner()! as Solid.Component)
                 return createRoot(_ => (
                     <div>{props.n === 0 ? 'end' : <TestComponent n={props.n - 1} />}</div>
                 ))
@@ -288,7 +285,7 @@ describe('TreeWalkerMode.Components', () => {
                 )
             })
 
-            const owner = getOwner()! as Solid.Root
+            const owner = Solid$$!.getOwner()! as Solid.Root
 
             const computationUpdates: Parameters<ComputationUpdateHandler>[] = []
 
@@ -374,7 +371,7 @@ describe('TreeWalkerMode.DOM', () => {
                 const [a, set] = createSignal(0)
                 createComputed(a)
                 toTrigger.push(() => set(1))
-                testComponents.push(getOwner()! as Solid.Component)
+                testComponents.push(Solid$$!.getOwner()! as Solid.Component)
                 return createRoot(_ => (
                     <div>{props.n === 0 ? 'end' : <TestComponent n={props.n - 1} />}</div>
                 ))
@@ -397,7 +394,7 @@ describe('TreeWalkerMode.DOM', () => {
             }
             createRenderEffect(() => <App />)
 
-            const owner = getOwner()! as Solid.Root
+            const owner = Solid$$!.getOwner()! as Solid.Root
 
             const computationUpdates: Parameters<ComputationUpdateHandler>[] = []
 

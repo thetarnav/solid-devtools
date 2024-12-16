@@ -28,17 +28,17 @@
     "type": "module",
     "main": "./dist/index_noop.js",
     "module": "./dist/index_noop.js",
-    "types": "./dist/types/index.d.ts",
+    "types": "./dist/index.d.ts",
     "exports": {
         "browser": {
             "development": {
-                "types": "./dist/types/index.d.ts",
+                "types": "./dist/index.d.ts",
                 "default": "./dist/index.js"
             },
-            "types": "./dist/types/index.d.ts",
+            "types": "./dist/index.d.ts",
             "default": "./dist/index_noop.js"
         },
-        "types": "./dist/types/index.d.ts",
+        "types": "./dist/index.d.ts",
         "default": "./dist/index_noop.js"
     },
     "scripts": {

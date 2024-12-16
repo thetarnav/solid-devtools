@@ -17,7 +17,6 @@ import {
 import type {Debugger} from '../main/index.ts'
 import * as registry from '../main/component-registry.ts'
 import {ObjectType, getObjectById} from '../main/id.ts'
-import SolidAPI from '../main/solid-api.ts'
 import {type NodeID} from '../main/types.ts'
 import {createElementsOverlay} from './element-overlay.tsx'
 import {
@@ -41,6 +40,7 @@ export function createLocator(props: {
     setLocatorEnabledSignal(signal: Accessor<boolean>): void
     onComponentClick(componentId: NodeID, next: VoidFunction): void
 }) {
+    
     const [enabledByPressingSignal, setEnabledByPressingSignal] = createSignal((): boolean => false)
     props.setLocatorEnabledSignal(createMemo(() => enabledByPressingSignal()()))
 
@@ -165,8 +165,9 @@ export function createLocator(props: {
     }
 
     // Enable the locator when the options were passed by the vite plugin
-    if (SolidAPI.locatorOptions) {
-        useLocator(SolidAPI.locatorOptions)
+    let locator_options = SolidDevtools$$!.get_locator_options()
+    if (locator_options) {
+        useLocator(locator_options)
     }
 
     return {

@@ -6,9 +6,6 @@ import {
     observeValueUpdate,
     removeValueUpdateObserver,
 } from '../observe.ts'
-import solidApi from '../solid-api.ts'
-
-const {getOwner} = solidApi
 
 describe('addSolidUpdateListener', () => {
     it('listens to solid updates', () =>
@@ -50,7 +47,7 @@ describe('interceptComputationRerun', () => {
                 return last_value
             }, 'init')
 
-            const owner = getOwner()!.owned![0]!
+            const owner = Solid$$!.getOwner()!.owned![0]!
             interceptComputationRerun(owner, (fn, prev) => {
                 last_patched_prev = prev
                 last_patched_value = fn()
@@ -74,7 +71,7 @@ describe('observeValueUpdate', () => {
     it('patches signal', () =>
         createRoot(dispose => {
             const [, setCount] = createSignal(0, {name: 's1'})
-            const signal = getOwner()!.sourceMap![0]!
+            const signal = Solid$$!.getOwner()!.sourceMap![0]!
             const symbol = Symbol()
             let last_prev: unknown
             let last_value: unknown

@@ -1,14 +1,17 @@
-import '@solid-devtools/debugger/setup'
-
+import * as solid from 'solid-js'
+import * as store from 'solid-js/store'
 import {
     setClientVersion,
     setOwnerLocation,
-    setSolidVersion,
+    setExpectedSolidVersion,
     useLocator,
+    setupSolidDevtools,
 } from '@solid-devtools/debugger/setup'
 
+setupSolidDevtools(solid.DEV, store.DEV)
+
 setClientVersion(process.env.CLIENT_VERSION)
-setSolidVersion(process.env.SOLID_VERSION, process.env.EXPECTED_SOLID_VERSION)
+setExpectedSolidVersion(process.env.EXPECTED_SOLID_VERSION)
 
 /**
  * Set debugger locator module options.

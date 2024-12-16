@@ -4,7 +4,6 @@ import {parseLocationString} from '../locator/index.ts'
 import {NodeType, ValueItemType} from '../main/constants.ts'
 import {ObjectType, getSdtId} from '../main/id.ts'
 import {observeValueUpdate, removeValueUpdateObserver} from '../main/observe.ts'
-import SolidAPI from '../main/solid-api.ts'
 import type {Mapped, NodeID, Solid, ValueItemID} from '../main/types.ts'
 import {
     getComponentRefreshNode,
@@ -15,6 +14,7 @@ import {
     isSolidSignal,
     isSolidStore,
     markOwnerType,
+    onCleanup,
 } from '../main/utils.ts'
 import {encodeValue} from './serialize.ts'
 import {type InspectorUpdateMap, PropGetterState} from './types.ts'
@@ -110,8 +110,8 @@ export class ObservedProps {
         Object.defineProperty(this.props, key, {
             get() {
                 const value = get()
-                if (SolidAPI.getListener()) {
-                    SolidAPI.onCleanup(
+                if (Solid$$!.getListener()) {
+                    onCleanup(
                         () => --o.n === 0 && self.onPropStateChange?.(key, PropGetterState.Stale),
                     )
                 }
@@ -175,8 +175,8 @@ const $INSPECTOR = Symbol('inspector')
 
 const typeToObjectTypeMap = {
     [NodeType.Signal]: ObjectType.Signal,
-    [NodeType.Memo]: ObjectType.Owner,
-    [NodeType.Store]: ObjectType.Store,
+    [NodeType.Memo]:   ObjectType.Owner,
+    [NodeType.Store]:  ObjectType.Store,
 }
 
 function mapSourceValue(
@@ -211,7 +211,7 @@ function mapSourceValue(
 
 function mapProps(props: Solid.Component['props']) {
     // proxy props need to be checked for changes in keys
-    const isProxy = !!(props as any)[SolidAPI.$PROXY]
+    const isProxy = !!(props as any)[Solid$$!.$PROXY]
     const record: Mapped.Props['record'] = {}
 
     let checkProxyProps: (() => ReturnType<typeof compareProxyPropKeys>) | undefined
@@ -318,7 +318,7 @@ export const collectOwnerDetails = /*#__PURE__*/ untrackedCallback(function (
                 // get location from component.location
                 (typeof location === 'string' && (location = parseLocationString(location))) ||
                 // get location from the babel plugin marks
-                ((location = SolidAPI.getOwnerLocation(owner)) &&
+                ((location = SolidDevtools$$!.getOwnerLocation(owner)) &&
                     (location = parseLocationString(location)))
             ) {
                 details.location = location

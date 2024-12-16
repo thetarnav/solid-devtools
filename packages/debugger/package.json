@@ -14,7 +14,7 @@
         "url": "https://github.com/thetarnav/solid-devtools/issues"
     },
     "private": false,
-    "sideEffects": false,
+    "sideEffects": true,
     "publishConfig": {
         "access": "public"
     },

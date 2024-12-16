@@ -1,12 +1,8 @@
 import {trimString} from '@solid-devtools/shared/utils'
 import {type Emit} from '@solid-primitives/event-bus'
 import {throttle} from '@solid-primitives/scheduled'
-import {$PROXY} from 'solid-js'
 import {NodeType} from './constants.ts'
-import SolidAPI from './solid-api.ts'
 import {type Solid} from './types.ts'
-
-const $NODE = SolidAPI.STORE_DEV.$NODE
 
 export const isObject = (o: unknown): o is object => typeof o === 'object' && !!o
 
@@ -27,11 +23,11 @@ export const isSolidMemo = (o: Readonly<Solid.Owner>): o is Solid.Memo =>
 
 export const isSolidComponent = (o: Readonly<Solid.Owner>): o is Solid.Component => 'component' in o
 
-export const isStoreNode = (o: object): o is Solid.StoreNode => $NODE in o
+export const isStoreNode = (o: object): o is Solid.StoreNode => SolidStore$$!.$NODE in o
 
 export const isSolidStore = (
     o: Solid.Owner | Solid.SourceMapValue | Solid.Store,
-): o is Solid.Store => !('observers' in o) && 'value' in o && isObject(o.value) && $PROXY in o.value
+): o is Solid.Store => !('observers' in o) && 'value' in o && isObject(o.value) && Solid$$!.$PROXY in o.value
 
 export const isSolidSignal = (o: Solid.SourceMapValue): o is Solid.Signal =>
     'value' in o && 'observers' in o && 'observerSlots' in o && 'comparator' in o
@@ -95,6 +91,14 @@ export function isDisposed(o: Readonly<Solid.Owner>): boolean {
     return !!(isSolidComputation(o)
         ? o.owner && (!o.owner.owned || !o.owner.owned.includes(o))
         : (o as Solid.Root).isDisposed)
+}
+
+export function onCleanup(fn: () => void) {
+    let owner = Solid$$!.getOwner()
+    if (owner) {
+        if (owner.cleanups === null) owner.cleanups = [fn]
+        else owner.cleanups.push(fn)
+    }
 }
 
 export function getComponentRefreshNode(owner: Readonly<Solid.Component>): Solid.Memo | null {
