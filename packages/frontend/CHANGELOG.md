@@ -1,5 +1,13 @@
 # @solid-devtools/frontend
 
+## 0.12.3
+
+### Patch Changes
+
+- dca83c0: Fix usage of theme package
+- Updated dependencies [40ace37]
+  - @solid-devtools/debugger@0.24.3
+
 ## 0.12.2
 
 ### Patch Changes

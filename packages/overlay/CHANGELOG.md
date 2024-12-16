@@ -1,5 +1,15 @@
 # @solid-devtools/overlay
 
+## 0.31.3
+
+### Patch Changes
+
+- db54e02: Correct package.json exports
+- Updated dependencies [dca83c0]
+- Updated dependencies [40ace37]
+  - @solid-devtools/frontend@0.12.3
+  - @solid-devtools/debugger@0.24.3
+
 ## 0.31.2
 
 ### Patch Changes
