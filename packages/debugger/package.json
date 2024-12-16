@@ -14,7 +14,7 @@
         "url": "https://github.com/thetarnav/solid-devtools/issues"
     },
     "private": false,
-    "sideEffects": false,
+    "sideEffects": true,
     "publishConfig": {
         "access": "public"
     },
@@ -73,9 +73,6 @@
     },
     "peerDependencies": {
         "solid-js": "^1.9.0"
-    },
-    "devDependencies": {
-        "solid-js": "^1.9.3"
     },
     "keywords": [
         "solid",

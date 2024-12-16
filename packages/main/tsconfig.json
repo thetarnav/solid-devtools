@@ -1,6 +1,7 @@
 {
     "extends": "../../tsconfig.json",
     "compilerOptions": {
+        "outDir": "dist",
         "types": ["@total-typescript/ts-reset", "node"]
     },
     "include": ["src/**/*", "test/**/*"]

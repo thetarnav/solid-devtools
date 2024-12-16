@@ -33,10 +33,11 @@ async function main() {
         entryPoints: entries,
         external:    external,
     }]
-
-    const ts_entries = entries
-
-    await build.build(esb_options, ts_entries, is_dev)
+    
+    await build.build(esb_options,
+                      is_dev,
+                      dirname,
+                      dist_dirname)
 }
 
 

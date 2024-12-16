@@ -1,48 +1,39 @@
-import {
-    createComputed,
-    createEffect,
-    createMemo,
-    createRenderEffect,
-    createRoot,
-    createSignal,
-} from 'solid-js'
-import {beforeEach, describe, expect, it, vi} from 'vitest'
+import * as s from 'solid-js'
+import * as test from 'vitest'
 import {NodeType, TreeWalkerMode} from '../../main/constants.ts'
 import {$setSdtId, ObjectType, getSdtId} from '../../main/id.ts'
-import SolidApi from '../../main/solid-api.ts'
 import {type Mapped, type Solid} from '../../main/types.ts'
 import {getNodeName} from '../../main/utils.ts'
 import {type ComputationUpdateHandler, walkSolidTree} from '../walker.ts'
-
-const {getOwner} = SolidApi
+import setup from '../../main/setup.ts'
 
 let mockLAST_ID = 0
-beforeEach(() => {
+test.beforeEach(() => {
     mockLAST_ID = 0
 })
-vi.mock('../../main/get-id', () => ({getNewSdtId: () => '#' + mockLAST_ID++}))
+test.vi.mock('../../main/get-id', () => ({getNewSdtId: () => '#' + mockLAST_ID++}))
 
 const mockTree = () => {
-    const [s] = createSignal('foo', {name: 's0'})
-    createSignal('hello', {name: 's1'})
+    const [source] = s.createSignal('foo', {name: 's0'})
+    s.createSignal('hello', {name: 's1'})
 
-    createEffect(
+    s.createEffect(
         () => {
-            createSignal({bar: 'baz'}, {name: 's2'})
-            createComputed(s, undefined, {name: 'c0'})
-            createComputed(() => createSignal(0, {name: 's3'}), undefined, {name: 'c1'})
+            s.createSignal({bar: 'baz'}, {name: 's2'})
+            s.createComputed(source, undefined, {name: 'c0'})
+            s.createComputed(() => s.createSignal(0, {name: 's3'}), undefined, {name: 'c1'})
         },
         undefined,
         {name: 'e0'},
     )
 }
 
-describe('TreeWalkerMode.Owners', () => {
-    it('default options', () => {
+test.describe('TreeWalkerMode.Owners', () => {
+    test.it('default options', () => {
         {
-            const [dispose, owner] = createRoot(_dispose => {
+            const [dispose, owner] = s.createRoot(_dispose => {
                 mockTree()
-                return [_dispose, getOwner()! as Solid.Root]
+                return [_dispose, setup.solid.getOwner()! as Solid.Root]
             })
 
             const tree = walkSolidTree(owner, {
@@ -58,24 +49,24 @@ describe('TreeWalkerMode.Owners', () => {
 
             dispose()
 
-            expect(tree).toEqual({
+            test.expect(tree).toEqual({
                 id: '#ff',
                 type: NodeType.Root,
                 children: [
                     {
-                        id: expect.any(String),
+                        id: test.expect.any(String),
                         name: 'e0',
                         type: NodeType.Effect,
                         frozen: true,
                         children: [
                             {
-                                id: expect.any(String),
+                                id: test.expect.any(String),
                                 name: 'c0',
                                 type: NodeType.Computation,
                                 children: [],
                             },
                             {
-                                id: expect.any(String),
+                                id: test.expect.any(String),
                                 name: 'c1',
                                 type: NodeType.Computation,
                                 frozen: true,
@@ -85,23 +76,23 @@ describe('TreeWalkerMode.Owners', () => {
                     },
                 ],
             } satisfies Mapped.Owner)
-            expect(tree, 'is json serializable').toEqual(JSON.parse(JSON.stringify(tree)))
+            test.expect(tree, 'is json serializable').toEqual(JSON.parse(JSON.stringify(tree)))
         }
 
         {
-            createRoot(dispose => {
-                const [s] = createSignal(0, {name: 'source'})
+            s.createRoot(dispose => {
+                const [source] = s.createSignal(0, {name: 'source'})
 
                 const div = document.createElement('div')
 
-                createComputed(
+                s.createComputed(
                     () => {
-                        const focused = createMemo(
+                        const focused = s.createMemo(
                             () => {
-                                s()
-                                createSignal(div, {name: 'element'})
-                                const memo = createMemo(() => 0, undefined, {name: 'memo'})
-                                createRenderEffect(memo, undefined, {name: 'render'})
+                                source()
+                                s.createSignal(div, {name: 'element'})
+                                const memo = s.createMemo(() => 0, undefined, {name: 'memo'})
+                                s.createRenderEffect(memo, undefined, {name: 'render'})
                                 return 'value'
                             },
                             undefined,
@@ -113,7 +104,7 @@ describe('TreeWalkerMode.Owners', () => {
                     {name: 'WRAPPER'},
                 )
 
-                const rootOwner = getOwner()! as Solid.Root
+                const rootOwner = setup.solid.getOwner()! as Solid.Root
                 const tree = walkSolidTree(rootOwner, {
                     rootId: $setSdtId(rootOwner, '#0'),
                     onComputationUpdate: () => {
@@ -125,30 +116,30 @@ describe('TreeWalkerMode.Owners', () => {
                     mode: TreeWalkerMode.Owners,
                 })
 
-                expect(tree).toEqual({
-                    id: expect.any(String),
+                test.expect(tree).toEqual({
+                    id: test.expect.any(String),
                     type: NodeType.Root,
                     name: undefined,
                     children: [
                         {
-                            id: expect.any(String),
+                            id: test.expect.any(String),
                             name: 'WRAPPER',
                             type: NodeType.Computation,
                             children: [
                                 {
-                                    id: expect.any(String),
+                                    id: test.expect.any(String),
                                     name: 'focused',
                                     type: NodeType.Memo,
                                     children: [
                                         {
-                                            id: expect.any(String),
+                                            id: test.expect.any(String),
                                             name: 'memo',
                                             type: NodeType.Memo,
                                             frozen: true,
                                             children: [],
                                         },
                                         {
-                                            id: expect.any(String),
+                                            id: test.expect.any(String),
                                             name: 'render',
                                             type: NodeType.Render,
                                             children: [],
@@ -165,18 +156,18 @@ describe('TreeWalkerMode.Owners', () => {
         }
     })
 
-    it('listen to computation updates', () => {
-        createRoot(dispose => {
+    test.it('listen to computation updates', () => {
+        s.createRoot(dispose => {
             const capturedComputationUpdates: Parameters<ComputationUpdateHandler>[] = []
 
             let computedOwner!: Solid.Owner
-            const [a, setA] = createSignal(0)
-            createComputed(() => {
-                computedOwner = getOwner()!
+            const [a, setA] = s.createSignal(0)
+            s.createComputed(() => {
+                computedOwner = setup.solid.getOwner()!
                 a()
             })
 
-            const owner = getOwner()! as Solid.Root
+            const owner = setup.solid.getOwner()! as Solid.Root
             walkSolidTree(owner, {
                 onComputationUpdate: (...args) => capturedComputationUpdates.push(args),
                 rootId: $setSdtId(owner, '#ff'),
@@ -186,12 +177,12 @@ describe('TreeWalkerMode.Owners', () => {
                 },
             })
 
-            expect(capturedComputationUpdates.length).toBe(0)
+            test.expect(capturedComputationUpdates.length).toBe(0)
 
             setA(1)
 
-            expect(capturedComputationUpdates.length).toBe(1)
-            expect(capturedComputationUpdates[0]).toEqual([
+            test.expect(capturedComputationUpdates.length).toBe(1)
+            test.expect(capturedComputationUpdates[0]).toEqual([
                 '#ff',
                 computedOwner,
                 getSdtId(computedOwner, ObjectType.Owner),
@@ -202,18 +193,18 @@ describe('TreeWalkerMode.Owners', () => {
         })
     })
 
-    it('gathers components', () => {
-        createRoot(dispose => {
+    test.it('gathers components', () => {
+        s.createRoot(dispose => {
             const TestComponent = (props: {n: number}) => {
-                const [a] = createSignal(0)
-                createComputed(a)
+                const [a] = s.createSignal(0)
+                s.createComputed(a)
                 return <div>{props.n === 0 ? 'end' : <TestComponent n={props.n - 1} />}</div>
             }
             const Button = () => {
                 return <button>Click me</button>
             }
 
-            createRenderEffect(() => {
+            s.createRenderEffect(() => {
                 return (
                     <>
                         <TestComponent n={5} />
@@ -222,7 +213,7 @@ describe('TreeWalkerMode.Owners', () => {
                 )
             })
 
-            const owner = getOwner()! as Solid.Root
+            const owner = setup.solid.getOwner()! as Solid.Root
 
             const components: string[] = []
 
@@ -239,7 +230,7 @@ describe('TreeWalkerMode.Owners', () => {
                 },
             })
 
-            expect(components.length).toBe(7)
+            test.expect(components.length).toBe(7)
 
             let testCompsLength = 0
             let btn!: string
@@ -247,29 +238,29 @@ describe('TreeWalkerMode.Owners', () => {
                 if (c === 'TestComponent') testCompsLength++
                 else if (c === 'Button') btn = c
             })
-            expect(testCompsLength).toBe(6)
-            expect(btn).toBeTruthy()
+            test.expect(testCompsLength).toBe(6)
+            test.expect(btn).toBeTruthy()
 
             dispose()
         })
     })
 })
 
-describe('TreeWalkerMode.Components', () => {
-    it('map component tree', () => {
+test.describe('TreeWalkerMode.Components', () => {
+    test.it('map component tree', () => {
         const toTrigger: VoidFunction[] = []
         const testComponents: Solid.Component[] = []
 
-        createRoot(dispose => {
+        s.createRoot(dispose => {
             const Wrapper = (props: {children: any}) => {
                 return <div>{props.children}</div>
             }
             const TestComponent = (props: {n: number}) => {
-                const [a, set] = createSignal(0)
-                createComputed(a)
+                const [a, set] = s.createSignal(0)
+                s.createComputed(a)
                 toTrigger.push(() => set(1))
-                testComponents.push(getOwner()! as Solid.Component)
-                return createRoot(_ => (
+                testComponents.push(setup.solid.getOwner()! as Solid.Component)
+                return s.createRoot(_ => (
                     <div>{props.n === 0 ? 'end' : <TestComponent n={props.n - 1} />}</div>
                 ))
             }
@@ -277,7 +268,7 @@ describe('TreeWalkerMode.Components', () => {
                 return <button>Click me</button>
             }
 
-            createRenderEffect(() => {
+            s.createRenderEffect(() => {
                 return (
                     <>
                         <Wrapper>
@@ -288,7 +279,7 @@ describe('TreeWalkerMode.Components', () => {
                 )
             })
 
-            const owner = getOwner()! as Solid.Root
+            const owner = setup.solid.getOwner()! as Solid.Root
 
             const computationUpdates: Parameters<ComputationUpdateHandler>[] = []
 
@@ -301,7 +292,7 @@ describe('TreeWalkerMode.Components', () => {
                 },
             })
 
-            expect(tree).toMatchObject({
+            test.expect(tree).toMatchObject({
                 type: NodeType.Root,
                 children: [
                     {
@@ -341,14 +332,14 @@ describe('TreeWalkerMode.Components', () => {
                 ],
             })
 
-            expect(computationUpdates.length).toBe(0)
+            test.expect(computationUpdates.length).toBe(0)
 
             toTrigger.forEach(t => t())
 
-            expect(computationUpdates.length).toBe(4)
+            test.expect(computationUpdates.length).toBe(4)
 
             for (let i = 0; i < 4; i++) {
-                expect(computationUpdates[i]).toEqual([
+                test.expect(computationUpdates[i]).toEqual([
                     '#ff',
                     testComponents[i],
                     getSdtId(testComponents[i]!, ObjectType.Owner),
@@ -361,21 +352,21 @@ describe('TreeWalkerMode.Components', () => {
     })
 })
 
-describe('TreeWalkerMode.DOM', () => {
-    it('map dom tree', () => {
+test.describe('TreeWalkerMode.DOM', () => {
+    test.it('map dom tree', () => {
         const toTrigger: VoidFunction[] = []
         const testComponents: Solid.Component[] = []
 
-        createRoot(dispose => {
+        s.createRoot(dispose => {
             const Wrapper = (props: {children: any}) => {
                 return <div>{props.children}</div>
             }
             const TestComponent = (props: {n: number}) => {
-                const [a, set] = createSignal(0)
-                createComputed(a)
+                const [a, set] = s.createSignal(0)
+                s.createComputed(a)
                 toTrigger.push(() => set(1))
-                testComponents.push(getOwner()! as Solid.Component)
-                return createRoot(_ => (
+                testComponents.push(setup.solid.getOwner()! as Solid.Component)
+                return s.createRoot(_ => (
                     <div>{props.n === 0 ? 'end' : <TestComponent n={props.n - 1} />}</div>
                 ))
             }
@@ -395,9 +386,9 @@ describe('TreeWalkerMode.DOM', () => {
                     </>
                 )
             }
-            createRenderEffect(() => <App />)
+            s.createRenderEffect(() => <App />)
 
-            const owner = getOwner()! as Solid.Root
+            const owner = setup.solid.getOwner()! as Solid.Root
 
             const computationUpdates: Parameters<ComputationUpdateHandler>[] = []
 
@@ -410,7 +401,7 @@ describe('TreeWalkerMode.DOM', () => {
                 },
             })
 
-            expect(tree).toMatchObject({
+            test.expect(tree).toMatchObject({
                 type: NodeType.Root,
                 children: [
                     {
@@ -492,12 +483,12 @@ describe('TreeWalkerMode.DOM', () => {
                 ],
             })
 
-            expect(computationUpdates.length).toBe(0)
+            test.expect(computationUpdates.length).toBe(0)
 
             toTrigger.forEach(t => t())
 
             for (let i = 0; i < 3; i++) {
-                expect(computationUpdates[i]).toEqual([
+                test.expect(computationUpdates[i]).toEqual([
                     '#ff',
                     testComponents[i],
                     getSdtId(testComponents[i]!, ObjectType.Owner),

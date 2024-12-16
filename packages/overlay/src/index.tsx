@@ -1,20 +1,26 @@
 import '@solid-devtools/debugger/setup'
 
-import {num} from '@nothing-but/utils'
+import * as num from '@nothing-but/utils/num'
 import {useDebugger} from '@solid-devtools/debugger/bundled'
 import {Icon, MountIcons} from '@solid-devtools/frontend'
-import {useIsMobile, useIsTouch} from '@solid-devtools/shared/primitives'
+import {useIsMobile, useIsTouch, atom} from '@solid-devtools/shared/primitives'
 import {createBodyCursor} from '@solid-primitives/cursor'
 import {makeEventListener} from '@solid-primitives/event-listener'
 import * as s from 'solid-js'
-import {Dynamic, Portal} from 'solid-js/web'
+import * as web from 'solid-js/web'
 import {Devtools} from './controller.tsx'
 
 import frontendStyles from '@solid-devtools/frontend/dist/styles.css'
 import overlayStyles from './styles.css'
 
-export function attachDevtoolsOverlay(props: s.ComponentProps<typeof Overlay> = {}): VoidFunction {
-    let dispose: VoidFunction | undefined
+export type OverlayOptions = {
+    defaultOpen?: boolean
+    alwaysOpen?:  boolean
+    noPadding?:   boolean
+}
+
+export function attachDevtoolsOverlay(props?: OverlayOptions): (() => void) {
+    let dispose: (() => void) | undefined
 
     setTimeout(() => {
         s.createRoot(_dispose => {
@@ -28,55 +34,54 @@ export function attachDevtoolsOverlay(props: s.ComponentProps<typeof Overlay> = 
     }
 }
 
-const Overlay: s.Component<{
-    defaultOpen?: boolean
-    alwaysOpen?: boolean
-    noPadding?: boolean
-}> = ({defaultOpen, alwaysOpen, noPadding}) => {
+const Overlay: s.Component<OverlayOptions> = ({defaultOpen, alwaysOpen, noPadding}) => {
+
     const debug = useDebugger()
-    if (defaultOpen || alwaysOpen) debug.toggleEnabled(true)
-    const [isOpen, _setOpen] = s.createSignal(alwaysOpen || debug.enabled())
-    const setOpen = alwaysOpen
-        ? () => {
-              /**/
-          }
-        : (enabled: boolean) => {
-              s.batch(() => {
-                  debug.toggleEnabled(enabled)
-                  _setOpen(enabled)
-              })
-          }
+
+    if (defaultOpen || alwaysOpen) {
+        debug.toggleEnabled(true)
+    }
+
+    const isOpen = atom(alwaysOpen || debug.enabled())
+    function toggleOpen(enabled?: boolean) {
+        if (!alwaysOpen) {
+            enabled ??= !isOpen()
+            debug.toggleEnabled(enabled)
+            isOpen.set(enabled)
+        }
+    }
 
     const isMobile = useIsMobile()
-    const isTouch = useIsTouch()
+    const isTouch  = useIsTouch()
 
-    const [progress, setProgress] = s.createSignal(0.5)
-    const [dragging, setDragging] = s.createSignal(false)
-    s.createComputed(() => setProgress(isMobile() ? 0.8 : 0.5))
+    const progress = s.createMemo(
+        () => atom(isMobile() ? 0.8 : 0.5)
+    )
+    const dragging = atom(false)
 
     makeEventListener(window, 'pointermove', e => {
         if (!dragging()) return
         const vh = window.innerHeight
-        setProgress(1 - num.clamp(e.y, 0, vh - 300) / vh)
+        progress().set(1 - num.clamp(e.y, 0, vh - 300) / vh)
     })
-    makeEventListener(window, 'pointerup', setDragging.bind(void 0, false))
+    makeEventListener(window, 'pointerup', () => dragging.set(false))
 
     createBodyCursor(() => dragging() && 'row-resize')
 
     return (
-        <Portal useShadow mount={document.documentElement}>
+        <web.Portal useShadow mount={document.documentElement}>
             <div
                 class="overlay__container"
                 classList={{'no-padding': noPadding}}
                 data-open={isOpen()}
-                style={{'--progress': progress()}}
+                style={{'--progress': progress()()}}
                 data-testid="solid-devtools-overlay"
             >
                 <div class="overlay__container__fixed">
                     {!alwaysOpen && (
-                        <button class="overlay__toggle-button" onClick={() => setOpen(!isOpen())}>
+                        <button class="overlay__toggle-button" onClick={() => toggleOpen()}>
                             Devtools
-                            <Dynamic
+                            <web.Dynamic
                                 component={isOpen() ? Icon.EyeSlash : Icon.Eye}
                                 class="overlay__toggle-button__icon"
                             />
@@ -87,7 +92,7 @@ const Overlay: s.Component<{
                             class="overlay__container__resizer"
                             onPointerDown={e => {
                                 e.preventDefault()
-                                setDragging(true)
+                                dragging.set(true)
                             }}
                         />
                     </s.Show>
@@ -101,6 +106,6 @@ const Overlay: s.Component<{
             <MountIcons />
             <style>{frontendStyles}</style>
             <style>{overlayStyles}</style>
-        </Portal>
+        </web.Portal>
     )
 }

@@ -74,8 +74,5 @@
         "@solid-primitives/styles": "^0.0.114",
         "@solid-primitives/utils": "^6.2.3",
         "@nothing-but/utils": "~0.17.0"
-    },
-    "devDependencies": {
-        "solid-js": "^1.9.3"
     }
 }

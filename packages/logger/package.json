@@ -47,9 +47,6 @@
         "test:unit": "echo \"NOOP test\"",
         "test:types": "tsc --noEmit --paths null"
     },
-    "devDependencies": {
-        "solid-js": "^1.9.3"
-    },
     "dependencies": {
         "@nothing-but/utils": "~0.17.0",
         "@solid-devtools/debugger": "workspace:^",

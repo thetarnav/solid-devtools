@@ -4,18 +4,9 @@ import {parseLocationString} from '../locator/index.ts'
 import {NodeType, ValueItemType} from '../main/constants.ts'
 import {ObjectType, getSdtId} from '../main/id.ts'
 import {observeValueUpdate, removeValueUpdateObserver} from '../main/observe.ts'
-import SolidAPI from '../main/solid-api.ts'
+import setup from '../main/setup.ts'
 import type {Mapped, NodeID, Solid, ValueItemID} from '../main/types.ts'
-import {
-    getComponentRefreshNode,
-    getNodeName,
-    isSolidComponent,
-    isSolidComputation,
-    isSolidMemo,
-    isSolidSignal,
-    isSolidStore,
-    markOwnerType,
-} from '../main/utils.ts'
+import * as utils from '../main/utils.ts'
 import {encodeValue} from './serialize.ts'
 import {type InspectorUpdateMap, PropGetterState} from './types.ts'
 
@@ -110,8 +101,8 @@ export class ObservedProps {
         Object.defineProperty(this.props, key, {
             get() {
                 const value = get()
-                if (SolidAPI.getListener()) {
-                    SolidAPI.onCleanup(
+                if (setup.solid.getListener()) {
+                    utils.onCleanup(
                         () => --o.n === 0 && self.onPropStateChange?.(key, PropGetterState.Stale),
                     )
                 }
@@ -149,10 +140,10 @@ const compareProxyPropKeys = (
  * Used to clear observers when the inspected owner is switched.
  */
 export function clearOwnerObservers(owner: Solid.Owner, observedPropsMap: ObservedPropsMap): void {
-    if (isSolidComputation(owner)) {
+    if (utils.isSolidComputation(owner)) {
         removeValueUpdateObserver(owner, $INSPECTOR)
 
-        if (isSolidComponent(owner)) {
+        if (utils.isSolidComponent(owner)) {
             observedPropsMap.get(owner.props)?.unobserve()
         }
     }
@@ -186,9 +177,9 @@ function mapSourceValue(
 ): Mapped.Signal | null {
     const type = isMemo
         ? NodeType.Memo
-        : isSolidStore(node)
+        : utils.isSolidStore(node)
           ? NodeType.Store
-          : isSolidSignal(node)
+          : utils.isSolidSignal(node)
             ? NodeType.Signal
             : null
 
@@ -203,7 +194,7 @@ function mapSourceValue(
 
     return {
         type,
-        name: getNodeName(node),
+        name: utils.getNodeName(node),
         id,
         value: encodeValue(value, false),
     }
@@ -211,7 +202,7 @@ function mapSourceValue(
 
 function mapProps(props: Solid.Component['props']) {
     // proxy props need to be checked for changes in keys
-    const isProxy = !!(props as any)[SolidAPI.$PROXY]
+    const isProxy = !!(props as any)[setup.solid.$PROXY]
     const record: Mapped.Props['record'] = {}
 
     let checkProxyProps: (() => ReturnType<typeof compareProxyPropKeys>) | undefined
@@ -279,11 +270,11 @@ export const collectOwnerDetails = /*#__PURE__*/ untrackedCallback(function (
     PropsMap = config.observedPropsMap
 
     const id = getSdtId(owner, ObjectType.Owner)
-    const type = markOwnerType(owner)
+    const type = utils.markOwnerType(owner)
     let {sourceMap, owned} = owner
     let getValue = () => owner.value
 
-    const details = {id, name: getNodeName(owner), type, signals: []} as Mapped.OwnerDetails
+    const details = {id, name: utils.getNodeName(owner), type, signals: []} as Mapped.OwnerDetails
 
     // handle context node specially
     if (type === NodeType.Context) {
@@ -300,11 +291,11 @@ export const collectOwnerDetails = /*#__PURE__*/ untrackedCallback(function (
 
     let checkProxyProps: ReturnType<typeof mapProps>['checkProxyProps']
 
-    if (isSolidComputation(owner)) {
+    if (utils.isSolidComputation(owner)) {
         // handle Component (props and location)
-        if (isSolidComponent(owner)) {
+        if (utils.isSolidComponent(owner)) {
             // marge component with refresh memo
-            const refresh = getComponentRefreshNode(owner)
+            const refresh = utils.getComponentRefreshNode(owner)
             if (refresh) {
                 sourceMap = refresh.sourceMap
                 owned = refresh.owned
@@ -318,7 +309,7 @@ export const collectOwnerDetails = /*#__PURE__*/ untrackedCallback(function (
                 // get location from component.location
                 (typeof location === 'string' && (location = parseLocationString(location))) ||
                 // get location from the babel plugin marks
-                ((location = SolidAPI.getOwnerLocation(owner)) &&
+                ((location = setup.get_owner_location(owner)) &&
                     (location = parseLocationString(location)))
             ) {
                 details.location = location
@@ -344,7 +335,7 @@ export const collectOwnerDetails = /*#__PURE__*/ untrackedCallback(function (
     // map memos
     if (owned) {
         for (const node of owned) {
-            if (!isSolidMemo(node)) continue
+            if (!utils.isSolidMemo(node)) continue
             const mapped = mapSourceValue(node, onSignalUpdate, true)
             mapped && details.signals.push(mapped)
         }

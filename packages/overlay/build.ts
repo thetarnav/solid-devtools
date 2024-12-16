@@ -48,14 +48,12 @@ async function main() {
         '@nothing-but/utils',
     ]
 
-    const entries = [
-        entry_index_filename,
-        entry_index_noop_filename,
-    ]
-
     const esb_options: esb.BuildOptions[] = [{
         ...common,
-        entryPoints: entries,
+        entryPoints: [
+            entry_index_filename,
+            entry_index_noop_filename,
+        ],
         external:    external,
         loader:      {'.css': 'text'},
         plugins:     [
@@ -64,9 +62,10 @@ async function main() {
         ],
     }]
 
-    const ts_entries = entries
-
-    await build.build(esb_options, ts_entries, is_dev)
+    await build.build(esb_options,
+                      is_dev,
+                      dirname,
+                      dist_dirname)
 }
 
 

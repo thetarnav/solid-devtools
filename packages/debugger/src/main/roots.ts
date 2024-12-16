@@ -2,7 +2,7 @@ import {warn} from '@solid-devtools/shared/utils'
 import {clearComponentRegistry} from './component-registry.ts'
 import {NodeType} from './constants.ts'
 import {ObjectType, getSdtId} from './id.ts'
-import SolidAPI from './solid-api.ts'
+import setup from './setup.ts'
 import {type NodeID, type Solid} from './types.ts'
 import {isSolidRoot, onOwnerCleanup} from './utils.ts'
 
@@ -62,8 +62,6 @@ function changeRootAttachment(root: Solid.Root, newParent: Solid.Owner | null): 
     }
 }
 
-let InternalRootCount = 0
-
 /**
  * Helps the debugger find and reattach an reactive owner created by `createRoot` to it's detached parent.
  *
@@ -76,8 +74,7 @@ let InternalRootCount = 0
  * 	attachDebugger();
  * });
  */
-export function attachDebugger(owner = SolidAPI.getOwner()): void {
-    if (InternalRootCount) return
+export function attachDebugger(owner = setup.solid.getOwner()): void {
 
     if (!owner)
         return warn('reatachOwner helper should be called synchronously in a reactive owner.')
@@ -144,19 +141,6 @@ export function attachDebugger(owner = SolidAPI.getOwner()): void {
 export function unobserveAllRoots(): void {
     RootMap.forEach(r => cleanupRoot(r))
     clearComponentRegistry()
-}
-
-/**
- * Sold's `createRoot` primitive that won't be tracked by the debugger.
- */
-export const createInternalRoot: typeof SolidAPI.createRoot = (fn, detachedOwner) => {
-    InternalRootCount++
-    const r = SolidAPI.createRoot(dispose => {
-        ;(SolidAPI.getOwner() as Solid.Root).isInternal = true
-        return fn(dispose)
-    }, detachedOwner)
-    InternalRootCount--
-    return r
 }
 
 /**

@@ -1,7 +1,6 @@
 import * as crx    from '@crxjs/vite-plugin'
 import * as fs     from 'node:fs'
 import * as module from 'node:module'
-import * as path   from 'node:path'
 import * as assert from 'node:assert'
 import * as vite   from 'vite'
 import solid       from 'vite-plugin-solid'
@@ -9,7 +8,6 @@ import ext_pkg     from './package.json'
 import {icons}     from './shared/icons.js'
 
 const require = module.createRequire(import.meta.url)
-const cwd = process.cwd()
 
 const browser = process.env['BROWSER'] ?? 'chrome'
 assert.ok(browser === 'chrome' || browser === 'firefox')
@@ -89,11 +87,7 @@ const sdt_version = JSON.stringify(sdt_pkg.version.match(/\d+.\d+.\d+/)![0])
 const vite_config: vite.UserConfig = {
     server: {port: 3333},
     resolve: {
-        alias: {
-            'solid-js/web': path.resolve(cwd, 'node_modules/solid-js/web/dist/web.js'),
-            'solid-js/store': path.resolve(cwd, 'node_modules/solid-js/store/dist/store.js'),
-            'solid-js': path.resolve(cwd, 'node_modules/solid-js/dist/solid.js'),
-        },
+        conditions: ['browser']
     },
     plugins: [
         solid({dev: false, hot: false}),

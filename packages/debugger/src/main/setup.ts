@@ -4,6 +4,6 @@ if (!globalThis.SolidDevtools$$) {
     )
 }
 
-const SolidApi = globalThis.SolidDevtools$$
+const setup = globalThis.SolidDevtools$$
 
-export default SolidApi
+export default setup

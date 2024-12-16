@@ -1,59 +1,10 @@
-import type * as SolidAPI from 'solid-js'
-import type {$PROXY, DEV, getListener, getOwner, onCleanup, untrack} from 'solid-js'
-import type * as StoreAPI from 'solid-js/store'
-import type {DEV as STORE_DEV, unwrap} from 'solid-js/store'
-import type * as WebAPI from 'solid-js/web'
 import type {EncodedValue, PropGetterState} from '../inspector/types.ts'
-import type {LocatorOptions, SourceLocation} from '../locator/types.ts'
+import type {SourceLocation} from '../locator/types.ts'
 import {NodeType, ValueItemType} from './constants.ts'
 
 //
 // EXPOSED SOLID API
 //
-
-export const enum DevEventType {
-    RootCreated = 'RootCreated',
-}
-
-export type DevEventDataMap = {
-    [DevEventType.RootCreated]: Solid.Owner
-}
-
-export type StoredDevEvent = {
-    [K in keyof DevEventDataMap]: {
-        timestamp: number
-        type: K
-        data: DevEventDataMap[K]
-    }
-}[keyof DevEventDataMap]
-
-declare global {
-    /** Solid DEV APIs exposed to the debugger by the setup script */
-    var SolidDevtools$$:
-        | {
-              readonly Solid: typeof SolidAPI
-              readonly Store: typeof StoreAPI
-              readonly Web: typeof WebAPI
-              readonly DEV: NonNullable<typeof DEV>
-              readonly getOwner: typeof getOwner
-              readonly createRoot: typeof SolidAPI.createRoot
-              readonly getListener: typeof getListener
-              readonly onCleanup: typeof onCleanup
-              readonly $PROXY: typeof $PROXY
-              readonly untrack: typeof untrack
-              readonly STORE_DEV: NonNullable<typeof STORE_DEV>
-              readonly unwrap: typeof unwrap
-              readonly getDevEvents: () => StoredDevEvent[]
-              readonly locatorOptions: LocatorOptions | null
-              readonly versions: {
-                  readonly client: string | null
-                  readonly solid: string | null
-                  readonly expectedSolid: string | null
-              }
-              readonly getOwnerLocation: (owner: Solid.Owner) => string | null
-          }
-        | undefined
-}
 
 // Additional "#" character is added to distinguish NodeID from string
 export type NodeID = `#${string}`

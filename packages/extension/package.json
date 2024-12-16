@@ -23,8 +23,7 @@
         "@solid-devtools/frontend": "workspace:^",
         "@solid-devtools/shared": "workspace:^",
         "@solid-primitives/utils": "^6.2.3",
-        "solid-devtools": "workspace:^",
-        "solid-js": "^1.9.3"
+        "solid-devtools": "workspace:^"
     },
     "overrides": {
         "@crxjs/vite-plugin": {

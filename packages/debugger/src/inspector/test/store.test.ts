@@ -2,15 +2,13 @@ import {createRoot} from 'solid-js'
 import {createMutable, createStore, modifyMutable, produce, reconcile, unwrap} from 'solid-js/store'
 import {beforeEach, describe, expect, it, vi} from 'vitest'
 import {ObjectType, getSdtId} from '../../main/id.ts'
-import SolidApi from '../../main/solid-api.ts'
+import setup from '../../main/setup.ts'
 import {isSolidStore} from '../../main/utils.ts'
 import {type Solid} from '../../types.ts'
 import {type OnNodeUpdate, type StoreNodeProperty, observeStoreNode, setOnStoreNodeUpdate} from '../store.ts'
 
-const {getOwner} = SolidApi
-
 const getOwnerStore = () => {
-    const owner = getOwner()
+    const owner = setup.solid.getOwner()
     if (!owner) throw new Error('No owner')
     if (!owner.sourceMap) throw new Error('No sourceMap')
     const store = owner.sourceMap.find(isSolidStore)

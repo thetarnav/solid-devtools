@@ -1,51 +1,45 @@
-import {batch, createComputed, createMemo, createRoot, createSignal} from 'solid-js'
-import {beforeEach, describe, expect, it, vi} from 'vitest'
+import * as s from 'solid-js'
+import * as test from 'vitest'
 import {NodeType} from '../../main/constants.ts'
 import {ObjectType, getSdtId} from '../../main/id.ts'
-import SolidApi from '../../main/solid-api.ts'
+import setup from '../../main/setup.ts'
 import type {NodeID, Solid} from '../../main/types.ts'
 import {type SerializedDGraph, collectDependencyGraph} from '../collect.ts'
 
-const {getOwner} = SolidApi
-
 let mockLAST_ID = 0
-beforeEach(() => {
+test.beforeEach(() => {
     mockLAST_ID = 0
 })
-vi.mock('../../main/get-id', () => ({getNewSdtId: () => '#' + mockLAST_ID++}))
+test.vi.mock('../../main/get-id', () => ({getNewSdtId: () => '#' + mockLAST_ID++}))
 
-describe('collectDependencyGraph', () => {
-    it('should collect dependency graph', () => {
+test.describe('collectDependencyGraph', () => {
+    test.it('should collect dependency graph', () => {
         let rootOwner!: Solid.Root
         let subRootOwner!: Solid.Root
 
-        const [e] = createSignal(0, {name: 's-e'})
+        const [e] = s.createSignal(0, {name: 's-e'})
 
-        createRoot(() => {
-            const [a] = createSignal(0, {name: 's-a'})
-            const [b] = createSignal(0, {name: 's-b'})
-            const [c] = createSignal(0, {name: 's-c'})
+        s.createRoot(() => {
+            const [a] = s.createSignal(0, {name: 's-a'})
+            const [b] = s.createSignal(0, {name: 's-b'})
+            const [c] = s.createSignal(0, {name: 's-c'})
 
-            const memoA = createMemo(() => a() + e(), null, {name: 'm-a'})
+            const memoA = s.createMemo(() => a() + e(), null, {name: 'm-a'})
 
-            rootOwner = getOwner()! as Solid.Root
+            rootOwner = setup.solid.getOwner()! as Solid.Root
 
-            createRoot(_ => {
-                const [d] = createSignal(0, {name: 's-d'})
-                const memoB = createMemo(() => b() + c(), null, {name: 'm-b'})
+            s.createRoot(_ => {
+                const [d] = s.createSignal(0, {name: 's-d'})
+                const memoB = s.createMemo(() => b() + c(), null, {name: 'm-b'})
 
-                subRootOwner = getOwner()! as Solid.Root
+                subRootOwner = setup.solid.getOwner()! as Solid.Root
 
-                createComputed(
-                    () => {
-                        memoA()
-                        memoB()
-                        c()
-                        d()
-                    },
-                    null,
-                    {name: 'c'},
-                )
+                s.createComputed(() => {
+                    memoA()
+                    memoB()
+                    c()
+                    d()
+                }, null, {name: 'c'})
             })
         })
 
@@ -81,7 +75,7 @@ describe('collectDependencyGraph', () => {
             },
         })
 
-        expect(result.graph, 'graph of computedOwner').toEqual({
+        test.expect(result.graph, 'graph of computedOwner').toEqual({
             [nodes.computedId]: {
                 name: 'c',
                 type: NodeType.Computation,
@@ -148,7 +142,7 @@ describe('collectDependencyGraph', () => {
             },
         } satisfies SerializedDGraph.Graph)
 
-        expect(result.graph, 'is JSON-serializable').toMatchObject(
+        test.expect(result.graph, 'is JSON-serializable').toMatchObject(
             JSON.parse(JSON.stringify(result.graph)) as any,
         )
 
@@ -158,7 +152,7 @@ describe('collectDependencyGraph', () => {
             },
         })
 
-        expect(result.graph).toEqual({
+        test.expect(result.graph).toEqual({
             [nodes.computedId]: {
                 name: 'c',
                 type: NodeType.Computation,
@@ -168,7 +162,7 @@ describe('collectDependencyGraph', () => {
                 graph: undefined,
             },
             [nodes.memoAId]: {
-                name: expect.any(String),
+                name: test.expect.any(String),
                 type: NodeType.Memo,
                 depth: 1,
                 sources: [nodes.signalAId, nodes.signalEId],
@@ -176,7 +170,7 @@ describe('collectDependencyGraph', () => {
                 graph: undefined,
             },
             [nodes.signalAId]: {
-                name: expect.any(String),
+                name: test.expect.any(String),
                 type: NodeType.Signal,
                 depth: 1,
                 observers: [nodes.memoAId],
@@ -184,7 +178,7 @@ describe('collectDependencyGraph', () => {
                 sources: undefined,
             },
             [nodes.signalEId]: {
-                name: expect.any(String),
+                name: test.expect.any(String),
                 type: NodeType.Signal,
                 depth: 0,
                 observers: [nodes.memoAId],
@@ -193,56 +187,42 @@ describe('collectDependencyGraph', () => {
             },
         } satisfies SerializedDGraph.Graph)
 
-        expect(result.graph, 'is JSON-serializable').toMatchObject(
+        test.expect(result.graph, 'is JSON-serializable').toMatchObject(
             JSON.parse(JSON.stringify(result.graph)) as any,
         )
     })
 
-    it('listens to visited nodes', () => {
+    test.it('listens to visited nodes', () => {
         const captured: NodeID[] = []
-        const cb = vi.fn(a => captured.push(a))
+        const cb = test.vi.fn(a => captured.push(a))
 
-        createRoot(() => {
-            const [a, setA] = createSignal(0, {name: 's-a'})
-            const [b, setB] = createSignal(0, {name: 's-b'})
-            const [c, setC] = createSignal(0, {name: 's-c'})
-            const [d, setD] = createSignal(0, {name: 's-d'})
+        s.createRoot(() => {
+            const [a, setA] = s.createSignal(0, {name: 's-a'})
+            const [b, setB] = s.createSignal(0, {name: 's-b'})
+            const [c, setC] = s.createSignal(0, {name: 's-c'})
+            const [d, setD] = s.createSignal(0, {name: 's-d'})
 
-            const mA = createMemo(() => a() + b(), undefined, {name: 'm-a'})
+            const mA = s.createMemo(() => a() + b(), undefined, {name: 'm-a'})
 
-            createComputed(
-                () => {
-                    c()
-                    d()
-                },
-                undefined,
-                {name: 'c-a'},
-            )
+            s.createComputed(() => {c(); d()}, undefined, {name: 'c-a'})
 
-            createComputed(
-                () => {
-                    mA()
-                    c()
-                },
-                undefined,
-                {name: 'c-b'},
-            )
+            s.createComputed(() => {mA(); c()}, undefined, {name: 'c-b'})
 
             const nodes = (() => {
-                const [signalA, signalB, signalC, signalD] = getOwner()!.sourceMap as [
+                const [signalA, signalB, signalC, signalD] = setup.solid.getOwner()!.sourceMap as [
                     Solid.Signal,
                     Solid.Signal,
                     Solid.Signal,
                     Solid.Signal,
                 ]
-                const [memoA, computedA, computedB] = getOwner()!.owned as [
+                const [memoA, computedA, computedB] = setup.solid.getOwner()!.owned as [
                     Solid.Memo,
                     Solid.Computation,
                     Solid.Computation,
                 ]
 
                 return {
-                    rootId: getSdtId(getOwner()!, ObjectType.Owner),
+                    rootId: getSdtId(setup.solid.getOwner()!, ObjectType.Owner),
                     signalAId: getSdtId(signalA, ObjectType.Signal),
                     signalBId: getSdtId(signalB, ObjectType.Signal),
                     signalCId: getSdtId(signalC, ObjectType.Signal),
@@ -256,7 +236,7 @@ describe('collectDependencyGraph', () => {
 
             const result = collectDependencyGraph(nodes.computedB, {onNodeUpdate: cb})
 
-            expect(result.graph).toEqual({
+            test.expect(result.graph).toEqual({
                 [nodes.computedBId]: {
                     name: 'c-b',
                     type: NodeType.Computation,
@@ -299,47 +279,47 @@ describe('collectDependencyGraph', () => {
                 },
             } satisfies SerializedDGraph.Graph)
 
-            expect(cb).toHaveBeenCalledTimes(0)
+            test.expect(cb).toHaveBeenCalledTimes(0)
 
             setA(1)
 
-            expect(captured).toHaveLength(3)
-            expect(captured.includes(nodes.signalAId)).toBeTruthy()
-            expect(captured.includes(nodes.memoAId)).toBeTruthy()
-            expect(captured.includes(nodes.computedBId)).toBeTruthy()
+            test.expect(captured).toHaveLength(3)
+            test.expect(captured.includes(nodes.signalAId)).toBeTruthy()
+            test.expect(captured.includes(nodes.memoAId)).toBeTruthy()
+            test.expect(captured.includes(nodes.computedBId)).toBeTruthy()
 
             captured.length = 0
             setB(1)
 
-            expect(captured).toHaveLength(3)
-            expect(captured.includes(nodes.signalBId)).toBeTruthy()
-            expect(captured.includes(nodes.memoAId)).toBeTruthy()
-            expect(captured.includes(nodes.computedBId)).toBeTruthy()
+            test.expect(captured).toHaveLength(3)
+            test.expect(captured.includes(nodes.signalBId)).toBeTruthy()
+            test.expect(captured.includes(nodes.memoAId)).toBeTruthy()
+            test.expect(captured.includes(nodes.computedBId)).toBeTruthy()
 
             captured.length = 0
             setC(1)
 
-            expect(captured).toHaveLength(2)
-            expect(captured.includes(nodes.signalCId)).toBeTruthy()
-            expect(captured.includes(nodes.computedBId)).toBeTruthy()
+            test.expect(captured).toHaveLength(2)
+            test.expect(captured.includes(nodes.signalCId)).toBeTruthy()
+            test.expect(captured.includes(nodes.computedBId)).toBeTruthy()
 
             captured.length = 0
             setD(1)
 
-            expect(captured.length).toBe(0)
+            test.expect(captured.length).toBe(0)
 
-            batch(() => {
+            s.batch(() => {
                 setA(2)
                 setB(2)
                 setC(2)
             })
 
-            expect(captured).toHaveLength(5)
-            expect(captured.includes(nodes.signalAId)).toBeTruthy()
-            expect(captured.includes(nodes.signalBId)).toBeTruthy()
-            expect(captured.includes(nodes.signalCId)).toBeTruthy()
-            expect(captured.includes(nodes.memoAId)).toBeTruthy()
-            expect(captured.includes(nodes.computedBId)).toBeTruthy()
+            test.expect(captured).toHaveLength(5)
+            test.expect(captured.includes(nodes.signalAId)).toBeTruthy()
+            test.expect(captured.includes(nodes.signalBId)).toBeTruthy()
+            test.expect(captured.includes(nodes.signalCId)).toBeTruthy()
+            test.expect(captured.includes(nodes.memoAId)).toBeTruthy()
+            test.expect(captured.includes(nodes.computedBId)).toBeTruthy()
         })
     })
 })

@@ -56,14 +56,10 @@ async function main() {
         platform:    'node',
     }]
 
-    const ts_entries = [
-        entry_index_filename,
-        entry_setup_filename,
-        entry_vite_filename,
-        entry_babel_filename,
-    ]
-
-    await build.build(esb_options, ts_entries, is_dev)
+    await build.build(esb_options,
+                      is_dev,
+                      dirname,
+                      dist_dirname)
 }
 
 
