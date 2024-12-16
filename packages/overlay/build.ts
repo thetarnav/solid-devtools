@@ -62,11 +62,10 @@ async function main() {
         ],
     }]
 
-    const ts_entries = [
-        entry_index_filename,
-    ]
-
-    await build.build(esb_options, ts_entries, is_dev)
+    await build.build(esb_options,
+                      is_dev,
+                      dirname,
+                      dist_dirname)
 }
 
 

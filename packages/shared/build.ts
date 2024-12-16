@@ -1,9 +1,9 @@
-import * as path      from 'node:path'
-import * as url       from 'node:url'
-import * as fs        from 'node:fs'
-import * as esb       from 'esbuild'
+import * as path  from 'node:path'
+import * as url   from 'node:url'
+import * as fs    from 'node:fs'
+import * as esb   from 'esbuild'
 
-import * as build     from '../../build.ts'
+import * as build from '../../build.ts'
 
 
 const filename = url.fileURLToPath(import.meta.url)
@@ -30,9 +30,10 @@ async function main() {
         external:    external,
     }]
 
-    const ts_entries = entries
-
-    await build.build(esb_options, ts_entries, is_dev)
+    await build.build(esb_options,
+                      is_dev,
+                      dirname,
+                      dist_dirname)
 }
 
 
