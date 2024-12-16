@@ -55,7 +55,7 @@ jobs:
           name: extension-artifacts
           path: artifacts
       - name: Submit to Chrome Web Store
-        run: npx chrome-webstore-upload-cli@3 --source artifacts/chrome.zip
+        run: npx chrome-webstore-upload-cli@3 --source artifacts/chrome
         env:
           EXTENSION_ID: kmcfjchnmmaeeagadbhoofajiopoceel
           CLIENT_ID: ${{ secrets.CLIENT_ID }}
@@ -74,7 +74,7 @@ jobs:
           name: extension-artifacts
           path: artifacts
       - name: Submit to Firefox Add-ons
-        run: npx web-ext@8 sign --channel listed -s artifacts/firefox.zip
+        run: npx web-ext@8 sign --channel listed -s artifacts/firefox
         env:
           WEB_EXT_API_KEY: ${{ secrets.FIREFOX_API_KEY }}
           WEB_EXT_API_SECRET: ${{ secrets.FIREFOX_API_SECRET }}
