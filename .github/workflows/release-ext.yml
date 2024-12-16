@@ -1,11 +1,11 @@
-name: Release Chrome Extension
+name: Release Extensions
 
 on: [workflow_dispatch]
 
 concurrency: ${{ github.workflow }}-${{ github.ref }}
 
 jobs:
-  release:
+  Build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repo
@@ -37,14 +37,44 @@ jobs:
         env:
           CI: true
 
-      - name: Submit Chrome Extension
-        uses: mnao305/chrome-extension-upload@v5.0.0
+      - name: Upload Extension Artifacts
+        uses: actions/upload-artifact@v4
         with:
-          file-path: packages/extension/dist/chrome.zip
-          extension-id: kmcfjchnmmaeeagadbhoofajiopoceel
-          client-id: ${{ secrets.CLIENT_ID }}
-          client-secret: ${{ secrets.CLIENT_SECRET }}
-          refresh-token: ${{ secrets.REFRESH_TOKEN }}
+          name: extension-artifacts
+          path: packages/extension/dist
 
-      - name: Submit Firefox Extension
-        run: cd packages/extension && pnpm dlx web-ext sign -s dist/firefox --api-key=${{ secrets.FIREFOX_API_KEY }} --api-secret=${{ secrets.FIREFOX_API_SECRET }} --channel=listed
+  Chrome:
+    needs: Build
+    name: Submit (Chrome)
+    environment: Chrome
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download Extension Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: extension-artifacts
+          path: artifacts
+      - name: Submit to Chrome Web Store
+        run: npx chrome-webstore-upload-cli@3 --source artifacts/chrome.zip
+        env:
+          EXTENSION_ID: kmcfjchnmmaeeagadbhoofajiopoceel
+          CLIENT_ID: ${{ secrets.CLIENT_ID }}
+          CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}
+          REFRESH_TOKEN: ${{ secrets.REFRESH_TOKEN }}
+
+  Firefox:
+    needs: Build
+    name: Submit (Firefox)
+    environment: Firefox
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download Extension Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: extension-artifacts
+          path: artifacts
+      - name: Submit to Firefox Add-ons
+        run: npx web-ext@8 sign --channel listed -s artifacts/firefox.zip
+        env:
+          WEB_EXT_API_KEY: ${{ secrets.FIREFOX_API_KEY }}
+          WEB_EXT_API_SECRET: ${{ secrets.FIREFOX_API_SECRET }}
