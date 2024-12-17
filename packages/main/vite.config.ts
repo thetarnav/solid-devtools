@@ -1,3 +1,3 @@
-import {vitestFullConfig} from '../../configs/vitest.config.ts'
+import {vitestFullConfig} from '../../vitest.config.ts'
 
 export default vitestFullConfig()
