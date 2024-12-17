@@ -18,6 +18,9 @@ const port = chrome.runtime.connect({name: ConnectionName.Devtools})
 
 const {onPortMessage: fromBackground} = createPortMessanger(port)
 
+// Firefox requires absolute path
+const PATH_PREFIX = import.meta.env.BROWSER === 'firefox' ? '/' : ''
+
 // "Versions" mean that devtools client is on the page
 once(fromBackground, 'Versions', () => {
 
@@ -25,9 +28,8 @@ once(fromBackground, 'Versions', () => {
 
     chrome.devtools.panels.create(
         'Solid',
-        // Firefox requires absolute path
-        (import.meta.env.BROWSER === 'firefox' ? '/' : '') + icons.disabled[32],
-        'index.html',
+        PATH_PREFIX + icons.disabled[32],
+        PATH_PREFIX + 'index.html',
         () => {
             if (chrome.runtime.lastError) {
                 error('Creating Devtools_Panel Failed', chrome.runtime.lastError)
