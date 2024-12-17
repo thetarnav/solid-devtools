@@ -20,8 +20,6 @@ type TabDataConfig = {
     forwardToClient:   (message: bridge.ForwardPayload) => void
 }
 
-type PostMessanger = {post: bridge.PostMessageFn; on: bridge.OnMessageFn}
-
 class TabData {
 
     connectListeners = new Set<
@@ -32,13 +30,23 @@ class TabData {
                                           debug.Debugger.OutputChannels>
                     | null = null
 
+    popup_messanger: bridge.PortMessanger<debug.Debugger.InputChannels,
+                                          debug.Debugger.OutputChannels>
+                    | null = null
+
+    detected_state: bridge.DetectionState = {
+        Solid:    false,
+        SolidDev: false,
+        Debugger: false,
+    }
+
     constructor(
         public id: number,
         // null when not connected with content-script
         public config: TabDataConfig | null,
     ) {}
 
-    untilContentScriptConnect(): Promise<PostMessanger> {
+    untilContentScriptConnect(): Promise<{post: bridge.PostMessageFn; on: bridge.OnMessageFn}> {
         return new Promise(resolve => {
             if (this.config) {
                 resolve({post: this.config.toContent.bind(this), on: this.config.fromContent.bind(this)})
@@ -66,21 +74,6 @@ class TabData {
         this.versions = versions
         bridge.emit(this.versionsBus, versions)
         this.versionsBus.clear()
-    }
-
-    detected: bridge.DetectionState = {
-        Solid:    false,
-        SolidDev: false,
-        Debugger: false,
-    }
-    detectedListeners = new bridge.CallbackSet<[bridge.DetectionState]>()
-    onDetected(fn: (state: bridge.DetectionState) => void) {
-        fn(this.detected)
-        this.detectedListeners.add(fn)
-    }
-    set_detected(state: bridge.DetectionState) {
-        this.detected = state
-        bridge.emit(this.detectedListeners, state)
     }
 }
 
@@ -172,7 +165,10 @@ chrome.runtime.onConnect.addListener(async port => {
         })
 
         // "DetectSolid" from content-script (realWorld)
-        content_messanger.on('Detected', state => tab.set_detected(state))
+        content_messanger.on('Detected', state => {
+            tab.popup_messanger?.post('Detected', state)
+            tab.detected_state = state
+        })
 
         port.onDisconnect.addListener(() => {
             tab.panel_messanger?.post('ResetPanel')
@@ -263,25 +259,34 @@ chrome.runtime.onConnect.addListener(async port => {
             }
         })
 
+        port.onDisconnect.addListener(() => {
+            tab.panel_messanger = null
+            content_messanger.post('DevtoolsClosed')
+        })
+
         break
     }
 
     case bridge.ConnectionName.Popup: {
-        const data = await getActiveTabData()
-        if (data instanceof Error) {
-            error(data)
+        const tab = await getActiveTabData()
+        if (tab instanceof Error) {
+            error(tab)
             break
         }
         const popup_messanger = bridge.createPortMessanger(
             bridge.Place_Name.Background,
             bridge.Place_Name.Popup,
             port)
+        tab.popup_messanger = popup_messanger
 
-        data.onVersions(v => {
+        popup_messanger.post('Detected', tab.detected_state)
+
+        tab.onVersions(v => {
             popup_messanger.post('Versions', v)
         })
-        data.onDetected(state => {
-            popup_messanger.post('Detected', state)
+
+        port.onDisconnect.addListener(() => {
+            tab.popup_messanger = null
         })
 
         break
