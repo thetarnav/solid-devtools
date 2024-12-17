@@ -60,6 +60,7 @@ export function get_common_esbuild_options(is_dev: boolean, dist_dirname: string
         treeShaking: !is_dev,
         logLevel:    is_dev ? 'debug' : 'warning',
         color:       true,
+        dropLabels:  [is_dev ? 'PROD' : 'DEV'],
     }
 }
 

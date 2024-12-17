@@ -41,6 +41,7 @@ async function main() {
         },
         external:    external,
         define:      {
+            ...common.define,
             'process.env.CLIENT_VERSION':         JSON.stringify(pkg.version),
             'process.env.SOLID_VERSION':          JSON.stringify(solid_pkg.version),
             'process.env.EXPECTED_SOLID_VERSION': JSON.stringify(pkg.peerDependencies['solid-js'].match(/\d+.\d+.\d+/)![0]),

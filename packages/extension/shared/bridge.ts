@@ -4,7 +4,7 @@ File for utilities, constants and types related to the communication between the
 
 */
 
-import {log} from '@solid-devtools/shared/utils'
+import {log, log_message} from '@solid-devtools/shared/utils'
 
 export const DEVTOOLS_ID_PREFIX = '[solid-devtools]_'
 
@@ -75,9 +75,7 @@ export function createPortMessanger<
 
         if (typeof name !== 'string') return
 
-        if (LOG_MESSAGES) {
-            log(`${place_name_here} <- ${place_name_conn} - ${name}:`, details)
-        }
+        if (LOG_MESSAGES) {log_message(place_name_here, place_name_conn, e)}
 
         let arr = listeners[name]
         if (arr) {
@@ -183,9 +181,7 @@ export function makeMessageListener
 
         if (typeof name !== 'string') return
 
-        if (LOG_MESSAGES) {
-            log(`${place_name} <- Window - ${name}:`, details)
-        }
+        if (LOG_MESSAGES) {log_message(place_name, 'Window', e.data)}
 
         let arr = window_listeners[name]
         if (arr) {

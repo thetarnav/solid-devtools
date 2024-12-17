@@ -165,6 +165,7 @@ let last_disconnected_tab_data: TabData | undefined
 let last_disconnected_tab_id: number | undefined
 
 chrome.runtime.onConnect.addListener(async port => {
+
     switch (port.name) {
     case bridge.ConnectionName.Content: {
         const tab_id = port.sender?.tab?.id
@@ -241,7 +242,9 @@ chrome.runtime.onConnect.addListener(async port => {
         // "Versions" means the devtools client is present
         data.onVersions(v => devtools_messanger.postPortMessage('Versions', v))
 
-        port.onDisconnect.addListener(() => content_messanger.post('DevtoolsClosed'))
+        port.onDisconnect.addListener(() => {
+            content_messanger.post('DevtoolsClosed')
+        })
 
         break
     }

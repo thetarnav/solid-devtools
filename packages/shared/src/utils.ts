@@ -26,6 +26,11 @@ export function error(...args: any[]): undefined {
     return
 }
 
+export function log_message(to: string, from: string, e: {name: string, details: any}) {
+    // eslint-disable-next-line no-console
+    console.log(...getLogLabel(), `${to.padEnd(20, ' ')} <- ${from.padEnd(14, ' ')} - ${e.name.padEnd(20, ' ')}:`, e.details)
+}
+
 export function formatTime(d: Date = new Date()): string {
     return (
         ('0' + d.getHours()).slice(-2) +

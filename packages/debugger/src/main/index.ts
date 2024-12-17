@@ -1,7 +1,8 @@
 import {createEventBus, createGlobalEmitter, type GlobalEmitter} from '@solid-primitives/event-bus'
 import {createStaticStore} from '@solid-primitives/static-store'
 import {defer} from '@solid-primitives/utils'
-import {batch, createComputed, createEffect, createMemo, createSignal} from 'solid-js'
+import * as s from 'solid-js'
+import {log_message} from '@solid-devtools/shared/utils'
 import {createDependencyGraph, type DGraphUpdate} from '../dependency/index.ts'
 import {createInspector, type InspectorUpdate, type ToggleInspectedValueData} from '../inspector/index.ts'
 import {createLocator} from '../locator/index.ts'
@@ -69,14 +70,14 @@ const [modules, toggleModules] = createStaticStore({
 })
 
 // The debugger can be enabled by devtools or by the locator
-const debuggerEnabled = createMemo(() => modules.debugger || modules.locatorKeyPressSignal())
-const dgraphEnabled = createMemo(() => modules.dgraph && debuggerEnabled())
+const debuggerEnabled = s.createMemo(() => modules.debugger || modules.locatorKeyPressSignal())
+const dgraphEnabled = s.createMemo(() => modules.dgraph && debuggerEnabled())
 // locator is enabled if debugger is enabled, and user pressed the key to activate it, or the plugin activated it
-const locatorEnabled = createMemo(
+const locatorEnabled = s.createMemo(
     () => (modules.locatorKeyPressSignal() || modules.locator) && debuggerEnabled(),
 )
 
-createEffect(
+s.createEffect(
     defer(debuggerEnabled, enabled => {
         hub.output.emit('DebuggerEnabled', enabled)
     }),
@@ -90,7 +91,7 @@ let currentView: DevtoolsMainView = DEFAULT_MAIN_VIEW
 const viewChange = createEventBus<DevtoolsMainView>()
 
 function setView(view: DevtoolsMainView) {
-    batch(() => {
+    s.batch(() => {
         // setStructureEnabled(view === DevtoolsMainView.Structure)
         // setDgraphEnabled(view === DevtoolsMainView.Dgraph)
         viewChange.emit((currentView = view))
@@ -125,12 +126,12 @@ const INITIAL_INSPECTED_STATE = {
     treeWalkerOwnerId: null,
 } as const satisfies Debugger.OutputChannels['InspectedState']
 
-const [inspectedState, setInspectedState] = createSignal<
+const [inspectedState, setInspectedState] = s.createSignal<
     Debugger.OutputChannels['InspectedState']
 >(INITIAL_INSPECTED_STATE, {equals: false})
-const inspectedOwnerId = createMemo(() => inspectedState().ownerId)
+const inspectedOwnerId = s.createMemo(() => inspectedState().ownerId)
 
-createEffect(() => hub.output.emit('InspectedState', inspectedState()))
+s.createEffect(() => hub.output.emit('InspectedState', inspectedState()))
 
 function getTreeWalkerOwnerId(ownerId: NodeID | null): NodeID | null {
     const owner = ownerId && getObjectById(ownerId, ObjectType.Owner)
@@ -161,7 +162,7 @@ function setInspectedNode(data: Debugger.InputChannels['InspectNode']): void {
     })
 }
 
-createComputed(
+s.createComputed(
     defer(debuggerEnabled, enabled => {
         if (!enabled) resetInspectedNode()
     }),
@@ -225,36 +226,39 @@ function openInspectedNodeLocation() {
 }
 
 // send the state of the client locator mode
-createEffect(
+s.createEffect(
     defer(modules.locatorKeyPressSignal, state => hub.output.emit('LocatorModeChange', state)),
 )
 
 hub.input.listen(e => {
+
+    DEV: {log_message('Debugger', 'Client', e)}
+
     switch (e.name) {
-        case 'ResetState': {
-            // reset all the internal state
-            batch(() => {
-                resetInspectedNode()
-                currentView = DEFAULT_MAIN_VIEW
-                structure.resetTreeWalkerMode()
-                locator.setDevtoolsHighlightTarget(null)
-            })
-            break
-        }
-        case 'HighlightElementChange':
-            return locator.setDevtoolsHighlightTarget(e.details)
-        case 'InspectNode':
-            return setInspectedNode(e.details)
-        case 'InspectValue':
-            return inspector.toggleValueNode(e.details)
-        case 'OpenLocation':
-            return openInspectedNodeLocation()
-        case 'TreeViewModeChange':
-            return structure.setTreeWalkerMode(e.details)
-        case 'ViewChange':
-            return setView(e.details)
-        case 'ToggleModule':
-            return toggleModule(e.details)
+    case 'ResetState': {
+        // reset all the internal state
+        s.batch(() => {
+            resetInspectedNode()
+            currentView = DEFAULT_MAIN_VIEW
+            structure.resetTreeWalkerMode()
+            locator.setDevtoolsHighlightTarget(null)
+        })
+        break
+    }
+    case 'HighlightElementChange':
+        return locator.setDevtoolsHighlightTarget(e.details)
+    case 'InspectNode':
+        return setInspectedNode(e.details)
+    case 'InspectValue':
+        return inspector.toggleValueNode(e.details)
+    case 'OpenLocation':
+        return openInspectedNodeLocation()
+    case 'TreeViewModeChange':
+        return structure.setTreeWalkerMode(e.details)
+    case 'ViewChange':
+        return setView(e.details)
+    case 'ToggleModule':
+        return toggleModule(e.details)
     }
 })
 
