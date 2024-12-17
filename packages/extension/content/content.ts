@@ -34,12 +34,21 @@ const {postPortMessage: toBackground, onPortMessage: fromBackground} = bridge.cr
 
 function loadScriptInRealWorld(path: string): Promise<void> {
     return new Promise((resolve, reject) => {
+
         const script = document.createElement('script')
         script.src  = chrome.runtime.getURL(path)
         script.type = 'module'
+
         script.addEventListener('error', err => reject(err))
         script.addEventListener('load', () => resolve())
-        document.head.append(script)
+
+        /* The script should execute as soon as possible */
+        const head = (document.head as HTMLHeadElement | null) || document.documentElement
+        if (head.firstChild) {
+            head.insertBefore(script, head.firstChild)
+        } else {
+            head.appendChild(script)
+        }
     })
 }
 
