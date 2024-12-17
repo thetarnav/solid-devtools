@@ -2,38 +2,42 @@
     Devtools panel entry point
 */
 
-import {type Debugger} from '@solid-devtools/debugger/types'
-import {createDevtools, MountIcons} from '@solid-devtools/frontend'
 import {createSignal} from 'solid-js'
 import {render} from 'solid-js/web'
-import {ConnectionName, createPortMessanger, once, type Versions} from '../shared/bridge.ts'
+import {type Debugger} from '@solid-devtools/debugger/types'
+import {log} from '@solid-devtools/shared/utils'
+import {createDevtools, MountIcons} from '@solid-devtools/frontend'
+import * as bridge from '../shared/bridge.ts'
 
 import '@solid-devtools/frontend/dist/styles.css'
 
-const port = chrome.runtime.connect({name: ConnectionName.Panel})
-const {postPortMessage: toBackground, onPortMessage: fromBackground} = createPortMessanger<
-    Debugger.OutputChannels,
-    Debugger.InputChannels
->(port)
+log(bridge.Place_Name.Panel+' loaded.')
+
+const port = chrome.runtime.connect({name: bridge.ConnectionName.Panel})
+const {postPortMessage: toBackground, onPortMessage: fromBackground} =
+    bridge.createPortMessanger<Debugger.OutputChannels, Debugger.InputChannels>(
+            bridge.Place_Name.Panel,
+            bridge.Place_Name.Background,
+            port)
 
 function App() {
-    const [versions, setVersions] = createSignal<Versions>({
+    const [versions, setVersions] = createSignal<bridge.Versions>({
         solid: '',
         client: '',
         expectedClient: '',
         extension: '',
     })
 
-    once(fromBackground, 'Versions', setVersions)
+    bridge.once(fromBackground, 'Versions', setVersions)
 
-    const {bridge, Devtools} = createDevtools()
+    const devtools = createDevtools()
 
-    bridge.output.listen(e => toBackground(e.name, e.details))
+    devtools.bridge.output.listen(e => toBackground(e.name, e.details))
 
     fromBackground(e => {
         // some events are internal and should not be forwarded to the devtools
-        if (!(e.name in bridge.input)) return
-        bridge.input.emit(e.name as any, e.details)
+        if (!(e.name in devtools.bridge.input)) return
+        devtools.bridge.input.emit(e.name as any, e.details)
     })
 
     return (
@@ -45,7 +49,7 @@ function App() {
                 inset: '0',
             }}
         >
-            <Devtools
+            <devtools.Devtools
                 headerSubtitle={`#${versions().extension}_${versions().client}/${
                     versions().expectedClient
                 }`}

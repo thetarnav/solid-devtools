@@ -2,13 +2,19 @@
 
 import * as s from 'solid-js'
 import {render} from 'solid-js/web'
+import {log} from '@solid-devtools/shared/utils'
 import * as bridge from '../shared/bridge.ts'
 
 import './popup.css'
 
+log(bridge.Place_Name.Popup+' loaded.')
+
 // Create a connection to the background page
 const port = chrome.runtime.connect({name: bridge.ConnectionName.Popup})
-const {onPortMessage: fromBackground} = bridge.createPortMessanger(port)
+const {onPortMessage: fromBackground} = bridge.createPortMessanger(
+    bridge.Place_Name.Popup,
+    bridge.Place_Name.Background,
+    port)
 
 const [versions, setVersions] = s.createSignal<bridge.Versions | null>(null)
 const [detectionState, setDetectionState] = s.createSignal<bridge.DetectionState>({

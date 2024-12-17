@@ -8,21 +8,24 @@ It connects to the background script.
 */
 
 import {error, log} from '@solid-devtools/shared/utils'
-import {ConnectionName, createPortMessanger, once} from '../shared/bridge.ts'
+import * as bridge from '../shared/bridge.ts'
 import * as icons from '../shared/icons.ts'
 
-log('Devtools_Script loaded.')
+log(bridge.Place_Name.Devtools_Script+' loaded.')
 
 // Create a connection to the background page
-const port = chrome.runtime.connect({name: ConnectionName.Devtools})
+const port = chrome.runtime.connect({name: bridge.ConnectionName.Devtools})
 
-const {onPortMessage: fromBackground} = createPortMessanger(port)
+const {onPortMessage: fromBackground} = bridge.createPortMessanger(
+    bridge.Place_Name.Devtools_Script,
+    bridge.Place_Name.Background,
+    port)
 
 // Firefox requires absolute path
 const PATH_PREFIX = import.meta.env.BROWSER === 'firefox' ? '/' : ''
 
 // "Versions" mean that devtools client is on the page
-once(fromBackground, 'Versions', () => {
+bridge.once(fromBackground, 'Versions', () => {
 
     log('Debugger connected -> Creating Devtools_Panel...')
 

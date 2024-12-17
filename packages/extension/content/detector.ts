@@ -9,7 +9,7 @@ import {detectSolid, onSolidDevDetect, onSolidDevtoolsDetect} from '@solid-devto
 import {log, warn} from '@solid-devtools/shared/utils'
 import * as bridge from '../shared/bridge.ts'
 
-if (import.meta.env.DEV) log('Detector_Real_World loaded.')
+if (import.meta.env.DEV) log(bridge.Place_Name.Detector_Real_World+' loaded.')
 
 const state: bridge.DetectionState = {
     Solid:    false,

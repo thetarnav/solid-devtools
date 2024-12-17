@@ -10,7 +10,7 @@ import {error, log} from '@solid-devtools/shared/utils'
 import * as bridge from '../shared/bridge.ts'
 import * as icons from '../shared/icons.ts'
 
-log('Background script working.')
+log(bridge.Place_Name.Background+' loaded.')
 
 type TabDataConfig = {
     toContent:         TabData['toContent']
@@ -170,7 +170,10 @@ chrome.runtime.onConnect.addListener(async port => {
         const tab_id = port.sender?.tab?.id
         if (typeof tab_id !== 'number') break
 
-        const content_messanger = bridge.createPortMessanger(port)
+        const content_messanger = bridge.createPortMessanger(
+            bridge.Place_Name.Background,
+            bridge.Place_Name.Content_Script,
+            port)
 
         let forwardHandler: ((message: bridge.ForwardPayload) => void) | undefined
         let data: TabData
@@ -228,7 +231,10 @@ chrome.runtime.onConnect.addListener(async port => {
             error(data)
             break
         }
-        const devtools_messanger = bridge.createPortMessanger(port)
+        const devtools_messanger = bridge.createPortMessanger(
+            bridge.Place_Name.Background,
+            bridge.Place_Name.Devtools_Script,
+            port)
 
         const content_messanger = await data.untilContentScriptConnect()
 
@@ -246,7 +252,10 @@ chrome.runtime.onConnect.addListener(async port => {
             error(data)
             break
         }
-        const panel_messanger = bridge.createPortMessanger(port)
+        const panel_messanger = bridge.createPortMessanger(
+            bridge.Place_Name.Background,
+            bridge.Place_Name.Panel,
+            port)
 
         const content_messanger = await data.untilContentScriptConnect()
 
@@ -287,7 +296,10 @@ chrome.runtime.onConnect.addListener(async port => {
             error(data)
             break
         }
-        const popup_messanger = bridge.createPortMessanger(port)
+        const popup_messanger = bridge.createPortMessanger(
+            bridge.Place_Name.Background,
+            bridge.Place_Name.Popup,
+            port)
 
         data.onVersions(v => {
             popup_messanger.postPortMessage('Versions', v)

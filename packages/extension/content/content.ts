@@ -17,7 +17,7 @@ import detectorPath from './detector?script&module'
 // @ts-expect-error ?script&module query ensures output in ES module format and only import the script path
 import debuggerPath from './debugger?script&module'
 
-if (import.meta.env.DEV) log('Content_Script loaded.')
+if (import.meta.env.DEV) log(bridge.Place_Name.Content_Script+' loaded.')
 
 const extension_version = chrome.runtime.getManifest().version
 
@@ -25,12 +25,14 @@ const port = chrome.runtime.connect({name: bridge.ConnectionName.Content})
 
 let devtools_opened = false
 
-bridge.startListeningWindowMessages()
-
-const fromClient = bridge.makeMessageListener()
+const fromClient = bridge.makeMessageListener(bridge.Place_Name.Content_Script)
 const toClient   = bridge.makePostMessage()
 
-const {postPortMessage: toBackground, onPortMessage: fromBackground} = bridge.createPortMessanger(port)
+const {postPortMessage: toBackground, onPortMessage: fromBackground} =
+    bridge.createPortMessanger(
+        bridge.Place_Name.Content_Script,
+        bridge.Place_Name.Background,
+        port)
 
 function loadScriptInRealWorld(path: string): Promise<void> {
     return new Promise((resolve, reject) => {

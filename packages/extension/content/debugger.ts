@@ -10,11 +10,9 @@ import {type Debugger} from '@solid-devtools/debugger/types'
 import {log, warn} from '@solid-devtools/shared/utils'
 import * as bridge from '../shared/bridge.ts'
 
-if (import.meta.env.DEV) log('Debugger_Real_World loaded.')
+if (import.meta.env.DEV) log(bridge.Place_Name.Debugger_Real_World+' loaded.')
 
-bridge.startListeningWindowMessages()
-
-const fromContent = bridge.makeMessageListener<Debugger.InputChannels>()
+const fromContent = bridge.makeMessageListener<Debugger.InputChannels>(bridge.Place_Name.Debugger_Real_World)
 const toContent   = bridge.makePostMessage<Debugger.OutputChannels>()
 
 class Version {
