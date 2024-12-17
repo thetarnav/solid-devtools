@@ -22,13 +22,6 @@ type TabDataConfig = {
 
 type PostMessanger = {post: bridge.PostMessageFn; on: bridge.OnMessageFn}
 
-class EventBus<T> extends Set<(payload: T) => void> {
-    emit(..._: void extends T ? [payload?: T] : [payload: T]): void
-    emit(payload?: any) {
-        for (const cb of this) cb(payload)
-    }
-}
-
 class TabData {
 
     connectListeners = new Set<
@@ -60,20 +53,18 @@ class TabData {
     reconnected(config: TabDataConfig) {
         this.config = config
 
-        for (let fn of this.connectListeners) {
-            fn(config.toContent.bind(this), config.fromContent.bind(this))
-        }
+        bridge.emit(this.connectListeners, config.toContent.bind(this), config.fromContent.bind(this))
     }
 
     versions: bridge.Versions | undefined
-    versionsBus = new EventBus<bridge.Versions>()
+    versionsBus = new bridge.CallbackSet<[bridge.Versions]>()
     onVersions(fn: (versions: bridge.Versions) => void) {
         if (this.versions) fn(this.versions)
         else this.versionsBus.add(fn)
     }
     setVersions(versions: bridge.Versions) {
         this.versions = versions
-        this.versionsBus.emit(versions)
+        bridge.emit(this.versionsBus, versions)
         this.versionsBus.clear()
     }
 
@@ -82,14 +73,14 @@ class TabData {
         SolidDev: false,
         Debugger: false,
     }
-    detectedListeners = new EventBus<bridge.DetectionState>()
+    detectedListeners = new bridge.CallbackSet<[bridge.DetectionState]>()
     onDetected(fn: (state: bridge.DetectionState) => void) {
         fn(this.detected)
         this.detectedListeners.add(fn)
     }
     set_detected(state: bridge.DetectionState) {
         this.detected = state
-        this.detectedListeners.emit(state)
+        bridge.emit(this.detectedListeners, state)
     }
 }
 

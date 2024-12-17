@@ -58,8 +58,8 @@ export function createPortMessanger<
 ): PortMessanger<IM, OM> {
     let port: chrome.runtime.Port | null = _port
 
-    let forwardHandler: ((event: ForwardPayload) => void) | undefined
-    let listeners: {[K in any]?: ((event: any) => void)[]} = {}
+    let forwardHandler: ((e: ForwardPayload) => void) | undefined
+    let listeners: {[K in any]?: ((e: AnyPayload) => void)[]} = {}
 
     if (LOG_MESSAGES) log(`${place_name_here}-${place_name_conn} port connected.`)
 
@@ -82,14 +82,11 @@ export function createPortMessanger<
         if (LOG_MESSAGES) {log_message(place_name_here, place_name_conn, e)}
 
         let arr = listeners[name]
-        if (arr) {
-            for (let fn of arr) fn(details)
-        }
+        if (arr) emit(arr, details)
 
         let arr2 = listeners['*']
-        if (arr2) {
-            for (let fn of arr2) fn({name, details})
-        } else if (forwardHandler) {
+        if (arr2) emit(arr2, {name, details})
+        else if (forwardHandler) {
             forwardHandler({name, details, forwarding: true})
         }
     }
@@ -173,7 +170,7 @@ export const makePostMessage: <M extends Record<string, any>>() => PostMessageFn
         postMessage({name, details}, '*')
 
 
-const window_listeners: {[K in any]?: ((payload: any) => void)[]} = {}
+const window_listeners: {[K in any]?: ((e: AnyPayload) => void)[]} = {}
 
 export function makeMessageListener
     <M extends Record<string, any>>
@@ -192,14 +189,10 @@ export function makeMessageListener
         if (LOG_MESSAGES) {log_message(place_name, 'Window', e.data)}
 
         let arr = window_listeners[name]
-        if (arr) {
-            for (let fn of arr) fn(details)
-        }
+        if (arr) emit(arr, details)
 
         let arr2 = window_listeners['*']
-        if (arr2) {
-            for (let fn of arr2) fn({name, details})
-        }
+        if (arr2) emit(arr2, {name, details})
     })
 
     return (...args: [any, any] | [any]) => {
@@ -214,7 +207,8 @@ export function makeMessageListener
     }
 }
 
-export type ForwardPayload = {forwarding: true; name: string; details: any}
+export type ForwardPayload = {name: string; details: any; forwarding: true}
+export type AnyPayload     = {name: string; details: any}
 
 export const isForwardMessage = (data: any): data is ForwardPayload =>
     typeof data === 'object' && data !== null && data.forwarding === true && 'name' in data
@@ -233,4 +227,10 @@ export function once<M extends Record<string, any>, K extends keyof (GeneralMess
         return handler(...cbArgs)
     })
     return unsub
+}
+
+export class CallbackSet<T extends any[] = []> extends Set<(...arr: T) => void> {}
+
+export function emit<T extends any[]>(fns: Iterable<(...args: T) => void>, ...args: T): void {
+    for (let fn of fns) fn(...args)
 }
