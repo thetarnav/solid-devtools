@@ -12,7 +12,7 @@
         "build": "node --experimental-transform-types ./build.ts --browser=firefox --browser=chrome",
         "test:unit": "echo \"No unit tests\"",
         "test:types": "tsc --noEmit --paths null",
-        "firefox-run": "web-ext run -s dist/firefox -p dev"
+        "firefox-run": "pnpx web-ext run -s dist/firefox -p dev"
     },
     "devDependencies": {
         "@crxjs/vite-plugin": "2.0.0-beta.28",

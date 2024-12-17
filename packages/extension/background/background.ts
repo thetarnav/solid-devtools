@@ -8,7 +8,7 @@ It has to coordinate the communication between the different scripts based on th
 
 import {error, log} from '@solid-devtools/shared/utils'
 import * as bridge from '../shared/bridge.ts'
-import {icons} from '../shared/icons.ts'
+import * as icons from '../shared/icons.ts'
 
 log('Background script working.')
 
@@ -201,7 +201,7 @@ chrome.runtime.onConnect.addListener(async port => {
             data.setVersions(v)
 
             // Change the popup icon to indicate that Solid is present on the page
-            chrome.action.setIcon({tabId: tab_id, path: icons.normal})
+            chrome.action.setIcon({tabId: tab_id, path: icons.blue})
         })
 
         // "DetectSolid" from content-script (realWorld)

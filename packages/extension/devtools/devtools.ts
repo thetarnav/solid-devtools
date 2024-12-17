@@ -9,7 +9,7 @@ It connects to the background script.
 
 import {error, log} from '@solid-devtools/shared/utils'
 import {ConnectionName, createPortMessanger, once} from '../shared/bridge.ts'
-import {icons} from '../shared/icons.ts'
+import * as icons from '../shared/icons.ts'
 
 log('Devtools_Script loaded.')
 
@@ -28,7 +28,7 @@ once(fromBackground, 'Versions', () => {
 
     chrome.devtools.panels.create(
         'Solid',
-        PATH_PREFIX + icons.disabled[32],
+        PATH_PREFIX + icons.OUTLINE_32,
         PATH_PREFIX + 'index.html',
         () => {
             if (chrome.runtime.lastError) {
