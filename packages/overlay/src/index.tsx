@@ -71,6 +71,7 @@ const Overlay: s.Component<OverlayOptions> = ({defaultOpen, alwaysOpen, noPaddin
     return (
         <web.Portal useShadow mount={document.documentElement}>
             <div
+                data-darkreader-ignore
                 class="overlay__container"
                 classList={{'no-padding': noPadding}}
                 data-open={isOpen()}

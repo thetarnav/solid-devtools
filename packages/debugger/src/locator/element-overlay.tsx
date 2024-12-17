@@ -15,7 +15,7 @@ export function createElementsOverlay(selected: Accessor<LocatorComponent[]>) {
     setTimeout(() => {
         runWithOwner(owner, () => (
             <Portal useShadow mount={document.documentElement}>
-                <div>{selected().map(useElementOverlay)}</div>
+                <div data-darkreader-ignore>{selected().map(useElementOverlay)}</div>
             </Portal>
         ))
     }, 1000)
