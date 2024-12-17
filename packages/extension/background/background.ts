@@ -13,10 +13,10 @@ import * as icons from '../shared/icons.ts'
 log(bridge.Place_Name.Background+' loaded.')
 
 type TabDataConfig = {
-    toContent:         TabData['toContent']
-    fromContent:       TabData['fromContent']
-    forwardToDevtools: TabData['forwardToDevtools']
-    forwardToClient:   TabData['forwardToClient']
+    toContent:         bridge.PostMessageFn
+    fromContent:       bridge.OnMessageFn
+    forwardToDevtools: (fn: (message: bridge.ForwardPayload) => void) => void
+    forwardToClient:   (message: bridge.ForwardPayload) => void
 }
 
 type PostMessanger = {post: bridge.PostMessageFn; on: bridge.OnMessageFn}
@@ -29,32 +29,22 @@ class EventBus<T> extends Set<(payload: T) => void> {
 }
 
 class TabData {
-    public connected = true
 
-    private disconnectBus = new EventBus()
-    private connectListeners = new Set<
+    disconnectBus = new EventBus()
+    connectListeners = new Set<
         (toContent: bridge.PostMessageFn, fromContent: bridge.OnMessageFn) => void
     >()
 
-    private toContent: bridge.PostMessageFn
-    private fromContent: bridge.OnMessageFn
-    public forwardToDevtools: (fn: (message: bridge.ForwardPayload) => void) => void
-    public forwardToClient: (message: bridge.ForwardPayload) => void
-
     constructor(
         public tabId: number,
-        config: TabDataConfig,
-    ) {
-        this.toContent = config.toContent
-        this.fromContent = config.fromContent
-        this.forwardToDevtools = config.forwardToDevtools
-        this.forwardToClient = config.forwardToClient
-    }
+        // null when not connected with content-script
+        public config: TabDataConfig | null,
+    ) {}
 
     untilContentScriptConnect(): Promise<PostMessanger> {
         return new Promise(resolve => {
-            if (this.connected) {
-                resolve({post: this.toContent.bind(this), on: this.fromContent.bind(this)})
+            if (this.config) {
+                resolve({post: this.config.toContent.bind(this), on: this.config.fromContent.bind(this)})
             } else {
                 this.connectListeners.add((toContent, fromContent) => {
                     resolve({post: toContent, on: fromContent})
@@ -64,15 +54,11 @@ class TabData {
     }
 
     reconnected(config: TabDataConfig) {
-        this.toContent = config.toContent
-        this.fromContent = config.fromContent
-        this.forwardToDevtools = config.forwardToDevtools
-        this.forwardToClient = config.forwardToClient
+        this.config = config
 
-        this.connected = true
-        this.connectListeners.forEach(fn =>
-            fn(this.toContent.bind(this), this.fromContent.bind(this)),
-        )
+        for (let fn of this.connectListeners) {
+            fn(config.toContent.bind(this), config.fromContent.bind(this))
+        }
     }
 
     onContentScriptDisconnect(fn: VoidFunction): void {
@@ -80,42 +66,36 @@ class TabData {
     }
 
     disconnected() {
-        this.connected = false
         this.disconnectBus.emit()
         this.disconnectBus.clear()
-        this.forwardToClient = () => {
-            /**/
-        }
-        this.forwardToDevtools = () => {
-            /**/
-        }
+        this.config = null
     }
 
-    #versions: bridge.Versions | undefined
-    #versionsBus = new EventBus<bridge.Versions>()
+    versions: bridge.Versions | undefined
+    versionsBus = new EventBus<bridge.Versions>()
     onVersions(fn: (versions: bridge.Versions) => void) {
-        if (this.#versions) fn(this.#versions)
-        else this.#versionsBus.add(fn)
+        if (this.versions) fn(this.versions)
+        else this.versionsBus.add(fn)
     }
     setVersions(versions: bridge.Versions) {
-        this.#versions = versions
-        this.#versionsBus.emit(versions)
-        this.#versionsBus.clear()
+        this.versions = versions
+        this.versionsBus.emit(versions)
+        this.versionsBus.clear()
     }
 
-    #detected: bridge.DetectionState = {
+    detected: bridge.DetectionState = {
         Solid:    false,
         SolidDev: false,
         Debugger: false,
     }
-    #detectedListeners = new EventBus<bridge.DetectionState>()
+    detectedListeners = new EventBus<bridge.DetectionState>()
     onDetected(fn: (state: bridge.DetectionState) => void) {
-        fn(this.#detected)
-        this.#detectedListeners.add(fn)
+        fn(this.detected)
+        this.detectedListeners.add(fn)
     }
-    detected(state: bridge.DetectionState) {
-        this.#detected = state
-        this.#detectedListeners.emit(state)
+    set_detected(state: bridge.DetectionState) {
+        this.detected = state
+        this.detectedListeners.emit(state)
     }
 }
 
@@ -162,7 +142,7 @@ const getActiveTabData = async (): Promise<TabData | Error> => {
 
 // for reconnecting after page reload
 let last_disconnected_tab_data: TabData | undefined
-let last_disconnected_tab_id: number | undefined
+let last_disconnected_tab_id:   number | undefined
 
 chrome.runtime.onConnect.addListener(async port => {
 
@@ -209,7 +189,7 @@ chrome.runtime.onConnect.addListener(async port => {
         })
 
         // "DetectSolid" from content-script (realWorld)
-        content_messanger.onPortMessage('Detected', state => data.detected(state))
+        content_messanger.onPortMessage('Detected', state => data.set_detected(state))
 
         port.onDisconnect.addListener(() => {
             data.disconnected()
@@ -255,6 +235,7 @@ chrome.runtime.onConnect.addListener(async port => {
             error(data)
             break
         }
+
         const panel_messanger = bridge.createPortMessanger(
             bridge.Place_Name.Background,
             bridge.Place_Name.Panel,
@@ -275,19 +256,29 @@ chrome.runtime.onConnect.addListener(async port => {
             panel_messanger.postPortMessage('ResetPanel')
         })
 
-        /* Force debugger to send state when panel conects */
-        data.forwardToClient({
-            name:       'ResetState',
-            details:    undefined,
-            forwarding: true, // TODO: this shouldn't be a "forward", but not sure how to typesafe send a post to debugger from here
-        })
+        if (!data.config) {
+            error(`No ${bridge.Place_Name.Content_Script} connection when ${bridge.Place_Name.Panel} got connected`)
+        } else {
+            /* Force debugger to send state when panel conects */
+            data.config.forwardToClient({
+                name:       'ResetState',
+                details:    undefined,
+                forwarding: true, // TODO: this shouldn't be a "forward", but not sure how to typesafe send a post to debugger from here
+            })
 
-        // FORWARD MESSAGES FROM and TO CLIENT
-        data.forwardToDevtools(message => {
-            port.postMessage(message)
-        })
+            // Forward messages from Content Script (client) to Panel
+            data.config.forwardToDevtools(message => {
+                port.postMessage(message)
+            })
+        }
+
+        // Forward messages from Panel to Content Script (client)
         panel_messanger.onForwardMessage(message => {
-            data.forwardToClient(message)
+            if (!data.config) {
+                error(`Cannot forward message, no ${bridge.Place_Name.Content_Script} connection.`, message)
+            } else {
+                data.config.forwardToClient(message)
+            }
         })
 
         break
