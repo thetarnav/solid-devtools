@@ -1,5 +1,14 @@
 # @solid-devtools/extension
 
+## 0.31.4
+
+### Patch Changes
+
+- 0cb47bb: Change panel icon style to outline
+- 99329a2: Load real-world scripts as soon as possible. Use documentElement when head is not present
+- d88ced2: Fix devtools panel path for firefox
+  - solid-devtools@0.31.4
+
 ## 0.31.3
 
 ### Patch Changes

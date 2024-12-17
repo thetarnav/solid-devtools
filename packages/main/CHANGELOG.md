@@ -1,5 +1,7 @@
 # solid-devtools
 
+## 0.31.4
+
 ## 0.31.3
 
 ### Patch Changes
