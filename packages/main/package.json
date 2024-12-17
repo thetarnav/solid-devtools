@@ -83,12 +83,12 @@
         "test:types": "tsc --noEmit --paths null"
     },
     "devDependencies": {
-        "@babel/core": "^7.18.13",
-        "@babel/generator": "^7.23.3",
-        "@babel/parser": "^7.23.3",
-        "@babel/plugin-syntax-jsx": "^7.23.3",
-        "@types/babel__core": "^7.20.4",
-        "@types/babel__generator": "^7.6.7"
+        "@babel/core": "^7.26.0",
+        "@babel/generator": "^7.26.3",
+        "@babel/parser": "^7.26.3",
+        "@babel/plugin-syntax-jsx": "^7.25.9",
+        "@types/babel__core": "^7.20.5",
+        "@types/babel__generator": "^7.6.8"
     },
     "dependencies": {
         "@babel/core": "^7.23.3",

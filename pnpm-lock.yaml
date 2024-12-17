@@ -282,19 +282,19 @@ importers:
         version: 6.0.3(@types/node@22.10.2)
     devDependencies:
       '@babel/generator':
-        specifier: ^7.23.3
+        specifier: ^7.26.3
         version: 7.26.3
       '@babel/parser':
-        specifier: ^7.23.3
+        specifier: ^7.26.3
         version: 7.26.3
       '@babel/plugin-syntax-jsx':
-        specifier: ^7.23.3
+        specifier: ^7.25.9
         version: 7.25.9(@babel/core@7.26.0)
       '@types/babel__core':
-        specifier: ^7.20.4
+        specifier: ^7.20.5
         version: 7.20.5
       '@types/babel__generator':
-        specifier: ^7.6.7
+        specifier: ^7.6.8
         version: 7.6.8
 
   packages/overlay:
