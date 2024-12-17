@@ -28,8 +28,7 @@ let devtools_opened = false
 const fromClient = bridge.makeMessageListener(bridge.Place_Name.Content_Script)
 const toClient   = bridge.makePostMessage()
 
-const {postPortMessage: toBackground, onPortMessage: fromBackground} =
-    bridge.createPortMessanger(
+const bg_messanger = bridge.createPortMessanger(
         bridge.Place_Name.Content_Script,
         bridge.Place_Name.Background,
         port)
@@ -74,7 +73,7 @@ window.addEventListener('message', e => {
 
     const state = e.data.state as bridge.DetectionState
 
-    toBackground('Detected', state)
+    bg_messanger.post('Detected', state)
 
     /* Load Debugger_Real_World */
     if (state.Debugger && !debugger_real_world_added) {
@@ -94,14 +93,14 @@ fromClient('Debugger_Connected', versions => {
         'color: #e38b1b',
     )
 
-    toBackground('Versions', {
+    bg_messanger.post('Versions', {
         client:         versions.client,
         solid:          versions.solid,
         extension:      extension_version,
         expectedClient: import.meta.env.EXPECTED_CLIENT,
     })
 
-    fromClient('ResetPanel', () => toBackground('ResetPanel'))
+    fromClient('ResetPanel', () => bg_messanger.post('ResetPanel'))
 
     if (devtools_opened) toClient('DevtoolsOpened')
 })
@@ -109,11 +108,11 @@ fromClient('Debugger_Connected', versions => {
 // After page reload, the content script is reloaded but the background script is not.
 // This means that 'DevtoolsOpened' message will come after the Client is setup.
 // We need to send it after it connects.
-fromBackground('DevtoolsOpened', () => {
+bg_messanger.on('DevtoolsOpened', () => {
     devtools_opened = true
     toClient('DevtoolsOpened')
 })
-fromBackground('DevtoolsClosed', () => toClient('DevtoolsClosed'))
+bg_messanger.on('DevtoolsClosed', () => toClient('DevtoolsClosed'))
 
 fromClient(e => {
     // forward all client messages to the background script in

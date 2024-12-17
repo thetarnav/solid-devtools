@@ -4,7 +4,7 @@ File for utilities, constants and types related to the communication between the
 
 */
 
-import {log, log_message} from '@solid-devtools/shared/utils'
+import {error, log, log_message} from '@solid-devtools/shared/utils'
 
 export const DEVTOOLS_ID_PREFIX = '[solid-devtools]_'
 
@@ -39,31 +39,35 @@ export type DetectEvent = {
 const LOG_MESSAGES = import.meta.env.DEV
 // const LOG_MESSAGES: boolean = true
 
+export interface PortMessanger<
+    IM extends {[K in string]: any},
+    OM extends {[K in string]: any},
+> {
+    post:      PostMessageFn<OM>
+    on:        OnMessageFn<IM>
+    onForward: (handler: (event: ForwardPayload) => void) => void
+}
+
 export function createPortMessanger<
     IM extends {[K in string]: any},
     OM extends {[K in string]: any},
 >(
     place_name_here: string,
     place_name_conn: string,
-    port: chrome.runtime.Port,
-): {
-    postPortMessage:  PostMessageFn<OM>
-    onPortMessage:    OnMessageFn<IM>
-    onForwardMessage: (handler: (event: ForwardPayload) => void) => void
-} {
+    _port: chrome.runtime.Port,
+): PortMessanger<IM, OM> {
+    let port: chrome.runtime.Port | null = _port
+
     let forwardHandler: ((event: ForwardPayload) => void) | undefined
     let listeners: {[K in any]?: ((event: any) => void)[]} = {}
 
-    let port_name = port.name.replace(DEVTOOLS_ID_PREFIX, '')
-
-    let connected = true
-    if (LOG_MESSAGES) log(`${port_name} port connected.`)
+    if (LOG_MESSAGES) log(`${place_name_here}-${place_name_conn} port connected.`)
 
     port.onDisconnect.addListener(() => {
-        if (LOG_MESSAGES) log(`${port_name} port disconnected.`)
-        connected = false
+        if (LOG_MESSAGES) log(`${place_name_here}-${place_name_conn} port disconnected.`)
         listeners = {}
-        port.onMessage.removeListener(onMessage)
+        _port.onMessage.removeListener(onMessage)
+        port = null
     })
 
     function onMessage(e: any) {
@@ -92,16 +96,20 @@ export function createPortMessanger<
     port.onMessage.addListener(onMessage)
 
     return {
-        postPortMessage: (name, details?: any) => {
-            if (!connected) return
-            port.postMessage({name, details})
+        post: (name, details?: any) => {
+            if (!port) {
+                error(`Trying to post ${String(name)} message to disconnected port ${place_name_here}-${place_name_conn}`)
+            } else {
+                port.postMessage({name, details})
+            }
         },
-        onPortMessage: (...args: [any, any] | [any]) => {
+        on: (...args: [any, any] | [any]) => {
 
             let name    = typeof args[0] === 'string' ? args[0] : '*'
             let handler = typeof args[0] === 'string' ? args[1] : args[0]
 
-            if (!connected) {
+            if (!port) {
+                error(`Trying to listen to disconnected port ${place_name_here}-${place_name_conn}`)
                 return () => {/**/}
             }
 
@@ -110,7 +118,7 @@ export function createPortMessanger<
             
             return () => (listeners[name] = arr.filter(l => l !== handler) as any)
         },
-        onForwardMessage(handler) {
+        onForward(handler) {
             forwardHandler = handler
         },
     }

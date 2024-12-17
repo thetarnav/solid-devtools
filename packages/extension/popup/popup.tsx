@@ -11,7 +11,7 @@ log(bridge.Place_Name.Popup+' loaded.')
 
 // Create a connection to the background page
 const port = chrome.runtime.connect({name: bridge.ConnectionName.Popup})
-const {onPortMessage: fromBackground} = bridge.createPortMessanger(
+const bg_messanger = bridge.createPortMessanger(
     bridge.Place_Name.Popup,
     bridge.Place_Name.Background,
     port)
@@ -23,8 +23,8 @@ const [detectionState, setDetectionState] = s.createSignal<bridge.DetectionState
     Debugger: false,
 })
 
-fromBackground('Detected', setDetectionState)
-bridge.once(fromBackground, 'Versions', setVersions)
+bg_messanger.on('Detected', setDetectionState)
+bg_messanger.on('Versions', setVersions)
 
 const App: s.Component = () => {
     return <>

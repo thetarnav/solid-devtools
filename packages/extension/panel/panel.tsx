@@ -14,11 +14,11 @@ import '@solid-devtools/frontend/dist/styles.css'
 log(bridge.Place_Name.Panel+' loaded.')
 
 const port = chrome.runtime.connect({name: bridge.ConnectionName.Panel})
-const {postPortMessage: toBackground, onPortMessage: fromBackground} =
-    bridge.createPortMessanger<Debugger.OutputChannels, Debugger.InputChannels>(
-            bridge.Place_Name.Panel,
-            bridge.Place_Name.Background,
-            port)
+const bg_messanger = bridge.createPortMessanger
+    <Debugger.OutputChannels, Debugger.InputChannels>(
+        bridge.Place_Name.Panel,
+        bridge.Place_Name.Background,
+        port)
 
 function App() {
     const [versions, setVersions] = createSignal<bridge.Versions>({
@@ -28,13 +28,13 @@ function App() {
         extension: '',
     })
 
-    bridge.once(fromBackground, 'Versions', setVersions)
+    bridge.once(bg_messanger.on, 'Versions', setVersions)
 
     const devtools = createDevtools()
 
-    devtools.bridge.output.listen(e => toBackground(e.name, e.details))
+    devtools.bridge.output.listen(e => bg_messanger.post(e.name, e.details))
 
-    fromBackground(e => {
+    bg_messanger.on(e => {
         // some events are internal and should not be forwarded to the devtools
         if (!(e.name in devtools.bridge.input)) return
         devtools.bridge.input.emit(e.name as any, e.details)

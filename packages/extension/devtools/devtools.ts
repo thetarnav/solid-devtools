@@ -16,7 +16,7 @@ log(bridge.Place_Name.Devtools_Script+' loaded.')
 // Create a connection to the background page
 const port = chrome.runtime.connect({name: bridge.ConnectionName.Devtools})
 
-const {onPortMessage: fromBackground} = bridge.createPortMessanger(
+const bg_messanger = bridge.createPortMessanger(
     bridge.Place_Name.Devtools_Script,
     bridge.Place_Name.Background,
     port)
@@ -25,7 +25,7 @@ const {onPortMessage: fromBackground} = bridge.createPortMessanger(
 const PATH_PREFIX = import.meta.env.BROWSER === 'firefox' ? '/' : ''
 
 // "Versions" mean that devtools client is on the page
-bridge.once(fromBackground, 'Versions', () => {
+bridge.once(bg_messanger.on, 'Versions', () => {
 
     log('Debugger connected -> Creating Devtools_Panel...')
 

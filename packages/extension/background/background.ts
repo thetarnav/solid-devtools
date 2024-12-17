@@ -160,8 +160,8 @@ chrome.runtime.onConnect.addListener(async port => {
         let data: TabData
 
         const config: TabDataConfig = {
-            toContent: content_messanger.postPortMessage,
-            fromContent: content_messanger.onPortMessage,
+            toContent: content_messanger.post,
+            fromContent: content_messanger.on,
             forwardToDevtools: fn => (forwardHandler = fn),
             forwardToClient: message => port.postMessage(message),
         }
@@ -181,7 +181,7 @@ chrome.runtime.onConnect.addListener(async port => {
         tab_data_map.set(tab_id, data)
 
         // "Versions" from content-script
-        bridge.once(content_messanger.onPortMessage, 'Versions', v => {
+        bridge.once(content_messanger.on, 'Versions', v => {
             data.setVersions(v)
 
             // Change the popup icon to indicate that Solid is present on the page
@@ -189,7 +189,7 @@ chrome.runtime.onConnect.addListener(async port => {
         })
 
         // "DetectSolid" from content-script (realWorld)
-        content_messanger.onPortMessage('Detected', state => data.set_detected(state))
+        content_messanger.on('Detected', state => data.set_detected(state))
 
         port.onDisconnect.addListener(() => {
             data.disconnected()
@@ -220,7 +220,7 @@ chrome.runtime.onConnect.addListener(async port => {
         const content_messanger = await data.untilContentScriptConnect()
 
         // "Versions" means the devtools client is present
-        data.onVersions(v => devtools_messanger.postPortMessage('Versions', v))
+        data.onVersions(v => devtools_messanger.post('Versions', v))
 
         port.onDisconnect.addListener(() => {
             content_messanger.post('DevtoolsClosed')
@@ -244,16 +244,16 @@ chrome.runtime.onConnect.addListener(async port => {
         const content_messanger = await data.untilContentScriptConnect()
 
         data.onVersions(v => {
-            panel_messanger.postPortMessage('Versions', v)
+            panel_messanger.post('Versions', v)
             // notify the content script that the devtools panel is ready
             content_messanger.post('DevtoolsOpened')
         })
 
         content_messanger.on('ResetPanel', () => {
-            panel_messanger.postPortMessage('ResetPanel')
+            panel_messanger.post('ResetPanel')
         })
         data.onContentScriptDisconnect(() => {
-            panel_messanger.postPortMessage('ResetPanel')
+            panel_messanger.post('ResetPanel')
         })
 
         if (!data.config) {
@@ -273,7 +273,7 @@ chrome.runtime.onConnect.addListener(async port => {
         }
 
         // Forward messages from Panel to Content Script (client)
-        panel_messanger.onForwardMessage(message => {
+        panel_messanger.onForward(message => {
             if (!data.config) {
                 error(`Cannot forward message, no ${bridge.Place_Name.Content_Script} connection.`, message)
             } else {
@@ -296,10 +296,10 @@ chrome.runtime.onConnect.addListener(async port => {
             port)
 
         data.onVersions(v => {
-            popup_messanger.postPortMessage('Versions', v)
+            popup_messanger.post('Versions', v)
         })
         data.onDetected(state => {
-            popup_messanger.postPortMessage('Detected', state)
+            popup_messanger.post('Detected', state)
         })
 
         break
