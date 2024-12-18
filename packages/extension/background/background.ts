@@ -13,26 +13,12 @@ import * as debug   from '@solid-devtools/debugger/types'
 
 log(bridge.Place_Name.Background+' loaded.')
 
-type TabDataConfig = {
-    toContent:         bridge.PostMessageFn
-    fromContent:       bridge.OnMessageFn
-    forwardToDevtools: (fn: (message: bridge.ForwardPayload) => void) => void
-    forwardToClient:   (message: bridge.ForwardPayload) => void
-}
-
 type PortMessanger = bridge.PortMessanger<debug.Debugger.InputChannels,
                                           debug.Debugger.OutputChannels>
 
 class TabData {
 
     id: number = -1
-
-    /** null when not connected with content-script */
-    config: TabDataConfig | undefined
-
-    connectListeners = new Set<
-        (toContent: bridge.PostMessageFn, fromContent: bridge.OnMessageFn) => void
-    >()
 
     panel_messanger:    PortMessanger | undefined
     popup_messanger:    PortMessanger | undefined
@@ -89,15 +75,7 @@ chrome.runtime.onConnect.addListener(async port => {
             bridge.Place_Name.Content_Script,
             port)
 
-        let forwardHandler: ((message: bridge.ForwardPayload) => void) | undefined
         let tab: TabData
-
-        const config: TabDataConfig = {
-            toContent:         content_messanger.post,
-            fromContent:       content_messanger.on,
-            forwardToDevtools: fn => (forwardHandler = fn),
-            forwardToClient:   message => port.postMessage(message),
-        }
 
         // Page was reloaded, so we need to reinitialize the tab data
         if (tab_id === last_disconnected_tab?.id) {
@@ -109,7 +87,6 @@ chrome.runtime.onConnect.addListener(async port => {
         }
 
         tab.id                = tab_id
-        tab.config            = config
         tab.content_messanger = content_messanger
 
         last_disconnected_tab = null
@@ -145,6 +122,17 @@ chrome.runtime.onConnect.addListener(async port => {
             tab.detected_state = state
         })
 
+        /* HANDLE FORWARDED MESSAGES FROM CLIENT (content-script) */
+        port.onMessage.addListener((e: bridge.ForwardPayload | any) => {
+            if (bridge.isForwardMessage(e)) {
+                if (tab.panel_messanger) {
+                    tab.panel_messanger.post(e.name as any, e.details)
+                } else {
+                    error(`Cannot forward ${bridge.Place_Name.Content_Script} -> ${bridge.Place_Name.Panel} - ${e.name}:`, e.details)
+                }
+            }
+        })
+
         /* Content Script Disconnected */
         port.onDisconnect.addListener(() => {
 
@@ -152,17 +140,11 @@ chrome.runtime.onConnect.addListener(async port => {
                 tab.panel_messanger.post('ResetPanel')
             }
 
-            tab.config            = undefined
             tab.content_messanger = undefined
 
             tab_data_map.delete(tab_id)
 
             last_disconnected_tab = tab
-        })
-
-        port.onMessage.addListener((message: bridge.ForwardPayload | any) => {
-            /* HANDLE FORWARDED MESSAGES FROM CLIENT (content-script) */
-            forwardHandler && bridge.isForwardMessage(message) && forwardHandler(message)
         })
 
         break
@@ -214,11 +196,11 @@ chrome.runtime.onConnect.addListener(async port => {
         panel_and_content_connect(tab)
 
         // Forward messages from Panel to Content Script (client)
-        panel_messanger.onForward(message => {
-            if (!tab.config) {
-                error(`Cannot forward message, no ${bridge.Place_Name.Content_Script} connection.`, message)
+        panel_messanger.onForward(e => {
+            if (tab.content_messanger) {
+                tab.content_messanger.forward(e)
             } else {
-                tab.config.forwardToClient(message)
+                error(`Cannot forward ${bridge.Place_Name.Panel} -> ${bridge.Place_Name.Content_Script} - ${e.name}:`, e.details)
             }
         })
 
@@ -288,24 +270,11 @@ function panel_and_content_connect(tab: TabData) {
         panel_handle_versions(tab, tab.panel_messanger, tab.versions)
     }
 
-    if (!tab.config) {
-        error(`No ${bridge.Place_Name.Content_Script} connection when ${bridge.Place_Name.Panel} got connected`)
-    } else {
-        /* Force debugger to send state when panel conects */
-        tab.config.forwardToClient({
-            name:       'ResetState',
-            details:    undefined,
-            forwarding: true, // TODO: this shouldn't be a "forward", but not sure how to typesafe send a post to debugger from here
-        })
-
-        // Forward messages from Content Script (client) to Panel
-        tab.config.forwardToDevtools(e => {
-            if (tab.panel_messanger) {
-                tab.panel_messanger.post(e.name as any, e.details)
-            } else {
-                error(`Cannot forward ${bridge.Place_Name.Content_Script} -> ${bridge.Place_Name.Panel} - ${e.name}:`, e.details)
-            }
-        })
-    }
+    /* Force debugger to send state when panel conects */
+    tab.content_messanger.forward({
+        name:       'ResetState',
+        details:    undefined,
+        forwarding: true,
+    })
 }
 

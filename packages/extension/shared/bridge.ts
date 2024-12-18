@@ -46,6 +46,7 @@ export interface PortMessanger<
     post:      PostMessageFn<OM>
     on:        OnMessageFn<IM>
     onForward: (handler: (event: ForwardPayload) => void) => void
+    forward:   (e: ForwardPayload) => void
 }
 
 export function createPortMessanger<
@@ -56,6 +57,7 @@ export function createPortMessanger<
     place_name_conn: string,
     _port: chrome.runtime.Port,
 ): PortMessanger<IM, OM> {
+
     let port: chrome.runtime.Port | null = _port
 
     let forwardHandler: ((e: ForwardPayload) => void) | undefined
@@ -95,7 +97,7 @@ export function createPortMessanger<
     return {
         post: (name, details?: any) => {
             if (!port) {
-                error(`Trying to post ${String(name)} message to disconnected port ${place_name_here} <-> ${place_name_conn}`)
+                error(`Trying to post ${String(name)} to disconnected port ${place_name_here} <-> ${place_name_conn}`)
             } else {
                 port.postMessage({name, details})
             }
@@ -118,6 +120,13 @@ export function createPortMessanger<
         onForward(handler) {
             forwardHandler = handler
         },
+        forward(e) {
+            if (port) {
+                port.postMessage(e)
+            } else {
+                error(`Trying to forward ${e.name} to disconnected port ${place_name_here} <-> ${place_name_conn}`)
+            }
+        }
     }
 }
 
