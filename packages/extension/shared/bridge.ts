@@ -61,10 +61,10 @@ export function createPortMessanger<
     let forwardHandler: ((e: ForwardPayload) => void) | undefined
     let listeners: {[K in any]?: ((e: AnyPayload) => void)[]} = {}
 
-    if (LOG_MESSAGES) log(`${place_name_here}-${place_name_conn} port connected.`)
+    if (LOG_MESSAGES) log(`${place_name_here} <-> ${place_name_conn} port connected.`)
 
     port.onDisconnect.addListener(() => {
-        if (LOG_MESSAGES) log(`${place_name_here}-${place_name_conn} port disconnected.`)
+        if (LOG_MESSAGES) log(`${place_name_here} <-> ${place_name_conn} port disconnected.`)
         listeners = {}
         _port.onMessage.removeListener(onMessage)
         port = null
@@ -95,7 +95,7 @@ export function createPortMessanger<
     return {
         post: (name, details?: any) => {
             if (!port) {
-                error(`Trying to post ${String(name)} message to disconnected port ${place_name_here}-${place_name_conn}`)
+                error(`Trying to post ${String(name)} message to disconnected port ${place_name_here} <-> ${place_name_conn}`)
             } else {
                 port.postMessage({name, details})
             }
@@ -106,7 +106,7 @@ export function createPortMessanger<
             let handler = typeof args[0] === 'string' ? args[1] : args[0]
 
             if (!port) {
-                error(`Trying to listen to disconnected port ${place_name_here}-${place_name_conn}`)
+                error(`Trying to listen to disconnected port ${place_name_here} <-> ${place_name_conn}`)
                 return () => {/**/}
             }
 

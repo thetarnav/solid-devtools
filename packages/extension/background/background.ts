@@ -20,6 +20,9 @@ type TabDataConfig = {
     forwardToClient:   (message: bridge.ForwardPayload) => void
 }
 
+type PortMessanger = bridge.PortMessanger<debug.Debugger.InputChannels,
+                                          debug.Debugger.OutputChannels>
+
 class TabData {
 
     id: number = -1
@@ -31,40 +34,15 @@ class TabData {
         (toContent: bridge.PostMessageFn, fromContent: bridge.OnMessageFn) => void
     >()
 
-    panel_messanger:    bridge.PortMessanger<debug.Debugger.InputChannels,
-                                             debug.Debugger.OutputChannels>
-                        | undefined
-
-    popup_messanger:    bridge.PortMessanger<debug.Debugger.InputChannels,
-                                             debug.Debugger.OutputChannels>
-                        | undefined
-    
-    devtools_messanger: bridge.PortMessanger<debug.Debugger.InputChannels,
-                                             debug.Debugger.OutputChannels>
-                        | undefined
+    panel_messanger:    PortMessanger | undefined
+    popup_messanger:    PortMessanger | undefined
+    devtools_messanger: PortMessanger | undefined
+    content_messanger:  PortMessanger | undefined
 
     detected_state: bridge.DetectionState = {
         Solid:    false,
         SolidDev: false,
         Debugger: false,
-    }
-
-    untilContentScriptConnect(): Promise<{post: bridge.PostMessageFn; on: bridge.OnMessageFn}> {
-        return new Promise(resolve => {
-            if (this.config) {
-                resolve({post: this.config.toContent.bind(this), on: this.config.fromContent.bind(this)})
-            } else {
-                this.connectListeners.add((toContent, fromContent) => {
-                    resolve({post: toContent, on: fromContent})
-                })
-            }
-        })
-    }
-
-    reconnected(config: TabDataConfig) {
-        this.config = config
-
-        bridge.emit(this.connectListeners, config.toContent.bind(this), config.fromContent.bind(this))
     }
 
     versions: bridge.Versions | undefined
@@ -124,17 +102,21 @@ chrome.runtime.onConnect.addListener(async port => {
         // Page was reloaded, so we need to reinitialize the tab data
         if (tab_id === last_disconnected_tab?.id) {
             tab = last_disconnected_tab
-            tab.reconnected(config)
         }
         // A fresh page
         else {
-            tab        = new TabData
-            tab.id     = tab_id
-            tab.config = config
+            tab = new TabData
         }
 
+        tab.id                = tab_id
+        tab.config            = config
+        tab.content_messanger = content_messanger
+
         last_disconnected_tab = null
+
         tab_data_map.set(tab_id, tab)
+
+        panel_and_content_connect(tab)
 
         // "Versions" from content-script
         bridge.once(content_messanger.on, 'Versions', v => {
@@ -146,9 +128,7 @@ chrome.runtime.onConnect.addListener(async port => {
             }
 
             if (tab.panel_messanger) {
-                tab.panel_messanger.post('Versions', v)
-                /* notify the content script that the devtools panel is already open */
-                content_messanger.post('DevtoolsOpened')
+                panel_handle_versions(tab, tab.panel_messanger, v)
             }
 
             if (tab.popup_messanger) {
@@ -165,10 +145,18 @@ chrome.runtime.onConnect.addListener(async port => {
             tab.detected_state = state
         })
 
+        /* Content Script Disconnected */
         port.onDisconnect.addListener(() => {
-            tab.panel_messanger?.post('ResetPanel')
-            tab.config = undefined
+
+            if (tab.panel_messanger) {
+                tab.panel_messanger.post('ResetPanel')
+            }
+
+            tab.config            = undefined
+            tab.content_messanger = undefined
+
             tab_data_map.delete(tab_id)
+
             last_disconnected_tab = tab
         })
 
@@ -186,6 +174,7 @@ chrome.runtime.onConnect.addListener(async port => {
             error(tab)
             break
         }
+        
         let devtools_messanger = bridge.createPortMessanger(
             bridge.Place_Name.Background,
             bridge.Place_Name.Devtools_Script,
@@ -196,10 +185,14 @@ chrome.runtime.onConnect.addListener(async port => {
             devtools_messanger.post('Versions', tab.versions)
         }
 
-        let content_messanger = await tab.untilContentScriptConnect()
-
+        /* Devtools Script Disconnected */
         port.onDisconnect.addListener(() => {
-            content_messanger.post('DevtoolsClosed')
+            
+            tab.devtools_messanger = undefined
+
+            if (tab.content_messanger) {
+                tab.content_messanger.post('DevtoolsClosed')
+            }
         })
 
         break
@@ -218,33 +211,7 @@ chrome.runtime.onConnect.addListener(async port => {
             port)
         tab.panel_messanger = panel_messanger
 
-        let content_messanger = await tab.untilContentScriptConnect()
-
-        if (tab.versions) {
-            panel_messanger.post('Versions', tab.versions)
-            /* notify the content script that the devtools panel is ready */
-            content_messanger.post('DevtoolsOpened')
-        }
-
-        content_messanger.on('ResetPanel', () => {
-            panel_messanger.post('ResetPanel')
-        })
-
-        if (!tab.config) {
-            error(`No ${bridge.Place_Name.Content_Script} connection when ${bridge.Place_Name.Panel} got connected`)
-        } else {
-            /* Force debugger to send state when panel conects */
-            tab.config.forwardToClient({
-                name:       'ResetState',
-                details:    undefined,
-                forwarding: true, // TODO: this shouldn't be a "forward", but not sure how to typesafe send a post to debugger from here
-            })
-
-            // Forward messages from Content Script (client) to Panel
-            tab.config.forwardToDevtools(message => {
-                port.postMessage(message)
-            })
-        }
+        panel_and_content_connect(tab)
 
         // Forward messages from Panel to Content Script (client)
         panel_messanger.onForward(message => {
@@ -255,9 +222,14 @@ chrome.runtime.onConnect.addListener(async port => {
             }
         })
 
+        /* Panel Disconnected */
         port.onDisconnect.addListener(() => {
+
             tab.panel_messanger = undefined
-            content_messanger.post('DevtoolsClosed')
+
+            if (tab.content_messanger) {
+                tab.content_messanger.post('DevtoolsClosed')
+            }
         })
 
         break
@@ -289,3 +261,51 @@ chrome.runtime.onConnect.addListener(async port => {
     }
     }
 })
+
+function panel_handle_versions(tab: TabData, panel_messanger: PortMessanger, versions: bridge.Versions) {
+
+    panel_messanger.post('Versions', versions)
+
+    /* tell client that the devtools panel is ready */
+    if (tab.content_messanger) {
+        tab.content_messanger.post('DevtoolsOpened')
+    } else {
+        error(`Versions available while ${bridge.Place_Name.Content_Script} not connected.`)
+    }
+}
+
+/** 
+ To be called whenever direct connection between content-script and panel needs to be recreated
+ Like when page refreshes or panel gets closed and opened
+*/
+function panel_and_content_connect(tab: TabData) {
+
+    if (!tab.content_messanger || !tab.panel_messanger)
+        return
+
+    /* Client is already connected */
+    if (tab.versions) {
+        panel_handle_versions(tab, tab.panel_messanger, tab.versions)
+    }
+
+    if (!tab.config) {
+        error(`No ${bridge.Place_Name.Content_Script} connection when ${bridge.Place_Name.Panel} got connected`)
+    } else {
+        /* Force debugger to send state when panel conects */
+        tab.config.forwardToClient({
+            name:       'ResetState',
+            details:    undefined,
+            forwarding: true, // TODO: this shouldn't be a "forward", but not sure how to typesafe send a post to debugger from here
+        })
+
+        // Forward messages from Content Script (client) to Panel
+        tab.config.forwardToDevtools(e => {
+            if (tab.panel_messanger) {
+                tab.panel_messanger.post(e.name as any, e.details)
+            } else {
+                error(`Cannot forward ${bridge.Place_Name.Content_Script} -> ${bridge.Place_Name.Panel} - ${e.name}:`, e.details)
+            }
+        })
+    }
+}
+
