@@ -57,7 +57,7 @@ export function createStructure(props: {
     /** root ids correcponding to owners in the update queue */
     const ownerRoots = new Map<Solid.Owner, NodeID>()
     const removedRoots = new Set<NodeID>()
-    let shouldUpdateAllRoots = false
+    let shouldUpdateAllRoots = true
 
     const onComputationUpdate: ComputationUpdateHandler = (
         rootId,
@@ -74,6 +74,7 @@ export function createStructure(props: {
     }
 
     function forceFlushRootUpdateQueue(): void {
+        
         if (props.enabled()) {
             const updated: StructureUpdates['updated'] = {}
 
