@@ -1,5 +1,11 @@
 # solid-devtools-shared
 
+## 0.16.1
+
+### Patch Changes
+
+- 5931162: Log messages recieved.
+
 ## 0.16.0
 
 ### Minor Changes
