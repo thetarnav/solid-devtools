@@ -1,5 +1,15 @@
 # @solid-devtools/debugger
 
+## 0.24.4
+
+### Patch Changes
+
+- 7ee9f7f: First structure flush should update all roots (instead of sending partial update) - Fixes #296
+- 0af688e: Add data-darkreader-ignore attrs to prevent dark reader from messing up the styles
+- 5931162: Log messages recieved.
+- Updated dependencies [5931162]
+  - @solid-devtools/shared@0.16.1
+
 ## 0.24.3
 
 ### Patch Changes
