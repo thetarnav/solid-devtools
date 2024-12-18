@@ -23,24 +23,23 @@ class TabData {
     panel_messanger:    PortMessanger | undefined
     popup_messanger:    PortMessanger | undefined
     devtools_messanger: PortMessanger | undefined
-    content_messanger:  PortMessanger | undefined
 
-    detected_state: bridge.DetectionState = {
-        Solid:    false,
-        SolidDev: false,
-        Debugger: false,
+    content:            undefined | {
+        messanger:      PortMessanger
+        detected_state: bridge.DetectionState | undefined
+        versions:       bridge.Versions | undefined
     }
-
-    versions: bridge.Versions | undefined
 }
 
 const ACTIVE_TAB_QUERY = {active: true, currentWindow: true} as const
 const queryActiveTabId = async (): Promise<number | Error> => {
     try {
-        const tabs = await chrome.tabs.query(ACTIVE_TAB_QUERY)
+        let tabs = await chrome.tabs.query(ACTIVE_TAB_QUERY)
         if (tabs.length === 0) return new Error('No active tab')
-        const tab = tabs[0]!
+
+        let tab = tabs[0]!
         if (!tab.id) return new Error('Active tab has no id')
+        
         return tab.id
     } catch (e) {
         return e instanceof Error ? e : new Error('Unknown error')
@@ -86,8 +85,12 @@ chrome.runtime.onConnect.addListener(async port => {
             tab = new TabData
         }
 
-        tab.id                = tab_id
-        tab.content_messanger = content_messanger
+        tab.id      = tab_id
+        tab.content = {
+            messanger:      content_messanger,
+            versions:       undefined,
+            detected_state: undefined,
+        }
 
         last_disconnected_tab = null
 
@@ -98,7 +101,7 @@ chrome.runtime.onConnect.addListener(async port => {
         // "Versions" from content-script
         bridge.once(content_messanger.on, 'Versions', v => {
 
-            tab.versions = v
+            tab.content!.versions = v
 
             if (tab.devtools_messanger) {
                 tab.devtools_messanger.post('Versions', v)
@@ -119,7 +122,7 @@ chrome.runtime.onConnect.addListener(async port => {
         /* "DetectSolid" from content-script (realWorld) */
         content_messanger.on('Detected', state => {
             tab.popup_messanger?.post('Detected', state)
-            tab.detected_state = state
+            tab.content!.detected_state = state
         })
 
         /* HANDLE FORWARDED MESSAGES FROM CLIENT (content-script) */
@@ -140,7 +143,7 @@ chrome.runtime.onConnect.addListener(async port => {
                 tab.panel_messanger.post('ResetPanel')
             }
 
-            tab.content_messanger = undefined
+            tab.content = undefined
 
             tab_data_map.delete(tab_id)
 
@@ -163,8 +166,8 @@ chrome.runtime.onConnect.addListener(async port => {
             port)
         tab.devtools_messanger = devtools_messanger
 
-        if (tab.versions) {
-            devtools_messanger.post('Versions', tab.versions)
+        if (tab.content && tab.content.versions) {
+            devtools_messanger.post('Versions', tab.content.versions)
         }
 
         /* Devtools Script Disconnected */
@@ -172,8 +175,8 @@ chrome.runtime.onConnect.addListener(async port => {
             
             tab.devtools_messanger = undefined
 
-            if (tab.content_messanger) {
-                tab.content_messanger.post('DevtoolsClosed')
+            if (tab.content) {
+                tab.content.messanger.post('DevtoolsClosed')
             }
         })
 
@@ -197,8 +200,8 @@ chrome.runtime.onConnect.addListener(async port => {
 
         // Forward messages from Panel to Content Script (client)
         panel_messanger.onForward(e => {
-            if (tab.content_messanger) {
-                tab.content_messanger.forward(e)
+            if (tab.content) {
+                tab.content.messanger.forward(e)
             } else {
                 error(`Cannot forward ${bridge.Place_Name.Panel} -> ${bridge.Place_Name.Content_Script} - ${e.name}:`, e.details)
             }
@@ -209,8 +212,8 @@ chrome.runtime.onConnect.addListener(async port => {
 
             tab.panel_messanger = undefined
 
-            if (tab.content_messanger) {
-                tab.content_messanger.post('DevtoolsClosed')
+            if (tab.content) {
+                tab.content.messanger.post('DevtoolsClosed')
             }
         })
 
@@ -229,11 +232,13 @@ chrome.runtime.onConnect.addListener(async port => {
             port)
         tab.popup_messanger = popup_messanger
 
-        if (tab.versions) {
-            popup_messanger.post('Versions', tab.versions)
+        if (tab.content && tab.content.versions) {
+            popup_messanger.post('Versions', tab.content.versions)
         }
 
-        popup_messanger.post('Detected', tab.detected_state)
+        if (tab.content && tab.content.detected_state) {
+            popup_messanger.post('Detected', tab.content.detected_state)
+        }
 
         port.onDisconnect.addListener(() => {
             tab.popup_messanger = undefined
@@ -249,8 +254,8 @@ function panel_handle_versions(tab: TabData, panel_messanger: PortMessanger, ver
     panel_messanger.post('Versions', versions)
 
     /* tell client that the devtools panel is ready */
-    if (tab.content_messanger) {
-        tab.content_messanger.post('DevtoolsOpened')
+    if (tab.content) {
+        tab.content.messanger.post('DevtoolsOpened')
     } else {
         error(`Versions available while ${bridge.Place_Name.Content_Script} not connected.`)
     }
@@ -262,16 +267,16 @@ function panel_handle_versions(tab: TabData, panel_messanger: PortMessanger, ver
 */
 function panel_and_content_connect(tab: TabData) {
 
-    if (!tab.content_messanger || !tab.panel_messanger)
+    if (!tab.content || !tab.panel_messanger)
         return
 
     /* Client is already connected */
-    if (tab.versions) {
-        panel_handle_versions(tab, tab.panel_messanger, tab.versions)
+    if (tab.content.versions) {
+        panel_handle_versions(tab, tab.panel_messanger, tab.content.versions)
     }
 
     /* Force debugger to send state when panel conects */
-    tab.content_messanger.forward({
+    tab.content.messanger.forward({
         name:       'ResetState',
         details:    undefined,
         forwarding: true,
