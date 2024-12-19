@@ -17,13 +17,20 @@ const bg_messanger = bridge.createPortMessanger(
     port)
 
 const [versions, setVersions] = s.createSignal<bridge.Versions | null>(null)
-const [detectionState, setDetectionState] = s.createSignal<bridge.DetectionState>({
+const empty_detection_state: bridge.DetectionState = {
     Solid:    false,
     SolidDev: false,
     Debugger: false,
-})
+}
+const [detectionState, setDetectionState] = s.createSignal(empty_detection_state)
 
-bg_messanger.on('Detected', setDetectionState)
+bg_messanger.on('Detected', e => {
+    if (e) {
+        setDetectionState(e)
+    } else {
+        setDetectionState(empty_detection_state)
+    }
+})
 bg_messanger.on('Versions', setVersions)
 
 const App: s.Component = () => {

@@ -86,8 +86,7 @@ toContent('Debugger_Connected', {
     solid:  debug.meta.versions.get_solid(),
 })
 
-fromContent('DevtoolsOpened', () => debug.toggleEnabled(true))
-fromContent('DevtoolsClosed', () => debug.toggleEnabled(false))
+fromContent('DevtoolsOpened', opened => debug.toggleEnabled(opened))
 
 // pass all the devtools events to the debugger
 fromContent(e => debug.emit(e.name as any, e.details))

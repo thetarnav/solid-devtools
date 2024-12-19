@@ -17,7 +17,7 @@ import detectorPath from './detector.ts?script&module'
 // @ts-expect-error ?script&module query ensures output in ES module format and only import the script path
 import debuggerPath from './debugger.ts?script&module'
 
-if (import.meta.env.DEV) log(bridge.Place_Name.Content_Script+' loaded.')
+if (import.meta.env.DEV) log(bridge.Place_Name.Content+' loaded.')
 
 const extension_version = chrome.runtime.getManifest().version
 
@@ -25,11 +25,11 @@ const port = chrome.runtime.connect({name: bridge.ConnectionName.Content})
 
 let devtools_opened = false
 
-const fromClient = bridge.makeMessageListener(bridge.Place_Name.Content_Script)
+const fromClient = bridge.makeMessageListener(bridge.Place_Name.Content)
 const toClient   = bridge.makePostMessage()
 
 const bg_messanger = bridge.createPortMessanger(
-        bridge.Place_Name.Content_Script,
+        bridge.Place_Name.Content,
         bridge.Place_Name.Background,
         port)
 
@@ -102,17 +102,16 @@ fromClient('Debugger_Connected', versions => {
 
     fromClient('ResetPanel', () => bg_messanger.post('ResetPanel'))
 
-    if (devtools_opened) toClient('DevtoolsOpened')
+    if (devtools_opened) toClient('DevtoolsOpened', devtools_opened)
 })
 
 // After page reload, the content script is reloaded but the background script is not.
 // This means that 'DevtoolsOpened' message will come after the Client is setup.
 // We need to send it after it connects.
-bg_messanger.on('DevtoolsOpened', () => {
-    devtools_opened = true
-    toClient('DevtoolsOpened')
+bg_messanger.on('DevtoolsOpened', opened => {
+    devtools_opened = opened
+    toClient('DevtoolsOpened', opened)
 })
-bg_messanger.on('DevtoolsClosed', () => toClient('DevtoolsClosed'))
 
 fromClient(e => {
     // forward all client messages to the background script in

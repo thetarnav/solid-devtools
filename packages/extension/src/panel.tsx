@@ -21,18 +21,30 @@ const bg_messanger = bridge.createPortMessanger
         port)
 
 function App() {
-    const [versions, setVersions] = createSignal<bridge.Versions>({
-        solid: '',
-        client: '',
+    const empty_versions: bridge.Versions = {
+        solid:          '',
+        client:         '',
         expectedClient: '',
-        extension: '',
-    })
+        extension:      '',
+    }
 
-    bridge.once(bg_messanger.on, 'Versions', setVersions)
+    const [versions, setVersions] = createSignal<bridge.Versions>(empty_versions)
+
+    bridge.once(bg_messanger.on, 'Versions', e => {
+        if (e) {
+            setVersions(e)
+        } else {
+            setVersions(empty_versions)
+        }
+    })
 
     const devtools = createDevtools()
 
-    devtools.bridge.output.listen(e => bg_messanger.post(e.name, e.details))
+    devtools.bridge.output.listen(e => bg_messanger.forward({
+        name:       e.name,
+        details:    e.details,
+        forwarding: true,
+    }))
 
     bg_messanger.on(e => {
         // some events are internal and should not be forwarded to the devtools

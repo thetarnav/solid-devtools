@@ -7,279 +7,287 @@ It has to coordinate the communication between the different scripts based on th
 */
 
 import {error, log} from '@solid-devtools/shared/utils'
-import * as debug   from '@solid-devtools/debugger/types'
 import * as bridge  from './bridge.ts'
 import * as icons   from './icons.ts'
 
+
 log(bridge.Place_Name.Background+' loaded.')
 
-type PortMessanger = bridge.PortMessanger<debug.Debugger.InputChannels,
-                                          debug.Debugger.OutputChannels>
 
-class TabData {
+type Tab_Id = number & {__Tab_Id__: true}
 
-    id: number = -1
+let active_tab_id: Tab_Id = 0 as Tab_Id
 
-    panel_messanger:    PortMessanger | undefined
-    popup_messanger:    PortMessanger | undefined
-    devtools_messanger: PortMessanger | undefined
-
-    content:            undefined | {
-        messanger:      PortMessanger
-        detected_state: bridge.DetectionState | undefined
-        versions:       bridge.Versions | undefined
-    }
-}
-
-const ACTIVE_TAB_QUERY = {active: true, currentWindow: true} as const
-const queryActiveTabId = async (): Promise<number | Error> => {
-    try {
-        let tabs = await chrome.tabs.query(ACTIVE_TAB_QUERY)
-        if (tabs.length === 0) return new Error('No active tab')
-
-        let tab = tabs[0]!
-        if (!tab.id) return new Error('Active tab has no id')
-
-        return tab.id
-    } catch (e) {
-        return e instanceof Error ? e : new Error('Unknown error')
-    }
-}
-
-const tab_data_map = new Map<number, TabData>()
-
-const getActiveTabData = async (): Promise<TabData | Error> => {
-
-    let active_tab_id = await queryActiveTabId()
-    if (active_tab_id instanceof Error) return active_tab_id
-
-    let data = tab_data_map.get(active_tab_id)
-    if (!data) return new Error(`No data for active tab "${active_tab_id}"`)
-
-    return data
-}
-
-// for reconnecting after page reload
-let last_disconnected_tab: TabData | null = null
-
-chrome.runtime.onConnect.addListener(async port => {
-
-    switch (port.name) {
-    case bridge.ConnectionName.Content: {
-        const tab_id = port.sender?.tab?.id
-        if (typeof tab_id !== 'number') break
-
-        const content_messanger = bridge.createPortMessanger(
-            bridge.Place_Name.Background,
-            bridge.Place_Name.Content_Script,
-            port)
-
-        let tab: TabData
-
-        // Page was reloaded, so we need to reinitialize the tab data
-        if (tab_id === last_disconnected_tab?.id) {
-            tab = last_disconnected_tab
-        }
-        // A fresh page
-        else {
-            tab = new TabData
-        }
-
-        tab.id      = tab_id
-        tab.content = {
-            messanger:      content_messanger,
-            versions:       undefined,
-            detected_state: undefined,
-        }
-
-        last_disconnected_tab = null
-
-        tab_data_map.set(tab_id, tab)
-
-        panel_and_content_connect(tab)
-
-        // "Versions" from content-script
-        bridge.once(content_messanger.on, 'Versions', v => {
-
-            tab.content!.versions = v
-
-            if (tab.devtools_messanger) {
-                tab.devtools_messanger.post('Versions', v)
-            }
-
-            if (tab.panel_messanger) {
-                panel_handle_versions(tab, tab.panel_messanger, v)
-            }
-
-            if (tab.popup_messanger) {
-                tab.popup_messanger.post('Versions', v)
-            }
-
-            /* Change the popup icon to indicate that Solid is present on the page */
-            chrome.action.setIcon({tabId: tab_id, path: icons.blue})
-        })
-
-        /* "DetectSolid" from content-script (realWorld) */
-        content_messanger.on('Detected', state => {
-            tab.popup_messanger?.post('Detected', state)
-            tab.content!.detected_state = state
-        })
-
-        /* HANDLE FORWARDED MESSAGES FROM CLIENT (content-script) */
-        port.onMessage.addListener((e: bridge.ForwardPayload | any) => {
-            if (bridge.isForwardMessage(e)) {
-                if (tab.panel_messanger) {
-                    tab.panel_messanger.post(e.name as any, e.details)
-                } else {
-                    error(`Cannot forward ${bridge.Place_Name.Content_Script} -> ${bridge.Place_Name.Panel} - ${e.name}:`, e.details)
-                }
-            }
-        })
-
-        /* Content Script Disconnected */
-        port.onDisconnect.addListener(() => {
-
-            if (tab.panel_messanger) {
-                tab.panel_messanger.post('ResetPanel')
-            }
-
-            tab.content = undefined
-
-            tab_data_map.delete(tab_id)
-
-            last_disconnected_tab = tab
-        })
-
-        break
-    }
-
-    case bridge.ConnectionName.Devtools: {
-        let tab = await getActiveTabData()
-        if (tab instanceof Error) {
-            error(tab)
-            break
-        }
-
-        let devtools_messanger = bridge.createPortMessanger(
-            bridge.Place_Name.Background,
-            bridge.Place_Name.Devtools_Script,
-            port)
-        tab.devtools_messanger = devtools_messanger
-
-        if (tab.content && tab.content.versions) {
-            devtools_messanger.post('Versions', tab.content.versions)
-        }
-
-        /* Devtools Script Disconnected */
-        port.onDisconnect.addListener(() => {
-
-            tab.devtools_messanger = undefined
-
-            if (tab.content) {
-                tab.content.messanger.post('DevtoolsClosed')
-            }
-        })
-
-        break
-    }
-
-    case bridge.ConnectionName.Panel: {
-        let tab = await getActiveTabData()
-        if (tab instanceof Error) {
-            error(tab)
-            break
-        }
-
-        let panel_messanger = bridge.createPortMessanger(
-            bridge.Place_Name.Background,
-            bridge.Place_Name.Panel,
-            port)
-        tab.panel_messanger = panel_messanger
-
-        panel_and_content_connect(tab)
-
-        // Forward messages from Panel to Content Script (client)
-        panel_messanger.onForward(e => {
-            if (tab.content) {
-                tab.content.messanger.forward(e)
-            } else {
-                error(`Cannot forward ${bridge.Place_Name.Panel} -> ${bridge.Place_Name.Content_Script} - ${e.name}:`, e.details)
-            }
-        })
-
-        /* Panel Disconnected */
-        port.onDisconnect.addListener(() => {
-
-            tab.panel_messanger = undefined
-
-            if (tab.content) {
-                tab.content.messanger.post('DevtoolsClosed')
-            }
-        })
-
-        break
-    }
-
-    case bridge.ConnectionName.Popup: {
-        let tab = await getActiveTabData()
-        if (tab instanceof Error) {
-            error(tab)
-            break
-        }
-        let popup_messanger = bridge.createPortMessanger(
-            bridge.Place_Name.Background,
-            bridge.Place_Name.Popup,
-            port)
-        tab.popup_messanger = popup_messanger
-
-        if (tab.content && tab.content.versions) {
-            popup_messanger.post('Versions', tab.content.versions)
-        }
-
-        if (tab.content && tab.content.detected_state) {
-            popup_messanger.post('Detected', tab.content.detected_state)
-        }
-
-        port.onDisconnect.addListener(() => {
-            tab.popup_messanger = undefined
-        })
-
-        break
-    }
-    }
+chrome.tabs.onActivated.addListener((info) => {
+    active_tab_id = info.tabId as Tab_Id
 })
 
-function panel_handle_versions(tab: TabData, panel_messanger: PortMessanger, versions: bridge.Versions) {
-
-    panel_messanger.post('Versions', versions)
-
-    /* tell client that the devtools panel is ready */
-    if (tab.content) {
-        tab.content.messanger.post('DevtoolsOpened')
-    } else {
-        error(`Versions available while ${bridge.Place_Name.Content_Script} not connected.`)
+function assert(condition: any, message?: string, cause?: any): asserts condition {
+    if (!condition) {
+        throw Error(message ?? 'Assertion failed', {cause})
     }
 }
 
-/**
- To be called whenever direct connection between content-script and panel needs to be recreated
- Like when page refreshes or panel gets closed and opened
-*/
-function panel_and_content_connect(tab: TabData) {
+function get_assert_tab_id(port: Port, place: bridge.Place_Name): Tab_Id {
+    let tab_id = port.sender?.tab?.id
+    assert(tab_id, `${place} has no port sender tab id.`, port)
+    return tab_id as Tab_Id
+}
 
-    if (!tab.content || !tab.panel_messanger)
-        return
+type Port = chrome.runtime.Port
 
-    /* Client is already connected */
-    if (tab.content.versions) {
-        panel_handle_versions(tab, tab.panel_messanger, tab.content.versions)
-    }
+function post_message<K extends keyof bridge.Channels>(
+    port: Port, name: K, details: bridge.Channels[K],
+) {
+    port.postMessage({name, details})
+}
+function post_message_obj(port: Port, e: bridge.Message) {
+    port.postMessage(e)
+}
 
-    /* Force debugger to send state when panel conects */
-    tab.content.messanger.forward({
-        name:       'ResetState',
-        details:    undefined,
-        forwarding: true,
+type Script_Popup = {
+    port:      Port
+}
+type Script_Panel = {
+    tab_id:    Tab_Id
+    port:      Port
+}
+type Script_Devtools = {
+    tab_id:    Tab_Id
+    port:      Port
+}
+type Script_Content = {
+    tab_id:    Tab_Id
+    port:      Port
+    detection: bridge.DetectionState | null
+    versions:  bridge.Versions       | null
+}
+
+let popup: Script_Popup | undefined
+
+const script_panel_map    = new Map<Tab_Id, Script_Panel>()
+const script_devtools_map = new Map<Tab_Id, Script_Devtools>()
+const script_content_map  = new Map<Tab_Id, Script_Content>()
+
+chrome.runtime.onConnect.addListener(port => {
+
+    on_connected(port)
+
+    port.onMessage.addListener(_e => {
+        let e = bridge.to_message(_e)
+        if (e) on_message(port, e)
     })
+
+    port.onDisconnect.addListener(() => {
+        on_disconnected(port)
+    })
+})
+
+function on_connected(port: Port) {
+
+    DEV: {log('Port connected', port)}
+
+    switch (port.name) {
+    case bridge.ConnectionName.Popup: {
+        popup = {port}
+
+        let content = script_content_map.get(active_tab_id)
+        if (content) {
+            post_message(popup.port, 'Detected', content.detection)
+            post_message(popup.port, 'Versions', content.versions)
+        }
+
+        break
+    }
+    case bridge.ConnectionName.Content: {
+        let tab_id = get_assert_tab_id(port, bridge.Place_Name.Content)
+
+        let content: Script_Content = {
+            port:      port,
+            tab_id:    tab_id,
+            detection: null,
+            versions:  null,
+        }
+        script_content_map.set(tab_id, content)
+
+        let panel = script_panel_map.get(tab_id)
+        if (panel) {
+            post_message(content.port, 'DevtoolsOpened', true)
+
+            post_message_obj(content.port, {
+                name:       'ResetState',
+                details:    undefined,
+                forwarding: true,
+            })
+        }
+
+        break
+    }
+    case bridge.ConnectionName.Devtools: {
+
+        let devtools: Script_Devtools = {port, tab_id: active_tab_id}
+        script_devtools_map.set(active_tab_id, devtools)
+
+        let content = script_content_map.get(active_tab_id)
+        if (content) {
+            post_message(port, 'Versions', content.versions)
+        }
+
+        break
+    }
+    case bridge.ConnectionName.Panel: {
+
+        let panel: Script_Panel = {port, tab_id: active_tab_id}
+        script_panel_map.set(active_tab_id, panel)
+
+        let content = script_content_map.get(active_tab_id)
+        if (content) {
+            post_message(port, 'Versions', content.versions)
+
+            post_message(content.port, 'DevtoolsOpened', true)
+
+            post_message_obj(content.port, {
+                name:       'ResetState',
+                details:    undefined,
+                forwarding: true,
+            })
+        }
+
+        break
+    }
+    }
 }
 
+function on_disconnected(port: Port) {
+
+    DEV: {log('Port disconnected', port)}
+
+    switch (port.name) {
+    case bridge.ConnectionName.Popup: {
+        popup = undefined
+        break
+    }
+    case bridge.ConnectionName.Content: {
+        let tab_id = get_assert_tab_id(port, bridge.Place_Name.Content)
+        script_content_map.delete(tab_id)
+
+        if (popup) {
+            post_message(popup.port, 'Detected', null)
+            post_message(popup.port, 'Versions', null)
+        }
+
+        let panel = script_panel_map.get(tab_id)
+        if (panel) {
+            post_message(panel.port, 'Versions', null)
+            post_message(panel.port, 'ResetPanel', undefined)
+        }
+
+        let devtools = script_devtools_map.get(tab_id)
+        if (devtools) {
+            post_message(devtools.port, 'Versions', null)
+        }
+
+
+        // Change the popup icon back to gray
+        chrome.action.setIcon({tabId: tab_id, path: icons.gray})
+
+        break
+    }
+    case bridge.ConnectionName.Devtools: {
+        script_devtools_map.delete(active_tab_id)
+
+        let content = script_content_map.get(active_tab_id)
+        if (content) {
+            post_message(content.port, 'DevtoolsOpened', false)
+        }
+
+        break
+    }
+    case bridge.ConnectionName.Panel: {
+        script_panel_map.delete(active_tab_id)
+
+        let content = script_content_map.get(active_tab_id)
+        if (content) {
+            post_message(content.port, 'DevtoolsOpened', false)
+        }
+
+        break
+    }
+    }
+}
+
+function on_message(port: Port, e: bridge.Message) {
+
+    DEV: {log('Message', e, 'from', port)}
+
+    switch (port.name) {
+    case bridge.ConnectionName.Popup: {
+        break
+    }
+    case bridge.ConnectionName.Content: {
+        let tab_id = get_assert_tab_id(port, bridge.Place_Name.Content)
+
+        let content = script_content_map.get(tab_id)
+        assert(content)
+
+        // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
+        switch (e.name) {
+        case 'Detected': {
+            content.detection = e.details
+
+            if (popup) {
+                post_message_obj(popup.port, e)
+            }
+
+            // Change the popup icon to indicate that Solid is present on the page
+            chrome.action.setIcon({tabId: tab_id, path: icons.blue})
+
+            break
+        }
+        case 'Versions': {
+            content.versions = e.details
+
+            if (popup) {
+                post_message_obj(popup.port, e)
+            }
+
+            let devtools = script_devtools_map.get(tab_id)
+            if (devtools) {
+                post_message_obj(devtools.port, e)
+            }
+
+            let panel = script_panel_map.get(tab_id)
+            if (panel) {
+                post_message_obj(panel.port, e)
+            }
+
+            break
+        }
+        default: {
+            // Forward all other messages to panel
+            let panel = script_panel_map.get(tab_id)
+            if (panel) {
+                post_message_obj(panel.port, e)
+            }
+        }
+        }
+
+        break
+    }
+    case bridge.ConnectionName.Devtools: {
+        break
+    }
+    case bridge.ConnectionName.Panel: {
+
+        // Forward all messages to Content
+        let content = script_content_map.get(active_tab_id)
+        if (content) {
+            post_message_obj(content.port, e)
+        } else {
+            error(`Cannot forward ${bridge.Place_Name.Panel} -> ${bridge.Place_Name.Content} - ${e.name}:`, e.details)
+        }
+        
+        break
+    }
+    }
+}

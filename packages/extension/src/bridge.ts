@@ -5,12 +5,13 @@ File for utilities, constants and types related to the communication between the
 */
 
 import {error, log, log_message} from '@solid-devtools/shared/utils'
+import * as debug from '@solid-devtools/debugger/types'
 
 export const DEVTOOLS_ID_PREFIX = '[solid-devtools]_'
 
 export const enum Place_Name {
-    Content_Script      = 'Content_Script',
-    Devtools_Script     = 'Devtools_Script',
+    Content             = 'Content_Script',
+    Devtools            = 'Devtools_Script',
     Popup               = 'Popup',
     Panel               = 'Panel',
     Background          = 'Background',
@@ -19,8 +20,8 @@ export const enum Place_Name {
 }
 
 export const enum ConnectionName {
-    Content  = DEVTOOLS_ID_PREFIX+Place_Name.Content_Script,
-    Devtools = DEVTOOLS_ID_PREFIX+Place_Name.Devtools_Script,
+    Content  = DEVTOOLS_ID_PREFIX+Place_Name.Content,
+    Devtools = DEVTOOLS_ID_PREFIX+Place_Name.Devtools,
     Popup    = DEVTOOLS_ID_PREFIX+Place_Name.Popup,
     Panel    = DEVTOOLS_ID_PREFIX+Place_Name.Panel,
 }
@@ -61,7 +62,7 @@ export function createPortMessanger<
     let port: chrome.runtime.Port | null = _port
 
     let forwardHandler: ((e: ForwardPayload) => void) | undefined
-    let listeners: {[K in any]?: ((e: AnyPayload) => void)[]} = {}
+    let listeners: {[K in any]?: ((e: any) => void)[]} = {}
 
     if (LOG_MESSAGES) log(`${place_name_here} <-> ${place_name_conn} port connected.`)
 
@@ -72,24 +73,20 @@ export function createPortMessanger<
         port = null
     })
 
-    function onMessage(e: any) {
+    function onMessage(_e: any) {
 
-        if (!e || typeof e !== 'object') return
-
-        let name    = e['name']
-        let details = e['details']
-
-        if (typeof name !== 'string') return
+        let e = to_message(_e)
+        if (!e) return
 
         if (LOG_MESSAGES) {log_message(place_name_here, place_name_conn, e)}
 
-        let arr = listeners[name]
-        if (arr) emit(arr, details)
+        let arr = listeners[e.name]
+        if (arr) emit(arr, e.details)
 
         let arr2 = listeners['*']
-        if (arr2) emit(arr2, {name, details})
+        if (arr2) emit(arr2, e)
         else if (forwardHandler) {
-            forwardHandler({name, details, forwarding: true})
+            forwardHandler({name: e.name, details: e.details, forwarding: true})
         }
     }
     port.onMessage.addListener(onMessage)
@@ -114,7 +111,7 @@ export function createPortMessanger<
 
             let arr = listeners[name] ?? (listeners[name] = [])
             arr.push(handler)
-            
+
             return () => (listeners[name] = arr.filter(l => l !== handler) as any)
         },
         onForward(handler) {
@@ -137,40 +134,57 @@ export type Versions = {
     extension: string
 }
 
-export interface GeneralMessages {
+export interface GeneralChannels {
     // client -> content -> devtools.html
-    Detected: DetectionState
+    Detected: DetectionState | null
 
     // the `string` payload is the main version
     Debugger_Connected: {
         solid:  string | null
         client: string | null
     }
-    Versions: Versions
+    Versions: Versions | null
 
     /** devtools -> client: the chrome devtools got opened or entirely closed */
-    DevtoolsOpened: void
-    DevtoolsClosed: void
+    DevtoolsOpened: boolean
 
     ResetPanel: void
 }
 
+export type Channels = debug.Debugger.InputChannels
+              & debug.Debugger.OutputChannels
+              & GeneralChannels
+
+export type Message = {
+    [K in keyof Channels]: {
+        name:        K,
+        details:     Channels[K],
+        forwarding?: boolean,
+    }
+}[keyof Channels]
+
+export function to_message(e: any): Message | null {
+    return e && typeof e === 'object' && typeof e['name'] === 'string'
+        ? e
+        : null
+}
+
 export type PostMessageFn<M extends Record<string, any> = Record<never, never>> = <
-    K extends keyof (GeneralMessages & M),
+    K extends keyof (GeneralChannels & M),
 >(
     type: K,
-    ..._: void extends (GeneralMessages & M)[K]
-        ? [payload?: (GeneralMessages & M)[K]]
-        : [payload: (GeneralMessages & M)[K]]
+    ..._: void extends (GeneralChannels & M)[K]
+        ? [payload?: (GeneralChannels & M)[K]]
+        : [payload: (GeneralChannels & M)[K]]
 ) => void
 
 export type OnMessageFn<M extends Record<string, any> = Record<never, never>> = {
-    <K extends keyof (GeneralMessages & M)>(
+    <K extends keyof (GeneralChannels & M)>(
         name: K,
-        handler: (payload: (GeneralMessages & M)[K]) => void,
+        handler: (payload: (GeneralChannels & M)[K]) => void,
     ): VoidFunction
-    <K extends keyof (GeneralMessages & M)>(
-        handler: (e: {name: K; details: (GeneralMessages & M)[K]}) => void,
+    <K extends keyof (GeneralChannels & M)>(
+        handler: (e: {name: K; details: (GeneralChannels & M)[K]}) => void,
     ): VoidFunction
 }
 
@@ -179,29 +193,25 @@ export const makePostMessage: <M extends Record<string, any>>() => PostMessageFn
         postMessage({name, details}, '*')
 
 
-const window_listeners: {[K in any]?: ((e: AnyPayload) => void)[]} = {}
+const window_listeners: {[K in any]?: ((e: any) => void)[]} = {}
 
 export function makeMessageListener
     <M extends Record<string, any>>
     (place_name: Place_Name): OnMessageFn<M>
 {
 
-    addEventListener('message', e => {
-        
-        if (!e.data || typeof e.data !== 'object') return
+    addEventListener('message', _e => {
 
-        let name    = e.data['name']
-        let details = e.data['details']
+        let e = to_message(_e.data)
+        if (!e) return
 
-        if (typeof name !== 'string') return
+        if (LOG_MESSAGES) {log_message(place_name, 'Window', e)}
 
-        if (LOG_MESSAGES) {log_message(place_name, 'Window', e.data)}
-
-        let arr = window_listeners[name]
-        if (arr) emit(arr, details)
+        let arr = window_listeners[e.name]
+        if (arr) emit(arr, e.details)
 
         let arr2 = window_listeners['*']
-        if (arr2) emit(arr2, {name, details})
+        if (arr2) emit(arr2, e)
     })
 
     return (...args: [any, any] | [any]) => {
@@ -226,10 +236,10 @@ export const forwardMessageToWindow = (message: ForwardPayload) => {
     postMessage({name: message.name, details: message.details}, '*')
 }
 
-export function once<M extends Record<string, any>, K extends keyof (GeneralMessages & M)>(
+export function once<M extends Record<string, any>, K extends keyof (GeneralChannels & M)>(
     method: OnMessageFn<M>,
     name: K,
-    handler: (details: (GeneralMessages & M)[K]) => void,
+    handler: (details: (GeneralChannels & M)[K]) => void,
 ): VoidFunction {
     const unsub = method(name, (...cbArgs) => {
         unsub()

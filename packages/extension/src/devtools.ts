@@ -11,13 +11,13 @@ import {error, log} from '@solid-devtools/shared/utils'
 import * as bridge from './bridge.ts'
 import * as icons from './icons.ts'
 
-log(bridge.Place_Name.Devtools_Script+' loaded.')
+log(bridge.Place_Name.Devtools+' loaded.')
 
 // Create a connection to the background page
 const port = chrome.runtime.connect({name: bridge.ConnectionName.Devtools})
 
 const bg_messanger = bridge.createPortMessanger(
-    bridge.Place_Name.Devtools_Script,
+    bridge.Place_Name.Devtools,
     bridge.Place_Name.Background,
     port)
 

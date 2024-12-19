@@ -106,6 +106,9 @@ const vite_config: vite.UserConfig = {
         },
         target: 'esnext',
     },
+    esbuild: {
+        dropLabels: [is_dev ? 'PROD' : 'DEV'],
+    },
     optimizeDeps: {
         exclude: ['@solid-devtools/debugger'],
     },
