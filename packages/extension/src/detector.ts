@@ -7,7 +7,7 @@ and notify the content script
 
 import {detectSolid, onSolidDevDetect, onSolidDevtoolsDetect} from '@solid-devtools/shared/detect'
 import {log, warn} from '@solid-devtools/shared/utils'
-import * as bridge from '../shared/bridge.ts'
+import * as bridge from './bridge.ts'
 
 if (import.meta.env.DEV) log(bridge.Place_Name.Detector_Real_World+' loaded.')
 

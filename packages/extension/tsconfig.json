@@ -4,13 +4,5 @@
         "outDir": "dist",
         "types": ["vite/client", "@types/chrome"],
     },
-    "include": [
-        "panel/**/*",
-        "background/**/*",
-        "content/**/*",
-        "devtools/**/*",
-        "shared/**/*",
-        "popup/**/*",
-        "env.d.ts"
-    ]
+    "include": ["src/**/*"]
 }

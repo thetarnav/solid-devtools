@@ -8,8 +8,8 @@ It connects to the background script.
 */
 
 import {error, log} from '@solid-devtools/shared/utils'
-import * as bridge from '../shared/bridge.ts'
-import * as icons from '../shared/icons.ts'
+import * as bridge from './bridge.ts'
+import * as icons from './icons.ts'
 
 log(bridge.Place_Name.Devtools_Script+' loaded.')
 
@@ -32,7 +32,7 @@ bridge.once(bg_messanger.on, 'Versions', () => {
     chrome.devtools.panels.create(
         'Solid',
         PATH_PREFIX + icons.OUTLINE_32,
-        PATH_PREFIX + 'index.html',
+        PATH_PREFIX + 'src/panel.html',
         () => {
             if (chrome.runtime.lastError) {
                 error('Creating Devtools_Panel Failed', chrome.runtime.lastError)

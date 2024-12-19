@@ -8,7 +8,7 @@ Debugger Client injected into the inspected page
 import {useDebugger} from '@solid-devtools/debugger'
 import {type Debugger} from '@solid-devtools/debugger/types'
 import {log, warn} from '@solid-devtools/shared/utils'
-import * as bridge from '../shared/bridge.ts'
+import * as bridge from './bridge.ts'
 
 if (import.meta.env.DEV) log(bridge.Place_Name.Debugger_Real_World+' loaded.')
 

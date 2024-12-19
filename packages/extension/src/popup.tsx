@@ -3,7 +3,7 @@
 import * as s from 'solid-js'
 import {render} from 'solid-js/web'
 import {log} from '@solid-devtools/shared/utils'
-import * as bridge from '../shared/bridge.ts'
+import * as bridge from './bridge.ts'
 
 import './popup.css'
 

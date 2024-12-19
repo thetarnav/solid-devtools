@@ -7,7 +7,7 @@ import {render} from 'solid-js/web'
 import {type Debugger} from '@solid-devtools/debugger/types'
 import {log} from '@solid-devtools/shared/utils'
 import {createDevtools, MountIcons} from '@solid-devtools/frontend'
-import * as bridge from '../shared/bridge.ts'
+import * as bridge from './bridge.ts'
 
 import '@solid-devtools/frontend/dist/styles.css'
 

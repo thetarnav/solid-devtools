@@ -10,12 +10,12 @@ This script is injected into every page and is responsible for:
 */
 
 import {error, log} from '@solid-devtools/shared/utils'
-import * as bridge from '../shared/bridge.ts'
+import * as bridge from './bridge.ts'
 
 // @ts-expect-error ?script&module query ensures output in ES module format and only import the script path
-import detectorPath from './detector?script&module'
+import detectorPath from './detector.ts?script&module'
 // @ts-expect-error ?script&module query ensures output in ES module format and only import the script path
-import debuggerPath from './debugger?script&module'
+import debuggerPath from './debugger.ts?script&module'
 
 if (import.meta.env.DEV) log(bridge.Place_Name.Content_Script+' loaded.')
 
@@ -85,7 +85,7 @@ window.addEventListener('message', e => {
 })
 
 fromClient('Debugger_Connected', versions => {
-    
+
     // eslint-disable-next-line no-console
     console.log(
         '🚧 %csolid-devtools%c is in early development! 🚧\nPlease report any bugs to https://github.com/thetarnav/solid-devtools/issues',

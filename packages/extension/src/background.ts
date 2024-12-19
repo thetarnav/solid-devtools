@@ -7,9 +7,9 @@ It has to coordinate the communication between the different scripts based on th
 */
 
 import {error, log} from '@solid-devtools/shared/utils'
-import * as bridge  from '../shared/bridge.ts'
-import * as icons   from '../shared/icons.ts'
 import * as debug   from '@solid-devtools/debugger/types'
+import * as bridge  from './bridge.ts'
+import * as icons   from './icons.ts'
 
 log(bridge.Place_Name.Background+' loaded.')
 
@@ -39,7 +39,7 @@ const queryActiveTabId = async (): Promise<number | Error> => {
 
         let tab = tabs[0]!
         if (!tab.id) return new Error('Active tab has no id')
-        
+
         return tab.id
     } catch (e) {
         return e instanceof Error ? e : new Error('Unknown error')
@@ -159,7 +159,7 @@ chrome.runtime.onConnect.addListener(async port => {
             error(tab)
             break
         }
-        
+
         let devtools_messanger = bridge.createPortMessanger(
             bridge.Place_Name.Background,
             bridge.Place_Name.Devtools_Script,
@@ -172,7 +172,7 @@ chrome.runtime.onConnect.addListener(async port => {
 
         /* Devtools Script Disconnected */
         port.onDisconnect.addListener(() => {
-            
+
             tab.devtools_messanger = undefined
 
             if (tab.content) {
@@ -261,7 +261,7 @@ function panel_handle_versions(tab: TabData, panel_messanger: PortMessanger, ver
     }
 }
 
-/** 
+/**
  To be called whenever direct connection between content-script and panel needs to be recreated
  Like when page refreshes or panel gets closed and opened
 */

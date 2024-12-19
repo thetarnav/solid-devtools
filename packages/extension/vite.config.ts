@@ -5,7 +5,7 @@ import * as assert from 'node:assert'
 import * as vite   from 'vite'
 import      solid  from 'vite-plugin-solid'
 import      pkg    from './package.json' with {type: 'json'}
-import * as icons  from './shared/icons.js'
+import * as icons  from './src/icons.ts'
 
 const require = module.createRequire(import.meta.url)
 
@@ -42,40 +42,26 @@ const manifest: crx.ManifestV3Export & Manifest_Additional_Fields = {
         : {gecko: {id: '{abfd162e-9948-403a-a75c-6e61184e1d47}'}},
     author: is_chrome ? {email: 'gthetarnav@gmail.com'} : 'Damian Tarnawski' as any,
     minimum_chrome_version: '94',
-    devtools_page: 'devtools/devtools.html',
-    /*
-     TODO: instead of running a content script on document start for every url
-     could potentially be replaced with `permissions: ['activeTab']`,
-     removing the content_script field
-     and running the content script programatically in bg script
-
-     chrome.action.onClicked.addListener((tab) => {
-         if (tab.id) chrome.scripting.executeScript({
-             target: { tabId: tab.id },
-             files: ['content/content.ts'],
-         });
-     });
-
-    */
+    devtools_page: 'src/devtools.html',
     content_scripts: [{
         matches: ['*://*/*'],
-        js: ['content/content.ts'],
+        js: ['src/content.ts'],
         run_at: 'document_start',
     }],
     background: is_chrome
         ? {
-            service_worker: 'background/background.ts',
+            service_worker: 'src/background.ts',
             type: 'module',
         }
         : {
-            scripts: ['background/background.ts'],
+            scripts: ['src/background.ts'],
             type: 'module',
         },
     permissions: [],
     action: {
         default_icon:  icons.gray,
         default_title: 'Solid Devtools',
-        default_popup: 'popup/popup.html',
+        default_popup: 'src/popup.html',
     },
     icons: icons.blue,
 }
@@ -114,7 +100,9 @@ const vite_config: vite.UserConfig = {
         emptyOutDir: !is_dev,
         outDir: 'dist/' + browser,
         rollupOptions: {
-            input: {panel: 'index.html'},
+            // adds panel as additional input because it's not a part of the manifest
+            // and is loaded dynamically in devtools.ts
+            input: {panel: 'src/panel.html'},
         },
         target: 'esnext',
     },
