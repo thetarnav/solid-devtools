@@ -22,6 +22,16 @@ chrome.tabs.onActivated.addListener((info) => {
     active_tab_id = info.tabId as Tab_Id
 })
 
+/* Get initial tab id */
+chrome.tabs
+    .query({active: true, currentWindow: true})
+    .then(tabs => {
+        let id = tabs[0]?.id
+        if (id) {
+            active_tab_id = id as Tab_Id
+        }
+    })
+
 function assert(condition: any, message?: string, cause?: any): asserts condition {
     if (!condition) {
         throw Error(message ?? 'Assertion failed', {cause})
@@ -33,8 +43,6 @@ function get_assert_tab_id(port: bridge.Port, place: bridge.Place_Name): Tab_Id 
     assert(tab_id, `${place} has no port sender tab id.`, port)
     return tab_id as Tab_Id
 }
-
-
 
 type Script_Popup = {
     port:      bridge.Port
