@@ -153,6 +153,13 @@ function on_disconnected(port: bridge.Port) {
     }
     case bridge.ConnectionName.Content: {
         let tab_id = get_assert_tab_id(port, bridge.Place_Name.Content)
+
+        let content = script_content_map.get(tab_id)!
+        if (content.port !== port) {
+            // Sometimes new Content Script can load before the old disconnects
+            return
+        }
+
         script_content_map.delete(tab_id)
 
         if (popup) {

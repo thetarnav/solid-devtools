@@ -17,13 +17,9 @@ import detector_path from './detector.ts?script&module'
 // @ts-expect-error ?script&module query ensures output in ES module format and only import the script path
 import debugger_path from './debugger.ts?script&module'
 
+
 if (import.meta.env.DEV) log(bridge.Place_Name.Content+' loaded.')
 
-const extension_version = chrome.runtime.getManifest().version
-
-const port = chrome.runtime.connect({name: bridge.ConnectionName.Content})
-
-let devtools_opened = false
 
 function loadScriptInRealWorld(path: string): Promise<void> {
     return new Promise((resolve, reject) => {
@@ -36,24 +32,40 @@ function loadScriptInRealWorld(path: string): Promise<void> {
         script.addEventListener('load', () => resolve())
 
         /* The script should execute as soon as possible */
-        const head = (document.head as HTMLHeadElement | null) || document.documentElement
-        if (head.firstChild) {
-            head.insertBefore(script, head.firstChild)
-        } else {
-            head.appendChild(script)
-        }
+        const mount = (document.head as HTMLHeadElement | null) || document.documentElement
+        mount.appendChild(script)
     })
 }
 
-/*
- Load Detect_Real_World script
-   ↳ Debugger_Setup detected
-       ↳ Load Debugger_Real_World
-           ↳ 'Debugger_Connected' message
-*/
 
-loadScriptInRealWorld(detector_path)
-    .catch(err => error(`Detector_Real_World (${detector_path}) failed to load.`, err))
+/* Wait for the document to fully load before injecting any scripts */
+if (document.readyState === 'complete') {
+    on_loaded()
+} else {
+    document.addEventListener('DOMContentLoaded', () => {
+        on_loaded()
+    })
+}
+
+function on_loaded() {
+
+    /*
+    Load Detect_Real_World script
+    ↳ Debugger_Setup detected
+        ↳ Load Debugger_Real_World
+            ↳ 'Debugger_Connected' message
+    */
+
+    loadScriptInRealWorld(detector_path)
+        .catch(err => error(`Detector_Real_World (${detector_path}) failed to load.`, err))
+}
+
+
+const extension_version = chrome.runtime.getManifest().version
+
+const port = chrome.runtime.connect({name: bridge.ConnectionName.Content})
+
+let devtools_opened = false
 
 // prevent the script to be added multiple times if detected before solid
 let debugger_real_world_added = false
@@ -119,3 +131,4 @@ bridge.window_on_message(e => {
         bridge.port_post_message_obj(port, e)
     }
 })
+
