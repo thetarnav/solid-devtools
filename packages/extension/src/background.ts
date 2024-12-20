@@ -7,11 +7,16 @@ It has to coordinate the communication between the different scripts based on th
 */
 
 import {error, log} from '@solid-devtools/shared/utils'
-import * as bridge  from './bridge.ts'
-import * as icons   from './icons.ts'
+
+import {
+    Place_Name, ConnectionName, type Port,
+    type DetectionState, type Versions, type Message,
+    port_on_message, port_post_message, port_post_message_obj,
+    ICONS_BLUE, ICONS_GRAY,
+} from './shared.ts'
 
 
-log(bridge.Place_Name.Background+' loaded.')
+log(Place_Name.Background+' loaded.')
 
 
 type Tab_Id = number & {__Tab_Id__: true}
@@ -38,28 +43,28 @@ function assert(condition: any, message?: string, cause?: any): asserts conditio
     }
 }
 
-function get_assert_tab_id(port: bridge.Port, place: bridge.Place_Name): Tab_Id {
+function get_assert_tab_id(port: Port, place: Place_Name): Tab_Id {
     let tab_id = port.sender?.tab?.id
     assert(tab_id, `${place} has no port sender tab id.`, port)
     return tab_id as Tab_Id
 }
 
 type Script_Popup = {
-    port:      bridge.Port
+    port:      Port
 }
 type Script_Panel = {
     tab_id:    Tab_Id
-    port:      bridge.Port
+    port:      Port
 }
 type Script_Devtools = {
     tab_id:    Tab_Id
-    port:      bridge.Port
+    port:      Port
 }
 type Script_Content = {
     tab_id:    Tab_Id
-    port:      bridge.Port
-    detection: bridge.DetectionState | null
-    versions:  bridge.Versions       | null
+    port:      Port
+    detection: DetectionState | null
+    versions:  Versions       | null
 }
 
 let popup: Script_Popup | undefined
@@ -72,7 +77,7 @@ chrome.runtime.onConnect.addListener(port => {
 
     on_connected(port)
 
-    bridge.port_on_message(port, e => on_message(port, e))
+    port_on_message(port, e => on_message(port, e))
 
     port.onDisconnect.addListener(() => on_disconnected(port))
 })
@@ -80,41 +85,41 @@ chrome.runtime.onConnect.addListener(port => {
 function toggle_action_icon(tab_id: Tab_Id) {
 
     if (script_content_map.get(tab_id)?.detection?.Solid) {
-        chrome.action.setIcon({tabId: tab_id, path: icons.blue})
+        chrome.action.setIcon({tabId: tab_id, path: ICONS_BLUE})
 
         /*
          For some reason setting the icon immediately does not always work
         */
         setTimeout(() => {
             if (script_content_map.get(tab_id)?.detection?.Solid) {
-                chrome.action.setIcon({tabId: tab_id, path: icons.blue})
+                chrome.action.setIcon({tabId: tab_id, path: ICONS_BLUE})
             } else {
-                chrome.action.setIcon({tabId: tab_id, path: icons.gray})
+                chrome.action.setIcon({tabId: tab_id, path: ICONS_GRAY})
             }
         }, 600)
     } else {
-        chrome.action.setIcon({tabId: tab_id, path: icons.gray})
+        chrome.action.setIcon({tabId: tab_id, path: ICONS_GRAY})
     }
 }
 
-function on_connected(port: bridge.Port) {
+function on_connected(port: Port) {
 
     DEV: {log('Port connected', port)}
 
     switch (port.name) {
-    case bridge.ConnectionName.Popup: {
+    case ConnectionName.Popup: {
         popup = {port}
 
         let content = script_content_map.get(active_tab_id)
         if (content) {
-            bridge.port_post_message(popup.port, 'Detected', content.detection)
-            bridge.port_post_message(popup.port, 'Versions', content.versions)
+            port_post_message(popup.port, 'Detected', content.detection)
+            port_post_message(popup.port, 'Versions', content.versions)
         }
 
         break
     }
-    case bridge.ConnectionName.Content: {
-        let tab_id = get_assert_tab_id(port, bridge.Place_Name.Content)
+    case ConnectionName.Content: {
+        let tab_id = get_assert_tab_id(port, Place_Name.Content)
 
         let content: Script_Content = {
             port:      port,
@@ -126,35 +131,35 @@ function on_connected(port: bridge.Port) {
 
         let panel = script_panel_map.get(tab_id)
         if (panel) {
-            bridge.port_post_message(content.port, 'DevtoolsOpened', true)
-            bridge.port_post_message(content.port, 'ResetState', undefined)
+            port_post_message(content.port, 'DevtoolsOpened', true)
+            port_post_message(content.port, 'ResetState', undefined)
         }
 
         break
     }
-    case bridge.ConnectionName.Devtools: {
+    case ConnectionName.Devtools: {
 
         let devtools: Script_Devtools = {port, tab_id: active_tab_id}
         script_devtools_map.set(active_tab_id, devtools)
 
         let content = script_content_map.get(active_tab_id)
         if (content) {
-            bridge.port_post_message(port, 'Versions', content.versions)
+            port_post_message(port, 'Versions', content.versions)
         }
 
         break
     }
-    case bridge.ConnectionName.Panel: {
+    case ConnectionName.Panel: {
 
         let panel: Script_Panel = {port, tab_id: active_tab_id}
         script_panel_map.set(active_tab_id, panel)
 
         let content = script_content_map.get(active_tab_id)
         if (content) {
-            bridge.port_post_message(port, 'Versions', content.versions)
+            port_post_message(port, 'Versions', content.versions)
 
-            bridge.port_post_message(content.port, 'DevtoolsOpened', true)
-            bridge.port_post_message(content.port, 'ResetState', undefined)
+            port_post_message(content.port, 'DevtoolsOpened', true)
+            port_post_message(content.port, 'ResetState', undefined)
         }
 
         break
@@ -162,17 +167,17 @@ function on_connected(port: bridge.Port) {
     }
 }
 
-function on_disconnected(port: bridge.Port) {
+function on_disconnected(port: Port) {
 
     DEV: {log('Port disconnected', port)}
 
     switch (port.name) {
-    case bridge.ConnectionName.Popup: {
+    case ConnectionName.Popup: {
         popup = undefined
         break
     }
-    case bridge.ConnectionName.Content: {
-        let tab_id = get_assert_tab_id(port, bridge.Place_Name.Content)
+    case ConnectionName.Content: {
+        let tab_id = get_assert_tab_id(port, Place_Name.Content)
 
         let content = script_content_map.get(tab_id)!
         if (content.port !== port) {
@@ -183,41 +188,41 @@ function on_disconnected(port: bridge.Port) {
         script_content_map.delete(tab_id)
 
         if (popup) {
-            bridge.port_post_message(popup.port, 'Detected', null)
-            bridge.port_post_message(popup.port, 'Versions', null)
+            port_post_message(popup.port, 'Detected', null)
+            port_post_message(popup.port, 'Versions', null)
         }
 
         let panel = script_panel_map.get(tab_id)
         if (panel) {
-            bridge.port_post_message(panel.port, 'Versions', null)
-            bridge.port_post_message(panel.port, 'ResetPanel', undefined)
+            port_post_message(panel.port, 'Versions', null)
+            port_post_message(panel.port, 'ResetPanel', undefined)
         }
 
         let devtools = script_devtools_map.get(tab_id)
         if (devtools) {
-            bridge.port_post_message(devtools.port, 'Versions', null)
+            port_post_message(devtools.port, 'Versions', null)
         }
 
         toggle_action_icon(tab_id)
 
         break
     }
-    case bridge.ConnectionName.Devtools: {
+    case ConnectionName.Devtools: {
         script_devtools_map.delete(active_tab_id)
 
         let content = script_content_map.get(active_tab_id)
         if (content) {
-            bridge.port_post_message(content.port, 'DevtoolsOpened', false)
+            port_post_message(content.port, 'DevtoolsOpened', false)
         }
 
         break
     }
-    case bridge.ConnectionName.Panel: {
+    case ConnectionName.Panel: {
         script_panel_map.delete(active_tab_id)
 
         let content = script_content_map.get(active_tab_id)
         if (content) {
-            bridge.port_post_message(content.port, 'DevtoolsOpened', false)
+            port_post_message(content.port, 'DevtoolsOpened', false)
         }
 
         break
@@ -225,16 +230,16 @@ function on_disconnected(port: bridge.Port) {
     }
 }
 
-function on_message(port: bridge.Port, e: bridge.Message) {
+function on_message(port: Port, e: Message) {
 
     DEV: {log('Message', e, 'from', port)}
 
     switch (port.name) {
-    case bridge.ConnectionName.Popup: {
+    case ConnectionName.Popup: {
         break
     }
-    case bridge.ConnectionName.Content: {
-        let tab_id = get_assert_tab_id(port, bridge.Place_Name.Content)
+    case ConnectionName.Content: {
+        let tab_id = get_assert_tab_id(port, Place_Name.Content)
 
         let content = script_content_map.get(tab_id)
         assert(content)
@@ -245,7 +250,7 @@ function on_message(port: bridge.Port, e: bridge.Message) {
             content.detection = e.details
 
             if (popup) {
-                bridge.port_post_message_obj(popup.port, e)
+                port_post_message_obj(popup.port, e)
             }
 
             toggle_action_icon(tab_id)
@@ -256,17 +261,17 @@ function on_message(port: bridge.Port, e: bridge.Message) {
             content.versions = e.details
 
             if (popup) {
-                bridge.port_post_message_obj(popup.port, e)
+                port_post_message_obj(popup.port, e)
             }
 
             let devtools = script_devtools_map.get(tab_id)
             if (devtools) {
-                bridge.port_post_message_obj(devtools.port, e)
+                port_post_message_obj(devtools.port, e)
             }
 
             let panel = script_panel_map.get(tab_id)
             if (panel) {
-                bridge.port_post_message_obj(panel.port, e)
+                port_post_message_obj(panel.port, e)
             }
 
             break
@@ -275,26 +280,26 @@ function on_message(port: bridge.Port, e: bridge.Message) {
             // Forward all other messages to panel
             let panel = script_panel_map.get(tab_id)
             if (panel) {
-                bridge.port_post_message_obj(panel.port, e)
+                port_post_message_obj(panel.port, e)
             }
         }
         }
 
         break
     }
-    case bridge.ConnectionName.Devtools: {
+    case ConnectionName.Devtools: {
         break
     }
-    case bridge.ConnectionName.Panel: {
+    case ConnectionName.Panel: {
 
         // Forward all messages to Content
         let content = script_content_map.get(active_tab_id)
         if (content) {
-            bridge.port_post_message_obj(content.port, e)
+            port_post_message_obj(content.port, e)
         } else {
-            error(`Cannot forward ${bridge.Place_Name.Panel} -> ${bridge.Place_Name.Content} - ${e.name}:`, e.details)
+            error(`Cannot forward ${Place_Name.Panel} -> ${Place_Name.Content} - ${e.name}:`, e.details)
         }
-        
+
         break
     }
     }

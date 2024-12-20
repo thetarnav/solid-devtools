@@ -7,9 +7,15 @@ Debugger Client injected into the inspected page
 
 import {useDebugger} from '@solid-devtools/debugger'
 import {log, warn} from '@solid-devtools/shared/utils'
-import * as bridge from './bridge.ts'
 
-if (import.meta.env.DEV) log(bridge.Place_Name.Debugger_Real_World+' loaded.')
+import {
+    Place_Name,
+    window_post_message, window_on_message, window_post_message_obj,
+} from './shared.ts'
+
+
+DEV: {log(Place_Name.Debugger_Real_World+' loaded.')}
+
 
 class Version {
     major: number = 0
@@ -76,14 +82,14 @@ warn_on_version_mismatch(debug.meta.versions.get_client(), import.meta.env.EXPEC
 warn_on_version_mismatch(debug.meta.versions.get_solid(), debug.meta.versions.get_expected_solid(), 'solid-js')
 
 // in case of navigation/page reload, reset the locator mode state in the extension
-bridge.window_post_message('ResetPanel', undefined)
-bridge.window_post_message('Debugger_Connected', {
+window_post_message('ResetPanel', undefined)
+window_post_message('Debugger_Connected', {
     client: debug.meta.versions.get_client(),
     solid:  debug.meta.versions.get_solid(),
 })
 
 /* From Content */
-bridge.window_on_message(e => {
+window_on_message(e => {
     // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
     switch (e.name) {
     case 'DevtoolsOpened':
@@ -96,4 +102,4 @@ bridge.window_on_message(e => {
 })
 
 /* Debugger -> Content */
-debug.listen(bridge.window_post_message_obj)
+debug.listen(window_post_message_obj)

@@ -6,6 +6,34 @@ File for utilities, constants and types related to the communication between the
 
 import * as debug from '@solid-devtools/debugger/types'
 
+
+export const ICON_SOLID_BLUE_16  = 'solid-normal-16.png'
+export const ICON_SOLID_BLUE_32  = 'solid-normal-32.png'
+export const ICON_SOLID_BLUE_48  = 'solid-normal-48.png'
+export const ICON_SOLID_BLUE_128 = 'solid-normal-128.png'
+
+export const ICON_SOLID_GRAY_16  = 'solid-gray-16.png'
+export const ICON_SOLID_GRAY_32  = 'solid-gray-32.png'
+export const ICON_SOLID_GRAY_48  = 'solid-gray-48.png'
+export const ICON_SOLID_GRAY_128 = 'solid-gray-128.png'
+
+export const ICON_OUTLINE_32     = 'solid-white-32.png'
+
+export const ICONS_BLUE: chrome.runtime.ManifestIcons = {
+    16:  ICON_SOLID_BLUE_16,
+    32:  ICON_SOLID_BLUE_32,
+    48:  ICON_SOLID_BLUE_48,
+    128: ICON_SOLID_BLUE_128,
+}
+
+export const ICONS_GRAY: chrome.runtime.ManifestIcons = {
+    16:  ICON_SOLID_GRAY_16,
+    32:  ICON_SOLID_GRAY_32,
+    48:  ICON_SOLID_GRAY_48,
+    128: ICON_SOLID_GRAY_128,
+}
+
+
 export const DEVTOOLS_ID_PREFIX = '[solid-devtools]_'
 
 export const enum Place_Name {

@@ -6,27 +6,31 @@ import * as s        from 'solid-js'
 import * as web      from 'solid-js/web'
 import {log}         from '@solid-devtools/shared/utils'
 import * as frontend from '@solid-devtools/frontend'
-import * as bridge   from './bridge.ts'
+
+import {
+    ConnectionName, Place_Name, port_on_message, port_post_message_obj,
+    type Versions,
+} from './shared.ts'
 
 import '@solid-devtools/frontend/dist/styles.css'
 
-log(bridge.Place_Name.Panel+' loaded.')
+log(Place_Name.Panel+' loaded.')
 
 
 function App() {
 
-    const empty_versions: bridge.Versions = {
+    const empty_versions: Versions = {
         solid:          '',
         client:         '',
         expectedClient: '',
         extension:      '',
     }
-    const [versions, setVersions] = s.createSignal<bridge.Versions>(empty_versions)
+    const [versions, setVersions] = s.createSignal<Versions>(empty_versions)
 
     const devtools = frontend.createDevtools()
     
-    const port = chrome.runtime.connect({name: bridge.ConnectionName.Panel})
-    bridge.port_on_message(port, e => {
+    const port = chrome.runtime.connect({name: ConnectionName.Panel})
+    port_on_message(port, e => {
         // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
         switch (e.name) {
         case 'Versions':
@@ -41,7 +45,7 @@ function App() {
     })
 
     /* Devtools -> Client */
-    devtools.bridge.output.listen(e => bridge.port_post_message_obj(port, e))
+    devtools.bridge.output.listen(e => port_post_message_obj(port, e))
 
     return (
         <div

@@ -10,7 +10,12 @@ This script is injected into every page and is responsible for:
 */
 
 import {error, log} from '@solid-devtools/shared/utils'
-import * as bridge from './bridge.ts'
+
+import {
+    Place_Name, ConnectionName,
+    port_on_message, port_post_message_obj, port_post_message,
+    window_post_message_obj, window_on_message, window_post_message,
+} from './shared.ts'
 
 // @ts-expect-error ?script&module query ensures output in ES module format and only import the script path
 import detector_path from './detector.ts?script&module'
@@ -18,7 +23,7 @@ import detector_path from './detector.ts?script&module'
 import debugger_path from './debugger.ts?script&module'
 
 
-if (import.meta.env.DEV) log(bridge.Place_Name.Content+' loaded.')
+DEV: {log(Place_Name.Content+' loaded.')}
 
 
 function loadScriptInRealWorld(path: string): Promise<void> {
@@ -63,7 +68,7 @@ function on_loaded() {
 
 const extension_version = chrome.runtime.getManifest().version
 
-const port = chrome.runtime.connect({name: bridge.ConnectionName.Content})
+const port = chrome.runtime.connect({name: ConnectionName.Content})
 
 let devtools_opened = false
 
@@ -71,28 +76,28 @@ let devtools_opened = false
 let debugger_real_world_added = false
 
 /* From Background */
-bridge.port_on_message(port, e => {
+port_on_message(port, e => {
     // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
     switch (e.name) {
     case 'DevtoolsOpened':
         devtools_opened = e.details
-        bridge.window_post_message_obj(e)
+        window_post_message_obj(e)
         break
     default:
         /* Background -> Client */
-        bridge.window_post_message_obj(e)
+        window_post_message_obj(e)
     }
 })
 
 /* From Client / Detector_Real_World */
-bridge.window_on_message(e => {
+window_on_message(e => {
     // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
     switch (e.name) {
     // From Detector_Real_World
     case 'Detected': {
 
         /* Forward to Background script */
-        bridge.port_post_message_obj(port, e)
+        port_post_message_obj(port, e)
 
         /* Load Debugger_Real_World */
         if (e.details && e.details.Debugger && !debugger_real_world_added) {
@@ -113,7 +118,7 @@ bridge.window_on_message(e => {
             'color: #e38b1b',
         )
 
-        bridge.port_post_message(port, 'Versions', {
+        port_post_message(port, 'Versions', {
             client:         e.details.client,
             solid:          e.details.solid,
             extension:      extension_version,
@@ -121,14 +126,14 @@ bridge.window_on_message(e => {
         })
 
         if (devtools_opened) {
-            bridge.window_post_message('DevtoolsOpened', devtools_opened)
+            window_post_message('DevtoolsOpened', devtools_opened)
         }
 
         break
     }
     default:
         /* Client -> Background */
-        bridge.port_post_message_obj(port, e)
+        port_post_message_obj(port, e)
     }
 })
 

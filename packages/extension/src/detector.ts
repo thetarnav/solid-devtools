@@ -7,11 +7,17 @@ and notify the content script
 
 import {detectSolid, onSolidDevDetect, onSolidDevtoolsDetect} from '@solid-devtools/shared/detect'
 import {log, warn} from '@solid-devtools/shared/utils'
-import * as bridge from './bridge.ts'
 
-if (import.meta.env.DEV) log(bridge.Place_Name.Detector_Real_World+' loaded.')
+import {
+    Place_Name, type DetectionState,
+    window_post_message,
+} from './shared.ts'
 
-const state: bridge.DetectionState = {
+
+DEV: {log(Place_Name.Detector_Real_World+' loaded.')}
+
+
+const state: DetectionState = {
     Solid:    false,
     SolidDev: false,
     Debugger: false,
@@ -27,7 +33,7 @@ detectSolid().then(detected => {
     }
     if (detected && !state.Solid) {
         state.Solid = true
-        bridge.window_post_message('Detected', state)
+        window_post_message('Detected', state)
     }
 })
 
@@ -37,7 +43,7 @@ onSolidDevDetect(() => {
     }
     state.SolidDev = true
     state.Solid    = true
-    bridge.window_post_message('Detected', state)
+    window_post_message('Detected', state)
 })
 
 onSolidDevtoolsDetect(() => {
@@ -45,5 +51,5 @@ onSolidDevtoolsDetect(() => {
         log('Devtools_Client detected.')
     }
     state.Debugger = true
-    bridge.window_post_message('Detected', state)
+    window_post_message('Detected', state)
 })

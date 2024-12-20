@@ -3,24 +3,28 @@
 import * as s from 'solid-js'
 import {render} from 'solid-js/web'
 import {log} from '@solid-devtools/shared/utils'
-import * as bridge from './bridge.ts'
+
+import {
+    ConnectionName, Place_Name, port_on_message,
+    type DetectionState, type Versions
+} from './shared.ts'
 
 import './popup.css'
 
-log(bridge.Place_Name.Popup+' loaded.')
+log(Place_Name.Popup+' loaded.')
 
 // Create a connection to the background page
-const port = chrome.runtime.connect({name: bridge.ConnectionName.Popup})
+const port = chrome.runtime.connect({name: ConnectionName.Popup})
 
-const [versions, setVersions] = s.createSignal<bridge.Versions | null>(null)
-const empty_detection_state: bridge.DetectionState = {
+const [versions, setVersions] = s.createSignal<Versions | null>(null)
+const empty_detection_state: DetectionState = {
     Solid:    false,
     SolidDev: false,
     Debugger: false,
 }
 const [detectionState, setDetectionState] = s.createSignal(empty_detection_state)
 
-bridge.port_on_message(port, e => {
+port_on_message(port, e => {
     // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
     switch (e.name) {
     case 'Detected':

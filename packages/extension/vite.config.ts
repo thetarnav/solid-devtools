@@ -5,15 +5,20 @@ import * as assert from 'node:assert'
 import * as vite   from 'vite'
 import      solid  from 'vite-plugin-solid'
 import      pkg    from './package.json' with {type: 'json'}
-import * as icons  from './src/icons.ts'
+
+import {
+    ICONS_GRAY,
+    ICONS_BLUE,
+}  from './src/shared.ts'
 
 const require = module.createRequire(import.meta.url)
 
-const browser = process.env['BROWSER'] ?? 'chrome'
-assert.ok(browser === 'chrome' || browser === 'firefox')
 
-const is_chrome = browser === 'chrome'
-const is_dev    = process.env['NODE_ENV'] === 'development'
+const BROWSER = process.env['BROWSER'] ?? 'chrome'
+assert.ok(BROWSER === 'chrome' || BROWSER === 'firefox')
+
+const IS_CHROME = BROWSER === 'chrome'
+const IS_DEV    = process.env['NODE_ENV'] === 'development'
 
 const manifest_version = (() => {
     // Convert from Semver (example: 0.1.0-beta6)
@@ -32,15 +37,15 @@ type Manifest_Additional_Fields = {
 
 const manifest: crx.ManifestV3Export & Manifest_Additional_Fields = {
     manifest_version: 3,
-    name: `${is_dev ? '[DEV] ' : ''}Solid Devtools`,
+    name: `${IS_DEV ? '[DEV] ' : ''}Solid Devtools`,
     description: 'Chrome Developer Tools extension for debugging SolidJS applications.',
     homepage_url: 'https://github.com/thetarnav/solid-devtools',
     version: manifest_version,
-    version_name: is_chrome ? pkg.version : undefined,
-    browser_specific_settings: is_chrome
+    version_name: IS_CHROME ? pkg.version : undefined,
+    browser_specific_settings: IS_CHROME
         ? undefined
         : {gecko: {id: '{abfd162e-9948-403a-a75c-6e61184e1d47}'}},
-    author: is_chrome ? {email: 'gthetarnav@gmail.com'} : 'Damian Tarnawski' as any,
+    author: IS_CHROME ? {email: 'gthetarnav@gmail.com'} : 'Damian Tarnawski' as any,
     minimum_chrome_version: '94',
     devtools_page: 'src/devtools.html',
     content_scripts: [{
@@ -48,7 +53,7 @@ const manifest: crx.ManifestV3Export & Manifest_Additional_Fields = {
         js: ['src/content.ts'],
         run_at: 'document_start',
     }],
-    background: is_chrome
+    background: IS_CHROME
         ? {
             service_worker: 'src/background.ts',
             type: 'module',
@@ -59,14 +64,16 @@ const manifest: crx.ManifestV3Export & Manifest_Additional_Fields = {
         },
     permissions: [],
     action: {
-        default_icon:  icons.gray,
+        default_icon:  ICONS_GRAY,
         default_title: 'Solid Devtools',
         default_popup: 'src/popup.html',
     },
-    icons: icons.blue,
+    icons: ICONS_BLUE,
 }
 
-const sdt_pkg: {version: string} = JSON.parse(fs.readFileSync(require.resolve('solid-devtools/package.json'), 'utf-8'))
+const sdt_pkg = JSON.parse(
+    fs.readFileSync(require.resolve('solid-devtools/package.json'), 'utf-8')
+) as {version: string}
 
 const sdt_version = JSON.stringify(sdt_pkg.version.match(/\d+.\d+.\d+/)![0])
 
@@ -79,7 +86,7 @@ const vite_config: vite.UserConfig = {
         solid({dev: false, hot: false}),
         crx.crx({
             manifest: manifest,
-            browser:  browser,
+            browser:  BROWSER,
         }),
         {
             name: 'replace-version',
@@ -93,12 +100,12 @@ const vite_config: vite.UserConfig = {
         },
     ],
     define: {
-        'import.meta.env.BROWSER': JSON.stringify(browser),
+        'import.meta.env.BROWSER': JSON.stringify(BROWSER),
     },
     build: {
         minify: false,
-        emptyOutDir: !is_dev,
-        outDir: 'dist/' + browser,
+        emptyOutDir: !IS_DEV,
+        outDir: 'dist/' + BROWSER,
         rollupOptions: {
             // adds panel as additional input because it's not a part of the manifest
             // and is loaded dynamically in devtools.ts
@@ -107,7 +114,7 @@ const vite_config: vite.UserConfig = {
         target: 'esnext',
     },
     esbuild: {
-        dropLabels: [is_dev ? 'PROD' : 'DEV'],
+        dropLabels: [IS_DEV ? 'PROD' : 'DEV'],
     },
     optimizeDeps: {
         exclude: ['@solid-devtools/debugger'],
