@@ -2,63 +2,54 @@
     Devtools panel entry point
 */
 
-import {createSignal} from 'solid-js'
-import {render} from 'solid-js/web'
-import {type Debugger} from '@solid-devtools/debugger/types'
-import {log} from '@solid-devtools/shared/utils'
-import {createDevtools, MountIcons} from '@solid-devtools/frontend'
-import * as bridge from './bridge.ts'
+import * as s        from 'solid-js'
+import * as web      from 'solid-js/web'
+import {log}         from '@solid-devtools/shared/utils'
+import * as frontend from '@solid-devtools/frontend'
+import * as bridge   from './bridge.ts'
 
 import '@solid-devtools/frontend/dist/styles.css'
 
 log(bridge.Place_Name.Panel+' loaded.')
 
-const port = chrome.runtime.connect({name: bridge.ConnectionName.Panel})
-const bg_messanger = bridge.createPortMessanger
-    <Debugger.OutputChannels, Debugger.InputChannels>(
-        bridge.Place_Name.Panel,
-        bridge.Place_Name.Background,
-        port)
 
 function App() {
+
     const empty_versions: bridge.Versions = {
         solid:          '',
         client:         '',
         expectedClient: '',
         extension:      '',
     }
+    const [versions, setVersions] = s.createSignal<bridge.Versions>(empty_versions)
 
-    const [versions, setVersions] = createSignal<bridge.Versions>(empty_versions)
-
-    bridge.once(bg_messanger.on, 'Versions', e => {
-        if (e) {
-            setVersions(e)
-        } else {
-            setVersions(empty_versions)
+    const devtools = frontend.createDevtools()
+    
+    const port = chrome.runtime.connect({name: bridge.ConnectionName.Panel})
+    bridge.port_on_message(port, e => {
+        // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
+        switch (e.name) {
+        case 'Versions':
+            setVersions(e.details ?? empty_versions)
+            break
+        default:
+            /* Client -> Devtools */
+            if (e.name in devtools.bridge.input) {
+                devtools.bridge.input.emit(e.name as any, e.details)
+            }
         }
     })
 
-    const devtools = createDevtools()
-
-    devtools.bridge.output.listen(e => bg_messanger.forward({
-        name:       e.name,
-        details:    e.details,
-        forwarding: true,
-    }))
-
-    bg_messanger.on(e => {
-        // some events are internal and should not be forwarded to the devtools
-        if (!(e.name in devtools.bridge.input)) return
-        devtools.bridge.input.emit(e.name as any, e.details)
-    })
+    /* Devtools -> Client */
+    devtools.bridge.output.listen(e => bridge.port_post_message_obj(port, e))
 
     return (
         <div
             style={{
                 position: 'fixed',
-                height: '100vh',
-                width: '100vw',
-                inset: '0',
+                height:   '100vh',
+                width:    '100vw',
+                inset:    '0',
             }}
         >
             <devtools.Devtools
@@ -76,9 +67,9 @@ function App() {
                 useShortcuts
                 catchWindowErrors
             />
-            <MountIcons />
+            <frontend.MountIcons />
         </div>
     )
 }
 
-render(() => <App />, document.getElementById('root')!)
+web.render(() => <App />, document.getElementById('root')!)

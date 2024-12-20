@@ -17,14 +17,6 @@ const state: bridge.DetectionState = {
     Debugger: false,
 }
 
-function postState() {
-    let data: bridge.DetectEvent = {
-        name:  bridge.DETECT_MESSAGE,
-        state: state,
-    }
-    postMessage(data, '*')
-}
-
 detectSolid().then(detected => {
     if (import.meta.env.DEV) {
         if (detected) {
@@ -35,7 +27,7 @@ detectSolid().then(detected => {
     }
     if (detected && !state.Solid) {
         state.Solid = true
-        postState()
+        bridge.window_post_message('Detected', state)
     }
 })
 
@@ -45,7 +37,7 @@ onSolidDevDetect(() => {
     }
     state.SolidDev = true
     state.Solid    = true
-    postState()
+    bridge.window_post_message('Detected', state)
 })
 
 onSolidDevtoolsDetect(() => {
@@ -53,5 +45,5 @@ onSolidDevtoolsDetect(() => {
         log('Devtools_Client detected.')
     }
     state.Debugger = true
-    postState()
+    bridge.window_post_message('Detected', state)
 })

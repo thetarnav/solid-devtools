@@ -6,14 +6,10 @@ Debugger Client injected into the inspected page
 */
 
 import {useDebugger} from '@solid-devtools/debugger'
-import {type Debugger} from '@solid-devtools/debugger/types'
 import {log, warn} from '@solid-devtools/shared/utils'
 import * as bridge from './bridge.ts'
 
 if (import.meta.env.DEV) log(bridge.Place_Name.Debugger_Real_World+' loaded.')
-
-const fromContent = bridge.makeMessageListener<Debugger.InputChannels>(bridge.Place_Name.Debugger_Real_World)
-const toContent   = bridge.makePostMessage<Debugger.OutputChannels>()
 
 class Version {
     major: number = 0
@@ -80,16 +76,24 @@ warn_on_version_mismatch(debug.meta.versions.get_client(), import.meta.env.EXPEC
 warn_on_version_mismatch(debug.meta.versions.get_solid(), debug.meta.versions.get_expected_solid(), 'solid-js')
 
 // in case of navigation/page reload, reset the locator mode state in the extension
-toContent('ResetPanel')
-toContent('Debugger_Connected', {
+bridge.window_post_message('ResetPanel', undefined)
+bridge.window_post_message('Debugger_Connected', {
     client: debug.meta.versions.get_client(),
     solid:  debug.meta.versions.get_solid(),
 })
 
-fromContent('DevtoolsOpened', opened => debug.toggleEnabled(opened))
+/* From Content */
+bridge.window_on_message(e => {
+    // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
+    switch (e.name) {
+    case 'DevtoolsOpened':
+        debug.toggleEnabled(e.details)
+        break
+    default:
+        /* Content -> Debugger */
+        debug.emit(e.name as any, e.details)
+    }
+})
 
-// pass all the devtools events to the debugger
-fromContent(e => debug.emit(e.name as any, e.details))
-
-// pass all the debugger events to the content script
-debug.listen(e => toContent(e.name, e.details))
+/* Debugger -> Content */
+debug.listen(bridge.window_post_message_obj)

@@ -13,9 +13,9 @@ import {error, log} from '@solid-devtools/shared/utils'
 import * as bridge from './bridge.ts'
 
 // @ts-expect-error ?script&module query ensures output in ES module format and only import the script path
-import detectorPath from './detector.ts?script&module'
+import detector_path from './detector.ts?script&module'
 // @ts-expect-error ?script&module query ensures output in ES module format and only import the script path
-import debuggerPath from './debugger.ts?script&module'
+import debugger_path from './debugger.ts?script&module'
 
 if (import.meta.env.DEV) log(bridge.Place_Name.Content+' loaded.')
 
@@ -24,14 +24,6 @@ const extension_version = chrome.runtime.getManifest().version
 const port = chrome.runtime.connect({name: bridge.ConnectionName.Content})
 
 let devtools_opened = false
-
-const fromClient = bridge.makeMessageListener(bridge.Place_Name.Content)
-const toClient   = bridge.makePostMessage()
-
-const bg_messanger = bridge.createPortMessanger(
-        bridge.Place_Name.Content,
-        bridge.Place_Name.Background,
-        port)
 
 function loadScriptInRealWorld(path: string): Promise<void> {
     return new Promise((resolve, reject) => {
@@ -53,7 +45,6 @@ function loadScriptInRealWorld(path: string): Promise<void> {
     })
 }
 
-
 /*
  Load Detect_Real_World script
    ↳ Debugger_Setup detected
@@ -61,65 +52,70 @@ function loadScriptInRealWorld(path: string): Promise<void> {
            ↳ 'Debugger_Connected' message
 */
 
-loadScriptInRealWorld(detectorPath)
-    .catch(err => error(`Detector_Real_World (${detectorPath}) failed to load.`, err))
+loadScriptInRealWorld(detector_path)
+    .catch(err => error(`Detector_Real_World (${detector_path}) failed to load.`, err))
 
 // prevent the script to be added multiple times if detected before solid
 let debugger_real_world_added = false
 
-/* from Detector_Real_World */
-window.addEventListener('message', e => {
-    if (!e.data || typeof e.data !== 'object' || e.data.name !== bridge.DETECT_MESSAGE) return
-
-    const state = e.data.state as bridge.DetectionState
-
-    bg_messanger.post('Detected', state)
-
-    /* Load Debugger_Real_World */
-    if (state.Debugger && !debugger_real_world_added) {
-        debugger_real_world_added = true
-
-        loadScriptInRealWorld(debuggerPath)
-            .catch(err => error(`Debugger_Real_World (${debuggerPath}) failed to load.`, err))
+/* From Background */
+bridge.port_on_message(port, e => {
+    // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
+    switch (e.name) {
+    case 'DevtoolsOpened':
+        devtools_opened = e.details
+        bridge.window_post_message_obj(e)
+        break
+    default:
+        /* Background -> Client */
+        bridge.window_post_message_obj(e)
     }
 })
 
-fromClient('Debugger_Connected', versions => {
+/* From Client / Detector_Real_World */
+bridge.window_on_message(e => {
+    // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
+    switch (e.name) {
+    // From Detector_Real_World
+    case 'Detected': {
 
-    // eslint-disable-next-line no-console
-    console.log(
-        '🚧 %csolid-devtools%c is in early development! 🚧\nPlease report any bugs to https://github.com/thetarnav/solid-devtools/issues',
-        'color: #fff; background: rgba(181, 111, 22, 0.7); padding: 1px 4px;',
-        'color: #e38b1b',
-    )
+        /* Forward to Background script */
+        bridge.port_post_message_obj(port, e)
 
-    bg_messanger.post('Versions', {
-        client:         versions.client,
-        solid:          versions.solid,
-        extension:      extension_version,
-        expectedClient: import.meta.env.EXPECTED_CLIENT,
-    })
+        /* Load Debugger_Real_World */
+        if (e.details && e.details.Debugger && !debugger_real_world_added) {
+            debugger_real_world_added = true
 
-    fromClient('ResetPanel', () => bg_messanger.post('ResetPanel'))
+            loadScriptInRealWorld(debugger_path)
+                .catch(err => error(`Debugger_Real_World (${debugger_path}) failed to load.`, err))
+        }
 
-    if (devtools_opened) toClient('DevtoolsOpened', devtools_opened)
-})
+        break
+    }
+    case 'Debugger_Connected': {
 
-// After page reload, the content script is reloaded but the background script is not.
-// This means that 'DevtoolsOpened' message will come after the Client is setup.
-// We need to send it after it connects.
-bg_messanger.on('DevtoolsOpened', opened => {
-    devtools_opened = opened
-    toClient('DevtoolsOpened', opened)
-})
+        // eslint-disable-next-line no-console
+        console.log(
+            '🚧 %csolid-devtools%c is in early development! 🚧\nPlease report any bugs to https://github.com/thetarnav/solid-devtools/issues',
+            'color: #fff; background: rgba(181, 111, 22, 0.7); padding: 1px 4px;',
+            'color: #e38b1b',
+        )
 
-fromClient(e => {
-    // forward all client messages to the background script in
-    const payload: bridge.ForwardPayload = {forwarding: true, name: e.name, details: e.details}
-    port.postMessage(payload)
-})
+        bridge.port_post_message(port, 'Versions', {
+            client:         e.details.client,
+            solid:          e.details.solid,
+            extension:      extension_version,
+            expectedClient: import.meta.env.EXPECTED_CLIENT,
+        })
 
-port.onMessage.addListener(data => {
-    // forward all devtools messages (from background) to the client
-    if (bridge.isForwardMessage(data)) bridge.forwardMessageToWindow(data)
+        if (devtools_opened) {
+            bridge.window_post_message('DevtoolsOpened', devtools_opened)
+        }
+
+        break
+    }
+    default:
+        /* Client -> Background */
+        bridge.port_post_message_obj(port, e)
+    }
 })

@@ -22,7 +22,6 @@
         "@solid-devtools/debugger": "workspace:^",
         "@solid-devtools/frontend": "workspace:^",
         "@solid-devtools/shared": "workspace:^",
-        "@solid-primitives/utils": "^6.2.3",
         "solid-devtools": "workspace:^"
     },
     "overrides": {

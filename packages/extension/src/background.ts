@@ -28,37 +28,28 @@ function assert(condition: any, message?: string, cause?: any): asserts conditio
     }
 }
 
-function get_assert_tab_id(port: Port, place: bridge.Place_Name): Tab_Id {
+function get_assert_tab_id(port: bridge.Port, place: bridge.Place_Name): Tab_Id {
     let tab_id = port.sender?.tab?.id
     assert(tab_id, `${place} has no port sender tab id.`, port)
     return tab_id as Tab_Id
 }
 
-type Port = chrome.runtime.Port
 
-function post_message<K extends keyof bridge.Channels>(
-    port: Port, name: K, details: bridge.Channels[K],
-) {
-    port.postMessage({name, details})
-}
-function post_message_obj(port: Port, e: bridge.Message) {
-    port.postMessage(e)
-}
 
 type Script_Popup = {
-    port:      Port
+    port:      bridge.Port
 }
 type Script_Panel = {
     tab_id:    Tab_Id
-    port:      Port
+    port:      bridge.Port
 }
 type Script_Devtools = {
     tab_id:    Tab_Id
-    port:      Port
+    port:      bridge.Port
 }
 type Script_Content = {
     tab_id:    Tab_Id
-    port:      Port
+    port:      bridge.Port
     detection: bridge.DetectionState | null
     versions:  bridge.Versions       | null
 }
@@ -73,17 +64,12 @@ chrome.runtime.onConnect.addListener(port => {
 
     on_connected(port)
 
-    port.onMessage.addListener(_e => {
-        let e = bridge.to_message(_e)
-        if (e) on_message(port, e)
-    })
+    bridge.port_on_message(port, e => on_message(port, e))
 
-    port.onDisconnect.addListener(() => {
-        on_disconnected(port)
-    })
+    port.onDisconnect.addListener(() => on_disconnected(port))
 })
 
-function on_connected(port: Port) {
+function on_connected(port: bridge.Port) {
 
     DEV: {log('Port connected', port)}
 
@@ -93,8 +79,8 @@ function on_connected(port: Port) {
 
         let content = script_content_map.get(active_tab_id)
         if (content) {
-            post_message(popup.port, 'Detected', content.detection)
-            post_message(popup.port, 'Versions', content.versions)
+            bridge.port_post_message(popup.port, 'Detected', content.detection)
+            bridge.port_post_message(popup.port, 'Versions', content.versions)
         }
 
         break
@@ -112,13 +98,8 @@ function on_connected(port: Port) {
 
         let panel = script_panel_map.get(tab_id)
         if (panel) {
-            post_message(content.port, 'DevtoolsOpened', true)
-
-            post_message_obj(content.port, {
-                name:       'ResetState',
-                details:    undefined,
-                forwarding: true,
-            })
+            bridge.port_post_message(content.port, 'DevtoolsOpened', true)
+            bridge.port_post_message(content.port, 'ResetState', undefined)
         }
 
         break
@@ -130,7 +111,7 @@ function on_connected(port: Port) {
 
         let content = script_content_map.get(active_tab_id)
         if (content) {
-            post_message(port, 'Versions', content.versions)
+            bridge.port_post_message(port, 'Versions', content.versions)
         }
 
         break
@@ -142,15 +123,10 @@ function on_connected(port: Port) {
 
         let content = script_content_map.get(active_tab_id)
         if (content) {
-            post_message(port, 'Versions', content.versions)
+            bridge.port_post_message(port, 'Versions', content.versions)
 
-            post_message(content.port, 'DevtoolsOpened', true)
-
-            post_message_obj(content.port, {
-                name:       'ResetState',
-                details:    undefined,
-                forwarding: true,
-            })
+            bridge.port_post_message(content.port, 'DevtoolsOpened', true)
+            bridge.port_post_message(content.port, 'ResetState', undefined)
         }
 
         break
@@ -158,7 +134,7 @@ function on_connected(port: Port) {
     }
 }
 
-function on_disconnected(port: Port) {
+function on_disconnected(port: bridge.Port) {
 
     DEV: {log('Port disconnected', port)}
 
@@ -172,19 +148,19 @@ function on_disconnected(port: Port) {
         script_content_map.delete(tab_id)
 
         if (popup) {
-            post_message(popup.port, 'Detected', null)
-            post_message(popup.port, 'Versions', null)
+            bridge.port_post_message(popup.port, 'Detected', null)
+            bridge.port_post_message(popup.port, 'Versions', null)
         }
 
         let panel = script_panel_map.get(tab_id)
         if (panel) {
-            post_message(panel.port, 'Versions', null)
-            post_message(panel.port, 'ResetPanel', undefined)
+            bridge.port_post_message(panel.port, 'Versions', null)
+            bridge.port_post_message(panel.port, 'ResetPanel', undefined)
         }
 
         let devtools = script_devtools_map.get(tab_id)
         if (devtools) {
-            post_message(devtools.port, 'Versions', null)
+            bridge.port_post_message(devtools.port, 'Versions', null)
         }
 
 
@@ -198,7 +174,7 @@ function on_disconnected(port: Port) {
 
         let content = script_content_map.get(active_tab_id)
         if (content) {
-            post_message(content.port, 'DevtoolsOpened', false)
+            bridge.port_post_message(content.port, 'DevtoolsOpened', false)
         }
 
         break
@@ -208,7 +184,7 @@ function on_disconnected(port: Port) {
 
         let content = script_content_map.get(active_tab_id)
         if (content) {
-            post_message(content.port, 'DevtoolsOpened', false)
+            bridge.port_post_message(content.port, 'DevtoolsOpened', false)
         }
 
         break
@@ -216,7 +192,7 @@ function on_disconnected(port: Port) {
     }
 }
 
-function on_message(port: Port, e: bridge.Message) {
+function on_message(port: bridge.Port, e: bridge.Message) {
 
     DEV: {log('Message', e, 'from', port)}
 
@@ -236,7 +212,7 @@ function on_message(port: Port, e: bridge.Message) {
             content.detection = e.details
 
             if (popup) {
-                post_message_obj(popup.port, e)
+                bridge.port_post_message_obj(popup.port, e)
             }
 
             // Change the popup icon to indicate that Solid is present on the page
@@ -248,17 +224,17 @@ function on_message(port: Port, e: bridge.Message) {
             content.versions = e.details
 
             if (popup) {
-                post_message_obj(popup.port, e)
+                bridge.port_post_message_obj(popup.port, e)
             }
 
             let devtools = script_devtools_map.get(tab_id)
             if (devtools) {
-                post_message_obj(devtools.port, e)
+                bridge.port_post_message_obj(devtools.port, e)
             }
 
             let panel = script_panel_map.get(tab_id)
             if (panel) {
-                post_message_obj(panel.port, e)
+                bridge.port_post_message_obj(panel.port, e)
             }
 
             break
@@ -267,7 +243,7 @@ function on_message(port: Port, e: bridge.Message) {
             // Forward all other messages to panel
             let panel = script_panel_map.get(tab_id)
             if (panel) {
-                post_message_obj(panel.port, e)
+                bridge.port_post_message_obj(panel.port, e)
             }
         }
         }
@@ -282,7 +258,7 @@ function on_message(port: Port, e: bridge.Message) {
         // Forward all messages to Content
         let content = script_content_map.get(active_tab_id)
         if (content) {
-            post_message_obj(content.port, e)
+            bridge.port_post_message_obj(content.port, e)
         } else {
             error(`Cannot forward ${bridge.Place_Name.Panel} -> ${bridge.Place_Name.Content} - ${e.name}:`, e.details)
         }

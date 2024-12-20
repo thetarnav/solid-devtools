@@ -11,10 +11,6 @@ log(bridge.Place_Name.Popup+' loaded.')
 
 // Create a connection to the background page
 const port = chrome.runtime.connect({name: bridge.ConnectionName.Popup})
-const bg_messanger = bridge.createPortMessanger(
-    bridge.Place_Name.Popup,
-    bridge.Place_Name.Background,
-    port)
 
 const [versions, setVersions] = s.createSignal<bridge.Versions | null>(null)
 const empty_detection_state: bridge.DetectionState = {
@@ -24,14 +20,17 @@ const empty_detection_state: bridge.DetectionState = {
 }
 const [detectionState, setDetectionState] = s.createSignal(empty_detection_state)
 
-bg_messanger.on('Detected', e => {
-    if (e) {
-        setDetectionState(e)
-    } else {
-        setDetectionState(empty_detection_state)
+bridge.port_on_message(port, e => {
+    // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
+    switch (e.name) {
+    case 'Detected':
+        setDetectionState(e.details ?? empty_detection_state)
+        break
+    case 'Versions':
+        setVersions(e.details)
+        break
     }
 })
-bg_messanger.on('Versions', setVersions)
 
 const App: s.Component = () => {
     return <>

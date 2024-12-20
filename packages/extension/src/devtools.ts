@@ -16,29 +16,36 @@ log(bridge.Place_Name.Devtools+' loaded.')
 // Create a connection to the background page
 const port = chrome.runtime.connect({name: bridge.ConnectionName.Devtools})
 
-const bg_messanger = bridge.createPortMessanger(
-    bridge.Place_Name.Devtools,
-    bridge.Place_Name.Background,
-    port)
-
 // Firefox requires absolute path
 const PATH_PREFIX = import.meta.env.BROWSER === 'firefox' ? '/' : ''
 
-// "Versions" mean that devtools client is on the page
-bridge.once(bg_messanger.on, 'Versions', () => {
+type Panel = chrome.devtools.panels.ExtensionPanel
 
-    log('Debugger connected -> Creating Devtools_Panel...')
+let panel_creating = false
+let panel: Panel | undefined
 
-    chrome.devtools.panels.create(
-        'Solid',
-        PATH_PREFIX + icons.OUTLINE_32,
-        PATH_PREFIX + 'src/panel.html',
-        () => {
-            if (chrome.runtime.lastError) {
-                error('Creating Devtools_Panel Failed', chrome.runtime.lastError)
-            } else {
-                log('Devtools_Panel created.')
-            }
-        },
-    )
+bridge.port_on_message(port, e => {
+
+    // "Versions" mean that devtools client is on the page
+    if (e.name === 'Versions' && !panel_creating && !panel) {
+        panel_creating = true
+
+        log('Debugger connected -> Creating Devtools_Panel...')
+
+        chrome.devtools.panels.create(
+            'Solid',
+            PATH_PREFIX + icons.OUTLINE_32,
+            PATH_PREFIX + 'src/panel.html',
+            _panel => {
+                panel_creating = false
+                panel = _panel
+
+                if (chrome.runtime.lastError) {
+                    error('Creating Devtools_Panel Failed', chrome.runtime.lastError)
+                } else {
+                    log('Devtools_Panel created.')
+                }
+            },
+        )
+    }
 })
