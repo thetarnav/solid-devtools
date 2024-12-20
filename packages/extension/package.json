@@ -6,10 +6,10 @@
     "author": "Damian Tarnawski <gthetarnav@gmail.com>",
     "type": "module",
     "scripts": {
-        "dev": "vite",
-        "build:chrome": "node --experimental-transform-types ./build.ts --browser=chrome",
-        "build:firefox": "node --experimental-transform-types ./build.ts --browser=firefox",
-        "build": "node --experimental-transform-types ./build.ts --browser=firefox --browser=chrome",
+        "dev": "node --experimental-transform-types ./build.ts --watch",
+        "build:chrome": "node --experimental-transform-types ./build.ts chrome",
+        "build:firefox": "node --experimental-transform-types ./build.ts firefox",
+        "build": "node --experimental-transform-types ./build.ts",
         "test:unit": "echo \"No unit tests\"",
         "test:types": "tsc --noEmit --paths null",
         "firefox-run": "pnpx web-ext run -s dist/firefox -p dev"
