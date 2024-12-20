@@ -77,6 +77,26 @@ chrome.runtime.onConnect.addListener(port => {
     port.onDisconnect.addListener(() => on_disconnected(port))
 })
 
+function toggle_action_icon(tab_id: Tab_Id) {
+
+    if (script_content_map.get(tab_id)?.detection?.Solid) {
+        chrome.action.setIcon({tabId: tab_id, path: icons.blue})
+
+        /*
+         For some reason setting the icon immediately does not always work
+        */
+        setTimeout(() => {
+            if (script_content_map.get(tab_id)?.detection?.Solid) {
+                chrome.action.setIcon({tabId: tab_id, path: icons.blue})
+            } else {
+                chrome.action.setIcon({tabId: tab_id, path: icons.gray})
+            }
+        }, 600)
+    } else {
+        chrome.action.setIcon({tabId: tab_id, path: icons.gray})
+    }
+}
+
 function on_connected(port: bridge.Port) {
 
     DEV: {log('Port connected', port)}
@@ -178,9 +198,7 @@ function on_disconnected(port: bridge.Port) {
             bridge.port_post_message(devtools.port, 'Versions', null)
         }
 
-
-        // Change the popup icon back to gray
-        chrome.action.setIcon({tabId: tab_id, path: icons.gray})
+        toggle_action_icon(tab_id)
 
         break
     }
@@ -230,8 +248,7 @@ function on_message(port: bridge.Port, e: bridge.Message) {
                 bridge.port_post_message_obj(popup.port, e)
             }
 
-            // Change the popup icon to indicate that Solid is present on the page
-            chrome.action.setIcon({tabId: tab_id, path: icons.blue})
+            toggle_action_icon(tab_id)
 
             break
         }
