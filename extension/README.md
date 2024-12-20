@@ -1,4 +1,4 @@
-<a href="https://github.com/thetarnav/solid-devtools/tree/main/packages/extension#readme" target="_blank">
+<a href="https://github.com/thetarnav/solid-devtools/tree/main/extension#readme" target="_blank">
   <p>
     <img width="100%" src="https://assets.solidjs.com/banner?type=Devtools&background=tiles&project=Chrome%20Extension" alt="Solid Devtools Extension">
   </p>

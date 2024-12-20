@@ -53,7 +53,7 @@ const controller = new Controller({
 
 This package is continuously under development, so the API is still not well defined. So instead of focusing on the API, the usage examples should show how you can embed this package in different context.
 
-- [Chrome Extension](https://github.com/thetarnav/solid-devtools/blob/main/packages/extension/src/App.tsx) - The extension is communicating with the [debugger](https://github.com/thetarnav/solid-devtools/tree/main/packages/debugger#readme) using the [main](https://github.com/thetarnav/solid-devtools/tree/main/packages/main/src) npm package.
+- [Chrome Extension](https://github.com/thetarnav/solid-devtools/blob/main/extension/src/App.tsx) - The extension is communicating with the [debugger](https://github.com/thetarnav/solid-devtools/tree/main/packages/debugger#readme) using the [main](https://github.com/thetarnav/solid-devtools/tree/main/packages/main/src) npm package.
 
 - [Overlay component](https://github.com/thetarnav/solid-devtools/blob/main/packages/overlay/src/controller.ts)
 

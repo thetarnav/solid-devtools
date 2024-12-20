@@ -18,7 +18,7 @@ export const test = pw.test.extend<{
             return
         }
 
-        const path_to_extension = path.resolve(__dirname, '../packages/extension/dist/chrome')
+        const path_to_extension = path.resolve(__dirname, '../extension/dist/chrome')
         const context = await pw.chromium.launchPersistentContext('', {
             args: [
                 '--headless=new',

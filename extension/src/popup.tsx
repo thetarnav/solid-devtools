@@ -59,7 +59,7 @@ const App: s.Component = () => {
                         <br />
                         Please follow the{' '}
                         <a
-                            href="https://github.com/thetarnav/solid-devtools/tree/main/packages/extension#getting-started"
+                            href="https://github.com/thetarnav/solid-devtools/tree/main/extension#getting-started"
                             target="_blank"
                         >
                             installation instructions

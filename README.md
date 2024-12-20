@@ -24,7 +24,7 @@ and interacting with Solid's reactivity graph.
   </picture>
 </a>
 
-## [The Chrome Extension](./packages/extension#readme)
+## [The Chrome Extension](./extension#readme)
 
 🚧 In early development. 🚧
 
@@ -32,7 +32,7 @@ Chrome Developer Tools extension for debugging SolidJS applications. It allows f
 
 Should work in any application using SolidJS, including SolidStart and Astro.
 
-[**>> See the guide on setting started <<**](./packages/extension#getting-started)
+[**>> See the guide on setting started <<**](./extension#getting-started)
 
 ## All devtools packages
 

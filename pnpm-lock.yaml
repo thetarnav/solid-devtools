@@ -97,6 +97,28 @@ importers:
         specifier: workspace:^
         version: link:../../packages/main
 
+  extension:
+    dependencies:
+      '@solid-devtools/debugger':
+        specifier: workspace:^
+        version: link:../packages/debugger
+      '@solid-devtools/frontend':
+        specifier: workspace:^
+        version: link:../packages/frontend
+      '@solid-devtools/shared':
+        specifier: workspace:^
+        version: link:../packages/shared
+      solid-devtools:
+        specifier: workspace:^
+        version: link:../packages/main
+    devDependencies:
+      '@crxjs/vite-plugin':
+        specifier: 2.0.0-beta.28
+        version: 2.0.0-beta.28
+      '@types/chrome':
+        specifier: ^0.0.287
+        version: 0.0.287
+
   packages/debugger:
     dependencies:
       '@nothing-but/utils':
@@ -138,28 +160,6 @@ importers:
       solid-js:
         specifier: ^1.9.0
         version: 1.9.3
-
-  packages/extension:
-    dependencies:
-      '@solid-devtools/debugger':
-        specifier: workspace:^
-        version: link:../debugger
-      '@solid-devtools/frontend':
-        specifier: workspace:^
-        version: link:../frontend
-      '@solid-devtools/shared':
-        specifier: workspace:^
-        version: link:../shared
-      solid-devtools:
-        specifier: workspace:^
-        version: link:../main
-    devDependencies:
-      '@crxjs/vite-plugin':
-        specifier: 2.0.0-beta.28
-        version: 2.0.0-beta.28
-      '@types/chrome':
-        specifier: ^0.0.287
-        version: 0.0.287
 
   packages/frontend:
     dependencies:

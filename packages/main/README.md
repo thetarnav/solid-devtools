@@ -10,7 +10,7 @@
 [![version](https://img.shields.io/npm/v/solid-devtools?style=for-the-badge)](https://www.npmjs.com/package/solid-devtools)
 [![npm](https://img.shields.io/npm/dw/solid-devtools?style=for-the-badge)](https://www.npmjs.com/package/solid-devtools)
 
-The main client library. It reexports the most [important tools](<(https://github.com/thetarnav/solid-devtools#available-devtools)>) and connects the client application to the [chrome extension](https://github.com/thetarnav/solid-devtools/tree/main/packages/extension#readme).
+The main client library. It reexports the most [important tools](<(https://github.com/thetarnav/solid-devtools#available-devtools)>) and connects the client application to the [chrome extension](https://github.com/thetarnav/solid-devtools/tree/main/extension#readme).
 
 ## Installation
 
@@ -24,7 +24,7 @@ pnpm add -D solid-devtools
 
 ## Using the browser extension
 
-For the usage guide of the Solid Devtools chrome extension, please refer to the [extension documentation](https://github.com/thetarnav/solid-devtools/tree/main/packages/extension#Getting-started).
+For the usage guide of the Solid Devtools chrome extension, please refer to the [extension documentation](https://github.com/thetarnav/solid-devtools/tree/main/extension#Getting-started).
 
 ## Type Module
 

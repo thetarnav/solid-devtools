@@ -41,7 +41,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: extension-artifacts
-          path: packages/extension/dist
+          path: extension/dist
 
   Chrome:
     needs: Build
