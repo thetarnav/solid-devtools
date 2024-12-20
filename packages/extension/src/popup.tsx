@@ -18,9 +18,9 @@ const port = chrome.runtime.connect({name: ConnectionName.Popup})
 
 const [versions, setVersions] = s.createSignal<Versions | null>(null)
 const empty_detection_state: DetectionState = {
-    Solid:    false,
-    SolidDev: false,
-    Debugger: false,
+    solid:    false,
+    solid_dev: false,
+    setup: false,
 }
 const [detectionState, setDetectionState] = s.createSignal(empty_detection_state)
 
@@ -39,20 +39,20 @@ port_on_message(port, e => {
 const App: s.Component = () => {
     return <>
         <div>
-            <p data-detected={detectionState().Solid}>
-                Solid {detectionState().Solid ? 'detected' : 'not detected'}
+            <p data-detected={detectionState().solid}>
+                Solid {detectionState().solid ? 'detected' : 'not detected'}
             </p>
         </div>
         <div>
-            <p data-detected={detectionState().SolidDev}>
-                Solid Dev Mode {detectionState().SolidDev ? 'detected' : 'not detected'}
+            <p data-detected={detectionState().solid_dev}>
+                Solid Dev Mode {detectionState().solid_dev ? 'detected' : 'not detected'}
             </p>
         </div>
         <div>
-            <p data-detected={detectionState().Debugger}>
-                Debugger {detectionState().Debugger ? 'detected' : 'not detected'}
+            <p data-detected={detectionState().setup}>
+                Debugger {detectionState().setup ? 'detected' : 'not detected'}
             </p>
-            <s.Show when={detectionState().SolidDev && !detectionState().Debugger}>
+            <s.Show when={detectionState().solid_dev && !detectionState().setup}>
                 <div class="details">
                     <p>
                         Devtools extension requires a runtime client to be installed.
@@ -77,7 +77,7 @@ const App: s.Component = () => {
                     <li>Solid ___________ {v.solid || 'unknown'}</li>
                     <li>Extension _______ {v.extension}</li>
                     <li>Client found ____ {v.client || 'unknown'}</li>
-                    <li>Client expected _ {v.expectedClient}</li>
+                    <li>Client expected _ {v.client_expected}</li>
                 </ul>
             </div>
         )}

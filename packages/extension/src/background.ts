@@ -84,14 +84,14 @@ chrome.runtime.onConnect.addListener(port => {
 
 function toggle_action_icon(tab_id: Tab_Id) {
 
-    if (script_content_map.get(tab_id)?.detection?.Solid) {
+    if (script_content_map.get(tab_id)?.detection?.solid) {
         chrome.action.setIcon({tabId: tab_id, path: ICONS_BLUE})
 
         /*
          For some reason setting the icon immediately does not always work
         */
         setTimeout(() => {
-            if (script_content_map.get(tab_id)?.detection?.Solid) {
+            if (script_content_map.get(tab_id)?.detection?.solid) {
                 chrome.action.setIcon({tabId: tab_id, path: ICONS_BLUE})
             } else {
                 chrome.action.setIcon({tabId: tab_id, path: ICONS_GRAY})

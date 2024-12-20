@@ -22,13 +22,13 @@ function App() {
     const empty_versions: Versions = {
         solid:          '',
         client:         '',
-        expectedClient: '',
+        client_expected: '',
         extension:      '',
     }
     const [versions, setVersions] = s.createSignal<Versions>(empty_versions)
 
     const devtools = frontend.createDevtools()
-    
+
     const port = chrome.runtime.connect({name: ConnectionName.Panel})
     port_on_message(port, e => {
         // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
@@ -58,14 +58,14 @@ function App() {
         >
             <devtools.Devtools
                 headerSubtitle={`#${versions().extension}_${versions().client}/${
-                    versions().expectedClient
+                    versions().client_expected
                 }`}
                 errorOverlayFooter={
                     <ul>
                         <li>Solid: {versions().solid}</li>
                         <li>Extension: {versions().extension}</li>
                         <li>Client: {versions().client}</li>
-                        <li>Expected client: {versions().expectedClient}</li>
+                        <li>Expected client: {versions().client_expected}</li>
                     </ul>
                 }
                 useShortcuts

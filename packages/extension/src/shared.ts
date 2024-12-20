@@ -54,16 +54,16 @@ export const enum ConnectionName {
 }
 
 export type DetectionState = {
-    Solid:    boolean
-    SolidDev: boolean
-    Debugger: boolean
+    solid:    boolean
+    solid_dev: boolean
+    setup: boolean
 }
 
 export type Versions = {
-    client: string | null
-    solid: string | null
-    expectedClient: string
-    extension: string
+    client:          string | null
+    client_expected: string
+    solid:           string | null
+    extension:       string
 }
 
 export interface GeneralChannels {

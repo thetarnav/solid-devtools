@@ -18,9 +18,7 @@ import {
 } from './shared.ts'
 
 // @ts-expect-error ?script&module query ensures output in ES module format and only import the script path
-import detector_path from './detector.ts?script&module'
-// @ts-expect-error ?script&module query ensures output in ES module format and only import the script path
-import debugger_path from './debugger.ts?script&module'
+import real_world_path from './real_world.ts?script&module'
 
 
 DEV: {log(Place_Name.Content+' loaded.')}
@@ -55,14 +53,14 @@ if (document.readyState === 'complete') {
 function on_loaded() {
 
     /*
-    Load Detect_Real_World script
+    Load Real_World script
     ↳ Debugger_Setup detected
-        ↳ Load Debugger_Real_World
+        ↳ Load Debugger
             ↳ 'Debugger_Connected' message
     */
 
-    loadScriptInRealWorld(detector_path)
-        .catch(err => error(`Detector_Real_World (${detector_path}) failed to load.`, err))
+    loadScriptInRealWorld(real_world_path)
+        .catch(err => error(`Real_World script (${real_world_path}) failed to load.`, err))
 }
 
 
@@ -71,9 +69,6 @@ const extension_version = chrome.runtime.getManifest().version
 const port = chrome.runtime.connect({name: ConnectionName.Content})
 
 let devtools_opened = false
-
-// prevent the script to be added multiple times if detected before solid
-let debugger_real_world_added = false
 
 /* From Background */
 port_on_message(port, e => {
@@ -93,22 +88,6 @@ port_on_message(port, e => {
 window_on_message(e => {
     // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
     switch (e.name) {
-    // From Detector_Real_World
-    case 'Detected': {
-
-        /* Forward to Background script */
-        port_post_message_obj(port, e)
-
-        /* Load Debugger_Real_World */
-        if (e.details && e.details.Debugger && !debugger_real_world_added) {
-            debugger_real_world_added = true
-
-            loadScriptInRealWorld(debugger_path)
-                .catch(err => error(`Debugger_Real_World (${debugger_path}) failed to load.`, err))
-        }
-
-        break
-    }
     case 'Debugger_Connected': {
 
         // eslint-disable-next-line no-console
@@ -122,7 +101,7 @@ window_on_message(e => {
             client:         e.details.client,
             solid:          e.details.solid,
             extension:      extension_version,
-            expectedClient: import.meta.env.EXPECTED_CLIENT,
+            client_expected: import.meta.env.EXPECTED_CLIENT,
         })
 
         if (devtools_opened) {
