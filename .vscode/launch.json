@@ -1,0 +1,17 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "HTTP Chrome",
+            "type": "chrome",
+            "request": "launch",
+            "skipFiles": ["${workspaceFolder}/node_modules/**/*.js"],
+            "sourceMaps": true,
+            "url": "http://localhost:3000",
+            "webRoot": "${workspaceFolder}",
+            "pathMapping": {
+                "/@fs/": ""
+            }
+        }
+    ]
+}

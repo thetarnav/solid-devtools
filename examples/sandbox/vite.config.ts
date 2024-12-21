@@ -30,6 +30,7 @@ export default defineConfig(mode => {
         build: {
             target: 'esnext',
             minify: false,
+            sourcemap: true,
         },
         optimizeDeps: {
             exclude: ['solid-devtools', '@solid-devtools/*']
