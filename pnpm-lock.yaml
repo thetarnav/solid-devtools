@@ -89,9 +89,6 @@ importers:
       '@solid-devtools/overlay':
         specifier: workspace:^
         version: link:../../packages/overlay
-      '@solid-primitives/timer':
-        specifier: ^1.3.10
-        version: 1.3.10(solid-js@1.9.3)
     devDependencies:
       solid-devtools:
         specifier: workspace:^

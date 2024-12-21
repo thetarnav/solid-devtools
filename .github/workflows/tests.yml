@@ -40,8 +40,6 @@ jobs:
 
       - name: Run Build and Tests
         run: pnpm run build-test:packages
-        env:
-          CI: true
 
       - name: Lint
         run: pnpm test:lint

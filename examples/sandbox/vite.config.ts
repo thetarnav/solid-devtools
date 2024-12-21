@@ -20,14 +20,18 @@ export default defineConfig(mode => {
             solid({hot: true, dev: true}),
         ],
         define: {
-            'process.env.EXT': JSON.stringify(is_ext),
-            'process.env.BUILD': JSON.stringify(is_build),
+            'import.meta.env.EXT': JSON.stringify(is_ext),
         },
         mode: 'development',
+        resolve: {
+            conditions: ['browser', 'development']
+        },
         build: {
             target: 'esnext',
             minify: false,
         },
-        optimizeDeps: {},
+        optimizeDeps: {
+            exclude: ['solid-devtools', '@solid-devtools/*']
+        },
     }
 })

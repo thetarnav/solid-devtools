@@ -34,8 +34,6 @@ jobs:
 
       - name: Build
         run: pnpm build
-        env:
-          CI: true
 
       - name: Upload Extension Artifacts
         uses: actions/upload-artifact@v4
