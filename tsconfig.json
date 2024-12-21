@@ -1,11 +1,45 @@
 {
-    "extends": "./tsconfig.base.json",
     "compilerOptions": {
-        "lib": ["DOM", "DOM.Iterable", "ESNext"],
-        "jsx": "preserve",
+        /*
+         Module resolution, imports
+        */
+        "module":                       "NodeNext",
+        "moduleResolution":             "NodeNext",
+        "verbatimModuleSyntax":         true,
+        "resolveJsonModule":            true,
+        "allowImportingTsExtensions":   true,
+        "allowSyntheticDefaultImports": true,
+        /*
+         JS
+        */
+        "allowJs": true,
+        "checkJs": true,
+        /*
+         Emit
+        */
+        "target":              "ESNext",
+        "emitDeclarationOnly": true,
+        "declarationMap":      true,
+        "declaration":         true,
+        "outDir":              "types",
+        /*
+         Types
+        */
+        "types":           ["@total-typescript/ts-reset"],
+        "lib":             ["DOM", "ESNext"],
+        "jsx":             "preserve",
         "jsxImportSource": "solid-js",
-        "declarationMap": true,
-        "declaration": true
+        /*
+         Checking
+        */
+        "strict":                             true,
+        "skipLibCheck":                       true,
+        "forceConsistentCasingInFileNames":   true,
+        "noPropertyAccessFromIndexSignature": true,
+        "noUncheckedIndexedAccess":           true,
     },
-    "exclude": ["node_modules", "**/dist/**/*"]
+    "exclude": [
+        "**/node_modules/**/*",
+        "**/dist/**/*",
+    ],
 }
