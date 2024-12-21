@@ -3,9 +3,11 @@ name: Deploy example page
 on:
   push:
     branches: [main]
+  pull_request:
+    branches: [main]
 
 jobs:
-  build:
+  Build:
     runs-on: ubuntu-latest
 
     steps:
@@ -44,9 +46,11 @@ jobs:
         with:
           path: examples/sandbox/dist
 
-  deploy:
-    needs: build
+  Deploy:
+    needs: Build
+    name: Deploy to Production env
     runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'push' }}
 
     # Grant GITHUB_TOKEN the permissions required to make a Pages deployment
     permissions:
@@ -54,8 +58,27 @@ jobs:
       id-token: write # to verify the deployment originates from an appropriate source
 
     environment:
-      name: github-pages
+      name: Production
       url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+  Deploy_Preview:
+    needs: Build
+    name: Deploy to Preview env
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'pull_request' }}
+
+    # Grant GITHUB_TOKEN the permissions required to make a Pages deployment
+    permissions:
+      pages: write # to deploy to Pages
+      id-token: write # to verify the deployment originates from an appropriate source
+
+    environment:
+      name: Preview
 
     steps:
       - name: Deploy to GitHub Pages
