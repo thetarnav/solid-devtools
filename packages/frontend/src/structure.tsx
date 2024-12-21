@@ -351,7 +351,7 @@ const LocatorButton: s.Component = () => {
     return (
         <ui.ToggleButton
             class="shrink-0 w-7 h-7"
-            onToggle={locator.setLocatorState}
+            onInteract={locator.setLocatorState}
             selected={locator.locatorEnabled()}
             title="Select an element in the page to inspect it"
         >
