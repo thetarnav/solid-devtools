@@ -18,7 +18,7 @@ Simply add the Overlay component to your app and get access to a powerful, in-br
 
 A couple of deployed demo websites where you can see the Overlay in action:
 
-- [Sandbox Website](https://solid-devtools.vercel.app) - [Source code](https://github.com/thetarnav/solid-devtools/tree/main/examples/sandbox)
+- [Sandbox Website](https://thetarnav.github.io/solid-devtools) - [Source code](https://github.com/thetarnav/solid-devtools/tree/main/examples/sandbox)
 
 ## Getting started
 
