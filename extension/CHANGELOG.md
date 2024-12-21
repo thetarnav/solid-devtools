@@ -1,5 +1,17 @@
 # @solid-devtools/extension
 
+## 0.31.6
+
+### Patch Changes
+
+- 063ff4d: Remove all event-bus abstractions from extension pkg
+- e82fd85: Rewrite and simplify the background script.
+  The devtools should be more reliable when switching tabs, closing, reloading etc.
+  The icon of the extension on the actions bar should light up when on site with solid detected.
+- Updated dependencies [66c6cbb]
+  - @solid-devtools/frontend@0.12.5
+  - solid-devtools@0.31.6
+
 ## 0.31.5
 
 ### Patch Changes
