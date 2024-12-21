@@ -47,14 +47,13 @@ export const toggle_button_styles = /*css*/ `
 `
 
 export const ToggleButton: s.ParentComponent<
-    s.ComponentProps<'button'> & {onToggle: (selected: boolean) => void; selected: boolean}
+    s.ComponentProps<'button'> & {onInteract: (selected: boolean) => void; selected: boolean}
 > = props => {
+
     props = combineProps(props, {
         class: toggle_button,
-        get 'aria-selected'() {
-            return props.selected
-        },
-        onClick: () => props.onToggle(!props.selected),
+        get 'aria-selected'() {return props.selected},
+        onClick() {props.onInteract(!props.selected)},
     })
 
     // ! createToggleButton doesn't seems to passing class to buttonProps
