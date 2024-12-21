@@ -22,6 +22,7 @@ export default defineConfig(mode => {
         define: {
             'import.meta.env.EXT': JSON.stringify(is_ext),
         },
+        base: '', // for github pages to not start with absolute "/"
         mode: 'development',
         resolve: {
             conditions: ['browser', 'development']
