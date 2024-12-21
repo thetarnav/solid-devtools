@@ -37,12 +37,12 @@ jobs:
         run: pnpm build
 
       - name: Build site
-        run: cd examples/sandbox && pnpm build
+        run: pnpm -dir examples/sandbox build
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: dist
+          path: examples/sandbox/dist
 
   deploy:
     needs: build
