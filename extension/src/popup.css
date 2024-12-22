@@ -58,6 +58,7 @@ p[data-detected='true']::before {
 
 .details {
     margin-top: 0.4rem;
+    color:      var(--lighter-dark);
 }
 
 .versions {
@@ -67,6 +68,7 @@ p[data-detected='true']::before {
 ul {
     margin:      0;
     margin-left: 2ch;
+    margin-top:  0.4rem;
     color:       var(--lighter-dark);
     padding:     0;
     list-style:  none;
@@ -74,4 +76,38 @@ ul {
 li::before {
     content:    '- ';
     margin-left: -2ch;
+}
+
+.external-links {
+    display:        flex;
+    flex-direction: column;
+    gap:            0.4rem;
+}
+.external-links a {
+    margin:        0 -0.4rem;
+    padding:       0.2rem 0.4rem;
+    transition:    background-color 0.2s;
+    display:       flex;
+    align-items:   center;
+    gap:           0.4rem;
+}
+
+.external-links .icon {
+    width:         0.8rem;
+    height:        0.8rem;
+    margin-bottom: 2px;
+}
+.external-links .icon path {
+    stroke-width:  12;
+}
+
+.issue-link:hover {
+    background-color: #fb923c20;
+    color:            #f97316;
+    text-decoration:  none;
+}
+.support-link:hover {
+    background-color: #ec489920;
+    color:            #ec4899;
+    text-decoration:  none;
 }
