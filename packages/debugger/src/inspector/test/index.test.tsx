@@ -1,3 +1,5 @@
+import '../../setup.ts'
+
 import {
     createComputed,
     createMemo,

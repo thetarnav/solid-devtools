@@ -27,14 +27,6 @@ jobs:
       - name: Install dependencies
         run: pnpm install --no-frozen-lockfile --ignore-scripts
 
-      - name: Cache turbo build setup
-        uses: actions/cache@v4
-        with:
-          path: node_modules/.cache/turbo
-          key: turbo-${{ github.sha }}
-          restore-keys: |
-            turbo-
-
       - name: Install Playwright browser and dependencies
         run: pnpm exec playwright install --with-deps chromium
 

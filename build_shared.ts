@@ -13,7 +13,6 @@ function is_env_truthy(value: string | undefined): boolean {
 
 export const CI = is_env_truthy(process.env['CI'])
                || is_env_truthy(process.env['GITHUB_ACTIONS'])
-               || !!process.env['TURBO_HASH']
 
 // type Worker_Data = {
 //     is_dev:     boolean,

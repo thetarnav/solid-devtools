@@ -51,9 +51,6 @@
             }
         }
     },
-    "scripts": {
-        "test:unit": "vitest"
-    },
     "dependencies": {
         "@nothing-but/utils": "~0.17.0",
         "@solid-devtools/shared": "workspace:^",

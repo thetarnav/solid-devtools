@@ -1,3 +1,5 @@
+import '../../setup.ts'
+
 import * as s from 'solid-js'
 import * as vi from 'vitest'
 import {NodeType} from '../constants.ts'

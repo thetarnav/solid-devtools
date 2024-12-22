@@ -1,3 +1,5 @@
+import '../../setup.ts'
+
 import {createRoot} from 'solid-js'
 import {createMutable, createStore, modifyMutable, produce, reconcile, unwrap} from 'solid-js/store'
 import {beforeEach, describe, expect, it, vi} from 'vitest'

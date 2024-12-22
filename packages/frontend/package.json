@@ -28,9 +28,6 @@
     "main": "dist/index.js",
     "module": "dist/index.js",
     "types": "dist/index.d.ts",
-    "scripts": {
-        "test:unit": "vitest"
-    },
     "dependencies": {
         "@nothing-but/utils": "~0.17.0",
         "@solid-devtools/debugger": "workspace:^",

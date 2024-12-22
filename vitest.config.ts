@@ -4,30 +4,21 @@ import * as vi    from 'vitest/config'
 
 const cwd = process.cwd()
 
-export const testConfig: vi.ViteUserConfig['test'] = {
-    passWithNoTests: true,
-    watch:           false,
-    globals:         true,
-    clearMocks:      true,
-    environment:     'jsdom',
-}
-
-export const resolveConfig = {
-    conditions: ['browser', 'development'],
-    alias: {
-        'solid-js/web':   path.resolve(cwd, 'node_modules/solid-js/web/dist/dev.js'),
-        'solid-js/store': path.resolve(cwd, 'node_modules/solid-js/store/dist/dev.js'),
-        'solid-js':       path.resolve(cwd, 'node_modules/solid-js/dist/dev.js'),
+export default vi.defineConfig({
+    plugins: [solid() as any],
+    test:    {
+        passWithNoTests: true,
+        watch:           false,
+        environment:     'jsdom',
+        isolate:         false,
+        include:         ['packages/**/*.test.{ts,tsx,js,jsx}'],
     },
-} satisfies vi.ViteUserConfig['resolve']
-
-export const vitestFullConfig = (patch?: (config: vi.ViteUserConfig) => void) =>
-    vi.defineConfig(() => {
-        const config: vi.ViteUserConfig = {
-            plugins: [solid() as any],
-            test: testConfig,
-            resolve: resolveConfig,
-        }
-        patch?.(config)
-        return config
-    })
+    resolve: {
+        conditions: ['browser', 'development'],
+        alias:      {
+            'solid-js/web':   path.resolve(cwd, 'node_modules/solid-js/web/dist/dev.js'),
+            'solid-js/store': path.resolve(cwd, 'node_modules/solid-js/store/dist/dev.js'),
+            'solid-js':       path.resolve(cwd, 'node_modules/solid-js/dist/dev.js'),
+        },
+    },
+})

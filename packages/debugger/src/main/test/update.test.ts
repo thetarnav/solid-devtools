@@ -1,3 +1,5 @@
+import '../../setup.ts'
+
 import {createComputed, createRoot, createSignal, onCleanup} from 'solid-js'
 import {describe, expect, it} from 'vitest'
 import {

@@ -1,3 +1,5 @@
+import '../../setup.ts'
+
 import {type Truthy} from '@solid-primitives/utils'
 import {createMutable, createStore} from 'solid-js/store'
 import {describe, expect, test, vi} from 'vitest'
