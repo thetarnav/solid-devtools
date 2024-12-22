@@ -5,7 +5,6 @@ import * as path from 'node:path'
 import * as esb  from 'esbuild'
 
 import {
-    CI,
     get_is_dev_from_args,
     type Package_Json,
 } from './build_shared.ts'
@@ -23,9 +22,6 @@ const dirname  = path.dirname(filename)
 {
     let tsc_args = ['pnpm', 'build:types']
     
-    if (CI) {
-        tsc_args.push('--noEmitOnError')
-    }
     if (is_dev) {
         tsc_args.push('--watch', '--preserveWatchOutput')
     }
