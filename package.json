@@ -8,7 +8,7 @@
     "scripts": {
         "----------------------DEV----------------------": "",
         "dev:ext": "pnpm -dir extension run dev",
-        "dev:packages": "pnpm run --parallel --filter=\"./packages/*\" dev",
+        "dev:packages": "node --experimental-transform-types ./build.ts --watch",
         "sandbox": "pnpm -dir examples/sandbox run dev",
         "sandbox:ext": "pnpm -dir examples/sandbox run dev:ext",
         "----------------------BUILD----------------------": "",
