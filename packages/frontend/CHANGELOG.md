@@ -1,5 +1,11 @@
 # @solid-devtools/frontend
 
+## 0.12.5
+
+### Patch Changes
+
+- 66c6cbb: Improve top-right menu (add sponsor link and nicer styles)
+
 ## 0.12.4
 
 ### Patch Changes
