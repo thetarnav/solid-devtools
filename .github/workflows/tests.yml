@@ -39,15 +39,7 @@ jobs:
         run: pnpm exec playwright install --with-deps chromium
 
       - name: Run Build and Tests
-        run: pnpm run build-test:packages
-
-      - name: Lint
-        run: pnpm test:lint
-
-      - name: Run Playwright tests
-        run: pnpm test:e2e
-        env:
-          CI: true
+        run: pnpm run build-test
 
       - uses: actions/upload-artifact@v4
         if: always()

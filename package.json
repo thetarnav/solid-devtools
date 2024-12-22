@@ -13,6 +13,7 @@
         "sandbox:ext": "pnpm -dir examples/sandbox run dev:ext",
         "----------------------BUILD----------------------": "",
         "build:packages": "node --experimental-transform-types ./build.ts",
+        "build:sandbox": "pnpm -dir examples/sandbox run build",
         "build:ext": "pnpm -dir extension run build",
         "build:types": "tsc -b packages/*",
         "build": "pnpm build:packages && pnpm build:ext",
@@ -26,7 +27,7 @@
         "build-test": "pnpm run build && pnpm run test",
         "changeset": "changeset",
         "version": "pnpm changeset version && pnpm i --no-frozen-lockfile && git add .",
-        "publish": "pnpm build && pnpm changeset publish"
+        "publish": "pnpm build:packages && pnpm changeset publish"
     },
     "devDependencies": {
         "@changesets/cli": "^2.27.10",

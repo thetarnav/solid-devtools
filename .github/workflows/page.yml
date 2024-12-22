@@ -36,10 +36,10 @@ jobs:
             turbo-
 
       - name: Build
-        run: pnpm build
+        run: pnpm build:packages
 
       - name: Build site
-        run: pnpm -dir examples/sandbox build
+        run: pnpm build:sandbox
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
