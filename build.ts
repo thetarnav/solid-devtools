@@ -1,207 +1,158 @@
-// import * as url       from 'node:url'
-import * as fs        from 'node:fs'
-import * as cp        from 'node:child_process'
-// import * as path      from 'node:path'    
-// import * as assert    from 'node:assert/strict'
-// import * as threads   from 'node:worker_threads'
-import * as esb       from 'esbuild'
-// import      ts        from 'typescript'
+import * as url  from 'node:url'
+import * as fs   from 'node:fs'
+import * as cp   from 'node:child_process'
+import * as path from 'node:path'    
+import * as esb  from 'esbuild'
 
-function is_env_truthy(value: string | undefined): boolean {
-    if (!value) return false
-    value = value.toLowerCase().trim()
-    return value === 'true'
-        || value === '"1"'
-        || value === '1'
-        || value === 'yes'
-        || value === 'y'
-}
+import {
+    CI,
+    get_is_dev_from_args,
+    type Package_Json,
+} from './build_shared.ts'
 
-export const CI = is_env_truthy(process.env['CI'])
-               || is_env_truthy(process.env['GITHUB_ACTIONS'])
-               || !!process.env['TURBO_HASH']
 
-// type Worker_Data = {
-//     is_dev:     boolean,
-//     base_path:  string,
-//     dist_path:  string,
-//     ts_entries: string[],
-// }
+const is_dev = get_is_dev_from_args()
 
-// const filename = url.fileURLToPath(import.meta.url)
-// const dirname  = path.dirname(filename)
+const filename = url.fileURLToPath(import.meta.url)
+const dirname  = path.dirname(filename)
 
-export const DEFAULT_EXTERNAL_DEPS: string[] = [
-    'solid-js',
-    'solid-js/*',
-    '@solid-devtools/shared/*',
-]
 
-export function get_external_deps_from_pkg(pkg_filename: string): string[] {
-    let pkg = JSON.parse(fs.readFileSync(pkg_filename) as any) as any
-    let deps = Object.keys({...pkg?.peerDependencies, ...pkg?.dependencies})
-    deps.push(...DEFAULT_EXTERNAL_DEPS)
-    return deps
-}
-
-export function get_is_dev_from_args(): boolean {
-    return process.argv.includes('--watch')
-}
-
-export function get_common_esbuild_options(is_dev: boolean, dist_dirname: string): esb.BuildOptions {
-    return {
-        platform:    'browser',
-        format:      'esm',
-        target:      'esnext',
-        sourcemap:   is_dev,
-        outdir:      dist_dirname,
-        bundle:      true,
-        splitting:   true,
-        treeShaking: !is_dev,
-        logLevel:    is_dev ? 'debug' : 'warning',
-        color:       true,
-        dropLabels:  [is_dev ? 'PROD' : 'DEV'],
-    }
-}
-
-export async function build(
-    options:    esb.BuildOptions[],
-    is_dev:     boolean,
-    base_path:  string,
-    dist_path:  string,
-): Promise<void> {
-
-    /* Clear dist when building to prod */
-    if (!is_dev) {
-        fs.rmSync(dist_path, {recursive: true, force: true})
-    }
-
-    let tsc_args = []
-
+/*
+ Spawn separate tsc process
+*/
+{
+    let tsc_args = ['pnpm', 'build:types']
+    
     if (CI) {
         tsc_args.push('--noEmitOnError')
     }
     if (is_dev) {
         tsc_args.push('--watch', '--preserveWatchOutput')
     }
-
-    let tsc_process = cp.spawn('tsc', tsc_args, {
-        cwd:   base_path,
-        stdio: 'inherit',
-    })
-
+    
+    let tsc_process = cp.spawn(tsc_args[0]!, tsc_args.slice(1), {stdio: 'inherit'})
+    
     tsc_process.on('error', error => {
         // eslint-disable-next-line no-console
         console.error('TSC process error:', error)
         if (!is_dev) process.exit(1)
     })
+}
 
-    // const worker = new threads.Worker(filename, {
-    //     workerData: {is_dev, dist_path, base_path, ts_entries} satisfies Worker_Data,
-    //     argv: process.argv,
-    //     env:  process.env,
-    // })
 
-    // worker.on('error', (error) => {
-    //     // eslint-disable-next-line no-console
-    //     console.error(`Worker error:`, error)
-    // })
+/*
+ Build all packages with esbuild
+ using options exported from /packages/ * /build.ts
+*/
 
-    /* Watch - never terminates */
-    if (is_dev) {
-        for (const option of options) {
-            esb.context(option)
-               .then(ctx => ctx.watch())
-        }
-    }
-    /* Build once - wait for all to finish */
-    else {
-        let begin = performance.now()
-        await Promise.all(options.map(option => esb.build(option)))
-        // eslint-disable-next-line no-console
-        console.log(`JS built in ${(performance.now()-begin).toFixed(2)}ms`)    
+const packages_dirname = path.join(dirname, 'packages')
+
+const packages_dirents = fs.readdirSync(packages_dirname, {withFileTypes: true})
+const packages_names = []
+for (let dirent of packages_dirents) {
+    if (dirent.isDirectory() && dirent.name !== 'types' && dirent.name !== 'dist') {
+        packages_names.push(dirent.name)
     }
 }
 
-// function main() {
+type Build_Task = {
+    promise: Promise<void>
+    resolve: () => void
+    done:    boolean
+}
+function make_build_task(): Build_Task {
+    let task: Build_Task = {} as any
+    task.promise = new Promise(resolve => {task.resolve = () => {task.done = true; resolve()}})
+    return task
+}
+
+type Build_Config = {
+    pkg_json: Package_Json
+    options:  esb.BuildOptions
+    task:     Build_Task
+}
+let configs: Build_Config[] = []
+
+for (let name of packages_names) {
+
+    let pkg_path = path.join(packages_dirname, name)
+
+    let pkg_json_path = path.join(pkg_path, 'package.json')
+    let pkg_json      = JSON.parse(fs.readFileSync(pkg_json_path) as any) as Package_Json
     
-//     if (threads.isMainThread)
-//         return
+    let build_path   = path.join(pkg_path, 'build.ts')
+    let options_list = (await import(build_path)).default() as esb.BuildOptions[]
 
-//     /* Worker - runs the ts program    */
+    for (let options of options_list) {
+        configs.push({pkg_json, options, task: make_build_task()})
+    }
+}
 
-//     const data = threads.workerData as Worker_Data
+for (let config of configs) {
 
-//     const port = threads.parentPort
-//     assert.ok(port != null)
+    let deps_pkg = config.pkg_json.dependencies || {}
+    let deps_external = config.options.external || []
+    let deps_configs = new Map<string, Build_Config>()
 
-//     const options = get_tsc_options(data.base_path)
+    /*
+     Find which internal dependencies build needs to wait on
+     Only necessary when the dependency is not parked as "external"
+     and bundled in with the package
+    */
+    for (let dep_name of Object.keys(deps_pkg)) {
+        if (deps_external.includes(dep_name)) continue
+        
+        let dep_config = configs.find(c => c.pkg_json.name === dep_name)
+        if (dep_config) deps_configs.set(dep_name, dep_config)
+    }
 
-//     /* Watch - never terminates */
-//     if (data.is_dev) {
-//         const host = ts.createWatchCompilerHost(
-//             data.ts_entries,
-//             options,
-//             ts.sys,
-//             undefined,
-//             report_diagnostic,
-//             report_watch_status_changed,
-//         )
-//         ts.createWatchProgram(host)
-//     }
-//     /* Emit once and exit */
-//     else {
-//         let begin = performance.now()
-//         ts.createProgram(data.ts_entries, options).emit()
-//         // eslint-disable-next-line no-console
-//         console.log(`DTS complete in ${(performance.now()-begin).toFixed(2)}ms`)
-//         process.exit(0)
-//     }
-// }
+    let deps_plugin: esb.Plugin = {
+        name: 'wait-for-deps',
+        setup(build) {
 
-// const format_host: ts.FormatDiagnosticsHost = {
-//     getCurrentDirectory:  () => process.cwd(),
-//     getCanonicalFileName: filename => filename,
-//     getNewLine:           () => ts.sys.newLine
-// }
+            let begin = performance.now()
 
-// function report_diagnostic(diagnostic: ts.Diagnostic) {
-//     // eslint-disable-next-line no-console
-//     console.error(ts.formatDiagnosticsWithColorAndContext([diagnostic], format_host))
-// }
-// function report_diagnostics(diagnostics: ts.Diagnostic[]) {
-//     // eslint-disable-next-line no-console
-//     console.error(ts.formatDiagnosticsWithColorAndContext(diagnostics, format_host))
-// }
-// function report_watch_status_changed(diagnostic: ts.Diagnostic) {
-//     // eslint-disable-next-line no-console
-//     console.info(ts.formatDiagnosticsWithColorAndContext([diagnostic], format_host))
-// }
+            build.onStart(() => {
+                if (config.task.done) {
+                    config.task = make_build_task()
+                }
+                begin = performance.now()
+            })
 
-// export function get_tsc_options(base_path: string): ts.CompilerOptions {
+            build.onEnd(() => {
+                // eslint-disable-next-line no-console
+                console.log(`\x1b[36m${config.pkg_json.name}\x1b[0m built in \x1b[33m${(performance.now()-begin).toFixed()}ms\x1b[0m`)
+                config.task.resolve()
+            })
 
-//     let ts_config_file = ts.findConfigFile(base_path, ts.sys.fileExists)
-//     if (!ts_config_file) throw Error('tsconfig.json not found')
+            /* Wait for each dependency to be done when requested */
+            for (let dep of deps_configs.values()) {
+                build.onResolve({filter: new RegExp('^'+dep.pkg_json.name)}, async args => {
+                    if (!dep.task.done) {
+                        // eslint-disable-next-line no-console
+                        console.log(`\x1b[36m${config.pkg_json.name}\x1b[0m waits on \x1b[36m${args.path}\x1b[0m`)
+                        await dep.task.promise
+                    }
+                    return null
+                })
+            }
+        },
+    }
 
-//     let {config, error} = ts.readConfigFile(ts_config_file, ts.sys.readFile)
-//     if (error) {
-//         report_diagnostic(error)
-//     }
-    
-//     let {options, errors} = ts.parseJsonConfigFileContent(config, ts.sys, base_path)
-//     if (errors.length > 0) {
-//         report_diagnostics(errors)
-//     }
+    config.options.plugins = [
+        ...(config.options.plugins || []),
+        deps_plugin,
+    ]
+}
 
-//     return {
-//         ...options,
-//         emitDeclarationOnly: true,
-//         noEmit:              false,
-//         noEmitOnError:       CI,
-//         declaration:         true,
-//         declarationMap:      true,
-//     }
-// }
-
-
-// main()
+/* Watch - never terminates */
+if (is_dev) {
+    for (let c of configs) {
+        esb.context(c.options)
+            .then(ctx => ctx.watch())
+    }
+}
+/* Build once - wait for all to finish */
+else {
+    await Promise.all(configs.map(c => esb.build(c.options)))
+}

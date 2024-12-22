@@ -1,7 +1,17 @@
 {
     "extends": "../../tsconfig.json",
     "compilerOptions": {
-        "outDir": "dist"
+        "composite": true,
+        "outDir": "dist",
+        "rootDir": "src"
     },
-    "include": ["src/**/*", "test/**/*"]
+    "include": ["src/**/*"],
+    "exclude": [
+        "**/node_modules/**/*",
+        "**/dist/**/*",
+    ],
+    "references": [
+        {"path": "../shared"},
+        {"path": "../debugger"},
+    ],
 }

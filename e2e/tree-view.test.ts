@@ -1,5 +1,5 @@
 import { expect } from '@playwright/test'
-import { test } from './fixtures'
+import { test } from './fixtures.ts'
 
 test('Search node in tree view', async ({ sdt_frame, search }) => {
     const selectedNode = sdt_frame.getByRole('treeitem', { selected: true })

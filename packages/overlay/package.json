@@ -41,11 +41,7 @@
         "types": "./dist/index.d.ts",
         "default": "./dist/index_noop.js"
     },
-    "scripts": {
-        "dev": "pnpm build --watch",
-        "build": "node --experimental-transform-types ./build.ts",
-        "test:types": "tsc --noEmit --paths null"
-    },
+    "scripts": {},
     "dependencies": {
         "@nothing-but/utils": "~0.17.0",
         "@solid-devtools/debugger": "workspace:^",

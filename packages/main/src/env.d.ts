@@ -1,3 +1,5 @@
+/// <reference types="node" />
+
 declare global {
     // process.env
     namespace NodeJS {

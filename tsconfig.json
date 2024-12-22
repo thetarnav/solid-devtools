@@ -21,7 +21,7 @@
         "emitDeclarationOnly": true,
         "declarationMap":      true,
         "declaration":         true,
-        "outDir":              "types",
+        "outDir":              "dist/types",
         /*
          Types
         */
@@ -41,5 +41,5 @@
     "exclude": [
         "**/node_modules/**/*",
         "**/dist/**/*",
-    ],
+    ]
 }

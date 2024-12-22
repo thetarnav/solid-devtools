@@ -2,6 +2,9 @@ node_modules
 dist
 gitignore
 
+# tsc build artifacts
+tsconfig.tsbuildinfo
+
 # debug
 npm-debug.log*
 yarn-debug.log*

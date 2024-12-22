@@ -4,7 +4,7 @@ import * as vi    from 'vitest/config'
 
 const cwd = process.cwd()
 
-export const testConfig: vi.UserConfig['test'] = {
+export const testConfig: vi.ViteUserConfig['test'] = {
     passWithNoTests: true,
     watch:           false,
     globals:         true,
@@ -19,12 +19,12 @@ export const resolveConfig = {
         'solid-js/store': path.resolve(cwd, 'node_modules/solid-js/store/dist/dev.js'),
         'solid-js':       path.resolve(cwd, 'node_modules/solid-js/dist/dev.js'),
     },
-} satisfies vi.UserConfig['resolve']
+} satisfies vi.ViteUserConfig['resolve']
 
-export const vitestFullConfig = (patch?: (config: vi.UserConfig) => void) =>
+export const vitestFullConfig = (patch?: (config: vi.ViteUserConfig) => void) =>
     vi.defineConfig(() => {
-        const config: vi.UserConfig = {
-            plugins: [solid()],
+        const config: vi.ViteUserConfig = {
+            plugins: [solid() as any],
             test: testConfig,
             resolve: resolveConfig,
         }

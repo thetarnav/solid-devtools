@@ -2,7 +2,9 @@ import fs              from 'node:fs'
 
 import ts_eslint       from '@typescript-eslint/eslint-plugin'
 import ts_parser       from '@typescript-eslint/parser'
+// @ts-expect-error no types for package
 import no_only_tests   from 'eslint-plugin-no-only-tests'
+// @ts-expect-error no types for package
 import eslint_comments from '@eslint-community/eslint-plugin-eslint-comments'
 import nb_eslint       from '@nothing-but/eslint-plugin'
 

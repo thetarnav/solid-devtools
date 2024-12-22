@@ -1,8 +1,17 @@
 {
     "extends": "../../tsconfig.json",
     "compilerOptions": {
+        "composite": true,
         "outDir": "dist",
-        "types": ["@total-typescript/ts-reset", "node"]
+        "rootDir": "src"
     },
-    "include": ["src/**/*", "test/**/*"]
+    "include": ["src/**/*"],
+    "exclude": [
+        "**/node_modules/**/*",
+        "**/dist/**/*",
+    ],
+    "references": [
+        {"path": "../shared"},
+        {"path": "../debugger"},
+    ],
 }

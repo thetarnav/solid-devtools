@@ -41,12 +41,7 @@
         "import": "./dist/server.js",
         "require": "./dist/server.cjs"
     },
-    "scripts": {
-        "dev": "pnpm build --watch",
-        "build": "node --experimental-transform-types ./build.ts",
-        "test:unit": "echo \"NOOP test\"",
-        "test:types": "tsc --noEmit --paths null"
-    },
+    "scripts": {},
     "dependencies": {
         "@nothing-but/utils": "~0.17.0",
         "@solid-devtools/debugger": "workspace:^",

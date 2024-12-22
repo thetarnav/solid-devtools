@@ -29,10 +29,7 @@
     "module": "dist/index.js",
     "types": "dist/index.d.ts",
     "scripts": {
-        "dev": "pnpm build --watch",
-        "build": "node --experimental-transform-types ./build.ts",
-        "test:unit": "vitest",
-        "test:types": "tsc --noEmit"
+        "test:unit": "vitest"
     },
     "dependencies": {
         "@nothing-but/utils": "~0.17.0",

@@ -4,7 +4,7 @@ import * as fsp       from 'node:fs/promises'
 import * as esb       from 'esbuild'
 import * as esb_solid from 'esbuild-plugin-solid'
 
-import * as build     from '../../build.ts'
+import * as build     from '../../build_shared.ts'
 
 
 const filename = url.fileURLToPath(import.meta.url)
@@ -21,7 +21,7 @@ function clean_css_plugin(is_dev: boolean): esb.Plugin {
         name: 'custom',
         setup(build) {
             if (is_dev) return
-            
+
             // minify css during build
             build.onLoad({filter: /\.css$/}, async args => {
                 const file = await fsp.readFile(args.path)
@@ -33,7 +33,7 @@ function clean_css_plugin(is_dev: boolean): esb.Plugin {
 }
 
 
-async function main() {
+export default () => {
 
     const is_dev   = build.get_is_dev_from_args()
     const common   = build.get_common_esbuild_options(is_dev, dist_dirname)
@@ -62,11 +62,5 @@ async function main() {
         ],
     }]
 
-    await build.build(esb_options,
-                      is_dev,
-                      dirname,
-                      dist_dirname)
+    return esb_options
 }
-
-
-main()

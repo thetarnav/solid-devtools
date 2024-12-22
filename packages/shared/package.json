@@ -16,12 +16,7 @@
         "solid",
         "devtools"
     ],
-    "scripts": {
-        "dev": "pnpm build --watch",
-        "build": "node --experimental-transform-types ./build.ts",
-        "test:unit": "echo \"no tests here\"",
-        "test:types": "tsc --noEmit --paths null"
-    },
+    "scripts": {},
     "private": false,
     "sideEffects": false,
     "main": "./dist/index.js",

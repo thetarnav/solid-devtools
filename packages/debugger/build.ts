@@ -3,7 +3,7 @@ import * as url       from 'node:url'
 import * as esb       from 'esbuild'
 import * as esb_solid from 'esbuild-plugin-solid'
 
-import * as build     from '../../build.ts'
+import * as build     from '../../build_shared.ts'
 
 
 const filename = url.fileURLToPath(import.meta.url)
@@ -18,8 +18,7 @@ const entry_types_filename = path.join(src_dirname, `types.ts`)
 
 const pkg_filename = path.join(dirname, 'package.json')
 
-
-async function main() {
+export default () => {
 
     const external = build.get_external_deps_from_pkg(pkg_filename)
     const is_dev   = build.get_is_dev_from_args()
@@ -50,11 +49,6 @@ async function main() {
         external:    external,
     }]
 
-    await build.build(esb_options,
-                      is_dev,
-                      dirname,
-                      dist_dirname)
+    return esb_options
 }
 
-
-main()
