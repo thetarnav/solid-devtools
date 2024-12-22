@@ -2,12 +2,13 @@ import devtools from 'solid-devtools/vite'
 import {defineConfig} from 'vite'
 import solid from 'vite-plugin-solid'
 
-const is_ext = process.env['EXT'] === 'true' || process.env['EXT'] === '1'
+const is_ext = process.argv.includes('--ext')
 
 export default defineConfig(mode => {
     const is_build = mode.command === 'build'
 
     return {
+        server: {port: 3000},
         plugins: [
             devtools({
                 autoname: true,
