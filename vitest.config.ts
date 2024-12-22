@@ -10,7 +10,7 @@ export default vi.defineConfig({
         passWithNoTests: true,
         watch:           false,
         environment:     'jsdom',
-        isolate:         false,
+        // isolate:         false,
         include:         ['packages/**/*.test.{ts,tsx,js,jsx}'],
     },
     resolve: {
