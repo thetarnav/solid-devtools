@@ -106,23 +106,8 @@ export default [{
 			'allowTernary'     : true,
 		}],
 		'@eslint-comments/no-unused-disable': 'warn',
-		  /*
-		code style | readability
-		*/
-		  // to many voids
-		  // "@typescript-eslint/explicit-function-return-type": [
-		  //     "warn",
-		  //     {
-		  //         "allowExpressions": true,
-		  //         "allowTypedFunctionExpressions": true,
-		  //         "allowHigherOrderFunctions": true,
-		  //         "allowDirectConstAssertionInArrowFunctions": true,
-		  //         "allowConciseArrowFunctionExpressionsStartingWithVoid": true,
-		  //         "allowIIFEs": true
-		  //     }
-		  // ],
-		  /*
-		prevent unexpected behavior
+        /*
+		 prevent unexpected behavior
 		*/
 		'@typescript-eslint/no-empty-object-type'       : 'warn',
 		'@typescript-eslint/no-unsafe-function-type'    : 'warn',
@@ -131,8 +116,8 @@ export default [{
 		'no-fallthrough'                                : ['warn', {'allowEmptyCase': true}],
 		  // '@nothing-but/no-ignored-return': 'warn',
 		  // '@nothing-but/no-return-to-void': 'warn',
-		  /*
-		tests
+        /*
+		 tests
 		*/
 		'@no-only-tests/no-only-tests': 'warn',
 	},
