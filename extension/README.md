@@ -25,9 +25,9 @@ Should work in any application using SolidJS, including SolidStart and Astro.
 
 ### 1. Install the chrome extension
 
-The extension is now available on the Chrome Web Store. You can install it when using a chromium-based browser by clicking the "Install" button.
+The extension is available on Chrome Web Store and Firefox Add-ons. You can install it when using a chromium-based browser by clicking the "Install" button.
 
-[**Solid Devtools Chrome Extension**](https://chrome.google.com/webstore/detail/solid-devtools/kmcfjchnmmaeeagadbhoofajiopoceel)
+[**Chrome Extension**](https://chrome.google.com/webstore/detail/solid-devtools/kmcfjchnmmaeeagadbhoofajiopoceel) | [**Firefox Extension**](https://addons.mozilla.org/en-US/firefox/addon/solid-devtools/)
 
 ### 2. Install the debugger library
 
