@@ -20,18 +20,23 @@ export type OverlayOptions = {
 }
 
 export function attachDevtoolsOverlay(props?: OverlayOptions): (() => void) {
-    let dispose: (() => void) | undefined
 
+    /*
+     Only load the overlay after the page is loaded
+    */
+    let show = atom(false)
     setTimeout(() => {
-        s.createRoot(_dispose => {
-            dispose = _dispose
-            return <Overlay {...props} />
-        })
-    }, 500)
+        show.set(true)
+    })
 
-    return () => {
-        dispose?.()
-    }
+    return s.createRoot(dispose => {
+        s.createEffect(() => {
+            if (show()) {
+                <Overlay {...props} />
+            }
+        })
+        return dispose
+    })
 }
 
 const Overlay: s.Component<OverlayOptions> = ({defaultOpen, alwaysOpen, noPadding}) => {
