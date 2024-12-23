@@ -1,5 +1,13 @@
 # @solid-devtools/overlay
 
+## 0.31.6
+
+### Patch Changes
+
+- 1183f3c: Reduce time to load the overlay
+- Updated dependencies [66c6cbb]
+  - @solid-devtools/frontend@0.12.5
+
 ## 0.31.5
 
 ### Patch Changes
