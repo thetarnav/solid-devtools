@@ -4,7 +4,7 @@ import {Entries} from '@solid-primitives/keyed'
 import {createStaticStore} from '@solid-primitives/static-store'
 import {defer} from '@solid-primitives/utils'
 import {handleTupleUpdates, createHover, createPingedSignal} from '@solid-devtools/shared/primitives'
-import {splitOnColon, warn} from '@solid-devtools/shared/utils'
+import {error, splitOnColon} from '@solid-devtools/shared/utils'
 import * as debug from '@solid-devtools/debugger/types'
 import * as theme from '@solid-devtools/shared/theme'
 import {SidePanelCtx} from './SidePanel.tsx'
@@ -270,31 +270,38 @@ export default function createInspector({bridge}: {bridge: DebuggerBridge}) {
         })
     })
 
-    function getValueItem(valueId: debug.ValueItemID): Inspector.ValueItem | undefined {
-        const [valueItemType, id] = splitOnColon(valueId)
+    function getValueItem(value_item_id: debug.ValueItemID): Inspector.ValueItem | undefined {
 
-        let valueItem: Inspector.ValueItem | undefined | null
+        const [type, id] = splitOnColon(value_item_id)
 
-        if (valueItemType === debug.ValueItemType.Signal) valueItem = state.signals[id]
-        else if (valueItemType === debug.ValueItemType.Prop) valueItem = state.props?.record[id]
-        else valueItem = state.value
-
-        return valueItem ?? warn(`ValueItem (${valueId}) not found`)
+        // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
+        switch (type) {
+        case debug.ValueItemType.Signal: return state.signals[id]
+        case debug.ValueItemType.Prop:   return state.props?.record[id]
+        case debug.ValueItemType.Value:  return state.value ?? undefined
+        }
     }
 
     bridge.input.InspectorUpdate.listen(
         handleTupleUpdates({
             value(update) {
-                const [valueId, value] = update
-                const valueItem = getValueItem(valueId)
-                valueItem?.setValue(decode.decodeValue(value, valueItem.value, storeNodeMap))
+                let [value_item_id, value] = update
+                let value_item = getValueItem(value_item_id)
+                if (value_item != null) {
+                    value_item.setValue(decode.decodeValue(value, value_item.value, storeNodeMap))
+                }
             },
             inspectToggle(update) {
-                const [valueId, value] = update
-                const valueItem = getValueItem(valueId)
+                let [value_item_id, value] = update
+                let value_item = getValueItem(value_item_id)
+                if (value_item == null) {
+                    error(`ValueItem not found for id ${value_item_id}.`)
+                    return
+                }
 
-                if (valueItem && decode.isObjectType(valueItem.value))
-                    decode.updateCollapsedValue(valueItem.value, value, storeNodeMap)
+                if (decode.isObjectType(value_item.value)) {
+                    decode.updateCollapsedValue(value_item.value, value, storeNodeMap)
+                }
             },
             propKeys(update) {
                 setState('props', updateProxyProps(update))

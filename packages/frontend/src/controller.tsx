@@ -3,17 +3,7 @@ import {SECOND} from '@solid-primitives/date'
 import {type EventBus, batchEmits, createEventBus, createEventHub} from '@solid-primitives/event-bus'
 import {debounce} from '@solid-primitives/scheduled'
 import {defer} from '@solid-primitives/utils'
-import {
-    JSX,
-    batch,
-    createContext,
-    createEffect,
-    createMemo,
-    createSelector,
-    createSignal,
-    onCleanup,
-    useContext,
-} from 'solid-js'
+import * as s from 'solid-js'
 import {App} from './App.tsx'
 import createInspector from './inspector.tsx'
 import {type Structure} from './structure.tsx'
@@ -26,30 +16,30 @@ type ToEventBusChannels<T extends Record<string, any>> = {
 
 function createDebuggerBridge() {
     const output = createEventHub<ToEventBusChannels<Debugger.InputChannels>>($ => ({
-        ResetState: $(),
-        InspectNode: $(),
-        InspectValue: $(),
+        ResetState:             $(),
+        InspectNode:            $(),
+        InspectValue:           $(),
         HighlightElementChange: $(),
-        OpenLocation: $(),
-        TreeViewModeChange: $(),
-        ViewChange: $(),
-        ToggleModule: $(),
+        OpenLocation:           $(),
+        TreeViewModeChange:     $(),
+        ViewChange:             $(),
+        ToggleModule:           $(),
     }))
 
     // Listener of the client events (from the debugger) will be called synchronously under `batch`
     // to make sure that the state is updated before the effect queue is flushed.
     const input = createEventHub<ToEventBusChannels<Debugger.OutputChannels>>($ => ({
-        DebuggerEnabled: batchEmits($()),
-        ResetPanel: batchEmits($()),
-        InspectedState: batchEmits($()),
+        DebuggerEnabled:      batchEmits($()),
+        ResetPanel:           batchEmits($()),
+        InspectedState:       batchEmits($()),
         InspectedNodeDetails: batchEmits($()),
-        StructureUpdates: batchEmits($()),
-        NodeUpdates: batchEmits($()),
-        InspectorUpdate: batchEmits($()),
-        LocatorModeChange: batchEmits($()),
-        HoveredComponent: batchEmits($()),
-        InspectedComponent: batchEmits($()),
-        DgraphUpdate: batchEmits($()),
+        StructureUpdates:     batchEmits($()),
+        NodeUpdates:          batchEmits($()),
+        InspectorUpdate:      batchEmits($()),
+        LocatorModeChange:    batchEmits($()),
+        HoveredComponent:     batchEmits($()),
+        InspectedComponent:   batchEmits($()),
+        DgraphUpdate:         batchEmits($()),
     }))
 
     return {input, output}
@@ -58,8 +48,8 @@ function createDebuggerBridge() {
 export type DebuggerBridge = ReturnType<typeof createDebuggerBridge>
 
 export type DevtoolsProps = {
-    errorOverlayFooter?: JSX.Element
-    headerSubtitle?: JSX.Element
+    errorOverlayFooter?: s.JSX.Element
+    headerSubtitle?: s.JSX.Element
     useShortcuts?: boolean
     catchWindowErrors?: boolean
 }
@@ -72,11 +62,11 @@ export type DevtoolsOptions = {
     useShortcuts: boolean
 }
 
-const DevtoolsOptionsCtx = createContext<DevtoolsOptions>(
+const DevtoolsOptionsCtx = s.createContext<DevtoolsOptions>(
     'DevtoolsOptionsCtx' as any as DevtoolsOptions,
 )
 
-export const useDevtoolsOptions = () => useContext(DevtoolsOptionsCtx)
+export const useDevtoolsOptions = () => s.useContext(DevtoolsOptionsCtx)
 
 export function devtoolsPropsToOptions(props: DevtoolsProps): DevtoolsOptions {
     return {
@@ -132,7 +122,7 @@ function createViewCache() {
     }, 3 * SECOND)
 
     function setCacheGetter<T extends DevtoolsMainView>(view: T, getter: () => CacheDataMap[T]) {
-        onCleanup(() => {
+        s.onCleanup(() => {
             const data = getter()
             nextShortCache = {view: view as any, data: data.short}
             longCache.set(view, data.long)
@@ -157,19 +147,19 @@ function createController(bridge: DebuggerBridge, options: DevtoolsOptions) {
     //
     // LOCATOR
     //
-    const [devtoolsLocatorEnabled, setDevtoolsLocatorState] = createSignal(false)
-    const [clientLocatorEnabled, setClientLocator] = createSignal(false)
+    const [devtoolsLocatorEnabled, setDevtoolsLocatorState] = s.createSignal(false)
+    const [clientLocatorEnabled, setClientLocator] = s.createSignal(false)
     const locatorEnabled = () => devtoolsLocatorEnabled() || clientLocatorEnabled()
 
     // send devtools locator state
-    createEffect(
+    s.createEffect(
         defer(devtoolsLocatorEnabled, enabled =>
             bridge.output.ToggleModule.emit({module: DebuggerModule.Locator, enabled}),
         ),
     )
 
     function setClientLocatorState(enabled: boolean) {
-        batch(() => {
+        s.batch(() => {
             setClientLocator(enabled)
             if (!enabled) setClientHoveredNode(null)
         })
@@ -178,20 +168,20 @@ function createController(bridge: DebuggerBridge, options: DevtoolsOptions) {
     //
     // HOVERED NODE
     //
-    const [clientHoveredNode, setClientHoveredNode] = createSignal<NodeID | null>(null)
-    const [extHoveredNode, setExtHoveredNode] = createSignal<{
+    const [clientHoveredNode, setClientHoveredNode] = s.createSignal<NodeID | null>(null)
+    const [extHoveredNode, setExtHoveredNode] = s.createSignal<{
         type: 'element' | 'node'
         id: NodeID
     } | null>(null, {equals: (a, b) => a?.id === b?.id})
 
     // highlight hovered element
-    createEffect(defer(extHoveredNode, bridge.output.HighlightElementChange.emit))
+    s.createEffect(defer(extHoveredNode, bridge.output.HighlightElementChange.emit))
 
-    const hoveredId = createMemo(() => {
+    const hoveredId = s.createMemo(() => {
         const extNode = extHoveredNode()
         return extNode ? extNode.id : clientHoveredNode()
     })
-    const isNodeHovered = createSelector<NodeID | null, NodeID>(hoveredId)
+    const isNodeHovered = s.createSelector<NodeID | null, NodeID>(hoveredId)
 
     function toggleHoveredNode(id: NodeID, type: 'element' | 'node' = 'node', isHovered?: boolean) {
         return setExtHoveredNode(p =>
@@ -207,14 +197,14 @@ function createController(bridge: DebuggerBridge, options: DevtoolsOptions) {
     //
     // * there is no need for different views now
 
-    const [openedView, setOpenedView] = createSignal<DevtoolsMainView>(DevtoolsMainView.Structure)
+    const [openedView, setOpenedView] = s.createSignal<DevtoolsMainView>(DevtoolsMainView.Structure)
     const viewCache = createViewCache()
 
     function openView(view: DevtoolsMainView) {
         setOpenedView(view)
     }
 
-    createEffect(defer(openedView, bridge.output.ViewChange.emit))
+    s.createEffect(defer(openedView, bridge.output.ViewChange.emit))
 
     //
     // Node updates - signals and computations updating
@@ -275,6 +265,6 @@ function createController(bridge: DebuggerBridge, options: DevtoolsOptions) {
 
 export type Controller = ReturnType<typeof createController>
 
-const ControllerCtx = createContext<Controller>('ControllerCtx' as any as Controller)
+const ControllerCtx = s.createContext<Controller>('ControllerCtx' as any as Controller)
 
-export const useController = () => useContext(ControllerCtx)
+export const useController = () => s.useContext(ControllerCtx)
