@@ -103,21 +103,25 @@ globalThis.${debug.WINDOW_PROJECTPATH_PROPERTY} = "${cwd}";`,
 })
 
 
-test.describe('returning primitives', () => {
+test.describe('autoname: returning primitives', () => {
     // Positive tests
     for (const [create, module, addExtraArg] of [
-        ['createSignal', 'solid-js'],
-        ['createMemo', 'solid-js', '1'],
-        ['createStore', 'solid-js/store'],
+        ['createSignal',  'solid-js'],
+        ['createMemo',    'solid-js', '1'],
+        ['createStore',   'solid-js/store'],
         ['createMutable', 'solid-js/store'],
     ] as const) {
+
         const extraArg = addExtraArg ? 'undefined, ' : ''
+
         test.describe(create, () => {
+
             for (const [type, importStatement, creator] of [
-                ['named import', `import { ${create} } from "${module}";`, create],
-                ['renamed import', `import { ${create} as foo } from "${module}";`, 'foo'],
+                ['named import',     `import { ${create} } from "${module}";`, create],
+                ['renamed import',   `import { ${create} as foo } from "${module}";`, 'foo'],
                 ['namespace import', `import * as foo from "${module}";`, `foo.${create}`],
             ] as const) {
+
                 test.describe(type, () => {
                     testTransform(
                         'no default value',
@@ -139,6 +143,26 @@ test.describe('returning primitives', () => {
   const signal = ${creator}(5, ${extraArg}{
     name: "signal"
   });`,
+                        plugin.namePlugin,
+                        true,
+                    )
+
+                    testTransform(
+                        'after comma',
+                        `${importStatement}
+const var_foo = 123,
+    sig_foo = ${creator}(5),
+    sig_bar = ${creator}(15),
+    var_bar = 321;`,
+                        `${importStatement}
+const var_foo = 123,
+    sig_foo = ${creator}(5, ${extraArg}{
+        name: "sig_foo"
+    }),
+    sig_bar = ${creator}(15, ${extraArg}{
+        name: "sig_bar"
+    }),
+    var_bar = 321;`,
                         plugin.namePlugin,
                         true,
                     )
@@ -252,7 +276,7 @@ test.describe('returning primitives', () => {
 })
 
 
-test.describe('effect primitives', () => {
+test.describe('autoname: effect primitives', () => {
     const fnName = 'fn'
 
     // Positive tests

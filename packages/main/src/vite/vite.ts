@@ -1,3 +1,4 @@
+import * as path from 'node:path'
 import * as vite from 'vite'
 import {type PluginItem, transformAsync} from '@babel/core'
 import * as debug from '@solid-devtools/debugger/types'
@@ -25,11 +26,12 @@ export type DevtoolsPluginOptions = {
     // SDT_DEV?: boolean
 }
 
-function getFileExtension(filename: string): string {
-    const index = filename.indexOf('?')
-    const filenameWithoutQuery = index !== -1 ? filename.slice(0, index) : filename
-    const lastDotIndex = filenameWithoutQuery.lastIndexOf('.')
-    return lastDotIndex !== -1 ? filenameWithoutQuery.slice(lastDotIndex + 1) : ''
+function get_extname(filename: string): string {
+    filename = path.extname(filename)
+    let idx = filename.indexOf('?')
+    if (idx === -1)
+        idx = filename.length
+    return filename.slice(1, idx)
 }
 
 // This export is used for configuration.
@@ -47,24 +49,33 @@ export const devtoolsPlugin = (_options: DevtoolsPluginOptions = {}): vite.Plugi
         // SDT_DEV: _options.SDT_DEV ?? false,
     } satisfies DevtoolsPluginOptions
 
-    const enabledJsxLocation = !!options.locator?.jsxLocation
-    const enabledComponentLocation = !!options.locator?.componentLocation
+    const enabled_jsx_location = !!options.locator?.jsxLocation
+    const enabled_component_location = !!options.locator?.componentLocation
 
-    let enablePlugin = false
-    const projectRoot = process.cwd()
+    const jsx_location_plugin_config: babel.JsxLocationPluginConfig | null =
+        (enabled_jsx_location || enabled_component_location)
+            ? {
+                jsx:        enabled_jsx_location,
+                components: enabled_component_location,
+            }
+            : null
+
+    let is_dev = false
+    let project_root = process.cwd()
 
     return {
         name: 'solid-devtools',
         enforce: 'pre',
         configResolved(config) {
-            enablePlugin = config.command === 'serve' && config.mode !== 'production'
+            project_root = config.root
+            is_dev = config.command === 'serve' && config.mode !== 'production'
         },
         resolveId(id) {
-            if (enablePlugin && id === babel.DevtoolsModule.Main) return babel.DevtoolsModule.Main
+            if (is_dev && id === babel.DevtoolsModule.Main) return babel.DevtoolsModule.Main
         },
         load(id) {
             // Inject runtime debugger script
-            if (!enablePlugin || id !== babel.DevtoolsModule.Main) return
+            if (!is_dev || id !== babel.DevtoolsModule.Main) return
 
             let code = `import "${babel.DevtoolsModule.Setup}";`
 
@@ -76,42 +87,40 @@ export const devtoolsPlugin = (_options: DevtoolsPluginOptions = {}): vite.Plugi
             return code
         },
         async transform(source, id, transformOptions) {
+
             // production and server should be disabled
-            if (transformOptions?.ssr || !enablePlugin) return
+            if (transformOptions?.ssr || !is_dev) return
 
-            const extension = getFileExtension(id)
+            const extname = get_extname(id)
 
-            if (!['mjs', 'cjs', 'cts', 'mts', 'js', 'jsx', 'ts', 'tsx'].includes(extension)) return
+            if (!['mjs', 'cjs', 'cts', 'mts', 'js', 'jsx', 'ts', 'tsx'].includes(extname)) return
 
-            const isJSX = extension === 'jsx' || extension === 'tsx'
+            const is_jsx = extname === 'jsx' || extname === 'tsx'
             const plugins: PluginItem[] = []
 
             // plugins that should only run on .tsx/.jsx files in development
-            if ((enabledJsxLocation || enabledComponentLocation) && isJSX) {
-                plugins.push(
-                    babel.jsxLocationPlugin({
-                        jsx: enabledJsxLocation,
-                        components: enabledComponentLocation,
-                    }),
-                )
+            if (jsx_location_plugin_config != null && is_jsx) {
+                plugins.push(babel.jsxLocationPlugin(jsx_location_plugin_config))
             }
             if (options.autoname) {
                 plugins.push(babel.namePlugin)
             }
 
-            if (plugins.length === 0) return {code: source}
+            if (plugins.length === 0) {
+                return {code: source}
+            }
 
             // babel doesn't work with typescript by default
-            plugins.splice(0, 0, ['@babel/plugin-syntax-typescript', {isTSX: isJSX}])
+            plugins.unshift(['@babel/plugin-syntax-typescript', {isTSX: is_jsx}])
 
             const result = await transformAsync(source, {
-                babelrc: false,
-                configFile: false,
-                root: projectRoot,
-                filename: id,
+                babelrc:        false,
+                configFile:     false,
+                root:           project_root,
+                filename:       id,
                 sourceFileName: id,
-                sourceMaps: true,
-                plugins,
+                sourceMaps:     true,
+                plugins:        plugins,
             })
 
             if (result) {

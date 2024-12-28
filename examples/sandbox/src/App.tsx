@@ -48,6 +48,7 @@ const Button = (props: {text: string; onClick: VoidFunction}) => {
 const PassChildren: s.ParentComponent = props => props.children
 
 const Article: s.Component = () => {
+
     const state = createMutable({
         count: 0,
         other: {name: 'article'},
