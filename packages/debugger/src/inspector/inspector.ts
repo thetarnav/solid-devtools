@@ -292,14 +292,19 @@ export const collectOwnerDetails = /*#__PURE__*/ untrackedCallback(function (
     let checkProxyProps: ReturnType<typeof mapProps>['checkProxyProps']
 
     if (utils.isSolidComputation(owner)) {
+
         // handle Component (props and location)
         if (utils.isSolidComponent(owner)) {
+
             // marge component with refresh memo
             const refresh = utils.getComponentRefreshNode(owner)
             if (refresh) {
+                
                 sourceMap = refresh.sourceMap
-                owned = refresh.owned
-                getValue = () => refresh.value
+                owned     = refresh.owned
+                getValue  = () => refresh.value
+
+                details.hmr = true
             }
 
             ;({checkProxyProps, props: details.props} = mapProps(owner.props))

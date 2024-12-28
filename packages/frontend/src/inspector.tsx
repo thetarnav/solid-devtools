@@ -39,12 +39,13 @@ export namespace Inspector {
     }
 
     export type State = {
-        name: string | null
-        type: debug.NodeType | null
-        signals: {[key: debug.NodeID]: Signal}
-        value: ValueItem | null
-        props: Props | null
+        name:     string | null
+        type:     debug.NodeType | null
+        signals:  {[key: debug.NodeID]: Signal}
+        value:    ValueItem | null
+        props:    Props | null
         location: string | null
+        hmr:      boolean
     }
 
     export type Module = ReturnType<typeof createInspector>
@@ -142,12 +143,13 @@ function updateStore(
 }
 
 const NULL_STATE = {
-    name: null,
-    type: null,
+    name:     null,
+    type:     null,
     location: null,
-    props: null,
-    signals: {},
-    value: null,
+    props:    null,
+    signals:  {},
+    value:    null,
+    hmr:      false,
 } as const satisfies Inspector.State
 
 const NULL_INSPECTED_NODE = {
@@ -226,6 +228,7 @@ export default function createInspector({bridge}: {bridge: DebuggerBridge}) {
             setState({
                 name: raw.name,
                 type: raw.type,
+                hmr:  raw.hmr ?? false,
                 location: raw.location?.file ?? null,
                 signals: raw.signals.reduce(
                     (signals, s) => {
@@ -358,6 +361,7 @@ function ListSignals<T>(props: {when: T; title: s.JSX.Element; children: s.JSX.E
 }
 
 export function InspectorView(): s.JSX.Element {
+
     const {inspector, hovered} = useController()
     const {state} = inspector
 
@@ -386,83 +390,79 @@ export function InspectorView(): s.JSX.Element {
                     title={<>Props {state.props!.proxy && <ui.Badge>PROXY</ui.Badge>}</>}
                 >
                     <Entries of={state.props!.record}>
-                        {(name, value) => (
-                            <ValueNode
-                                name={name}
-                                value={value().value}
-                                isExtended={value().extended}
-                                onClick={() => inspector.inspectValueItem(value())}
-                                onElementHover={hovered.toggleHoveredElement}
-                                isSignal={value().getter !== false}
-                                isStale={value().getter === debug.PropGetterState.Stale}
-                            />
-                        )}
+                    {(name, value) => (
+                        <ValueNode
+                            name={name}
+                            value={value().value}
+                            isExtended={value().extended}
+                            onClick={() => inspector.inspectValueItem(value())}
+                            onElementHover={hovered.toggleHoveredElement}
+                            isSignal={value().getter !== false}
+                            isStale={value().getter === debug.PropGetterState.Stale}
+                        />
+                    )}
                     </Entries>
                 </ListSignals>
                 <ListSignals when={valueItems().stores.length} title="Stores">
                     <s.For each={valueItems().stores}>
-                        {store => (
-                            <ValueNode
-                                name={store.name}
-                                value={store.value}
-                                isExtended={store.extended}
-                                onClick={() => inspector.inspectValueItem(store)}
-                                onElementHover={hovered.toggleHoveredElement}
-                            />
-                        )}
+                    {store => (
+                        <ValueNode
+                            name={store.name}
+                            value={store.value}
+                            isExtended={store.extended}
+                            onClick={() => inspector.inspectValueItem(store)}
+                            onElementHover={hovered.toggleHoveredElement}
+                        />
+                    )}
                     </s.For>
                 </ListSignals>
                 <ListSignals when={valueItems().signals.length} title="Signals">
                     <s.For each={valueItems().signals}>
-                        {signal => (
-                            <ValueNode
-                                name={signal.name}
-                                value={signal.value}
-                                onClick={() => inspector.inspectValueItem(signal)}
-                                onElementHover={hovered.toggleHoveredElement}
-                                isExtended={signal.extended}
-                                isInspected={inspector.isInspected(signal.id)}
-                                isSignal
-                                actions={[
-                                    {
-                                        icon: 'Graph',
-                                        title: 'Open in Graph panel',
-                                        onClick() {
-                                            s.batch(() => {
-                                                inspector.setInspectedSignal(signal.id)
-                                                setOpenPanel('dgraph')
-                                            })
-                                        },
-                                    },
-                                ]}
-                            />
-                        )}
+                    {signal => (
+                        <ValueNode
+                            name={signal.name}
+                            value={signal.value}
+                            onClick={() => inspector.inspectValueItem(signal)}
+                            onElementHover={hovered.toggleHoveredElement}
+                            isExtended={signal.extended}
+                            isInspected={inspector.isInspected(signal.id)}
+                            isSignal
+                            actions={[{
+                                icon: 'Graph',
+                                title: 'Open in Graph panel',
+                                onClick() {
+                                    s.batch(() => {
+                                        inspector.setInspectedSignal(signal.id)
+                                        setOpenPanel('dgraph')
+                                    })
+                                },
+                            }]}
+                        />
+                    )}
                     </s.For>
                 </ListSignals>
                 <ListSignals when={valueItems().memos.length} title="Memos">
                     <s.For each={valueItems().memos}>
-                        {memo => (
-                            <ValueNode
-                                name={memo.name}
-                                value={memo.value}
-                                isExtended={memo.extended}
-                                onClick={() => inspector.inspectValueItem(memo)}
-                                onElementHover={hovered.toggleHoveredElement}
-                                isSignal
-                                actions={[
-                                    {
-                                        icon: 'Graph',
-                                        title: 'Open in Graph panel',
-                                        onClick() {
-                                            s.batch(() => {
-                                                inspector.setInspectedOwner(memo.id)
-                                                setOpenPanel('dgraph')
-                                            })
-                                        },
-                                    },
-                                ]}
-                            />
-                        )}
+                    {memo => (
+                        <ValueNode
+                            name={memo.name}
+                            value={memo.value}
+                            isExtended={memo.extended}
+                            onClick={() => inspector.inspectValueItem(memo)}
+                            onElementHover={hovered.toggleHoveredElement}
+                            isSignal
+                            actions={[{
+                                icon: 'Graph',
+                                title: 'Open in Graph panel',
+                                onClick() {
+                                    s.batch(() => {
+                                        inspector.setInspectedOwner(memo.id)
+                                        setOpenPanel('dgraph')
+                                    })
+                                },
+                            }]}
+                        />
+                    )}
                     </s.For>
                 </ListSignals>
                 <s.Show when={state.value || state.location}>
@@ -472,12 +472,22 @@ export function InspectorView(): s.JSX.Element {
                         </GroupTitle>
                         {state.value && (
                             <ValueNode
-                                name="value"
-                                value={state.value.value}
-                                isExtended={state.value.extended}
-                                onClick={() => inspector.inspectValueItem(state.value!)}
-                                onElementHover={hovered.toggleHoveredElement}
-                                isSignal
+                                name           = "value"
+                                value          = {state.value.value}
+                                isExtended     = {state.value.extended}
+                                onClick        = {() => inspector.inspectValueItem(state.value!)}
+                                onElementHover = {hovered.toggleHoveredElement}
+                                isSignal       = {
+                                    state.type === debug.NodeType.Computation ||
+                                    state.type === debug.NodeType.CatchError ||
+                                    state.type === debug.NodeType.Effect ||
+                                    state.type === debug.NodeType.Memo ||
+                                    state.type === debug.NodeType.Refresh ||
+                                    state.type === debug.NodeType.Render ||
+                                    state.type === debug.NodeType.Signal ||
+                                    state.type === debug.NodeType.Store ||
+                                    state.hmr
+                                }
                             />
                         )}
                         {state.location && (

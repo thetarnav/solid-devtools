@@ -114,14 +114,16 @@ export namespace Mapped {
     }
 
     export interface OwnerDetails {
-        id: NodeID
-        name?: string
-        type: NodeType
-        props?: Props
-        signals: Signal[]
+        id:        NodeID
+        name?:     string
+        type:      NodeType
+        props?:    Props
+        signals:   Signal[]
         /** for computations */
-        value?: EncodedValue[]
+        value?:    EncodedValue[]
         // component with a location
         location?: SourceLocation
+        // component wrapped with a hmr memo?
+        hmr?:      true
     }
 }

@@ -31,6 +31,7 @@ export const action_button = clsx(hover_background, hover_text, 'w-6 h-6 rounded
 export const action_icon = 'w-4 h-4'
 
 export function createSidePanel() {
+    
     const ctx = useController()
     const {inspector} = ctx
     const {state, openComponentLocation, setInspectedOwner} = inspector
