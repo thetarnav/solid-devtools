@@ -1,55 +1,43 @@
-import {
-    type Component,
-    createComponent,
-    createComputed,
-    createEffect,
-    createMemo,
-    createRenderEffect,
-    createResource,
-    createRoot,
-    createSignal,
-    ErrorBoundary,
-    type ParentComponent,
-    type Setter,
-    Show,
-    Suspense,
-} from 'solid-js'
+import * as s from 'solid-js'
 import {createMutable} from 'solid-js/store'
+import * as sweb from 'solid-js/web'
 import Recursive from './Recursive.tsx'
 import {ThemeExample} from './Theme.tsx'
-import Todos from './Todos.tsx'
+
+// import Todos from './Todos.tsx'
+const Todos = s.lazy(() => import('./Todos.tsx'))
 
 const doMediumCalc = () => {
     Array.from({length: 1000000}, (_, i) => i).sort(() => Math.random() - 5)
 }
 
-let setRootCount: Setter<number>
+let setRootCount: s.Setter<number>
 let disposeOuterRoot: VoidFunction
 
-createRoot(dispose => {
+s.createRoot(dispose => {
     disposeOuterRoot = dispose
 
-    const [count, setCount] = createSignal(0)
+    const [count, setCount] = s.createSignal(0)
     setRootCount = setCount
 
     function createEffectInRoot(dispose: VoidFunction) {
-        createEffect(() => count() === 4 && dispose(), undefined, {})
+        s.createEffect(() => count() === 4 && dispose(), undefined, {})
 
-        createRoot(_ => {
-            createEffect(() => count())
+        s.createRoot(_ => {
+            s.createEffect(() => count())
         })
     }
 
-    createEffect(() => {
+    s.createEffect(() => {
         count()
         if (count() === 1) {
-            createRoot(createEffectInRoot)
+            s.createRoot(createEffectInRoot)
         }
     }, undefined)
 })
 
 const Button = (props: {text: string; onClick: VoidFunction}) => {
-    const text = createMemo(() => <span>{props.text}</span>)
+    const text = s.createMemo(() => <span>{props.text}</span>)
     return (
         <button aria-label={props.text} onClick={props.onClick}>
             {text()}
@@ -57,9 +45,9 @@ const Button = (props: {text: string; onClick: VoidFunction}) => {
     )
 }
 
-const PassChildren: ParentComponent = props => props.children
+const PassChildren: s.ParentComponent = props => props.children
 
-const Article: Component = () => {
+const Article: s.Component = () => {
     const state = createMutable({
         count: 0,
         other: {name: 'article'},
@@ -70,7 +58,7 @@ const Article: Component = () => {
     })
     ;(state as any).circular = state
 
-    const [data] = createResource(
+    const [data] = s.createResource(
         () => state.count,
         async c => {
             await new Promise(r => setTimeout(r, 1000))
@@ -90,19 +78,19 @@ const Article: Component = () => {
                 </b>
             </p>
             {/* <p>Count: {state.count}</p> */}
-            <Suspense>
+            <s.Suspense>
                 <p>
                     <PassChildren>
                         <button onClick={() => state.count++}>Increment {data()}</button>
                     </PassChildren>
                 </p>
-            </Suspense>
+            </s.Suspense>
         </article>
     )
 }
 
 const DynamicSpreadParent = () => {
-    const [props, setProps] = createSignal<any>({
+    const [props, setProps] = s.createSignal<any>({
         a: 1,
         b: 2,
         c: 3,
@@ -120,17 +108,17 @@ const DynamicSpreadParent = () => {
     return <DynamicSpreadChild {...props()} />
 }
 
-const Broken: Component = () => {
+const Broken: s.Component = () => {
     throw new Error('Oh No')
 }
 
-const App: Component = () => {
-    const [count, setCount] = createSignal(0)
-    const [showEven, setShowEven] = createSignal(false)
-    const fnSig = createSignal({fn: () => {}}, {equals: (a, b) => a.fn === b.fn})
-    const nullSig = createSignal(null)
-    const symbolSig = createSignal(Symbol('hello-symbol'))
-    const [header, setHeader] = createSignal(
+const App: s.Component = () => {
+    const [count, setCount] = s.createSignal(0)
+    const [showEven, setShowEven] = s.createSignal(false)
+    const fnSig = s.createSignal({fn: () => {}}, {equals: (a, b) => a.fn === b.fn})
+    const nullSig = s.createSignal(null)
+    const symbolSig = s.createSignal(Symbol('hello-symbol'))
+    const [header, setHeader] = s.createSignal(
         <h1 onClick={() => setHeader(<h1>Call that an easter egg</h1>)}>Welcome to the Sandbox</h1>,
     )
 
@@ -138,7 +126,7 @@ const App: Component = () => {
     //   setCount(count() + 1)
     // }, 2000)
 
-    const objmemo = createMemo(() => {
+    const objmemo = s.createMemo(() => {
         return {
             foo: 'bar',
             count: count(),
@@ -148,22 +136,18 @@ const App: Component = () => {
         }
     })
 
-    createComputed(
-        _ => {
-            const hello = createSignal('hello')
-            setShowEven(count() % 3 === 0)
-            return count()
-        },
-        undefined,
-        {name: 'very-long-name-that-will-definitely-not-have-enough-space-to-render'},
-    )
+    s.createComputed(_ => {
+        const hello = s.createSignal('hello')
+        setShowEven(count() % 3 === 0)
+        return count()
+    },  undefined, {name: 'very-long-name-that-will-definitely-not-have-enough-space-to-render'})
 
-    createComputed(() => {}, undefined, {name: 'frozen'})
-    createRenderEffect(() => {})
+    s.createComputed(() => {}, undefined, {name: 'frozen'})
+    s.createRenderEffect(() => {})
 
-    const Bold: ParentComponent = props => <b>{props.children}</b>
+    const Bold: s.ParentComponent = props => <b>{props.children}</b>
 
-    const [showBroken, setShowBroken] = createSignal(false)
+    const [showBroken, setShowBroken] = s.createSignal(false)
 
     return (
         <>
@@ -174,37 +158,38 @@ const App: Component = () => {
                     <Button onClick={() => setCount(p => ++p)} text={`Count: ${count()}`} />
                     <Button onClick={() => setCount(p => ++p)} text={`Count: ${count()}`} />
                 </header>
-                <div style={{height: '1rem', 'margin-top': '1rem'}}>
-                    <Show when={showEven()}>
-                        {createComponent(() => {
-                            return <Bold>{count()} is even!</Bold>
-                        }, {})}
-                    </Show>
-                </div>
+                <sweb.Dynamic
+                    component='div'
+                    style={{height: '1rem', 'margin-top': '1rem'}}
+                >
+                    <s.Show when={showEven()}>
+                    {s.createComponent(() => <>
+                        <Bold>{count()} is even!</Bold>
+                    </>, {})}
+                    </s.Show>
+                </sweb.Dynamic>
                 {/* <button onClick={() => disposeApp()}>Dispose whole application</button>
                 <br /> */}
                 <button onClick={() => setShowBroken(p => !p)}>
                     {showBroken() ? 'Hide' : 'Show'} broken component.
                 </button>
-                <ErrorBoundary
-                    fallback={(err, reset) => (
-                        <>
-                            {err.toString()}
-                            <button
-                                onClick={() => {
-                                    setShowBroken(false)
-                                    reset()
-                                }}
-                            >
-                                Reset
-                            </button>
-                        </>
-                    )}
+                <s.ErrorBoundary
+                    fallback={(err, reset) => <>
+                        {err.toString()}
+                        <button
+                            onClick={() => {
+                                setShowBroken(false)
+                                reset()
+                            }}
+                        >
+                            Reset
+                        </button>
+                    </>}
                 >
-                    <Show when={showBroken()}>
+                    <s.Show when={showBroken()}>
                         <Broken />
-                    </Show>
-                </ErrorBoundary>
+                    </s.Show>
+                </s.ErrorBoundary>
                 <br />
                 <br />
             </div>
@@ -212,20 +197,25 @@ const App: Component = () => {
             <button onClick={() => setRootCount(p => ++p)}>Update root count</button>
             <button onClick={() => disposeOuterRoot()}>Dispose OUTSIDE_ROOT</button>
             <Article />
-            <Todos />
-            <div style={{margin: '24px'}}>
-                <CountingComponent />
-            </div>
-            <div style={{margin: '24px'}}>
-                <ThemeExample />
-            </div>
+            <Todos title='Simple Todos Example' />
+            {s.untrack(() => {
+                const MARGIN = '24px'
+                return <>
+                    <div style={{margin: MARGIN}}>
+                        <CountingComponent />
+                    </div>
+                    <div style={{margin: MARGIN}}>
+                        <ThemeExample />
+                    </div>
+                </>
+            })}
             <Recursive />
         </>
     )
 }
 
 const CountingComponent = () => {
-    const [count, setCount] = createSignal(0)
+    const [count, setCount] = s.createSignal(0)
     // const interval = setInterval(() => setCount(c => c + 1), 1000)
     // onCleanup(() => clearInterval(interval))
     return <div>Count value is {count()}</div>

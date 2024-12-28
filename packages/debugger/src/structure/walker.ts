@@ -1,4 +1,5 @@
 import {untrackedCallback} from '@solid-devtools/shared/primitives'
+import {asArray} from '@solid-devtools/shared/utils'
 import type {ComponentRegisterHandler} from '../main/component-registry.ts'
 import {NodeType, TreeWalkerMode} from '../main/constants.ts'
 import {ObjectType, getSdtId} from '../main/id.ts'
@@ -144,36 +145,39 @@ function mapElements(
 }
 
 function mapOwner(
-    owner: Solid.Owner,
+    owner:  Solid.Owner,
     parent: Mapped.Owner | null,
-    overwriteType?: NodeType,
 ): Mapped.Owner | undefined {
-    const id = getSdtId(owner, ObjectType.Owner)
-    const type = overwriteType ?? markOwnerType(owner)
+
+    const id   = getSdtId(owner, ObjectType.Owner)
+    const type = markOwnerType(owner)
     const name = getNodeName(owner)
+
     const mapped = {id, type, name} as Mapped.Owner
 
     let resolvedElements: ReturnType<typeof resolveElements> | undefined
 
     // Component
     if (type === NodeType.Component) {
-        // Context
-        //
-        // context nodes have following structure:
-        // | <provider> - Component
-        // | | RenderEffect - node with context key (contextNode)
-        // | | | children memo - memoizing children fn param
-        // | | | children memo - resolving nested children
-        //
-        // The provider component will be omitted
-        let contextNode: Solid.Computation | undefined
-        if (
-            name === 'provider' &&
+
+        let first_owned: Solid.Owner | undefined
+
+        /* 
+         Context
+        
+         <provider> - Component
+          ↳ RenderEffect - node with context key (first_owned)
+             ↳ children memo - memoizing children fn param
+             ↳ children memo - resolving nested children
+        
+         The provider component will be omitted
+        */
+        if (name === 'provider' &&
             owner.owned &&
             owner.owned.length === 1 &&
-            markOwnerType((contextNode = owner.owned[0]!)) === NodeType.Context
+            markOwnerType((first_owned = owner.owned[0]!)) === NodeType.Context
         ) {
-            return mapOwner(contextNode, parent, NodeType.Context)
+            return mapOwner(first_owned, parent)
         }
 
         // Register component to global map
@@ -195,7 +199,9 @@ function mapOwner(
     // Computation
     else if (isObservableComputation(owner)) {
         observeComputation(owner, owner)
-        if (!owner.sources || owner.sources.length === 0) mapped.frozen = true
+        if (!owner.sources || owner.sources.length === 0) {
+            mapped.frozen = true
+        }
     }
 
     const children: Mapped.Owner[] = []
@@ -206,18 +212,12 @@ function mapOwner(
 
     // Map html elements in DOM mode
     // elements might already be resolved when mapping components
-    if (
-        Mode === TreeWalkerMode.DOM &&
-        (resolvedElements =
-            resolvedElements === undefined ? resolveElements(owner.value) : resolvedElements)
+    if (Mode === TreeWalkerMode.DOM &&
+        (resolvedElements = resolvedElements === undefined
+            ? resolveElements(owner.value)
+            : resolvedElements)
     ) {
-        children.push.apply(
-            children,
-            mapElements(
-                Array.isArray(resolvedElements) ? resolvedElements : [resolvedElements],
-                parent?.children,
-            ),
-        )
+        children.push.apply(children, mapElements(asArray(resolvedElements), parent?.children))
     }
 
     // global `AddedToParentElements` will be changed in mapChildren
