@@ -14,37 +14,24 @@ export function Node_Type_Icon(props: {
     let prev_rendered: s.JSX.Element | undefined
 
     const fn = (): s.JSX.Element => {
+
         let IconComp: IconComponent | undefined
         // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
         switch (props.type) {
-            case NodeType.Memo:
-                IconComp = Icon.Memo
-                break
-            case NodeType.Effect:
-                IconComp = Icon.Effect
-                break
-            case NodeType.Root:
-                IconComp = Icon.Root
-                break
-            case NodeType.Render:
-                IconComp = Icon.RenderEffect
-                break
-            case NodeType.Computation:
-                IconComp = Icon.Computation
-                break
-            case NodeType.Context:
-                IconComp = Icon.Context
-                break
-            case NodeType.Signal:
-                IconComp = Icon.Signal
-                break
+        case NodeType.Memo:        IconComp = Icon.Memo         ;break
+        case NodeType.Effect:      IconComp = Icon.Effect       ;break
+        case NodeType.Root:        IconComp = Icon.Root         ;break
+        case NodeType.Render:      IconComp = Icon.RenderEffect ;break
+        case NodeType.Computation: IconComp = Icon.Computation  ;break
+        case NodeType.Context:     IconComp = Icon.Context      ;break
+        case NodeType.Signal:      IconComp = Icon.Signal       ;break
         }
 
         if (IconComp === prev_icon) {
             return prev_rendered
         }
         prev_icon = IconComp
-        prev_rendered = IconComp ? <IconComp class={props.class} /> : null
+        prev_rendered = IconComp ? <IconComp class={clsx('mb-px', props.class)} /> : null
         return prev_rendered
     }
     return fn as any as s.JSX.Element
@@ -54,10 +41,10 @@ const strike_through_line =
     'before:content-empty before:absolute before:-z-1 before:top-1/2 before:inset-x-0 before:h-px before:bg-current'
 
 const node_type_classes = (frozen: boolean): string =>
-    clsx('text-.8em select-none text-disabled', frozen && strike_through_line)
+    clsx('mt-px -mb-px text-.8em select-none text-disabled', frozen && strike_through_line)
 
 const name_classes = (frozen: boolean): string =>
-    clsx(frozen && [strike_through_line, 'text-disabled'])
+    clsx('mt-px -mb-px', frozen && [strike_through_line, 'text-disabled'])
 
 const component_classes = (frozen: boolean): string =>
     clsx(name_classes(frozen), ui.tag_brackets, 'text-component')
