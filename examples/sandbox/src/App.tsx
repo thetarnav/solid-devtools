@@ -4,8 +4,8 @@ import * as sweb from 'solid-js/web'
 import Recursive from './Recursive.tsx'
 import {ThemeExample} from './Theme.tsx'
 
-// import Todos from './Todos.tsx'
-const Todos = s.lazy(() => import('./Todos.tsx'))
+import Todos from './Todos.tsx'
+// const Todos = s.lazy(() => import('./Todos.tsx'))
 
 const doMediumCalc = () => {
     Array.from({length: 1000000}, (_, i) => i).sort(() => Math.random() - 5)
