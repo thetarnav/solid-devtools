@@ -604,9 +604,18 @@ export const value_node_styles = /*css*/ `
         color: ${theme.vars.disabled};
     }
 
+    .${value_element_container_class}:before {
+        content: '<';
+        color: ${theme.vars.disabled};
+    }
+    .${value_element_container_class}:after {
+        content: '>';
+        color: ${theme.vars.disabled};
+    }
     .${value_element_container_class}:hover {
         ${ui.highlight_opacity_var}: 0.6;
     }
+    /**/
 `
 
 const ValuePreview: s.Component<{
@@ -679,9 +688,13 @@ const ValuePreview: s.Component<{
                 </span>
             )
         case debug.ValueType.Element: {
-            const {onElementHover: onHover} = s.useContext(ValueContext)!
+            const ctx = s.useContext(ValueContext)!
 
-            const hoverProps = onHover && createHover(hovered => onHover(value.id, hovered))
+            const hoverProps = createHover(hovered => {
+                if (ctx.onElementHover) {
+                    ctx.onElementHover(value.id, hovered)
+                }
+            })
 
             return (
                 <span class={value_element_container} aria-label={props.label} {...hoverProps}>
@@ -782,7 +795,7 @@ export const ValueNode: s.Component<{
         >
             <div
                 class={clsx(
-                    'absolute mt-.25 -inset-y-.25 -inset-x-1 b b-solid b-dom rounded',
+                    'pointer-events-none absolute mt-.25 -inset-y-.25 -inset-x-1 b b-solid b-dom rounded',
                     props.isInspected ? 'opacity-50' : 'opacity-0',
                 )}
                 style={{'mask-image': 'linear-gradient(90deg, black, transparent)'}}

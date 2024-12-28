@@ -36,19 +36,27 @@ export function createHover(handle: (hovering: boolean) => void): {
 } {
     let state = false
     let mounted = true
+
     const mql = window.matchMedia('(hover: none)')
-    let isTouch = mql.matches
-    makeEventListener(mql, 'change', ({matches}) => {
-        if ((isTouch = matches)) handle((state = false))
+    let is_touch = mql.matches
+
+    makeEventListener(mql, 'change', e => {
+        if (is_touch = e.matches) {
+            handle(state = false)
+        }
     })
+
     onCleanup(() => {
         mounted = false
-        if (state) handle((state = false))
+        if (state) handle(state = false)
     })
-    const onChange = (newState: boolean): void => {
-        if (isTouch || !mounted) return
-        state !== newState && handle((state = newState))
+
+    const onChange = (new_state: boolean): void => {
+        if (!is_touch && mounted && state !== new_state) {
+            handle(state = new_state)
+        }
     }
+    
     return {
         onMouseEnter: () => onChange(true),
         onMouseLeave: () => setTimeout(() => onChange(false)),

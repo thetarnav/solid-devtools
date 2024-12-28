@@ -840,46 +840,46 @@ export const OwnerPath: s.Component = () => {
                 )}
                 <div class="flex flex-wrap text-sm leading-3 font-mono" ref={container}>
                     {path().map(node => {
-                        const hoverProps = createHover(hovering =>
-                            hovered.toggleHoveredNode(node.id, 'node', hovering),
-                        )
-                        return (
-                            <>
-                                <div class="w-3 h-4 mx-.5 center-child first:hidden">
-                                    <ui.Icon.CarretRight class="w-2 h-2 mb-[0.15rem] text-disabled" />
-                                </div>
+
+                        const hoverProps = createHover(hovering => {
+                            hovered.toggleHoveredNode(node.id, 'node', hovering)
+                        })
+
+                        return <>
+                            <div class="w-3 h-4 mx-.5 center-child first:hidden">
+                                <ui.Icon.CarretRight class="w-2 h-2 mb-[0.15rem] text-disabled" />
+                            </div>
+                            <div
+                                class={`${ui.highlight_container} h-3 p-y-.25 my-0.25
+                                flex items-center gap-x-1 cursor-pointer`}
+                                style={{
+                                    [ui.highlight_opacity_var]: hovered.isNodeHovered(node.id)
+                                        ? '0.3'
+                                        : '0',
+                                }}
+                                {...hoverProps}
+                                onClick={() => inspector.setInspectedOwner(node.id)}
+                            >
                                 <div
-                                    class={`${ui.highlight_container} h-3 p-y-.25 my-0.25
-                                    flex items-center gap-x-1 cursor-pointer`}
-                                    style={{
-                                        [ui.highlight_opacity_var]: hovered.isNodeHovered(node.id)
-                                            ? '0.3'
-                                            : '0',
-                                    }}
-                                    {...hoverProps}
-                                    onClick={() => inspector.setInspectedOwner(node.id)}
-                                >
+                                    class={`${ui.highlight_element} b b-solid b-gray-400 rounded-sm`}
+                                />
+                                {node.type === debug.NodeType.Component ||
+                                 node.type === debug.NodeType.Element ? (
                                     <div
-                                        class={`${ui.highlight_element} b b-solid b-gray-400 rounded-sm`}
+                                        class={node.type === debug.NodeType.Component
+                                            ? 'text-text'
+                                            : 'text-disabled'}
+                                    >
+                                        {node.name || debug.UNKNOWN}
+                                    </div>
+                                ) : (
+                                    <ui.Node_Type_Icon
+                                        type={node.type}
+                                        class="w-2.5 h-2.5 text-disabled"
                                     />
-                                    {node.type === debug.NodeType.Component ||
-                                    node.type === debug.NodeType.Element ? (
-                                        <div
-                                            class={node.type === debug.NodeType.Component
-                                                ? 'text-text'
-                                                : 'text-disabled'}
-                                        >
-                                            {node.name || debug.UNKNOWN}
-                                        </div>
-                                    ) : (
-                                        <ui.Node_Type_Icon
-                                            type={node.type}
-                                            class="w-2.5 h-2.5 text-disabled"
-                                        />
-                                    )}
-                                </div>
-                            </>
-                        )
+                                )}
+                            </div>
+                        </>
                     })}
                 </div>
             </div>
