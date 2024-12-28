@@ -46,7 +46,6 @@ const Todo: s.Component<{
 }
 
 const Todos: s.Component<{title: string}> = (props) => {
-    console.log(s.getOwner())
 
     const [newTitle, setTitle] = s.createSignal('')
     const [todos, setTodos] = createLocalStore('todos-2', {
