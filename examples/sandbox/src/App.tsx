@@ -112,6 +112,11 @@ const Broken: s.Component = () => {
     throw new Error('Oh No')
 }
 
+const createComponent = (content: () => s.JSX.Element) => {
+    const Content = () => <div>{content()}</div>
+    return Content
+}
+
 const App: s.Component = () => {
     const [count, setCount] = s.createSignal(0)
     const [showEven, setShowEven] = s.createSignal(false)
@@ -147,6 +152,8 @@ const App: s.Component = () => {
 
     const Bold: s.ParentComponent = props => <b>{props.children}</b>
 
+    const BoldWrapper = createComponent(() => <Bold>{count()} is even!</Bold>)
+
     const [showBroken, setShowBroken] = s.createSignal(false)
 
     return (
@@ -164,7 +171,7 @@ const App: s.Component = () => {
                 >
                     <s.Show when={showEven()}>
                     {s.createComponent(() => <>
-                        <Bold>{count()} is even!</Bold>
+                        <BoldWrapper/>
                     </>, {})}
                     </s.Show>
                 </sweb.Dynamic>
