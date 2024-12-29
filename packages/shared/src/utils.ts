@@ -1,34 +1,31 @@
-const getLogLabel = (): string[] => [
-    `%csolid-devtools`,
-    'color: #fff; background: #2c4f7c; padding: 1px 4px;',
-]
+export const LOG_LABEL_CYAN = `\x1b[1;30m\x1b[46msolid-devtools\x1b[0m`
 
 export function info<T>(data: T): T {
     // eslint-disable-next-line no-console
-    console.info(...getLogLabel(), data)
+    console.info(LOG_LABEL_CYAN, data)
     return data
 }
 
 export function log(...args: any[]): undefined {
     // eslint-disable-next-line no-console
-    console.log(...getLogLabel(), ...args)
+    console.log(LOG_LABEL_CYAN, ...args)
     return
 }
 export function warn(...args: any[]): undefined {
     // eslint-disable-next-line no-console
-    console.warn(...getLogLabel(), ...args)
+    console.warn(LOG_LABEL_CYAN, ...args)
     return
 }
 
 export function error(...args: any[]): undefined {
     // eslint-disable-next-line no-console
-    console.error(...getLogLabel(), ...args)
+    console.error(LOG_LABEL_CYAN, ...args)
     return
 }
 
 export function log_message(to: string, from: string, e: {name: string, details: any}) {
     // eslint-disable-next-line no-console
-    console.log(...getLogLabel(), `${to.padEnd(20, ' ')} <- ${from.padEnd(14, ' ')} - ${e.name.padEnd(20, ' ')}:`, e.details)
+    console.log(`${LOG_LABEL_CYAN} \x1b[36m${to}\x1b[0m <- \x1b[36m${from}\x1b[0m: \x1b[35m${e.name}\x1b[0m:`, e.details)
 }
 
 export function formatTime(d: Date = new Date()): string {

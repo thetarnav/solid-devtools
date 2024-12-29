@@ -262,6 +262,12 @@ hub.input.listen(e => {
     }
 })
 
+DEV: {
+    hub.output.listen(e => {
+        log_message('Client', 'Debugger', e)
+    })
+}
+
 /**
  * Used for connecting debugger to devtools
  */
