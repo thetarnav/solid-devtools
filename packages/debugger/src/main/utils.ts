@@ -78,16 +78,14 @@ export const getNodeName = (o: {
     let name: string | undefined
 
     search: {
-        if (typeof o.component === 'function') {
-            if (typeof o.component.displayName === 'string' && o.component.displayName.length > 0) {
-                name = o.component.displayName
-                break search
-            }
-            if (typeof o.component.name === 'string' && o.component.name.length > 0) {
-                name = o.component.name
-                break search
-            }
+        if (typeof o.component === 'function' &&
+            typeof o.component.displayName === 'string' &&
+            o.component.displayName.length > 0
+        ) {
+            name = o.component.displayName
+            break search
         }
+        /* solid.devComponent already assigns o.component.name to o.name */
     
         if (o.name != null && o.name.length > 0) {
             name = o.name   
