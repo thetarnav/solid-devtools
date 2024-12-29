@@ -38,9 +38,9 @@ Important if you want to work on the chrome extension. _(The script may fail som
 
 **Builds all of the client packages in the watch mode.** Those are the packages that run in the users browser. (client, shared, locator, debugger, frontend, overlay)
 
-#### `pnpm sandbox` — Opens the [sandbox](https://github.com/thetarnav/solid-devtools/tree/main/examples/sandbox) playground with overlay component
+#### `pnpm dev:sandbox` — Opens the [sandbox](https://github.com/thetarnav/solid-devtools/tree/main/examples/sandbox) playground with overlay component
 
-#### `pnpm sandbox:ext` — Opens the [sandbox](https://github.com/thetarnav/solid-devtools/tree/main/examples/sandbox) playground with extension client
+#### `pnpm dev:sandbox:ext` — Opens the [sandbox](https://github.com/thetarnav/solid-devtools/tree/main/examples/sandbox) playground with extension client
 
 ### TEST
 
