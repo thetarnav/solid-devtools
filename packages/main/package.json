@@ -76,6 +76,19 @@
         },
         "./package.json": "./package.json"
     },
+    "typesVersions": {
+        "*": {
+            "setup": [
+                "./dist/setup.d.ts"
+            ],
+            "vite": [
+                "./dist/vite.d.ts"
+            ],
+            "babel": [
+                "./dist/babel.d.ts"
+            ]
+        }
+    },
     "devDependencies": {
         "@babel/core": "^7.26.0",
         "@babel/generator": "^7.26.3",
