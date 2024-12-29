@@ -16,7 +16,6 @@ import {
 export type ComputationUpdateHandler = (
     rootId: NodeID,
     owner: Solid.Owner,
-    ownerId: NodeID,
     changedStructure: boolean,
 ) => void
 
@@ -30,27 +29,26 @@ const ElementsMap = new Map<Mapped.Owner, {el: HTMLElement; component: Mapped.Ow
 
 const $WALKER = Symbol('tree-walker')
 
-function observeComputation(owner: Solid.Computation, attachedData: Solid.Owner): void {
+function observeComputation(comp: Solid.Computation, owner_to_update: Solid.Owner): void {
 
     // leaf nodes (ones that don't have children) don't have to cause a structure update
     // Unless the walker is in DOM mode, then we need to observe all computations
     // This is because DOM can change without the owner structure changing
-    let was_leaf = !owner.owned || owner.owned.length === 0
+    let was_leaf = !comp.owned || comp.owned.length === 0
 
-    let owner_id = getSdtId(attachedData, ObjectType.Owner)
-
-    // global will change
-    let bound_listener = OnComputationUpdate.bind(null, RootId, attachedData, owner_id)
+    // copy globals
+    let root_id = RootId
+    let on_computation_update = OnComputationUpdate
     let mode = Mode
 
     const handler = () => {
-        let is_leaf = !owner.owned || owner.owned.length === 0
+        let is_leaf = !comp.owned || comp.owned.length === 0
         let changed_structure = was_leaf !== is_leaf || !is_leaf || mode === TreeWalkerMode.DOM
         was_leaf = is_leaf
-        bound_listener(changed_structure)
+        on_computation_update(root_id, owner_to_update, changed_structure)
     }
 
-    observeComputationUpdate(owner, handler, $WALKER)
+    observeComputationUpdate(comp, handler, $WALKER)
 }
 
 function mapChildren(owner: Solid.Owner, mappedOwner: Mapped.Owner | null): Mapped.Owner[] {

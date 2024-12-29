@@ -256,7 +256,6 @@ function createController(bridge: DebuggerBridge, options: DevtoolsOptions) {
         options,
         bridge,
         viewCache,
-        listenToNodeUpdates: nodeUpdates.listen,
         listenToNodeUpdate(id: NodeID, fn: VoidFunction) {
             return nodeUpdates.listen(updatedId => updatedId === id && fn())
         },

@@ -772,27 +772,31 @@ const DisplayStructureTree: s.Component = () => {
                         }}
                     >
                         <s.For each={virtual().list}>
-                            {node => {
-                                const {id} = node.value
-                                return (
-                                    <OwnerNode
-                                        owner={node.value}
-                                        isHovered={
-                                            hovered.isNodeHovered(id) || structure.isSearched(id)
-                                        }
-                                        isSelected={inspector.isInspectedTreeWalkerOwner(id)}
-                                        listenToUpdate={listener =>
-                                            ctx.listenToNodeUpdate(id, listener)
-                                        }
-                                        onHoverChange={state =>
-                                            hovered.toggleHoveredNode(id, 'node', state)
-                                        }
-                                        onInspectChange={() => inspector.toggleInspectedOwner(id)}
-                                        toggleCollapsed={toggleCollapsed}
-                                        isCollapsed={isCollapsed(node.value)}
-                                    />
-                                )
-                            }}
+                        {node => <>
+                            <OwnerNode
+                                owner={node.value}
+                                isHovered={
+                                    hovered.isNodeHovered(node.value.id) ||
+                                    structure.isSearched(node.value.id)
+                                }
+                                isSelected={
+                                    inspector.isInspectedTreeWalkerOwner(node.value.id)
+                                }
+                                isCollapsed={
+                                    isCollapsed(node.value)
+                                }
+                                listenToUpdate={listener =>
+                                    ctx.listenToNodeUpdate(node.value.id, listener)
+                                }
+                                onHoverChange={state =>
+                                    hovered.toggleHoveredNode(node.value.id, 'node', state)
+                                }
+                                onInspectChange={() => {
+                                    inspector.toggleInspectedOwner(node.value.id)
+                                }}
+                                toggleCollapsed={toggleCollapsed}
+                            />
+                        </>}
                         </s.For>
                     </div>
                 </div>
@@ -897,10 +901,9 @@ export const OwnerNode: s.Component<{
     listenToUpdate(cb: VoidFunction): VoidFunction
     toggleCollapsed(node: Structure.Node): void
 }> = props => {
-    const {onHoverChange, listenToUpdate, onInspectChange} = props
+    
+    const {onHoverChange, listenToUpdate, onInspectChange, toggleCollapsed} = props
     const {name, type, hmr} = props.owner
-
-    const {toggleCollapsed} = props
 
     const {pingUpdated, OwnerName} = ui.createHighlightedOwnerName()
     listenToUpdate(pingUpdated)

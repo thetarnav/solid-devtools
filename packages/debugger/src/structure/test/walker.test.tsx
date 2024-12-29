@@ -3,7 +3,7 @@ import '../../setup.ts'
 import * as s from 'solid-js'
 import * as test from 'vitest'
 import {NodeType, TreeWalkerMode} from '../../main/constants.ts'
-import {$setSdtId, ObjectType, getSdtId} from '../../main/id.ts'
+import {$setSdtId} from '../../main/id.ts'
 import {type Mapped, type Solid} from '../../main/types.ts'
 import {getNodeName} from '../../main/utils.ts'
 import {type ComputationUpdateHandler, walkSolidTree} from '../walker.ts'
@@ -187,7 +187,6 @@ test.describe('TreeWalkerMode.Owners', () => {
             test.expect(capturedComputationUpdates[0]).toEqual([
                 '#ff',
                 computedOwner,
-                getSdtId(computedOwner, ObjectType.Owner),
                 false,
             ])
 
@@ -344,7 +343,6 @@ test.describe('TreeWalkerMode.Components', () => {
                 test.expect(computationUpdates[i]).toEqual([
                     '#ff',
                     testComponents[i],
-                    getSdtId(testComponents[i]!, ObjectType.Owner),
                     false,
                 ])
             }
@@ -468,7 +466,6 @@ test.describe('TreeWalkerMode.DOM', () => {
                 test.expect(computationUpdates[i]).toEqual([
                     '#ff',
                     testComponents[i],
-                    getSdtId(testComponents[i]!, ObjectType.Owner),
                     true,
                 ])
             }
