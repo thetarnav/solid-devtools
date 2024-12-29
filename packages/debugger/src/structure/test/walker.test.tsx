@@ -405,84 +405,59 @@ test.describe('TreeWalkerMode.DOM', () => {
 
             test.expect(tree).toMatchObject({
                 type: NodeType.Root,
-                children: [
-                    {
+                children: [{
+                    type: NodeType.Component,
+                    name: 'App',
+                    children: [{
                         type: NodeType.Component,
-                        name: 'App',
-                        children: [
-                            {
-                                type: NodeType.Component,
-                                name: 'Wrapper',
-                                children: [
-                                    {
+                        name: 'Wrapper',
+                        children: [{
+                            type: NodeType.Element,
+                            name: 'div',
+                            children: [{
+                                type: NodeType.Element,
+                                name: 'main',
+                                children: [{
+                                    type: NodeType.Component,
+                                    name: 'TestComponent',
+                                    children: [{
                                         type: NodeType.Element,
                                         name: 'div',
-                                        children: [
-                                            {
+                                        children: [{
+                                            type: NodeType.Component,
+                                            name: 'TestComponent',
+                                            children: [{
                                                 type: NodeType.Element,
-                                                name: 'main',
-                                                children: [
-                                                    {
-                                                        type: NodeType.Component,
-                                                        name: 'TestComponent',
-                                                        children: [
-                                                            {
-                                                                type: NodeType.Element,
-                                                                name: 'div',
-                                                                children: [
-                                                                    {
-                                                                        type: NodeType.Component,
-                                                                        name: 'TestComponent',
-                                                                        children: [
-                                                                            {
-                                                                                type: NodeType.Element,
-                                                                                name: 'div',
-                                                                                children: [
-                                                                                    {
-                                                                                        type: NodeType.Component,
-                                                                                        name: 'TestComponent',
-                                                                                        children: [
-                                                                                            {
-                                                                                                type: NodeType.Element,
-                                                                                                name: 'div',
-                                                                                                children:
-                                                                                                    [],
-                                                                                            },
-                                                                                        ],
-                                                                                    },
-                                                                                ],
-                                                                            },
-                                                                        ],
-                                                                    },
-                                                                ],
-                                                            },
-                                                        ],
-                                                    },
-                                                    {
-                                                        type: NodeType.Component,
-                                                        name: 'Button',
-                                                        children: [
-                                                            {
-                                                                type: NodeType.Element,
-                                                                name: 'button',
-                                                                children: [],
-                                                            },
-                                                        ],
-                                                    },
-                                                ],
-                                            },
-                                        ],
-                                    },
-                                ],
-                            },
-                            {
-                                type: NodeType.Element,
-                                name: 'footer',
-                                children: [],
-                            },
-                        ],
-                    },
-                ],
+                                                name: 'div',
+                                                children: [{
+                                                    type: NodeType.Component,
+                                                    name: 'TestComponent',
+                                                    children: [{
+                                                        type: NodeType.Element,
+                                                        name: 'div',
+                                                        children: [],
+                                                    }],
+                                                }],
+                                            }],
+                                        }],
+                                    }],
+                                }, {
+                                    type: NodeType.Component,
+                                    name: 'Button',
+                                    children: [{
+                                        type: NodeType.Element,
+                                        name: 'button',
+                                        children: [],
+                                    }],
+                                }],
+                            }],
+                        }],
+                    }, {
+                        type: NodeType.Element,
+                        name: 'footer',
+                        children: [],
+                    }],
+                }],
             })
 
             test.expect(computationUpdates.length).toBe(0)

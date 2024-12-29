@@ -246,19 +246,26 @@ hub.input.listen(e => {
         break
     }
     case 'HighlightElementChange':
-        return locator.setDevtoolsHighlightTarget(e.details)
+        locator.setDevtoolsHighlightTarget(e.details)
+        break
     case 'InspectNode':
-        return setInspectedNode(e.details)
+        setInspectedNode(e.details)
+        break
     case 'InspectValue':
-        return inspector.toggleValueNode(e.details)
+        inspector.toggleValueNode(e.details)
+        break
     case 'OpenLocation':
-        return openInspectedNodeLocation()
+        openInspectedNodeLocation()
+        break
     case 'TreeViewModeChange':
-        return structure.setTreeWalkerMode(e.details)
+        structure.setTreeWalkerMode(e.details)
+        break
     case 'ViewChange':
-        return setView(e.details)
+        setView(e.details)
+        break
     case 'ToggleModule':
-        return toggleModule(e.details)
+        toggleModule(e.details)
+        break
     }
 })
 

@@ -14,9 +14,6 @@ export const isSolidOwner = (
 export const isSolidComputation = (o: Readonly<Solid.Owner>): o is Solid.Computation =>
     !!(o as any).fn
 
-export const isObservableComputation = (o: Readonly<Solid.Owner>): o is Solid.Computation =>
-    !!(o as any).fn && o.context === null
-
 export const isSolidRoot = (o: Readonly<Solid.Owner>): o is Solid.Root => !('fn' in o)
 
 export const isSolidMemo = (o: Readonly<Solid.Owner>): o is Solid.Memo =>

@@ -8,7 +8,7 @@ import {type Mapped, type NodeID, type Solid} from '../main/types.ts'
 import {
     getComponentRefreshNode,
     getNodeName,
-    isObservableComputation,
+    isSolidComputation,
     markOwnerType,
     resolveElements,
 } from '../main/utils.ts'
@@ -31,27 +31,24 @@ const ElementsMap = new Map<Mapped.Owner, {el: HTMLElement; component: Mapped.Ow
 const $WALKER = Symbol('tree-walker')
 
 function observeComputation(owner: Solid.Computation, attachedData: Solid.Owner): void {
+
     // leaf nodes (ones that don't have children) don't have to cause a structure update
     // Unless the walker is in DOM mode, then we need to observe all computations
     // This is because DOM can change without the owner structure changing
-    let isLeaf = !owner.owned || owner.owned.length === 0
-    const boundHandler = OnComputationUpdate.bind(
-        void 0,
-        RootId,
-        attachedData,
-        getSdtId(attachedData, ObjectType.Owner),
-    )
-    const handler =
-        isLeaf && Mode !== TreeWalkerMode.DOM
-            ? () => {
-                  if (isLeaf && (!owner.owned || owner.owned.length === 0)) {
-                      boundHandler(false)
-                  } else {
-                      isLeaf = false
-                      boundHandler(true)
-                  }
-              }
-            : boundHandler.bind(void 0, true)
+    let was_leaf = !owner.owned || owner.owned.length === 0
+
+    let owner_id = getSdtId(attachedData, ObjectType.Owner)
+
+    // global will change
+    let bound_listener = OnComputationUpdate.bind(null, RootId, attachedData, owner_id)
+    let mode = Mode
+
+    const handler = () => {
+        let is_leaf = !owner.owned || owner.owned.length === 0
+        let changed_structure = was_leaf !== is_leaf || !is_leaf || mode === TreeWalkerMode.DOM
+        was_leaf = is_leaf
+        bound_listener(changed_structure)
+    }
 
     observeComputationUpdate(owner, handler, $WALKER)
 }
@@ -74,7 +71,7 @@ function mapChildren(owner: Solid.Owner, mappedOwner: Mapped.Owner | null): Mapp
                 const mappedChild = mapOwner(child, mappedOwner)
                 if (mappedChild) children.push(mappedChild)
             } else {
-                if (isObservableComputation(child)) observeComputation(child, owner)
+                if (isSolidComputation(child)) observeComputation(child, owner)
                 children.push.apply(children, mapChildren(child, mappedOwner))
             }
         }
@@ -197,9 +194,9 @@ function mapOwner(
         }
     }
     // Computation
-    else if (isObservableComputation(owner)) {
+    else if (isSolidComputation(owner)) {
         observeComputation(owner, owner)
-        if (!owner.sources || owner.sources.length === 0) {
+        if (type != NodeType.Context && (!owner.sources || owner.sources.length === 0)) {
             mapped.frozen = true
         }
     }
