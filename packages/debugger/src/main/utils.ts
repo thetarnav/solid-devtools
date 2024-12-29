@@ -5,39 +5,44 @@ import {NodeType} from './constants.ts'
 import {type Solid} from './types.ts'
 import setup from './setup.ts'
 
-export const isObject = (o: unknown): o is object => typeof o === 'object' && !!o
+export const isSolidOwner = (o: Solid.Owner | Solid.Store | Solid.Signal): o is Solid.Owner =>
+    'owned' in o
 
-export const isSolidOwner = (
-    o: Readonly<Solid.Owner | Solid.Store | Solid.Signal>,
-): o is Solid.Owner => 'owned' in o
-
-export const isSolidComputation = (o: Readonly<Solid.Owner>): o is Solid.Computation =>
+export const isSolidComputation = (o: Solid.Owner): o is Solid.Computation =>
     !!(o as any).fn
 
-export const isSolidRoot = (o: Readonly<Solid.Owner>): o is Solid.Root => !('fn' in o)
+export const isSolidRoot = (o: Solid.Owner): o is Solid.Root =>
+    !('fn' in o)
 
-export const isSolidMemo = (o: Readonly<Solid.Owner>): o is Solid.Memo =>
+export const isSolidMemo = (o: Solid.Owner): o is Solid.Memo =>
     'fn' in o && 'comparator' in o
 
-export const isSolidComponent = (o: Readonly<Solid.Owner>): o is Solid.Component => 'component' in o
+export const isSolidComponent = (o: Solid.Owner): o is Solid.Component =>
+    'component' in o
 
-export const isStoreNode = (o: object): o is Solid.StoreNode => setup.store.$NODE in o
+export const isStoreNode = (o: object): o is Solid.StoreNode =>
+    setup.store.$NODE in o
 
-export const isSolidStore = (
-    o: Solid.Owner | Solid.SourceMapValue | Solid.Store,
-): o is Solid.Store => !('observers' in o) && 'value' in o && isObject(o.value) && setup.solid.$PROXY in o.value
+export const isSolidStore = (o: Solid.Owner | Solid.SourceMapValue | Solid.Store): o is Solid.Store =>
+    !('observers' in o) &&
+    typeof o.value === 'object' &&
+    o.value != null &&
+    setup.solid.$PROXY in o.value
 
 export const isSolidSignal = (o: Solid.SourceMapValue): o is Solid.Signal =>
-    'value' in o && 'observers' in o && 'observerSlots' in o && 'comparator' in o
+    'value' in o &&
+    'observers' in o &&
+    'observerSlots' in o &&
+    'comparator' in o
 
-export function getNodeType(o: Readonly<Solid.Signal | Solid.Owner | Solid.Store>): NodeType {
+export function getNodeType(o: Solid.Signal | Solid.Owner | Solid.Store): NodeType {
     if (isSolidOwner(o)) return getOwnerType(o)
     return isSolidStore(o) ? NodeType.Store : NodeType.Signal
 }
 
 const SOLID_REFRESH_PREFIX = '[solid-refresh]'
 
-export const getOwnerType = (o: Readonly<Solid.Owner>): NodeType => {
+export const getOwnerType = (o: Solid.Owner): NodeType => {
     if (typeof o.sdtType !== 'undefined') return o.sdtType
     if (!isSolidComputation(o)) {
         if ('sources' in o) return NodeType.CatchError
@@ -72,7 +77,7 @@ export const getOwnerType = (o: Readonly<Solid.Owner>): NodeType => {
 
 export const getNodeName = (o: {
     component?: ((..._: any) => any) & {displayName?: string},
-    name?:      string
+    name?:      string,
 }): string | undefined => {
 
     let name: string | undefined
@@ -135,25 +140,25 @@ export function getComponentRefreshNode(owner: Readonly<Solid.Component>): Solid
     return null
 }
 
+
 export function resolveElements(value: unknown): HTMLElement[] | null {
-    const resolved = getResolvedElements(value)
-    if (Array.isArray(resolved)) return resolved.length ? resolved : null
-    return resolved ? [resolved] : null
-}
-function getResolvedElements(value: unknown): HTMLElement | HTMLElement[] | null {
+
     // do not call a function, unless it's a signal (to prevent creating new nodes)
-    if (typeof value === 'function' && !value.length && value.name === 'bound readSignal')
-        return getResolvedElements(value())
+    if (typeof value === 'function' && !value.length && value.name === 'bound readSignal') {
+        return resolveElements(value())
+    }
+
     if (Array.isArray(value)) {
         const results: HTMLElement[] = []
         for (const item of value) {
-            const result = getResolvedElements(item)
+            const result = resolveElements(item)
             if (result)
                 Array.isArray(result) ? results.push.apply(results, result) : results.push(result)
         }
-        return results
+        return results.length ? results : null
     }
-    return value instanceof HTMLElement ? value : null
+
+    return value instanceof HTMLElement ? [value] : null
 }
 
 /**
