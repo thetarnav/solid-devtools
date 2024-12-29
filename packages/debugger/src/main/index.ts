@@ -12,7 +12,6 @@ import {DebuggerModule, DEFAULT_MAIN_VIEW, DevtoolsMainView, TreeWalkerMode} fro
 import {getObjectById, getSdtId, ObjectType} from './id.ts'
 import setup from './setup.ts'
 import {type Mapped, type NodeID} from './types.ts'
-import {createBatchedUpdateEmitter} from './utils.ts'
 
 export namespace Debugger {
     export type InspectedState = {
@@ -169,9 +168,21 @@ s.createComputed(
 )
 
 // Computation and signal updates
-const pushNodeUpdate = createBatchedUpdateEmitter<NodeID>(updates => {
-    hub.output.emit('NodeUpdates', updates)
-})
+let node_updates_ids: NodeID[] = []
+let node_updates_timeout = 0
+
+function pushNodeUpdate(id: NodeID) {
+    
+    node_updates_ids.push(id)
+    
+    if (node_updates_timeout === 0) {
+        node_updates_timeout = window.setTimeout(() => {
+            hub.output.emit('NodeUpdates', node_updates_ids)
+            node_updates_ids = []
+            node_updates_timeout = 0
+        })
+    }
+}
 
 //
 // Structure:

@@ -1,6 +1,4 @@
 import {trimString} from '@solid-devtools/shared/utils'
-import {type Emit} from '@solid-primitives/event-bus'
-import {throttle} from '@solid-primitives/scheduled'
 import {NodeType} from './constants.ts'
 import {type Solid} from './types.ts'
 import setup from './setup.ts'
@@ -244,23 +242,4 @@ export function onOwnerDispose(
 ): VoidFunction {
     if (isSolidRoot(owner)) return onOwnerCleanup(owner, fn, prepend, symbol)
     return onParentCleanup(owner, fn, prepend, symbol)
-}
-
-/**
- * Batches series of updates to a single array of updates.
- *
- * The updates are deduped by `id` property
- */
-export function createBatchedUpdateEmitter<T>(emit: Emit<T[]>): (update: T) => void {
-    const updates = new Set<T>()
-
-    const triggerUpdateEmit = throttle(() => {
-        emit([...updates])
-        updates.clear()
-    })
-
-    return update => {
-        updates.add(update)
-        triggerUpdateEmit()
-    }
 }
