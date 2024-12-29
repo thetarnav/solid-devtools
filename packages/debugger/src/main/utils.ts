@@ -73,11 +73,40 @@ export const getOwnerType = (o: Readonly<Solid.Owner>): NodeType => {
     return NodeType.Computation
 }
 
-export const getNodeName = (o: {name?: string}): string | undefined => {
-    if (!o.name) return
-    let name = o.name
-    if (name.startsWith(SOLID_REFRESH_PREFIX)) name = name.slice(SOLID_REFRESH_PREFIX.length)
-    return trimString(name, 20)
+export const getNodeName = (o: {
+    component?: ((..._: any) => any) & {displayName?: string},
+    name?:      string
+}): string | undefined => {
+
+    let name: string | undefined
+
+    search: {
+        if (typeof o.component === 'function') {
+            if (typeof o.component.displayName === 'string' && o.component.displayName.length > 0) {
+                name = o.component.displayName
+                break search
+            }
+            if (typeof o.component.name === 'string' && o.component.name.length > 0) {
+                name = o.component.name
+                break search
+            }
+        }
+    
+        if (o.name != null && o.name.length > 0) {
+            name = o.name   
+            break search
+        }
+
+        return undefined
+    }
+    
+    if (name.startsWith(SOLID_REFRESH_PREFIX)) {
+        name = name.slice(SOLID_REFRESH_PREFIX.length)
+    }
+    
+    name = trimString(name, 36)
+
+    return name
 }
 
 export function markOwnerType(o: Solid.Owner): NodeType {

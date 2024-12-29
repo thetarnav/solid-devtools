@@ -115,6 +115,7 @@ const Broken: s.Component = () => {
 
 const createComponent = (content: () => s.JSX.Element) => {
     const Content = () => <div>{content()}</div>
+    Content.displayName = 'createComponent.Content'
     return Content
 }
 
