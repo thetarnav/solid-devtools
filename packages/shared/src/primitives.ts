@@ -27,6 +27,9 @@ export type WritableDeep<T> = 0 extends 1 & T
 export const untrackedCallback = <Fn extends AnyFunction>(fn: Fn): Fn =>
     ((...a: Parameters<Fn>) => untrack<ReturnType<Fn>>(fn.bind(void 0, ...a))) as any
 
+export const batchedCallback = <Fn extends AnyFunction>(fn: Fn): Fn =>
+    ((...a: Parameters<Fn>) => batch<ReturnType<Fn>>(fn.bind(void 0, ...a))) as any
+
 export const useIsTouch = createSingletonRoot(() => createMediaQuery('(hover: none)'))
 export const useIsMobile = createSingletonRoot(() => createMediaQuery('(max-width: 640px)'))
 
@@ -178,21 +181,4 @@ export function createPingedSignal(
     onCleanup(() => clearTimeout(timeoutId))
 
     return [isUpdated, ping]
-}
-
-export function handleTupleUpdate<
-    T extends readonly [PropertyKey, any],
-    O = {readonly [K in T as K[0]]: (value: K[1]) => void},
->(handlers: O): (update: T) => void {
-    return update => (handlers as any)[update[0]](update[1])
-}
-
-export function handleTupleUpdates<
-    T extends readonly [PropertyKey, any],
-    O = {readonly [K in T as K[0]]: (value: K[1]) => void},
->(handlers: O): (updates: T[]) => void {
-    function runUpdates(updates: T[]): void {
-        for (const [key, value] of updates) (handlers as any)[key](value)
-    }
-    return updates => batch(runUpdates.bind(void 0, updates))
 }

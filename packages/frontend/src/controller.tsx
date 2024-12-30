@@ -1,8 +1,9 @@
-import {type Debugger, DebuggerModule, DevtoolsMainView, type NodeID} from '@solid-devtools/debugger/types'
 import {SECOND} from '@solid-primitives/date'
-import {type EventBus, batchEmits, createEventBus, createEventHub} from '@solid-primitives/event-bus'
+import {type EventBus, createEventBus, createEventHub} from '@solid-primitives/event-bus'
 import {debounce} from '@solid-primitives/scheduled'
 import {defer} from '@solid-primitives/utils'
+import {type Debugger, DebuggerModule, DevtoolsMainView, type NodeID} from '@solid-devtools/debugger/types'
+import {mutate_remove} from '@solid-devtools/shared/utils'
 import * as s from 'solid-js'
 import {App} from './App.tsx'
 import createInspector from './inspector.tsx'
@@ -14,7 +15,16 @@ type ToEventBusChannels<T extends Record<string, any>> = {
     [K in keyof T]: EventBus<T[K]>
 }
 
+export type InputMessage = {
+    [K in keyof Debugger.OutputChannels]: {
+        name:    K,
+        details: Debugger.OutputChannels[K],
+    }
+}[keyof Debugger.OutputChannels]
+export type InputListener = (e: InputMessage) => void
+
 function createDebuggerBridge() {
+    
     const output = createEventHub<ToEventBusChannels<Debugger.InputChannels>>($ => ({
         ResetState:             $(),
         InspectNode:            $(),
@@ -26,21 +36,22 @@ function createDebuggerBridge() {
         ToggleModule:           $(),
     }))
 
-    // Listener of the client events (from the debugger) will be called synchronously under `batch`
-    // to make sure that the state is updated before the effect queue is flushed.
-    const input = createEventHub<ToEventBusChannels<Debugger.OutputChannels>>($ => ({
-        DebuggerEnabled:      batchEmits($()),
-        ResetPanel:           batchEmits($()),
-        InspectedState:       batchEmits($()),
-        InspectedNodeDetails: batchEmits($()),
-        StructureUpdates:     batchEmits($()),
-        NodeUpdates:          batchEmits($()),
-        InspectorUpdate:      batchEmits($()),
-        LocatorModeChange:    batchEmits($()),
-        HoveredComponent:     batchEmits($()),
-        InspectedComponent:   batchEmits($()),
-        DgraphUpdate:         batchEmits($()),
-    }))
+    let input_listeners: InputListener[] = []
+    const input = {
+        listen(listener: InputListener) {
+            input_listeners.push(listener)
+            s.onCleanup(() => {
+                mutate_remove(input_listeners, listener)
+            })
+        },
+        emit(e: InputMessage) {
+            s.batch(() => {
+                for (let fn of input_listeners) {
+                    fn(e)
+                }
+            })
+        },
+    }
 
     return {input, output}
 }
@@ -152,11 +163,9 @@ function createController(bridge: DebuggerBridge, options: DevtoolsOptions) {
     const locatorEnabled = () => devtoolsLocatorEnabled() || clientLocatorEnabled()
 
     // send devtools locator state
-    s.createEffect(
-        defer(devtoolsLocatorEnabled, enabled =>
-            bridge.output.ToggleModule.emit({module: DebuggerModule.Locator, enabled}),
-        ),
-    )
+    s.createEffect(defer(devtoolsLocatorEnabled, enabled =>
+        bridge.output.ToggleModule.emit({module: DebuggerModule.Locator, enabled}),
+    ))
 
     function setClientLocatorState(enabled: boolean) {
         s.batch(() => {
@@ -210,7 +219,6 @@ function createController(bridge: DebuggerBridge, options: DevtoolsOptions) {
     // Node updates - signals and computations updating
     //
     const nodeUpdates = createEventBus<NodeID>()
-    bridge.input.NodeUpdates.listen(updated => updated.forEach(id => nodeUpdates.emit(id)))
 
     //
     // INSPECTOR
@@ -220,22 +228,42 @@ function createController(bridge: DebuggerBridge, options: DevtoolsOptions) {
     //
     // Client events
     //
-    bridge.input.ResetPanel.listen(() => {
-        setClientLocatorState(false)
-        setDevtoolsLocatorState(false)
-        inspector.setInspectedOwner(null)
+    bridge.input.listen(e => {
+        switch (e.name) {
+        case 'NodeUpdates':
+            for (let id of e.details) {
+                nodeUpdates.emit(id)
+            }
+            break
+        case 'ResetPanel':
+            setClientLocatorState(false)
+            setDevtoolsLocatorState(false)
+            inspector.setInspectedOwner(null)
+            break
+        case 'HoveredComponent':
+            setClientHoveredNode(p => {
+                return e.details.state
+                    ? e.details.nodeId
+                    : p && p === e.details.nodeId ? null : p
+            })
+            break
+        case 'InspectedComponent':
+            inspector.setInspectedOwner(e.details)
+            setDevtoolsLocatorState(false)
+            break
+        case 'LocatorModeChange':
+            setClientLocatorState(e.details)
+            break
+        case 'DebuggerEnabled':
+        case 'InspectedState':
+        case 'InspectedNodeDetails':
+        case 'StructureUpdates':
+        case 'InspectorUpdate':
+        case 'DgraphUpdate':
+            // handled elsewhere for now
+            break
+        }
     })
-
-    bridge.input.HoveredComponent.listen(({nodeId, state}) => {
-        setClientHoveredNode(p => (state ? nodeId : p && p === nodeId ? null : p))
-    })
-
-    bridge.input.InspectedComponent.listen(node => {
-        inspector.setInspectedOwner(node)
-        setDevtoolsLocatorState(false)
-    })
-
-    bridge.input.LocatorModeChange.listen(setClientLocatorState)
 
     return {
         locator: {

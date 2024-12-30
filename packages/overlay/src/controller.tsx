@@ -26,8 +26,7 @@ export function Devtools(props: DevtoolsProps): s.JSX.Element {
     })
 
     debug.listen(e => {
-        // TODO this should be fixed in the solid-primitives package (allow for passing events straight through)
-        separate(e.details, details => bridge.input.emit(e.name, details as never))
+        separate(e, bridge.input.emit)
     })
 
     return <Frontend {...props} />

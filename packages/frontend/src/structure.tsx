@@ -148,14 +148,18 @@ export function createStructure() {
         }
     }
 
-    //
-    // Listen to Client Events
-    //
-    bridge.input.ResetPanel.listen(() => {
-        updateStructure(null)
+    /* Listen to Client Events */
+    bridge.input.listen(e => {
+        /* eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check */
+        switch (e.name) {
+        case 'ResetPanel':
+            updateStructure(null)
+            break
+        case 'StructureUpdates':
+            updateStructure(e.details)
+            break
+        }
     })
-
-    bridge.input.StructureUpdates.listen(updateStructure)
 
     // TREE VIEW MODE
     s.createEffect(defer(mode, bridge.output.TreeViewModeChange.emit))

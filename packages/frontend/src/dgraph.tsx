@@ -10,7 +10,15 @@ export function createDependencyGraph() {
     const {bridge, inspector} = useController()
 
     const [graph, setGraph] = s.createSignal<debug.DGraphUpdate>(null)
-    bridge.input.DgraphUpdate.listen(setGraph)
+
+    bridge.input.listen(e => {
+        // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
+        switch (e.name) {
+        case 'DgraphUpdate':
+            setGraph(e.details)
+            break
+        }
+    })
 
     bridge.output.ToggleModule.emit({module: debug.DebuggerModule.Dgraph, enabled: true})
     s.onCleanup(() =>

@@ -155,3 +155,14 @@ export function dedupeArrayById<T extends {id: unknown}>(input: T[]): T[] {
     }
     return deduped
 }
+
+export function mutate_filter<T>(array: T[], callback: (item: T) => boolean): void {
+    for (let i = array.length - 1; i >= 0; i--) {
+        if (!callback(array[i]!)) array.splice(i, 1)
+    }
+}
+
+export function mutate_remove<T>(array: T[], item: T): void {
+    const index = array.indexOf(item)
+    if (index !== -1) array.splice(index, 1)
+}

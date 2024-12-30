@@ -2,8 +2,8 @@ import clsx from 'clsx'
 import * as s from 'solid-js'
 import {Entries} from '@solid-primitives/keyed'
 import {createStaticStore} from '@solid-primitives/static-store'
-import {defer} from '@solid-primitives/utils'
-import {handleTupleUpdates, createHover, createPingedSignal} from '@solid-devtools/shared/primitives'
+import {defer, entries} from '@solid-primitives/utils'
+import {createHover, createPingedSignal} from '@solid-devtools/shared/primitives'
 import {error, splitOnColon} from '@solid-devtools/shared/utils'
 import * as debug from '@solid-devtools/debugger/types'
 import * as theme from '@solid-devtools/shared/theme'
@@ -210,17 +210,30 @@ export default function createInspector({bridge}: {bridge: DebuggerBridge}) {
 
     const storeNodeMap = new decode.StoreNodeMap()
 
-    bridge.input.InspectedState.listen(newState => {
-        s.batch(() => {
-            const prev = inspected.ownerId
-            setInspected(newState)
-            if (newState.ownerId !== prev) setState({...NULL_STATE})
-        })
-    })
+    function getValueItem(value_item_id: debug.ValueItemID): Inspector.ValueItem | undefined {
 
-    bridge.input.InspectedNodeDetails.listen(function (raw) {
-        const id = inspected.ownerId
-        s.batch(() => {
+        const [type, id] = splitOnColon(value_item_id)
+
+        // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
+        switch (type) {
+        case debug.ValueItemType.Signal: return state.signals[id]
+        case debug.ValueItemType.Prop:   return state.props?.record[id]
+        case debug.ValueItemType.Value:  return state.value ?? undefined
+        }
+    }
+
+    bridge.input.listen(e => {
+        // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
+        switch (e.name) {
+        case 'InspectedState': {
+            let prev = inspected.ownerId
+            setInspected(e.details)
+            if (e.details.ownerId !== prev) setState({...NULL_STATE})
+            break
+        }
+        case 'InspectedNodeDetails': {
+            const raw = e.details
+            const id = inspected.ownerId
             // The current inspected node is not the same as the one that sent the details
             // (replace it with the new one)
             if (!id || id !== raw.id) setInspectedOwner(raw.id)
@@ -236,88 +249,94 @@ export default function createInspector({bridge}: {bridge: DebuggerBridge}) {
                             s.id,
                             s.type,
                             s.name,
-                            decode.decodeValue(s.value, null, storeNodeMap),
-                        )
+                            decode.decodeValue(s.value, null, storeNodeMap))
                         return signals
                     },
                     {} as Inspector.State['signals'],
                 ),
                 value: raw.value
                     ? createValueItem(
-                          debug.ValueItemType.Value,
-                          decode.decodeValue(raw.value, null, storeNodeMap),
-                      )
+                        debug.ValueItemType.Value,
+                        decode.decodeValue(raw.value, null, storeNodeMap))
                     : null,
                 props: raw.props
                     ? {
-                          proxy: raw.props.proxy,
-                          record: Object.entries(raw.props.record).reduce(
-                              (record, [key, p]) => {
-                                  record[key] = createPropItem(
-                                      key,
-                                      p.value
-                                          ? decode.decodeValue(p.value, null, storeNodeMap)
-                                          : {type: debug.ValueType.Unknown},
-                                      p.getter,
-                                  )
-                                  return record
-                              },
-                              {} as Inspector.Props['record'],
-                          ),
-                      }
+                        proxy: raw.props.proxy,
+                        record: Object.entries(raw.props.record).reduce(
+                            (record, [key, p]) => {
+                                record[key] = createPropItem(
+                                    key,
+                                    p.value
+                                        ? decode.decodeValue(p.value, null, storeNodeMap)
+                                        : {type: debug.ValueType.Unknown},
+                                    p.getter)
+                                return record
+                            },
+                            {} as Inspector.Props['record'],
+                        ),
+                    }
                     : null,
             })
-        })
-    })
 
-    function getValueItem(value_item_id: debug.ValueItemID): Inspector.ValueItem | undefined {
-
-        const [type, id] = splitOnColon(value_item_id)
-
-        // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
-        switch (type) {
-        case debug.ValueItemType.Signal: return state.signals[id]
-        case debug.ValueItemType.Prop:   return state.props?.record[id]
-        case debug.ValueItemType.Value:  return state.value ?? undefined
+            break
         }
-    }
+        case 'InspectorUpdate': {
+            const KIND = 0, DATA = 1
 
-    bridge.input.InspectorUpdate.listen(
-        handleTupleUpdates({
-            value(update) {
-                let [value_item_id, value] = update
-                let value_item = getValueItem(value_item_id)
-                if (value_item != null) {
+            for (let update of e.details) {
+                switch (update[KIND]) {
+                case 'value': {
+                    let [value_item_id, value] = update[DATA]
+
+                    let value_item = getValueItem(value_item_id)
+                    if (value_item == null) {
+                        error(`ValueItem not found for id ${value_item_id}.`)
+                        break
+                    }
+
                     value_item.setValue(decode.decodeValue(value, value_item.value, storeNodeMap))
-                }
-            },
-            inspectToggle(update) {
-                let [value_item_id, value] = update
-                let value_item = getValueItem(value_item_id)
-                if (value_item == null) {
-                    error(`ValueItem not found for id ${value_item_id}.`)
-                    return
-                }
 
-                if (decode.isObjectType(value_item.value)) {
-                    decode.updateCollapsedValue(value_item.value, value, storeNodeMap)
+                    break
                 }
-            },
-            propKeys(update) {
-                setState('props', updateProxyProps(update))
-            },
-            propState(update) {
-                if (!state.props) return
+                case 'inspectToggle': {
+                    let [value_item_id, value] = update[DATA]
 
-                for (const [key, getterState] of Object.entries(update)) {
-                    state.props.record[key]?.setGetter(getterState)
+                    let value_item = getValueItem(value_item_id)
+                    if (value_item == null) {
+                        error(`ValueItem not found for id ${value_item_id}.`)
+                        break
+                    }
+    
+                    if (decode.isObjectType(value_item.value)) {
+                        decode.updateCollapsedValue(value_item.value, value, storeNodeMap)
+                    }
+
+                    break
                 }
-            },
-            store(update) {
-                updateStore(update, storeNodeMap)
-            },
-        }),
-    )
+                case 'propKeys': {
+                    setState('props', updateProxyProps(update[DATA]))
+                    break
+                }
+                case 'propState': {
+                    if (!state.props) break
+    
+                    for (const [key, getterState] of entries(update[DATA])) {
+                        state.props.record[key]?.setGetter(getterState)
+                    }
+
+                    break
+                }
+                case 'store': {
+                    updateStore(update[DATA], storeNodeMap)
+                    break
+                }
+                }
+            }
+
+            break
+        }
+        }
+    })
 
     /**
      * Toggle the inspection of a value item (signal, prop, or owner value)

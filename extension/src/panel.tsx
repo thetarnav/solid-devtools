@@ -20,10 +20,10 @@ log(Place_Name.Panel+' loaded.')
 function App() {
 
     const empty_versions: Versions = {
-        solid:          '',
-        client:         '',
+        solid:           '',
+        client:          '',
         client_expected: '',
-        extension:      '',
+        extension:       '',
     }
     const [versions, setVersions] = s.createSignal<Versions>(empty_versions)
 
@@ -38,9 +38,10 @@ function App() {
             break
         default:
             /* Client -> Devtools */
-            if (e.name in devtools.bridge.input) {
-                devtools.bridge.input.emit(e.name as any, e.details)
-            }
+            devtools.bridge.input.emit(
+                // @ts-expect-error
+                e
+            )
         }
     })
 
