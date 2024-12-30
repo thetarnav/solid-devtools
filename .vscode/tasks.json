@@ -1,0 +1,31 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "dev:packages",
+            "detail": "Build packages in dev (watch) mode",
+            "type": "shell",
+            "command": "pnpm run dev:packages",
+            "isBackground": true,
+            "problemMatcher": []
+        },
+        {
+            "label": "dev:sandbox",
+            "detail": "Start a local server for developing on overlay",
+            "type": "shell",
+            "command": "pnpm run dev:sandbox",
+            "isBackground": true,
+            "problemMatcher": []
+        },
+        {
+            "label": "dev:packages&sandbox",
+            "detail": "Build packages and start a local server for developing on overlay",
+            "dependsOn": [
+                "dev:packages",
+                "dev:sandbox",
+            ],
+            "dependsOrder": "parallel",
+            "problemMatcher": []
+        }
+    ]
+}

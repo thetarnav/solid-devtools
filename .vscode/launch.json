@@ -6,13 +6,14 @@
             "type": "chrome",
             "request": "launch",
             "skipFiles": [
-                "${workspaceFolder}/node_modules/**/*.js",
+                "**/node_modules/**/*",
                 "<node_internals>/**",
                 "${workspaceFolder}/packages/shared/**/*",
             ],
             "sourceMaps": true,
             "url": "http://localhost:3000",
             "webRoot": "${workspaceFolder}",
+            // For vite
             "pathMapping": {
                 "/@fs/": ""
             },
