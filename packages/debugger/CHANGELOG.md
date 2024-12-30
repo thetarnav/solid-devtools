@@ -1,5 +1,15 @@
 # @solid-devtools/debugger
 
+## 0.24.5
+
+### Patch Changes
+
+- 4f31c75: Use Component.displayName for component names if present.
+- f910bc9: Add "hmr" field to OwnerDetails.
+- 1610d19: Fix some computations not being listened for changes
+- Updated dependencies [5afa738]
+  - @solid-devtools/shared@0.17.0
+
 ## 0.24.4
 
 ### Patch Changes

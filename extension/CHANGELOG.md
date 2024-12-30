@@ -1,5 +1,24 @@
 # @solid-devtools/extension
 
+## 0.31.7
+
+### Patch Changes
+
+- 5afa738: Replace bridge.input event hub abstraction with a simple event bus (to be removed later)
+- Updated dependencies [54e3ec7]
+- Updated dependencies [d1657b4]
+- Updated dependencies [d354b6c]
+- Updated dependencies [5b43034]
+- Updated dependencies [4f31c75]
+- Updated dependencies [f910bc9]
+- Updated dependencies [f910bc9]
+- Updated dependencies [1610d19]
+- Updated dependencies [5afa738]
+  - @solid-devtools/frontend@0.13.0
+  - solid-devtools@0.31.7
+  - @solid-devtools/debugger@0.24.5
+  - @solid-devtools/shared@0.17.0
+
 ## 0.31.6
 
 ### Patch Changes

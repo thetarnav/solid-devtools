@@ -1,5 +1,18 @@
 # solid-devtools
 
+## 0.31.7
+
+### Patch Changes
+
+- d1657b4: Add typesVersions field back to package.json
+  Related: https://github.com/solidjs/templates/pull/156
+- Updated dependencies [4f31c75]
+- Updated dependencies [f910bc9]
+- Updated dependencies [1610d19]
+- Updated dependencies [5afa738]
+  - @solid-devtools/debugger@0.24.5
+  - @solid-devtools/shared@0.17.0
+
 ## 0.31.6
 
 ## 0.31.5
