@@ -1,5 +1,11 @@
 # solid-devtools-shared
 
+## 0.17.0
+
+### Minor Changes
+
+- 5afa738: Replace bridge.input event hub abstraction with a simple event bus (to be removed later)
+
 ## 0.16.1
 
 ### Patch Changes

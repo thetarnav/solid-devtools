@@ -1,5 +1,29 @@
 # @solid-devtools/frontend
 
+## 0.13.0
+
+### Minor Changes
+
+- 5afa738: Replace bridge.input event hub abstraction with a simple event bus (to be removed later)
+
+### Patch Changes
+
+- 54e3ec7: Fix html elements in inspector not highlighting on hover and not having "<>" characters
+- d354b6c: Show HMR badge in the inspector
+- 5b43034: Update scroll data in timeout, after the ResizeObserver callback
+  To prevent this error:
+  > ResizeObserver loop completed with undelivered notifications
+  > As changing scroll data can then change el.scrollTop
+  > Fixes #307
+- f910bc9: Display owner "value" as a signal only if it can change.
+- f910bc9: Add "hmr" field to OwnerDetails.
+- Updated dependencies [4f31c75]
+- Updated dependencies [f910bc9]
+- Updated dependencies [1610d19]
+- Updated dependencies [5afa738]
+  - @solid-devtools/debugger@0.24.5
+  - @solid-devtools/shared@0.17.0
+
 ## 0.12.5
 
 ### Patch Changes
