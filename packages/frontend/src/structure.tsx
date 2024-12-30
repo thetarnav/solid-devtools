@@ -162,7 +162,9 @@ export function createStructure() {
     })
 
     // TREE VIEW MODE
-    s.createEffect(defer(mode, bridge.output.TreeViewModeChange.emit))
+    s.createEffect(defer(mode, mode => {
+        bridge.output.emit({name: 'TreeViewModeChange', details: mode})
+    }))
 
     return {
         state,

@@ -20,10 +20,16 @@ export function createDependencyGraph() {
         }
     })
 
-    bridge.output.ToggleModule.emit({module: debug.DebuggerModule.Dgraph, enabled: true})
-    s.onCleanup(() =>
-        bridge.output.ToggleModule.emit({module: debug.DebuggerModule.Dgraph, enabled: false}),
-    )
+    bridge.output.emit({
+        name:    'ToggleModule',
+        details: {module: debug.DebuggerModule.Dgraph, enabled: true},
+    })
+    s.onCleanup(() => {
+        bridge.output.emit({
+            name:    'ToggleModule',
+            details: {module: debug.DebuggerModule.Dgraph, enabled: false},
+        })
+    })
 
     function inspectNode(id: debug.NodeID) {
         const node = graph()?.[id]

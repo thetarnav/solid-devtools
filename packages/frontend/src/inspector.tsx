@@ -200,7 +200,9 @@ export default function createInspector({bridge}: {bridge: DebuggerBridge}) {
     }
 
     // sync inspected node with the debugger
-    s.createEffect(defer(inspectedNode, bridge.output.InspectNode.emit))
+    s.createEffect(defer(inspectedNode, node => {
+        bridge.output.emit({name: 'InspectNode', details: node})
+    }))
 
     //
     // Inspector state
@@ -344,14 +346,20 @@ export default function createInspector({bridge}: {bridge: DebuggerBridge}) {
     function inspectValueItem(item: Inspector.ValueItem, selected?: boolean): void {
         if (selected !== undefined && item.extended === selected) return
         selected = item.setExtended(p => selected ?? !p)
-        bridge.output.InspectValue.emit({id: item.itemId, selected})
+        bridge.output.emit({
+            name:    'InspectValue',
+            details: {id: item.itemId, selected},
+        })
     }
 
     //
     // LOCATION
     //
     function openComponentLocation(): void {
-        bridge.output.OpenLocation.emit()
+        bridge.output.emit({
+            name:    'OpenLocation',
+            details: undefined,
+        })
     }
 
     return {

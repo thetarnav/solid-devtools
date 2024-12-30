@@ -1,5 +1,5 @@
 import {SECOND} from '@solid-primitives/date'
-import {type EventBus, createEventBus, createEventHub} from '@solid-primitives/event-bus'
+import {createEventBus} from '@solid-primitives/event-bus'
 import {debounce} from '@solid-primitives/scheduled'
 import {defer} from '@solid-primitives/utils'
 import {type Debugger, DebuggerModule, DevtoolsMainView, type NodeID} from '@solid-devtools/debugger/types'
@@ -10,41 +10,50 @@ import createInspector from './inspector.tsx'
 import {type Structure} from './structure.tsx'
 import * as ui from './ui/index.ts'
 
-// TODO: add to solid-primitives/event-bus
-type ToEventBusChannels<T extends Record<string, any>> = {
-    [K in keyof T]: EventBus<T[K]>
-}
-
-export type InputMessage = {
+export type Input_Message = {
     [K in keyof Debugger.OutputChannels]: {
         name:    K,
         details: Debugger.OutputChannels[K],
     }
 }[keyof Debugger.OutputChannels]
-export type InputListener = (e: InputMessage) => void
+export type Input_Listener = (e: Input_Message) => void
+
+export type Output_Message = {
+    [K in keyof Debugger.InputChannels]: {
+        name:    K,
+        details: Debugger.InputChannels[K],
+    }
+}[keyof Debugger.InputChannels]
+export type Output_Listener = (e: Output_Message) => void
 
 function createDebuggerBridge() {
     
-    const output = createEventHub<ToEventBusChannels<Debugger.InputChannels>>($ => ({
-        ResetState:             $(),
-        InspectNode:            $(),
-        InspectValue:           $(),
-        HighlightElementChange: $(),
-        OpenLocation:           $(),
-        TreeViewModeChange:     $(),
-        ViewChange:             $(),
-        ToggleModule:           $(),
-    }))
+    let output_listeners: Output_Listener[] = []
+    const output = {
+        listen(listener: Output_Listener) {
+            output_listeners.push(listener)
+            s.onCleanup(() => {
+                mutate_remove(output_listeners, listener)
+            })
+        },
+        emit(e: Output_Message) {
+            s.batch(() => {
+                for (let fn of output_listeners) {
+                    fn(e)
+                }
+            })
+        },
+    }
 
-    let input_listeners: InputListener[] = []
+    let input_listeners: Input_Listener[] = []
     const input = {
-        listen(listener: InputListener) {
+        listen(listener: Input_Listener) {
             input_listeners.push(listener)
             s.onCleanup(() => {
                 mutate_remove(input_listeners, listener)
             })
         },
-        emit(e: InputMessage) {
+        emit(e: Input_Message) {
             s.batch(() => {
                 for (let fn of input_listeners) {
                     fn(e)
@@ -163,9 +172,12 @@ function createController(bridge: DebuggerBridge, options: DevtoolsOptions) {
     const locatorEnabled = () => devtoolsLocatorEnabled() || clientLocatorEnabled()
 
     // send devtools locator state
-    s.createEffect(defer(devtoolsLocatorEnabled, enabled =>
-        bridge.output.ToggleModule.emit({module: DebuggerModule.Locator, enabled}),
-    ))
+    s.createEffect(defer(devtoolsLocatorEnabled, enabled => {
+        bridge.output.emit({
+            name:    'ToggleModule',
+            details: {module: DebuggerModule.Locator, enabled}
+        })
+    }))
 
     function setClientLocatorState(enabled: boolean) {
         s.batch(() => {
@@ -184,7 +196,12 @@ function createController(bridge: DebuggerBridge, options: DevtoolsOptions) {
     } | null>(null, {equals: (a, b) => a?.id === b?.id})
 
     // highlight hovered element
-    s.createEffect(defer(extHoveredNode, bridge.output.HighlightElementChange.emit))
+    s.createEffect(defer(extHoveredNode, node => {
+        bridge.output.emit({
+            name:    'HighlightElementChange',
+            details: node,
+        })
+    }))
 
     const hoveredId = s.createMemo(() => {
         const extNode = extHoveredNode()
@@ -213,7 +230,9 @@ function createController(bridge: DebuggerBridge, options: DevtoolsOptions) {
         setOpenedView(view)
     }
 
-    s.createEffect(defer(openedView, bridge.output.ViewChange.emit))
+    s.createEffect(defer(openedView, view => {
+        bridge.output.emit({name: 'ViewChange', details: view})
+    }))
 
     //
     // Node updates - signals and computations updating
