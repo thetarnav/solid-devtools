@@ -495,15 +495,21 @@ const getFocusedNodeData = (
 }
 
 const DisplayStructureTree: s.Component = () => {
-    const [containerScroll, setContainerScroll] = s.createSignal({top: 0, height: 0})
+    
+    const [containerScroll, setContainerScroll] = s.createSignal({
+        top:    0,
+        height: 0,
+    }, {
+        equals: (a, b) => a.top === b.top && a.height === b.height
+    })
 
     const remSize = useRemSize()
-    const getContainerTopMargin = (): number => remSize() * v_margin_in_rem
-    const getRowHeight = (): number => remSize() * row_height_in_rem
+    const getContainerTopMargin = () => remSize() * v_margin_in_rem
+    const getRowHeight = () => remSize() * row_height_in_rem
 
     const updateScrollData = (el: HTMLElement): void => {
         setContainerScroll({
-            top: Math.max(el.scrollTop - getContainerTopMargin(), 0),
+            top:    Math.max(el.scrollTop - getContainerTopMargin(), 0),
             height: el.clientHeight,
         })
     }
@@ -621,16 +627,14 @@ const DisplayStructureTree: s.Component = () => {
     })
 
     // Seep the inspected or central node in view when the list is changing
-    s.createEffect(
-        defer(collapsedList, () => {
-            if (!lastFocusedNodeData) return
-            const [nodeId, lastPosition] = lastFocusedNodeData
-            const index = getNodeIndexById(nodeId)
-            if (index === -1) return
-            const move = index - virtual().start - lastPosition
-            if (move !== 0) container.scrollTop += move * getRowHeight()
-        }),
-    )
+    s.createEffect(defer(collapsedList, () => {
+        if (!lastFocusedNodeData) return
+        const [nodeId, lastPosition] = lastFocusedNodeData
+        const index = getNodeIndexById(nodeId)
+        if (index === -1) return
+        const move = index - virtual().start - lastPosition
+        if (move !== 0) container.scrollTop += move * getRowHeight()
+    }))
 
     // Scroll to selected node when it changes
     // listen to inspected ID, instead of node, because node reference can change
@@ -752,8 +756,17 @@ const DisplayStructureTree: s.Component = () => {
         <ui.Scrollable
             ref={el => {
                 container = el
-                setTimeout(() => updateScrollData(el))
-                createResizeObserver(el, () => updateScrollData(el))
+                createResizeObserver(el, () => {
+                    /*
+                     Update data in timeout, after the ResizeObserver callback
+                     To prevent this error:
+                      > ResizeObserver loop completed with undelivered notifications
+                     As changing scroll data can then change el.scrollTop
+                    */
+                    setTimeout(() => {
+                        updateScrollData(el)
+                    })
+                })
             }}
             onScroll={e => updateScrollData(e.currentTarget)}
         >
