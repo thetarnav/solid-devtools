@@ -1,14 +1,13 @@
 import '@solid-devtools/debugger/setup'
 
-import * as num from '@nothing-but/utils/num'
-import {useDebugger} from '@solid-devtools/debugger/bundled'
-import {Icon, MountIcons} from '@solid-devtools/frontend'
-import {useIsMobile, useIsTouch, atom} from '@solid-devtools/shared/primitives'
-import {createBodyCursor} from '@solid-primitives/cursor'
-import {makeEventListener} from '@solid-primitives/event-listener'
 import * as s from 'solid-js'
 import * as web from 'solid-js/web'
-import {Devtools} from './controller.tsx'
+import {createBodyCursor} from '@solid-primitives/cursor'
+import {makeEventListener} from '@solid-primitives/event-listener'
+import * as num from '@nothing-but/utils/num'
+import {useDebugger} from '@solid-devtools/debugger/bundled'
+import {Icon, MountIcons, createDevtools} from '@solid-devtools/frontend'
+import {useIsMobile, useIsTouch, atom} from '@solid-devtools/shared/primitives'
 
 import frontendStyles from '@solid-devtools/frontend/dist/styles.css'
 import overlayStyles from './styles.css'
@@ -104,7 +103,26 @@ const Overlay: s.Component<OverlayOptions> = ({defaultOpen, alwaysOpen, noPaddin
                     </s.Show>
                     <div class="overlay__container__inner">
                         <s.Show when={isOpen()}>
-                            <Devtools headerSubtitle="overlay" />
+                        {_ => {
+                            
+                            debug.emit('ResetState')
+                        
+                            s.onCleanup(() => debug.emit('InspectNode', null))
+                        
+                            const devtools = createDevtools({
+                                headerSubtitle: () => 'overlay',
+                            })
+                        
+                            devtools.output.listen(e => {
+                                separate(e.details, details => debug.emit(e.name, details as never))
+                            })
+                        
+                            debug.listen(e => {
+                                separate(e, devtools.input.emit)
+                            })
+                        
+                            return <devtools.Devtools />
+                        }}
                         </s.Show>
                     </div>
                 </div>
@@ -114,4 +132,16 @@ const Overlay: s.Component<OverlayOptions> = ({defaultOpen, alwaysOpen, noPaddin
             <style>{overlayStyles}</style>
         </web.Portal>
     )
+}
+
+
+
+function clone<T>(data: T): T {
+    return typeof data === 'object' ? (JSON.parse(JSON.stringify(data)) as T) : data
+}
+function separate<T>(data: T, callback: (value: T) => void): void {
+    queueMicrotask(() => {
+        const v = clone(data)
+        queueMicrotask(() => callback(v))
+    })
 }

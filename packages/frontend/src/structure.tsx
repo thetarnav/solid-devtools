@@ -9,7 +9,7 @@ import {type Atom, atom, createHover} from '@solid-devtools/shared/primitives'
 import * as theme from '@solid-devtools/shared/theme'
 import * as debug from '@solid-devtools/debugger/types'
 import {hover_background, panel_header_el_border} from './SidePanel.tsx'
-import {useController, useDevtoolsOptions} from './controller.tsx'
+import {useController} from './controller.tsx'
 import * as ui from './ui/index.ts'
 
 
@@ -73,7 +73,6 @@ export function getNodePath(node: Structure.Node): Structure.Node[] {
 
 export function createStructure() {
     const ctx = useController()
-    const {inspector, bridge} = ctx
     const cachedInitialState = ctx.viewCache.get(debug.DevtoolsMainView.Structure)
 
     const [mode, setMode] = s.createSignal<debug.TreeWalkerMode>(
@@ -97,7 +96,7 @@ export function createStructure() {
     }))
 
     const inspectedNode = s.createMemo(() => {
-        const id = inspector.inspected.treeWalkerOwnerId
+        const id = ctx.inspector.inspected.treeWalkerOwnerId
         return id ? findNode(id) : null
     })
 
@@ -137,19 +136,19 @@ export function createStructure() {
         if (query === lastSearch) {
             if (lastSearchResults) {
                 lastSearchIndex = (lastSearchIndex + 1) % lastSearchResults.length
-                inspector.setInspectedOwner(lastSearchResults[lastSearchIndex]!)
+                ctx.inspector.setInspectedOwner(lastSearchResults[lastSearchIndex]!)
             }
             return
         } else {
             lastSearch = query
             const result = searchNodeList(query)
-            if (result) inspector.setInspectedOwner(result[(lastSearchIndex = 0)]!)
+            if (result) ctx.inspector.setInspectedOwner(result[(lastSearchIndex = 0)]!)
             lastSearchResults = result
         }
     }
 
     /* Listen to Client Events */
-    bridge.input.listen(e => {
+    ctx.input.listen(e => {
         /* eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check */
         switch (e.name) {
         case 'ResetPanel':
@@ -163,7 +162,7 @@ export function createStructure() {
 
     // TREE VIEW MODE
     s.createEffect(defer(mode, mode => {
-        bridge.output.emit({name: 'TreeViewModeChange', details: mode})
+        ctx.output.emit({name: 'TreeViewModeChange', details: mode})
     }))
 
     return {
@@ -367,7 +366,7 @@ const LocatorButton: s.Component = () => {
 }
 
 const Search: s.Component = () => {
-    const options = useDevtoolsOptions()
+    const ctx = useController()
     const structure = useStructure()
 
     const [value, setValue] = s.createSignal('')
@@ -398,7 +397,7 @@ const Search: s.Component = () => {
             }</style>
             <input
                 ref={input => {
-                    if (options.useShortcuts) {
+                    if (ctx.options.useShortcuts) {
                         createShortcut(['/'], () => input.focus())
                         createShortcut(['Escape'], () => {
                             if (document.activeElement === input) input.blur()

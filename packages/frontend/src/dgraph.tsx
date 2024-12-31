@@ -7,11 +7,11 @@ import {useController} from './controller.tsx'
 import * as ui from './ui/index.ts'
 
 export function createDependencyGraph() {
-    const {bridge, inspector} = useController()
+    const ctx = useController()
 
     const [graph, setGraph] = s.createSignal<debug.DGraphUpdate>(null)
 
-    bridge.input.listen(e => {
+    ctx.input.listen(e => {
         // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
         switch (e.name) {
         case 'DgraphUpdate':
@@ -20,12 +20,12 @@ export function createDependencyGraph() {
         }
     })
 
-    bridge.output.emit({
+    ctx.output.emit({
         name:    'ToggleModule',
         details: {module: debug.DebuggerModule.Dgraph, enabled: true},
     })
     s.onCleanup(() => {
-        bridge.output.emit({
+        ctx.output.emit({
             name:    'ToggleModule',
             details: {module: debug.DebuggerModule.Dgraph, enabled: false},
         })
@@ -37,9 +37,9 @@ export function createDependencyGraph() {
         if (!node) return console.warn('inspectNode: node not found', id)
 
         if (node.type === debug.NodeType.Signal) {
-            inspector.setInspectedNode(node.graph ?? null, id)
+            ctx.inspector.setInspectedNode(node.graph ?? null, id)
         } else {
-            inspector.setInspectedOwner(id)
+            ctx.inspector.setInspectedOwner(id)
         }
     }
 

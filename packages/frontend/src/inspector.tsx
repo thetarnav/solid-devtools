@@ -8,7 +8,7 @@ import {error, splitOnColon} from '@solid-devtools/shared/utils'
 import * as debug from '@solid-devtools/debugger/types'
 import * as theme from '@solid-devtools/shared/theme'
 import {SidePanelCtx} from './SidePanel.tsx'
-import {useController, type DebuggerBridge} from './controller.tsx'
+import {useController, type InputEventBus, type OutputEventBus} from './controller.tsx'
 import * as ui from './ui/index.ts'
 import * as decode from './decode.ts'
 
@@ -158,7 +158,10 @@ const NULL_INSPECTED_NODE = {
     treeWalkerOwnerId: null,
 } as const satisfies debug.Debugger.InspectedState
 
-export default function createInspector({bridge}: {bridge: DebuggerBridge}) {
+export default function createInspector(
+    output: OutputEventBus,
+    input:  InputEventBus,
+) {
     //
     // Inspected owner/signal
     //
@@ -201,7 +204,7 @@ export default function createInspector({bridge}: {bridge: DebuggerBridge}) {
 
     // sync inspected node with the debugger
     s.createEffect(defer(inspectedNode, node => {
-        bridge.output.emit({name: 'InspectNode', details: node})
+        output.emit({name: 'InspectNode', details: node})
     }))
 
     //
@@ -224,7 +227,7 @@ export default function createInspector({bridge}: {bridge: DebuggerBridge}) {
         }
     }
 
-    bridge.input.listen(e => {
+    input.listen(e => {
         // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
         switch (e.name) {
         case 'InspectedState': {
@@ -346,7 +349,7 @@ export default function createInspector({bridge}: {bridge: DebuggerBridge}) {
     function inspectValueItem(item: Inspector.ValueItem, selected?: boolean): void {
         if (selected !== undefined && item.extended === selected) return
         selected = item.setExtended(p => selected ?? !p)
-        bridge.output.emit({
+        output.emit({
             name:    'InspectValue',
             details: {id: item.itemId, selected},
         })
@@ -356,7 +359,7 @@ export default function createInspector({bridge}: {bridge: DebuggerBridge}) {
     // LOCATION
     //
     function openComponentLocation(): void {
-        bridge.output.emit({
+        output.emit({
             name:    'OpenLocation',
             details: undefined,
         })

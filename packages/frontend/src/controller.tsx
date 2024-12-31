@@ -10,33 +10,58 @@ import createInspector from './inspector.tsx'
 import {type Structure} from './structure.tsx'
 import * as ui from './ui/index.ts'
 
-export type Input_Message = {
+
+export type InputMessage = {
     [K in keyof Debugger.OutputChannels]: {
         name:    K,
         details: Debugger.OutputChannels[K],
     }
 }[keyof Debugger.OutputChannels]
-export type Input_Listener = (e: Input_Message) => void
+export type InputListener = (e: InputMessage) => void
 
-export type Output_Message = {
+export type InputEventBus = {
+    emit:   (e: InputMessage) => void,
+    listen: (fn: InputListener) => void,
+}
+
+export type OutputMessage = {
     [K in keyof Debugger.InputChannels]: {
         name:    K,
         details: Debugger.InputChannels[K],
     }
 }[keyof Debugger.InputChannels]
-export type Output_Listener = (e: Output_Message) => void
+export type OutputListener = (e: OutputMessage) => void
 
-function createDebuggerBridge() {
-    
-    let output_listeners: Output_Listener[] = []
-    const output = {
-        listen(listener: Output_Listener) {
+export type OutputEventBus = {
+    emit:   (e: OutputMessage) => void,
+    listen: (fn: OutputListener) => void,
+}
+
+
+/**
+ * devtools options provided to {@link Devtools} component
+ * with their default values
+ */
+export type DevtoolsOptionsWithDefaults = {
+    errorOverlayFooter: () => s.JSX.Element
+    headerSubtitle:     () => s.JSX.Element
+    useShortcuts:       boolean
+    catchWindowErrors:  boolean
+}
+
+export type DevtoolsOptions = Partial<DevtoolsOptionsWithDefaults>
+
+export function createDevtools(props: DevtoolsOptions) {
+
+    let output_listeners: OutputListener[] = []
+    const output: OutputEventBus = {
+        listen(listener) {
             output_listeners.push(listener)
             s.onCleanup(() => {
                 mutate_remove(output_listeners, listener)
             })
         },
-        emit(e: Output_Message) {
+        emit(e) {
             s.batch(() => {
                 for (let fn of output_listeners) {
                     fn(e)
@@ -45,15 +70,15 @@ function createDebuggerBridge() {
         },
     }
 
-    let input_listeners: Input_Listener[] = []
-    const input = {
-        listen(listener: Input_Listener) {
+    let input_listeners: InputListener[] = []
+    const input: InputEventBus = {
+        listen(listener) {
             input_listeners.push(listener)
             s.onCleanup(() => {
                 mutate_remove(input_listeners, listener)
             })
         },
-        emit(e: Input_Message) {
+        emit(e) {
             s.batch(() => {
                 for (let fn of input_listeners) {
                     fn(e)
@@ -62,60 +87,29 @@ function createDebuggerBridge() {
         },
     }
 
-    return {input, output}
-}
-
-export type DebuggerBridge = ReturnType<typeof createDebuggerBridge>
-
-export type DevtoolsProps = {
-    errorOverlayFooter?: s.JSX.Element
-    headerSubtitle?: s.JSX.Element
-    useShortcuts?: boolean
-    catchWindowErrors?: boolean
-}
-
-/**
- * devtools options provided to {@link Devtools} component
- * with their default values
- */
-export type DevtoolsOptions = {
-    useShortcuts: boolean
-}
-
-const DevtoolsOptionsCtx = s.createContext<DevtoolsOptions>(
-    'DevtoolsOptionsCtx' as any as DevtoolsOptions,
-)
-
-export const useDevtoolsOptions = () => s.useContext(DevtoolsOptionsCtx)
-
-export function devtoolsPropsToOptions(props: DevtoolsProps): DevtoolsOptions {
-    return {
-        useShortcuts: props.useShortcuts ?? false,
+    let options: DevtoolsOptionsWithDefaults = {
+        errorOverlayFooter: props.errorOverlayFooter ?? (() => null),
+        headerSubtitle:     props.headerSubtitle     ?? (() => null),
+        useShortcuts:       props.useShortcuts       ?? false,
+        catchWindowErrors:  props.catchWindowErrors  ?? false,
     }
-}
 
-export function createDevtools() {
-    const bridge = createDebuggerBridge()
+    const controller = createController(output, input, options)
 
     return {
-        bridge,
-        Devtools(props: DevtoolsProps) {
-            const options = devtoolsPropsToOptions(props)
-
-            const controller = createController(bridge, options)
-
+        output,
+        input,
+        Devtools() {
             return (
                 <div class={ui.devtools_root_class + ' h-inherit'}>
                     <ui.Styles />
                     <ui.ErrorOverlay
-                        footer={props.errorOverlayFooter}
-                        catchWindowErrors={props.catchWindowErrors}
+                        footer={options.errorOverlayFooter()}
+                        catchWindowErrors={options.catchWindowErrors}
                     >
-                        <DevtoolsOptionsCtx.Provider value={options}>
-                            <ControllerCtx.Provider value={controller}>
-                                <App headerSubtitle={props.headerSubtitle} />
-                            </ControllerCtx.Provider>
-                        </DevtoolsOptionsCtx.Provider>
+                        <ControllerCtx.Provider value={controller}>
+                            <App headerSubtitle={options.headerSubtitle()} />
+                        </ControllerCtx.Provider>
                     </ui.ErrorOverlay>
                 </div>
             )
@@ -163,7 +157,11 @@ function createViewCache() {
     return {set: setCacheGetter, get: getCache}
 }
 
-function createController(bridge: DebuggerBridge, options: DevtoolsOptions) {
+function createController(
+    output:  OutputEventBus,
+    input:   InputEventBus,
+    options: DevtoolsOptions,
+) {
     //
     // LOCATOR
     //
@@ -173,7 +171,7 @@ function createController(bridge: DebuggerBridge, options: DevtoolsOptions) {
 
     // send devtools locator state
     s.createEffect(defer(devtoolsLocatorEnabled, enabled => {
-        bridge.output.emit({
+        output.emit({
             name:    'ToggleModule',
             details: {module: DebuggerModule.Locator, enabled}
         })
@@ -197,7 +195,7 @@ function createController(bridge: DebuggerBridge, options: DevtoolsOptions) {
 
     // highlight hovered element
     s.createEffect(defer(extHoveredNode, node => {
-        bridge.output.emit({
+        output.emit({
             name:    'HighlightElementChange',
             details: node,
         })
@@ -231,7 +229,7 @@ function createController(bridge: DebuggerBridge, options: DevtoolsOptions) {
     }
 
     s.createEffect(defer(openedView, view => {
-        bridge.output.emit({name: 'ViewChange', details: view})
+        output.emit({name: 'ViewChange', details: view})
     }))
 
     //
@@ -242,12 +240,12 @@ function createController(bridge: DebuggerBridge, options: DevtoolsOptions) {
     //
     // INSPECTOR
     //
-    const inspector = createInspector({bridge})
+    const inspector = createInspector(output, input)
 
     //
     // Client events
     //
-    bridge.input.listen(e => {
+    input.listen(e => {
         switch (e.name) {
         case 'NodeUpdates':
             for (let id of e.details) {
@@ -301,7 +299,8 @@ function createController(bridge: DebuggerBridge, options: DevtoolsOptions) {
         },
         inspector,
         options,
-        bridge,
+        output,
+        input,
         viewCache,
         listenToNodeUpdate(id: NodeID, fn: VoidFunction) {
             return nodeUpdates.listen(updatedId => updatedId === id && fn())
