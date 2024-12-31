@@ -1,10 +1,10 @@
+import * as s from 'solid-js'
 import {SECOND} from '@solid-primitives/date'
 import {createEventBus} from '@solid-primitives/event-bus'
 import {debounce} from '@solid-primitives/scheduled'
 import {defer} from '@solid-primitives/utils'
-import {type Debugger, DebuggerModule, DevtoolsMainView, type NodeID} from '@solid-devtools/debugger/types'
+import * as debug from '@solid-devtools/debugger/types'
 import {mutate_remove} from '@solid-devtools/shared/utils'
-import * as s from 'solid-js'
 import {App} from './App.tsx'
 import createInspector from './inspector.tsx'
 import {type Structure} from './structure.tsx'
@@ -12,11 +12,11 @@ import * as ui from './ui/index.ts'
 
 
 export type InputMessage = {
-    [K in keyof Debugger.OutputChannels]: {
+    [K in keyof debug.Debugger.OutputChannels]: {
         name:    K,
-        details: Debugger.OutputChannels[K],
+        details: debug.Debugger.OutputChannels[K],
     }
-}[keyof Debugger.OutputChannels]
+}[keyof debug.Debugger.OutputChannels]
 export type InputListener = (e: InputMessage) => void
 
 export type InputEventBus = {
@@ -25,11 +25,11 @@ export type InputEventBus = {
 }
 
 export type OutputMessage = {
-    [K in keyof Debugger.InputChannels]: {
+    [K in keyof debug.Debugger.InputChannels]: {
         name:    K,
-        details: Debugger.InputChannels[K],
+        details: debug.Debugger.InputChannels[K],
     }
-}[keyof Debugger.InputChannels]
+}[keyof debug.Debugger.InputChannels]
 export type OutputListener = (e: OutputMessage) => void
 
 export type OutputEventBus = {
@@ -83,7 +83,7 @@ export function createDevtools(props: DevtoolsOptions) {
  */
 function createViewCache() {
     type CacheDataMap = {
-        [DevtoolsMainView.Structure]: Structure.Cache
+        [debug.DevtoolsMainView.Structure]: Structure.Cache
     }
     let shortCache: null | any = null
     let nextShortCache: typeof shortCache = null
@@ -94,7 +94,7 @@ function createViewCache() {
         nextShortCache = null
     }, 3 * SECOND)
 
-    function setCacheGetter<T extends DevtoolsMainView>(view: T, getter: () => CacheDataMap[T]) {
+    function setCacheGetter<T extends debug.DevtoolsMainView>(view: T, getter: () => CacheDataMap[T]) {
         s.onCleanup(() => {
             const data = getter()
             nextShortCache = {view: view as any, data: data.short}
@@ -102,7 +102,7 @@ function createViewCache() {
             clearShortCache()
         })
     }
-    function getCache<T extends DevtoolsMainView>(
+    function getCache<T extends debug.DevtoolsMainView>(
         view: T,
     ): {[K in 'short' | 'long']: CacheDataMap[T][K] | null} {
         const short = shortCache && shortCache.view === view ? shortCache.data : null
@@ -170,7 +170,7 @@ function createAppCtx(props: DevtoolsOptions) {
     s.createEffect(defer(devtoolsLocatorEnabled, enabled => {
         output.emit({
             name:    'ToggleModule',
-            details: {module: DebuggerModule.Locator, enabled}
+            details: {module: debug.DebuggerModule.Locator, enabled}
         })
     }))
 
@@ -184,10 +184,10 @@ function createAppCtx(props: DevtoolsOptions) {
     //
     // HOVERED NODE
     //
-    const [clientHoveredNode, setClientHoveredNode] = s.createSignal<NodeID | null>(null)
+    const [clientHoveredNode, setClientHoveredNode] = s.createSignal<debug.NodeID | null>(null)
     const [extHoveredNode, setExtHoveredNode] = s.createSignal<{
         type: 'element' | 'node'
-        id: NodeID
+        id: debug.NodeID
     } | null>(null, {equals: (a, b) => a?.id === b?.id})
 
     // highlight hovered element
@@ -202,14 +202,14 @@ function createAppCtx(props: DevtoolsOptions) {
         const extNode = extHoveredNode()
         return extNode ? extNode.id : clientHoveredNode()
     })
-    const isNodeHovered = s.createSelector<NodeID | null, NodeID>(hoveredId)
+    const isNodeHovered = s.createSelector<debug.NodeID | null, debug.NodeID>(hoveredId)
 
-    function toggleHoveredNode(id: NodeID, type: 'element' | 'node' = 'node', isHovered?: boolean) {
+    function toggleHoveredNode(id: debug.NodeID, type: 'element' | 'node' = 'node', isHovered?: boolean) {
         return setExtHoveredNode(p =>
             p && p.id === id ? (isHovered ? p : null) : isHovered ? {id, type} : p,
         )
     }
-    function toggleHoveredElement(id: NodeID, isHovered?: boolean) {
+    function toggleHoveredElement(id: debug.NodeID, isHovered?: boolean) {
         return toggleHoveredNode(id, 'element', isHovered)
     }
 
@@ -218,10 +218,10 @@ function createAppCtx(props: DevtoolsOptions) {
     //
     // * there is no need for different views now
 
-    const [openedView, setOpenedView] = s.createSignal<DevtoolsMainView>(DevtoolsMainView.Structure)
+    const [openedView, setOpenedView] = s.createSignal<debug.DevtoolsMainView>(debug.DevtoolsMainView.Structure)
     const viewCache = createViewCache()
 
-    function openView(view: DevtoolsMainView) {
+    function openView(view: debug.DevtoolsMainView) {
         setOpenedView(view)
     }
 
@@ -232,7 +232,7 @@ function createAppCtx(props: DevtoolsOptions) {
     //
     // Node updates - signals and computations updating
     //
-    const nodeUpdates = createEventBus<NodeID>()
+    const nodeUpdates = createEventBus<debug.NodeID>()
 
     //
     // INSPECTOR
@@ -299,7 +299,7 @@ function createAppCtx(props: DevtoolsOptions) {
         output,
         input,
         viewCache,
-        listenToNodeUpdate(id: NodeID, fn: VoidFunction) {
+        listenToNodeUpdate(id: debug.NodeID, fn: VoidFunction) {
             return nodeUpdates.listen(updatedId => updatedId === id && fn())
         },
     }
