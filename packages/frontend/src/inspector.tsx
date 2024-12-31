@@ -156,7 +156,7 @@ const NULL_INSPECTED_NODE = {
     ownerId: null,
     signalId: null,
     treeWalkerOwnerId: null,
-} as const satisfies debug.Debugger.InspectedState
+} as const satisfies debug.InspectedState
 
 export default function createInspector(
     output: OutputEventBus,
@@ -167,14 +167,14 @@ export default function createInspector(
     //
 
     const [inspected, setInspected] =
-        createStaticStore<debug.Debugger.InspectedState>(NULL_INSPECTED_NODE)
+        createStaticStore<debug.InspectedState>(NULL_INSPECTED_NODE)
     const inspectedNode = s.createMemo(() => ({...inspected}), void 0, {
         equals: (a, b) => a.ownerId === b.ownerId && a.signalId === b.signalId,
     })
     const isSomeNodeInspected = s.createMemo(
         () => inspected.ownerId !== null || inspected.signalId !== null,
     )
-    const isInspected = s.createSelector<debug.Debugger.InspectedState, debug.NodeID>(
+    const isInspected = s.createSelector<debug.InspectedState, debug.NodeID>(
         inspectedNode,
         (id, node) => node.ownerId === id || node.signalId === id,
     )

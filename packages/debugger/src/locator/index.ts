@@ -1,20 +1,11 @@
-import {makeHoverElementListener} from '@solid-devtools/shared/primitives'
-import {warn} from '@solid-devtools/shared/utils'
-import {type EmitterEmit} from '@solid-primitives/event-bus'
+import * as s from 'solid-js'
+import {defer} from '@solid-primitives/utils'
 import {makeEventListener} from '@solid-primitives/event-listener'
 import {createKeyHold} from '@solid-primitives/keyboard'
 import {scheduleIdle} from '@solid-primitives/scheduled'
-import {defer} from '@solid-primitives/utils'
-import {
-    type Accessor,
-    createEffect,
-    createMemo,
-    createSignal,
-    getOwner,
-    onCleanup,
-    runWithOwner,
-} from 'solid-js'
-import type {Debugger} from '../main/index.ts'
+import {makeHoverElementListener} from '@solid-devtools/shared/primitives'
+import {warn} from '@solid-devtools/shared/utils'
+import {type OutputEmit} from '../main/index.ts'
 import * as registry from '../main/component-registry.ts'
 import {ObjectType, getObjectById} from '../main/id.ts'
 import SolidAPI from '../main/setup.ts'
@@ -36,18 +27,18 @@ import {type HighlightElementPayload, type LocatorOptions} from './types.ts'
 export {parseLocationString} from './find-components.ts'
 
 export function createLocator(props: {
-    emit: EmitterEmit<Debugger.OutputChannels>
-    locatorEnabled: Accessor<boolean>
-    setLocatorEnabledSignal(signal: Accessor<boolean>): void
+    locatorEnabled: s.Accessor<boolean>
+    setLocatorEnabledSignal(signal: s.Accessor<boolean>): void
     onComponentClick(componentId: NodeID, next: VoidFunction): void
+    emit: OutputEmit
 }) {
-    const [enabledByPressingSignal, setEnabledByPressingSignal] = createSignal((): boolean => false)
-    props.setLocatorEnabledSignal(createMemo(() => enabledByPressingSignal()()))
+    const [enabledByPressingSignal, setEnabledByPressingSignal] = s.createSignal((): boolean => false)
+    props.setLocatorEnabledSignal(s.createMemo(() => enabledByPressingSignal()()))
 
-    const [hoverTarget, setHoverTarget] = createSignal<HTMLElement | null>(null)
-    const [devtoolsTarget, setDevtoolsTarget] = createSignal<HighlightElementPayload>(null)
+    const [hoverTarget, setHoverTarget] = s.createSignal<HTMLElement | null>(null)
+    const [devtoolsTarget, setDevtoolsTarget] = s.createSignal<HighlightElementPayload>(null)
 
-    const [highlightedComponents, setHighlightedComponents] = createSignal<LocatorComponent[]>([])
+    const [highlightedComponents, setHighlightedComponents] = s.createSignal<LocatorComponent[]>([])
 
     const calcHighlightedComponents = (
         target: HTMLElement | HighlightElementPayload,
@@ -85,7 +76,7 @@ export function createLocator(props: {
         }))
     }
 
-    createEffect(
+    s.createEffect(
         defer(
             () => hoverTarget() ?? devtoolsTarget(),
             scheduleIdle(target =>
@@ -97,10 +88,12 @@ export function createLocator(props: {
     createElementsOverlay(highlightedComponents)
 
     // notify of component hovered by using the debugger
-    createEffect((prev: NodeID | undefined) => {
+    s.createEffect((prev: NodeID | undefined) => {
         const target = hoverTarget()
         const comp = target && registry.findComponent(target)
-        if (prev) props.emit('HoveredComponent', {nodeId: prev, state: false})
+        if (prev) {
+            props.emit('HoveredComponent', {nodeId: prev, state: false})
+        }
         if (comp) {
             const {id} = comp
             props.emit('HoveredComponent', {nodeId: id, state: true})
@@ -110,12 +103,12 @@ export function createLocator(props: {
 
     let targetIDE: TargetIDE | TargetURLFunction | undefined
 
-    createEffect(() => {
+    s.createEffect(() => {
         if (!props.locatorEnabled()) return
 
         // set hovered element as target
         makeHoverElementListener(el => setHoverTarget(el))
-        onCleanup(() => setHoverTarget(null))
+        s.onCleanup(() => setHoverTarget(null))
 
         // go to selected component source code on click
         makeEventListener(
@@ -144,7 +137,7 @@ export function createLocator(props: {
     })
 
     let locatorUsed = false
-    const owner = getOwner()!
+    const owner = s.getOwner()!
     /**
      * User function to enable user locator features. Such as element hover and go to source.
      *
@@ -153,7 +146,7 @@ export function createLocator(props: {
      * @param options {@link LocatorOptions} for the locator.
      */
     function useLocator(options: LocatorOptions): void {
-        runWithOwner(owner, () => {
+        s.runWithOwner(owner, () => {
             if (locatorUsed) return warn('useLocator can be called only once.')
             locatorUsed = true
             if (options.targetIDE) targetIDE = options.targetIDE

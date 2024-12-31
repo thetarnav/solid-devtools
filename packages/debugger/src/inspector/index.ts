@@ -1,8 +1,7 @@
 import {warn} from '@solid-devtools/shared/utils'
-import {type EmitterEmit} from '@solid-primitives/event-bus'
 import {scheduleIdle, throttle} from '@solid-primitives/scheduled'
 import {type Accessor, createEffect, onCleanup} from 'solid-js'
-import type {Debugger} from '../main/index.ts'
+import {type OutputEmit} from '../main/index.ts'
 import {ObjectType, getObjectById} from '../main/id.ts'
 import {addSolidUpdateListener} from '../main/observe.ts'
 import {type Mapped, type NodeID, type Solid, type ValueItemID} from '../main/types.ts'
@@ -20,10 +19,10 @@ export type ToggleInspectedValueData = {id: ValueItemID; selected: boolean}
  * Plugin module
  */
 export function createInspector(props: {
-    inspectedOwnerId: Accessor<NodeID | null>
-    emit: EmitterEmit<Debugger.OutputChannels>
-    enabled: Accessor<boolean>
+    inspectedOwnerId:   Accessor<NodeID | null>
+    enabled:            Accessor<boolean>
     resetInspectedNode: VoidFunction
+    emit:               OutputEmit
 }) {
     let lastDetails: Mapped.OwnerDetails | undefined
     let inspectedOwner: Solid.Owner | null
@@ -90,7 +89,9 @@ export function createInspector(props: {
                 }
 
                 // Emit updates
-                batchedUpdates.length && props.emit('InspectorUpdate', batchedUpdates)
+                if (batchedUpdates.length) {
+                    props.emit('InspectorUpdate', batchedUpdates)
+                }
             })
 
             const flushPropsCheck = throttle(flush, 200)

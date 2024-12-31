@@ -59,7 +59,6 @@
         "solid-js": "^1.9.0"
     },
     "dependencies": {
-        "@solid-primitives/event-bus": "^1.0.11",
         "@solid-primitives/event-listener": "^2.3.3",
         "@solid-primitives/media": "^2.2.9",
         "@solid-primitives/refs": "^1.0.8",

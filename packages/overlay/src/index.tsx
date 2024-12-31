@@ -105,7 +105,7 @@ const Overlay: s.Component<OverlayOptions> = ({defaultOpen, alwaysOpen, noPaddin
                         <s.Show when={isOpen()}>
                         {_ => {
                             
-                            debug.emit('ResetState')
+                            debug.emit('ResetState', undefined)
                         
                             s.onCleanup(() => debug.emit('InspectNode', null))
                         
@@ -114,7 +114,7 @@ const Overlay: s.Component<OverlayOptions> = ({defaultOpen, alwaysOpen, noPaddin
                             })
                         
                             devtools.output.listen(e => {
-                                separate(e.details, details => debug.emit(e.name, details as never))
+                                separate(e, debug.emitObj)
                             })
                         
                             debug.listen(e => {

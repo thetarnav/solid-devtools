@@ -4,7 +4,7 @@ import {
     setClientVersion,
     setOwnerLocation,
     setSolidVersion,
-    useLocator,
+    setLocatorOptions,
 } from '@solid-devtools/debugger/setup'
 
 setClientVersion(process.env.CLIENT_VERSION)
@@ -19,4 +19,4 @@ export function setComponentLocation(location: string): void {
     setOwnerLocation(location)
 }
 
-export {useLocator as setLocatorOptions}
+export {setLocatorOptions}

@@ -28,7 +28,11 @@ export function getOwnerLocation(owner: Solid.Owner) {
 }
 
 let PassedLocatorOptions: LocatorOptions | null = null
+/** @deprecated use `setLocatorOptions` */
 export function useLocator(options: LocatorOptions) {
+    PassedLocatorOptions = options
+}
+export function setLocatorOptions(options: LocatorOptions) {
     PassedLocatorOptions = options
 }
 

@@ -1,24 +1,24 @@
-import {type EmitterEmit} from '@solid-primitives/event-bus'
 import {throttle} from '@solid-primitives/scheduled'
 import {defer} from '@solid-primitives/utils'
 import {type Accessor, createEffect, createMemo} from 'solid-js'
-import type {Debugger} from '../main/index.ts'
 import {DevtoolsMainView, NodeType} from '../main/constants.ts'
 import {ObjectType, getObjectById} from '../main/id.ts'
 import {type NodeID, type Solid} from '../main/types.ts'
 import {getNodeType} from '../main/utils.ts'
 import {type OnNodeUpdate, type SerializedDGraph, collectDependencyGraph} from './collect.ts'
+import {type OutputEmit, type InspectedState} from '../main/index.ts'
 
 export {type SerializedDGraph} from './collect.ts'
 
 export type DGraphUpdate = SerializedDGraph.Graph | null
 
 export function createDependencyGraph(props: {
-    emit: EmitterEmit<Debugger.OutputChannels>
-    enabled: Accessor<boolean>
-    inspectedState: Accessor<Debugger.InspectedState>
-    onNodeUpdate: (nodeId: NodeID) => void
+    enabled:        Accessor<boolean>
+    inspectedState: Accessor<InspectedState>
+    onNodeUpdate:   (nodeId: NodeID) => void
+    emit:           OutputEmit
 }) {
+
     let clearListeners: VoidFunction | null = null
 
     const onNodeUpdate: OnNodeUpdate = id => {

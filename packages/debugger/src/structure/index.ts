@@ -46,8 +46,8 @@ function getClosestIncludedOwner(owner: Solid.Owner, mode: TreeWalkerMode): Soli
 
 export function createStructure(props: {
     onStructureUpdate: (updates: StructureUpdates) => void
-    onNodeUpdate: (nodeId: NodeID) => void
-    enabled: () => boolean
+    onNodeUpdate:      (nodeId: NodeID) => void
+    enabled:           () => boolean
 }) {
     let treeWalkerMode: TreeWalkerMode = DEFAULT_WALKER_MODE
 

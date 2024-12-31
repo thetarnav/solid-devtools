@@ -79,19 +79,19 @@ async function attach_debugger() {
     const instance = debug.useDebugger()
 
     /* Check versions */
-    warn_on_version_mismatch(instance.meta.versions.get_client(),
+    warn_on_version_mismatch(instance.versions.get_client(),
                              import.meta.env.EXPECTED_CLIENT,
                              'solid-devtools')
 
-    warn_on_version_mismatch(instance.meta.versions.get_solid(),
-                             instance.meta.versions.get_expected_solid(),
+    warn_on_version_mismatch(instance.versions.get_solid(),
+                             instance.versions.get_expected_solid(),
                              'solid-js')
 
     // in case of navigation/page reload, reset the locator mode state in the extension
     window_post_message('ResetPanel', undefined)
     window_post_message('Debugger_Connected', {
-        client: instance.meta.versions.get_client(),
-        solid:  instance.meta.versions.get_solid(),
+        client: instance.versions.get_client(),
+        solid:  instance.versions.get_solid(),
     })
 
     /* From Content */

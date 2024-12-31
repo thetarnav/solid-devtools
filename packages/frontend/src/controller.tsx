@@ -11,27 +11,15 @@ import {type Structure} from './structure.tsx'
 import * as ui from './ui/index.ts'
 
 
-export type InputMessage = {
-    [K in keyof debug.Debugger.OutputChannels]: {
-        name:    K,
-        details: debug.Debugger.OutputChannels[K],
-    }
-}[keyof debug.Debugger.OutputChannels]
-export type InputListener = (e: InputMessage) => void
+export type InputMessage   = debug.OutputMessage
+export type InputListener  = debug.OutputListener
+export type OutputMessage  = debug.InputMessage
+export type OutputListener = debug.InputListener
 
 export type InputEventBus = {
     emit:   (e: InputMessage) => void,
     listen: (fn: InputListener) => void,
 }
-
-export type OutputMessage = {
-    [K in keyof debug.Debugger.InputChannels]: {
-        name:    K,
-        details: debug.Debugger.InputChannels[K],
-    }
-}[keyof debug.Debugger.InputChannels]
-export type OutputListener = (e: OutputMessage) => void
-
 export type OutputEventBus = {
     emit:   (e: OutputMessage) => void,
     listen: (fn: OutputListener) => void,

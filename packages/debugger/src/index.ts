@@ -1,4 +1,4 @@
-export {useDebugger, useLocator} from './main/index.ts'
+export {useDebugger} from './main/index.ts'
 export {
     addSolidUpdateListener,
     interceptComputationRerun,

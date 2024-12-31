@@ -57,12 +57,13 @@ const debug = useDebugger()
 
 _Debugger feature inspired by [LocatorJS](https://www.locatorjs.com)_
 
-Locator let's you locate components on the page, and go to their source code in your IDE. All you need to do is configure it by calling `useLocator` with some options.
+Locator let's you locate components on the page, and go to their source code in your IDE. All you need to do is configure it by calling `setLocatorOptions` with some options.
 
 ```ts
-import { useLocator } from '@solid-devtools/debugger' // or 'solid-devtools/setup'
+import { useDebugger } from '@solid-devtools/debugger' // or 'solid-devtools/setup'
 
-useLocator()
+const debug = useDebugger()
+debug.setLocatorOptions()
 ```
 
 It will not allow you to highlight hovered components on the page and reveal them in the IDE or the Chrome Extension. _(depending of if the extension panel is open or not)_
@@ -80,7 +81,7 @@ Choose in which IDE the component source code should be revealed.
 Out-of-the-box options: `vscode`, `atom`, `webstorm` and `vscode-insiders`
 
 ```ts
-useLocator({
+setLocatorOptions({
   targetIDE: 'vscode',
 })
 ```
@@ -92,7 +93,7 @@ To be able to go the source code, the code location needs to be inlined during b
 To target custom URLs (e.g. Github files) the `targetIDE` option accepts an function returning a `string` or `false`.
 
 ```ts
-useLocator({
+setLocatorOptions({
   targetIDE: ({ filePath, line }) =>
     // will navigate to this link when clicking
     `https://github.com/thetarnav/solid-devtools/blob/main/playgrounds/sandbox/${filePath}#L${line}`,
@@ -102,7 +103,7 @@ useLocator({
 Returning `false` will prevent calling `window.open` to navigate to URL, and let you handle the click yourself.
 
 ```ts
-useLocator({
+setLocatorOptions({
   targetIDE({ projectPath, filePath, line, column, element }) {
     console.log({ projectPath, filePath, line, column, element })
     return false
@@ -117,7 +118,7 @@ Holding which key should enable the locator overlay? It's `"Alt"` by default —
 Key options: `"Alt"`, `"Control"`, `"Mete"`, `"Shift"` or `string` to be compared with `e.key` property.
 
 ```tsx
-useLocator({
+setLocatorOptions({
   key: 'Control',
 })
 ```

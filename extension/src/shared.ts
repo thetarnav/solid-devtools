@@ -83,8 +83,8 @@ export interface GeneralChannels {
     ResetPanel: void
 }
 
-export type Channels = debug.Debugger.InputChannels
-              & debug.Debugger.OutputChannels
+export type Channels = debug.InputChannels
+              & debug.OutputChannels
               & GeneralChannels
 
 export type Message = {
