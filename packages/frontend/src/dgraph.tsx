@@ -3,11 +3,11 @@ import * as s from 'solid-js'
 import * as debug from '@solid-devtools/debugger/types'
 import {createHover} from '@solid-devtools/shared/primitives'
 import * as theme from '@solid-devtools/shared/theme'
-import {useController} from './controller.tsx'
+import {useAppCtx} from './controller.tsx'
 import * as ui from './ui/index.ts'
 
 export function createDependencyGraph() {
-    const ctx = useController()
+    const ctx = useAppCtx()
 
     const [graph, setGraph] = s.createSignal<debug.DGraphUpdate>(null)
 
@@ -220,7 +220,7 @@ function Line(props: {
 }
 
 export function Dgraph_View(): s.JSX.Element {
-    const ctx = useController()
+    const ctx = useAppCtx()
     const {inspector, hovered} = ctx
     const dgraph = createDependencyGraph()
 

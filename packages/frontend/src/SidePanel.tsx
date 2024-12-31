@@ -1,7 +1,7 @@
 import clsx from 'clsx'
 import * as s from 'solid-js'
 import * as theme from '@solid-devtools/shared/theme'
-import {useController} from './controller.tsx'
+import {useAppCtx} from './controller.tsx'
 import * as dgraph from './dgraph.tsx'
 import {InspectorView} from './inspector.tsx'
 import * as ui from './ui/index.ts'
@@ -31,8 +31,8 @@ export const action_button = clsx(hover_background, hover_text, 'w-6 h-6 rounded
 export const action_icon = 'w-4 h-4'
 
 export function createSidePanel() {
-    
-    const ctx = useController()
+
+    const ctx = useAppCtx()
     const {inspector} = ctx
     const {state, openComponentLocation, setInspectedOwner} = inspector
 

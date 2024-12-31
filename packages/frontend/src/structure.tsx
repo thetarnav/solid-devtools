@@ -9,7 +9,7 @@ import {type Atom, atom, createHover} from '@solid-devtools/shared/primitives'
 import * as theme from '@solid-devtools/shared/theme'
 import * as debug from '@solid-devtools/debugger/types'
 import {hover_background, panel_header_el_border} from './SidePanel.tsx'
-import {useController} from './controller.tsx'
+import {useAppCtx} from './controller.tsx'
 import * as ui from './ui/index.ts'
 
 
@@ -72,7 +72,7 @@ export function getNodePath(node: Structure.Node): Structure.Node[] {
 }
 
 export function createStructure() {
-    const ctx = useController()
+    const ctx = useAppCtx()
     const cachedInitialState = ctx.viewCache.get(debug.DevtoolsMainView.Structure)
 
     const [mode, setMode] = s.createSignal<debug.TreeWalkerMode>(
@@ -352,7 +352,7 @@ export function StructureView(): s.JSXElement {
 }
 
 const LocatorButton: s.Component = () => {
-    const {locator} = useController()
+    const {locator} = useAppCtx()
     return (
         <ui.ToggleButton
             class="shrink-0 w-7 h-7"
@@ -366,7 +366,7 @@ const LocatorButton: s.Component = () => {
 }
 
 const Search: s.Component = () => {
-    const ctx = useController()
+    const ctx = useAppCtx()
     const structure = useStructure()
 
     const [value, setValue] = s.createSignal('')
@@ -496,7 +496,7 @@ const getFocusedNodeData = (
 }
 
 const DisplayStructureTree: s.Component = () => {
-    
+
     const [containerScroll, setContainerScroll] = s.createSignal({
         top:    0,
         height: 0,
@@ -526,7 +526,7 @@ const DisplayStructureTree: s.Component = () => {
         })
     }
 
-    const ctx = useController()
+    const ctx = useAppCtx()
     const {inspector, hovered} = ctx
     const structure = useStructure()
 
@@ -825,7 +825,7 @@ const DisplayStructureTree: s.Component = () => {
 
 
 export const OwnerPath: s.Component = () => {
-    const {inspector, hovered} = useController()
+    const {inspector, hovered} = useAppCtx()
     const structure = useStructure()
 
     let container!: HTMLDivElement
@@ -919,7 +919,7 @@ export const OwnerNode: s.Component<{
     listenToUpdate(cb: VoidFunction): VoidFunction
     toggleCollapsed(node: Structure.Node): void
 }> = props => {
-    
+
     const {onHoverChange, listenToUpdate, onInspectChange, toggleCollapsed} = props
     const {name, type, hmr} = props.owner
 

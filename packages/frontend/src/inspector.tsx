@@ -8,7 +8,7 @@ import {error, splitOnColon} from '@solid-devtools/shared/utils'
 import * as debug from '@solid-devtools/debugger/types'
 import * as theme from '@solid-devtools/shared/theme'
 import {SidePanelCtx} from './SidePanel.tsx'
-import {useController, type InputEventBus, type OutputEventBus} from './controller.tsx'
+import {useAppCtx, type InputEventBus, type OutputEventBus} from './controller.tsx'
 import * as ui from './ui/index.ts'
 import * as decode from './decode.ts'
 
@@ -311,7 +311,7 @@ export default function createInspector(
                         error(`ValueItem not found for id ${value_item_id}.`)
                         break
                     }
-    
+
                     if (decode.isObjectType(value_item.value)) {
                         decode.updateCollapsedValue(value_item.value, value, storeNodeMap)
                     }
@@ -324,7 +324,7 @@ export default function createInspector(
                 }
                 case 'propState': {
                     if (!state.props) break
-    
+
                     for (const [key, getterState] of entries(update[DATA])) {
                         state.props.record[key]?.setGetter(getterState)
                     }
@@ -399,7 +399,7 @@ function ListSignals<T>(props: {when: T; title: s.JSX.Element; children: s.JSX.E
 
 export function InspectorView(): s.JSX.Element {
 
-    const {inspector, hovered} = useController()
+    const {inspector, hovered} = useAppCtx()
     const {state} = inspector
 
     const {setOpenPanel} = s.useContext(SidePanelCtx)!

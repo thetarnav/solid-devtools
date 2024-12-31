@@ -53,63 +53,22 @@ export type DevtoolsOptions = Partial<DevtoolsOptionsWithDefaults>
 
 export function createDevtools(props: DevtoolsOptions) {
 
-    let output_listeners: OutputListener[] = []
-    const output: OutputEventBus = {
-        listen(listener) {
-            output_listeners.push(listener)
-            s.onCleanup(() => {
-                mutate_remove(output_listeners, listener)
-            })
-        },
-        emit(e) {
-            s.batch(() => {
-                for (let fn of output_listeners) {
-                    fn(e)
-                }
-            })
-        },
-    }
-
-    let input_listeners: InputListener[] = []
-    const input: InputEventBus = {
-        listen(listener) {
-            input_listeners.push(listener)
-            s.onCleanup(() => {
-                mutate_remove(input_listeners, listener)
-            })
-        },
-        emit(e) {
-            s.batch(() => {
-                for (let fn of input_listeners) {
-                    fn(e)
-                }
-            })
-        },
-    }
-
-    let options: DevtoolsOptionsWithDefaults = {
-        errorOverlayFooter: props.errorOverlayFooter ?? (() => null),
-        headerSubtitle:     props.headerSubtitle     ?? (() => null),
-        useShortcuts:       props.useShortcuts       ?? false,
-        catchWindowErrors:  props.catchWindowErrors  ?? false,
-    }
-
-    const controller = createController(output, input, options)
+    const ctx = createAppCtx(props)
 
     return {
-        output,
-        input,
+        output: ctx.output,
+        input:  ctx.input,
         Devtools() {
             return (
                 <div class={ui.devtools_root_class + ' h-inherit'}>
                     <ui.Styles />
                     <ui.ErrorOverlay
-                        footer={options.errorOverlayFooter()}
-                        catchWindowErrors={options.catchWindowErrors}
+                        footer={ctx.options.errorOverlayFooter()}
+                        catchWindowErrors={ctx.options.catchWindowErrors}
                     >
-                        <ControllerCtx.Provider value={controller}>
-                            <App headerSubtitle={options.headerSubtitle()} />
-                        </ControllerCtx.Provider>
+                        <AppCtx.Provider value={ctx}>
+                            <App headerSubtitle={ctx.options.headerSubtitle()} />
+                        </AppCtx.Provider>
                     </ui.ErrorOverlay>
                 </div>
             )
@@ -157,11 +116,49 @@ function createViewCache() {
     return {set: setCacheGetter, get: getCache}
 }
 
-function createController(
-    output:  OutputEventBus,
-    input:   InputEventBus,
-    options: DevtoolsOptions,
-) {
+function createAppCtx(props: DevtoolsOptions) {
+
+    let output_listeners: OutputListener[] = []
+    const output: OutputEventBus = {
+        listen(listener) {
+            output_listeners.push(listener)
+            s.onCleanup(() => {
+                mutate_remove(output_listeners, listener)
+            })
+        },
+        emit(e) {
+            s.batch(() => {
+                for (let fn of output_listeners) {
+                    fn(e)
+                }
+            })
+        },
+    }
+
+    let input_listeners: InputListener[] = []
+    const input: InputEventBus = {
+        listen(listener) {
+            input_listeners.push(listener)
+            s.onCleanup(() => {
+                mutate_remove(input_listeners, listener)
+            })
+        },
+        emit(e) {
+            s.batch(() => {
+                for (let fn of input_listeners) {
+                    fn(e)
+                }
+            })
+        },
+    }
+
+    let options: DevtoolsOptionsWithDefaults = {
+        errorOverlayFooter: props.errorOverlayFooter ?? (() => null),
+        headerSubtitle:     props.headerSubtitle     ?? (() => null),
+        useShortcuts:       props.useShortcuts       ?? false,
+        catchWindowErrors:  props.catchWindowErrors  ?? false,
+    }
+
     //
     // LOCATOR
     //
@@ -308,8 +305,8 @@ function createController(
     }
 }
 
-export type Controller = ReturnType<typeof createController>
+export type AppCtx = ReturnType<typeof createAppCtx>
 
-const ControllerCtx = s.createContext<Controller>('ControllerCtx' as any as Controller)
+const AppCtx = s.createContext<AppCtx>('ControllerCtx' as any as AppCtx)
 
-export const useController = () => s.useContext(ControllerCtx)
+export const useAppCtx = () => s.useContext(AppCtx)
