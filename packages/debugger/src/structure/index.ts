@@ -1,4 +1,3 @@
-import {type Listen} from '@solid-primitives/event-bus'
 import {throttle} from '@solid-primitives/scheduled'
 import * as registry from '../main/component-registry.ts'
 import {DEFAULT_WALKER_MODE, DevtoolsMainView, NodeType, TreeWalkerMode} from '../main/constants.ts'
@@ -49,7 +48,6 @@ export function createStructure(props: {
     onStructureUpdate: (updates: StructureUpdates) => void
     onNodeUpdate: (nodeId: NodeID) => void
     enabled: () => boolean
-    listenToViewChange: Listen<DevtoolsMainView>
 }) {
     let treeWalkerMode: TreeWalkerMode = DEFAULT_WALKER_MODE
 
@@ -125,13 +123,6 @@ export function createStructure(props: {
         flushRootUpdateQueue()
     })
 
-    props.listenToViewChange(view => {
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-        if (view === DevtoolsMainView.Structure) {
-            updateAllRoots()
-        }
-    })
-
     function updateAllRoots(): void {
         shouldUpdateAllRoots = true
         flushRootUpdateQueue()
@@ -155,6 +146,12 @@ export function createStructure(props: {
         resetTreeWalkerMode: () => setTreeWalkerMode(DEFAULT_WALKER_MODE),
         getClosestIncludedOwner(owner: Solid.Owner) {
             return getClosestIncludedOwner(owner, treeWalkerMode)
+        },
+        onViewChange(view: DevtoolsMainView) {
+            // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+            if (view === DevtoolsMainView.Structure) {
+                updateAllRoots()
+            }
         },
     }
 }

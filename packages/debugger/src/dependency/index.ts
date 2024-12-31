@@ -1,4 +1,4 @@
-import {type EmitterEmit, type Listen} from '@solid-primitives/event-bus'
+import {type EmitterEmit} from '@solid-primitives/event-bus'
 import {throttle} from '@solid-primitives/scheduled'
 import {defer} from '@solid-primitives/utils'
 import {type Accessor, createEffect, createMemo} from 'solid-js'
@@ -17,7 +17,6 @@ export function createDependencyGraph(props: {
     emit: EmitterEmit<Debugger.OutputChannels>
     enabled: Accessor<boolean>
     inspectedState: Accessor<Debugger.InspectedState>
-    listenToViewChange: Listen<DevtoolsMainView>
     onNodeUpdate: (nodeId: NodeID) => void
 }) {
     let clearListeners: VoidFunction | null = null
@@ -76,7 +75,9 @@ export function createDependencyGraph(props: {
         }),
     )
 
-    props.listenToViewChange(() => {
-        inspectDGraph()
-    })
+    return {
+        onViewChange(_: DevtoolsMainView) {
+            inspectDGraph()
+        }
+    }
 }

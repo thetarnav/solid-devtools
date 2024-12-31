@@ -1,4 +1,4 @@
-import {createEventBus, createGlobalEmitter, type GlobalEmitter} from '@solid-primitives/event-bus'
+import {createGlobalEmitter, type GlobalEmitter} from '@solid-primitives/event-bus'
 import {createStaticStore} from '@solid-primitives/static-store'
 import {defer} from '@solid-primitives/utils'
 import * as s from 'solid-js'
@@ -69,33 +69,25 @@ const [modules, toggleModules] = createStaticStore({
 })
 
 // The debugger can be enabled by devtools or by the locator
-const debuggerEnabled = s.createMemo(() => modules.debugger || modules.locatorKeyPressSignal())
-const dgraphEnabled = s.createMemo(() => modules.dgraph && debuggerEnabled())
+const debuggerEnabled = s.createMemo(
+    () => modules.debugger || modules.locatorKeyPressSignal()
+)
+const dgraphEnabled = s.createMemo(
+    () => modules.dgraph && debuggerEnabled()
+)
 // locator is enabled if debugger is enabled, and user pressed the key to activate it, or the plugin activated it
 const locatorEnabled = s.createMemo(
     () => (modules.locatorKeyPressSignal() || modules.locator) && debuggerEnabled(),
 )
 
-s.createEffect(
-    defer(debuggerEnabled, enabled => {
-        hub.output.emit('DebuggerEnabled', enabled)
-    }),
-)
+s.createEffect(defer(debuggerEnabled, enabled => {
+    hub.output.emit('DebuggerEnabled', enabled)
+}))
 
 //
 // Current Open VIEW (currently not used)
 //
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 let currentView: DevtoolsMainView = DEFAULT_MAIN_VIEW
-const viewChange = createEventBus<DevtoolsMainView>()
-
-function setView(view: DevtoolsMainView) {
-    s.batch(() => {
-        // setStructureEnabled(view === DevtoolsMainView.Structure)
-        // setDgraphEnabled(view === DevtoolsMainView.Dgraph)
-        viewChange.emit((currentView = view))
-    })
-}
 
 //
 // Enabled Modules
@@ -194,7 +186,6 @@ const structure = createStructure({
     },
     onNodeUpdate: pushNodeUpdate,
     enabled: debuggerEnabled,
-    listenToViewChange: viewChange.listen,
 })
 
 //
@@ -210,10 +201,9 @@ const inspector = createInspector({
 //
 // Dependency Graph
 //
-createDependencyGraph({
+const dgraph = createDependencyGraph({
     emit: hub.output.emit,
     enabled: dgraphEnabled,
-    listenToViewChange: viewChange.listen,
     onNodeUpdate: pushNodeUpdate,
     inspectedState,
 })
@@ -272,7 +262,9 @@ hub.input.listen(e => {
         structure.setTreeWalkerMode(e.details)
         break
     case 'ViewChange':
-        setView(e.details)
+        currentView = e.details
+        structure.onViewChange(currentView)
+        dgraph.onViewChange(currentView)
         break
     case 'ToggleModule':
         toggleModule(e.details)
