@@ -121,9 +121,6 @@ importers:
       '@solid-primitives/cursor':
         specifier: ^0.0.115
         version: 0.0.115(solid-js@1.9.3)
-      '@solid-primitives/event-bus':
-        specifier: ^1.0.11
-        version: 1.0.11(solid-js@1.9.3)
       '@solid-primitives/event-listener':
         specifier: ^2.3.3
         version: 2.3.3(solid-js@1.9.3)
@@ -314,9 +311,6 @@ importers:
       '@nothing-but/utils':
         specifier: ~0.17.0
         version: 0.17.0
-      '@solid-primitives/event-bus':
-        specifier: ^1.0.11
-        version: 1.0.11(solid-js@1.9.3)
       '@solid-primitives/event-listener':
         specifier: ^2.3.3
         version: 2.3.3(solid-js@1.9.3)
