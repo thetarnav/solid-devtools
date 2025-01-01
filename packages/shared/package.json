@@ -26,32 +26,16 @@
     "exports": {
         ".": {
             "import": {
+                "@solid-devtools/source": "./src/index.ts",
                 "types": "./dist/index.d.ts",
                 "default": "./dist/index.js"
             }
         },
-        "./detect": {
+        "./*": {
             "import": {
-                "types": "./dist/detect.d.ts",
-                "default": "./dist/detect.js"
-            }
-        },
-        "./primitives": {
-            "import": {
-                "types": "./dist/primitives.d.ts",
-                "default": "./dist/primitives.js"
-            }
-        },
-        "./utils": {
-            "import": {
-                "types": "./dist/utils.d.ts",
-                "default": "./dist/utils.js"
-            }
-        },
-        "./theme": {
-            "import": {
-                "types": "./dist/theme.d.ts",
-                "default": "./dist/theme.js"
+                "@solid-devtools/source": "./src/*.ts",
+                "types": "./dist/*.d.ts",
+                "default": "./dist/*.js"
             }
         }
     },

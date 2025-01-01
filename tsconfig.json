@@ -30,6 +30,10 @@
         "jsx":             "preserve",
         "jsxImportSource": "solid-js",
         /*
+         Use source files locally
+        */
+        "customConditions": ["@solid-devtools/source"],
+        /*
          Checking
         */
         "strict":                             true,

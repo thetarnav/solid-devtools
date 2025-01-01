@@ -27,6 +27,7 @@
     "types": "./dist/index.d.ts",
     "exports": {
         ".": {
+            "@solid-devtools/source": "./src/index.ts",
             "browser": {
                 "development": {
                     "import": {
@@ -45,6 +46,7 @@
             }
         },
         "./setup": {
+            "@solid-devtools/source": "./src/setup.ts",
             "browser": {
                 "development": {
                     "import": {
@@ -63,12 +65,14 @@
             }
         },
         "./vite": {
+            "@solid-devtools/source": "./src/vite.ts",
             "import": {
                 "types": "./dist/vite.d.ts",
                 "default": "./dist/vite.js"
             }
         },
         "./babel": {
+            "@solid-devtools/source": "./src/babel.ts",
             "import": {
                 "types": "./dist/babel.d.ts",
                 "default": "./dist/babel.js"
