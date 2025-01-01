@@ -71,7 +71,7 @@ jobs:
 
     environment:
       name: Preview
-      url: ${{ steps.deployment.outputs.page_url }}
+      url: ${{ steps.deployment.outputs.page_url }}-pr-${{ github.event.pull_request.head.ref }}
 
     steps:
       - name: Deploy to GitHub Pages
