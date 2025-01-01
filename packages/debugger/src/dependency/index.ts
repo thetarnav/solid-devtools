@@ -1,6 +1,7 @@
+import * as s from 'solid-js'
 import {throttle} from '@solid-primitives/scheduled'
 import {defer} from '@solid-primitives/utils'
-import {type Accessor, createEffect, createMemo} from 'solid-js'
+import {msg} from '@solid-devtools/shared/utils'
 import {DevtoolsMainView, NodeType} from '../main/constants.ts'
 import {ObjectType, getObjectById} from '../main/id.ts'
 import {type NodeID, type Solid} from '../main/types.ts'
@@ -13,8 +14,8 @@ export {type SerializedDGraph} from './collect.ts'
 export type DGraphUpdate = SerializedDGraph.Graph | null
 
 export function createDependencyGraph(props: {
-    enabled:        Accessor<boolean>
-    inspectedState: Accessor<InspectedState>
+    enabled:        s.Accessor<boolean>
+    inspectedState: s.Accessor<InspectedState>
     onNodeUpdate:   (nodeId: NodeID) => void
     emit:           OutputEmit
 }) {
@@ -30,7 +31,7 @@ export function createDependencyGraph(props: {
         })
     }
 
-    const inspectedNode = createMemo(() => {
+    const inspectedNode = s.createMemo(() => {
         const state = props.inspectedState()
 
         if (state.signalId) {
@@ -57,7 +58,7 @@ export function createDependencyGraph(props: {
             type === NodeType.Context
         ) {
             clearListeners = null
-            props.emit('DgraphUpdate', null)
+            props.emit(msg('DgraphUpdate', null))
             return
         }
 
@@ -65,11 +66,11 @@ export function createDependencyGraph(props: {
             onNodeUpdate,
         })
         clearListeners = dgraph.clearListeners
-        props.emit('DgraphUpdate', dgraph.graph)
+        props.emit(msg('DgraphUpdate', dgraph.graph))
     }
     const triggerInspect = throttle(inspectDGraph, 200)
 
-    createEffect(
+    s.createEffect(
         defer([props.enabled, inspectedNode], () => {
             queueMicrotask(inspectDGraph)
         }),

@@ -245,9 +245,9 @@ function on_message(port: Port, e: Message) {
         assert(content)
 
         // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
-        switch (e.name) {
+        switch (e.kind) {
         case 'Detected': {
-            content.detection = e.details
+            content.detection = e.data
 
             if (popup) {
                 port_post_message_obj(popup.port, e)
@@ -258,7 +258,7 @@ function on_message(port: Port, e: Message) {
             break
         }
         case 'Versions': {
-            content.versions = e.details
+            content.versions = e.data
 
             if (popup) {
                 port_post_message_obj(popup.port, e)
@@ -297,7 +297,7 @@ function on_message(port: Port, e: Message) {
         if (content) {
             port_post_message_obj(content.port, e)
         } else {
-            error(`Cannot forward ${Place_Name.Panel} -> ${Place_Name.Content} - ${e.name}:`, e.details)
+            error(`Cannot forward ${Place_Name.Panel} -> ${Place_Name.Content} - ${e.kind}:`, e.data)
         }
 
         break

@@ -6,6 +6,7 @@ import {createElementSize, createResizeObserver} from '@solid-primitives/resize-
 import {useRemSize} from '@solid-primitives/styles'
 
 import {type Atom, atom, createHover} from '@solid-devtools/shared/primitives'
+import {msg} from '@solid-devtools/shared/utils'
 import * as theme from '@solid-devtools/shared/theme'
 import * as debug from '@solid-devtools/debugger/types'
 import {hover_background, panel_header_el_border} from './SidePanel.tsx'
@@ -150,19 +151,19 @@ export function createStructure() {
     /* Listen to Client Events */
     ctx.input.listen(e => {
         /* eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check */
-        switch (e.name) {
+        switch (e.kind) {
         case 'ResetPanel':
             updateStructure(null)
             break
         case 'StructureUpdates':
-            updateStructure(e.details)
+            updateStructure(e.data)
             break
         }
     })
 
     // TREE VIEW MODE
     s.createEffect(defer(mode, mode => {
-        ctx.output.emit({name: 'TreeViewModeChange', details: mode})
+        ctx.output.emit(msg('TreeViewModeChange', mode))
     }))
 
     return {

@@ -4,7 +4,7 @@ import {makeEventListener} from '@solid-primitives/event-listener'
 import {createKeyHold} from '@solid-primitives/keyboard'
 import {scheduleIdle} from '@solid-primitives/scheduled'
 import {makeHoverElementListener} from '@solid-devtools/shared/primitives'
-import {warn} from '@solid-devtools/shared/utils'
+import {msg, warn} from '@solid-devtools/shared/utils'
 import {type OutputEmit} from '../main/index.ts'
 import * as registry from '../main/component-registry.ts'
 import {ObjectType, getObjectById} from '../main/id.ts'
@@ -92,11 +92,11 @@ export function createLocator(props: {
         const target = hoverTarget()
         const comp = target && registry.findComponent(target)
         if (prev) {
-            props.emit('HoveredComponent', {nodeId: prev, state: false})
+            props.emit(msg('HoveredComponent', {nodeId: prev, state: false}))
         }
         if (comp) {
             const {id} = comp
-            props.emit('HoveredComponent', {nodeId: id, state: true})
+            props.emit(msg('HoveredComponent', {nodeId: id, state: true}))
             return id
         }
     })

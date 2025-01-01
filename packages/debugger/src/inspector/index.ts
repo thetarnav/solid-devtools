@@ -1,4 +1,4 @@
-import {warn} from '@solid-devtools/shared/utils'
+import {msg, warn} from '@solid-devtools/shared/utils'
 import {scheduleIdle, throttle} from '@solid-primitives/scheduled'
 import {type Accessor, createEffect, onCleanup} from 'solid-js'
 import {type OutputEmit} from '../main/index.ts'
@@ -99,7 +99,7 @@ export function createInspector(props: {
 
                 // Emit updates
                 if (batchedUpdates.length) {
-                    props.emit('InspectorUpdate', batchedUpdates)
+                    props.emit(msg('InspectorUpdate', batchedUpdates))
                 }
             })
 
@@ -164,7 +164,7 @@ export function createInspector(props: {
                     observedPropsMap: propsMap,
                 })
 
-                props.emit('InspectedNodeDetails', result.details)
+                props.emit(msg('InspectedNodeDetails', result.details))
 
                 valueMap        = result.valueMap
                 lastDetails     = result.details

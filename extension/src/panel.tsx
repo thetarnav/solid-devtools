@@ -50,9 +50,9 @@ function App() {
     const port = chrome.runtime.connect({name: ConnectionName.Panel})
     port_on_message(port, e => {
         // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
-        switch (e.name) {
+        switch (e.kind) {
         case 'Versions':
-            setVersions(e.details ?? empty_versions)
+            setVersions(e.data ?? empty_versions)
             break
         default:
             /* Client -> Devtools */
@@ -65,14 +65,14 @@ function App() {
 
     devtools.output.listen(e => {
         // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
-        switch (e.name) {
+        switch (e.kind) {
         case 'ConsoleInspectValue': {
             /*
              `chrome.devtools.inspectedWindow.eval` runs in a devtools console
              so the value can be additionally inspected with `inspect()`
             */
             let get_value = `window[${JSON.stringify(debug.GLOBAL_GET_VALUE)}]`
-            let value_id = JSON.stringify(e.details)
+            let value_id = JSON.stringify(e.data)
             
             chrome.devtools.inspectedWindow.eval(
                 /*js*/`typeof ${get_value} === 'function' && (() => {

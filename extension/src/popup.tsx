@@ -26,12 +26,12 @@ const [detectionState, setDetectionState] = s.createSignal(empty_detection_state
 
 port_on_message(port, e => {
     // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
-    switch (e.name) {
+    switch (e.kind) {
     case 'Detected':
-        setDetectionState(e.details ?? empty_detection_state)
+        setDetectionState(e.data ?? empty_detection_state)
         break
     case 'Versions':
-        setVersions(e.details)
+        setVersions(e.data)
         break
     }
 })

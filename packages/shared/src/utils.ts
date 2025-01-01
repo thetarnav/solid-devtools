@@ -1,6 +1,14 @@
-export type Message<K, V> = {
-    name:    K,
-    details: V,
+export type Union<T> = {
+    [K in keyof T]: UnionMember<T, K>
+}[keyof T]
+
+export type UnionMember<T, K extends keyof T> = {
+    kind: K,
+    data: T[K],
+}
+
+export function msg<T, K extends keyof T>(kind: K, data: T[K]): UnionMember<T, K> {
+    return {kind, data}
 }
 
 export const LOG_LABEL_CYAN = `\x1b[1;30m\x1b[46msolid-devtools\x1b[0m`
@@ -28,9 +36,9 @@ export function error(...args: any[]): undefined {
     return
 }
 
-export function log_message(to: string, from: string, e: {name: string, details: any}) {
+export function log_message(to: string, from: string, e: {kind: string, data: any}) {
     // eslint-disable-next-line no-console
-    console.log(`${LOG_LABEL_CYAN} \x1b[36m${to}\x1b[0m <- \x1b[36m${from}\x1b[0m: \x1b[35m${e.name}\x1b[0m:`, e.details)
+    console.log(`${LOG_LABEL_CYAN} \x1b[36m${to}\x1b[0m <- \x1b[36m${from}\x1b[0m: \x1b[35m${e.kind}\x1b[0m:`, e.data)
 }
 
 export function formatTime(d: Date = new Date()): string {

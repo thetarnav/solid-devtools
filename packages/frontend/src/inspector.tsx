@@ -4,7 +4,7 @@ import {Entries} from '@solid-primitives/keyed'
 import {createStaticStore} from '@solid-primitives/static-store'
 import {defer, entries, type FalsyValue} from '@solid-primitives/utils'
 import {createHover, createPingedSignal} from '@solid-devtools/shared/primitives'
-import {error, splitOnColon} from '@solid-devtools/shared/utils'
+import {error, msg, splitOnColon} from '@solid-devtools/shared/utils'
 import * as debug from '@solid-devtools/debugger/types'
 import * as theme from '@solid-devtools/shared/theme'
 import {SidePanelCtx} from './SidePanel.tsx'
@@ -204,7 +204,7 @@ export default function createInspector(
 
     // sync inspected node with the debugger
     s.createEffect(defer(inspectedNode, node => {
-        output.emit({name: 'InspectNode', details: node})
+        output.emit(msg('InspectNode', node))
     }))
 
     //
@@ -229,15 +229,15 @@ export default function createInspector(
 
     input.listen(e => {
         // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
-        switch (e.name) {
+        switch (e.kind) {
         case 'InspectedState': {
             let prev = inspected.ownerId
-            setInspected(e.details)
-            if (e.details.ownerId !== prev) setState({...NULL_STATE})
+            setInspected(e.data)
+            if (e.data.ownerId !== prev) setState({...NULL_STATE})
             break
         }
         case 'InspectedNodeDetails': {
-            const raw = e.details
+            const raw = e.data
             const id = inspected.ownerId
             // The current inspected node is not the same as the one that sent the details
             // (replace it with the new one)
@@ -288,7 +288,7 @@ export default function createInspector(
         case 'InspectorUpdate': {
             const KIND = 0, DATA = 1
 
-            for (let update of e.details) {
+            for (let update of e.data) {
                 switch (update[KIND]) {
                 case 'value': {
                     let [value_item_id, value] = update[DATA]
@@ -349,20 +349,14 @@ export default function createInspector(
     function inspectValueItem(item: Inspector.ValueItem, selected?: boolean): void {
         if (selected !== undefined && item.extended === selected) return
         selected = item.setExtended(p => selected ?? !p)
-        output.emit({
-            name:    'InspectValue',
-            details: {id: item.itemId, selected},
-        })
+        output.emit(msg('InspectValue', {id: item.itemId, selected}))
     }
 
     //
     // LOCATION
     //
     function openComponentLocation(): void {
-        output.emit({
-            name:    'OpenLocation',
-            details: undefined,
-        })
+        output.emit(msg('OpenLocation', undefined))
     }
 
     return {
@@ -410,10 +404,7 @@ export function InspectorView(): s.JSX.Element {
                 icon:  'Eye',
                 title: 'Inspect',
                 onClick() {
-                    ctx.output.emit({
-                        name:    'ConsoleInspectValue',
-                        details: item.itemId,
-                    })
+                    ctx.output.emit(msg('ConsoleInspectValue', item.itemId))
                 },
             }
         }

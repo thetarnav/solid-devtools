@@ -31,7 +31,7 @@ let panel: Panel | undefined
 port_on_message(port, e => {
 
     // "Versions" mean that devtools client is on the page
-    if (e.name === 'Versions' && e.details && !panel_creating && !panel) {
+    if (e.kind === 'Versions' && e.data && !panel_creating && !panel) {
         panel_creating = true
 
         log('Debugger connected -> Creating Devtools_Panel...')

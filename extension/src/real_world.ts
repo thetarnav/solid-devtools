@@ -97,13 +97,13 @@ async function attach_debugger() {
     /* From Content */
     window_on_message(e => {
         // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
-        switch (e.name) {
+        switch (e.kind) {
         case 'DevtoolsOpened':
-            instance.toggleEnabled(e.details)
+            instance.toggleEnabled(e.data)
             break
         default:
             /* Content -> Debugger */
-            instance.emit(e.name as any, e.details)
+            instance.emit(e as any)
         }
     })
 

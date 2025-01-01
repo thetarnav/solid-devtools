@@ -8,6 +8,7 @@ import * as num from '@nothing-but/utils/num'
 import {useDebugger} from '@solid-devtools/debugger/bundled'
 import {Icon, MountIcons, createDevtools} from '@solid-devtools/frontend'
 import {useIsMobile, useIsTouch, atom} from '@solid-devtools/shared/primitives'
+import {msg} from '@solid-devtools/shared/utils'
 
 import frontendStyles from '@solid-devtools/frontend/dist/styles.css'
 import overlayStyles from './styles.css'
@@ -105,16 +106,16 @@ const Overlay: s.Component<OverlayOptions> = ({defaultOpen, alwaysOpen, noPaddin
                         <s.Show when={isOpen()}>
                         {_ => {
                             
-                            debug.emit('ResetState', undefined)
+                            debug.emit(msg('ResetState', undefined))
                         
-                            s.onCleanup(() => debug.emit('InspectNode', null))
+                            s.onCleanup(() => debug.emit(msg('InspectNode', null)))
                         
                             const devtools = createDevtools({
                                 headerSubtitle: () => 'overlay',
                             })
                         
                             devtools.output.listen(e => {
-                                separate(e, debug.emitObj)
+                                separate(e, debug.emit)
                             })
                         
                             debug.listen(e => {

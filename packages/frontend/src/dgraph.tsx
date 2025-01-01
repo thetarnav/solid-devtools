@@ -3,6 +3,7 @@ import * as s from 'solid-js'
 import * as debug from '@solid-devtools/debugger/types'
 import {createHover} from '@solid-devtools/shared/primitives'
 import * as theme from '@solid-devtools/shared/theme'
+import {msg} from '@solid-devtools/shared/utils'
 import {useAppCtx} from './controller.tsx'
 import * as ui from './ui/index.ts'
 
@@ -13,22 +14,16 @@ export function createDependencyGraph() {
 
     ctx.input.listen(e => {
         // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
-        switch (e.name) {
+        switch (e.kind) {
         case 'DgraphUpdate':
-            setGraph(e.details)
+            setGraph(e.data)
             break
         }
     })
 
-    ctx.output.emit({
-        name:    'ToggleModule',
-        details: {module: debug.DebuggerModule.Dgraph, enabled: true},
-    })
+    ctx.output.emit(msg('ToggleModule', {module: debug.DebuggerModule.Dgraph, enabled: true}))
     s.onCleanup(() => {
-        ctx.output.emit({
-            name:    'ToggleModule',
-            details: {module: debug.DebuggerModule.Dgraph, enabled: false},
-        })
+        ctx.output.emit(msg('ToggleModule', {module: debug.DebuggerModule.Dgraph, enabled: false}))
     })
 
     function inspectNode(id: debug.NodeID) {

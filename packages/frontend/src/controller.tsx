@@ -4,7 +4,7 @@ import {createEventBus} from '@solid-primitives/event-bus'
 import {debounce} from '@solid-primitives/scheduled'
 import {defer} from '@solid-primitives/utils'
 import * as debug from '@solid-devtools/debugger/types'
-import {mutate_remove} from '@solid-devtools/shared/utils'
+import {msg, mutate_remove} from '@solid-devtools/shared/utils'
 import {App} from './App.tsx'
 import createInspector from './inspector.tsx'
 import {type Structure} from './structure.tsx'
@@ -157,8 +157,8 @@ function createAppCtx(props: DevtoolsOptions) {
     // send devtools locator state
     s.createEffect(defer(devtoolsLocatorEnabled, enabled => {
         output.emit({
-            name:    'ToggleModule',
-            details: {module: debug.DebuggerModule.Locator, enabled}
+            kind: 'ToggleModule',
+            data: {module: debug.DebuggerModule.Locator, enabled}
         })
     }))
 
@@ -181,8 +181,8 @@ function createAppCtx(props: DevtoolsOptions) {
     // highlight hovered element
     s.createEffect(defer(extHoveredNode, node => {
         output.emit({
-            name:    'HighlightElementChange',
-            details: node,
+            kind: 'HighlightElementChange',
+            data: node,
         })
     }))
 
@@ -214,7 +214,7 @@ function createAppCtx(props: DevtoolsOptions) {
     }
 
     s.createEffect(defer(openedView, view => {
-        output.emit({name: 'ViewChange', details: view})
+        output.emit(msg('ViewChange', view))
     }))
 
     //
@@ -231,9 +231,9 @@ function createAppCtx(props: DevtoolsOptions) {
     // Client events
     //
     input.listen(e => {
-        switch (e.name) {
+        switch (e.kind) {
         case 'NodeUpdates':
-            for (let id of e.details) {
+            for (let id of e.data) {
                 nodeUpdates.emit(id)
             }
             break
@@ -244,17 +244,17 @@ function createAppCtx(props: DevtoolsOptions) {
             break
         case 'HoveredComponent':
             setClientHoveredNode(p => {
-                return e.details.state
-                    ? e.details.nodeId
-                    : p && p === e.details.nodeId ? null : p
+                return e.data.state
+                    ? e.data.nodeId
+                    : p && p === e.data.nodeId ? null : p
             })
             break
         case 'InspectedComponent':
-            inspector.setInspectedOwner(e.details)
+            inspector.setInspectedOwner(e.data)
             setDevtoolsLocatorState(false)
             break
         case 'LocatorModeChange':
-            setClientLocatorState(e.details)
+            setClientLocatorState(e.data)
             break
         case 'DebuggerEnabled':
         case 'InspectedState':

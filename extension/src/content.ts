@@ -73,9 +73,9 @@ let devtools_opened = false
 /* From Background */
 port_on_message(port, e => {
     // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
-    switch (e.name) {
+    switch (e.kind) {
     case 'DevtoolsOpened':
-        devtools_opened = e.details
+        devtools_opened = e.data
         window_post_message_obj(e)
         break
     default:
@@ -87,7 +87,7 @@ port_on_message(port, e => {
 /* From Client / Detector_Real_World */
 window_on_message(e => {
     // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
-    switch (e.name) {
+    switch (e.kind) {
     case 'Debugger_Connected': {
 
         // eslint-disable-next-line no-console
@@ -98,9 +98,9 @@ window_on_message(e => {
         )
 
         port_post_message(port, 'Versions', {
-            client:         e.details.client,
-            solid:          e.details.solid,
-            extension:      extension_version,
+            client:          e.data.client,
+            solid:           e.data.solid,
+            extension:       extension_version,
             client_expected: import.meta.env.EXPECTED_CLIENT,
         })
 

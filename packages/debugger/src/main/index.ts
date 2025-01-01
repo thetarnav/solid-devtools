@@ -1,7 +1,7 @@
 import {createStaticStore} from '@solid-primitives/static-store'
 import {defer} from '@solid-primitives/utils'
 import * as s from 'solid-js'
-import {log_message, mutate_remove, type Message} from '@solid-devtools/shared/utils'
+import {log_message, msg, mutate_remove, type Union} from '@solid-devtools/shared/utils'
 import {createDependencyGraph, type DGraphUpdate} from '../dependency/index.ts'
 import {createInspector, type InspectorUpdate, type ToggleInspectedValueData} from '../inspector/index.ts'
 import {createLocator} from '../locator/index.ts'
@@ -20,42 +20,38 @@ export type InspectedState = {
 }
 
 export type OutputChannels = {
-    DebuggerEnabled: boolean
-    ResetPanel: void
-    InspectedState: InspectedState
-    InspectedNodeDetails: Mapped.OwnerDetails
-    StructureUpdates: StructureUpdates
-    NodeUpdates: NodeID[]
-    InspectorUpdate: InspectorUpdate[]
-    LocatorModeChange: boolean
-    HoveredComponent: {nodeId: NodeID; state: boolean}
-    InspectedComponent: NodeID
-    DgraphUpdate: DGraphUpdate
+    DebuggerEnabled:        boolean
+    ResetPanel:             void
+    InspectedState:         InspectedState
+    InspectedNodeDetails:   Mapped.OwnerDetails
+    StructureUpdates:       StructureUpdates
+    NodeUpdates:            NodeID[]
+    InspectorUpdate:        InspectorUpdate[]
+    LocatorModeChange:      boolean
+    HoveredComponent:       {nodeId: NodeID; state: boolean}
+    InspectedComponent:     NodeID
+    DgraphUpdate:           DGraphUpdate
 }
 
 export type InputChannels = {
-    ResetState: void
-    InspectNode: {ownerId: NodeID | null; signalId: NodeID | null} | null
-    InspectValue: ToggleInspectedValueData
-    ConsoleInspectValue: ValueItemID
+    ResetState:             void
+    InspectNode:            {ownerId: NodeID | null; signalId: NodeID | null} | null
+    InspectValue:           ToggleInspectedValueData
+    ConsoleInspectValue:    ValueItemID
     HighlightElementChange: HighlightElementPayload
-    OpenLocation: void
-    TreeViewModeChange: TreeWalkerMode
-    ViewChange: DevtoolsMainView
-    ToggleModule: {module: DebuggerModule; enabled: boolean}
+    OpenLocation:           void
+    TreeViewModeChange:     TreeWalkerMode
+    ViewChange:             DevtoolsMainView
+    ToggleModule:           {module: DebuggerModule; enabled: boolean}
 }
 
-export type InputMessage = {
-    [K in keyof InputChannels]: Message<K, InputChannels[K]>
-}[keyof InputChannels]
+export type InputMessage  = Union<InputChannels>
 export type InputListener = (e: InputMessage) => void
 
-export type OutputMessage = {
-    [K in keyof OutputChannels]: Message<K, OutputChannels[K]>
-}[keyof OutputChannels]
+export type OutputMessage  = Union<OutputChannels>
 export type OutputListener = (e: OutputMessage) => void
 
-export type OutputEmit = <K extends keyof OutputChannels>(name: K, details: OutputChannels[K]) => void
+export type OutputEmit = (e: OutputMessage) => void
 
 function createDebugger() {
 
@@ -66,14 +62,11 @@ function createDebugger() {
         return () => mutate_remove(_output_listeners, listener)
     }
     
-    function emitOutputObj(e: OutputMessage) {
+    function emitOutput(e: OutputMessage) {
     
         DEV: {log_message('Client', 'Debugger', e)}
     
         for (let fn of _output_listeners) fn(e)
-    }
-    const emitOutput: OutputEmit = (name, details) => {
-        emitOutputObj({name, details} as any)
     }
     
     //
@@ -99,7 +92,7 @@ function createDebugger() {
     )
     
     s.createEffect(defer(debuggerEnabled, enabled => {
-        emitOutput('DebuggerEnabled', enabled)
+        emitOutput(msg('DebuggerEnabled', enabled))
     }))
     
     //
@@ -141,7 +134,7 @@ function createDebugger() {
     const inspectedOwnerId = s.createMemo(() => inspectedState().ownerId)
     
     s.createEffect(() => {
-        emitOutput('InspectedState', inspectedState())
+        emitOutput(msg('InspectedState', inspectedState()))
     })
     
     function getTreeWalkerOwnerId(ownerId: NodeID | null): NodeID | null {
@@ -189,7 +182,7 @@ function createDebugger() {
         
         if (node_updates_timeout === 0) {
             node_updates_timeout = window.setTimeout(() => {
-                emitOutput('NodeUpdates', node_updates_ids)
+                emitOutput(msg('NodeUpdates', node_updates_ids))
                 node_updates_ids = []
                 node_updates_timeout = 0
             })
@@ -201,7 +194,7 @@ function createDebugger() {
     //
     const structure = createStructure({
         onStructureUpdate(updates) {
-            emitOutput('StructureUpdates', updates)
+            emitOutput(msg('StructureUpdates', updates))
             updateInspectedNode()
         },
         onNodeUpdate: pushNodeUpdate,
@@ -238,7 +231,7 @@ function createDebugger() {
         },
         onComponentClick(componentId, next) {
             if (modules.debugger) {
-                emitOutput('InspectedComponent', componentId)
+                emitOutput(msg('InspectedComponent', componentId))
             } else {
                 next()
             }
@@ -254,14 +247,14 @@ function createDebugger() {
     
     // send the state of the client locator mode
     s.createEffect(defer(modules.locatorKeyPressSignal, state => {
-        emitOutput('LocatorModeChange', state)
+        emitOutput(msg('LocatorModeChange', state))
     }))
     
-    function emitInputObj(e: InputMessage) {
+    function emitInput(e: InputMessage) {
     
         DEV: {log_message('Debugger', 'Client', e)}
     
-        switch (e.name) {
+        switch (e.kind) {
         case 'ResetState': {
             // reset all the internal state
             s.batch(() => {
@@ -273,35 +266,32 @@ function createDebugger() {
             break
         }
         case 'HighlightElementChange':
-            locator.setDevtoolsHighlightTarget(e.details)
+            locator.setDevtoolsHighlightTarget(e.data)
             break
         case 'InspectNode':
-            setInspectedNode(e.details)
+            setInspectedNode(e.data)
             break
         case 'InspectValue':
-            inspector.toggleValueNode(e.details)
+            inspector.toggleValueNode(e.data)
             break
         case 'ConsoleInspectValue':
-            inspector.consoleLogValue(e.details)
+            inspector.consoleLogValue(e.data)
             break
         case 'OpenLocation':
             openInspectedNodeLocation()
             break
         case 'TreeViewModeChange':
-            structure.setTreeWalkerMode(e.details)
+            structure.setTreeWalkerMode(e.data)
             break
         case 'ViewChange':
-            currentView = e.details
+            currentView = e.data
             structure.onViewChange(currentView)
             dgraph.onViewChange(currentView)
             break
         case 'ToggleModule':
-            toggleModule(e.details)
+            toggleModule(e.data)
             break
         }
-    }
-    function emitInput<K extends keyof InputChannels>(name: K, details: InputChannels[K]) {
-        emitInputObj({name, details} as any)
     }
 
     return {
@@ -309,7 +299,6 @@ function createDebugger() {
         enabled:           debuggerEnabled,
         listen:            listen,
         emit:              emitInput,
-        emitObj:           emitInputObj,
         setLocatorOptions: locator.useLocator,
         toggleEnabled(enabled: boolean) {
             toggleModules('debugger', enabled)
