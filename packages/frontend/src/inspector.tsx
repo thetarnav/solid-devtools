@@ -2,7 +2,7 @@ import clsx from 'clsx'
 import * as s from 'solid-js'
 import {Entries} from '@solid-primitives/keyed'
 import {createStaticStore} from '@solid-primitives/static-store'
-import {defer, entries} from '@solid-primitives/utils'
+import {defer, entries, type FalsyValue} from '@solid-primitives/utils'
 import {createHover, createPingedSignal} from '@solid-devtools/shared/primitives'
 import {error, splitOnColon} from '@solid-devtools/shared/utils'
 import * as debug from '@solid-devtools/debugger/types'
@@ -425,11 +425,10 @@ export function InspectorView(): s.JSX.Element {
     const {setOpenPanel} = s.useContext(SidePanelCtx)!
 
     const valueItems = s.createMemo(() => {
-        const list = Object.values(state.signals)
         const memos:   Inspector.Signal[] = []
         const signals: Inspector.Signal[] = []
         const stores:  Inspector.Signal[] = []
-        for (const signal of list) {
+        for (const signal of Object.values(state.signals)) {
             switch (signal.type) {
             case debug.NodeType.Memo:   memos.push(signal)   ;break
             case debug.NodeType.Signal: signals.push(signal) ;break
@@ -456,6 +455,10 @@ export function InspectorView(): s.JSX.Element {
                             onElementHover={hovered.toggleHoveredElement}
                             isSignal={value().getter !== false}
                             isStale={value().getter === debug.PropGetterState.Stale}
+                            actions={[
+                                value().value.type !== debug.ValueType.Unknown &&
+                                    getValueActionInspect(value().itemId),
+                            ]}
                         />
                     )}
                     </Entries>
@@ -833,7 +836,7 @@ export const ValueNode: s.Component<{
     isStale?: boolean
     onClick?: VoidFunction
     onElementHover?: ToggleElementHover
-    actions?: ValueNodeAction[]
+    actions?: (ValueNodeAction | FalsyValue)[]
     class?: string
 }> = props => {
     const ctx = s.useContext(ValueContext)
@@ -908,7 +911,7 @@ export const ValueNode: s.Component<{
                         isHovered() ? 'opacity-100' : 'opacity-0',
                     )}
                 >
-                    <s.For each={props.actions}>
+                    <s.For each={props.actions.filter(Boolean)}>
                         {action => <>
                             <button
                                 onClick={action.onClick}
