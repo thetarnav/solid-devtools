@@ -1,5 +1,25 @@
 # @solid-devtools/overlay
 
+## 0.32.0
+
+### Minor Changes
+
+- c7f699f: Change the message structure from {name, details} to {kind, data}
+
+### Patch Changes
+
+- eef06c4: Simplify createDevtools interface
+- 6b1b16d: Refactor `useDebugger`.
+  `useLocator` is removed, instead use `useDebugger().setLocatorOptions()`.
+  `debugger.meta.versions` moved to `debugger.versions`
+- Updated dependencies [eef06c4]
+- Updated dependencies [c7f699f]
+- Updated dependencies [ba5b62a]
+- Updated dependencies [6b1b16d]
+  - @solid-devtools/frontend@0.14.0
+  - @solid-devtools/debugger@0.25.0
+  - @solid-devtools/shared@0.18.0
+
 ## 0.31.7
 
 ### Patch Changes

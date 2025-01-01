@@ -1,5 +1,24 @@
 # @solid-devtools/frontend
 
+## 0.14.0
+
+### Minor Changes
+
+- eef06c4: Simplify createDevtools interface
+- c7f699f: Change the message structure from {name, details} to {kind, data}
+- ba5b62a: New feature: inspecting values in the console. (Closes #166)
+
+### Patch Changes
+
+- 6b1b16d: Refactor `useDebugger`.
+  `useLocator` is removed, instead use `useDebugger().setLocatorOptions()`.
+  `debugger.meta.versions` moved to `debugger.versions`
+- Updated dependencies [c7f699f]
+- Updated dependencies [ba5b62a]
+- Updated dependencies [6b1b16d]
+  - @solid-devtools/debugger@0.25.0
+  - @solid-devtools/shared@0.18.0
+
 ## 0.13.0
 
 ### Minor Changes
