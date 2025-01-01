@@ -397,32 +397,50 @@ function ListSignals<T>(props: {when: T; title: s.JSX.Element; children: s.JSX.E
     )
 }
 
-function getValueActionInspect(id: debug.ValueItemID): ValueNodeAction {
-
-    let code = /*js*/`(() => {
-        let v = window.$SdtGetValue(${JSON.stringify(id)})
-        inspect(v)
-        console.log(v)
-    })()`
-    let cb = (_: any, err: any) => {
-        if (err) {error(err)}
-    }
-
-    return {
-        icon:  'Eye',
-        title: 'Inspect',
-        onClick() {
-            chrome.devtools.inspectedWindow.eval(code, cb)
-        },
-    }
-}
-
 export function InspectorView(): s.JSX.Element {
 
     const {inspector, hovered} = useAppCtx()
     const {state} = inspector
 
     const {setOpenPanel} = s.useContext(SidePanelCtx)!
+
+    function getValueActionInspect(item: Inspector.ValueItem): ValueNodeAction | undefined {
+
+        if ((   item.value.type === debug.ValueType.Element
+            ) || (
+                item.value.type === debug.ValueType.Function &&
+                item.value.name.length > 0
+        )) {
+            let code = /*js*/`(() => {
+                let v = window.$SdtGetValue(${JSON.stringify(item.itemId)})
+                inspect(v)
+                console.log(v)
+            })()`
+            let cb = (_: any, err: any) => {
+                if (err) {error(err)}
+            }
+        
+            return {
+                icon:  'Eye',
+                title: 'Inspect',
+                onClick() {
+                    chrome.devtools.inspectedWindow.eval(code, cb)
+                },
+            }
+        }
+    }
+    function getValueActionGraph(signal: Inspector.Signal): ValueNodeAction {
+        return {
+            icon:  'Graph',
+            title: 'Open in Graph panel',
+            onClick() {
+                s.batch(() => {
+                    inspector.setInspectedSignal(signal.id)
+                    setOpenPanel('dgraph')
+                })
+            },
+        }
+    }
 
     const valueItems = s.createMemo(() => {
         const memos:   Inspector.Signal[] = []
@@ -456,8 +474,7 @@ export function InspectorView(): s.JSX.Element {
                             isSignal={value().getter !== false}
                             isStale={value().getter === debug.PropGetterState.Stale}
                             actions={[
-                                value().value.type !== debug.ValueType.Unknown &&
-                                    getValueActionInspect(value().itemId),
+                                getValueActionInspect(value()),
                             ]}
                         />
                     )}
@@ -473,7 +490,7 @@ export function InspectorView(): s.JSX.Element {
                             onClick={() => inspector.inspectValueItem(store)}
                             onElementHover={hovered.toggleHoveredElement}
                             actions={[
-                                getValueActionInspect(store.itemId),
+                                getValueActionInspect(store),
                             ]}
                         />
                     )}
@@ -493,17 +510,8 @@ export function InspectorView(): s.JSX.Element {
                             isInspected={inspector.isInspected(signal.id)}
                             isSignal
                             actions={[
-                                getValueActionInspect(signal.itemId),
-                                {
-                                    icon:  'Graph',
-                                    title: 'Open in Graph panel',
-                                    onClick() {
-                                        s.batch(() => {
-                                            inspector.setInspectedSignal(signal.id)
-                                            setOpenPanel('dgraph')
-                                        })
-                                    },
-                                },
+                                getValueActionInspect(signal),
+                                getValueActionGraph(signal),
                             ]}
                         />
                     )}
@@ -520,17 +528,8 @@ export function InspectorView(): s.JSX.Element {
                             onElementHover={hovered.toggleHoveredElement}
                             isSignal
                             actions={[
-                                getValueActionInspect(memo.itemId),
-                                {
-                                    icon: 'Graph',
-                                    title: 'Open in Graph panel',
-                                    onClick() {
-                                        s.batch(() => {
-                                            inspector.setInspectedOwner(memo.id)
-                                            setOpenPanel('dgraph')
-                                        })
-                                    },
-                                },
+                                getValueActionInspect(memo),
+                                getValueActionGraph(memo),
                             ]}
                         />
                     )}
@@ -560,7 +559,7 @@ export function InspectorView(): s.JSX.Element {
                                     state.hmr
                                 }
                                 actions={[
-                                    getValueActionInspect(state.value.itemId),
+                                    getValueActionInspect(state.value),
                                 ]}
                             />
                         )}
