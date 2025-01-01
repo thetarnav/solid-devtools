@@ -4,6 +4,11 @@ import {type PluginItem, transformAsync} from '@babel/core'
 import * as debug from '@solid-devtools/debugger/types'
 import * as babel from '../babel.ts'
 
+export const enum DevtoolsModule {
+    Main  = 'solid-devtools',
+    Setup = 'solid-devtools/setup',
+}
+
 export type LocatorPluginOptions = {
     /** Choose in which IDE the component source code should be revealed. */
     targetIDE?: Exclude<debug.LocatorOptions['targetIDE'], debug.TargetURLFunction>
@@ -71,16 +76,16 @@ export const devtoolsPlugin = (_options: DevtoolsPluginOptions = {}): vite.Plugi
             is_dev = config.command === 'serve' && config.mode !== 'production'
         },
         resolveId(id) {
-            if (is_dev && id === babel.DevtoolsModule.Main) return babel.DevtoolsModule.Main
+            if (is_dev && id === DevtoolsModule.Main) return DevtoolsModule.Main
         },
         load(id) {
             // Inject runtime debugger script
-            if (!is_dev || id !== babel.DevtoolsModule.Main) return
+            if (!is_dev || id !== DevtoolsModule.Main) return
 
-            let code = `import "${babel.DevtoolsModule.Setup}";`
+            let code = `import "${DevtoolsModule.Setup}";`
 
             if (options.locator) {
-                code += `\nimport { setLocatorOptions } from "${babel.DevtoolsModule.Setup}";
+                code += `\nimport { setLocatorOptions } from "${DevtoolsModule.Setup}";
         setLocatorOptions(${JSON.stringify(options.locator)});`
             }
 

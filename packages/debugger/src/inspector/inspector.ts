@@ -1,6 +1,6 @@
 import {misc} from '@nothing-but/utils'
 import {untrackedCallback} from '@solid-devtools/shared/primitives'
-import {parseLocationString} from '../locator/index.ts'
+import {parseLocationString, type SourceLocation} from '../locator/index.ts'
 import {NodeType, ValueItemType} from '../main/constants.ts'
 import {ObjectType, getSdtId} from '../main/id.ts'
 import {observeValueUpdate, removeValueUpdateObserver} from '../main/observe.ts'
@@ -309,14 +309,16 @@ export const collectOwnerDetails = /*#__PURE__*/ untrackedCallback(function (
 
             ;({checkProxyProps, props: details.props} = mapProps(owner.props))
 
-            let location = (owner.component as any).location
-            if (
-                // get location from component.location
-                (typeof location === 'string' && (location = parseLocationString(location))) ||
-                // get location from the babel plugin marks
-                ((location = setup.get_owner_location(owner)) &&
-                    (location = parseLocationString(location)))
-            ) {
+            let location: string | SourceLocation | undefined
+            if ((
+                (location = owner.sdtLocation) &&
+                typeof location === 'string' &&
+                (location = parseLocationString(location))
+            ) || (
+                (location = (owner.component as any).location) &&
+                typeof location === 'string' &&
+                (location = parseLocationString(location))
+            )) {
                 details.location = location
             }
         } else {

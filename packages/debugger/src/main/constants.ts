@@ -56,3 +56,5 @@ export enum ValueItemType {
 }
 
 export const UNKNOWN = 'unknown'
+
+export const OWNER_LOCATION_PROP = 'sdtLocation'

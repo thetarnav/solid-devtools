@@ -26,6 +26,8 @@ import {type HighlightElementPayload, type LocatorOptions} from './types.ts'
 
 export {parseLocationString} from './find-components.ts'
 
+export * from './types.ts'
+
 export function createLocator(props: {
     locatorEnabled: s.Accessor<boolean>
     setLocatorEnabledSignal(signal: s.Accessor<boolean>): void

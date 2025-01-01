@@ -12,20 +12,6 @@ import {error} from '@solid-devtools/shared/utils'
 import type {LocatorOptions} from './locator/types.ts'
 import type {Solid} from './main/types.ts'
 
-const OwnerLocationMap = new WeakMap<Solid.Owner, string>()
-
-/**
- * Set the location of the owner in source code.
- * Used by the babel plugin.
- */
-export function setOwnerLocation(location: string) {
-    const owner = s.getOwner()
-    owner && OwnerLocationMap.set(owner, location)
-}
-
-export function getOwnerLocation(owner: Solid.Owner) {
-    return OwnerLocationMap.get(owner) ?? null
-}
 
 let PassedLocatorOptions: LocatorOptions | null = null
 /** @deprecated use `setLocatorOptions` */
@@ -73,7 +59,6 @@ declare global {
             get_solid():          string | null
             get_expected_solid(): string | null
         }
-        get_owner_location(owner: Solid.Owner): string | null
     }
 }
 
@@ -116,7 +101,6 @@ if (!s.DEV || !store.DEV) {
             get_solid()          {return SolidVersion},
             get_expected_solid() {return ExpectedSolidVersion},
         },
-        get_owner_location: getOwnerLocation,
     }
 
     s.DEV.hooks.afterCreateOwner = owner => {

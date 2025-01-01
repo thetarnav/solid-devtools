@@ -1,6 +1,6 @@
 import type {EncodedValue, PropGetterState} from '../inspector/types.ts'
 import type {SourceLocation} from '../locator/types.ts'
-import {NodeType, ValueItemType} from './constants.ts'
+import {NodeType, OWNER_LOCATION_PROP, ValueItemType} from './constants.ts'
 
 //
 // EXPOSED SOLID API
@@ -70,6 +70,7 @@ declare module 'solid-js/types/reactive/signal.d.ts' {
     interface Owner {
         sdtType?: NodeType
         sdtSubRoots?: Solid.Owner[] | null
+        [OWNER_LOCATION_PROP]?: string
     }
 }
 

@@ -12,14 +12,13 @@ import * as plugin from './babel.ts'
 
 
 const removeExtraSpaces = (str: string): string => {
-    return str.replace(/ {2,}/g, ' ').replace(/[\t\n] ?/g, '')
+    return str.replace(/\s+/g, '')
 }
 
 function assertTransform(
     src: string,
     expected: string,
     plugin: babel.PluginObj<any>,
-    trim = false,
 ): void {
     const ast = parser.parse(src, {
         sourceType: 'module',
@@ -28,8 +27,8 @@ function assertTransform(
 
     babel.traverse(ast, plugin.visitor, undefined, {filename: `${cwd}/${file}`})
     const res = new generator.CodeGenerator(ast).generate()
-    const output = trim ? removeExtraSpaces(res.code) : res.code
-    const expectedOutput = trim ? removeExtraSpaces(expected) : expected
+    const output = removeExtraSpaces(res.code)
+    const expectedOutput = removeExtraSpaces(expected)
 
     test.expect(output).toBe(expectedOutput)
 }
@@ -39,15 +38,14 @@ function testTransform(
     src: string,
     expected: string,
     plugin: babel.PluginObj<any>,
-    trim = false,
 ): void {
     test.test(name, () => {
-        assertTransform(src, expected, plugin, trim)
+        assertTransform(src, expected, plugin)
     })
 }
 
 
-const setLocationImport = `import { ${plugin.SET_COMPONENT_LOC} as ${plugin.SET_COMPONENT_LOC_LOCAL} } from "${plugin.DevtoolsModule.Setup}";`
+const setLocationImport = `import { getOwner as ${plugin.SDT_GET_OWNER} } from "solid-js";`
 
 test.describe('location', () => {
     const testData: [
@@ -59,12 +57,12 @@ test.describe('location', () => {
         [
             'function component',
             `function Button(props) {
-  return <button>Click me</button>
+    return <button>Click me</button>
 }`,
             `${setLocationImport}
 function Button(props) {
-  ${plugin.SET_COMPONENT_LOC_LOCAL}("${file}:1:0");
-  return <button>Click me</button>;
+    if (${plugin.SDT_GET_OWNER}()) ${plugin.SDT_GET_OWNER}().${debug.OWNER_LOCATION_PROP} = "${file}:1:0";
+    return <button>Click me</button>;
 }
 globalThis.${debug.WINDOW_PROJECTPATH_PROPERTY} = "${cwd}";`,
             {jsx: false, components: true},
@@ -72,12 +70,12 @@ globalThis.${debug.WINDOW_PROJECTPATH_PROPERTY} = "${cwd}";`,
         [
             'arrow component',
             `const Button = props => {
-  return <button>Click me</button>
+    return <button>Click me</button>
 }`,
             `${setLocationImport}
 const Button = props => {
-  ${plugin.SET_COMPONENT_LOC_LOCAL}("${file}:1:6");
-  return <button>Click me</button>;
+    if (${plugin.SDT_GET_OWNER}()) ${plugin.SDT_GET_OWNER}().${debug.OWNER_LOCATION_PROP} = "${file}:1:6";
+    return <button>Click me</button>;
 };
 globalThis.${debug.WINDOW_PROJECTPATH_PROPERTY} = "${cwd}";`,
             {jsx: false, components: true},
@@ -85,10 +83,10 @@ globalThis.${debug.WINDOW_PROJECTPATH_PROPERTY} = "${cwd}";`,
         [
             'jsx',
             `function Button(props) {
-  return <button>Click me</button>
+    return <button>Click me</button>
 }`,
             `function Button(props) {
-  return <button ${debug.LOCATION_ATTRIBUTE_NAME}="${file}:2:11">Click me</button>;
+    return <button ${debug.LOCATION_ATTRIBUTE_NAME}="${file}:2:13">Click me</button>;
 }
 globalThis.${debug.WINDOW_PROJECTPATH_PROPERTY} = "${cwd}";`,
             {jsx: true, components: false},
@@ -132,7 +130,6 @@ test.describe('autoname: returning primitives', () => {
     name: "signal"
   });`,
                         plugin.namePlugin,
-                        true,
                     )
 
                     testTransform(
@@ -144,7 +141,6 @@ test.describe('autoname: returning primitives', () => {
     name: "signal"
   });`,
                         plugin.namePlugin,
-                        true,
                     )
 
                     testTransform(
@@ -164,7 +160,6 @@ const var_foo = 123,
     }),
     var_bar = 321;`,
                         plugin.namePlugin,
-                        true,
                     )
 
                     testTransform(
@@ -180,7 +175,6 @@ const var_foo = 123,
           });`,
 
                         plugin.namePlugin,
-                        true,
                     )
 
                     testTransform(
@@ -198,7 +192,6 @@ const var_foo = 123,
   });`,
 
                         plugin.namePlugin,
-                        true,
                     )
 
                     testTransform(
@@ -216,7 +209,6 @@ const var_foo = 123,
   });`,
 
                         plugin.namePlugin,
-                        true,
                     )
 
                     testTransform(
@@ -230,7 +222,6 @@ const var_foo = 123,
   });`,
 
                         plugin.namePlugin,
-                        true,
                     )
 
                     testTransform(
@@ -244,7 +235,6 @@ const var_foo = 123,
   });`,
 
                         plugin.namePlugin,
-                        true,
                     )
                 })
             }
@@ -262,14 +252,14 @@ const var_foo = 123,
             test.test(`no import`, () => {
                 const src = `const signal = ${create}();`
 
-                assertTransform(src, src, plugin.namePlugin, true)
+                assertTransform(src, src, plugin.namePlugin)
             })
 
             test.test(`incorrect import`, () => {
                 const src = `import { ${create} } from "${module}";
   const signal = ${create}();`
 
-                assertTransform(src, src, plugin.namePlugin, true)
+                assertTransform(src, src, plugin.namePlugin)
             })
         })
     }
@@ -301,7 +291,6 @@ test.describe('autoname: effect primitives', () => {
               });
             }`,
                         plugin.namePlugin,
-                        true,
                     )
                 })
 
@@ -318,7 +307,6 @@ test.describe('autoname: effect primitives', () => {
             });
           };`,
                     plugin.namePlugin,
-                    true,
                 )
 
                 testTransform(
@@ -334,7 +322,6 @@ test.describe('autoname: effect primitives', () => {
             });
           };`,
                     plugin.namePlugin,
-                    true,
                 )
 
                 testTransform(
@@ -350,7 +337,6 @@ test.describe('autoname: effect primitives', () => {
               });
             });`,
                     plugin.namePlugin,
-                    true,
                 )
             }
         })
@@ -364,7 +350,7 @@ test.describe('autoname: effect primitives', () => {
           ${create}(() => {});
         }`
 
-                assertTransform(src, src, plugin.namePlugin, true)
+                assertTransform(src, src, plugin.namePlugin)
             })
         })
     }
