@@ -397,6 +397,26 @@ function ListSignals<T>(props: {when: T; title: s.JSX.Element; children: s.JSX.E
     )
 }
 
+function getValueActionInspect(id: debug.ValueItemID): ValueNodeAction {
+
+    let code = /*js*/`(() => {
+        let v = window.$SdtGetValue(${JSON.stringify(id)})
+        inspect(v)
+        console.log(v)
+    })()`
+    let cb = (_: any, err: any) => {
+        if (err) {error(err)}
+    }
+
+    return {
+        icon:  'Eye',
+        title: 'Inspect',
+        onClick() {
+            chrome.devtools.inspectedWindow.eval(code, cb)
+        },
+    }
+}
+
 export function InspectorView(): s.JSX.Element {
 
     const {inspector, hovered} = useAppCtx()
@@ -449,6 +469,9 @@ export function InspectorView(): s.JSX.Element {
                             isExtended={store.extended}
                             onClick={() => inspector.inspectValueItem(store)}
                             onElementHover={hovered.toggleHoveredElement}
+                            actions={[
+                                getValueActionInspect(store.itemId),
+                            ]}
                         />
                     )}
                     </s.For>
@@ -459,21 +482,26 @@ export function InspectorView(): s.JSX.Element {
                         <ValueNode
                             name={signal.name}
                             value={signal.value}
-                            onClick={() => inspector.inspectValueItem(signal)}
+                            onClick={() => {
+                                inspector.inspectValueItem(signal)
+                            }}
                             onElementHover={hovered.toggleHoveredElement}
                             isExtended={signal.extended}
                             isInspected={inspector.isInspected(signal.id)}
                             isSignal
-                            actions={[{
-                                icon: 'Graph',
-                                title: 'Open in Graph panel',
-                                onClick() {
-                                    s.batch(() => {
-                                        inspector.setInspectedSignal(signal.id)
-                                        setOpenPanel('dgraph')
-                                    })
+                            actions={[
+                                getValueActionInspect(signal.itemId),
+                                {
+                                    icon:  'Graph',
+                                    title: 'Open in Graph panel',
+                                    onClick() {
+                                        s.batch(() => {
+                                            inspector.setInspectedSignal(signal.id)
+                                            setOpenPanel('dgraph')
+                                        })
+                                    },
                                 },
-                            }]}
+                            ]}
                         />
                     )}
                     </s.For>
@@ -488,16 +516,19 @@ export function InspectorView(): s.JSX.Element {
                             onClick={() => inspector.inspectValueItem(memo)}
                             onElementHover={hovered.toggleHoveredElement}
                             isSignal
-                            actions={[{
-                                icon: 'Graph',
-                                title: 'Open in Graph panel',
-                                onClick() {
-                                    s.batch(() => {
-                                        inspector.setInspectedOwner(memo.id)
-                                        setOpenPanel('dgraph')
-                                    })
+                            actions={[
+                                getValueActionInspect(memo.itemId),
+                                {
+                                    icon: 'Graph',
+                                    title: 'Open in Graph panel',
+                                    onClick() {
+                                        s.batch(() => {
+                                            inspector.setInspectedOwner(memo.id)
+                                            setOpenPanel('dgraph')
+                                        })
+                                    },
                                 },
-                            }]}
+                            ]}
                         />
                     )}
                     </s.For>
@@ -525,6 +556,9 @@ export function InspectorView(): s.JSX.Element {
                                     state.type === debug.NodeType.Store ||
                                     state.hmr
                                 }
+                                actions={[
+                                    getValueActionInspect(state.value.itemId),
+                                ]}
                             />
                         )}
                         {state.location && (
@@ -785,6 +819,12 @@ function createNestedHover(): NestedHover {
     }
 }
 
+export type ValueNodeAction = {
+    icon:    keyof typeof ui.icon;
+    title?:  string;
+    onClick: () => void
+}
+
 export const ValueNode: s.Component<{
     value: decode.DecodedValue
     name: string | undefined
@@ -798,7 +838,7 @@ export const ValueNode: s.Component<{
     isStale?: boolean
     onClick?: VoidFunction
     onElementHover?: ToggleElementHover
-    actions?: {icon: keyof typeof ui.Icon; title?: string; onClick: VoidFunction}[]
+    actions?: ValueNodeAction[]
     class?: string
 }> = props => {
     const ctx = s.useContext(ValueContext)
@@ -866,26 +906,24 @@ export const ValueNode: s.Component<{
                 <div
                     class={clsx(
                         'absolute z-2 top-0 right-2 h-inspector_row',
-                        'flex justify-end items-center',
+                        'flex justify-end items-center gap-1',
                         'transition-opacity',
-                        isHovered()
-                            ? 'opacity-55 hover:opacity-80 active:opacity-100'
-                            : 'opacity-0',
+                        isHovered() ? 'opacity-100' : 'opacity-0',
                     )}
                 >
                     <s.For each={props.actions}>
-                        {action => {
-                            const IconComponent = ui.Icon[action.icon]
-                            return (
-                                <button
-                                    onClick={action.onClick}
-                                    class="center-child"
-                                    title={action.title}
-                                >
-                                    <IconComponent class="h-4 w-4" />
-                                </button>
-                            )
-                        }}
+                        {action => <>
+                            <button
+                                onClick={action.onClick}
+                                class={clsx(
+                                    'center-child',
+                                    'opacity-55 hover:opacity-80 active:opacity-100',
+                                )}
+                                title={action.title}
+                            >
+                                <ui.Icon icon={action.icon} class="h-4 w-4" />
+                            </button>
+                        </>}
                     </s.For>
                 </div>
             )}

@@ -2,7 +2,7 @@ import clsx from 'clsx'
 import * as s from 'solid-js'
 import {combineProps} from '@solid-primitives/props'
 import * as theme from '@solid-devtools/shared/theme'
-import Icon from './icons.tsx'
+import {icon} from './icons.tsx'
 import * as color from './color.ts'
 
 export const toggle_button = 'toggle-button'
@@ -88,7 +88,7 @@ export const CollapseToggle: s.Component<{
             }
             {...(props.name && {'aria-label': `Expand or collapse ${props.name}`})}
         >
-            <Icon.Triangle
+            <icon.Triangle
                 class={clsx(
                     'w-2 h-2 text-panel-5 transition',
                     props.collapsed ? 'rotate-90' : 'rotate-180',

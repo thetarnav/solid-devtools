@@ -9,7 +9,7 @@ import {onOwnerDispose} from '../main/utils.ts'
 import {type ObservedPropsMap, ValueNodeMap, clearOwnerObservers, collectOwnerDetails} from './inspector.ts'
 import {encodeValue} from './serialize.ts'
 import {type StoreNodeProperty, type StoreUpdateData, observeStoreNode, setOnStoreNodeUpdate} from './store.ts'
-import {type InspectorUpdate, type InspectorUpdateMap, PropGetterState} from './types.ts'
+import {GLOBAL_GET_VALUE, type InspectorUpdate, type InspectorUpdateMap, PropGetterState} from './types.ts'
 
 export * from './types.ts'
 
@@ -24,12 +24,20 @@ export function createInspector(props: {
     resetInspectedNode: VoidFunction
     emit:               OutputEmit
 }) {
+    
     let lastDetails: Mapped.OwnerDetails | undefined
     let inspectedOwner: Solid.Owner | null
     let valueMap = new ValueNodeMap()
     const propsMap: ObservedPropsMap = new WeakMap()
     /** compare props object with the previous one to see whats changed */
     let checkProxyProps: (() => InspectorUpdateMap['propKeys'] | null) | null
+
+    /*
+     For the extension for inspecting values through `inspect()`
+    */
+    window[GLOBAL_GET_VALUE] = (id: ValueItemID) => {
+        return valueMap.get(id)?.getValue?.()
+    }
 
     // Batch and dedupe inspector updates
     // these will include updates to signals, stores, props, and node value
@@ -156,11 +164,12 @@ export function createInspector(props: {
                 })
 
                 props.emit('InspectedNodeDetails', result.details)
-                valueMap = result.valueMap
-                lastDetails = result.details
+
+                valueMap        = result.valueMap
+                lastDetails     = result.details
                 checkProxyProps = result.checkProxyProps || null
             } else {
-                lastDetails = undefined
+                lastDetails     = undefined
                 checkProxyProps = null
             }
 

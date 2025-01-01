@@ -3,28 +3,27 @@ import clsx from 'clsx'
 import {NodeType, UNKNOWN} from '@solid-devtools/debugger/types'
 import {createPingedSignal} from '@solid-devtools/shared/primitives'
 import {Highlight} from './highlight.tsx'
-import Icon, {type IconComponent} from './icons.tsx'
 import * as ui from '../ui/index.ts'
 
 export function Node_Type_Icon(props: {
     type: NodeType | undefined | null
     class?: string
 }): s.JSX.Element {
-    let prev_icon: IconComponent | undefined
+    let prev_icon: ui.IconComponent | undefined
     let prev_rendered: s.JSX.Element | undefined
 
     const fn = (): s.JSX.Element => {
 
-        let IconComp: IconComponent | undefined
+        let IconComp: ui.IconComponent | undefined
         // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
         switch (props.type) {
-        case NodeType.Memo:        IconComp = Icon.Memo         ;break
-        case NodeType.Effect:      IconComp = Icon.Effect       ;break
-        case NodeType.Root:        IconComp = Icon.Root         ;break
-        case NodeType.Render:      IconComp = Icon.RenderEffect ;break
-        case NodeType.Computation: IconComp = Icon.Computation  ;break
-        case NodeType.Context:     IconComp = Icon.Context      ;break
-        case NodeType.Signal:      IconComp = Icon.Signal       ;break
+        case NodeType.Memo:        IconComp = ui.icon.Memo         ;break
+        case NodeType.Effect:      IconComp = ui.icon.Effect       ;break
+        case NodeType.Root:        IconComp = ui.icon.Root         ;break
+        case NodeType.Render:      IconComp = ui.icon.RenderEffect ;break
+        case NodeType.Computation: IconComp = ui.icon.Computation  ;break
+        case NodeType.Context:     IconComp = ui.icon.Context      ;break
+        case NodeType.Signal:      IconComp = ui.icon.Signal       ;break
         }
 
         if (IconComp === prev_icon) {

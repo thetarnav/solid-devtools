@@ -77,7 +77,7 @@ export function createSidePanel() {
                                     class={action_button}
                                     onClick={openComponentLocation}
                                 >
-                                    <ui.Icon.Code class={action_icon} />
+                                    <ui.icon.Code class={action_icon} />
                                 </button>
                             )}
                             <button
@@ -85,7 +85,7 @@ export function createSidePanel() {
                                 class={action_button}
                                 onClick={() => setInspectedOwner(null)}
                             >
-                                <ui.Icon.Close class={action_icon} />
+                                <ui.icon.Close class={action_icon} />
                             </button>
                         </div>
                         <ui.ToggleTabs
