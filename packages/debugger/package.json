@@ -27,24 +27,27 @@
     "types": "./dist/index.d.ts",
     "exports": {
         ".": {
-            "@solid-devtools/source": "./src/index.ts",
             "import": {
                 "types": "./dist/index.d.ts",
                 "default": "./dist/index.js"
             }
         },
         "./bundled": {
-            "@solid-devtools/source": "./src/index.ts",
             "import": {
                 "types": "./dist/index.d.ts",
                 "default": "./dist/bundled.js"
             }
         },
-        "./*": {
-            "@solid-devtools/source": "./src/*.ts",
+        "./types": {
             "import": {
-                "types": "./dist/*.d.ts",
-                "default": "./dist/*.js"
+                "types": "./dist/types.d.ts",
+                "default": "./dist/types.js"
+            }
+        },
+        "./setup": {
+            "import": {
+                "types": "./dist/setup.d.ts",
+                "default": "./dist/setup.js"
             }
         }
     },

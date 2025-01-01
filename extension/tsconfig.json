@@ -3,10 +3,5 @@
     "compilerOptions": {
         "outDir": "dist",
     },
-    "include": ["src/**/*"],
-    "references": [
-        {"path": "../packages/shared"},
-        {"path": "../packages/frontend"},
-        {"path": "../packages/debugger"},
-    ],
+    "include": ["src/**/*"]
 }

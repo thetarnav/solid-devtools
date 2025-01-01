@@ -26,7 +26,6 @@
     "module": "./dist/server.js",
     "types": "./dist/index.d.ts",
     "exports": {
-        "@solid-devtools/source": "./src/index.ts",
         "browser": {
             "development": {
                 "import": "./dist/index.js",
