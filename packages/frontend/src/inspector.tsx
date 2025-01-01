@@ -406,21 +406,14 @@ export function InspectorView(): s.JSX.Element {
     function getValueActionInspect(item: Inspector.ValueItem): ValueNodeAction | undefined {
 
         if (item.value.type !== debug.ValueType.Unknown) {
-
-            let code = /*js*/`(() => {
-                let v = window.$SdtGetValue(${JSON.stringify(item.itemId)})
-                inspect(v)
-                console.log(v)
-            })()`
-            let cb = (_: any, err: any) => {
-                if (err) {error(err)}
-            }
-        
             return {
                 icon:  'Eye',
                 title: 'Inspect',
                 onClick() {
-                    chrome.devtools.inspectedWindow.eval(code, cb)
+                    ctx.output.emit({
+                        name:    'ConsoleInspectValue',
+                        details: item.itemId,
+                    })
                 },
             }
         }

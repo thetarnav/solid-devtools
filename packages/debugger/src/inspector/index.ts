@@ -35,9 +35,10 @@ export function createInspector(props: {
     /*
      For the extension for inspecting values through `inspect()`
     */
-    window[GLOBAL_GET_VALUE] = (id: ValueItemID) => {
+    function getValue(id: ValueItemID): unknown {
         return valueMap.get(id)?.getValue?.()
     }
+    window[GLOBAL_GET_VALUE] = getValue
 
     // Batch and dedupe inspector updates
     // these will include updates to signals, stores, props, and node value
@@ -195,5 +196,9 @@ export function createInspector(props: {
             node.setSelected(selected)
             pushInspectToggle(id, selected)
         },
+        consoleLogValue(value_id: ValueItemID): void {
+            // eslint-disable-next-line no-console
+            console.log(getValue(value_id))
+        }
     }
 }

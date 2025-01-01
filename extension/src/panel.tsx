@@ -4,8 +4,9 @@
 
 import * as s        from 'solid-js'
 import * as web      from 'solid-js/web'
-import {log}         from '@solid-devtools/shared/utils'
+import {error, log}  from '@solid-devtools/shared/utils'
 import * as frontend from '@solid-devtools/frontend'
+import * as debug    from '@solid-devtools/debugger/types'
 
 import {
     ConnectionName, Place_Name, port_on_message, port_post_message_obj,
@@ -62,8 +63,36 @@ function App() {
         }
     })
 
-    /* Devtools -> Client */
-    devtools.output.listen(e => port_post_message_obj(port, e))
+    devtools.output.listen(e => {
+        // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
+        switch (e.name) {
+        case 'ConsoleInspectValue': {
+            /*
+             `chrome.devtools.inspectedWindow.eval` runs in a devtools console
+             so the value can be additionally inspected with `inspect()`
+            */
+            let get_value = `window[${JSON.stringify(debug.GLOBAL_GET_VALUE)}]`
+            let value_id = JSON.stringify(e.details)
+            
+            chrome.devtools.inspectedWindow.eval(
+                /*js*/`typeof ${get_value} === 'function' && (() => {
+                    let v = ${get_value}(${value_id})
+                    inspect(v)
+                    console.log(v)
+                })()`,
+                (_, err?: chrome.devtools.inspectedWindow.EvaluationExceptionInfo) => {
+                if (err && (err.isError || err.isException)) {
+                    error(err.description)
+                }
+            })
+            break
+        }
+        default:
+            /* Devtools -> Client */
+            port_post_message_obj(port, e)
+            break
+        }
+    })
 
     return (
         <div
