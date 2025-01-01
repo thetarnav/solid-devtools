@@ -1,5 +1,17 @@
 # solid-devtools-shared
 
+## 0.18.0
+
+### Minor Changes
+
+- c7f699f: Change the message structure from {name, details} to {kind, data}
+
+### Patch Changes
+
+- 6b1b16d: Refactor `useDebugger`.
+  `useLocator` is removed, instead use `useDebugger().setLocatorOptions()`.
+  `debugger.meta.versions` moved to `debugger.versions`
+
 ## 0.17.0
 
 ### Minor Changes

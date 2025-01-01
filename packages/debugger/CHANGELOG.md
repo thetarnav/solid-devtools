@@ -1,5 +1,21 @@
 # @solid-devtools/debugger
 
+## 0.25.0
+
+### Minor Changes
+
+- c7f699f: Change the message structure from {name, details} to {kind, data}
+- ba5b62a: New feature: inspecting values in the console. (Closes #166)
+- 6b1b16d: Refactor `useDebugger`.
+  `useLocator` is removed, instead use `useDebugger().setLocatorOptions()`.
+  `debugger.meta.versions` moved to `debugger.versions`
+
+### Patch Changes
+
+- Updated dependencies [c7f699f]
+- Updated dependencies [6b1b16d]
+  - @solid-devtools/shared@0.18.0
+
 ## 0.24.5
 
 ### Patch Changes

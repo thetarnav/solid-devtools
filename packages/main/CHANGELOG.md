@@ -1,5 +1,18 @@
 # solid-devtools
 
+## 0.32.0
+
+### Patch Changes
+
+- 6b1b16d: Refactor `useDebugger`.
+  `useLocator` is removed, instead use `useDebugger().setLocatorOptions()`.
+  `debugger.meta.versions` moved to `debugger.versions`
+- Updated dependencies [c7f699f]
+- Updated dependencies [ba5b62a]
+- Updated dependencies [6b1b16d]
+  - @solid-devtools/debugger@0.25.0
+  - @solid-devtools/shared@0.18.0
+
 ## 0.31.7
 
 ### Patch Changes
