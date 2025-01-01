@@ -30,6 +30,7 @@
     "module": "./dist/index_noop.js",
     "types": "./dist/index.d.ts",
     "exports": {
+        "@solid-devtools/source": "./src/index.tsx",
         "browser": {
             "development": {
                 "types": "./dist/index.d.ts",
