@@ -665,7 +665,6 @@ const value_element_container = clsx(
     value_element_container_class,
     ui.tag_brackets,
     value_base,
-    ui.highlight_container,
     'text-dom',
 )
 
@@ -682,9 +681,6 @@ export const value_node_styles = /*css*/ `
     .${value_element_container_class}:after {
         content: '>';
         color: ${theme.vars.disabled};
-    }
-    .${value_element_container_class}:hover {
-        ${ui.highlight_opacity_var}: 0.6;
     }
     /**/
 `
@@ -769,7 +765,6 @@ const ValuePreview: s.Component<{
 
             return (
                 <span class={value_element_container} aria-label={props.label} {...hoverProps}>
-                    <div class={ui.highlight_element} />
                     {value.name}
                 </span>
             )
@@ -867,6 +862,9 @@ export const ValueNode: s.Component<{
                 'font-mono leading-inspector_row',
                 props.isStale && 'opacity-60',
             )}
+            style={{
+                [ui.highlight_opacity_var]: isHovered() ? '0.3' : '0',
+            }}
             {...(props.name && {'aria-label': `${props.name} signal`})}
             {...hoverProps}
         >
@@ -881,7 +879,6 @@ export const ValueNode: s.Component<{
                 class={clsx(
                     ui.highlight_element,
                     'b b-solid b-highlight-border',
-                    isHovered() ? 'opacity-30' : 'opacity-0',
                 )}
             />
 
