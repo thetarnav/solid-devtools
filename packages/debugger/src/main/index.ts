@@ -10,7 +10,7 @@ import {createStructure, type StructureUpdates} from '../structure/index.ts'
 import {DebuggerModule, DEFAULT_MAIN_VIEW, DevtoolsMainView, TreeWalkerMode} from './constants.ts'
 import {getObjectById, getSdtId, ObjectType} from './id.ts'
 import setup from './setup.ts'
-import {type Mapped, type NodeID} from './types.ts'
+import {type Mapped, type NodeID, type ValueItemID} from './types.ts'
 
 export type InspectedState = {
     readonly ownerId: NodeID | null
@@ -37,6 +37,7 @@ export type InputChannels = {
     ResetState: void
     InspectNode: {ownerId: NodeID | null; signalId: NodeID | null} | null
     InspectValue: ToggleInspectedValueData
+    ConsoleInspectValue: ValueItemID
     HighlightElementChange: HighlightElementPayload
     OpenLocation: void
     TreeViewModeChange: TreeWalkerMode
@@ -279,6 +280,9 @@ function createDebugger() {
             break
         case 'InspectValue':
             inspector.toggleValueNode(e.details)
+            break
+        case 'ConsoleInspectValue':
+            inspector.consoleLogValue(e.details)
             break
         case 'OpenLocation':
             openInspectedNodeLocation()

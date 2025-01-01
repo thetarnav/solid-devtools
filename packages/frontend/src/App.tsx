@@ -16,7 +16,7 @@ export const App: s.Component<{headerSubtitle?: s.JSX.Element}> = props => {
         >
             <header class="p-2 flex items-center gap-x-2 bg-panel-bg b-b b-solid b-panel-border text-text">
                 <div class="flex items-center gap-x-2">
-                    <ui.Icon.SolidWhite class="w-4 h-4 text-disabled" />
+                    <ui.icon.SolidWhite class="w-4 h-4 text-disabled" />
                     <div>
                         <h3>Solid Developer Tools</h3>
                         {props.headerSubtitle && (
@@ -80,7 +80,7 @@ const Options: s.Component = () => {
             }}>
             <summary
                 class={`${ui.toggle_button} rounded-md ml-auto w-7 h-7`}>
-                <ui.Icon.Options
+                <ui.icon.Options
                     class="w-4.5 h-4.5"
                 />
             </summary>
@@ -97,7 +97,7 @@ const Options: s.Component = () => {
                         class='
                             flex items-center gap-1 p-1 rounded-md outline-none
                             text-text transition-colors hover:bg-orange-500/10 focus:bg-orange-500/10'>
-                        <ui.Icon.Bug class='w-3 h-3 mb-px text-orange-500 dark:text-orange-400' />
+                        <ui.icon.Bug class='w-3 h-3 mb-px text-orange-500 dark:text-orange-400' />
                         Report a bug
                     </a>
                     <a
@@ -108,7 +108,7 @@ const Options: s.Component = () => {
                         class='
                             flex items-center gap-1 p-1 rounded-md outline-none
                             text-text transition-colors hover:bg-pink-500/10 focus:bg-pink-500/10'>
-                        <ui.Icon.Heart class='w-3 h-3 mb-px text-pink-500 dark:text-pink-400' />
+                        <ui.icon.Heart class='w-3 h-3 mb-px text-pink-500 dark:text-pink-400' />
                         Support the project
                     </a>
                 </div>

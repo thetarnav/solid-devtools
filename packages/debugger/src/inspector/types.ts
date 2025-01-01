@@ -68,3 +68,14 @@ export type InspectorUpdateMap = {
 export type InspectorUpdate = {
     [T in keyof InspectorUpdateMap]: [type: T, data: InspectorUpdateMap[T]]
 }[keyof InspectorUpdateMap]
+
+/*
+ For the extension for inspecting values through `inspect()`
+*/
+export const GLOBAL_GET_VALUE = '$SdtGetValue'
+
+declare global {
+    interface Window {
+        [GLOBAL_GET_VALUE]?: (id: ValueItemID) => unknown
+    }
+}

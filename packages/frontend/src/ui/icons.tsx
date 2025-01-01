@@ -2,11 +2,12 @@
  * Some icons taken from https://phosphoricons.com
  */
 
-import {type Component} from 'solid-js'
+import * as s    from 'solid-js'
+import * as sweb from 'solid-js/web'
 
-export type ProxyIconComponent<ID extends keyof typeof embedIconComponents> = Component<{id: ID}>
+export type ProxyIconComponent<ID extends keyof typeof embedIconComponents> = s.Component<{id: ID}>
 
-export type IconComponent = Component<{class?: string}>
+export type IconComponent = s.Component<{class?: string}>
 
 const ArrowRight: ProxyIconComponent<'ArrowRight'> = ({id}) => (
     <svg id={`sdt_icon_${id}`} fill="none" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
@@ -817,12 +818,12 @@ const iconComponents = {
     SolidWhite,
 } as const
 
-export const Icon: {
-    [key in keyof typeof embedIconComponents | keyof typeof iconComponents]: IconComponent
-} = {} as any
+export type IconName = keyof typeof embedIconComponents | keyof typeof iconComponents
+
+export const icon: {[key in IconName]: IconComponent} = {} as any
 
 for (const name in embedIconComponents) {
-    ;(Icon as any)[name] = (props: {class?: string}) => (
+    ;(icon as any)[name] = (props: {class?: string}) => (
         <svg class={props.class}>
             <use href={`#sdt_icon_${name.toString()}`} />
         </svg>
@@ -830,12 +831,17 @@ for (const name in embedIconComponents) {
 }
 
 for (const name in iconComponents) {
-    ;(Icon as any)[name] = iconComponents[name as keyof typeof iconComponents]
+    ;(icon as any)[name] = iconComponents[name as keyof typeof iconComponents]
 }
 
-export default Icon
+export function Icon(props: {
+    icon:   IconName
+    class?: string,
+}) {
+    return <sweb.Dynamic component={icon[props.icon]} class="h-4 w-4" />
+}
 
-export const MountIcons: Component = () => {
+export const MountIcons: s.Component = () => {
     return (
         <div style="display:none">
             {(Object.keys(embedIconComponents) as (keyof typeof embedIconComponents)[]).map(

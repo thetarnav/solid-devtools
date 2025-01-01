@@ -1,6 +1,6 @@
-import {Icon} from '../ui/index.ts'
 import * as s from 'solid-js'
 import {makeEventListener} from '@solid-primitives/event-listener'
+import {icon} from './index.ts'
 
 export type HeadlessErrorOverlayRenderProps = {
     error: unknown
@@ -140,7 +140,7 @@ export const HeadlessErrorOverlay: s.ParentComponent<{
 const button =
     'w-8 h-8 center-child rounded-md bg-panel-8 hover:bg-panel-7 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-panel-7 active:bg-panel-6 active:ring-offset-0 active:ring-0'
 
-const icon = 'w-4 h-4 text-current'
+const icon_class = 'w-4 h-4 text-current'
 
 const RenderErrorOverlay: s.Component<HeadlessErrorOverlayRenderProps & {
     footer?: s.JSX.Element,
@@ -152,11 +152,11 @@ const RenderErrorOverlay: s.Component<HeadlessErrorOverlayRenderProps & {
                     <div class="center-child gap-x-1">
                         <button class={button} onClick={props.goPrev}>
                             <span class="sr-only">Prev</span>
-                            <Icon.ArrowLeft class={icon} />
+                            <icon.ArrowLeft class={icon_class} />
                         </button>
                         <button class={button} onClick={props.goNext}>
                             <span class="sr-only">Prev</span>
-                            <Icon.ArrowRight class={icon} />
+                            <icon.ArrowRight class={icon_class} />
                         </button>
                         <span class="p-1 font-500">
                             <span>{props.currentCount}</span>
@@ -167,7 +167,7 @@ const RenderErrorOverlay: s.Component<HeadlessErrorOverlayRenderProps & {
                     <div class="center-child gap-x-1">
                         <button class={button} onClick={props.resetError}>
                             <span class="sr-only">Reset</span>
-                            <Icon.Refresh class={icon} />
+                            <icon.Refresh class={icon_class} />
                         </button>
                     </div>
                 </div>

@@ -360,7 +360,7 @@ const LocatorButton: s.Component = () => {
             selected={locator.locatorEnabled()}
             title="Select an element in the page to inspect it"
         >
-            <ui.Icon.Select class="w-4 h-4" />
+            <ui.icon.Select class="w-4 h-4" />
         </ui.ToggleButton>
     )
 }
@@ -417,14 +417,14 @@ const Search: s.Component = () => {
             <div
                 class={`${edge_container_base} pointer-events-none left-0 p-l-1.5 transition-transform group-focus-within:-translate-x-full`}
             >
-                <ui.Icon.Search class={icon_base} />
+                <ui.icon.Search class={icon_base} />
             </div>
             {value() && (
                 <button
                     class={`${hover_background} ${edge_container_base} right-1 p-x-.5 rounded`}
                     type="reset"
                 >
-                    <ui.Icon.Close class={icon_base} />
+                    <ui.icon.Close class={icon_base} />
                 </button>
             )}
         </form>
@@ -857,7 +857,7 @@ export const OwnerPath: s.Component = () => {
                             'background-image': `linear-gradient(to right, ${theme.vars.panel.bg} ${theme.spacing[8]}, transparent ${theme.spacing[32]})`,
                         }}
                     >
-                        <ui.Icon.Options class="w-3 h3 text-disabled" />
+                        <ui.icon.Options class="w-3 h3 text-disabled" />
                     </div>
                 )}
                 <div class="flex flex-wrap text-sm leading-3 font-mono" ref={container}>
@@ -869,7 +869,7 @@ export const OwnerPath: s.Component = () => {
 
                         return <>
                             <div class="w-3 h-4 mx-.5 center-child first:hidden">
-                                <ui.Icon.CarretRight class="w-2 h-2 mb-[0.15rem] text-disabled" />
+                                <ui.icon.CarretRight class="w-2 h-2 mb-[0.15rem] text-disabled" />
                             </div>
                             <div
                                 class={`${ui.highlight_container} h-3 p-y-.25 my-0.25

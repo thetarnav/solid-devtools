@@ -2,7 +2,7 @@ import clsx from 'clsx'
 import * as s from 'solid-js'
 import {Entries} from '@solid-primitives/keyed'
 import {createStaticStore} from '@solid-primitives/static-store'
-import {defer, entries} from '@solid-primitives/utils'
+import {defer, entries, type FalsyValue} from '@solid-primitives/utils'
 import {createHover, createPingedSignal} from '@solid-devtools/shared/primitives'
 import {error, splitOnColon} from '@solid-devtools/shared/utils'
 import * as debug from '@solid-devtools/debugger/types'
@@ -399,17 +399,43 @@ function ListSignals<T>(props: {when: T; title: s.JSX.Element; children: s.JSX.E
 
 export function InspectorView(): s.JSX.Element {
 
-    const {inspector, hovered} = useAppCtx()
-    const {state} = inspector
+    const ctx = useAppCtx()
 
     const {setOpenPanel} = s.useContext(SidePanelCtx)!
 
+    function getValueActionInspect(item: Inspector.ValueItem): ValueNodeAction | undefined {
+
+        if (item.value.type !== debug.ValueType.Unknown) {
+            return {
+                icon:  'Eye',
+                title: 'Inspect',
+                onClick() {
+                    ctx.output.emit({
+                        name:    'ConsoleInspectValue',
+                        details: item.itemId,
+                    })
+                },
+            }
+        }
+    }
+    function getValueActionGraph(signal: Inspector.Signal): ValueNodeAction {
+        return {
+            icon:  'Graph',
+            title: 'Open in Graph panel',
+            onClick() {
+                s.batch(() => {
+                    ctx.inspector.setInspectedSignal(signal.id)
+                    setOpenPanel('dgraph')
+                })
+            },
+        }
+    }
+
     const valueItems = s.createMemo(() => {
-        const list = Object.values(state.signals)
         const memos:   Inspector.Signal[] = []
         const signals: Inspector.Signal[] = []
         const stores:  Inspector.Signal[] = []
-        for (const signal of list) {
+        for (const signal of Object.values(ctx.inspector.state.signals)) {
             switch (signal.type) {
             case debug.NodeType.Memo:   memos.push(signal)   ;break
             case debug.NodeType.Signal: signals.push(signal) ;break
@@ -423,19 +449,25 @@ export function InspectorView(): s.JSX.Element {
         <ui.Scrollable>
             <div class="min-w-full w-fit p-4 p-b-14 flex flex-col gap-y-4">
                 <ListSignals
-                    when={state.props && Object.keys(state.props.record).length}
-                    title={<>Props {state.props!.proxy && <ui.Badge>PROXY</ui.Badge>}</>}
+                    when={
+                        ctx.inspector.state.props != null &&
+                        Object.keys(ctx.inspector.state.props.record).length
+                    }
+                    title={<>Props {ctx.inspector.state.props!.proxy && <ui.Badge>PROXY</ui.Badge>}</>}
                 >
-                    <Entries of={state.props!.record}>
+                    <Entries of={ctx.inspector.state.props!.record}>
                     {(name, value) => (
                         <ValueNode
                             name={name}
                             value={value().value}
                             isExtended={value().extended}
-                            onClick={() => inspector.inspectValueItem(value())}
-                            onElementHover={hovered.toggleHoveredElement}
+                            onClick={() => ctx.inspector.inspectValueItem(value())}
+                            onElementHover={ctx.hovered.toggleHoveredElement}
                             isSignal={value().getter !== false}
                             isStale={value().getter === debug.PropGetterState.Stale}
+                            actions={[
+                                getValueActionInspect(value()),
+                            ]}
                         />
                     )}
                     </Entries>
@@ -447,8 +479,11 @@ export function InspectorView(): s.JSX.Element {
                             name={store.name}
                             value={store.value}
                             isExtended={store.extended}
-                            onClick={() => inspector.inspectValueItem(store)}
-                            onElementHover={hovered.toggleHoveredElement}
+                            onClick={() => ctx.inspector.inspectValueItem(store)}
+                            onElementHover={ctx.hovered.toggleHoveredElement}
+                            actions={[
+                                getValueActionInspect(store),
+                            ]}
                         />
                     )}
                     </s.For>
@@ -459,21 +494,17 @@ export function InspectorView(): s.JSX.Element {
                         <ValueNode
                             name={signal.name}
                             value={signal.value}
-                            onClick={() => inspector.inspectValueItem(signal)}
-                            onElementHover={hovered.toggleHoveredElement}
+                            onClick={() => {
+                                ctx.inspector.inspectValueItem(signal)
+                            }}
+                            onElementHover={ctx.hovered.toggleHoveredElement}
                             isExtended={signal.extended}
-                            isInspected={inspector.isInspected(signal.id)}
+                            isInspected={ctx.inspector.isInspected(signal.id)}
                             isSignal
-                            actions={[{
-                                icon: 'Graph',
-                                title: 'Open in Graph panel',
-                                onClick() {
-                                    s.batch(() => {
-                                        inspector.setInspectedSignal(signal.id)
-                                        setOpenPanel('dgraph')
-                                    })
-                                },
-                            }]}
+                            actions={[
+                                getValueActionInspect(signal),
+                                getValueActionGraph(signal),
+                            ]}
                         />
                     )}
                     </s.For>
@@ -485,60 +516,64 @@ export function InspectorView(): s.JSX.Element {
                             name={memo.name}
                             value={memo.value}
                             isExtended={memo.extended}
-                            onClick={() => inspector.inspectValueItem(memo)}
-                            onElementHover={hovered.toggleHoveredElement}
+                            onClick={() => ctx.inspector.inspectValueItem(memo)}
+                            onElementHover={ctx.hovered.toggleHoveredElement}
                             isSignal
-                            actions={[{
-                                icon: 'Graph',
-                                title: 'Open in Graph panel',
-                                onClick() {
-                                    s.batch(() => {
-                                        inspector.setInspectedOwner(memo.id)
-                                        setOpenPanel('dgraph')
-                                    })
-                                },
-                            }]}
+                            actions={[
+                                getValueActionInspect(memo),
+                                getValueActionGraph(memo),
+                            ]}
                         />
                     )}
                     </s.For>
                 </ListSignals>
-                <s.Show when={state.value || state.location}>
+                <s.Show when={
+                    ctx.inspector.state.value ||
+                    ctx.inspector.state.location
+                }>
                     <div>
                         <GroupTitle>
-                            {state.type ? debug.NODE_TYPE_NAMES[state.type] : 'Owner'}
+                            {ctx.inspector.state.type
+                                ? debug.NODE_TYPE_NAMES[ctx.inspector.state.type]
+                                : 'Owner'}
                         </GroupTitle>
-                        {state.value && (
+                        {ctx.inspector.state.value && (
                             <ValueNode
                                 name           = "value"
-                                value          = {state.value.value}
-                                isExtended     = {state.value.extended}
-                                onClick        = {() => inspector.inspectValueItem(state.value!)}
-                                onElementHover = {hovered.toggleHoveredElement}
+                                value          = {ctx.inspector.state.value.value}
+                                isExtended     = {ctx.inspector.state.value.extended}
+                                onClick        = {() => {
+                                    ctx.inspector.inspectValueItem(ctx.inspector.state.value!)
+                                }}
+                                onElementHover = {ctx.hovered.toggleHoveredElement}
                                 isSignal       = {
-                                    state.type === debug.NodeType.Computation ||
-                                    state.type === debug.NodeType.CatchError ||
-                                    state.type === debug.NodeType.Effect ||
-                                    state.type === debug.NodeType.Memo ||
-                                    state.type === debug.NodeType.Refresh ||
-                                    state.type === debug.NodeType.Render ||
-                                    state.type === debug.NodeType.Signal ||
-                                    state.type === debug.NodeType.Store ||
-                                    state.hmr
+                                    ctx.inspector.state.type === debug.NodeType.Computation ||
+                                    ctx.inspector.state.type === debug.NodeType.CatchError ||
+                                    ctx.inspector.state.type === debug.NodeType.Effect ||
+                                    ctx.inspector.state.type === debug.NodeType.Memo ||
+                                    ctx.inspector.state.type === debug.NodeType.Refresh ||
+                                    ctx.inspector.state.type === debug.NodeType.Render ||
+                                    ctx.inspector.state.type === debug.NodeType.Signal ||
+                                    ctx.inspector.state.type === debug.NodeType.Store ||
+                                    ctx.inspector.state.hmr
                                 }
+                                actions={[
+                                    getValueActionInspect(ctx.inspector.state.value),
+                                ]}
                             />
                         )}
-                        {state.location && (
+                        {ctx.inspector.state.location && (
                             <ValueNode
                                 name="location"
                                 value={{
                                     type: debug.ValueType.String,
-                                    value: state.location,
+                                    value: ctx.inspector.state.location,
                                 }}
                                 actions={[
                                     {
                                         icon: 'Code',
                                         title: 'Open component location',
-                                        onClick: inspector.openComponentLocation,
+                                        onClick: ctx.inspector.openComponentLocation,
                                     },
                                 ]}
                             />
@@ -568,7 +603,7 @@ const CollapsableObjectPreview: s.Component<{
                 return (
                     <s.Show
                         when={decode.isValueNested(value())}
-                        children={s.untrack(() => {
+                        children={_ => {
                             const [extended, setExtended] = s.createSignal(false)
                             return (
                                 <ValueNode
@@ -578,7 +613,7 @@ const CollapsableObjectPreview: s.Component<{
                                     isExtended={extended()}
                                 />
                             )
-                        })}
+                        }}
                         fallback={<ValueNode name={key} value={value()} />}
                     />
                 )
@@ -598,8 +633,14 @@ const ObjectValuePreview: s.Component<{
 }> = props => {
     return (
         <s.Show
-            when={props.data.value && props.data.length && props.extended}
-            children={<CollapsableObjectPreview value={props.data.value!} />}
+            when={
+                props.data.value &&
+                props.data.length &&
+                props.extended
+            }
+            children={
+                <CollapsableObjectPreview value={props.data.value!} />
+            }
             fallback={
                 <s.Show
                     when={props.data.length}
@@ -631,7 +672,6 @@ const value_element_container = clsx(
     value_element_container_class,
     ui.tag_brackets,
     value_base,
-    ui.highlight_container,
     'text-dom',
 )
 
@@ -648,9 +688,6 @@ export const value_node_styles = /*css*/ `
     .${value_element_container_class}:after {
         content: '>';
         color: ${theme.vars.disabled};
-    }
-    .${value_element_container_class}:hover {
-        ${ui.highlight_opacity_var}: 0.6;
     }
     /**/
 `
@@ -735,7 +772,6 @@ const ValuePreview: s.Component<{
 
             return (
                 <span class={value_element_container} aria-label={props.label} {...hoverProps}>
-                    <div class={ui.highlight_element} />
                     {value.name}
                 </span>
             )
@@ -785,6 +821,12 @@ function createNestedHover(): NestedHover {
     }
 }
 
+export type ValueNodeAction = {
+    icon:    keyof typeof ui.icon;
+    title?:  string;
+    onClick: () => void
+}
+
 export const ValueNode: s.Component<{
     value: decode.DecodedValue
     name: string | undefined
@@ -798,7 +840,7 @@ export const ValueNode: s.Component<{
     isStale?: boolean
     onClick?: VoidFunction
     onElementHover?: ToggleElementHover
-    actions?: {icon: keyof typeof ui.Icon; title?: string; onClick: VoidFunction}[]
+    actions?: (ValueNodeAction | FalsyValue)[]
     class?: string
 }> = props => {
     const ctx = s.useContext(ValueContext)
@@ -827,6 +869,9 @@ export const ValueNode: s.Component<{
                 'font-mono leading-inspector_row',
                 props.isStale && 'opacity-60',
             )}
+            style={{
+                [ui.highlight_opacity_var]: isHovered() ? '0.3' : '0',
+            }}
             {...(props.name && {'aria-label': `${props.name} signal`})}
             {...hoverProps}
         >
@@ -841,7 +886,6 @@ export const ValueNode: s.Component<{
                 class={clsx(
                     ui.highlight_element,
                     'b b-solid b-highlight-border',
-                    isHovered() ? 'opacity-30' : 'opacity-0',
                 )}
             />
 
@@ -866,26 +910,24 @@ export const ValueNode: s.Component<{
                 <div
                     class={clsx(
                         'absolute z-2 top-0 right-2 h-inspector_row',
-                        'flex justify-end items-center',
+                        'flex justify-end items-center gap-1',
                         'transition-opacity',
-                        isHovered()
-                            ? 'opacity-55 hover:opacity-80 active:opacity-100'
-                            : 'opacity-0',
+                        isHovered() ? 'opacity-100' : 'opacity-0',
                     )}
                 >
-                    <s.For each={props.actions}>
-                        {action => {
-                            const IconComponent = ui.Icon[action.icon]
-                            return (
-                                <button
-                                    onClick={action.onClick}
-                                    class="center-child"
-                                    title={action.title}
-                                >
-                                    <IconComponent class="h-4 w-4" />
-                                </button>
-                            )
-                        }}
+                    <s.For each={props.actions.filter(Boolean)}>
+                        {action => <>
+                            <button
+                                onClick={action.onClick}
+                                class={clsx(
+                                    'center-child',
+                                    'opacity-55 hover:opacity-80 active:opacity-100',
+                                )}
+                                title={action.title}
+                            >
+                                <ui.Icon icon={action.icon} class="h-4 w-4" />
+                            </button>
+                        </>}
                     </s.For>
                 </div>
             )}
