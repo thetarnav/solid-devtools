@@ -23,24 +23,18 @@ let IgnoreNextSeen: boolean
 
 const encodeNonObject = (value: unknown): EncodedValue => {
     switch (typeof value) {
-        case 'number':
-            if (value === Infinity) return [ValueType.Number, INFINITY]
-            if (value === -Infinity) return [ValueType.Number, NEGATIVE_INFINITY]
-            if (isNaN(value)) return [ValueType.Number, NAN]
-            return [ValueType.Number, value]
-        case 'boolean':
-            return [ValueType.Boolean, value]
-        case 'string':
-            return [ValueType.String, value]
-        case 'symbol':
-            return [ValueType.Symbol, value.description || '']
-        case 'function':
-            return [ValueType.Function, value.name]
-        case 'object':
-            return [ValueType.Null, null]
-        case 'bigint':
-        case 'undefined':
-            return [ValueType.Null, UNDEFINED]
+    case 'number':
+        if (value === Infinity)  return [ValueType.Number, INFINITY]
+        if (value === -Infinity) return [ValueType.Number, NEGATIVE_INFINITY]
+        if (isNaN(value))        return [ValueType.Number, NAN]
+                                 return [ValueType.Number, value]
+    case 'boolean':   return [ValueType.Boolean, value]
+    case 'string':    return [ValueType.String, value]
+    case 'symbol':    return [ValueType.Symbol, value.description || '']
+    case 'function':  return [ValueType.Function, value.name]
+    case 'object':    return [ValueType.Null, null]
+    case 'bigint':
+    case 'undefined': return [ValueType.Null, UNDEFINED]
     }
 }
 
