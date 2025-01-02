@@ -42,7 +42,6 @@ export namespace Solid {
     export type Root = OwnerBase & {
         attachedTo?: Owner
         isDisposed?: true
-        isInternal?: true
 
         context: null
         fn?: never

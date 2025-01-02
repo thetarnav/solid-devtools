@@ -84,8 +84,8 @@ export function attachDebugger(owner = setup.solid.getOwner()): void {
     let isFirstTopLevel = true
     while (owner) {
         if (isSolidRoot(owner)) {
-            // INTERNAL | disposed
-            if (owner.isInternal || owner.isDisposed) return
+            // disposed
+            if (owner.isDisposed) return
             // already attached
             if (RootMap.has(getSdtId(owner, ObjectType.Owner))) {
                 isFirstTopLevel = false
@@ -149,7 +149,7 @@ export function unobserveAllRoots(): void {
 export function getTopRoot(owner: Solid.Owner): Solid.Root | null {
     let root: Solid.Root | null = null
     do {
-        if (isSolidRoot(owner) && !owner.isInternal && !owner.isDisposed) root = owner
+        if (isSolidRoot(owner) && !owner.isDisposed) root = owner
         owner = owner.owner!
         // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     } while (owner)
