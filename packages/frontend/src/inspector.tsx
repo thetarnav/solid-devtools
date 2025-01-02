@@ -15,22 +15,27 @@ import * as decode from './decode.ts'
 
 export namespace Inspector {
     export type ValueItem = {
-        itemId: debug.ValueItemID
-        extended: boolean
+        itemId:      debug.ValueItemID
+        extended:    s.Accessor<boolean>
         setExtended: s.Setter<boolean>
-        value: decode.DecodedValue
-        setValue: s.Setter<decode.DecodedValue>
+        value:       s.Accessor<decode.DecodedValue>
+        setValue:    s.Setter<decode.DecodedValue>
     }
 
-    export type Signal = ValueItem & {
-        type: debug.NodeType.Signal | debug.NodeType.Memo | debug.NodeType.Store
-        name: string | undefined
-        id: debug.NodeID
+    export type Signal = {
+        item:        ValueItem
+        type:        debug.NodeType.Signal |
+                     debug.NodeType.Memo |
+                     debug.NodeType.Store |
+                     debug.NodeType.CustomValue
+        name:        string | undefined
+        id:          debug.NodeID
     }
 
-    export type Prop = ValueItem & {
-        getter: debug.PropGetterState | false
-        setGetter: s.Setter<debug.PropGetterState>
+    export type Prop = {
+        item:        ValueItem
+        getter:      s.Accessor<debug.PropGetterState | false>
+        setGetter:   s.Setter<debug.PropGetterState>
     }
 
     export type Props = {
@@ -55,29 +60,9 @@ function createValueItem(
     itemId: debug.ValueItemID,
     initValue: decode.DecodedValue,
 ): Inspector.ValueItem {
-    const [selected, setSelected] = s.createSignal(false)
+    const [extended, setExtended] = s.createSignal(false)
     const [value, setValue] = s.createSignal<decode.DecodedValue>(initValue)
-    return {
-        itemId,
-        get extended() {
-            return selected()
-        },
-        setExtended: setSelected,
-        get value() {
-            return value()
-        },
-        setValue,
-    }
-}
-
-function createSignalItem(
-    id: debug.NodeID,
-    type: debug.NodeType.Signal | debug.NodeType.Memo | debug.NodeType.Store,
-    name: string | undefined,
-    initValue: decode.DecodedValue,
-): Inspector.Signal {
-    const valueItem = createValueItem(`${debug.ValueItemType.Signal}:${id}`, initValue)
-    return s.mergeProps(valueItem, {type, name, id})
+    return {itemId, extended, setExtended, value, setValue}
 }
 
 function createPropItem(
@@ -87,12 +72,11 @@ function createPropItem(
 ): Inspector.Prop {
     const valueItem = createValueItem(`${debug.ValueItemType.Prop}:${property}`, initValue)
     const [getter, setGetter] = s.createSignal(initGetterState)
-    return s.mergeProps(valueItem, {
-        get getter() {
-            return getter()
-        },
-        setGetter: setGetter as any,
-    })
+    return {
+        item:      valueItem,
+        getter:    getter,
+        setGetter: setGetter as s.Setter<debug.PropGetterState>,
+    }
 }
 
 /**
@@ -221,8 +205,8 @@ export default function createInspector(
 
         // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
         switch (type) {
-        case debug.ValueItemType.Signal: return state.signals[id]
-        case debug.ValueItemType.Prop:   return state.props?.record[id]
+        case debug.ValueItemType.Signal: return state.signals[id]?.item
+        case debug.ValueItemType.Prop:   return state.props?.record[id]?.item
         case debug.ValueItemType.Value:  return state.value ?? undefined
         }
     }
@@ -243,22 +227,27 @@ export default function createInspector(
             // (replace it with the new one)
             if (!id || id !== raw.id) setInspectedOwner(raw.id)
 
+            let signals: Inspector.State['signals'] = {}
+            for (let signal of raw.signals) {
+
+                let item_id: debug.ValueItemID = `${debug.ValueItemType.Signal}:${signal.id}`
+                let value = decode.decodeValue(signal.value, null, storeNodeMap)
+                let item = createValueItem(item_id, value)
+
+                signals[signal.id] = {
+                    item: item,
+                    id:   signal.id,
+                    name: signal.name,
+                    type: signal.type,
+                }
+            }
+
             setState({
                 name: raw.name,
                 type: raw.type,
                 hmr:  raw.hmr ?? false,
                 location: raw.location?.file ?? null,
-                signals: raw.signals.reduce(
-                    (signals, s) => {
-                        signals[s.id] = createSignalItem(
-                            s.id,
-                            s.type,
-                            s.name,
-                            decode.decodeValue(s.value, null, storeNodeMap))
-                        return signals
-                    },
-                    {} as Inspector.State['signals'],
-                ),
+                signals: signals,
                 value: raw.value
                     ? createValueItem(
                         debug.ValueItemType.Value,
@@ -299,7 +288,7 @@ export default function createInspector(
                         break
                     }
 
-                    value_item.setValue(decode.decodeValue(value, value_item.value, storeNodeMap))
+                    value_item.setValue(decode.decodeValue(value, value_item.value(), storeNodeMap))
 
                     break
                 }
@@ -312,8 +301,9 @@ export default function createInspector(
                         break
                     }
 
-                    if (decode.isObjectType(value_item.value)) {
-                        decode.updateCollapsedValue(value_item.value, value, storeNodeMap)
+                    let value_item_value = value_item.value()
+                    if (decode.isObjectType(value_item_value)) {
+                        decode.updateCollapsedValue(value_item_value, value, storeNodeMap)
                     }
 
                     break
@@ -347,7 +337,7 @@ export default function createInspector(
      * Toggle the inspection of a value item (signal, prop, or owner value)
      */
     function inspectValueItem(item: Inspector.ValueItem, selected?: boolean): void {
-        if (selected !== undefined && item.extended === selected) return
+        if (selected !== undefined && item.extended() === selected) return
         selected = item.setExtended(p => selected ?? !p)
         output.emit(msg('InspectValue', {id: item.itemId, selected}))
     }
@@ -399,7 +389,7 @@ export function InspectorView(): s.JSX.Element {
 
     function getValueActionInspect(item: Inspector.ValueItem): ValueNodeAction | undefined {
 
-        if (item.value.type !== debug.ValueType.Unknown) {
+        if (item.value().type !== debug.ValueType.Unknown) {
             return {
                 icon:  'Eye',
                 title: 'Inspect',
@@ -423,17 +413,21 @@ export function InspectorView(): s.JSX.Element {
     }
 
     const valueItems = s.createMemo(() => {
-        const memos:   Inspector.Signal[] = []
-        const signals: Inspector.Signal[] = []
-        const stores:  Inspector.Signal[] = []
-        for (const signal of Object.values(ctx.inspector.state.signals)) {
+        let r = {
+            custom_values: [] as Inspector.Signal[],
+            signals:       [] as Inspector.Signal[],
+            stores:        [] as Inspector.Signal[],
+            memos:         [] as Inspector.Signal[],
+        }
+        for (let signal of Object.values(ctx.inspector.state.signals)) {
             switch (signal.type) {
-            case debug.NodeType.Memo:   memos.push(signal)   ;break
-            case debug.NodeType.Signal: signals.push(signal) ;break
-            case debug.NodeType.Store:  stores.push(signal)  ;break
+            case debug.NodeType.CustomValue: r.custom_values.push(signal) ;break
+            case debug.NodeType.Signal:      r.signals.push(signal)       ;break
+            case debug.NodeType.Store:       r.stores.push(signal)        ;break
+            case debug.NodeType.Memo:        r.memos.push(signal)         ;break
             }
         }
-        return {memos, signals, stores}
+        return r
     })
 
     return (
@@ -449,31 +443,53 @@ export function InspectorView(): s.JSX.Element {
                     <Entries of={ctx.inspector.state.props!.record}>
                     {(name, value) => (
                         <ValueNode
-                            name={name}
-                            value={value().value}
-                            isExtended={value().extended}
-                            onClick={() => ctx.inspector.inspectValueItem(value())}
-                            onElementHover={ctx.hovered.toggleHoveredElement}
-                            isSignal={value().getter !== false}
-                            isStale={value().getter === debug.PropGetterState.Stale}
-                            actions={[
-                                getValueActionInspect(value()),
+                            name           = {name}
+                            value          = {value().item.value()}
+                            isExtended     = {value().item.extended()}
+                            isSignal       = {value().getter() !== false}
+                            isStale        = {value().getter() === debug.PropGetterState.Stale}
+                            onElementHover = {ctx.hovered.toggleHoveredElement}
+                            onClick        = {() => {
+                                ctx.inspector.inspectValueItem(value().item)
+                            }}
+                            actions        = {[
+                                getValueActionInspect(value().item),
                             ]}
                         />
                     )}
                     </Entries>
                 </ListSignals>
+                <ListSignals when={valueItems().custom_values.length} title="Custom Values">
+                    <s.For each={valueItems().custom_values}>
+                    {sig => (
+                        <ValueNode
+                            name           = {sig.name}
+                            value          = {sig.item.value()}
+                            isExtended     = {sig.item.extended()}
+                            onElementHover = {ctx.hovered.toggleHoveredElement}
+                            onClick        = {() => {
+                                ctx.inspector.inspectValueItem(sig.item)
+                            }}
+                            actions        = {[
+                                getValueActionInspect(sig.item),
+                            ]}
+                        />
+                    )}
+                    </s.For>
+                </ListSignals>
                 <ListSignals when={valueItems().stores.length} title="Stores">
                     <s.For each={valueItems().stores}>
                     {store => (
                         <ValueNode
-                            name={store.name}
-                            value={store.value}
-                            isExtended={store.extended}
-                            onClick={() => ctx.inspector.inspectValueItem(store)}
-                            onElementHover={ctx.hovered.toggleHoveredElement}
-                            actions={[
-                                getValueActionInspect(store),
+                            name           = {store.name}
+                            value          = {store.item.value()}
+                            isExtended     = {store.item.extended()}
+                            onElementHover = {ctx.hovered.toggleHoveredElement}
+                            onClick        = {() => {
+                                ctx.inspector.inspectValueItem(store.item)
+                            }}
+                            actions        = {[
+                                getValueActionInspect(store.item),
                             ]}
                         />
                     )}
@@ -483,17 +499,17 @@ export function InspectorView(): s.JSX.Element {
                     <s.For each={valueItems().signals}>
                     {signal => (
                         <ValueNode
-                            name={signal.name}
-                            value={signal.value}
-                            onClick={() => {
-                                ctx.inspector.inspectValueItem(signal)
-                            }}
-                            onElementHover={ctx.hovered.toggleHoveredElement}
-                            isExtended={signal.extended}
-                            isInspected={ctx.inspector.isInspected(signal.id)}
+                            name           = {signal.name}
+                            value          = {signal.item.value()}
+                            isExtended     = {signal.item.extended()}
+                            isInspected    = {ctx.inspector.isInspected(signal.id)}
                             isSignal
-                            actions={[
-                                getValueActionInspect(signal),
+                            onElementHover = {ctx.hovered.toggleHoveredElement}
+                            onClick        = {() => {
+                                ctx.inspector.inspectValueItem(signal.item)
+                            }}
+                            actions        = {[
+                                getValueActionInspect(signal.item),
                                 getValueActionGraph(signal),
                             ]}
                         />
@@ -504,14 +520,16 @@ export function InspectorView(): s.JSX.Element {
                     <s.For each={valueItems().memos}>
                     {memo => (
                         <ValueNode
-                            name={memo.name}
-                            value={memo.value}
-                            isExtended={memo.extended}
-                            onClick={() => ctx.inspector.inspectValueItem(memo)}
-                            onElementHover={ctx.hovered.toggleHoveredElement}
+                            name           = {memo.name}
+                            value          = {memo.item.value()}
+                            isExtended     = {memo.item.extended()}
                             isSignal
-                            actions={[
-                                getValueActionInspect(memo),
+                            onElementHover = {ctx.hovered.toggleHoveredElement}
+                            onClick        = {() => {
+                                ctx.inspector.inspectValueItem(memo.item)
+                            }}
+                            actions        = {[
+                                getValueActionInspect(memo.item),
                                 getValueActionGraph(memo),
                             ]}
                         />
@@ -531,8 +549,8 @@ export function InspectorView(): s.JSX.Element {
                         {ctx.inspector.state.value && (
                             <ValueNode
                                 name           = "value"
-                                value          = {ctx.inspector.state.value.value}
-                                isExtended     = {ctx.inspector.state.value.extended}
+                                value          = {ctx.inspector.state.value.value()}
+                                isExtended     = {ctx.inspector.state.value.extended()}
                                 onClick        = {() => {
                                     ctx.inspector.inspectValueItem(ctx.inspector.state.value!)
                                 }}

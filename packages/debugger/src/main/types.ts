@@ -87,6 +87,7 @@ export type OnStoreNodeUpdate = Solid.OnStoreNodeUpdate & {
 //
 
 export namespace Mapped {
+
     export interface Owner {
         id: NodeID
         type: Exclude<NodeType, NodeType.Refresh | NodeType.Signal | NodeType.Store>
@@ -99,10 +100,10 @@ export namespace Mapped {
         frozen?: true
     }
 
-    export interface Signal {
-        type: NodeType.Signal | NodeType.Memo | NodeType.Store
+    export interface SourceValue {
+        type:  NodeType.Signal | NodeType.Memo | NodeType.Store | NodeType.CustomValue
         name?: string
-        id: NodeID
+        id:    NodeID
         value: EncodedValue[]
     }
 
@@ -118,7 +119,7 @@ export namespace Mapped {
         name?:     string
         type:      NodeType
         props?:    Props
-        signals:   Signal[]
+        signals:   SourceValue[]
         /** for computations */
         value?:    EncodedValue[]
         // component with a location

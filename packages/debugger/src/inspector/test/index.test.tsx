@@ -1,13 +1,6 @@
 import '../../setup.ts'
 
-import {
-    createComputed,
-    createMemo,
-    createRenderEffect,
-    createRoot,
-    createSignal,
-    JSX,
-} from 'solid-js'
+import * as s from 'solid-js'
 import {beforeEach, describe, expect, it, vi} from 'vitest'
 import {getObjectById, getSdtId, ObjectType} from '../../main/id.ts'
 import setup from '../../main/setup.ts'
@@ -22,33 +15,36 @@ vi.mock('../../main/get-id', () => ({getNewSdtId: () => '#' + mockLAST_ID++}))
 
 describe('collectOwnerDetails', () => {
     it('collects focused owner details', () => {
-        createRoot(dispose => {
-            const [s] = createSignal(0, {name: 'source'})
+        s.createRoot(dispose => {
+            const [source] = s.createSignal(0, {name: 'source'})
 
             let memo!: Solid.Owner
             const div = document.createElement('div')
 
-            createComputed(
-                () => {
-                    const focused = createMemo(
-                        () => {
-                            memo = setup.solid.getOwner()!
-                            s()
-                            createSignal(div, {name: 'element'})
-                            const m = createMemo(() => 0, undefined, {name: 'memo'})
-                            createRenderEffect(m, undefined, {name: 'render'})
-                            return 'value'
-                        },
-                        undefined,
-                        {name: 'focused'},
-                    )
-                    focused()
-                },
-                undefined,
-                {name: 'WRAPPER'},
-            )
+            s.createComputed(() => {
 
-            const [signalB] = memo.sourceMap as [Solid.Signal]
+                const focused = s.createMemo(() => {
+                    
+                    memo = setup.solid.getOwner()!
+                    
+                    source()
+
+                    s.DEV!.registerGraph({
+                        value: {foo: 123},
+                        name:  'custom value',
+                    })
+                    s.createSignal(div, {name: 'element'})
+                    const m = s.createMemo(() => 0, undefined, {name: 'memo'})
+                    s.createRenderEffect(m, undefined, {name: 'render'})
+
+                    return 'value'
+                }, undefined, {name: 'focused'})
+
+                focused()
+
+            }, undefined, {name: 'WRAPPER'})
+
+            const [customValue, signalB] = memo.sourceMap as [Solid.SourceMapValue, Solid.Signal]
             const [innerMemo] = memo.owned as [Solid.Memo, Solid.Computation]
 
             const {details, valueMap} = collectOwnerDetails(memo, {
@@ -68,10 +64,16 @@ describe('collectOwnerDetails', () => {
                 value: [[ValueType.String, 'value']],
                 signals: [
                     {
+                        type: NodeType.CustomValue,
+                        id: getSdtId(customValue, ObjectType.CustomValue),
+                        name: 'custom value',
+                        value: [[ValueType.Object, 1]],
+                    },
+                    {
                         type: NodeType.Signal,
                         id: getSdtId(signalB, ObjectType.Signal),
                         name: 'element',
-                        value: [[ValueType.Element, '#3:div']],
+                        value: [[ValueType.Element, '#4:div']],
                     },
                     {
                         type: NodeType.Memo,
@@ -82,27 +84,28 @@ describe('collectOwnerDetails', () => {
                 ],
             } satisfies Mapped.OwnerDetails)
 
+            expect(valueMap.get(`signal:${getSdtId(customValue, ObjectType.CustomValue)}`)).toBeTruthy()
             expect(valueMap.get(`signal:${getSdtId(signalB, ObjectType.Signal)}`)).toBeTruthy()
             expect(valueMap.get(`signal:${getSdtId(innerMemo, ObjectType.Owner)}`)).toBeTruthy()
 
-            expect(getObjectById('#3', ObjectType.Element)).toBe(div)
+            expect(getObjectById('#4', ObjectType.Element)).toBe(div)
 
             dispose()
         })
     })
 
     it('component props', () => {
-        createRoot(dispose => {
+        s.createRoot(dispose => {
             let owner!: Solid.Owner
             const TestComponent = (props: {
                 count: number
-                children: JSX.Element
+                children: s.JSX.Element
                 nested: {foo: number; bar: string}
             }) => {
                 owner = setup.solid.getOwner()!
                 return <div>{props.children}</div>
             }
-            createRenderEffect(() => (
+            s.createRenderEffect(() => (
                 <TestComponent count={123} nested={{foo: 1, bar: '2'}}>
                     <button>Click me</button>
                 </TestComponent>
@@ -150,13 +153,13 @@ describe('collectOwnerDetails', () => {
     })
 
     it('dynamic component props', () => {
-        createRoot(dispose => {
+        s.createRoot(dispose => {
             let owner!: Solid.Owner
-            const Button = (props: JSX.ButtonHTMLAttributes<HTMLButtonElement>) => {
+            const Button = (props: s.JSX.ButtonHTMLAttributes<HTMLButtonElement>) => {
                 owner = setup.solid.getOwner()!
                 return <button {...props}>Click me</button>
             }
-            createRenderEffect(() => {
+            s.createRenderEffect(() => {
                 const props = () =>
                     ({
                         onClick: () => {
@@ -205,11 +208,11 @@ describe('collectOwnerDetails', () => {
     })
 
     it('listens to value updates', () => {
-        createRoot(dispose => {
+        s.createRoot(dispose => {
             let owner!: Solid.Owner
 
-            const [count, setCount] = createSignal(0)
-            createMemo(() => {
+            const [count, setCount] = s.createSignal(0)
+            s.createMemo(() => {
                 owner = setup.solid.getOwner()!
                 return count()
             })
@@ -241,10 +244,10 @@ describe('collectOwnerDetails', () => {
     })
 
     it('listens to signal updates', () => {
-        createRoot(dispose => {
+        s.createRoot(dispose => {
             const owner = setup.solid.getOwner()!
-            const [, setCount] = createSignal(0) // id: "0"
-            const [, setCount2] = createSignal(0) // id: "1"
+            const [, setCount] = s.createSignal(0) // id: "0"
+            const [, setCount2] = s.createSignal(0) // id: "1"
 
             const onValueUpdate = vi.fn()
             collectOwnerDetails(owner, {

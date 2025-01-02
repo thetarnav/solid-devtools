@@ -3,7 +3,7 @@ import {NodeType} from './constants.ts'
 import {type Solid} from './types.ts'
 import setup from './setup.ts'
 
-export const isSolidOwner = (o: Solid.Owner | Solid.Store | Solid.Signal): o is Solid.Owner =>
+export const isSolidOwner = (o: Solid.SourceMapValue | Solid.Owner | Solid.Store | Solid.Signal): o is Solid.Owner =>
     'owned' in o
 
 export const isSolidComputation = (o: Solid.Owner): o is Solid.Computation =>
@@ -33,9 +33,13 @@ export const isSolidSignal = (o: Solid.SourceMapValue): o is Solid.Signal =>
     'observerSlots' in o &&
     'comparator' in o
 
-export function getNodeType(o: Solid.Signal | Solid.Owner | Solid.Store): NodeType {
-    if (isSolidOwner(o)) return getOwnerType(o)
-    return isSolidStore(o) ? NodeType.Store : NodeType.Signal
+export function getNodeType(
+    o: Solid.SourceMapValue | Solid.Signal | Solid.Owner | Solid.Store
+): NodeType {
+    if (isSolidOwner(o))  return getOwnerType(o)
+    if (isSolidStore(o))  return NodeType.Store
+    if (isSolidSignal(o)) return NodeType.Signal
+    else                  return NodeType.CustomValue
 }
 
 const SOLID_REFRESH_PREFIX = '[solid-refresh]'

@@ -164,38 +164,35 @@ let PropsMap: ObservedPropsMap
 
 const $INSPECTOR = Symbol('inspector')
 
-const typeToObjectTypeMap = {
-    [NodeType.Signal]: ObjectType.Signal,
-    [NodeType.Memo]: ObjectType.Owner,
-    [NodeType.Store]: ObjectType.Store,
-}
-
 function mapSourceValue(
-    node: Solid.SourceMapValue | Solid.Memo | Solid.Store,
+    node:    Solid.SourceMapValue | Solid.Computation,
     handler: (nodeId: NodeID, value: unknown) => void,
-    isMemo: boolean,
-): Mapped.Signal | null {
-    const type = isMemo
-        ? NodeType.Memo
-        : utils.isSolidStore(node)
-          ? NodeType.Store
-          : utils.isSolidSignal(node)
-            ? NodeType.Signal
-            : null
+): Mapped.SourceValue | null {
 
-    if (!type) return null
+    let type = utils.getNodeType(node)
+    let {value} = node
+    let id: NodeID
 
-    const {value} = node,
-        id = getSdtId(node, typeToObjectTypeMap[type])
+    // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
+    switch (type) {
+    case NodeType.Memo:        id = getSdtId(node as Solid.Memo,           ObjectType.Owner)       ;break
+    case NodeType.Signal:      id = getSdtId(node as Solid.Signal,         ObjectType.Signal)      ;break
+    case NodeType.Store:       id = getSdtId(node as Solid.Store,          ObjectType.Store)       ;break
+    case NodeType.CustomValue: id = getSdtId(node as Solid.SourceMapValue, ObjectType.CustomValue) ;break
+    default:
+        return null
+    }
 
     ValueMap.add(`${ValueItemType.Signal}:${id}`, () => node.value)
 
-    if (type !== NodeType.Store) observeValueUpdate(node, v => handler(id, v), $INSPECTOR)
+    if (type === NodeType.Memo || type === NodeType.Signal) {
+        observeValueUpdate(node, v => handler(id, v), $INSPECTOR)
+    }
 
     return {
-        type,
-        name: utils.getNodeName(node),
-        id,
+        type:  type,
+        name:  utils.getNodeName(node),
+        id:    id,
         value: encodeValue(value, false),
     }
 }
@@ -299,7 +296,7 @@ export const collectOwnerDetails = /*#__PURE__*/ untrackedCallback(function (
             // marge component with refresh memo
             const refresh = utils.getComponentRefreshNode(owner)
             if (refresh) {
-                
+
                 sourceMap = refresh.sourceMap
                 owned     = refresh.owned
                 getValue  = () => refresh.value
@@ -334,7 +331,7 @@ export const collectOwnerDetails = /*#__PURE__*/ untrackedCallback(function (
     // map signals
     if (sourceMap) {
         for (const signal of sourceMap) {
-            const mapped = mapSourceValue(signal, onSignalUpdate, false)
+            const mapped = mapSourceValue(signal, onSignalUpdate)
             mapped && details.signals.push(mapped)
         }
     }
@@ -342,8 +339,7 @@ export const collectOwnerDetails = /*#__PURE__*/ untrackedCallback(function (
     // map memos
     if (owned) {
         for (const node of owned) {
-            if (!utils.isSolidMemo(node)) continue
-            const mapped = mapSourceValue(node, onSignalUpdate, true)
+            const mapped = mapSourceValue(node, onSignalUpdate)
             mapped && details.signals.push(mapped)
         }
     }

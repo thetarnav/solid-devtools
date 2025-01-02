@@ -120,6 +120,9 @@ const createComponent = (content: () => s.JSX.Element) => {
 }
 
 const App: s.Component = () => {
+
+    s.DEV?.registerGraph({value: {foo: 123}, name: 'my_custom_value'})
+
     const [count, setCount] = s.createSignal(0)
     const [showEven, setShowEven] = s.createSignal(false)
     const fnSig = s.createSignal({fn: () => {}}, {equals: (a, b) => a.fn === b.fn})

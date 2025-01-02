@@ -2,19 +2,21 @@ import {getNewSdtId} from './get-id.ts'
 import {type NodeID, type Solid} from './types.ts'
 
 export const enum ObjectType {
-    Owner     = 'owner',
-    Element   = 'element',
-    Signal    = 'signal',
-    Store     = 'store',
-    StoreNode = 'store-node',
+    Owner       = 'OWNER',
+    Element     = 'ELEMENT',
+    Signal      = 'SIGNAL',
+    Store       = 'STORE',
+    StoreNode   = 'STORE_NODE',
+    CustomValue = 'CUSTOM_VALUE',
 }
 
 type ValueMap = {
-    [ObjectType.Owner]:     Solid.Owner
-    [ObjectType.Element]:   Element
-    [ObjectType.Signal]:    Solid.Signal
-    [ObjectType.Store]:     Solid.Store
-    [ObjectType.StoreNode]: Solid.StoreNode
+    [ObjectType.Owner]:       Solid.Owner
+    [ObjectType.Element]:     Element
+    [ObjectType.Signal]:      Solid.Signal
+    [ObjectType.Store]:       Solid.Store
+    [ObjectType.StoreNode]:   Solid.StoreNode
+    [ObjectType.CustomValue]: Solid.SourceMapValue
 }
 
 const WeakIdMap = new WeakMap<ValueMap[ObjectType], NodeID>()
@@ -22,11 +24,12 @@ const WeakIdMap = new WeakMap<ValueMap[ObjectType], NodeID>()
 const RefMapMap: {
     readonly [T in ObjectType]: Map<NodeID, WeakRef<ValueMap[T]>>
 } = {
-    [ObjectType.Owner]: new Map(),
-    [ObjectType.Element]: new Map(),
-    [ObjectType.Signal]: new Map(),
-    [ObjectType.Store]: new Map(),
-    [ObjectType.StoreNode]: new Map(),
+    [ObjectType.Owner]:       new Map(),
+    [ObjectType.Element]:     new Map(),
+    [ObjectType.Signal]:      new Map(),
+    [ObjectType.Store]:       new Map(),
+    [ObjectType.StoreNode]:   new Map(),
+    [ObjectType.CustomValue]: new Map(),
 }
 
 const CleanupRegistry = new FinalizationRegistry((data: {map: ObjectType; id: NodeID}) => {
