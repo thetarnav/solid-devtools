@@ -119,6 +119,8 @@ const createComponent = (content: () => s.JSX.Element) => {
     return Content
 }
 
+const [someUnusedTopLevelSignal, setSomeUnusedTopLevelSignal] = s.createSignal(123)
+
 const App: s.Component = () => {
 
     s.DEV?.registerGraph({value: {foo: 123}, name: 'my_custom_value'})

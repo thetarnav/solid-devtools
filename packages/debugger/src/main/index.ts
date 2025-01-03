@@ -8,6 +8,7 @@ import {createLocator} from '../locator/index.ts'
 import {createStructure} from '../structure/index.ts'
 import {DebuggerModule, DEFAULT_MAIN_VIEW, DevtoolsMainView} from './constants.ts'
 import {getObjectById, getSdtId, ObjectType} from './id.ts'
+import {initRoots} from './roots.ts'
 import setup from './setup.ts'
 import {
     INSPECTED_STATE_NULL,
@@ -20,6 +21,8 @@ import {
 } from './types.ts'
 
 function createDebugger() {
+
+    initRoots()
 
     const _output_listeners: OutputListener[] = []
     
@@ -107,7 +110,7 @@ function createDebugger() {
         if (data == null) {
             setInspectedState(INSPECTED_STATE_NULL)
         } else {
-            let ownerId  = data.ownerId  && getObjectById(data.ownerId, ObjectType.Owner)   && data.ownerId
+            let ownerId  = data.ownerId  && getObjectById(data.ownerId,  ObjectType.Owner)  && data.ownerId
             let signalId = data.signalId && getObjectById(data.signalId, ObjectType.Signal) && data.signalId
             let treeWalkerOwnerId = getTreeWalkerOwnerId(ownerId)
             setInspectedState({ownerId, signalId, treeWalkerOwnerId})
@@ -199,14 +202,6 @@ function createDebugger() {
     s.createEffect(defer(modules.locatorKeyPressSignal, state => {
         emitOutput(msg('LocatorModeChange', state))
     }))
-
-    console.log(setup.unowned.signals)
-    setup.unowned.onSignalAdded = (ref, idx) => {
-        console.log('unowned.onSignalAdded', ref.deref(), idx)
-    }
-    setup.unowned.onSignalRemoved = (ref, idx) => {
-        console.log('unowned.onSignalRemoved', ref.deref(), idx)
-    }
     
     function emitInput(e: InputMessage) {
     

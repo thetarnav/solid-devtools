@@ -73,7 +73,7 @@ describe('collectOwnerDetails', () => {
                         type: NodeType.Signal,
                         id: getSdtId(signalB, ObjectType.Signal),
                         name: 'element',
-                        value: [[ValueType.Element, '#4:div']],
+                        value: [[ValueType.Element, '#3:div']],
                     },
                     {
                         type: NodeType.Memo,
@@ -88,7 +88,7 @@ describe('collectOwnerDetails', () => {
             expect(valueMap.get(`signal:${getSdtId(signalB, ObjectType.Signal)}`)).toBeTruthy()
             expect(valueMap.get(`signal:${getSdtId(innerMemo, ObjectType.Owner)}`)).toBeTruthy()
 
-            expect(getObjectById('#4', ObjectType.Element)).toBe(div)
+            expect(getObjectById('#3', ObjectType.Element)).toBe(div)
 
             dispose()
         })
@@ -124,11 +124,11 @@ describe('collectOwnerDetails', () => {
             dispose()
 
             expect(details).toEqual({
-                id: '#1',
+                id: '#0',
                 name: 'TestComponent',
                 type: NodeType.Component,
                 signals: [],
-                value: [[ValueType.Element, '#2:div']],
+                value: [[ValueType.Element, '#1:div']],
                 props: {
                     proxy: false,
                     record: {
@@ -148,7 +148,7 @@ describe('collectOwnerDetails', () => {
                 },
             } satisfies Mapped.OwnerDetails)
 
-            expect(getObjectById('#2', ObjectType.Element)).toBeInstanceOf(HTMLDivElement)
+            expect(getObjectById('#1', ObjectType.Element)).toBeInstanceOf(HTMLDivElement)
         })
     })
 
@@ -181,11 +181,11 @@ describe('collectOwnerDetails', () => {
             })
 
             expect(details).toEqual({
-                id: '#1',
+                id: '#0',
                 name: 'Button',
                 type: NodeType.Component,
                 signals: [],
-                value: [[ValueType.Element, '#2:button']],
+                value: [[ValueType.Element, '#1:button']],
                 props: {
                     proxy: true,
                     record: {
@@ -201,7 +201,7 @@ describe('collectOwnerDetails', () => {
                 },
             } satisfies Mapped.OwnerDetails)
 
-            expect(getObjectById('#2', ObjectType.Element)).toBeInstanceOf(HTMLButtonElement)
+            expect(getObjectById('#1', ObjectType.Element)).toBeInstanceOf(HTMLButtonElement)
 
             dispose()
         })

@@ -1,10 +1,21 @@
 import {warn} from '@solid-devtools/shared/utils'
-import {clearComponentRegistry} from './component-registry.ts'
 import {NodeType} from './constants.ts'
 import {ObjectType, getSdtId} from './id.ts'
 import setup from './setup.ts'
 import {type NodeID, type Solid} from './types.ts'
 import {isSolidRoot, onOwnerCleanup} from './utils.ts'
+
+/**
+ * a fake root for collecting signals used top-level
+ */
+export const UNOWNED_ROOT: Solid.Root = {
+    cleanups: null,
+    owned:    null,
+    context:  null,
+    owner:    null,
+    name:     'UNOWNED',
+    sdtType:  NodeType.Root,
+}
 
 // ROOTS
 // map of all top-roots
@@ -134,13 +145,22 @@ export function attachDebugger(owner = setup.solid.getOwner()): void {
     }
 }
 
-/**
- * Unobserves currently observed root owners.
- * This is not reversable, and should be used only when you are sure that they won't be used anymore.
- */
-export function unobserveAllRoots(): void {
-    RootMap.forEach(r => cleanupRoot(r))
-    clearComponentRegistry()
+export function initRoots() {
+
+    /* Attach the UNOWNED Root */
+    attachDebugger(UNOWNED_ROOT)
+
+    /* Get owners created before debugger loaded */
+    for (const e of setup.get_created_owners()) {
+        attachDebugger(e)
+    }
+    
+    /* Listen to new created owners */
+    setup.solid.hooks.afterCreateOwner = function (owner) {
+        if (isSolidRoot(owner)) {
+            attachDebugger(owner)
+        }
+    }
 }
 
 /**

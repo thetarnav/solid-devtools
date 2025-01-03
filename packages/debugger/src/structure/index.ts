@@ -75,44 +75,39 @@ export function createStructure(props: {
     function forceFlushRootUpdateQueue(): void {
         
         if (props.enabled()) {
-            const updated: StructureUpdates['updated'] = {}
-
-            const partial = !shouldUpdateAllRoots
+            
+            let partial = !shouldUpdateAllRoots
             shouldUpdateAllRoots = false
 
-            const [owners, getRootId] = partial
-                ? [updateQueue, (owner: Solid.Owner) => ownerRoots.get(owner)!]
-                : [
-                      roots.getCurrentRoots(),
-                      (owner: Solid.Owner) => getSdtId(owner, ObjectType.Owner),
-                  ]
+            let updated: StructureUpdates['updated'] = {}
 
-            for (const owner of owners) {
-                const rootId = getRootId(owner)
-                const tree = walkSolidTree(owner, {
+            let owners: Iterable<Solid.Owner>
+            let getRootId: (owner: Solid.Owner) => NodeID
+
+            if (partial) {
+                owners    = updateQueue
+                getRootId = owner => ownerRoots.get(owner)!
+            } else {
+                owners    = roots.getCurrentRoots()
+                getRootId = owner => getSdtId(owner, ObjectType.Owner)
+            }
+
+            for (let owner of owners) {
+                let rootId = getRootId(owner)
+                let tree = walkSolidTree(owner, {
                     rootId,
                     mode: treeWalkerMode,
                     onComputationUpdate,
                     registerComponent: registry.registerComponent,
                 })
-                const map = updated[rootId]
+                let map = updated[rootId]
                 if (map) map[tree.id] = tree
                 else updated[rootId] = {[tree.id]: tree}
             }
 
-            if (!partial) {
-                updated['#unowned'] = {
-                    ['#unowned']: {
-                        id:       '#unowned',
-                        name:     'UNOWNED',
-                        type:     NodeType.Root,
-                        children: [],
-                    }
-                }
-            }
-
             props.onStructureUpdate({partial, updated, removed: [...removedRoots]})
         }
+
         updateQueue.clear()
         flushRootUpdateQueue.clear()
         removedRoots.clear()

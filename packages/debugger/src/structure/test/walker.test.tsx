@@ -19,15 +19,13 @@ const mockTree = () => {
     const [source] = s.createSignal('foo', {name: 's0'})
     s.createSignal('hello', {name: 's1'})
 
-    s.createEffect(
-        () => {
-            s.createSignal({bar: 'baz'}, {name: 's2'})
-            s.createComputed(source, undefined, {name: 'c0'})
-            s.createComputed(() => s.createSignal(0, {name: 's3'}), undefined, {name: 'c1'})
-        },
-        undefined,
-        {name: 'e0'},
-    )
+    s.createEffect(() => {
+        s.createSignal({bar: 'baz'}, {name: 's2'})
+        s.createComputed(source, undefined, {name: 'c0'})
+        s.createComputed(() => {
+            s.createSignal(0, {name: 's3'})
+        }, undefined, {name: 'c1'})
+    }, undefined, {name: 'e0'})
 }
 
 test.describe('TreeWalkerMode.Owners', () => {
