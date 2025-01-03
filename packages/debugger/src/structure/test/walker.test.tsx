@@ -8,6 +8,11 @@ import {type Mapped, type Solid} from '../../main/types.ts'
 import {getNodeName} from '../../main/utils.ts'
 import {type ComputationUpdateHandler, walkSolidTree} from '../walker.ts'
 import setup from '../../main/setup.ts'
+import {initRoots} from '../../main/roots.ts'
+
+test.beforeAll(() => {
+    initRoots()
+})
 
 let mockLAST_ID = 0
 test.beforeEach(() => {
@@ -15,24 +20,22 @@ test.beforeEach(() => {
 })
 test.vi.mock('../../main/get-id', () => ({getNewSdtId: () => '#' + mockLAST_ID++}))
 
-const mockTree = () => {
-    const [source] = s.createSignal('foo', {name: 's0'})
-    s.createSignal('hello', {name: 's1'})
-
-    s.createEffect(() => {
-        s.createSignal({bar: 'baz'}, {name: 's2'})
-        s.createComputed(source, undefined, {name: 'c0'})
-        s.createComputed(() => {
-            s.createSignal(0, {name: 's3'})
-        }, undefined, {name: 'c1'})
-    }, undefined, {name: 'e0'})
-}
-
 test.describe('TreeWalkerMode.Owners', () => {
     test.it('default options', () => {
         {
             const [dispose, owner] = s.createRoot(_dispose => {
-                mockTree()
+                
+                const [source] = s.createSignal('foo', {name: 's0'})
+                s.createSignal('hello', {name: 's1'})
+
+                s.createEffect(() => {
+                    s.createSignal({bar: 'baz'}, {name: 's2'})
+                    s.createComputed(source, undefined, {name: 'c0'})
+                    s.createComputed(() => {
+                        s.createSignal(0, {name: 's3'})
+                    }, undefined, {name: 'c1'})
+                }, undefined, {name: 'e0'})
+                
                 return [_dispose, setup.solid.getOwner()! as Solid.Root]
             })
 
