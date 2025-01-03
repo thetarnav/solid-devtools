@@ -1,5 +1,21 @@
 # solid-devtools
 
+## 0.33.0
+
+### Minor Changes
+
+- ed4215b: Assign component location directly to the owner
+  Instead of importing setComponentLocation from solid-devtools/setup
+  Fixes (#299)
+
+### Patch Changes
+
+- Updated dependencies [ed4215b]
+- Updated dependencies [4e32e04]
+- Updated dependencies [ce98e83]
+  - @solid-devtools/debugger@0.26.0
+  - @solid-devtools/shared@0.19.0
+
 ## 0.32.0
 
 ### Patch Changes

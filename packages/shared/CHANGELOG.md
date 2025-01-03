@@ -1,5 +1,12 @@
 # solid-devtools-shared
 
+## 0.19.0
+
+### Minor Changes
+
+- ce98e83: Add UNOWNED Root with top-level signals
+  -> Show signals created outside of reactive context (Closes #209)
+
 ## 0.18.0
 
 ### Minor Changes

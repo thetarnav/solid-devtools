@@ -1,5 +1,21 @@
 # @solid-devtools/frontend
 
+## 0.15.0
+
+### Minor Changes
+
+- 4e32e04: Display custom values added with `registerGraph()` in the inspector
+- ce98e83: Add UNOWNED Root with top-level signals
+  -> Show signals created outside of reactive context (Closes #209)
+
+### Patch Changes
+
+- Updated dependencies [ed4215b]
+- Updated dependencies [4e32e04]
+- Updated dependencies [ce98e83]
+  - @solid-devtools/debugger@0.26.0
+  - @solid-devtools/shared@0.19.0
+
 ## 0.14.0
 
 ### Minor Changes

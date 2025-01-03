@@ -1,5 +1,21 @@
 # @solid-devtools/debugger
 
+## 0.26.0
+
+### Minor Changes
+
+- ed4215b: Assign component location directly to the owner
+  Instead of importing setComponentLocation from solid-devtools/setup
+  Fixes (#299)
+- 4e32e04: Display custom values added with `registerGraph()` in the inspector
+- ce98e83: Add UNOWNED Root with top-level signals
+  -> Show signals created outside of reactive context (Closes #209)
+
+### Patch Changes
+
+- Updated dependencies [ce98e83]
+  - @solid-devtools/shared@0.19.0
+
 ## 0.25.0
 
 ### Minor Changes
