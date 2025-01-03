@@ -7,7 +7,7 @@ import * as debug from '@solid-devtools/debugger/types'
 import {msg, mutate_remove} from '@solid-devtools/shared/utils'
 import {App} from './App.tsx'
 import createInspector from './inspector.tsx'
-import {type Structure} from './structure.tsx'
+import * as structure from './structure.tsx'
 import * as ui from './ui/index.ts'
 
 
@@ -71,7 +71,7 @@ export function createDevtools(props: DevtoolsOptions) {
  */
 function createViewCache() {
     type CacheDataMap = {
-        [debug.DevtoolsMainView.Structure]: Structure.Cache
+        [debug.DevtoolsMainView.Structure]: structure.Cache
     }
     let shortCache: null | any = null
     let nextShortCache: typeof shortCache = null

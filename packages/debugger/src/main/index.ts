@@ -1,57 +1,23 @@
+import * as s from 'solid-js'
 import {createStaticStore} from '@solid-primitives/static-store'
 import {defer} from '@solid-primitives/utils'
-import * as s from 'solid-js'
-import {log_message, msg, mutate_remove, type Union} from '@solid-devtools/shared/utils'
-import {createDependencyGraph, type DGraphUpdate} from '../dependency/index.ts'
-import {createInspector, type InspectorUpdate, type ToggleInspectedValueData} from '../inspector/index.ts'
+import {log_message, msg, mutate_remove, type Timeout} from '@solid-devtools/shared/utils'
+import {createDependencyGraph} from '../dependency/index.ts'
+import {createInspector} from '../inspector/index.ts'
 import {createLocator} from '../locator/index.ts'
-import {type HighlightElementPayload} from '../locator/types.ts'
-import {createStructure, type StructureUpdates} from '../structure/index.ts'
-import {DebuggerModule, DEFAULT_MAIN_VIEW, DevtoolsMainView, TreeWalkerMode} from './constants.ts'
+import {createStructure} from '../structure/index.ts'
+import {DebuggerModule, DEFAULT_MAIN_VIEW, DevtoolsMainView} from './constants.ts'
 import {getObjectById, getSdtId, ObjectType} from './id.ts'
 import setup from './setup.ts'
-import {type Mapped, type NodeID, type ValueItemID} from './types.ts'
-
-export type InspectedState = {
-    readonly ownerId: NodeID | null
-    readonly signalId: NodeID | null
-    /** closest note to inspected signal/owner on the owner structure */
-    readonly treeWalkerOwnerId: NodeID | null
-}
-
-export type OutputChannels = {
-    DebuggerEnabled:        boolean
-    ResetPanel:             void
-    InspectedState:         InspectedState
-    InspectedNodeDetails:   Mapped.OwnerDetails
-    StructureUpdates:       StructureUpdates
-    NodeUpdates:            NodeID[]
-    InspectorUpdate:        InspectorUpdate[]
-    LocatorModeChange:      boolean
-    HoveredComponent:       {nodeId: NodeID; state: boolean}
-    InspectedComponent:     NodeID
-    DgraphUpdate:           DGraphUpdate
-}
-
-export type InputChannels = {
-    ResetState:             void
-    InspectNode:            {ownerId: NodeID | null; signalId: NodeID | null} | null
-    InspectValue:           ToggleInspectedValueData
-    ConsoleInspectValue:    ValueItemID
-    HighlightElementChange: HighlightElementPayload
-    OpenLocation:           void
-    TreeViewModeChange:     TreeWalkerMode
-    ViewChange:             DevtoolsMainView
-    ToggleModule:           {module: DebuggerModule; enabled: boolean}
-}
-
-export type InputMessage  = Union<InputChannels>
-export type InputListener = (e: InputMessage) => void
-
-export type OutputMessage  = Union<OutputChannels>
-export type OutputListener = (e: OutputMessage) => void
-
-export type OutputEmit = (e: OutputMessage) => void
+import {
+    INSPECTED_STATE_NULL,
+    type InputChannels,
+    type InputMessage,
+    type InspectedState,
+    type NodeID,
+    type OutputListener,
+    type OutputMessage,
+} from './types.ts'
 
 function createDebugger() {
 
@@ -122,16 +88,10 @@ function createDebugger() {
     //
     
     // Current inspected node is shared between modules
-    const INITIAL_INSPECTED_STATE = {
-        ownerId: null,
-        signalId: null,
-        treeWalkerOwnerId: null,
-    } as const satisfies OutputChannels['InspectedState']
-    
-    const [inspectedState, setInspectedState] = s.createSignal<
-        OutputChannels['InspectedState']
-    >(INITIAL_INSPECTED_STATE, {equals: false})
-    const inspectedOwnerId = s.createMemo(() => inspectedState().ownerId)
+    const [inspectedState, setInspectedState] = s.createSignal<InspectedState>(
+        INSPECTED_STATE_NULL,
+        {equals: false},
+    )
     
     s.createEffect(() => {
         emitOutput(msg('InspectedState', inspectedState()))
@@ -143,48 +103,34 @@ function createDebugger() {
         return treeWalkerOwner ? getSdtId(treeWalkerOwner, ObjectType.Owner) : null
     }
     
-    /** Check if the inspected node doesn't need to change (treeview mode changed or sth) */
-    function updateInspectedNode() {
-        setInspectedState(p => ({
-            ...p,
-            treeWalkerOwnerId: getTreeWalkerOwnerId(p.treeWalkerOwnerId),
-        }))
-    }
-    
-    function resetInspectedNode() {
-        setInspectedState(INITIAL_INSPECTED_STATE)
-    }
-    
     function setInspectedNode(data: InputChannels['InspectNode']): void {
-        let {ownerId, signalId} = data ?? {ownerId: null, signalId: null}
-        if (ownerId && !getObjectById(ownerId, ObjectType.Owner)) ownerId = null
-        if (signalId && !getObjectById(signalId, ObjectType.Signal)) signalId = null
-        setInspectedState({
-            ownerId,
-            signalId,
-            treeWalkerOwnerId: getTreeWalkerOwnerId(ownerId),
-        })
+        if (data == null) {
+            setInspectedState(INSPECTED_STATE_NULL)
+        } else {
+            let ownerId  = data.ownerId  && getObjectById(data.ownerId, ObjectType.Owner)   && data.ownerId
+            let signalId = data.signalId && getObjectById(data.signalId, ObjectType.Signal) && data.signalId
+            let treeWalkerOwnerId = getTreeWalkerOwnerId(ownerId)
+            setInspectedState({ownerId, signalId, treeWalkerOwnerId})
+        }
     }
     
-    s.createComputed(
-        defer(debuggerEnabled, enabled => {
-            if (!enabled) resetInspectedNode()
-        }),
-    )
+    s.createComputed(defer(debuggerEnabled, enabled => {
+        if (!enabled) setInspectedState(INSPECTED_STATE_NULL)
+    }))
     
     // Computation and signal updates
     let node_updates_ids: NodeID[] = []
-    let node_updates_timeout = 0
+    let node_updates_timeout = null as null | Timeout
     
     function pushNodeUpdate(id: NodeID) {
         
         node_updates_ids.push(id)
         
-        if (node_updates_timeout === 0) {
-            node_updates_timeout = window.setTimeout(() => {
+        if (node_updates_timeout == null) {
+            node_updates_timeout = setTimeout(() => {
                 emitOutput(msg('NodeUpdates', node_updates_ids))
-                node_updates_ids = []
-                node_updates_timeout = 0
+                node_updates_ids     = []
+                node_updates_timeout = null
             })
         }
     }
@@ -195,7 +141,11 @@ function createDebugger() {
     const structure = createStructure({
         onStructureUpdate(updates) {
             emitOutput(msg('StructureUpdates', updates))
-            updateInspectedNode()
+            /** Check if the inspected node doesn't need to change */
+            setInspectedState(p => ({
+                ...p,
+                treeWalkerOwnerId: getTreeWalkerOwnerId(p.treeWalkerOwnerId),
+            }))
         },
         onNodeUpdate: pushNodeUpdate,
         enabled: debuggerEnabled,
@@ -206,8 +156,8 @@ function createDebugger() {
     //
     const inspector = createInspector({
         enabled:            debuggerEnabled,
-        inspectedOwnerId:   inspectedOwnerId,
-        resetInspectedNode: resetInspectedNode,
+        inspectedState:     inspectedState,
+        resetInspectedNode: () => setInspectedState(INSPECTED_STATE_NULL),
         emit:               emitOutput,
     })
     
@@ -249,6 +199,14 @@ function createDebugger() {
     s.createEffect(defer(modules.locatorKeyPressSignal, state => {
         emitOutput(msg('LocatorModeChange', state))
     }))
+
+    console.log(setup.unowned.signals)
+    setup.unowned.onSignalAdded = (ref, idx) => {
+        console.log('unowned.onSignalAdded', ref.deref(), idx)
+    }
+    setup.unowned.onSignalRemoved = (ref, idx) => {
+        console.log('unowned.onSignalRemoved', ref.deref(), idx)
+    }
     
     function emitInput(e: InputMessage) {
     
@@ -258,7 +216,7 @@ function createDebugger() {
         case 'ResetState': {
             // reset all the internal state
             s.batch(() => {
-                resetInspectedNode()
+                setInspectedState(INSPECTED_STATE_NULL)
                 currentView = DEFAULT_MAIN_VIEW
                 structure.resetTreeWalkerMode()
                 locator.setDevtoolsHighlightTarget(null)

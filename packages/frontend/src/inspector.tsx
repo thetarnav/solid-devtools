@@ -136,22 +136,17 @@ const NULL_STATE = {
     hmr:      false,
 } as const satisfies Inspector.State
 
-const NULL_INSPECTED_NODE = {
-    ownerId: null,
-    signalId: null,
-    treeWalkerOwnerId: null,
-} as const satisfies debug.InspectedState
-
 export default function createInspector(
     output: OutputEventBus,
     input:  InputEventBus,
 ) {
+    
     //
     // Inspected owner/signal
     //
-
-    const [inspected, setInspected] =
-        createStaticStore<debug.InspectedState>(NULL_INSPECTED_NODE)
+    const [inspected, setInspected] = createStaticStore<debug.InspectedState>(
+        debug.INSPECTED_STATE_NULL
+    )
     const inspectedNode = s.createMemo(() => ({...inspected}), void 0, {
         equals: (a, b) => a.ownerId === b.ownerId && a.signalId === b.signalId,
     })

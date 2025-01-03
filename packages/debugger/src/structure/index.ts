@@ -49,6 +49,7 @@ export function createStructure(props: {
     onNodeUpdate:      (nodeId: NodeID) => void
     enabled:           () => boolean
 }) {
+
     let treeWalkerMode: TreeWalkerMode = DEFAULT_WALKER_MODE
 
     const updateQueue = new Set<Solid.Owner>()
@@ -78,6 +79,7 @@ export function createStructure(props: {
 
             const partial = !shouldUpdateAllRoots
             shouldUpdateAllRoots = false
+
             const [owners, getRootId] = partial
                 ? [updateQueue, (owner: Solid.Owner) => ownerRoots.get(owner)!]
                 : [
@@ -96,6 +98,17 @@ export function createStructure(props: {
                 const map = updated[rootId]
                 if (map) map[tree.id] = tree
                 else updated[rootId] = {[tree.id]: tree}
+            }
+
+            if (!partial) {
+                updated['#unowned'] = {
+                    ['#unowned']: {
+                        id:       '#unowned',
+                        name:     'UNOWNED',
+                        type:     NodeType.Root,
+                        children: [],
+                    }
+                }
             }
 
             props.onStructureUpdate({partial, updated, removed: [...removedRoots]})
