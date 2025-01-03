@@ -9,43 +9,41 @@ import {type Atom, atom, createHover} from '@solid-devtools/shared/primitives'
 import {msg} from '@solid-devtools/shared/utils'
 import * as theme from '@solid-devtools/shared/theme'
 import * as debug from '@solid-devtools/debugger/types'
+
 import {hover_background, panel_header_el_border} from './SidePanel.tsx'
 import {useAppCtx} from './controller.tsx'
 import * as ui from './ui/index.ts'
 
 
-export namespace Structure {
-    export interface Node {
-        id:       debug.NodeID
-        name?:    string
-        type:     debug.NodeType
-        level:    number
-        parent:   Node | null
-        children: Node[]
-        hmr?:     true
-        frozen?:  true
-    }
-
-    export interface Root extends Node {
-        name?: undefined
-        frozen?: undefined
-        type: debug.NodeType.Root
-    }
-
-    export type State = {roots: Node[]; nodeList: Node[]}
-
-    // State to be stored in the controller cache
-    export type Cache = {short: State; long: {mode: debug.TreeWalkerMode}}
-
-    export type Module = ReturnType<typeof createStructure>
+export interface Node {
+    id:       debug.NodeID
+    name?:    string
+    type:     debug.NodeType
+    level:    number
+    parent:   Node | null
+    children: Node[]
+    hmr?:     true
+    frozen?:  true
 }
+
+export interface Root extends Node {
+    type: debug.NodeType.Root
+}
+
+export type State = {roots: Node[]; nodeList: Node[]}
+
+// State to be stored in the controller cache
+export type Cache = {short: State; long: {mode: debug.TreeWalkerMode}}
+
+export type Module = ReturnType<typeof createStructure>
+
 
 /**
  * Finds the top-root node
  */
-export function getRootNode(node: Structure.Node): Structure.Node {
-    let current: Structure.Node | null = node
-    let lastRoot: Structure.Node | undefined
+export function getRootNode(node: Node): Node {
+    let current: Node | null = node
+    let lastRoot: Node | undefined
     while (current) {
         if (current.type === debug.NodeType.Root) lastRoot = current
         current = current.parent
@@ -54,15 +52,15 @@ export function getRootNode(node: Structure.Node): Structure.Node {
     throw new Error('Parent root not found')
 }
 
-export function getClosestComponentNode(node: Structure.Node): Structure.Node | undefined {
-    let current: Structure.Node | null = node
+export function getClosestComponentNode(node: Node): Node | undefined {
+    let current: Node | null = node
     while (current) {
         if (current.type === debug.NodeType.Component) return current
         current = current.parent
     }
 }
 
-export function getNodePath(node: Structure.Node): Structure.Node[] {
+export function getNodePath(node: Node): Node[] {
     const path = [node]
     let parent = node.parent
     while (parent) {
@@ -88,8 +86,15 @@ export function createStructure() {
         })
     }
 
-    const [state, setState] = s.createSignal<Structure.State>(
-        cachedInitialState.short || {nodeList: [], roots: []},
+    function getStateNull(): State {
+        return {
+            nodeList: [],
+            roots:    [],
+        }
+    }
+
+    const [state, setState] = s.createSignal<State>(
+        cachedInitialState.short || getStateNull(),
     )
     ctx.viewCache.set(debug.DevtoolsMainView.Structure, () => ({
         short: state(),
@@ -103,11 +108,11 @@ export function createStructure() {
 
     function updateStructure(update: debug.StructureUpdates | null): void {
         setState(prev =>
-            update ? reconcileStructure(prev.roots, update) : {nodeList: [], roots: []},
+            update ? reconcileStructure(prev.roots, update) : getStateNull(),
         )
     }
 
-    function findNode(id: debug.NodeID): Structure.Node | undefined {
+    function findNode(id: debug.NodeID): Node | undefined {
         for (const node of state().nodeList) {
             if (node.id === id) return node
         }
@@ -183,17 +188,17 @@ export function createStructure() {
 }
 
 let Updated: debug.StructureUpdates['updated']
-let NewNodeList: Structure.Node[]
+let NewNodeList: Node[]
 
 function createNode(
-    raw: debug.Mapped.Owner,
-    parent: Structure.Node | null,
-    level: number,
-): Structure.Node {
+    raw:    debug.Mapped.Owner,
+    parent: Node | null,
+    level:  number,
+): Node {
     const {id, name, type, children: rawChildren} = raw
 
-    const children: Structure.Node[] = []
-    const node: Structure.Node = {id, type, children, parent, level}
+    const children: Node[] = []
+    const node: Node = {id, type, children, parent, level}
 
     if (name) node.name = name
     if (type === debug.NodeType.Component && raw.hmr) node.hmr = raw.hmr
@@ -208,11 +213,11 @@ function createNode(
 }
 
 function updateNode(
-    node: Structure.Node,
+    node: Node,
     rootId: debug.NodeID,
     raw: debug.Mapped.Owner | undefined,
     level: number,
-): Structure.Node {
+): Node {
     const {id, children} = node
     NewNodeList.push(node)
     node.level = level
@@ -224,10 +229,10 @@ function updateNode(
         if ('frozen' in raw && raw.frozen) node.frozen = true
 
         const {children: rawChildren} = raw
-        const newChildren: Structure.Node[] = (node.children = [])
+        const newChildren: Node[] = (node.children = [])
 
         if (rawChildren.length) {
-            const prevChildrenMap: Record<debug.NodeID, Structure.Node> = {}
+            const prevChildrenMap: Record<debug.NodeID, Node> = {}
             for (const child of children) prevChildrenMap[child.id] = child
 
             for (const childRaw of rawChildren) {
@@ -249,12 +254,12 @@ function updateNode(
 }
 
 export function reconcileStructure(
-    prevRoots: Structure.Node[],
+    prevRoots: Node[],
     {removed, updated, partial}: debug.StructureUpdates,
-): Structure.State {
+): State {
     Updated = updated
     NewNodeList = []
-    const nextRoots: Structure.Node[] = []
+    const nextRoots: Node[] = []
 
     const upatedTopLevelRoots = new Set<debug.NodeID>()
     for (const root of prevRoots) {
@@ -276,9 +281,9 @@ export function reconcileStructure(
 }
 
 export const path_height = theme.spacing[4.5]
-export const row_height = theme.spacing[4.5]
+export const row_height  = theme.spacing[4.5]
 export const row_padding = theme.spacing[3.5]
-export const v_margin = theme.spacing[3]
+export const v_margin    = theme.spacing[3]
 
 export const path_height_in_rem = theme.remValue(path_height)
 export const row_height_in_rem = theme.remValue(row_height)
@@ -319,9 +324,9 @@ export function getVirtualVars(
     return {start, end, length}
 }
 
-const StructureContext = s.createContext<Structure.Module>()
+const StructureContext = s.createContext<Module>()
 
-export function useStructure(): Structure.Module {
+export function useStructure(): Module {
     const ctx = s.useContext(StructureContext)
     if (!ctx) throw new Error('Structure context not found')
     return ctx
@@ -448,39 +453,35 @@ const ToggleMode: s.Component = () => {
                 active={structure.mode()}
                 onSelect={structure.changeTreeViewMode}
             >
-                {Option =>
-                    [debug.TreeWalkerMode.Components, debug.TreeWalkerMode.Owners, debug.TreeWalkerMode.DOM].map(
-                        mode => (
-                            <Option
-                                for={mode}
-                                class="group"
-                                style={{
-                                    [ui.toggle_tab_color_var]:
-                                        mode === debug.TreeWalkerMode.Owners
-                                            ? theme.vars.text.DEFAULT
-                                            : mode === debug.TreeWalkerMode.DOM
-                                              ? theme.vars.dom
-                                              : theme.vars.component,
-                                }}
-                            >
-                                <div
-                                    class="w-2 h-2 rounded-full border border-solid opacity-60 transition-opacity group-hover:opacity-100 group-focus:opacity-100 group-[[aria-selected=true]]:opacity-100"
-                                    style={{
-                                        'border-color': `var(${ui.toggle_tab_color_var})`,
-                                    }}
-                                />
-                                {tabsContentMap[mode]}
-                            </Option>
-                        ),
-                    )
-                }
+            {Option =>
+                [debug.TreeWalkerMode.Components, debug.TreeWalkerMode.Owners, debug.TreeWalkerMode.DOM].map(mode => (
+                    <Option
+                        for={mode}
+                        class="group"
+                        style={{
+                            [ui.toggle_tab_color_var]:
+                                  mode === debug.TreeWalkerMode.Owners ? theme.vars.text.DEFAULT
+                                : mode === debug.TreeWalkerMode.DOM    ? theme.vars.dom
+                                                                       : theme.vars.component,
+                        }}
+                    >
+                        <div
+                            class="w-2 h-2 rounded-full border border-solid opacity-60 transition-opacity group-hover:opacity-100 group-focus:opacity-100 group-[[aria-selected=true]]:opacity-100"
+                            style={{
+                                'border-color': `var(${ui.toggle_tab_color_var})`,
+                            }}
+                        />
+                        {tabsContentMap[mode]}
+                    </Option>
+                ))
+            }
             </ui.ToggleTabs>
         </div>
     )
 }
 
 const getFocusedNodeData = (
-    list: Structure.Node[],
+    list: Node[],
     start: number,
     end: number,
     index: number,
@@ -516,11 +517,11 @@ const DisplayStructureTree: s.Component = () => {
         })
     }
 
-    const [collapsed, setCollapsed] = s.createSignal(new WeakSet<Structure.Node>(), {equals: false})
+    const [collapsed, setCollapsed] = s.createSignal(new WeakSet<Node>(), {equals: false})
 
-    const isCollapsed = (node: Structure.Node): boolean => collapsed().has(node)
+    const isCollapsed = (node: Node): boolean => collapsed().has(node)
 
-    const toggleCollapsed = (node: Structure.Node): void => {
+    const toggleCollapsed = (node: Node): void => {
         setCollapsed(set => {
             set.delete(node) || set.add(node)
             return set
@@ -541,7 +542,7 @@ const DisplayStructureTree: s.Component = () => {
         lastInspectedIndex = inspectedIndex()
     })
 
-    const collapsedList = s.createMemo((prev: Structure.Node[] = []) => {
+    const collapsedList = s.createMemo((prev: Node[] = []) => {
         // position of focused component needs to be calculated right before the collapsed list is recalculated
         // to be compated with it after the changes
         // `list data` has to be updated in an effect, so that this memo can run before it, instead of reading it here
@@ -554,7 +555,7 @@ const DisplayStructureTree: s.Component = () => {
         )
 
         const all_nodes_list = structure.state().nodeList
-        const collapsed_list: Structure.Node[] = []
+        const collapsed_list: Node[] = []
         const set = collapsed()
 
         /*
@@ -579,8 +580,8 @@ const DisplayStructureTree: s.Component = () => {
         start: number
         end: number
         fullLength: number
-        list: readonly Atom<Structure.Node>[]
-        nodeList: readonly Structure.Node[]
+        list: readonly Atom<Node>[]
+        nodeList: readonly Node[]
         minLevel: number
     }>((prev = {start: 0, end: 0, fullLength: 0, list: [], nodeList: [], minLevel: 0}) => {
         const nodeList = collapsedList()
@@ -589,8 +590,8 @@ const DisplayStructureTree: s.Component = () => {
 
         if (prev.nodeList === nodeList && prev.start === start && prev.end === end) return prev
 
-        const next: Atom<Structure.Node>[] = Array(length)
-        const prevMap: Record<debug.NodeID, Atom<Structure.Node>> = {}
+        const next: Atom<Node>[] = Array(length)
+        const prevMap: Record<debug.NodeID, Atom<Node>> = {}
         for (const node of prev.list) prevMap[node.value.id] = node
 
         let minLevel = length ? Infinity : 0
@@ -911,14 +912,14 @@ export const OwnerPath: s.Component = () => {
 }
 
 export const OwnerNode: s.Component<{
-    owner: Structure.Node
+    owner: Node
     isHovered: boolean
     isSelected: boolean
     isCollapsed: boolean
     onHoverChange(hovered: boolean): void
     onInspectChange(inspect: boolean): void
     listenToUpdate(cb: VoidFunction): VoidFunction
-    toggleCollapsed(node: Structure.Node): void
+    toggleCollapsed(node: Node): void
 }> = props => {
 
     const {onHoverChange, listenToUpdate, onInspectChange, toggleCollapsed} = props

@@ -5,24 +5,8 @@ Dev hooks and observing reactive graph nodes
 */
 
 import {chain, tryOnCleanup} from '@solid-primitives/utils'
-import {attachDebugger} from './roots.ts'
 import setup from './setup.ts'
 import {type Solid, type ValueUpdateListener} from './types.ts'
-import {isSolidRoot} from './utils.ts'
-
-for (const e of setup.get_created_owners()) {
-    attachDebugger(e)
-}
-
-//
-// AFTER CREATE OWNER
-//
-
-setup.solid.hooks.afterCreateOwner = function (owner) {
-    if (isSolidRoot(owner)) {
-        attachDebugger(owner)
-    }
-}
 
 //
 // AFTER UPDATE

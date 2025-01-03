@@ -1,5 +1,4 @@
 import {misc} from '@nothing-but/utils'
-import {untrackedCallback} from '@solid-devtools/shared/primitives'
 import {parseLocationString, type SourceLocation} from '../locator/index.ts'
 import {NodeType, ValueItemType} from '../main/constants.ts'
 import {ObjectType, getSdtId} from '../main/id.ts'
@@ -7,6 +6,7 @@ import {observeValueUpdate, removeValueUpdateObserver} from '../main/observe.ts'
 import setup from '../main/setup.ts'
 import type {Mapped, NodeID, Solid, ValueItemID} from '../main/types.ts'
 import * as utils from '../main/utils.ts'
+import {UNOWNED_ROOT} from '../main/roots.ts'
 import {encodeValue} from './serialize.ts'
 import {type InspectorUpdateMap, PropGetterState} from './types.ts'
 
@@ -250,14 +250,17 @@ function mapProps(props: Solid.Component['props']) {
     return {props: {proxy: isProxy, record}, checkProxyProps}
 }
 
-export const collectOwnerDetails = /*#__PURE__*/ untrackedCallback(function (
-    owner: Solid.Owner,
-    config: {
-        onPropStateChange: Inspector.OnPropStateChange
-        onValueUpdate: Inspector.OnValueUpdate
-        observedPropsMap: ObservedPropsMap
-    },
+export type CollectDetailsConfig = {
+    onPropStateChange: Inspector.OnPropStateChange
+    onValueUpdate:     Inspector.OnValueUpdate
+    observedPropsMap:  ObservedPropsMap
+}
+
+export function collectOwnerDetails(
+    owner:  Solid.Owner,
+    config: CollectDetailsConfig,
 ) {
+
     const {onValueUpdate} = config
 
     // Set globals
@@ -279,8 +282,8 @@ export const collectOwnerDetails = /*#__PURE__*/ untrackedCallback(function (
         owned = null
         const symbols = Object.getOwnPropertySymbols(owner.context)
         /*
-            since 1.8 context keys from parent are cloned to child context
-            the last key should be the added value
+         since 1.8 context keys from parent are cloned to child context
+         the last key should be the added value
         */
         const context_value = owner.context[symbols[symbols.length - 1]!]
         getValue = () => context_value
@@ -329,18 +332,28 @@ export const collectOwnerDetails = /*#__PURE__*/ untrackedCallback(function (
         onValueUpdate(`${ValueItemType.Signal}:${signalId}`)
 
     // map signals
-    if (sourceMap) {
-        for (const signal of sourceMap) {
-            const mapped = mapSourceValue(signal, onSignalUpdate)
-            mapped && details.signals.push(mapped)
-        }
+    if (sourceMap) for (let signal of sourceMap) {
+        let mapped = mapSourceValue(signal, onSignalUpdate)
+        if (mapped) details.signals.push(mapped)
     }
 
     // map memos
-    if (owned) {
-        for (const node of owned) {
-            const mapped = mapSourceValue(node, onSignalUpdate)
-            mapped && details.signals.push(mapped)
+    if (owned) for (let node of owned) {
+        let mapped = mapSourceValue(node, onSignalUpdate)
+        if (mapped) details.signals.push(mapped)
+    }
+
+    /* Handle the fake unowned root */
+    if (owner === UNOWNED_ROOT) {
+        for (let signal_ref of setup.unowned.signals) {
+
+            let signal = signal_ref.deref()
+            if (signal == null) continue
+    
+            let mapped = mapSourceValue(signal, onSignalUpdate)
+            if (mapped == null) continue
+            
+            details.signals.push(mapped)
         }
     }
 
@@ -356,4 +369,4 @@ export const collectOwnerDetails = /*#__PURE__*/ untrackedCallback(function (
     ValueMap = OnValueUpdate = OnPropStateChange = PropsMap = undefined!
 
     return result
-})
+}

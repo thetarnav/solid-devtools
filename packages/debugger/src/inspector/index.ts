@@ -1,11 +1,12 @@
-import {msg, warn} from '@solid-devtools/shared/utils'
+import * as s from 'solid-js'
 import {scheduleIdle, throttle} from '@solid-primitives/scheduled'
-import {type Accessor, createEffect, onCleanup} from 'solid-js'
-import {type OutputEmit} from '../main/index.ts'
+import {msg, warn} from '@solid-devtools/shared/utils'
 import {ObjectType, getObjectById} from '../main/id.ts'
 import {addSolidUpdateListener} from '../main/observe.ts'
-import {type Mapped, type NodeID, type Solid, type ValueItemID} from '../main/types.ts'
+import {type InspectedState, type Mapped, type NodeID, type OutputEmit, type Solid, type ValueItemID} from '../main/types.ts'
 import {onOwnerDispose} from '../main/utils.ts'
+import setup from '../main/setup.ts'
+import {UNOWNED_ROOT} from '../main/roots.ts'
 import {type ObservedPropsMap, ValueNodeMap, clearOwnerObservers, collectOwnerDetails} from './inspector.ts'
 import {encodeValue} from './serialize.ts'
 import {type StoreNodeProperty, type StoreUpdateData, observeStoreNode, setOnStoreNodeUpdate} from './store.ts'
@@ -19,8 +20,8 @@ export type ToggleInspectedValueData = {id: ValueItemID; selected: boolean}
  * Plugin module
  */
 export function createInspector(props: {
-    inspectedOwnerId:   Accessor<NodeID | null>
-    enabled:            Accessor<boolean>
+    inspectedState:     s.Accessor<InspectedState>
+    enabled:            s.Accessor<boolean>
     resetInspectedNode: VoidFunction
     emit:               OutputEmit
 }) {
@@ -146,46 +147,63 @@ export function createInspector(props: {
 
     let clearPrevDisposeListener: VoidFunction | undefined
 
-    createEffect(() => {
-        if (!props.enabled()) return
-        const id = props.inspectedOwnerId()
+    
 
-        queueMicrotask(() => {
-            const owner = id && getObjectById(id, ObjectType.Owner)
-            inspectedOwner && clearOwnerObservers(inspectedOwner, propsMap)
-            inspectedOwner = owner
-            valueMap.reset()
-            clearUpdates()
+    function inspectOwnerId(id: NodeID | null): void {
+    
+        const owner = id && getObjectById(id, ObjectType.Owner)
+        if (inspectedOwner) clearOwnerObservers(inspectedOwner, propsMap)
+        inspectedOwner = owner
+    
+        valueMap.reset()
+        clearUpdates()
+    
+        if (owner) {
+            const result = collectOwnerDetails(owner, {
+                onValueUpdate:     pushValueUpdate,
+                onPropStateChange: pushPropState,
+                observedPropsMap:  propsMap,
+            })
+    
+            props.emit(msg('InspectedNodeDetails', result.details))
+    
+            valueMap        = result.valueMap
+            lastDetails     = result.details
+            checkProxyProps = result.checkProxyProps || null
+        } else {
+            lastDetails     = undefined
+            checkProxyProps = null
+        }
+    
+        clearPrevDisposeListener?.()
+        clearPrevDisposeListener = owner
+            ? onOwnerDispose(owner, props.resetInspectedNode)
+            : undefined
+    }
 
-            if (owner) {
-                const result = collectOwnerDetails(owner, {
-                    onValueUpdate: pushValueUpdate,
-                    onPropStateChange: pushPropState,
-                    observedPropsMap: propsMap,
-                })
-
-                props.emit(msg('InspectedNodeDetails', result.details))
-
-                valueMap        = result.valueMap
-                lastDetails     = result.details
-                checkProxyProps = result.checkProxyProps || null
-            } else {
-                lastDetails     = undefined
-                checkProxyProps = null
-            }
-
-            clearPrevDisposeListener?.()
-            clearPrevDisposeListener = owner
-                ? onOwnerDispose(owner, props.resetInspectedNode)
-                : undefined
-        })
+    const inspectedOwnerId = s.createMemo(
+        () => props.enabled()
+            ? props.inspectedState().ownerId
+            : null
+    )
+    s.createEffect(() => {
+        let id = inspectedOwnerId()
+        s.untrack(() => inspectOwnerId(id))
     })
 
-    createEffect(() => {
+    function onUnownedRootChange() {
+        if (inspectedOwner === UNOWNED_ROOT) {
+            inspectOwnerId(inspectedOwnerId())
+        }
+    }
+    setup.unowned.onSignalAdded   = onUnownedRootChange
+    setup.unowned.onSignalRemoved = onUnownedRootChange
+
+    s.createEffect(() => {
         if (!props.enabled()) return
 
         // Check if proxy props have changed keys after each update queue
-        onCleanup(addSolidUpdateListener(() => checkProxyProps && triggerPropsCheck()))
+        s.onCleanup(addSolidUpdateListener(() => checkProxyProps && triggerPropsCheck()))
     })
 
     return {

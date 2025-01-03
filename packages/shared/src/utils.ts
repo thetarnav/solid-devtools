@@ -1,3 +1,5 @@
+export type Timeout = ReturnType<typeof setTimeout>
+
 export type Union<T> = {
     [K in keyof T]: UnionMember<T, K>
 }[keyof T]

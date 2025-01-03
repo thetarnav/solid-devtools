@@ -1,6 +1,55 @@
-import type {EncodedValue, PropGetterState} from '../inspector/types.ts'
-import type {SourceLocation} from '../locator/types.ts'
-import {NodeType, OWNER_LOCATION_PROP, ValueItemType} from './constants.ts'
+import type {Union} from '@solid-devtools/shared/utils'
+import type {EncodedValue, InspectorUpdate, PropGetterState, ToggleInspectedValueData} from '../inspector/types.ts'
+import type {HighlightElementPayload, SourceLocation} from '../locator/types.ts'
+import type {StructureUpdates, DGraphUpdate} from '../types.ts'
+import {DebuggerModule, DevtoolsMainView, NodeType, OWNER_LOCATION_PROP, TreeWalkerMode, ValueItemType} from './constants.ts'
+
+export type InspectedState = {
+    readonly ownerId: NodeID | null
+    readonly signalId: NodeID | null
+    /** closest note to inspected signal/owner on the owner structure */
+    readonly treeWalkerOwnerId: NodeID | null
+}
+
+export const INSPECTED_STATE_NULL: InspectedState = {
+    ownerId:           null,
+    signalId:          null,
+    treeWalkerOwnerId: null,
+}
+
+export type OutputChannels = {
+    DebuggerEnabled:        boolean
+    ResetPanel:             void
+    InspectedState:         InspectedState
+    InspectedNodeDetails:   Mapped.OwnerDetails
+    StructureUpdates:       StructureUpdates
+    NodeUpdates:            NodeID[]
+    InspectorUpdate:        InspectorUpdate[]
+    LocatorModeChange:      boolean
+    HoveredComponent:       {nodeId: NodeID; state: boolean}
+    InspectedComponent:     NodeID
+    DgraphUpdate:           DGraphUpdate
+}
+
+export type InputChannels = {
+    ResetState:             void
+    InspectNode:            {ownerId: NodeID | null; signalId: NodeID | null} | null
+    InspectValue:           ToggleInspectedValueData
+    ConsoleInspectValue:    ValueItemID
+    HighlightElementChange: HighlightElementPayload
+    OpenLocation:           void
+    TreeViewModeChange:     TreeWalkerMode
+    ViewChange:             DevtoolsMainView
+    ToggleModule:           {module: DebuggerModule; enabled: boolean}
+}
+
+export type InputMessage  = Union<InputChannels>
+export type InputListener = (e: InputMessage) => void
+
+export type OutputMessage  = Union<OutputChannels>
+export type OutputListener = (e: OutputMessage) => void
+
+export type OutputEmit = (e: OutputMessage) => void
 
 //
 // EXPOSED SOLID API

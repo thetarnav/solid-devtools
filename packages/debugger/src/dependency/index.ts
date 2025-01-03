@@ -4,10 +4,9 @@ import {defer} from '@solid-primitives/utils'
 import {msg} from '@solid-devtools/shared/utils'
 import {DevtoolsMainView, NodeType} from '../main/constants.ts'
 import {ObjectType, getObjectById} from '../main/id.ts'
-import {type NodeID, type Solid} from '../main/types.ts'
+import {type InspectedState, type NodeID, type OutputEmit, type Solid} from '../main/types.ts'
 import {getNodeType} from '../main/utils.ts'
 import {type OnNodeUpdate, type SerializedDGraph, collectDependencyGraph} from './collect.ts'
-import {type OutputEmit, type InspectedState} from '../main/index.ts'
 
 export {type SerializedDGraph} from './collect.ts'
 

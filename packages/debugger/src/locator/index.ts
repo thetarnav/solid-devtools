@@ -5,11 +5,10 @@ import {createKeyHold} from '@solid-primitives/keyboard'
 import {scheduleIdle} from '@solid-primitives/scheduled'
 import {makeHoverElementListener} from '@solid-devtools/shared/primitives'
 import {msg, warn} from '@solid-devtools/shared/utils'
-import {type OutputEmit} from '../main/index.ts'
 import * as registry from '../main/component-registry.ts'
 import {ObjectType, getObjectById} from '../main/id.ts'
 import SolidAPI from '../main/setup.ts'
-import {type NodeID} from '../main/types.ts'
+import {type NodeID, type OutputEmit} from '../main/types.ts'
 import {createElementsOverlay} from './element-overlay.tsx'
 import {
     type LocatorComponent,

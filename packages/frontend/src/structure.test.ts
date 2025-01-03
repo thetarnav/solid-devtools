@@ -1,6 +1,6 @@
 import * as debug from '@solid-devtools/debugger/types'
 import {describe, expect, test} from 'vitest'
-import {reconcileStructure, type Structure} from './structure.tsx'
+import * as structure from './structure.tsx'
 
 describe('reconcileStructure', () => {
     let updated: debug.StructureUpdates['updated'] = {
@@ -36,10 +36,10 @@ describe('reconcileStructure', () => {
     }
     let removed: debug.NodeID[] = []
 
-    let prevRoots: Structure.Node[] = []
+    let prevRoots: structure.Node[] = []
 
     test('initial', () => {
-        const {roots, nodeList} = reconcileStructure(prevRoots, {
+        const {roots, nodeList} = structure.reconcileStructure(prevRoots, {
             updated,
             removed,
             partial: false,
@@ -104,7 +104,7 @@ describe('reconcileStructure', () => {
             },
         }
 
-        const {roots, nodeList} = reconcileStructure(prevRoots, {
+        const {roots, nodeList} = structure.reconcileStructure(prevRoots, {
             updated,
             removed,
             partial: true,
@@ -173,7 +173,7 @@ describe('reconcileStructure', () => {
 
         removed = ['#10']
 
-        const {roots, nodeList} = reconcileStructure(prevRoots, {
+        const {roots, nodeList} = structure.reconcileStructure(prevRoots, {
             updated,
             removed,
             partial: true,
@@ -249,7 +249,7 @@ describe('reconcileStructure', () => {
             },
         }
 
-        const {roots, nodeList} = reconcileStructure(prevRoots, {
+        const {roots, nodeList} = structure.reconcileStructure(prevRoots, {
             updated,
             removed,
             partial: true,
@@ -287,7 +287,7 @@ describe('reconcileStructure', () => {
             },
         }
 
-        const {roots, nodeList} = reconcileStructure(prevRoots, {
+        const {roots, nodeList} = structure.reconcileStructure(prevRoots, {
             updated,
             removed,
             partial: true,
