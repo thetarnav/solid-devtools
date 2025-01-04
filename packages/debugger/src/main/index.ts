@@ -6,15 +6,15 @@ import {createDependencyGraph} from '../dependency/index.ts'
 import {createInspector} from '../inspector/index.ts'
 import {createLocator} from '../locator/index.ts'
 import {createStructure} from '../structure/index.ts'
-import {DebuggerModule, DEFAULT_MAIN_VIEW, DevtoolsMainView} from './constants.ts'
 import {getObjectById, getSdtId, ObjectType} from './id.ts'
 import {initRoots} from './roots.ts'
 import setup from './setup.ts'
 import {
-    INSPECTED_STATE_NULL,
+    DebuggerModule,
+    DEFAULT_MAIN_VIEW, DevtoolsMainView,
+    INSPECTED_STATE_NULL, type InspectedState,
     type InputChannels,
     type InputMessage,
-    type InspectedState,
     type NodeID,
     type OutputListener,
     type OutputMessage,

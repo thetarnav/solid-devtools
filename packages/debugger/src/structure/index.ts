@@ -1,9 +1,8 @@
 import {throttle} from '@solid-primitives/scheduled'
 import * as registry from '../main/component-registry.ts'
-import {DEFAULT_WALKER_MODE, DevtoolsMainView, NodeType, TreeWalkerMode} from '../main/constants.ts'
 import {ObjectType, getSdtId} from '../main/id.ts'
 import * as roots from '../main/roots.ts'
-import {type Mapped, type NodeID, type Solid} from '../main/types.ts'
+import {type Mapped, type NodeID, type Solid, DEFAULT_WALKER_MODE, DevtoolsMainView, NodeType, TreeWalkerMode} from '../main/types.ts'
 import {isDisposed, markOwnerType} from '../main/utils.ts'
 import {type ComputationUpdateHandler, walkSolidTree} from './walker.ts'
 

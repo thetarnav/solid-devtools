@@ -1,10 +1,9 @@
 import {untrackedCallback} from '@solid-devtools/shared/primitives'
 import {asArray} from '@solid-devtools/shared/utils'
 import type {ComponentRegisterHandler} from '../main/component-registry.ts'
-import {NodeType, TreeWalkerMode} from '../main/constants.ts'
 import {ObjectType, getSdtId} from '../main/id.ts'
 import {observeComputationUpdate} from '../main/observe.ts'
-import {type Mapped, type NodeID, type Solid} from '../main/types.ts'
+import {type Mapped, type NodeID, type Solid, NodeType, TreeWalkerMode} from '../main/types.ts'
 import {
     getComponentRefreshNode,
     getNodeName,

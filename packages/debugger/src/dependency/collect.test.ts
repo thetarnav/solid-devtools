@@ -2,10 +2,9 @@ import '../setup.ts'
 
 import * as s from 'solid-js'
 import * as test from 'vitest'
-import {NodeType} from '../main/constants.ts'
 import {ObjectType, getSdtId} from '../main/id.ts'
 import setup from '../main/setup.ts'
-import type {NodeID, Solid} from '../main/types.ts'
+import {NodeType, type NodeID, type Solid} from '../main/types.ts'
 import {type SerializedDGraph, collectDependencyGraph} from './collect.ts'
 
 

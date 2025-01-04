@@ -1,8 +1,7 @@
 import {warn} from '@solid-devtools/shared/utils'
-import {NodeType} from './constants.ts'
 import {ObjectType, getSdtId} from './id.ts'
 import setup from './setup.ts'
-import {type NodeID, type Solid} from './types.ts'
+import {type NodeID, type Solid, NodeType} from './types.ts'
 import {isSolidRoot, onOwnerCleanup} from './utils.ts'
 
 /**
