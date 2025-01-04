@@ -1,4 +1,3 @@
-import {getNewSdtId} from './get-id.ts'
 import {type NodeID, type Solid} from './types.ts'
 
 export const enum ObjectType {
@@ -35,6 +34,9 @@ const RefMapMap: {
 const CleanupRegistry = new FinalizationRegistry((data: {map: ObjectType; id: NodeID}) => {
     RefMapMap[data.map].delete(data.id)
 })
+
+let LastId = 0
+export const getNewSdtId = (): NodeID => `#${(LastId++).toString(36)}`
 
 export function getSdtId<T extends ObjectType>(obj: ValueMap[T], objType: T): NodeID {
     let id = WeakIdMap.get(obj)

@@ -7,9 +7,6 @@ import {ObjectType, getObjectById} from '../main/id.ts'
 import {encodeValue} from './serialize.ts'
 import {type EncodedValue, INFINITY, NAN, NEGATIVE_INFINITY, UNDEFINED, ValueType} from './types.ts'
 
-let mockLAST_ID = 0
-vi.mock('../main/get-id.ts', () => ({getNewSdtId: () => '#' + mockLAST_ID++}))
-
 type Expectations = [name: string, data: unknown, encoded: EncodedValue[]][]
 
 const div1 = document.createElement('div')
@@ -24,7 +21,6 @@ const [state] = createStore({a: 1, b: 2, c: 3})
 const mutable = createMutable({a: 1, b: 2, c: 3})
 
 describe('encodeValue Preview', () => {
-    mockLAST_ID = 0
 
     const encodePreviewExpectations: Expectations = [
         ['Infinity', Infinity, [[ValueType.Number, INFINITY]]],
@@ -86,7 +82,6 @@ describe('encodeValue Preview', () => {
 })
 
 describe('encodeValue Deep', () => {
-    mockLAST_ID = 0
 
     const encodeDeepExpectations: Expectations = [
         ['Array empty', [], [[ValueType.Array, []]]],
@@ -163,7 +158,6 @@ describe('encodeValue Deep', () => {
 })
 
 describe('save elements to a map', () => {
-    mockLAST_ID = 0
 
     const elMapExpectations: Expectations = [
         ['Element div', div1, [[ValueType.Element, '#0:div']]],
@@ -193,7 +187,6 @@ describe('save elements to a map', () => {
 })
 
 describe('encodeValue with repeated references', () => {
-    mockLAST_ID = 0
 
     const one: any = {a: 1}
     one.b = one
@@ -240,7 +233,6 @@ describe('encodeValue with repeated references', () => {
 })
 
 describe('finding stores in values', () => {
-    mockLAST_ID = 0
 
     const [state1] = createStore({a: 1})
     const [state2] = createStore({ref: state1})

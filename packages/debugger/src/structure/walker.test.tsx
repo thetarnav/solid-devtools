@@ -14,12 +14,6 @@ test.beforeAll(() => {
     initRoots()
 })
 
-let mockLAST_ID = 0
-test.beforeEach(() => {
-    mockLAST_ID = 0
-})
-test.vi.mock('../main/get-id.ts', () => ({getNewSdtId: () => '#' + mockLAST_ID++}))
-
 test.describe('TreeWalkerMode.Owners', () => {
     test.it('default options', () => {
         {

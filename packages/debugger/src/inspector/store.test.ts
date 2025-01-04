@@ -2,7 +2,7 @@ import '../setup.ts'
 
 import {createRoot} from 'solid-js'
 import {createMutable, createStore, modifyMutable, produce, reconcile, unwrap} from 'solid-js/store'
-import {beforeEach, describe, expect, it, vi} from 'vitest'
+import {describe, expect, it, vi} from 'vitest'
 import {ObjectType, getSdtId} from '../main/id.ts'
 import setup from '../main/setup.ts'
 import {isSolidStore} from '../main/utils.ts'
@@ -20,12 +20,6 @@ const getOwnerStore = () => {
 
 const getNodeProp = (node: Solid.StoreNode, prop: string): StoreNodeProperty =>
     `${getSdtId(unwrap(node), ObjectType.StoreNode)}:${prop}`
-
-let mockLAST_ID = 0
-beforeEach(() => {
-    mockLAST_ID = 0
-})
-vi.mock('../main/get-id.ts', () => ({getNewSdtId: () => '#' + mockLAST_ID++}))
 
 type UpdateParams = Parameters<OnNodeUpdate>
 
