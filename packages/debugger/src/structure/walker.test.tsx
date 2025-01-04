@@ -1,14 +1,14 @@
-import '../../setup.ts'
+import '../setup.ts'
 
 import * as s from 'solid-js'
 import * as test from 'vitest'
-import {NodeType, TreeWalkerMode} from '../../main/constants.ts'
-import {$setSdtId} from '../../main/id.ts'
-import {type Mapped, type Solid} from '../../main/types.ts'
-import {getNodeName} from '../../main/utils.ts'
-import {type ComputationUpdateHandler, walkSolidTree} from '../walker.ts'
-import setup from '../../main/setup.ts'
-import {initRoots} from '../../main/roots.ts'
+import {NodeType, TreeWalkerMode} from '../main/constants.ts'
+import {$setSdtId} from '../main/id.ts'
+import {type Mapped, type Solid} from '../main/types.ts'
+import {getNodeName} from '../main/utils.ts'
+import {type ComputationUpdateHandler, walkSolidTree} from './walker.ts'
+import setup from '../main/setup.ts'
+import {initRoots} from '../main/roots.ts'
 
 test.beforeAll(() => {
     initRoots()
@@ -18,7 +18,7 @@ let mockLAST_ID = 0
 test.beforeEach(() => {
     mockLAST_ID = 0
 })
-test.vi.mock('../../main/get-id', () => ({getNewSdtId: () => '#' + mockLAST_ID++}))
+test.vi.mock('../main/get-id.ts', () => ({getNewSdtId: () => '#' + mockLAST_ID++}))
 
 test.describe('TreeWalkerMode.Owners', () => {
     test.it('default options', () => {

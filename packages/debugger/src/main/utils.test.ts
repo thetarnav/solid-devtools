@@ -1,11 +1,11 @@
-import '../../setup.ts'
+import '../setup.ts'
 
 import * as s from 'solid-js'
 import * as vi from 'vitest'
-import {NodeType} from '../constants.ts'
+import {NodeType} from './constants.ts'
 import {type Solid} from '../types.ts'
-import * as utils from '../utils.ts'
-import setup from '../setup.ts'
+import * as utils from './utils.ts'
+import setup from './setup.ts'
 
 vi.describe('getOwnerType', () => {
     const tests = {

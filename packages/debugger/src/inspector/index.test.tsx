@@ -1,20 +1,14 @@
-import '../../setup.ts'
+import '../setup.ts'
 
 import * as s from 'solid-js'
-import {beforeEach, describe, expect, it, vi} from 'vitest'
-import {getObjectById, getSdtId, ObjectType} from '../../main/id.ts'
-import setup from '../../main/setup.ts'
-import {type Mapped, NodeType, PropGetterState, type Solid, ValueType} from '../../types.ts'
-import {collectOwnerDetails} from '../inspector.ts'
+import * as test from 'vitest'
+import {getObjectById, getSdtId, ObjectType} from '../main/id.ts'
+import setup from '../main/setup.ts'
+import {type Mapped, NodeType, PropGetterState, type Solid, ValueType} from '../types.ts'
+import {collectOwnerDetails} from './inspector.ts'
 
-let mockLAST_ID = 0
-beforeEach(() => {
-    mockLAST_ID = 0
-})
-vi.mock('../../main/get-id', () => ({getNewSdtId: () => '#' + mockLAST_ID++}))
-
-describe('collectOwnerDetails', () => {
-    it('collects focused owner details', () => {
+test.describe('collectOwnerDetails', () => {
+    test.it('collects focused owner details', () => {
         s.createRoot(dispose => {
             const [source] = s.createSignal(0, {name: 'source'})
 
@@ -57,7 +51,7 @@ describe('collectOwnerDetails', () => {
                 },
             })
 
-            expect(details).toEqual({
+            test.expect(details).toEqual({
                 id: getSdtId(memo, ObjectType.Owner),
                 name: 'focused',
                 type: NodeType.Memo,
@@ -84,26 +78,29 @@ describe('collectOwnerDetails', () => {
                 ],
             } satisfies Mapped.OwnerDetails)
 
-            expect(valueMap.get(`signal:${getSdtId(customValue, ObjectType.CustomValue)}`)).toBeTruthy()
-            expect(valueMap.get(`signal:${getSdtId(signalB, ObjectType.Signal)}`)).toBeTruthy()
-            expect(valueMap.get(`signal:${getSdtId(innerMemo, ObjectType.Owner)}`)).toBeTruthy()
+            test.expect(valueMap.get(`signal:${getSdtId(customValue, ObjectType.CustomValue)}`)).toBeTruthy()
+            test.expect(valueMap.get(`signal:${getSdtId(signalB, ObjectType.Signal)}`)).toBeTruthy()
+            test.expect(valueMap.get(`signal:${getSdtId(innerMemo, ObjectType.Owner)}`)).toBeTruthy()
 
-            expect(getObjectById('#3', ObjectType.Element)).toBe(div)
+            test.expect(getObjectById('#3', ObjectType.Element)).toBe(div)
 
             dispose()
         })
     })
 
-    it('component props', () => {
+    test.it('component props', () => {
         s.createRoot(dispose => {
+
             let owner!: Solid.Owner
+            let div_ref!: HTMLDivElement
+
             const TestComponent = (props: {
                 count: number
                 children: s.JSX.Element
                 nested: {foo: number; bar: string}
             }) => {
                 owner = setup.solid.getOwner()!
-                return <div>{props.children}</div>
+                return <div ref={div_ref}>{props.children}</div>
             }
             s.createRenderEffect(() => (
                 <TestComponent count={123} nested={{foo: 1, bar: '2'}}>
@@ -123,12 +120,12 @@ describe('collectOwnerDetails', () => {
 
             dispose()
 
-            expect(details).toEqual({
-                id: '#0',
+            test.expect(details).toEqual({
+                id: getSdtId(owner, ObjectType.Owner),
                 name: 'TestComponent',
                 type: NodeType.Component,
                 signals: [],
-                value: [[ValueType.Element, '#1:div']],
+                value: [[ValueType.Element, `${getSdtId(div_ref, ObjectType.Element)}:div`]],
                 props: {
                     proxy: false,
                     record: {
@@ -147,14 +144,15 @@ describe('collectOwnerDetails', () => {
                     },
                 },
             } satisfies Mapped.OwnerDetails)
-
-            expect(getObjectById('#1', ObjectType.Element)).toBeInstanceOf(HTMLDivElement)
         })
     })
 
-    it('dynamic component props', () => {
+    test.it('dynamic component props', () => {
         s.createRoot(dispose => {
+
             let owner!: Solid.Owner
+            let el_ref!: HTMLDivElement
+
             const Button = (props: s.JSX.ButtonHTMLAttributes<HTMLButtonElement>) => {
                 owner = setup.solid.getOwner()!
                 return <button {...props}>Click me</button>
@@ -167,7 +165,7 @@ describe('collectOwnerDetails', () => {
                         },
                         role: 'button',
                     }) as const
-                return <Button {...props()} />
+                return (el_ref = <Button {...props()} /> as any)
             })
 
             const {details} = collectOwnerDetails(owner, {
@@ -180,12 +178,12 @@ describe('collectOwnerDetails', () => {
                 },
             })
 
-            expect(details).toEqual({
-                id: '#0',
+            test.expect(details).toEqual({
+                id: getSdtId(owner, ObjectType.Owner),
                 name: 'Button',
                 type: NodeType.Component,
                 signals: [],
-                value: [[ValueType.Element, '#1:button']],
+                value: [[ValueType.Element, `${getSdtId(el_ref, ObjectType.Element)}:button`]],
                 props: {
                     proxy: true,
                     record: {
@@ -201,13 +199,11 @@ describe('collectOwnerDetails', () => {
                 },
             } satisfies Mapped.OwnerDetails)
 
-            expect(getObjectById('#1', ObjectType.Element)).toBeInstanceOf(HTMLButtonElement)
-
             dispose()
         })
     })
 
-    it('listens to value updates', () => {
+    test.it('listens to value updates', () => {
         s.createRoot(dispose => {
             let owner!: Solid.Owner
 
@@ -217,7 +213,7 @@ describe('collectOwnerDetails', () => {
                 return count()
             })
 
-            const onValueUpdate = vi.fn()
+            const onValueUpdate = test.vi.fn()
             collectOwnerDetails(owner, {
                 observedPropsMap: new WeakMap(),
                 onPropStateChange: () => {
@@ -226,30 +222,32 @@ describe('collectOwnerDetails', () => {
                 onValueUpdate: onValueUpdate,
             })
 
-            expect(onValueUpdate).not.toBeCalled()
+            test.expect(onValueUpdate).not.toBeCalled()
 
             setCount(1)
-            expect(onValueUpdate).toBeCalledTimes(1)
-            expect(onValueUpdate).toHaveBeenLastCalledWith('value')
+            test.expect(onValueUpdate).toBeCalledTimes(1)
+            test.expect(onValueUpdate).toHaveBeenLastCalledWith('value')
 
             setCount(2)
-            expect(onValueUpdate).toBeCalledTimes(2)
-            expect(onValueUpdate).toHaveBeenLastCalledWith('value')
+            test.expect(onValueUpdate).toBeCalledTimes(2)
+            test.expect(onValueUpdate).toHaveBeenLastCalledWith('value')
 
             setCount(2)
-            expect(onValueUpdate).toBeCalledTimes(2)
+            test.expect(onValueUpdate).toBeCalledTimes(2)
 
             dispose()
         })
     })
 
-    it('listens to signal updates', () => {
+    test.it('listens to signal updates', () => {
         s.createRoot(dispose => {
             const owner = setup.solid.getOwner()!
-            const [, setCount] = s.createSignal(0) // id: "0"
-            const [, setCount2] = s.createSignal(0) // id: "1"
+            const [, setCount1] = s.createSignal(0)
+            const [, setCount2] = s.createSignal(0)
 
-            const onValueUpdate = vi.fn()
+            const [count1, count2] = owner.sourceMap as [Solid.Signal, Solid.Signal]
+
+            const onValueUpdate = test.vi.fn()
             collectOwnerDetails(owner, {
                 observedPropsMap: new WeakMap(),
                 onPropStateChange: () => {
@@ -258,18 +256,18 @@ describe('collectOwnerDetails', () => {
                 onValueUpdate: onValueUpdate,
             })
 
-            expect(onValueUpdate).not.toBeCalled()
+            test.expect(onValueUpdate).not.toBeCalled()
 
-            setCount(1)
-            expect(onValueUpdate).toBeCalledTimes(1)
-            expect(onValueUpdate).toHaveBeenLastCalledWith('signal:#1')
+            setCount1(1)
+            test.expect(onValueUpdate).toBeCalledTimes(1)
+            test.expect(onValueUpdate).toHaveBeenLastCalledWith(`signal:${getSdtId(count1, ObjectType.Signal)}`)
 
-            setCount(1)
-            expect(onValueUpdate).toBeCalledTimes(1)
+            setCount1(1)
+            test.expect(onValueUpdate).toBeCalledTimes(1)
 
             setCount2(1)
-            expect(onValueUpdate).toBeCalledTimes(2)
-            expect(onValueUpdate).toHaveBeenLastCalledWith('signal:#2')
+            test.expect(onValueUpdate).toBeCalledTimes(2)
+            test.expect(onValueUpdate).toHaveBeenLastCalledWith(`signal:${getSdtId(count2, ObjectType.Signal)}`)
 
             dispose()
         })

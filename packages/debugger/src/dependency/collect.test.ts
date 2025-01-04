@@ -1,18 +1,18 @@
-import '../../setup.ts'
+import '../setup.ts'
 
 import * as s from 'solid-js'
 import * as test from 'vitest'
-import {NodeType} from '../../main/constants.ts'
-import {ObjectType, getSdtId} from '../../main/id.ts'
-import setup from '../../main/setup.ts'
-import type {NodeID, Solid} from '../../main/types.ts'
-import {type SerializedDGraph, collectDependencyGraph} from '../collect.ts'
+import {NodeType} from '../main/constants.ts'
+import {ObjectType, getSdtId} from '../main/id.ts'
+import setup from '../main/setup.ts'
+import type {NodeID, Solid} from '../main/types.ts'
+import {type SerializedDGraph, collectDependencyGraph} from './collect.ts'
 
 let mockLAST_ID = 0
 test.beforeEach(() => {
     mockLAST_ID = 0
 })
-test.vi.mock('../../main/get-id', () => ({getNewSdtId: () => '#' + mockLAST_ID++}))
+test.vi.mock('../main/get-id.ts', () => ({getNewSdtId: () => '#' + mockLAST_ID++}))
 
 test.describe('collectDependencyGraph', () => {
     test.it('should collect dependency graph', () => {

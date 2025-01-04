@@ -1,4 +1,4 @@
-import '../../setup.ts'
+import '../setup.ts'
 
 import {createComputed, createRoot, createSignal, onCleanup} from 'solid-js'
 import {describe, expect, it} from 'vitest'
@@ -7,8 +7,8 @@ import {
     interceptComputationRerun,
     observeValueUpdate,
     removeValueUpdateObserver,
-} from '../observe.ts'
-import setup from '../setup.ts'
+} from './observe.ts'
+import setup from './setup.ts'
 
 describe('addSolidUpdateListener', () => {
     it('listens to solid updates', () =>
