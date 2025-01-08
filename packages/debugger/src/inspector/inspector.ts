@@ -164,33 +164,35 @@ let PropsMap: ObservedPropsMap
 const $INSPECTOR = Symbol('inspector')
 
 function mapSourceValue(
-    node:    Solid.SourceMapValue | Solid.Computation,
-    handler: (nodeId: NodeID, value: unknown) => void,
+    node_raw: Solid.SourceMapValue | Solid.Computation,
+    handler:  (nodeId: NodeID, value: unknown) => void,
 ): Mapped.SourceValue | null {
 
-    let type = utils.getNodeType(node)
-    let {value} = node
+    let node = utils.getNode(node_raw)
+    let {value} = node_raw
     let id: NodeID
 
     // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
-    switch (type) {
-    case NodeType.Memo:        id = getSdtId(node as Solid.Memo,           ObjectType.Owner)       ;break
-    case NodeType.Signal:      id = getSdtId(node as Solid.Signal,         ObjectType.Signal)      ;break
-    case NodeType.Store:       id = getSdtId(node as Solid.Store,          ObjectType.Store)       ;break
-    case NodeType.CustomValue: id = getSdtId(node as Solid.SourceMapValue, ObjectType.CustomValue) ;break
+    switch (node.kind) {
+    case NodeType.Memo:        id = getSdtId(node.data, ObjectType.Owner)       ;break
+    case NodeType.Signal:      id = getSdtId(node.data, ObjectType.Signal)      ;break
+    case NodeType.Store:       id = getSdtId(node.data, ObjectType.Store)       ;break
+    case NodeType.CustomValue: id = getSdtId(node.data, ObjectType.CustomValue) ;break
     default:
         return null
     }
 
-    ValueMap.add(`${ValueItemType.Signal}:${id}`, () => node.value)
+    ValueMap.add(`${ValueItemType.Signal}:${id}`, () => node_raw.value)
 
-    if (type === NodeType.Memo || type === NodeType.Signal) {
-        observeValueUpdate(node, v => handler(id, v), $INSPECTOR)
+    if (node.kind === NodeType.Memo ||
+        node.kind === NodeType.Signal
+    ) {
+        observeValueUpdate(node.data, v => handler(id, v), $INSPECTOR)
     }
 
     return {
-        type:  type,
-        name:  utils.getNodeName(node),
+        type:  node.kind,
+        name:  utils.getNodeName(node.data),
         id:    id,
         value: encodeValue(value, false),
     }

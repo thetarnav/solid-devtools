@@ -4,7 +4,7 @@ import {defer} from '@solid-primitives/utils'
 import {msg} from '@solid-devtools/shared/utils'
 import {ObjectType, getObjectById} from '../main/id.ts'
 import {DevtoolsMainView, NodeType, type InspectedState, type NodeID, type OutputEmit, type Solid} from '../main/types.ts'
-import {getNodeType} from '../main/utils.ts'
+import {getNode} from '../main/utils.ts'
 import {type OnNodeUpdate, type SerializedDGraph, collectDependencyGraph} from './collect.ts'
 
 export {type SerializedDGraph} from './collect.ts'
@@ -31,11 +31,16 @@ export function createDependencyGraph(props: {
 
     const inspectedNode = s.createMemo(() => {
         const state = props.inspectedState()
+        let node_raw: Solid.Owner | Solid.Signal | null = null
 
         if (state.signalId) {
-            return getObjectById(state.signalId, ObjectType.Signal)
+            node_raw = getObjectById(state.signalId, ObjectType.Signal)
         } else if (state.ownerId) {
-            return getObjectById(state.ownerId, ObjectType.Owner)
+            node_raw = getObjectById(state.ownerId, ObjectType.Owner)
+        }
+
+        if (node_raw != null) {
+            return getNode(node_raw)
         }
 
         return null
@@ -45,22 +50,20 @@ export function createDependencyGraph(props: {
         // listeners need to be cleared each time, because each update will cause the graph to be mapped again
         clearListeners?.()
 
-        const node = inspectedNode()
-        const type = node && getNodeType(node)
+        let node = inspectedNode()
 
-        if (
-            !props.enabled() ||
-            !type ||
-            type === NodeType.Root ||
-            type === NodeType.Component ||
-            type === NodeType.Context
+        if (!props.enabled() ||
+            !node ||
+            node.kind === NodeType.Root ||
+            node.kind === NodeType.Component ||
+            node.kind === NodeType.Context
         ) {
             clearListeners = null
             props.emit(msg('DgraphUpdate', null))
             return
         }
 
-        const dgraph = collectDependencyGraph(node as Solid.Computation | Solid.Signal, {
+        const dgraph = collectDependencyGraph(node.data as any, {
             onNodeUpdate,
         })
         clearListeners = dgraph.clearListeners

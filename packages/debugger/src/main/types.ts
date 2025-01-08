@@ -56,6 +56,23 @@ export const NODE_TYPE_NAMES: Readonly<Record<NodeType, string>> = {
     [NodeType.CustomValue]: 'Custom Value',
 }
 
+export type NodeData = {
+    [NodeType.Root]:        Solid.Root,
+    [NodeType.Component]:   Solid.Component,
+    [NodeType.Element]:     Element,
+    [NodeType.Effect]:      Solid.Computation,
+    [NodeType.Render]:      Solid.Computation,
+    [NodeType.Memo]:        Solid.Memo,
+    [NodeType.Computation]: Solid.Computation,
+    [NodeType.Refresh]:     Solid.Memo,
+    [NodeType.Context]:     Solid.Computation,
+    [NodeType.CatchError]:  Solid.Computation,
+    [NodeType.Signal]:      Solid.Signal,
+    [NodeType.Store]:       Solid.Store,
+    [NodeType.CustomValue]: Solid.SourceMapValue,
+}
+export type Node = Union<NodeData>
+
 export enum ValueItemType {
     Signal = 'signal',
     Prop   = 'prop',

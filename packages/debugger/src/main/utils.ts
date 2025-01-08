@@ -1,5 +1,5 @@
 import {trimString} from '@solid-devtools/shared/utils'
-import {type Solid, NodeType} from './types.ts'
+import {type Node, type Solid, NodeType} from './types.ts'
 import setup from './setup.ts'
 
 export const isSolidOwner = (o: Solid.SourceMapValue | Solid.Owner | Solid.Store | Solid.Signal): o is Solid.Owner =>
@@ -74,6 +74,15 @@ export const getOwnerType = (o: Solid.Owner): NodeType => {
         return NodeType.Render
     }
     return NodeType.Computation
+}
+
+export function getNode(
+    o: Solid.SourceMapValue | Solid.Signal | Solid.Owner | Solid.Store,
+): Node {
+    return {
+        kind: getNodeType(o),
+        data: o as any,
+    }
 }
 
 export const getNodeName = (o: {
