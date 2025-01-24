@@ -64,7 +64,7 @@ By node I mean any solid internal object, like owners, signals, roots, store-nod
 
 ### Owner disposing
 
-- Patching `owner.cleanups` to listen to cleanup of any owner — [source code](https://github.com/thetarnav/solid-devtools/blob/main/packages/debugger/src/main/utils.ts#L205-L227)
+- Writing to `owner.cleanups` to listen to cleanup of any owner — [source code](https://github.com/thetarnav/solid-devtools/blob/main/packages/debugger/src/main/utils.ts#L205-L227)
 
 #### Issues
 
