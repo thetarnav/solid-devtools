@@ -143,3 +143,5 @@ So if there is an effect that listens to some store property *(e.g. `createEffec
 - There is no way to connect a render effect to the dom property it updates, so I cannot give any meaningfull info about them, or to which element they even belong.
 
 - There is no connection between a signal accessor and the signal object it belongs to.
+
+  This is an usually an issue with jsx and components returning signals. I cannot show what the value is without calling the accessor which might have side effects.
