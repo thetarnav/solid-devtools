@@ -74,7 +74,7 @@ By node I mean any solid internal object, like owners, signals, roots, store-nod
 
 ### Computation updates
 
-- `owner.fn` is patched to observe when the computration reruns — [source code](https://github.com/thetarnav/solid-devtools/blob/main/packages/debugger/src/main/observe.ts#L50-L88)
+- `owner.fn` is patched to observe when the computation reruns — [source code](https://github.com/thetarnav/solid-devtools/blob/main/packages/debugger/src/main/observe.ts#L50-L88)
 
 - `owner.value` is read to get the current owner value and patched to listen to changes — [source code](https://github.com/thetarnav/solid-devtools/blob/main/packages/debugger/src/main/observe.ts#L98-L123)
     - signals are being observed the same way
@@ -145,3 +145,5 @@ So if there is an effect that listens to some store property *(e.g. `createEffec
 - There is no connection between a signal accessor and the signal object it belongs to.
 
   This is an usually an issue with jsx and components returning signals. I cannot show what the value is without calling the accessor which might have side effects.
+
+- No tools to mark "custom primitives" for devtools. For example `createResource` doesn't have a single instance that I can inspect—it's made up from multiple separate signals, computations and other values.
