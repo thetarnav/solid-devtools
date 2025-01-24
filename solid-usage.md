@@ -138,7 +138,7 @@ So if there is an effect that listens to some store property *(e.g. `createEffec
 
 - The other is similar to `afterCreateOwner` — signals created before the hook callback is set will be missed. This one is trickier to solve because signals don't have a clear lifecycle unlike roots.
 
-## Additional issues
+### Additional issues
 
 - There is no way to connect a render effect to the dom property it updates, so I cannot give any meaningfull info about them, or to which element they even belong.
 
