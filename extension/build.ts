@@ -150,6 +150,7 @@ for (let browser of browsers) {
             'import.meta.env.BROWSER': JSON.stringify(browser),
         },
         build: {
+            modulePreload: false,
             minify:        false,
             target:        'esnext',
             emptyOutDir:   !is_dev,
