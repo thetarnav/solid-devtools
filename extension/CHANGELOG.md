@@ -1,5 +1,11 @@
 # @solid-devtools/extension
 
+## 0.33.1
+
+### Patch Changes
+
+- 4f67e44: Disable module preload (fixes #332)
+
 ## 0.33.0
 
 ### Patch Changes
