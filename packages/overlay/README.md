@@ -51,9 +51,9 @@ attachDevtoolsOverlay({
 
 Don't worry about wrapping it with a `isDev` guard, the Overlay takes care of that for you. It should be excluded from production builds automatically.
 
-### Enabling the Babel plugin
+### Enabling the autoname
 
-Enabling the [babel plugin](https://github.com/thetarnav/solid-devtools/tree/main/packages/transform#readme) is optional, but can offer some extra improvements.
+Enabling the autoname setting is optional, but can display name of SolidJS's reactive state in overlay.
 
 To enable it you need to add it to plugins array in your `.vite.config.ts` file:
 
@@ -62,19 +62,19 @@ To enable it you need to add it to plugins array in your `.vite.config.ts` file:
 
 import { defineConfig } from 'vite'
 import solid from 'vite-plugin-solid'
-import devtools from '@solid-devtools/transform'
+import devtools from 'solid-devtools/vite'
 
 export default defineConfig({
   plugins: [
     devtools({
-      name: true,
+      autoname: true,
     }),
     solid(),
   ],
 })
 ```
 
-[**See transform options**](https://github.com/thetarnav/solid-devtools/tree/main/packages/transform#options)
+[**See vite plugin**](https://github.com/thetarnav/solid-devtools/blob/main/packages/main/src/vite/vite.ts)
 
 ## Changelog
 
