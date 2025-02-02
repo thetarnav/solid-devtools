@@ -1,5 +1,11 @@
 # @solid-devtools/overlay
 
+## 0.33.1
+
+### Patch Changes
+
+- 8e2e322: Fixed README.md to update process for enabling babel plugin at overlay.
+
 ## 0.33.0
 
 ### Patch Changes
