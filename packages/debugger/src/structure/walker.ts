@@ -156,6 +156,24 @@ function mapOwner(
 
         let first_owned: Solid.Owner | undefined
 
+        /*
+         solid.lazy(MyComponent) hoc
+          ↳ wrap (callback returned from lazy, called as a component)
+             ↳ memo
+                ↳ MyComponent
+        */
+        if (name === 'wrap' &&
+            typeof ((owner as Solid.Component).component as any)?.preload === 'function' &&
+            owner.owned &&
+            owner.owned.length === 1 &&
+            markOwnerType((first_owned = owner.owned[0]!)) === NodeType.Memo &&
+            first_owned.owned &&
+            first_owned.owned.length === 1 &&
+            markOwnerType((first_owned = first_owned.owned[0]!)) === NodeType.Component
+        ) {
+            return mapOwner(first_owned, parent)
+        }
+
         /* 
          Context
         
