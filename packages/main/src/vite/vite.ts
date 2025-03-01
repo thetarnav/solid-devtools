@@ -2,6 +2,7 @@ import * as path from 'node:path'
 import * as vite from 'vite'
 import {type PluginItem, transformAsync} from '@babel/core'
 import * as debug from '@solid-devtools/debugger/types'
+import babelTsSyntaxPlugin from '@babel/plugin-syntax-typescript';
 import * as babel from '../babel.ts'
 
 export const enum DevtoolsModule {
@@ -116,7 +117,7 @@ export const devtoolsPlugin = (_options: DevtoolsPluginOptions = {}): vite.Plugi
             }
 
             // babel doesn't work with typescript by default
-            plugins.unshift(['@babel/plugin-syntax-typescript', {isTSX: is_jsx}])
+            plugins.unshift([babelTsSyntaxPlugin, {isTSX: is_jsx}])
 
             const result = await transformAsync(source, {
                 babelrc:        false,
