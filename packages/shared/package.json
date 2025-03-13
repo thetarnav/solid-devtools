@@ -43,14 +43,14 @@
         "solid-js": "^1.9.0"
     },
     "dependencies": {
-        "@solid-primitives/event-listener": "^2.3.3",
-        "@solid-primitives/media": "^2.2.9",
-        "@solid-primitives/refs": "^1.0.8",
-        "@solid-primitives/rootless": "^1.4.5",
-        "@solid-primitives/scheduled": "^1.4.4",
-        "@solid-primitives/static-store": "^0.0.8",
-        "@solid-primitives/styles": "^0.0.114",
-        "@solid-primitives/utils": "^6.2.3",
-        "@nothing-but/utils": "~0.17.0"
+        "@nothing-but/utils": "~0.17.0",
+        "@solid-primitives/event-listener": "^2.4.0",
+        "@solid-primitives/media": "^2.3.0",
+        "@solid-primitives/refs": "^1.1.0",
+        "@solid-primitives/rootless": "^1.5.0",
+        "@solid-primitives/scheduled": "^1.5.0",
+        "@solid-primitives/static-store": "^0.1.0",
+        "@solid-primitives/styles": "^0.1.0",
+        "@solid-primitives/utils": "^6.3.0"
     }
 }

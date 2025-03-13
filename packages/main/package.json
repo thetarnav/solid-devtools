@@ -95,16 +95,16 @@
     },
     "devDependencies": {
         "@babel/core": "^7.26.0",
-        "@babel/generator": "^7.26.3",
-        "@babel/parser": "^7.26.3",
+        "@babel/generator": "^7.26.10",
+        "@babel/parser": "^7.26.10",
         "@babel/plugin-syntax-jsx": "^7.25.9",
         "@types/babel__core": "^7.20.5",
         "@types/babel__generator": "^7.6.8"
     },
     "dependencies": {
-        "@babel/core": "^7.23.3",
-        "@babel/plugin-syntax-typescript": "^7.23.3",
-        "@babel/types": "^7.23.3",
+        "@babel/core": "^7.26.10",
+        "@babel/plugin-syntax-typescript": "^7.25.9",
+        "@babel/types": "^7.26.10",
         "@solid-devtools/debugger": "workspace:^",
         "@solid-devtools/shared": "workspace:^"
     },

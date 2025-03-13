@@ -2,3 +2,5 @@ packages:
   - extension
   - packages/*
   - examples/*
+onlyBuiltDependencies:
+  - esbuild

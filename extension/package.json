@@ -15,8 +15,8 @@
         "firefox-run": "pnpx web-ext run -s dist/firefox -p dev"
     },
     "devDependencies": {
-        "@crxjs/vite-plugin": "2.0.0-beta.28",
-        "@types/chrome": "^0.0.287"
+        "@crxjs/vite-plugin": "2.0.0-beta.32",
+        "@types/chrome": "^0.0.309"
     },
     "dependencies": {
         "@solid-devtools/debugger": "workspace:^",
@@ -28,6 +28,5 @@
         "@crxjs/vite-plugin": {
             "vite": "^6"
         }
-    },
-    "packageManager": "pnpm@9.14.4"
+    }
 }

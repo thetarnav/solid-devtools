@@ -87,7 +87,7 @@ export function interceptPropertySet<TObject extends object, TKey extends keyof 
 
 // TODO fix this in solid-primitives
 export const asArray = <T>(value: T): (T extends any[] ? T[number] : T)[] =>
-    Array.isArray(value) ? (value as any) : [value]
+    Array.isArray(value) ? (value as any) : [value as any]
 
 export const isObject = (o: unknown): o is object => typeof o === 'object' && !!o
 

@@ -51,15 +51,15 @@
     "dependencies": {
         "@nothing-but/utils": "~0.17.0",
         "@solid-devtools/shared": "workspace:^",
-        "@solid-primitives/bounds": "^0.0.122",
-        "@solid-primitives/cursor": "^0.0.115",
-        "@solid-primitives/event-listener": "^2.3.3",
-        "@solid-primitives/keyboard": "^1.2.8",
-        "@solid-primitives/platform": "^0.1.2",
-        "@solid-primitives/rootless": "^1.4.5",
-        "@solid-primitives/scheduled": "^1.4.4",
-        "@solid-primitives/static-store": "^0.0.8",
-        "@solid-primitives/utils": "^6.2.3"
+        "@solid-primitives/bounds": "^0.1.0",
+        "@solid-primitives/cursor": "^0.1.0",
+        "@solid-primitives/event-listener": "^2.4.0",
+        "@solid-primitives/keyboard": "^1.3.0",
+        "@solid-primitives/platform": "^0.2.0",
+        "@solid-primitives/rootless": "^1.5.0",
+        "@solid-primitives/scheduled": "^1.5.0",
+        "@solid-primitives/static-store": "^0.1.0",
+        "@solid-primitives/utils": "^6.3.0"
     },
     "peerDependencies": {
         "solid-js": "^1.9.0"
