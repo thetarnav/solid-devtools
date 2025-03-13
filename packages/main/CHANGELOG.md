@@ -1,5 +1,11 @@
 # solid-devtools
 
+## 0.33.1
+
+### Patch Changes
+
+- 05163c3: fix: babel plugin resolution by importing @babel/plugin-syntax-typescript instead of passing it as a string
+
 ## 0.33.0
 
 ### Minor Changes
