@@ -62,6 +62,16 @@ By node I mean any solid internal object, like owners, signals, roots, store-nod
 
 - Reads `owner.owner` and `owner.owned` to walk the tree in both directions
 
+### Components
+
+- Component functions are wrapped with `devComponent` when called.
+- To get component elements, I read `owner.value` of a component and walk the recieved arrays or functions to get to the elements. This is the only way to map elements to components, which is important for the [locator feature](https://github.com/thetarnav/solid-devtools/tree/main/packages/debugger#using-component-locator).
+    - [source code](https://github.com/thetarnav/solid-devtools/blob/508bc73783c049478a629960ee353219a4b9a953/packages/debugger/src/main/utils.ts#L154-L172)
+
+#### Issues
+
+- Calling signals to get to the elements is bad. I might call it before it's supposed to be read causing side effects. And there is no way of knowing when the elements might have changed without subscribing to the read signals, or invalidating the results on every reactive update.
+
 ### Owner disposing
 
 - Writing to `owner.cleanups` to listen to cleanup of any owner — [source code](https://github.com/thetarnav/solid-devtools/blob/main/packages/debugger/src/main/utils.ts#L205-L227)
