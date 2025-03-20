@@ -7,7 +7,7 @@ type ComponentData = {
     id: NodeID
     owner: Solid.Component
     name: string | undefined
-    elements: Set<HTMLElement>
+    elements: Set<Element>
     elementNodes: Set<NodeID>
     cleanup: VoidFunction
 }
@@ -16,7 +16,7 @@ type ComponentData = {
 const ComponentMap = new Map<NodeID, ComponentData>()
 
 // Map of element nodes to component nodes
-const ElementNodeMap = new Map<NodeID, {el: HTMLElement; component: ComponentData}>()
+const ElementNodeMap = new Map<NodeID, {el: Element; component: ComponentData}>()
 
 function cleanupComponent(nodeID: NodeID) {
     const component = ComponentMap.get(nodeID)
@@ -35,12 +35,12 @@ export function registerComponent(
               owner: Solid.Component
               id: NodeID
               name: string | undefined
-              elements: HTMLElement[] | null
+              elements: Element[] | null
           }
         | {
               componentId: NodeID
               elementId: NodeID
-              element: HTMLElement
+              element: Element
           },
 ): void {
     // Add new element node to existing component node
@@ -86,7 +86,7 @@ export function clearComponentRegistry() {
 
 export function getComponent(
     id: NodeID,
-): {name: string | undefined; id: NodeID; elements: HTMLElement[]} | null {
+): {name: string | undefined; id: NodeID; elements: Element[]} | null {
     // provided if might be of an element node (in DOM mode) or component node
     // both need to be checked
 
@@ -108,16 +108,16 @@ export function getComponent(
  */
 export function getComponentElement(
     elementId: NodeID,
-): {name: string | undefined; id: NodeID; element: HTMLElement} | undefined {
+): {name: string | undefined; id: NodeID; element: Element} | undefined {
     const elData = ElementNodeMap.get(elementId)
     return elData && {name: elData.component.name, id: elData.component.id, element: elData.el}
 }
 
 // TODO could use some optimization (caching)
-export function findComponent(el: HTMLElement): {name: string; id: NodeID} | null {
+export function findComponent(el: Element): {name: string; id: NodeID} | null {
     const including = new Map<Solid.Owner, ComponentData>()
 
-    let currEl: HTMLElement | null = el
+    let currEl: Element | null = el
     while (currEl) {
         for (const component of ComponentMap.values()) {
             if (component.elements.has(currEl)) including.set(component.owner, component)

@@ -6,7 +6,7 @@ export type LocationAttr = `${string}:${number}:${number}`
 export type LocatorComponent = {
     id: NodeID
     name: string | undefined
-    element: HTMLElement
+    element: Element
     location?: LocationAttr | undefined
 }
 
@@ -20,7 +20,7 @@ export type SourceLocation = {
 
 export type SourceCodeData = SourceLocation & {
     projectPath: string
-    element: HTMLElement | string | undefined
+    element: Element | string | undefined
 }
 
 export type TargetURLFunction = (data: SourceCodeData) => string | void

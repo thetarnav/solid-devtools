@@ -36,25 +36,25 @@ export function createLocator(props: {
     const [enabledByPressingSignal, setEnabledByPressingSignal] = s.createSignal((): boolean => false)
     props.setLocatorEnabledSignal(s.createMemo(() => enabledByPressingSignal()()))
 
-    const [hoverTarget, setHoverTarget] = s.createSignal<HTMLElement | null>(null)
+    const [hoverTarget, setHoverTarget] = s.createSignal<Element | null>(null)
     const [devtoolsTarget, setDevtoolsTarget] = s.createSignal<HighlightElementPayload>(null)
 
     const [highlightedComponents, setHighlightedComponents] = s.createSignal<LocatorComponent[]>([])
 
     const calcHighlightedComponents = (
-        target: HTMLElement | HighlightElementPayload,
+        target: Element | HighlightElementPayload,
     ): LocatorComponent[] => {
         if (!target) return []
 
         // target is an elementId
         if ('type' in target && target.type === 'element') {
             const element = getObjectById(target.id, ObjectType.Element)
-            if (!(element instanceof HTMLElement)) return []
+            if (!(element instanceof Element)) return []
             target = element
         }
 
         // target is an element
-        if (target instanceof HTMLElement) {
+        if (target instanceof Element) {
             const comp = registry.findComponent(target)
             if (!comp) return []
             return [
@@ -117,7 +117,7 @@ export function createLocator(props: {
             'click',
             e => {
                 const {target} = e
-                if (!(target instanceof HTMLElement)) return
+                if (!(target instanceof Element)) return
                 const highlighted = highlightedComponents()
                 const comp =
                     highlighted.find(({element}) => target.contains(element)) ?? highlighted[0]

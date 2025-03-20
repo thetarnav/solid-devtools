@@ -1,259 +1,376 @@
 import {untrackedCallback} from '@solid-devtools/shared/primitives'
-import {asArray} from '@solid-devtools/shared/utils'
 import type {ComponentRegisterHandler} from '../main/component-registry.ts'
 import {ObjectType, getSdtId} from '../main/id.ts'
 import {observeComputationUpdate} from '../main/observe.ts'
-import {type Mapped, type NodeID, type Solid, NodeType, TreeWalkerMode} from '../main/types.ts'
+import {
+    type Mapped,
+    type NodeID,
+    type Solid,
+    NodeType,
+    TreeWalkerMode,
+} from '../main/types.ts'
 import {
     getComponentRefreshNode,
     getNodeName,
     isSolidComputation,
     markOwnerType,
-    resolveElements,
+    owner_each_child,
 } from '../main/utils.ts'
 
 export type ComputationUpdateHandler = (
-    rootId: NodeID,
-    owner: Solid.Owner,
+    rootId:           NodeID,
+    owner:            Solid.Owner,
     changedStructure: boolean,
 ) => void
 
-// Globals set before each walker cycle
-let Mode: TreeWalkerMode
-let RootId: NodeID
-let OnComputationUpdate: ComputationUpdateHandler
-let RegisterComponent: ComponentRegisterHandler
-
-const ElementsMap = new Map<Mapped.Owner, {el: HTMLElement; component: Mapped.Owner}>()
+export type TreeWalkerConfig = {
+    mode:                TreeWalkerMode
+    rootId:              NodeID
+    onComputationUpdate: ComputationUpdateHandler
+    registerComponent:   ComponentRegisterHandler
+}
 
 const $WALKER = Symbol('tree-walker')
 
-function observeComputation(comp: Solid.Computation, owner_to_update: Solid.Owner): void {
+function observeComputation(
+    comp:            Solid.Computation,
+    owner_to_update: Solid.Owner,
+    config:          TreeWalkerConfig,
+): void {
 
     // leaf nodes (ones that don't have children) don't have to cause a structure update
     // Unless the walker is in DOM mode, then we need to observe all computations
     // This is because DOM can change without the owner structure changing
     let was_leaf = !comp.owned || comp.owned.length === 0
 
-    // copy globals
-    let root_id = RootId
-    let on_computation_update = OnComputationUpdate
-    let mode = Mode
+    // copy values in case config gets mutated
+    let {rootId, onComputationUpdate, mode} = config
 
     const handler = () => {
         let is_leaf = !comp.owned || comp.owned.length === 0
         let changed_structure = was_leaf !== is_leaf || !is_leaf || mode === TreeWalkerMode.DOM
         was_leaf = is_leaf
-        on_computation_update(root_id, owner_to_update, changed_structure)
+        onComputationUpdate(rootId, owner_to_update, changed_structure)
     }
 
     observeComputationUpdate(comp, handler, $WALKER)
 }
 
-function mapChildren(owner: Solid.Owner, mappedOwner: Mapped.Owner | null): Mapped.Owner[] {
-    const children: Mapped.Owner[] = []
+function resolveElements(
+    value: unknown, list: Element[] = []
+): Element[] {
+    pushResolvedElements(list, value)
+    return list
+}
 
-    const rawChildren: Solid.Owner[] = owner.owned ? owner.owned.slice() : []
-    if (owner.sdtSubRoots) rawChildren.push.apply(rawChildren, owner.sdtSubRoots)
-
-    if (Mode === TreeWalkerMode.Owners) {
-        for (const child of rawChildren) {
-            const mappedChild = mapOwner(child, mappedOwner)
-            if (mappedChild) children.push(mappedChild)
-        }
-    } else {
-        for (const child of rawChildren) {
-            const type = markOwnerType(child)
-            if (type === NodeType.Component) {
-                const mappedChild = mapOwner(child, mappedOwner)
-                if (mappedChild) children.push(mappedChild)
-            } else {
-                if (isSolidComputation(child)) observeComputation(child, owner)
-                children.push.apply(children, mapChildren(child, mappedOwner))
+function pushResolvedElements(list: Element[], value: unknown): void {
+    if (value != null) {
+        // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
+        switch (typeof value) {
+        case 'function':
+            // do not call a function, unless it's a signal (to prevent creating new nodes)
+            if (value.length === 0 && value.name === 'bound readSignal') {
+                pushResolvedElements(list, value())
             }
+            break
+        case 'object':
+            if (Array.isArray(value)) {
+                for (let item of value) {
+                    pushResolvedElements(list, item)
+                }
+            } else if (value instanceof Element) {
+                list.push(value)
+            }
+
+            break
+        }
+    }
+}
+
+/**
+ * Updates a map of Element to Component_Owner by traversing the owner tree
+ * 
+ * @param owner owner to start traversal from
+ * @param eli   Element interface
+ * @param map   Optional existing map to update
+ * 
+ * The elements are resolved shallowly,
+ * so only top-level elements will be mapped to their components.
+ */
+export function gatherElementMap(
+    owner: Solid.Owner,
+    map:   Map<Element, Solid.Component> = new Map(),
+): Map<Element, Solid.Component> {
+
+    if (markOwnerType(owner) === NodeType.Component) {
+        for (let el of resolveElements(owner.value)) {
+            map.set(el, owner as Solid.Component)
+        }
+    }
+    
+    for (let child of owner_each_child(owner)) {
+        gatherElementMap(child, map)
+    }
+    
+    return map
+}
+
+function mapChildren(
+    owner:     Solid.Owner,
+    owner_map: Mapped.Owner | null,
+    config:    TreeWalkerConfig,
+    children:  Mapped.Owner[] = [],
+): Mapped.Owner[] {
+
+    for (let child of owner_each_child(owner)) {
+        if (config.mode === TreeWalkerMode.Owners ||
+            markOwnerType(child) === NodeType.Component
+        ) {
+            children.push(mapOwner(child, owner_map, config))
+        } else {
+            if (isSolidComputation(child)) {
+                observeComputation(child, owner, config)
+            }
+            mapChildren(child, owner_map, config, children)
         }
     }
 
     return children
 }
 
-let MappedOwnerNode: Mapped.Owner
-let AddedToParentElements = false
-
-/**
- * @param els elements to map
- * @param parentChildren parent owner children.
- * Will be checked for existing elements, and if found, `MappedOwnerNode` will be injected in the place of the element.
- * Passing `undefined` will skip this check.
- */
-function mapElements(
-    els: Iterable<Element>,
-    parentChildren: Mapped.Owner[] | undefined,
-): Mapped.Owner[] {
-    const r = [] as Mapped.Owner[]
-
-    els: for (const el of els) {
-        if (!(el instanceof HTMLElement)) continue
-
-        if (parentChildren) {
-            // find el in parent els and remove it
-            const toCheck = [parentChildren]
-            let index = 0
-            let elNodes = toCheck[index++]
-            while (elNodes) {
-                for (let i = 0; i < elNodes.length; i++) {
-                    const elNode = elNodes[i]!
-                    const elNodeData = ElementsMap.get(elNode)
-                    if (elNodeData && elNodeData.el === el) {
-                        if (AddedToParentElements) {
-                            // if the element is already added to the parent, just remove the element
-                            elNodes.splice(i, 1)
-                        } else {
-                            // otherwise, we can just replace it with the component
-                            elNodes[i] = MappedOwnerNode
-                            AddedToParentElements = true
-                        }
-                        r.push(elNode)
-                        elNodeData.component = MappedOwnerNode
-                        continue els
-                    }
-                    if (elNode.children.length) toCheck.push(elNode.children)
-                }
-                elNodes = toCheck[index++]
-            }
-        }
-
-        const mappedEl: Mapped.Owner = {
-            id: getSdtId(el, ObjectType.Element),
-            type: NodeType.Element,
-            name: el.localName,
-            children: [],
-        }
-        r.push(mappedEl)
-        ElementsMap.set(mappedEl, {el, component: MappedOwnerNode})
-
-        if (el.children.length) mappedEl.children = mapElements(el.children, parentChildren)
-    }
-
-    return r
-}
+let element_set = new Set<any>()
 
 function mapOwner(
     owner:  Solid.Owner,
     parent: Mapped.Owner | null,
-): Mapped.Owner | undefined {
+    config: TreeWalkerConfig,
+): Mapped.Owner {
 
     const id   = getSdtId(owner, ObjectType.Owner)
     const type = markOwnerType(owner)
     const name = getNodeName(owner)
 
-    const mapped = {id, type, name} as Mapped.Owner
+    const mapped = {id, type, name, children: []} as Mapped.Owner
 
-    let resolvedElements: ReturnType<typeof resolveElements> | undefined
+    let resolved_elements: Element[] | undefined
 
     // Component
     if (type === NodeType.Component) {
 
         let first_owned: Solid.Owner | undefined
 
-        /* 
+        /*
          Context
-        
+
          <provider> - Component
           ↳ RenderEffect - node with context key (first_owned)
              ↳ children memo - memoizing children fn param
              ↳ children memo - resolving nested children
-        
+
          The provider component will be omitted
         */
         if (name === 'provider' &&
-            owner.owned &&
+            owner.owned != null &&
             owner.owned.length === 1 &&
-            markOwnerType((first_owned = owner.owned[0]!)) === NodeType.Context
+            markOwnerType(first_owned = owner.owned[0]!) === NodeType.Context
         ) {
-            return mapOwner(first_owned, parent)
+            return mapOwner(first_owned, parent, config)
         }
 
         // Register component to global map
-        RegisterComponent({
-            owner: owner as Solid.Component,
-            id,
-            name,
-            elements: (resolvedElements = resolveElements(owner.value)),
+        config.registerComponent({
+            owner:    owner as Solid.Component,
+            id:       id,
+            name:     name,
+            elements: (resolved_elements = resolveElements(owner.value)),
         })
 
         // Refresh
         // omitting refresh memo — map it's children instead
-        const refresh = getComponentRefreshNode(owner as Solid.Component)
-        if (refresh) {
+        let refresh = getComponentRefreshNode(owner as Solid.Component)
+        if (refresh != null) {
             mapped.hmr = true
             owner = refresh
         }
     }
     // Computation
     else if (isSolidComputation(owner)) {
-        observeComputation(owner, owner)
+        observeComputation(owner, owner, config)
         if (type != NodeType.Context && (!owner.sources || owner.sources.length === 0)) {
             mapped.frozen = true
         }
     }
 
-    const children: Mapped.Owner[] = []
-    mapped.children = children
-
-    AddedToParentElements = false as boolean
-    MappedOwnerNode = mapped
-
+    mapChildren(owner, mapped, config, mapped.children)
+    
     // Map html elements in DOM mode
-    // elements might already be resolved when mapping components
-    if (Mode === TreeWalkerMode.DOM &&
-        (resolvedElements = resolvedElements === undefined
-            ? resolveElements(owner.value)
-            : resolvedElements)
-    ) {
-        children.push.apply(children, mapElements(asArray(resolvedElements), parent?.children))
+    if (config.mode === TreeWalkerMode.DOM) {
+        // elements might already be resolved when mapping components
+        resolved_elements ??= resolveElements(owner.value)
+
+        let elements_stack_arr = [resolved_elements] as (Iterable<Element> & ArrayLike<Element>)[]
+        let elements_stack_idx = [0]
+        let elements_stack_owner = [mapped]
+        let elements_stack_len = 1
+
+        let children_stack_arr = [mapped.children]
+        let children_stack_idx = [0]
+        let children_stack_len = 1
+
+        while (children_stack_len > 0) {
+            
+            let children  = children_stack_arr[children_stack_len-1]!
+            let child_idx = children_stack_idx[children_stack_len-1]!
+
+            if (child_idx >= children.length) {
+                children_stack_len -= 1
+                continue
+            }
+
+            children_stack_idx[children_stack_len-1]! += 1
+
+            let child = children[child_idx]!
+            
+            if (child.type === NodeType.Element) {
+
+                // Don't go over added element children
+                // TODO: add children cap stack
+                if (children_stack_len-1 === 0) {
+                    continue
+                }
+                
+                while (elements_stack_len > 0) {
+            
+                    let elements = elements_stack_arr  [elements_stack_len-1]!
+                    let el_idx   = elements_stack_idx  [elements_stack_len-1]!
+                    let el_owner = elements_stack_owner[elements_stack_len-1]!
+
+                    if (el_idx >= elements.length) {
+                        elements_stack_len -= 1
+                        continue
+                    }
+
+                    elements_stack_idx[elements_stack_len-1]! += 1
+
+                    let el = elements[el_idx]!
+                    let el_id = getSdtId(el, ObjectType.Element)
+                    
+                    // Child has this element
+                    if (el_id === child.id) {
+                        if (elements_stack_len > 1) {
+                            el_owner.children.push(children_stack_arr[0]![children_stack_idx[0]!-1]!)
+                            children_stack_arr[0]!.splice(children_stack_idx[0]!-1, 1)
+                            children_stack_idx[0]! -= 1
+                        }
+                        children_stack_len = 0
+
+                        // Skip remaining elements from the child
+                        for (let skip_child_idx = child_idx + 1;;) {
+                            let el_idx = elements_stack_idx[elements_stack_len-1]!
+
+                            if (el_idx >= elements.length ||
+                                skip_child_idx >= children.length ||
+                                children[skip_child_idx]!.id !== getSdtId(elements[el_idx]!, ObjectType.Element)
+                            ) {
+                                break
+                            }
+
+                            elements_stack_idx[elements_stack_len-1]! += 1
+                            skip_child_idx += 1
+                        }
+
+                        break
+                    }
+
+                    if (element_set.has(el)) {
+                        continue
+                    }
+
+                    else {
+                        let el_json: Mapped.Owner = {
+                            id:       el_id,
+                            type:     NodeType.Element,
+                            name:     el.tagName.toLowerCase(),
+                            children: [],
+                        }
+                        el_owner.children.push(el_json)
+                        element_set.add(el)
+
+                        elements_stack_arr  [elements_stack_len] = el.children
+                        elements_stack_idx  [elements_stack_len] = 0
+                        elements_stack_owner[elements_stack_len] = el_json
+                        elements_stack_len += 1
+                    }
+                }
+
+            } else {
+                children_stack_arr[children_stack_len] = child.children
+                children_stack_idx[children_stack_len] = 0
+                children_stack_len += 1
+                continue
+            }
+        }
+
+        // append remaining elements to children
+        while (elements_stack_len > 0) {
+            let elements = elements_stack_arr  [elements_stack_len-1]!
+            let idx      = elements_stack_idx  [elements_stack_len-1]!
+            let el_owner = elements_stack_owner[elements_stack_len-1]!
+
+            if (idx >= elements.length) {
+                elements_stack_len -= 1
+                continue
+            }
+
+            elements_stack_idx[elements_stack_len-1]! += 1
+
+            let el = elements[idx]!
+
+            if (element_set.has(el)) {
+                continue
+            }
+
+            let el_json: Mapped.Owner = {
+                id:       getSdtId(el, ObjectType.Element),
+                type:     NodeType.Element,
+                name:     el.tagName.toLowerCase(),
+                children: [],
+            }
+            el_owner.children.push(el_json)
+            element_set.add(el)
+
+            elements_stack_arr  [elements_stack_len] = el.children
+            elements_stack_idx  [elements_stack_len] = 0
+            elements_stack_owner[elements_stack_len] = el_json
+            elements_stack_len += 1
+        }
     }
 
-    // global `AddedToParentElements` will be changed in mapChildren
-    const addedToParent = AddedToParentElements
-
-    children.push.apply(children, mapChildren(owner, mapped))
-
-    return addedToParent ? undefined : mapped
+    return mapped
 }
 
 export const walkSolidTree = /*#__PURE__*/ untrackedCallback(function (
-    owner: Solid.Owner | Solid.Root,
-    config: {
-        mode: TreeWalkerMode
-        rootId: NodeID
-        onComputationUpdate: ComputationUpdateHandler
-        registerComponent: ComponentRegisterHandler
-    },
+    owner:  Solid.Owner | Solid.Root,
+    config: TreeWalkerConfig,
 ): Mapped.Owner {
-    // set the globals to be available for this walk cycle
-    Mode = config.mode
-    RootId = config.rootId
-    OnComputationUpdate = config.onComputationUpdate
-    RegisterComponent = config.registerComponent
 
-    const r = mapOwner(owner, null)!
+    if (config.mode === TreeWalkerMode.DOM) {
 
-    if (Mode === TreeWalkerMode.DOM) {
+        let res = mapOwner(owner, null, config)
+
         // Register all mapped element nodes to their components
-        for (const [elNode, {el, component}] of ElementsMap) {
-            RegisterComponent({
-                element: el,
-                componentId: component.id,
-                elementId: elNode.id,
-            })
-        }
+        // for (let [el, o] of el_map) {
+        //     config.registerComponent({
+        //         element:     el,
+        //         componentId: getSdtId(o, ObjectType.Owner),
+        //         elementId:   getSdtId(el, ObjectType.Element),
+        //     })
+        // }
 
-        ElementsMap.clear()
+        element_set.clear()
+
+        return res
     }
 
-    // clear the globals
-    Mode = RootId = OnComputationUpdate = RegisterComponent = undefined!
-
-    return r
+    return mapOwner(owner, null, config)
 })

@@ -22,7 +22,10 @@ export function createElementsOverlay(selected: Accessor<LocatorComponent[]>) {
 }
 
 const ElementOverlay: Component<{component: LocatorComponent | null}> = props => {
-    const element = () => props.component?.element
+    const element = () => {
+        let el = props.component?.element
+        return el instanceof HTMLElement ? el : null
+    }
     // set pointer cursor to selected component
     createElementCursor(element, 'pointer')
     const tag = () => element()?.localName
