@@ -6,6 +6,7 @@ import {createDependencyGraph} from '../dependency/index.ts'
 import {createInspector} from '../inspector/index.ts'
 import {createLocator} from '../locator/index.ts'
 import {createStructure} from '../structure/index.ts'
+import * as walker from '../structure/walker.ts'
 import {getObjectById, getSdtId, ObjectType} from './id.ts'
 import {initRoots} from './roots.ts'
 import setup from './setup.ts'
@@ -18,6 +19,7 @@ import {
     type NodeID,
     type OutputListener,
     type OutputMessage,
+    dom_element_interface,
 } from './types.ts'
 
 function createDebugger() {
@@ -137,6 +139,9 @@ function createDebugger() {
             })
         }
     }
+
+    let eli = dom_element_interface
+    let component_registry = walker.makeComponentRegistry(eli)
     
     //
     // Structure:
@@ -152,6 +157,7 @@ function createDebugger() {
         },
         onNodeUpdate: pushNodeUpdate,
         enabled: debuggerEnabled,
+        component_registry: component_registry,
     })
     
     //
@@ -190,6 +196,7 @@ function createDebugger() {
             }
         },
         emit: emitOutput,
+        component_registry: component_registry,
     })
     
     // Opens the source code of the inspected component

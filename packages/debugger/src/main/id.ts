@@ -11,7 +11,7 @@ export const enum ObjectType {
 
 type ValueMap = {
     [ObjectType.Owner]:       Solid.Owner
-    [ObjectType.Element]:     Element
+    [ObjectType.Element]:     object
     [ObjectType.Signal]:      Solid.Signal
     [ObjectType.Store]:       Solid.Store
     [ObjectType.StoreNode]:   Solid.StoreNode

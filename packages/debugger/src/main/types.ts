@@ -130,6 +130,27 @@ export type OutputListener = (e: OutputMessage) => void
 
 export type OutputEmit = (e: OutputMessage) => void
 
+/**
+ * When using a custom solid renderer, you should provide a custom element interface.
+ * By default the debugger assumes that rendered elements are DOM elements.
+ */
+export type ElementInterface<T extends object> = {
+    isElement:          (obj: object | T) => obj is T,
+    getElementName:     (el: T) => string,
+    getElementChildren: (el: T) => Iterable<T>,
+    getElementAt:       (e: MouseEvent) => T | null,
+}
+
+/**
+ * Implementation of {@link ElementInterface} for {@link Element}
+ */
+export const dom_element_interface: ElementInterface<Element> = {
+    isElement:          obj => obj instanceof Element,
+    getElementName:     el => el.localName,
+    getElementChildren: el => el.children,
+    getElementAt:       e => e.target as Element | null,
+}
+
 //
 // EXPOSED SOLID API
 //

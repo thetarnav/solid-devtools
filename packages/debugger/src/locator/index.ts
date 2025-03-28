@@ -5,7 +5,7 @@ import {createKeyHold} from '@solid-primitives/keyboard'
 import {scheduleIdle} from '@solid-primitives/scheduled'
 import {makeHoverElementListener} from '@solid-devtools/shared/primitives'
 import {msg, warn} from '@solid-devtools/shared/utils'
-import * as registry from '../main/component-registry.ts'
+import * as walker from '../structure/walker.ts'
 import {ObjectType, getObjectById} from '../main/id.ts'
 import SolidAPI from '../main/setup.ts'
 import {type NodeID, type OutputEmit} from '../main/types.ts'
@@ -27,11 +27,12 @@ export {parseLocationString} from './find-components.ts'
 
 export * from './types.ts'
 
-export function createLocator(props: {
-    locatorEnabled: s.Accessor<boolean>
-    setLocatorEnabledSignal(signal: s.Accessor<boolean>): void
-    onComponentClick(componentId: NodeID, next: VoidFunction): void
-    emit: OutputEmit
+export function createLocator<TEl extends object>(props: {
+    locatorEnabled: s.Accessor<boolean>,
+    setLocatorEnabledSignal(signal: s.Accessor<boolean>): void,
+    onComponentClick(componentId: NodeID, next: VoidFunction): void,
+    emit: OutputEmit,
+    component_registry: walker.ComponentRegistry<TEl>,
 }) {
     const [enabledByPressingSignal, setEnabledByPressingSignal] = s.createSignal((): boolean => false)
     props.setLocatorEnabledSignal(s.createMemo(() => enabledByPressingSignal()()))
@@ -55,7 +56,7 @@ export function createLocator(props: {
 
         // target is an element
         if (target instanceof HTMLElement) {
-            const comp = registry.findComponent(target)
+            const comp = walker.findComponent(props.component_registry, target)
             if (!comp) return []
             return [
                 {
@@ -68,7 +69,7 @@ export function createLocator(props: {
         }
 
         // target is a component or an element of a component (in DOM walker mode)
-        const comp = registry.getComponent(target.id)
+        const comp = walker.getComponent(props.component_registry, target.id)
         if (!comp) return []
         return comp.elements.map(element => ({
             element,
@@ -91,7 +92,7 @@ export function createLocator(props: {
     // notify of component hovered by using the debugger
     s.createEffect((prev: NodeID | undefined) => {
         const target = hoverTarget()
-        const comp = target && registry.findComponent(target)
+        const comp = target && walker.findComponent(props.component_registry, target)
         if (prev) {
             props.emit(msg('HoveredComponent', {nodeId: prev, state: false}))
         }

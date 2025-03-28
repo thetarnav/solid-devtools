@@ -1,10 +1,9 @@
 import {throttle} from '@solid-primitives/scheduled'
-import * as registry from '../main/component-registry.ts'
 import {ObjectType, getSdtId} from '../main/id.ts'
 import * as roots from '../main/roots.ts'
 import {type Mapped, type NodeID, type Solid, DEFAULT_WALKER_MODE, DevtoolsMainView, NodeType, TreeWalkerMode} from '../main/types.ts'
 import {isDisposed, markOwnerType} from '../main/utils.ts'
-import {type ComputationUpdateHandler, walkSolidTree} from './walker.ts'
+import * as walker from './walker.ts'
 
 export type StructureUpdates = {
     /** Partial means that the updates are based on the previous structure state */
@@ -43,10 +42,11 @@ function getClosestIncludedOwner(owner: Solid.Owner, mode: TreeWalkerMode): Soli
     return root
 }
 
-export function createStructure(props: {
+export function createStructure<TEl extends object>(props: {
     onStructureUpdate: (updates: StructureUpdates) => void
     onNodeUpdate:      (nodeId: NodeID) => void
     enabled:           () => boolean
+    component_registry: walker.ComponentRegistry<TEl>,
 }) {
 
     let treeWalkerMode: TreeWalkerMode = DEFAULT_WALKER_MODE
@@ -57,7 +57,7 @@ export function createStructure(props: {
     const removedRoots = new Set<NodeID>()
     let shouldUpdateAllRoots = true
 
-    const onComputationUpdate: ComputationUpdateHandler = (
+    const onComputationUpdate: walker.ComputationUpdateHandler = (
         rootId, owner, changedStructure,
     ) => {
         // separate the callback from the computation
@@ -72,9 +72,9 @@ export function createStructure(props: {
     }
 
     function forceFlushRootUpdateQueue(): void {
-        
+
         if (props.enabled()) {
-            
+
             let partial = !shouldUpdateAllRoots
             shouldUpdateAllRoots = false
 
@@ -92,16 +92,17 @@ export function createStructure(props: {
             }
 
             for (let owner of owners) {
-                let rootId = getRootId(owner)
-                let tree = walkSolidTree(owner, {
-                    rootId,
-                    mode: treeWalkerMode,
-                    onComputationUpdate,
-                    registerComponent: registry.registerComponent,
+                let root_id = getRootId(owner)
+                let tree = walker.walkSolidTree(owner, {
+                    rootId:   root_id,
+                    mode:     treeWalkerMode,
+                    onUpdate: onComputationUpdate,
+                    eli:      props.component_registry.eli,
+                    registry: props.component_registry,
                 })
-                let map = updated[rootId]
-                if (map) map[tree.id] = tree
-                else updated[rootId] = {[tree.id]: tree}
+                let map = updated[root_id]
+                if (map != null) map[tree.id] = tree
+                else updated[root_id] = {[tree.id]: tree}
             }
 
             props.onStructureUpdate({partial, updated, removed: [...removedRoots]})
@@ -143,7 +144,7 @@ export function createStructure(props: {
     function setTreeWalkerMode(mode: TreeWalkerMode): void {
         treeWalkerMode = mode
         updateAllRoots()
-        registry.clearComponentRegistry()
+        walker.clearComponentRegistry(props.component_registry)
     }
 
     return {

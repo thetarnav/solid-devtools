@@ -2,6 +2,31 @@ import {trimString} from '@solid-devtools/shared/utils'
 import {type Node, type Solid, NodeType} from './types.ts'
 import setup from './setup.ts'
 
+export function* unwrap_each<T>(arr: readonly T[] | null | undefined): ArrayIterator<T> {
+    if (arr != null) {
+        yield* arr.values()
+    }
+}
+
+export function append_array<T>(arr: T[], items: readonly T[]): void {
+    arr.push.apply(arr, items as any)
+}
+export function unwrap_append<T>(arr: T[], item: T | null | undefined): void {
+    if (item != null) {
+        arr.push(item)
+    }
+}
+export function unwrap_append_array<T>(arr: T[], items: readonly T[] | null | undefined): void {
+    if (items != null) {
+        arr.push.apply(arr, items as any)
+    }
+}
+
+export function* owner_each_child(o: Solid.Owner): ArrayIterator<Solid.Owner> {
+    yield* unwrap_each(o.owned)
+    yield* unwrap_each(o.sdtSubRoots)
+}
+
 export const isSolidOwner = (o: Solid.SourceMapValue | Solid.Owner | Solid.Store | Solid.Signal): o is Solid.Owner =>
     'owned' in o
 
