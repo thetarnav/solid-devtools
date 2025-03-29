@@ -39,9 +39,9 @@ const LOC_ATTR_REGEX_UNIX =
 
 export const LOC_ATTR_REGEX = isWindows ? LOC_ATTR_REGEX_WIN : LOC_ATTR_REGEX_UNIX
 
-export function getLocationAttr(element: Element): LocationAttr | undefined {
-    const attr = element.getAttribute(LOCATION_ATTRIBUTE_NAME)
-    if (!attr || !LOC_ATTR_REGEX.test(attr)) return
+export function getLocationAttr(element: Element): LocationAttr | null {
+    let attr = element.getAttribute(LOCATION_ATTRIBUTE_NAME)
+    if (!attr || !LOC_ATTR_REGEX.test(attr)) return null
     return attr as LocationAttr
 }
 

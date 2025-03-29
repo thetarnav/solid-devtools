@@ -137,10 +137,10 @@ export type SourceLocation = {
 }
 
 export type Rect = {
-    x: number
-    y: number
-    w: number
-    h: number
+    x:      number
+    y:      number
+    width:  number
+    height: number
 }
 
 /**
@@ -149,10 +149,10 @@ export type Rect = {
  */
 export type ElementInterface<T extends object> = {
     isElement:    (obj: object | T) => obj is T,
+    getElementAt: (e: MouseEvent) => T | null,
     getName:      (el: T) => string | null,
     getChildren:  (el: T) => Iterable<T>,
     getParent:    (el: T) => T | null,
-    getElementAt: (e: MouseEvent) => T | null,
     getLocation:  (el: T) => SourceLocation | null,
     getRect:      (el: T) => Rect | null,
 }
@@ -162,18 +162,14 @@ export type ElementInterface<T extends object> = {
  */
 export const dom_element_interface: ElementInterface<Element> = {
     isElement:    obj => obj instanceof Element,
+    getElementAt: e => e.target as Element | null,
     getName:      el => el.localName,
     getChildren:  el => el.children,
     getParent:    el => el.parentElement,
-    getElementAt: e => e.target as Element | null,
+    getRect:      el => el.getBoundingClientRect(),
     getLocation:  el => {
         let attr = locator.getLocationAttr(el)
-        if (attr == null) return null
-        return locator.parseLocationString(attr) ?? null
-    },
-    getRect:      el => {
-        let rect = el.getBoundingClientRect()
-        return {x: rect.x, y: rect.y, w: rect.width, h: rect.height}
+        return attr && locator.parseLocationString(attr) || null
     },
 }
 

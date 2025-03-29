@@ -14,27 +14,27 @@ export function createElementsOverlay<TEl extends object>(
         const component = () => active() ? componentRaw() : null
 
         const name = () => component()?.name
-    
+
         const rect = s.createMemo((prev: Rect) => {
             let comp = component()
             if (comp === null) return prev
-            
+
             let rect = eli.getRect(comp.element)
             if (rect === null) return prev
 
             return rect
         }, {x: 0, y: 0, w: 0, h: 0})
-        
+
         const transform  = () => `translate(${Math.round(rect().x)}px, ${Math.round(rect().y)}px)`
         const placeOnTop = () => rect().y > window.innerHeight / 2
 
         const tag = () => {
             let comp = component()
             if (comp === null) return UNKNOWN
-            
+
             return eli.getName(comp.element) ?? UNKNOWN
         }
-    
+
         return (
             <>
                 <style>{styles}</style>
@@ -42,8 +42,8 @@ export function createElementsOverlay<TEl extends object>(
                     class="element-overlay"
                     style={{
                         transform: transform(),
-                        width: rect().w + 'px',
-                        height: rect().h + 'px',
+                        width: rect().width + 'px',
+                        height: rect().height + 'px',
                     }}
                 >
                     <div class="border" />
