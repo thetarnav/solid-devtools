@@ -136,16 +136,24 @@ export type SourceLocation = {
     column: number
 }
 
+export type Rect = {
+    x: number
+    y: number
+    w: number
+    h: number
+}
+
 /**
  * When using a custom solid renderer, you should provide a custom element interface.
  * By default the debugger assumes that rendered elements are DOM elements.
  */
 export type ElementInterface<T extends object> = {
     isElement:    (obj: object | T) => obj is T,
-    getName:      (el: T) => string,
+    getName:      (el: T) => string | null,
     getChildren:  (el: T) => Iterable<T>,
     getElementAt: (e: MouseEvent) => T | null,
     getLocation:  (el: T) => SourceLocation | null,
+    getRect:      (el: T) => Rect | null,
 }
 
 /**
@@ -160,6 +168,10 @@ export const dom_element_interface: ElementInterface<Element> = {
         let attr = locator.getLocationAttr(el)
         if (attr == null) return null
         return locator.parseLocationString(attr) ?? null
+    },
+    getRect:      el => {
+        let rect = el.getBoundingClientRect()
+        return {x: rect.x, y: rect.y, w: rect.width, h: rect.height}
     },
 }
 

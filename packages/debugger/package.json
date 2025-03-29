@@ -52,7 +52,6 @@
         "@nothing-but/utils": "~0.17.0",
         "@solid-devtools/shared": "workspace:^",
         "@solid-primitives/bounds": "^0.1.0",
-        "@solid-primitives/cursor": "^0.1.0",
         "@solid-primitives/event-listener": "^2.4.0",
         "@solid-primitives/keyboard": "^1.3.0",
         "@solid-primitives/platform": "^0.2.0",

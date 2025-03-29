@@ -124,7 +124,7 @@ export function createLocator<TEl extends object>(props: {
         setHighlightedComponents(locator_components)
     })))
 
-    createElementsOverlay(highlightedComponents)
+    createElementsOverlay(highlightedComponents, props.component_registry.eli)
 
     // notify of component hovered by using the debugger
     s.createEffect((prev: NodeID | undefined) => {
