@@ -8,6 +8,7 @@ import {
     type Solid,
     NodeType,
     TreeWalkerMode,
+    UNKNOWN,
 } from '../main/types.ts'
 import {
     getComponentRefreshNode,
@@ -35,7 +36,7 @@ type ComponentRegistry<TEl extends object> = {
     /** Map of component nodes */
     components:    Map<NodeID, ComponentData<TEl>>,
     /** Map of element nodes to component nodes */
-    element_nodes: Map<NodeID, {el: HTMLElement; component: ComponentData<TEl>}>,
+    element_nodes: Map<NodeID, {el: TEl; component: ComponentData<TEl>}>,
 }
 
 export
@@ -120,7 +121,7 @@ const registerElement = <TEl extends object>(
     if (!component) return
 
     component.element_nodes.add(elementId)
-    r.element_nodes.set(elementId, {el: element as unknown as TEl, component})
+    r.element_nodes.set(elementId, {el: element as any as TEl, component})
 }
 
 export
@@ -134,7 +135,7 @@ const getComponent = <TEl extends object>(
     let component = r.components.get(id)
     if (component) return {
         name: component.name,
-        elements: [...component.elements].map(el => el as unknown as TEl),
+        elements: [...component.elements].map(el => el as any as TEl),
         id
     }
 
@@ -166,39 +167,36 @@ export
 const findComponent = <TEl extends object>(
     r: ComponentRegistry<TEl>,
     el: TEl,
-): {name: string; id: NodeID} | null => {
+): ComponentData<TEl> | null => {
 
     let including = new Map<Solid.Owner, ComponentData<TEl>>()
-
-    let currEl: TEl | null = el
-    while (currEl) {
-        for (let component of r.components.values()) {
-            if ([...component.elements].some(e => e === currEl || e === currEl as unknown as TEl)) {
-                including.set(component.owner, component)
+    
+    for (let curr: TEl | null = el;
+        curr != null && including.size === 0;
+    ) {
+        for (let comp of r.components.values()) {
+            for (let comp_el of comp.elements) {
+                if (comp_el === curr) {
+                    including.set(comp.owner, comp)
+                }
             }
         }
-        currEl = including.size === 0 ? currEl.parentElement : null
+        curr = r.eli.getParent(curr) // go up
     }
 
     if (including.size > 1) {
         // find the closest component
         for (let owner of including.keys()) {
-            if (!including.has(owner)) continue
-            let currOwner = owner.owner
-            while (currOwner) {
-                let deleted = including.delete(currOwner)
-                if (deleted) break
-                currOwner = currOwner.owner
+            if (including.has(owner)) {
+                for (let curr = owner.owner; curr != null;) {
+                    if (including.delete(curr)) break
+                    curr = curr.owner // go up
+                }
             }
         }
     }
 
-    if (including.size === 0) return null
-    let value = including.values().next().value
-    if (value && value.name) {
-        return {name: value.name, id: value.id}
-    }
-    return null
+    return including.values().next().value ?? null
 }
 
 
@@ -327,7 +325,7 @@ function mapElements<TEl extends object>(
         let el_json: Mapped.Owner = {
             id:       getSdtId(el, ObjectType.Element),
             type:     NodeType.Element,
-            name:     eli.getName(el),
+            name:     eli.getName(el) ?? UNKNOWN,
             children: [],
         }
         out.push(el_json)
