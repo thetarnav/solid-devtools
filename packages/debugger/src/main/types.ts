@@ -1,6 +1,6 @@
 import type {Union} from '@solid-devtools/shared/utils'
 import type {EncodedValue, InspectorUpdate, PropGetterState, ToggleInspectedValueData} from '../inspector/types.ts'
-import type {HighlightElementPayload, SourceLocation} from '../locator/types.ts'
+import * as locator from '../locator/locator.ts'
 import type {StructureUpdates, DGraphUpdate} from '../types.ts'
 
 /**
@@ -115,7 +115,7 @@ export type InputChannels = {
     InspectNode:            {ownerId: NodeID | null; signalId: NodeID | null} | null
     InspectValue:           ToggleInspectedValueData
     ConsoleInspectValue:    ValueItemID
-    HighlightElementChange: HighlightElementPayload
+    HighlightElementChange: locator.HighlightElementPayload
     OpenLocation:           void
     TreeViewModeChange:     TreeWalkerMode
     ViewChange:             DevtoolsMainView
@@ -130,25 +130,37 @@ export type OutputListener = (e: OutputMessage) => void
 
 export type OutputEmit = (e: OutputMessage) => void
 
+export type SourceLocation = {
+    file:   string
+    line:   number
+    column: number
+}
+
 /**
  * When using a custom solid renderer, you should provide a custom element interface.
  * By default the debugger assumes that rendered elements are DOM elements.
  */
 export type ElementInterface<T extends object> = {
-    isElement:          (obj: object | T) => obj is T,
-    getElementName:     (el: T) => string,
-    getElementChildren: (el: T) => Iterable<T>,
-    getElementAt:       (e: MouseEvent) => T | null,
+    isElement:    (obj: object | T) => obj is T,
+    getName:      (el: T) => string,
+    getChildren:  (el: T) => Iterable<T>,
+    getElementAt: (e: MouseEvent) => T | null,
+    getLocation:  (el: T) => SourceLocation | null,
 }
 
 /**
  * Implementation of {@link ElementInterface} for {@link Element}
  */
 export const dom_element_interface: ElementInterface<Element> = {
-    isElement:          obj => obj instanceof Element,
-    getElementName:     el => el.localName,
-    getElementChildren: el => el.children,
-    getElementAt:       e => e.target as Element | null,
+    isElement:    obj => obj instanceof Element,
+    getName:      el => el.localName,
+    getChildren:  el => el.children,
+    getElementAt: e => e.target as Element | null,
+    getLocation:  el => {
+        let attr = locator.getLocationAttr(el)
+        if (attr == null) return null
+        return locator.parseLocationString(attr) ?? null
+    },
 }
 
 //

@@ -120,21 +120,21 @@ const registerElement = <TEl extends object>(
     if (!component) return
 
     component.element_nodes.add(elementId)
-    r.element_nodes.set(elementId, {el: element as unknown as HTMLElement, component})
+    r.element_nodes.set(elementId, {el: element as unknown as TEl, component})
 }
 
 export
 const getComponent = <TEl extends object>(
     r: ComponentRegistry<TEl>,
     id: NodeID,
-): {name: string | undefined; id: NodeID; elements: HTMLElement[]} | null => {
+): {name: string | undefined; id: NodeID; elements: TEl[]} | null => {
     // provided if might be of an element node (in DOM mode) or component node
     // both need to be checked
 
     let component = r.components.get(id)
     if (component) return {
         name: component.name,
-        elements: [...component.elements].map(el => el as unknown as HTMLElement),
+        elements: [...component.elements].map(el => el as unknown as TEl),
         id
     }
 
@@ -155,7 +155,7 @@ export
 const getComponentElement = <TEl extends object>(
     r: ComponentRegistry<TEl>,
     elementId: NodeID,
-): {name: string | undefined; id: NodeID; element: HTMLElement} | undefined => {
+): {name: string | undefined; id: NodeID; element: TEl} | undefined => {
     let el_data = r.element_nodes.get(elementId)
     if (el_data != null) {
         return {name: el_data.component.name, id: el_data.component.id, element: el_data.el}
@@ -165,12 +165,12 @@ const getComponentElement = <TEl extends object>(
 export
 const findComponent = <TEl extends object>(
     r: ComponentRegistry<TEl>,
-    el: HTMLElement
+    el: TEl,
 ): {name: string; id: NodeID} | null => {
 
     let including = new Map<Solid.Owner, ComponentData<TEl>>()
 
-    let currEl: HTMLElement | null = el
+    let currEl: TEl | null = el
     while (currEl) {
         for (let component of r.components.values()) {
             if ([...component.elements].some(e => e === currEl || e === currEl as unknown as TEl)) {
@@ -327,13 +327,13 @@ function mapElements<TEl extends object>(
         let el_json: Mapped.Owner = {
             id:       getSdtId(el, ObjectType.Element),
             type:     NodeType.Element,
-            name:     eli.getElementName(el),
+            name:     eli.getName(el),
             children: [],
         }
         out.push(el_json)
         ElementsMap.set(el_json, {el, component: MappedOwnerNode})
 
-        mapElements(eli.getElementChildren(el), parent_children, eli, el_json.children)
+        mapElements(eli.getChildren(el), parent_children, eli, el_json.children)
     }
 
     return out

@@ -1,27 +1,27 @@
+import * as s from 'solid-js'
+import * as sweb from 'solid-js/web'
 import {createElementBounds} from '@solid-primitives/bounds'
 import {createElementCursor} from '@solid-primitives/cursor'
 import {createRootPool} from '@solid-primitives/rootless'
-import {type Accessor, type Component, createMemo, getOwner, runWithOwner, Show} from 'solid-js'
-import {Portal} from 'solid-js/web'
-import {type LocatorComponent} from './find-components.ts'
+import type {LocatorComponent} from './index.ts'
 
-export function createElementsOverlay(selected: Accessor<LocatorComponent[]>) {
-    const useElementOverlay = createRootPool((component: Accessor<LocatorComponent>, active) => (
+export function createElementsOverlay(selected: s.Accessor<LocatorComponent[]>) {
+    const useElementOverlay = createRootPool((component: s.Accessor<LocatorComponent>, active) => (
         <ElementOverlay component={active() ? component() : null} />
     ))
 
     // wait a second to let the framework mess with the document before attaching the overlay
-    const owner = getOwner()!
+    const owner = s.getOwner()!
     setTimeout(() => {
-        runWithOwner(owner, () => (
-            <Portal useShadow mount={document.documentElement}>
+        s.runWithOwner(owner, () => (
+            <sweb.Portal useShadow mount={document.documentElement}>
                 <div data-darkreader-ignore>{selected().map(useElementOverlay)}</div>
-            </Portal>
+            </sweb.Portal>
         ))
     }, 1000)
 }
 
-const ElementOverlay: Component<{component: LocatorComponent | null}> = props => {
+const ElementOverlay: s.Component<{component: LocatorComponent | null}> = props => {
     const element = () => props.component?.element
     // set pointer cursor to selected component
     createElementCursor(element, 'pointer')
@@ -29,12 +29,12 @@ const ElementOverlay: Component<{component: LocatorComponent | null}> = props =>
     const name = () => props.component?.name
 
     const bounds = createElementBounds(element)
-    const left = createMemo<number>(prev => (bounds.left === null ? prev : bounds.left), 0)
-    const top = createMemo<number>(prev => (bounds.top === null ? prev : bounds.top), 0)
-    const width = createMemo<number>(prev => (bounds.width === null ? prev : bounds.width), 0)
-    const height = createMemo<number>(prev => (bounds.height === null ? prev : bounds.height), 0)
-    const transform = createMemo(() => `translate(${Math.round(left())}px, ${Math.round(top())}px)`)
-    const placeOnTop = createMemo(() => top() > window.innerHeight / 2)
+    const left = s.createMemo<number>(prev => (bounds.left === null ? prev : bounds.left), 0)
+    const top = s.createMemo<number>(prev => (bounds.top === null ? prev : bounds.top), 0)
+    const width = s.createMemo<number>(prev => (bounds.width === null ? prev : bounds.width), 0)
+    const height = s.createMemo<number>(prev => (bounds.height === null ? prev : bounds.height), 0)
+    const transform = s.createMemo(() => `translate(${Math.round(left())}px, ${Math.round(top())}px)`)
+    const placeOnTop = s.createMemo(() => top() > window.innerHeight / 2)
 
     return (
         <>
@@ -48,7 +48,7 @@ const ElementOverlay: Component<{component: LocatorComponent | null}> = props =>
                 }}
             >
                 <div class="border" />
-                <Show when={name()}>
+                <s.Show when={name()}>
                     <div class={`name-container ${placeOnTop() ? 'top' : 'bottom'}`}>
                         <div class="name-animated-container">
                             <div class="name-background"></div>
@@ -60,7 +60,7 @@ const ElementOverlay: Component<{component: LocatorComponent | null}> = props =>
                             </div>
                         </div>
                     </div>
-                </Show>
+                </s.Show>
             </div>
         </>
     )
