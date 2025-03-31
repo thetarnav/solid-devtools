@@ -164,20 +164,13 @@ export function createLocator<TEl extends object>(props: {
                 return
             }
 
-            if (comp.location == null) {
-                DEV: {warn("Locator: can't find source location for component (comp=%o)", comp)}
-                return
-            }
-
-            let source_code_data = locator.getSourceCodeData(comp.location, comp.element as any)
-            if (source_code_data == null) {
-                DEV: {warn("Locator: can't find source code data for component (comp=%o)", comp)}
-                return
-            }
+            let source_code_data = comp.location
+                ? locator.getSourceCodeData(comp.location, comp.element as any)
+                : null
 
             // intercept on-page components clicks and send them to the devtools overlay
             props.onComponentClick(comp.id, () => {
-                if (target_ide == null) return
+                if (target_ide == null || source_code_data == null) return
                 e.preventDefault()
                 e.stopPropagation()
                 locator.openSourceCode(target_ide, source_code_data)
