@@ -19,10 +19,16 @@ import {
     type NodeID,
     type OutputListener,
     type OutputMessage,
+    type DebuggerOptions,
     dom_element_interface,
+    type ElementInterface,
 } from './types.ts'
 
-function createDebugger() {
+function createDebugger<TEl extends object>(
+    options?: DebuggerOptions<TEl>,
+) {
+
+    let eli = options?.eli ?? dom_element_interface as any as ElementInterface<TEl>
 
     initRoots()
 
@@ -140,7 +146,6 @@ function createDebugger() {
         }
     }
 
-    let eli = dom_element_interface
     let component_registry = walker.makeComponentRegistry(eli)
     
     //
@@ -266,12 +271,15 @@ function createDebugger() {
     }
 }
 
-let _debugger_instance: ReturnType<typeof createDebugger> | undefined
+export type Debugger = ReturnType<typeof createDebugger>
+let _debugger_instance: Debugger | undefined
 
 /**
  * Used for connecting debugger to devtools
  */
-export function useDebugger() {
-    _debugger_instance ??= createDebugger()
+export function useDebugger<TEl extends object>(
+    options?: DebuggerOptions<TEl>,
+): Debugger {
+    _debugger_instance ??= createDebugger(options)
     return _debugger_instance
 }

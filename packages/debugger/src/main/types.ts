@@ -173,6 +173,10 @@ export const dom_element_interface: ElementInterface<Element> = {
     },
 }
 
+export type DebuggerOptions<TEl extends object> = {
+    eli: ElementInterface<TEl>,
+}
+
 //
 // EXPOSED SOLID API
 //

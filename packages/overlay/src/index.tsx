@@ -6,6 +6,7 @@ import {createBodyCursor} from '@solid-primitives/cursor'
 import {makeEventListener} from '@solid-primitives/event-listener'
 import * as num from '@nothing-but/utils/num'
 import {useDebugger} from '@solid-devtools/debugger/bundled'
+import * as debug from '@solid-devtools/debugger/types'
 import {Icon, MountIcons, createDevtools} from '@solid-devtools/frontend'
 import {useIsMobile, useIsTouch, atom} from '@solid-devtools/shared/primitives'
 import {msg} from '@solid-devtools/shared/utils'
@@ -14,9 +15,10 @@ import frontendStyles from '@solid-devtools/frontend/dist/styles.css'
 import overlayStyles from './styles.css'
 
 export type OverlayOptions = {
-    defaultOpen?: boolean
-    alwaysOpen?:  boolean
-    noPadding?:   boolean
+    defaultOpen?:     boolean
+    alwaysOpen?:      boolean
+    noPadding?:       boolean
+    debuggerOptions?: debug.DebuggerOptions<any>
 }
 
 export function attachDevtoolsOverlay(props?: OverlayOptions): (() => void) {
@@ -39,19 +41,21 @@ export function attachDevtoolsOverlay(props?: OverlayOptions): (() => void) {
     })
 }
 
-const Overlay: s.Component<OverlayOptions> = ({defaultOpen, alwaysOpen, noPadding}) => {
+const Overlay: s.Component<OverlayOptions> = props => {
 
-    const debug = useDebugger()
+    let {alwaysOpen, debuggerOptions, defaultOpen, noPadding} = props
+
+    const instance = useDebugger(debuggerOptions)
 
     if (defaultOpen || alwaysOpen) {
-        debug.toggleEnabled(true)
+        instance.toggleEnabled(true)
     }
 
-    const isOpen = atom(alwaysOpen || debug.enabled())
+    const isOpen = atom(alwaysOpen || instance.enabled())
     function toggleOpen(enabled?: boolean) {
         if (!alwaysOpen) {
             enabled ??= !isOpen()
-            debug.toggleEnabled(enabled)
+            instance.toggleEnabled(enabled)
             isOpen.set(enabled)
         }
     }
@@ -106,19 +110,19 @@ const Overlay: s.Component<OverlayOptions> = ({defaultOpen, alwaysOpen, noPaddin
                         <s.Show when={isOpen()}>
                         {_ => {
                             
-                            debug.emit(msg('ResetState', undefined))
+                            instance.emit(msg('ResetState', undefined))
                         
-                            s.onCleanup(() => debug.emit(msg('InspectNode', null)))
+                            s.onCleanup(() => instance.emit(msg('InspectNode', null)))
                         
                             const devtools = createDevtools({
                                 headerSubtitle: () => 'overlay',
                             })
                         
                             devtools.output.listen(e => {
-                                separate(e, debug.emit)
+                                separate(e, instance.emit)
                             })
                         
-                            debug.listen(e => {
+                            instance.listen(e => {
                                 separate(e, devtools.input.emit)
                             })
                         
