@@ -23,7 +23,7 @@ export function createElementsOverlay<TEl extends object>(
             if (rect === null) return prev
 
             return rect
-        }, {x: 0, y: 0, w: 0, h: 0})
+        }, {x: 0, y: 0, width: 0, height: 0})
 
         const transform  = () => `translate(${Math.round(rect().x)}px, ${Math.round(rect().y)}px)`
         const placeOnTop = () => rect().y > window.innerHeight / 2

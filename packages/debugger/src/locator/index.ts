@@ -169,7 +169,7 @@ export function createLocator<TEl extends object>(props: {
                 return
             }
 
-            let source_code_data = locator.getSourceCodeData(comp.location, comp.element)
+            let source_code_data = locator.getSourceCodeData(comp.location, comp.element as any)
             if (source_code_data == null) {
                 DEV: {warn("Locator: can't find source code data for component (comp=%o)", comp)}
                 return
