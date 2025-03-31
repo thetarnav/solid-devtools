@@ -28,7 +28,7 @@ function createDebugger<TEl extends object>(
     assert(globalThis.SolidDevtools$$, 'solid-devtools is not setup')
 
     if (options != null) {
-        globalThis.SolidDevtools$$.options = options
+        globalThis.SolidDevtools$$.debugger_options = options
     }
 
     initRoots()
@@ -147,7 +147,7 @@ function createDebugger<TEl extends object>(
         }
     }
 
-    let component_registry = walker.makeComponentRegistry(setup.options.eli)
+    let component_registry = walker.makeComponentRegistry(setup.debugger_options.eli)
     
     //
     // Structure:
