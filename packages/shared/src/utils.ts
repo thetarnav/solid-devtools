@@ -21,20 +21,20 @@ export function info<T>(data: T): T {
     return data
 }
 
-export function log(...args: any[]): undefined {
+export function log(message: string, ...args: any[]): undefined {
     // eslint-disable-next-line no-console
-    console.log(LOG_LABEL_CYAN, ...args)
+    console.log(LOG_LABEL_CYAN+' '+message, ...args)
     return
 }
-export function warn(...args: any[]): undefined {
+export function warn(message: string, ...args: any[]): undefined {
     // eslint-disable-next-line no-console
-    console.warn(LOG_LABEL_CYAN, ...args)
+    console.warn(LOG_LABEL_CYAN+' '+message, ...args)
     return
 }
 
-export function error(...args: any[]): undefined {
+export function error(message: string, ...args: any[]): undefined {
     // eslint-disable-next-line no-console
-    console.error(LOG_LABEL_CYAN, ...args)
+    console.error(LOG_LABEL_CYAN+' '+message, ...args)
     return
 }
 
