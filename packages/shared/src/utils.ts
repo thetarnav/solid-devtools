@@ -9,6 +9,12 @@ export type UnionMember<T, K extends keyof T> = {
     data: T[K],
 }
 
+export function assert(condition: any, message?: string, cause?: any): asserts condition {
+    if (!condition) {
+        throw Error(message ?? 'Assertion failed', {cause})
+    }
+}
+
 export function msg<T, K extends keyof T>(kind: K, data: T[K]): UnionMember<T, K> {
     return {kind, data}
 }

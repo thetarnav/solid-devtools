@@ -6,7 +6,7 @@ It has to coordinate the communication between the different scripts based on th
 
 */
 
-import {error, log} from '@solid-devtools/shared/utils'
+import {assert, error, log} from '@solid-devtools/shared/utils'
 
 import {
     Place_Name, ConnectionName, type Port,
@@ -36,12 +36,6 @@ chrome.tabs
             active_tab_id = id as Tab_Id
         }
     })
-
-function assert(condition: any, message?: string, cause?: any): asserts condition {
-    if (!condition) {
-        throw Error(message ?? 'Assertion failed', {cause})
-    }
-}
 
 function get_assert_tab_id(port: Port, place: Place_Name): Tab_Id {
     let tab_id = port.sender?.tab?.id
