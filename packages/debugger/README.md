@@ -27,7 +27,7 @@ pnpm add @solid-devtools/debugger
 > **Warning**
 > This package changes extremely often, and is not meant to be used directly. Unless you know what you're doing, use the main package instead.
 
-### Module overview
+## Module overview
 
 The debugger is split into four submodules:
 
@@ -48,19 +48,19 @@ The debugger needs to be setup before it can be used. To do that, import the `./
 ```ts
 import '@solid-devtools/debugger/setup'
 
-import { useDebugger } from '@solid-devtools/debugger/bundled' // or from '@solid-devtools/debugger'
+import {useDebugger} from '@solid-devtools/debugger/bundled' // or from '@solid-devtools/debugger'
 
 const debug = useDebugger()
 ```
 
-### Using component locator
+## Using component locator
 
 _Debugger feature inspired by [LocatorJS](https://www.locatorjs.com)_
 
 Locator let's you locate components on the page, and go to their source code in your IDE. All you need to do is configure it by calling `setLocatorOptions` with some options.
 
 ```ts
-import { useDebugger } from '@solid-devtools/debugger' // or 'solid-devtools/setup'
+import {useDebugger} from '@solid-devtools/debugger' // or 'solid-devtools/setup'
 
 const debug = useDebugger()
 debug.setLocatorOptions()
@@ -68,13 +68,13 @@ debug.setLocatorOptions()
 
 It will not allow you to highlight hovered components on the page and reveal them in the IDE or the Chrome Extension. _(depending of if the extension panel is open or not)_
 
-#### Locator Options
+### Locator Options
 
 Not passing any options will enable the locator with <kbd>Alt</kbd> as the trigger key and no `targetIDE` selected.
 
 Currently Locator allows for specifying these props:
 
-##### `targetIDE`
+#### `targetIDE`
 
 Choose in which IDE the component source code should be revealed.
 
@@ -111,7 +111,7 @@ setLocatorOptions({
 })
 ```
 
-##### `key`
+#### `key`
 
 Holding which key should enable the locator overlay? It's `"Alt"` by default — <kbd>Alt</kbd> on Windows, and <kbd>Option</kbd> or <kbd>⌥</kbd> on macOS.
 
@@ -123,13 +123,40 @@ setLocatorOptions({
 })
 ```
 
-#### Using the Locator on the page
+### Using the Locator on the page
 
 To activate the Locator module — you have to hold down the <kbd>Alt</kbd>/<kbd>Option</kbd> key and move your mouse around the page to highlight components and their different HTML Elements.
 
 Clicking the component should take you to the component source code, given that you specified the [`targetIDE`](#targetIDE) option.
 
 https://user-images.githubusercontent.com/24491503/174093606-a0d80331-021f-4d43-b0bb-e9a4041e1a26.mp4
+
+## Supporting custom renderers
+
+By default the debugger assumes you are using `"solid-js/web"` as jsx renderer and that the rendered elements are `HTMLElement`s.
+
+If you are using a custom renderer—such as Three.js, Pixi.js, or Lightning.js—you need to provide the debugger with an `ElementInterface` implementation.
+
+```ts
+import * as debug from '@solid-devtools/debugger/types'
+import {setElementInterface} from '@solid-devtools/debugger/setup' // or 'solid-devtools/setup'
+
+/** ElementInterface implementation for DOM Element */
+let element_interface: debug.ElementInterface<Element> = {
+    isElement:    obj => obj instanceof Element,
+    getElementAt: e => e.target as Element | null,
+    getName:      el => el.localName,
+    getChildren:  el => el.children,
+    getParent:    el => el.parentElement,
+    getRect:      el => el.getBoundingClientRect(),
+    getLocation:  el => {
+        let attr = debug.getLocationAttr(el)
+        return attr && debug.parseLocationString(attr) || null
+    },
+}
+
+setElementInterface(element_interface)
+```
 
 ## Changelog
 
