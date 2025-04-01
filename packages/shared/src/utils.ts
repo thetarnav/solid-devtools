@@ -9,6 +9,12 @@ export type UnionMember<T, K extends keyof T> = {
     data: T[K],
 }
 
+export function assert(condition: any, message?: string, cause?: any): asserts condition {
+    if (!condition) {
+        throw Error(message ?? 'Assertion failed', {cause})
+    }
+}
+
 export function msg<T, K extends keyof T>(kind: K, data: T[K]): UnionMember<T, K> {
     return {kind, data}
 }
@@ -21,20 +27,20 @@ export function info<T>(data: T): T {
     return data
 }
 
-export function log(...args: any[]): undefined {
+export function log(message: string, ...args: any[]): undefined {
     // eslint-disable-next-line no-console
-    console.log(LOG_LABEL_CYAN, ...args)
+    console.log(LOG_LABEL_CYAN+' '+message, ...args)
     return
 }
-export function warn(...args: any[]): undefined {
+export function warn(message: string, ...args: any[]): undefined {
     // eslint-disable-next-line no-console
-    console.warn(LOG_LABEL_CYAN, ...args)
+    console.warn(LOG_LABEL_CYAN+' '+message, ...args)
     return
 }
 
-export function error(...args: any[]): undefined {
+export function error(message: string, ...args: any[]): undefined {
     // eslint-disable-next-line no-console
-    console.error(LOG_LABEL_CYAN, ...args)
+    console.error(LOG_LABEL_CYAN+' '+message, ...args)
     return
 }
 

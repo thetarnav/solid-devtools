@@ -1,26 +1,33 @@
+import type {KbdKey} from '@solid-primitives/keyboard'
 import {isWindows} from '@solid-primitives/platform'
-import {LOCATION_ATTRIBUTE_NAME, type NodeID, WINDOW_PROJECTPATH_PROPERTY} from '../types.ts'
+import type {ToDyscriminatedUnion} from '@solid-devtools/shared/utils'
+import {type NodeID, type SourceLocation} from '../main/types.ts'
+
+export type LocatorOptions = {
+    /** Choose in which IDE the component source code should be revealed. */
+    targetIDE?: false | TargetIDE | TargetURLFunction
+    /**
+     * Holding which key should enable the locator overlay?
+     * @default 'Alt'
+     */
+    key?: false | KbdKey
+}
+
+export type HighlightElementPayload = ToDyscriminatedUnion<{
+    node: {id: NodeID}
+    element: {id: NodeID}
+}> | null
+
+// used by the transform
+export const WINDOW_PROJECTPATH_PROPERTY = '$sdt_projectPath'
+export const LOCATION_ATTRIBUTE_NAME = 'data-source-loc'
 
 export type LocationAttr = `${string}:${number}:${number}`
 
-export type LocatorComponent = {
-    id: NodeID
-    name: string | undefined
-    element: HTMLElement
-    location?: LocationAttr | undefined
-}
-
 export type TargetIDE = 'vscode' | 'webstorm' | 'atom' | 'vscode-insiders'
-
-export type SourceLocation = {
-    file: string
-    line: number
-    column: number
-}
 
 export type SourceCodeData = SourceLocation & {
     projectPath: string
-    element: HTMLElement | string | undefined
 }
 
 export type TargetURLFunction = (data: SourceCodeData) => string | void
@@ -31,9 +38,9 @@ const LOC_ATTR_REGEX_UNIX =
 
 export const LOC_ATTR_REGEX = isWindows ? LOC_ATTR_REGEX_WIN : LOC_ATTR_REGEX_UNIX
 
-export function getLocationAttr(element: Element): LocationAttr | undefined {
-    const attr = element.getAttribute(LOCATION_ATTRIBUTE_NAME)
-    if (!attr || !LOC_ATTR_REGEX.test(attr)) return
+export function getLocationAttr(element: Element): LocationAttr | null {
+    let attr = element.getAttribute(LOCATION_ATTRIBUTE_NAME)
+    if (!attr || !LOC_ATTR_REGEX.test(attr)) return null
     return attr as LocationAttr
 }
 
@@ -56,14 +63,13 @@ function getTargetURL(target: TargetIDE | TargetURLFunction, data: SourceCodeDat
 export const getProjectPath = (): string | undefined => (window as any)[WINDOW_PROJECTPATH_PROPERTY]
 
 export function getSourceCodeData(
-    location: LocationAttr,
-    element: SourceCodeData['element'],
+    location: SourceLocation,
 ): SourceCodeData | undefined {
-    const projectPath: string | undefined = getProjectPath()
-    if (!projectPath) return
-    const parsed = parseLocationString(location)
-    if (!parsed) return
-    return {...parsed, projectPath, element}
+
+    let projectPath: string | undefined = getProjectPath()
+    if (projectPath == null) return
+
+    return {...location, projectPath}
 }
 
 /**

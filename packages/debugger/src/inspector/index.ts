@@ -62,6 +62,7 @@ export function createInspector(props: {
                     const encoded = encodeValue(
                         node.getValue(),
                         selected,
+                        setup.eli,
                         selected &&
                             (storeNode => node.addStoreObserver(observeStoreNode(storeNode))),
                     )
@@ -79,7 +80,7 @@ export function createInspector(props: {
                         [
                             storeProperty,
                             typeof data === 'object'
-                                ? encodeValue(data.value, true, undefined, true)
+                                ? encodeValue(data.value, true, setup.eli, undefined, true)
                                 : data ?? null,
                         ],
                     ])
@@ -163,6 +164,7 @@ export function createInspector(props: {
                 onValueUpdate:     pushValueUpdate,
                 onPropStateChange: pushPropState,
                 observedPropsMap:  propsMap,
+                eli:               setup.eli,
             })
     
             props.emit(msg('InspectedNodeDetails', result.details))

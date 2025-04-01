@@ -8,31 +8,32 @@ It also starts listening to Solid DEV events and stores them to be sent to the d
 
 import * as s     from 'solid-js'
 import * as store from 'solid-js/store'
-import {error} from '@solid-devtools/shared/utils'
-import type {LocatorOptions} from './locator/types.ts'
-import type {Solid} from './main/types.ts'
+import {assert, error} from '@solid-devtools/shared/utils'
+import * as debug from './types.ts'
 
-
-let PassedLocatorOptions: LocatorOptions | null = null
 /** @deprecated use `setLocatorOptions` */
-export function useLocator(options: LocatorOptions) {
-    PassedLocatorOptions = options
+export function useLocator(options: debug.LocatorOptions) {
+    setLocatorOptions(options)
 }
-export function setLocatorOptions(options: LocatorOptions) {
-    PassedLocatorOptions = options
+export function setLocatorOptions(options: debug.LocatorOptions) {
+    assert(globalThis.SolidDevtools$$, 'solid-devtools is not setup')
+    globalThis.SolidDevtools$$.locator_options = options
 }
 
-let ClientVersion:        string | null = null
-let SolidVersion:         string | null = null
-let ExpectedSolidVersion: string | null = null
+export function setElementInterface(eli: debug.ElementInterface<any>) {
+    assert(globalThis.SolidDevtools$$, 'solid-devtools is not setup')
+    globalThis.SolidDevtools$$.eli = eli
+}
 
 export function setClientVersion(version: string) {
-    ClientVersion = version
+    assert(globalThis.SolidDevtools$$, 'solid-devtools is not setup')
+    globalThis.SolidDevtools$$.versions.client = version
 }
 
 export function setSolidVersion(version: string, expected: string) {
-    SolidVersion = version
-    ExpectedSolidVersion = expected
+    assert(globalThis.SolidDevtools$$, 'solid-devtools is not setup')
+    globalThis.SolidDevtools$$.versions.solid = version
+    globalThis.SolidDevtools$$.versions.expected_solid = expected
 }
 
 export type SetupApi = {
@@ -50,17 +51,22 @@ export type SetupApi = {
         $RAW:         typeof store.$RAW
     }
     // custom
-    get_created_owners():  Solid.Owner[]
-    get_locator_options(): LocatorOptions | null
+    eli:              debug.ElementInterface<any>
+    locator_options:  debug.LocatorOptions | null
+    get_created_owners:  () => debug.Solid.Owner[]
+    get_locator_options: () => debug.LocatorOptions | null
     versions: {
-        get_client():         string | null
-        get_solid():          string | null
-        get_expected_solid(): string | null
+        client:             string | null
+        solid:              string | null
+        expected_solid:     string | null
+        get_client:         () => string | null
+        get_solid:          () => string | null
+        get_expected_solid: () => string | null
     }
     unowned: {
-        signals:         WeakRef<Solid.Signal>[]
-        onSignalAdded:   ((ref: WeakRef<Solid.Signal>, idx: number) => void) | null
-        onSignalRemoved: ((ref: WeakRef<Solid.Signal>, idx: number) => void) | null
+        signals:         WeakRef<debug.Solid.Signal>[]
+        onSignalAdded:   ((ref: WeakRef<debug.Solid.Signal>, idx: number) => void) | null
+        onSignalRemoved: ((ref: WeakRef<debug.Solid.Signal>, idx: number) => void) | null
     }
 }
 
@@ -77,7 +83,7 @@ if (!s.DEV || !store.DEV) {
     error('SolidJS in not in development mode!')
 } else {
 
-    let created_owners: Solid.Owner[] | null = []
+    let created_owners: debug.Solid.Owner[] | null = []
 
     let setup: SetupApi = {
         solid: {
@@ -100,13 +106,16 @@ if (!s.DEV || !store.DEV) {
             created_owners = null
             return events
         },
-        get_locator_options() {
-            return PassedLocatorOptions
-        },
+        eli:             debug.dom_element_interface,
+        locator_options: null,
+        get_locator_options() {return this.locator_options},
         versions: {
-            get_client()         {return ClientVersion},
-            get_solid()          {return SolidVersion},
-            get_expected_solid() {return ExpectedSolidVersion},
+            client:              null,
+            solid:               null,
+            expected_solid:      null,
+            get_client()         {return this.client},
+            get_solid()          {return this.solid},
+            get_expected_solid() {return this.expected_solid},
         },
         unowned: {
             signals:         [],
@@ -120,7 +129,7 @@ if (!s.DEV || !store.DEV) {
         created_owners?.push(owner)
     }
 
-    let signals_registry = new FinalizationRegistry<WeakRef<Solid.Signal>>(ref => {
+    let signals_registry = new FinalizationRegistry<WeakRef<debug.Solid.Signal>>(ref => {
         let idx = setup.unowned.signals.indexOf(ref)
         setup.unowned.signals.splice(idx, 1)
         setup.unowned.onSignalRemoved?.(ref, idx)

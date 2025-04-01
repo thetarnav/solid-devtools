@@ -1,11 +1,12 @@
 import * as s from 'solid-js'
 import {createStaticStore} from '@solid-primitives/static-store'
 import {defer} from '@solid-primitives/utils'
-import {log_message, msg, mutate_remove, type Timeout} from '@solid-devtools/shared/utils'
+import {assert, log_message, msg, mutate_remove, type Timeout} from '@solid-devtools/shared/utils'
 import {createDependencyGraph} from '../dependency/index.ts'
 import {createInspector} from '../inspector/index.ts'
 import {createLocator} from '../locator/index.ts'
 import {createStructure} from '../structure/index.ts'
+import * as walker from '../structure/walker.ts'
 import {getObjectById, getSdtId, ObjectType} from './id.ts'
 import {initRoots} from './roots.ts'
 import setup from './setup.ts'
@@ -21,6 +22,7 @@ import {
 } from './types.ts'
 
 function createDebugger() {
+    assert(globalThis.SolidDevtools$$, 'solid-devtools is not setup')
 
     initRoots()
 
@@ -137,6 +139,8 @@ function createDebugger() {
             })
         }
     }
+
+    let component_registry = walker.makeComponentRegistry(setup.eli)
     
     //
     // Structure:
@@ -152,6 +156,7 @@ function createDebugger() {
         },
         onNodeUpdate: pushNodeUpdate,
         enabled: debuggerEnabled,
+        component_registry: component_registry,
     })
     
     //
@@ -190,12 +195,13 @@ function createDebugger() {
             }
         },
         emit: emitOutput,
+        component_registry: component_registry,
     })
     
     // Opens the source code of the inspected component
     function openInspectedNodeLocation() {
         const details = inspector.getLastDetails()
-        details?.location && locator.openElementSourceCode(details.location, details.name)
+        details?.location && locator.openElementSourceCode(details.location)
     }
     
     // send the state of the client locator mode
@@ -259,12 +265,13 @@ function createDebugger() {
     }
 }
 
-let _debugger_instance: ReturnType<typeof createDebugger> | undefined
+export type Debugger = ReturnType<typeof createDebugger>
+let _debugger_instance: Debugger | undefined
 
 /**
  * Used for connecting debugger to devtools
  */
-export function useDebugger() {
+export function useDebugger(): Debugger {
     _debugger_instance ??= createDebugger()
     return _debugger_instance
 }

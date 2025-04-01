@@ -1,7 +1,9 @@
 import type * as API from './setup.ts'
 
-export const {setLocatorOptions}: typeof API = {
-    setLocatorOptions() {
-        /**/
-    },
+export const {
+    setLocatorOptions,
+    setElementInterface,
+}: typeof API = {
+    setLocatorOptions()   {/**/},
+    setElementInterface() {/**/},
 }

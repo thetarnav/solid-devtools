@@ -1,6 +1,6 @@
 import type {Union} from '@solid-devtools/shared/utils'
 import type {EncodedValue, InspectorUpdate, PropGetterState, ToggleInspectedValueData} from '../inspector/types.ts'
-import type {HighlightElementPayload, SourceLocation} from '../locator/types.ts'
+import * as locator from '../locator/locator.ts'
 import type {StructureUpdates, DGraphUpdate} from '../types.ts'
 
 /**
@@ -115,7 +115,7 @@ export type InputChannels = {
     InspectNode:            {ownerId: NodeID | null; signalId: NodeID | null} | null
     InspectValue:           ToggleInspectedValueData
     ConsoleInspectValue:    ValueItemID
-    HighlightElementChange: HighlightElementPayload
+    HighlightElementChange: locator.HighlightElementPayload
     OpenLocation:           void
     TreeViewModeChange:     TreeWalkerMode
     ViewChange:             DevtoolsMainView
@@ -129,6 +129,49 @@ export type OutputMessage  = Union<OutputChannels>
 export type OutputListener = (e: OutputMessage) => void
 
 export type OutputEmit = (e: OutputMessage) => void
+
+export type SourceLocation = {
+    file:   string
+    line:   number
+    column: number
+}
+
+export type Rect = {
+    x:      number
+    y:      number
+    width:  number
+    height: number
+}
+
+/**
+ * When using a custom solid renderer, you should provide a custom element interface.
+ * By default the debugger assumes that rendered elements are DOM elements.
+ */
+export type ElementInterface<T extends object> = {
+    isElement:    (obj: object | T) => obj is T,
+    getElementAt: (e: MouseEvent) => T | null,
+    getName:      (el: T) => string | null,
+    getChildren:  (el: T) => Iterable<T>,
+    getParent:    (el: T) => T | null,
+    getLocation:  (el: T) => SourceLocation | null,
+    getRect:      (el: T) => Rect | null,
+}
+
+/**
+ * Implementation of {@link ElementInterface} for {@link Element}
+ */
+export const dom_element_interface: ElementInterface<Element> = {
+    isElement:    obj => obj instanceof Element,
+    getElementAt: e => e.target as Element | null,
+    getName:      el => el.localName,
+    getChildren:  el => el.children,
+    getParent:    el => el.parentElement,
+    getRect:      el => el.getBoundingClientRect(),
+    getLocation:  el => {
+        let attr = locator.getLocationAttr(el)
+        return attr && locator.parseLocationString(attr) || null
+    },
+}
 
 //
 // EXPOSED SOLID API

@@ -3,9 +3,8 @@ import '../setup.ts'
 import * as s from 'solid-js'
 import * as test from 'vitest'
 import {$setSdtId} from '../main/id.ts'
-import {NodeType, TreeWalkerMode, type Mapped, type Solid} from '../main/types.ts'
-import {getNodeName} from '../main/utils.ts'
-import {type ComputationUpdateHandler, walkSolidTree} from './walker.ts'
+import {dom_element_interface, NodeType, TreeWalkerMode, type Mapped, type Solid} from '../main/types.ts'
+import * as walker from './walker.ts'
 import setup from '../main/setup.ts'
 import {initRoots} from '../main/roots.ts'
 
@@ -13,11 +12,15 @@ test.beforeAll(() => {
     initRoots()
 })
 
+let eli = dom_element_interface
+
 test.describe('TreeWalkerMode.Owners', () => {
     test.it('default options', () => {
         {
+            let registry = walker.makeComponentRegistry(eli)
+
             const [dispose, owner] = s.createRoot(_dispose => {
-                
+
                 const [source] = s.createSignal('foo', {name: 's0'})
                 s.createSignal('hello', {name: 's1'})
 
@@ -28,19 +31,18 @@ test.describe('TreeWalkerMode.Owners', () => {
                         s.createSignal(0, {name: 's3'})
                     }, undefined, {name: 'c1'})
                 }, undefined, {name: 'e0'})
-                
+
                 return [_dispose, setup.solid.getOwner()! as Solid.Root]
             })
 
-            const tree = walkSolidTree(owner, {
-                onComputationUpdate: () => {
+            const tree = walker.walkSolidTree(owner, {
+                onUpdate: () => {
                     /**/
                 },
                 rootId: $setSdtId(owner, '#ff'),
-                registerComponent: () => {
-                    /**/
-                },
                 mode: TreeWalkerMode.Owners,
+                eli: eli,
+                registry: registry,
             })
 
             dispose()
@@ -76,6 +78,8 @@ test.describe('TreeWalkerMode.Owners', () => {
         }
 
         {
+            let registry = walker.makeComponentRegistry(eli)
+
             s.createRoot(dispose => {
                 const [source] = s.createSignal(0, {name: 'source'})
 
@@ -101,15 +105,14 @@ test.describe('TreeWalkerMode.Owners', () => {
                 )
 
                 const rootOwner = setup.solid.getOwner()! as Solid.Root
-                const tree = walkSolidTree(rootOwner, {
+                const tree = walker.walkSolidTree(rootOwner, {
                     rootId: $setSdtId(rootOwner, '#0'),
-                    onComputationUpdate: () => {
-                        /**/
-                    },
-                    registerComponent: () => {
+                    onUpdate: () => {
                         /**/
                     },
                     mode: TreeWalkerMode.Owners,
+                    eli: eli,
+                    registry: registry,
                 })
 
                 test.expect(tree).toEqual({
@@ -153,8 +156,11 @@ test.describe('TreeWalkerMode.Owners', () => {
     })
 
     test.it('listen to computation updates', () => {
+
+        let registry = walker.makeComponentRegistry(eli)
+
         s.createRoot(dispose => {
-            const capturedComputationUpdates: Parameters<ComputationUpdateHandler>[] = []
+            const capturedComputationUpdates: Parameters<walker.ComputationUpdateHandler>[] = []
 
             let computedOwner!: Solid.Owner
             const [a, setA] = s.createSignal(0)
@@ -164,13 +170,12 @@ test.describe('TreeWalkerMode.Owners', () => {
             })
 
             const owner = setup.solid.getOwner()! as Solid.Root
-            walkSolidTree(owner, {
-                onComputationUpdate: (...args) => capturedComputationUpdates.push(args),
+            walker.walkSolidTree(owner, {
+                onUpdate: (...args) => capturedComputationUpdates.push(args),
                 rootId: $setSdtId(owner, '#ff'),
                 mode: TreeWalkerMode.Owners,
-                registerComponent: () => {
-                    /**/
-                },
+                eli: eli,
+                registry: registry,
             })
 
             test.expect(capturedComputationUpdates.length).toBe(0)
@@ -189,52 +194,54 @@ test.describe('TreeWalkerMode.Owners', () => {
     })
 
     test.it('gathers components', () => {
+
+        let registry = walker.makeComponentRegistry(eli)
+
         s.createRoot(dispose => {
             const TestComponent = (props: {n: number}) => {
                 const [a] = s.createSignal(0)
                 s.createComputed(a)
                 return <div>{props.n === 0 ? 'end' : <TestComponent n={props.n - 1} />}</div>
             }
-            const Button = () => {
-                return <button>Click me</button>
-            }
+            const Button = () => <button>Click me</button>
 
-            s.createRenderEffect(() => {
-                return (
-                    <>
-                        <TestComponent n={5} />
-                        <Button />
-                    </>
-                )
-            })
+            s.createRenderEffect(() => <>
+                <TestComponent n={5} />
+                <Button />
+            </>)
 
             const owner = setup.solid.getOwner()! as Solid.Root
 
-            const components: string[] = []
-
-            walkSolidTree(owner, {
-                onComputationUpdate: () => {
+            walker.walkSolidTree(owner, {
+                onUpdate: () => {
                     /**/
                 },
                 rootId: $setSdtId(owner, '#ff'),
                 mode: TreeWalkerMode.Owners,
-                registerComponent: c => {
-                    if (!('owner' in c)) return
-                    const name = getNodeName(c.owner)
-                    name && components.push(name)
-                },
+                eli: eli,
+                registry: registry,
             })
 
-            test.expect(components.length).toBe(7)
+            let n_text_comps = 0
+            let n_buttons = 0
 
-            let testCompsLength = 0
-            let btn!: string
-            components.forEach(c => {
-                if (c === 'TestComponent') testCompsLength++
-                else if (c === 'Button') btn = c
-            })
-            test.expect(testCompsLength).toBe(6)
-            test.expect(btn).toBeTruthy()
+            for (let comp of registry.components.values()) {
+                // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
+                switch (comp.name) {
+                case 'TestComponent':
+                    n_text_comps++
+                    break
+                case 'Button':
+                    n_buttons++
+                    break
+                default:
+                    test.assert(false, `Unexpected component name: ${comp.name}`)
+                }
+            }
+
+            test.expect(registry.components.size).toBe(7)
+            test.expect(n_text_comps).toBe(6)
+            test.expect(n_buttons).toBe(1)
 
             dispose()
         })
@@ -243,6 +250,9 @@ test.describe('TreeWalkerMode.Owners', () => {
 
 test.describe('TreeWalkerMode.Components', () => {
     test.it('map component tree', () => {
+
+        let registry = walker.makeComponentRegistry(eli)
+
         const toTrigger: VoidFunction[] = []
         const testComponents: Solid.Component[] = []
 
@@ -276,15 +286,14 @@ test.describe('TreeWalkerMode.Components', () => {
 
             const owner = setup.solid.getOwner()! as Solid.Root
 
-            const computationUpdates: Parameters<ComputationUpdateHandler>[] = []
+            const computationUpdates: Parameters<walker.ComputationUpdateHandler>[] = []
 
-            const tree = walkSolidTree(owner, {
-                onComputationUpdate: (...a) => computationUpdates.push(a),
+            const tree = walker.walkSolidTree(owner, {
+                onUpdate: (...a) => computationUpdates.push(a),
                 rootId: $setSdtId(owner, '#ff'),
                 mode: TreeWalkerMode.Components,
-                registerComponent: () => {
-                    /**/
-                },
+                eli: eli,
+                registry: registry,
             })
 
             test.expect(tree).toMatchObject({
@@ -348,6 +357,9 @@ test.describe('TreeWalkerMode.Components', () => {
 
 test.describe('TreeWalkerMode.DOM', () => {
     test.it('map dom tree', () => {
+
+        let registry = walker.makeComponentRegistry(eli)
+
         const toTrigger: VoidFunction[] = []
         const testComponents: Solid.Component[] = []
 
@@ -384,15 +396,14 @@ test.describe('TreeWalkerMode.DOM', () => {
 
             const owner = setup.solid.getOwner()! as Solid.Root
 
-            const computationUpdates: Parameters<ComputationUpdateHandler>[] = []
+            const computationUpdates: Parameters<walker.ComputationUpdateHandler>[] = []
 
-            const tree = walkSolidTree(owner, {
-                onComputationUpdate: (...a) => computationUpdates.push(a),
+            const tree = walker.walkSolidTree(owner, {
+                onUpdate: (...a) => computationUpdates.push(a),
                 rootId: $setSdtId(owner, '#ff'),
                 mode: TreeWalkerMode.DOM,
-                registerComponent: () => {
-                    /**/
-                },
+                eli: eli,
+                registry: registry,
             })
 
             test.expect(tree).toMatchObject({

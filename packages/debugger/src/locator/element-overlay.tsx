@@ -1,69 +1,80 @@
-import {createElementBounds} from '@solid-primitives/bounds'
-import {createElementCursor} from '@solid-primitives/cursor'
+import * as s from 'solid-js'
+import * as sweb from 'solid-js/web'
 import {createRootPool} from '@solid-primitives/rootless'
-import {type Accessor, type Component, createMemo, getOwner, runWithOwner, Show} from 'solid-js'
-import {Portal} from 'solid-js/web'
-import {type LocatorComponent} from './find-components.ts'
+import type {LocatorComponent} from './index.ts'
+import {UNKNOWN, type ElementInterface, type Rect} from '../types.ts'
 
-export function createElementsOverlay(selected: Accessor<LocatorComponent[]>) {
-    const useElementOverlay = createRootPool((component: Accessor<LocatorComponent>, active) => (
-        <ElementOverlay component={active() ? component() : null} />
-    ))
+export function createElementsOverlay<TEl extends object>(
+    selected: s.Accessor<LocatorComponent<TEl>[]>,
+    eli:      ElementInterface<TEl>,
+) {
 
-    // wait a second to let the framework mess with the document before attaching the overlay
-    const owner = getOwner()!
-    setTimeout(() => {
-        runWithOwner(owner, () => (
-            <Portal useShadow mount={document.documentElement}>
-                <div data-darkreader-ignore>{selected().map(useElementOverlay)}</div>
-            </Portal>
-        ))
-    }, 1000)
-}
+    const useElementOverlay = createRootPool((componentRaw: s.Accessor<LocatorComponent<TEl>>, active) => {
 
-const ElementOverlay: Component<{component: LocatorComponent | null}> = props => {
-    const element = () => props.component?.element
-    // set pointer cursor to selected component
-    createElementCursor(element, 'pointer')
-    const tag = () => element()?.localName
-    const name = () => props.component?.name
+        const component = () => active() ? componentRaw() : null
 
-    const bounds = createElementBounds(element)
-    const left = createMemo<number>(prev => (bounds.left === null ? prev : bounds.left), 0)
-    const top = createMemo<number>(prev => (bounds.top === null ? prev : bounds.top), 0)
-    const width = createMemo<number>(prev => (bounds.width === null ? prev : bounds.width), 0)
-    const height = createMemo<number>(prev => (bounds.height === null ? prev : bounds.height), 0)
-    const transform = createMemo(() => `translate(${Math.round(left())}px, ${Math.round(top())}px)`)
-    const placeOnTop = createMemo(() => top() > window.innerHeight / 2)
+        const name = () => component()?.name
 
-    return (
-        <>
-            <style>{styles}</style>
-            <div
-                class="element-overlay"
-                style={{
-                    transform: transform(),
-                    width: width() + 'px',
-                    height: height() + 'px',
-                }}
-            >
-                <div class="border" />
-                <Show when={name()}>
-                    <div class={`name-container ${placeOnTop() ? 'top' : 'bottom'}`}>
-                        <div class="name-animated-container">
-                            <div class="name-background"></div>
-                            <div class="name-text">
-                                {name()}: <span>{tag()}</span>
-                            </div>
-                            <div class="name-invisible">
-                                {name()}: {tag()}
+        const rect = s.createMemo((prev: Rect) => {
+            let comp = component()
+            if (comp === null) return prev
+
+            let rect = eli.getRect(comp.element)
+            if (rect === null) return prev
+
+            return rect
+        }, {x: 0, y: 0, width: 0, height: 0})
+
+        const transform  = () => `translate(${Math.round(rect().x)}px, ${Math.round(rect().y)}px)`
+        const placeOnTop = () => rect().y > window.innerHeight / 2
+
+        const tag = () => {
+            let comp = component()
+            if (comp === null) return UNKNOWN
+
+            return eli.getName(comp.element) ?? UNKNOWN
+        }
+
+        return (
+            <>
+                <style>{styles}</style>
+                <div
+                    class="element-overlay"
+                    style={{
+                        transform: transform(),
+                        width: rect().width + 'px',
+                        height: rect().height + 'px',
+                    }}
+                >
+                    <div class="border" />
+                    <s.Show when={name()}>
+                        <div class={`name-container ${placeOnTop() ? 'top' : 'bottom'}`}>
+                            <div class="name-animated-container">
+                                <div class="name-background"></div>
+                                <div class="name-text">
+                                    {name()}: <span>{tag()}</span>
+                                </div>
+                                <div class="name-invisible">
+                                    {name()}: {tag()}
+                                </div>
                             </div>
                         </div>
-                    </div>
-                </Show>
-            </div>
-        </>
-    )
+                    </s.Show>
+                </div>
+            </>
+        )
+
+    })
+
+    // wait a second to let the framework mess with the document before attaching the overlay
+    const owner = s.getOwner()!
+    setTimeout(() => {
+        s.runWithOwner(owner, () => (
+            <sweb.Portal useShadow mount={document.documentElement}>
+                <div data-darkreader-ignore>{selected().map(useElementOverlay)}</div>
+            </sweb.Portal>
+        ))
+    }, 1000)
 }
 
 const styles = /*css*/ `

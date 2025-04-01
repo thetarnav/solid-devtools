@@ -118,9 +118,6 @@ importers:
       '@solid-primitives/bounds':
         specifier: ^0.1.0
         version: 0.1.0(solid-js@1.9.5)
-      '@solid-primitives/cursor':
-        specifier: ^0.1.0
-        version: 0.1.0(solid-js@1.9.5)
       '@solid-primitives/event-listener':
         specifier: ^2.4.0
         version: 2.4.0(solid-js@1.9.5)

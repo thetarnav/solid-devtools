@@ -3,6 +3,7 @@ import {getSdtId, ObjectType} from '../main/id.ts'
 import setup from '../main/setup.ts'
 import * as utils from '../main/utils.ts'
 import {
+    type ElementInterface,
     type EncodedValue,
     INFINITY,
     NAN,
@@ -13,12 +14,15 @@ import {
     ValueType,
 } from '../types.ts'
 
+export type HandleStoreCallback = (node: Solid.StoreNode, nodeId: NodeID) => void
+export type HandleStore = HandleStoreCallback | FalsyValue
+
 // globals
 let Deep: boolean
 let List: EncodedValue[]
 let Seen: Map<unknown, number>
 let InStore: boolean
-let HandleStore: ((node: Solid.StoreNode, nodeId: NodeID) => void) | FalsyValue
+let HandleStore: HandleStore
 let IgnoreNextSeen: boolean
 
 const encodeNonObject = (value: unknown): EncodedValue => {
@@ -38,7 +42,10 @@ const encodeNonObject = (value: unknown): EncodedValue => {
     }
 }
 
-function encode(value: unknown): number {
+function encode<TEl extends object>(
+    value: unknown,
+    eli:   ElementInterface<TEl>,
+): number {
     const ignoreNextStore = IgnoreNextSeen
     if (ignoreNextStore) IgnoreNextSeen = false
     else {
@@ -58,12 +65,11 @@ function encode(value: unknown): number {
     ignoreNextStore || Seen.set(value, index)
 
     // HTML Elements
-    if (value instanceof Element) {
+    if (eli.isElement(value)) {
         ;(encoded as EncodedValue<ValueType.Element>)[0] = ValueType.Element
-        ;(encoded as EncodedValue<ValueType.Element>)[1] = `${getSdtId(
-            value,
-            ObjectType.Element,
-        )}:${value.localName}`
+        let id   = getSdtId(value, ObjectType.Element)
+        let name = eli.getName(value)
+        ;(encoded as EncodedValue<ValueType.Element>)[1] = `${id}:${name}`
     }
     // Store Nodes
     else if (!ignoreNextStore && utils.isStoreNode(value)) {
@@ -76,14 +82,24 @@ function encode(value: unknown): number {
         const wasInStore = InStore
         InStore = IgnoreNextSeen = true
         ;(encoded as EncodedValue<ValueType.Store>)[0] = ValueType.Store
-        ;(encoded as EncodedValue<ValueType.Store>)[1] = `${id}:${encode(node)}`
+        ;(encoded as EncodedValue<ValueType.Store>)[1] = `${id}:${encode(node, eli)}`
         InStore = wasInStore
     }
     // Arrays
     else if (Array.isArray(value)) {
         ;(encoded as EncodedValue<ValueType.Array>)[0] = ValueType.Array
-        ;(encoded as EncodedValue<ValueType.Array>)[1] = Deep ? value.map(encode) : value.length
-    } else {
+        if (Deep) {
+            let data: number[] = Array(value.length)
+            for (let i = 0; i < value.length; i++) {
+                data[i] = encode(value[i], eli)
+            }
+            ;(encoded as EncodedValue<ValueType.Array>)[1] = data
+        } else {
+            ;(encoded as EncodedValue<ValueType.Array>)[1] = value.length    
+        }
+    }
+    // Objects
+    else {
         const name = Object.prototype.toString.call(value).slice(8, -1)
         // normal objects (records)
         if (name === 'Object') {
@@ -95,7 +111,7 @@ function encode(value: unknown): number {
                 for (const [key, descriptor] of Object.entries(
                     Object.getOwnPropertyDescriptors(value),
                 )) {
-                    data[key] = descriptor.get ? -1 : encode(descriptor.value)
+                    data[key] = descriptor.get ? -1 : encode(descriptor.value, eli)
                 }
             } else {
                 ;(encoded as EncodedValue<ValueType.Object>)[1] = Object.keys(value).length
@@ -119,11 +135,12 @@ function encode(value: unknown): number {
  * @param handleStore handle encountered store nodes
  * @returns encoded value
  */
-export function encodeValue(
-    value: unknown,
-    deep: boolean,
-    handleStore?: typeof HandleStore,
-    inStore = false,
+export function encodeValue<TEl extends object>(
+    value:        unknown,
+    deep:         boolean,
+    eli:          ElementInterface<TEl>,
+    handleStore?: HandleStore,
+    inStore:      boolean = false,
 ): EncodedValue[] {
     Deep = deep
     List = []
@@ -131,7 +148,7 @@ export function encodeValue(
     InStore = inStore
     HandleStore = handleStore
 
-    encode(value)
+    encode(value, eli)
     const result = List
 
     Deep = List = Seen = HandleStore = InStore = undefined!

@@ -39,19 +39,21 @@ export function attachDevtoolsOverlay(props?: OverlayOptions): (() => void) {
     })
 }
 
-const Overlay: s.Component<OverlayOptions> = ({defaultOpen, alwaysOpen, noPadding}) => {
+const Overlay: s.Component<OverlayOptions> = props => {
 
-    const debug = useDebugger()
+    let {alwaysOpen, defaultOpen, noPadding} = props
+
+    const instance = useDebugger()
 
     if (defaultOpen || alwaysOpen) {
-        debug.toggleEnabled(true)
+        instance.toggleEnabled(true)
     }
 
-    const isOpen = atom(alwaysOpen || debug.enabled())
+    const isOpen = atom(alwaysOpen || instance.enabled())
     function toggleOpen(enabled?: boolean) {
         if (!alwaysOpen) {
             enabled ??= !isOpen()
-            debug.toggleEnabled(enabled)
+            instance.toggleEnabled(enabled)
             isOpen.set(enabled)
         }
     }
@@ -106,19 +108,19 @@ const Overlay: s.Component<OverlayOptions> = ({defaultOpen, alwaysOpen, noPaddin
                         <s.Show when={isOpen()}>
                         {_ => {
                             
-                            debug.emit(msg('ResetState', undefined))
+                            instance.emit(msg('ResetState', undefined))
                         
-                            s.onCleanup(() => debug.emit(msg('InspectNode', null)))
+                            s.onCleanup(() => instance.emit(msg('InspectNode', null)))
                         
                             const devtools = createDevtools({
                                 headerSubtitle: () => 'overlay',
                             })
                         
                             devtools.output.listen(e => {
-                                separate(e, debug.emit)
+                                separate(e, instance.emit)
                             })
                         
-                            debug.listen(e => {
+                            instance.listen(e => {
                                 separate(e, devtools.input.emit)
                             })
                         
