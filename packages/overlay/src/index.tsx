@@ -6,7 +6,6 @@ import {createBodyCursor} from '@solid-primitives/cursor'
 import {makeEventListener} from '@solid-primitives/event-listener'
 import * as num from '@nothing-but/utils/num'
 import {useDebugger} from '@solid-devtools/debugger/bundled'
-import * as debug from '@solid-devtools/debugger/types'
 import {Icon, MountIcons, createDevtools} from '@solid-devtools/frontend'
 import {useIsMobile, useIsTouch, atom} from '@solid-devtools/shared/primitives'
 import {msg} from '@solid-devtools/shared/utils'
@@ -15,10 +14,9 @@ import frontendStyles from '@solid-devtools/frontend/dist/styles.css'
 import overlayStyles from './styles.css'
 
 export type OverlayOptions = {
-    defaultOpen?:     boolean
-    alwaysOpen?:      boolean
-    noPadding?:       boolean
-    debuggerOptions?: debug.DebuggerOptions<any>
+    defaultOpen?: boolean
+    alwaysOpen?:  boolean
+    noPadding?:   boolean
 }
 
 export function attachDevtoolsOverlay(props?: OverlayOptions): (() => void) {
@@ -43,9 +41,9 @@ export function attachDevtoolsOverlay(props?: OverlayOptions): (() => void) {
 
 const Overlay: s.Component<OverlayOptions> = props => {
 
-    let {alwaysOpen, debuggerOptions, defaultOpen, noPadding} = props
+    let {alwaysOpen, defaultOpen, noPadding} = props
 
-    const instance = useDebugger(debuggerOptions)
+    const instance = useDebugger()
 
     if (defaultOpen || alwaysOpen) {
         instance.toggleEnabled(true)

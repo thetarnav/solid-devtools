@@ -2,8 +2,8 @@ import type * as API from './setup.ts'
 
 export const {
     setLocatorOptions,
-    setDebuggerOptions,
+    setElementInterface,
 }: typeof API = {
-    setLocatorOptions()  {/**/},
-    setDebuggerOptions() {/**/},
+    setLocatorOptions()   {/**/},
+    setElementInterface() {/**/},
 }

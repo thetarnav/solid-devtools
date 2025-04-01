@@ -10,5 +10,5 @@ setSolidVersion(process.env.SOLID_VERSION, process.env.EXPECTED_SOLID_VERSION)
 
 export {
     setLocatorOptions,
-    setDebuggerOptions,
+    setElementInterface,
 } from '@solid-devtools/debugger/setup'

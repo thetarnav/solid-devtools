@@ -19,17 +19,10 @@ import {
     type NodeID,
     type OutputListener,
     type OutputMessage,
-    type DebuggerOptions,
 } from './types.ts'
 
-function createDebugger<TEl extends object>(
-    options?: DebuggerOptions<TEl>,
-) {
+function createDebugger() {
     assert(globalThis.SolidDevtools$$, 'solid-devtools is not setup')
-
-    if (options != null) {
-        globalThis.SolidDevtools$$.debugger_options = options
-    }
 
     initRoots()
 
@@ -147,7 +140,7 @@ function createDebugger<TEl extends object>(
         }
     }
 
-    let component_registry = walker.makeComponentRegistry(setup.debugger_options.eli)
+    let component_registry = walker.makeComponentRegistry(setup.eli)
     
     //
     // Structure:
@@ -278,9 +271,7 @@ let _debugger_instance: Debugger | undefined
 /**
  * Used for connecting debugger to devtools
  */
-export function useDebugger<TEl extends object>(
-    options?: DebuggerOptions<TEl>,
-): Debugger {
-    _debugger_instance ??= createDebugger(options)
+export function useDebugger(): Debugger {
+    _debugger_instance ??= createDebugger()
     return _debugger_instance
 }

@@ -20,9 +20,9 @@ export function setLocatorOptions(options: debug.LocatorOptions) {
     globalThis.SolidDevtools$$.locator_options = options
 }
 
-export function setDebuggerOptions(options: debug.DebuggerOptions<any>) {
+export function setElementInterface(eli: debug.ElementInterface<any>) {
     assert(globalThis.SolidDevtools$$, 'solid-devtools is not setup')
-    globalThis.SolidDevtools$$.debugger_options = options
+    globalThis.SolidDevtools$$.eli = eli
 }
 
 export function setClientVersion(version: string) {
@@ -51,7 +51,7 @@ export type SetupApi = {
         $RAW:         typeof store.$RAW
     }
     // custom
-    debugger_options: debug.DebuggerOptions<any>
+    eli:              debug.ElementInterface<any>
     locator_options:  debug.LocatorOptions | null
     get_created_owners:  () => debug.Solid.Owner[]
     get_locator_options: () => debug.LocatorOptions | null
@@ -106,13 +106,9 @@ if (!s.DEV || !store.DEV) {
             created_owners = null
             return events
         },
-        debugger_options: {
-            eli: debug.dom_element_interface,
-        },
+        eli:             debug.dom_element_interface,
         locator_options: null,
-        get_locator_options() {
-            return this.locator_options
-        },
+        get_locator_options() {return this.locator_options},
         versions: {
             client:              null,
             solid:               null,
