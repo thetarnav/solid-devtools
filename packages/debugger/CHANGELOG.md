@@ -1,5 +1,17 @@
 # @solid-devtools/debugger
 
+## 0.27.0
+
+### Minor Changes
+
+- 370c545: Remove element field from SourceCodeData
+- 95b348b: Add setElementInterface funtion to setup to support custom renderers (closes #343)
+
+### Patch Changes
+
+- Updated dependencies [a72919e]
+  - @solid-devtools/shared@0.19.1
+
 ## 0.26.0
 
 ### Minor Changes
