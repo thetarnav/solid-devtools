@@ -1,5 +1,11 @@
 # solid-devtools-shared
 
+## 0.19.1
+
+### Patch Changes
+
+- a72919e: Move assert to shared/utils
+
 ## 0.19.0
 
 ### Minor Changes

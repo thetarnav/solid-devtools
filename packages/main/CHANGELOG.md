@@ -1,5 +1,20 @@
 # solid-devtools
 
+## 0.34.0
+
+### Minor Changes
+
+- 95b348b: Add setElementInterface funtion to setup to support custom renderers (closes #343)
+
+### Patch Changes
+
+- 05163c3: fix: babel plugin resolution by importing @babel/plugin-syntax-typescript instead of passing it as a string
+- Updated dependencies [370c545]
+- Updated dependencies [95b348b]
+- Updated dependencies [a72919e]
+  - @solid-devtools/debugger@0.27.0
+  - @solid-devtools/shared@0.19.1
+
 ## 0.33.0
 
 ### Minor Changes

@@ -1,5 +1,15 @@
 # @solid-devtools/frontend
 
+## 0.15.1
+
+### Patch Changes
+
+- Updated dependencies [370c545]
+- Updated dependencies [95b348b]
+- Updated dependencies [a72919e]
+  - @solid-devtools/debugger@0.27.0
+  - @solid-devtools/shared@0.19.1
+
 ## 0.15.0
 
 ### Minor Changes
