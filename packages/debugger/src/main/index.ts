@@ -208,7 +208,7 @@ function createDebugger<TEl extends object>(
     // Opens the source code of the inspected component
     function openInspectedNodeLocation() {
         const details = inspector.getLastDetails()
-        details?.location && locator.openElementSourceCode(details.location, details.name)
+        details?.location && locator.openElementSourceCode(details.location)
     }
     
     // send the state of the client locator mode

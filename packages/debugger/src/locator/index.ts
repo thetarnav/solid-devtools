@@ -165,7 +165,7 @@ export function createLocator<TEl extends object>(props: {
             }
 
             let source_code_data = comp.location
-                ? locator.getSourceCodeData(comp.location, comp.element as any)
+                ? locator.getSourceCodeData(comp.location)
                 : null
 
             // intercept on-page components clicks and send them to the devtools overlay
@@ -210,14 +210,13 @@ export function createLocator<TEl extends object>(props: {
         setDevtoolsHighlightTarget(target: locator.HighlightElementPayload) {
             setDevtoolsTarget(target)
         },
-        openElementSourceCode(location: SourceLocation, element: locator.SourceCodeData['element']) {
+        openElementSourceCode(location: SourceLocation) {
             if (!target_ide) return warn('Please set `targetIDE` it in useLocator options.')
             const projectPath = locator.getProjectPath()
             if (!projectPath) return warn('projectPath is not set.')
             locator.openSourceCode(target_ide, {
                 ...location,
                 projectPath,
-                element,
             })
         },
     }

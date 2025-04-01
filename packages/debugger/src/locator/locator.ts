@@ -28,7 +28,6 @@ export type TargetIDE = 'vscode' | 'webstorm' | 'atom' | 'vscode-insiders'
 
 export type SourceCodeData = SourceLocation & {
     projectPath: string
-    element: HTMLElement | string | undefined
 }
 
 export type TargetURLFunction = (data: SourceCodeData) => string | void
@@ -65,13 +64,12 @@ export const getProjectPath = (): string | undefined => (window as any)[WINDOW_P
 
 export function getSourceCodeData(
     location: SourceLocation,
-    element: SourceCodeData['element'],
 ): SourceCodeData | undefined {
 
     let projectPath: string | undefined = getProjectPath()
     if (projectPath == null) return
 
-    return {...location, projectPath, element}
+    return {...location, projectPath}
 }
 
 /**
