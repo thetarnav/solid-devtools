@@ -88,7 +88,7 @@ function encode<TEl extends object>(
     // Arrays
     else if (Array.isArray(value)) {
         ;(encoded as EncodedValue<ValueType.Array>)[0] = ValueType.Array
-        if (Deep && value.length > 0) {
+        if (Deep) {
             let data: number[] = Array(value.length)
             for (let i = 0; i < value.length; i++) {
                 data[i] = encode(value[i], eli)
