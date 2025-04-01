@@ -4,8 +4,10 @@ import * as s from 'solid-js'
 import * as test from 'vitest'
 import {getObjectById, getSdtId, ObjectType} from '../main/id.ts'
 import setup from '../main/setup.ts'
-import {type Mapped, NodeType, PropGetterState, type Solid, ValueType} from '../types.ts'
+import {dom_element_interface, type Mapped, NodeType, PropGetterState, type Solid, ValueType} from '../types.ts'
 import {collectOwnerDetails} from './inspector.ts'
+
+const eli = dom_element_interface
 
 test.describe('collectOwnerDetails', () => {
     test.it('collects focused owner details', () => {
@@ -42,13 +44,10 @@ test.describe('collectOwnerDetails', () => {
             const [innerMemo] = memo.owned as [Solid.Memo, Solid.Computation]
 
             const {details, valueMap} = collectOwnerDetails(memo, {
-                observedPropsMap: new WeakMap(),
-                onPropStateChange: () => {
-                    /**/
-                },
-                onValueUpdate: () => {
-                    /**/
-                },
+                observedPropsMap:  new WeakMap(),
+                onPropStateChange: () => {/**/},
+                onValueUpdate:     () => {/**/},
+                eli:               eli,
             })
 
             test.expect(details).toEqual({
@@ -109,13 +108,10 @@ test.describe('collectOwnerDetails', () => {
             ))
 
             const {details} = collectOwnerDetails(owner, {
-                observedPropsMap: new WeakMap(),
-                onPropStateChange: () => {
-                    /**/
-                },
-                onValueUpdate: () => {
-                    /**/
-                },
+                observedPropsMap:  new WeakMap(),
+                onPropStateChange: () => {/**/},
+                onValueUpdate:     () => {/**/},
+                eli:               eli,
             })
 
             dispose()
@@ -169,13 +165,10 @@ test.describe('collectOwnerDetails', () => {
             })
 
             const {details} = collectOwnerDetails(owner, {
-                observedPropsMap: new WeakMap(),
-                onPropStateChange: () => {
-                    /**/
-                },
-                onValueUpdate: () => {
-                    /**/
-                },
+                observedPropsMap:  new WeakMap(),
+                onPropStateChange: () => {/**/},
+                onValueUpdate:     () => {/**/},
+                eli:               eli,
             })
 
             test.expect(details).toEqual({
@@ -215,11 +208,10 @@ test.describe('collectOwnerDetails', () => {
 
             const onValueUpdate = test.vi.fn()
             collectOwnerDetails(owner, {
-                observedPropsMap: new WeakMap(),
-                onPropStateChange: () => {
-                    /**/
-                },
-                onValueUpdate: onValueUpdate,
+                observedPropsMap:  new WeakMap(),
+                onPropStateChange: () => {/**/},
+                onValueUpdate:     onValueUpdate,
+                eli:               eli,
             })
 
             test.expect(onValueUpdate).not.toBeCalled()
@@ -249,11 +241,10 @@ test.describe('collectOwnerDetails', () => {
 
             const onValueUpdate = test.vi.fn()
             collectOwnerDetails(owner, {
-                observedPropsMap: new WeakMap(),
-                onPropStateChange: () => {
-                    /**/
-                },
-                onValueUpdate: onValueUpdate,
+                observedPropsMap:  new WeakMap(),
+                onPropStateChange: () => {/**/},
+                onValueUpdate:     onValueUpdate,
+                eli:               eli,
             })
 
             test.expect(onValueUpdate).not.toBeCalled()

@@ -3,7 +3,7 @@ import {parseLocationString} from '../locator/index.ts'
 import {ObjectType, getSdtId} from '../main/id.ts'
 import {observeValueUpdate, removeValueUpdateObserver} from '../main/observe.ts'
 import setup from '../main/setup.ts'
-import {type Mapped, type NodeID, type Solid, type SourceLocation, type ValueItemID, NodeType, ValueItemType} from '../main/types.ts'
+import {type ElementInterface, type Mapped, type NodeID, type Solid, type SourceLocation, type ValueItemID, NodeType, ValueItemType} from '../main/types.ts'
 import * as utils from '../main/utils.ts'
 import {UNOWNED_ROOT} from '../main/roots.ts'
 import {encodeValue} from './serialize.ts'
@@ -163,9 +163,10 @@ let PropsMap: ObservedPropsMap
 
 const $INSPECTOR = Symbol('inspector')
 
-function mapSourceValue(
+function mapSourceValue<TEl extends object>(
     node_raw: Solid.SourceMapValue | Solid.Computation,
     handler:  (nodeId: NodeID, value: unknown) => void,
+    eli:      ElementInterface<TEl>,
 ): Mapped.SourceValue | null {
 
     let node = utils.getNode(node_raw)
@@ -194,11 +195,14 @@ function mapSourceValue(
         type:  node.kind,
         name:  utils.getNodeName(node.data),
         id:    id,
-        value: encodeValue(value, false),
+        value: encodeValue(value, false, eli),
     }
 }
 
-function mapProps(props: Solid.Component['props']) {
+function mapProps<TEl extends object>(
+    props: Solid.Component['props'],
+    eli:   ElementInterface<TEl>,
+) {
     // proxy props need to be checked for changes in keys
     const isProxy = !!(props as any)[setup.solid.$PROXY]
     const record: Mapped.Props['record'] = {}
@@ -232,14 +236,14 @@ function mapProps(props: Solid.Component['props']) {
                 const lastValue = getValue()
                 record[key] = {
                     getter: isStale ? PropGetterState.Stale : PropGetterState.Live,
-                    value: lastValue !== $NOT_SET ? encodeValue(getValue(), false) : null,
+                    value: lastValue !== $NOT_SET ? encodeValue(getValue(), false, eli) : null,
                 }
             }
             // VALUE
             else {
                 record[key] = {
                     getter: false,
-                    value: encodeValue(desc.value, false),
+                    value: encodeValue(desc.value, false, eli),
                 }
                 // non-object props cannot be inspected (won't ever change and aren't deep)
                 if (Array.isArray(desc.value) || misc.is_plain_object(desc.value))
@@ -251,18 +255,19 @@ function mapProps(props: Solid.Component['props']) {
     return {props: {proxy: isProxy, record}, checkProxyProps}
 }
 
-export type CollectDetailsConfig = {
+export type CollectDetailsConfig<TEl extends object> = {
     onPropStateChange: Inspector.OnPropStateChange
     onValueUpdate:     Inspector.OnValueUpdate
     observedPropsMap:  ObservedPropsMap
+    eli:               ElementInterface<TEl>,
 }
 
-export function collectOwnerDetails(
+export function collectOwnerDetails<TEl extends object>(
     owner:  Solid.Owner,
-    config: CollectDetailsConfig,
+    config: CollectDetailsConfig<TEl>,
 ) {
 
-    const {onValueUpdate} = config
+    const {onValueUpdate, eli} = config
 
     // Set globals
     ValueMap = new ValueNodeMap()
@@ -308,7 +313,7 @@ export function collectOwnerDetails(
                 details.hmr = true
             }
 
-            ;({checkProxyProps, props: details.props} = mapProps(owner.props))
+            ;({checkProxyProps, props: details.props} = mapProps(owner.props, eli))
 
             let location: string | SourceLocation | undefined
             if ((
@@ -326,7 +331,7 @@ export function collectOwnerDetails(
             observeValueUpdate(owner, () => onValueUpdate(ValueItemType.Value), $INSPECTOR)
         }
 
-        details.value = encodeValue(getValue(), false)
+        details.value = encodeValue(getValue(), false, eli)
     }
 
     const onSignalUpdate = (signalId: NodeID) =>
@@ -334,13 +339,13 @@ export function collectOwnerDetails(
 
     // map signals
     if (sourceMap) for (let signal of sourceMap) {
-        let mapped = mapSourceValue(signal, onSignalUpdate)
+        let mapped = mapSourceValue(signal, onSignalUpdate, eli)
         if (mapped) details.signals.push(mapped)
     }
 
     // map memos
     if (owned) for (let node of owned) {
-        let mapped = mapSourceValue(node, onSignalUpdate)
+        let mapped = mapSourceValue(node, onSignalUpdate, eli)
         if (mapped) details.signals.push(mapped)
     }
 
@@ -351,7 +356,7 @@ export function collectOwnerDetails(
             let signal = signal_ref.deref()
             if (signal == null) continue
     
-            let mapped = mapSourceValue(signal, onSignalUpdate)
+            let mapped = mapSourceValue(signal, onSignalUpdate, eli)
             if (mapped == null) continue
             
             details.signals.push(mapped)
