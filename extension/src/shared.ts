@@ -5,7 +5,7 @@ File for utilities, constants and types related to the communication between the
 */
 
 import * as debug from '@solid-devtools/debugger/types'
-import {type Union} from '@solid-devtools/shared/utils'
+import * as utils from '@solid-devtools/shared/utils'
 
 
 export const ICON_SOLID_BLUE_16  = 'solid-normal-16.png'
@@ -33,7 +33,6 @@ export const ICONS_GRAY: chrome.runtime.ManifestIcons = {
     48:  ICON_SOLID_GRAY_48,
     128: ICON_SOLID_GRAY_128,
 }
-
 
 export const DEVTOOLS_ID_PREFIX = '[solid-devtools]_'
 
@@ -88,12 +87,20 @@ export type Channels = debug.InputChannels
               & debug.OutputChannels
               & GeneralChannels
 
-export type Message = Union<Channels>
+export type Message = utils.Union<Channels>
+
+export function place_log(place: Place_Name, message: string, ...args: any[]): void {
+    utils.log(`${utils.ANSI_CYAN}${place}${utils.ANSI_RESET}: ${message}`, ...args)
+}
+export function place_error(place: Place_Name, message: string, ...args: any[]): void {
+    utils.error(`${utils.ANSI_CYAN}${place}${utils.ANSI_RESET}: ${message}`, ...args)
+}
+export function place_warn(place: Place_Name, message: string, ...args: any[]): void {
+    utils.warn(`${utils.ANSI_CYAN}${place}${utils.ANSI_RESET}: ${message}`, ...args)
+}
 
 export function to_message(e: any): Message | null {
-    return e && typeof e === 'object' && typeof e['kind'] === 'string'
-        ? e
-        : null
+    return e && typeof e === 'object' && typeof e['kind'] === 'string' ? e : null
 }
 
 export type Port = chrome.runtime.Port

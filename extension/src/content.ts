@@ -9,20 +9,18 @@ This script is injected into every page and is responsible for:
 
 */
 
-import {error, log} from '@solid-devtools/shared/utils'
-
 import {
     Place_Name, ConnectionName,
     port_on_message, port_post_message_obj, port_post_message,
     window_post_message_obj, window_on_message, window_post_message,
+    place_error, place_log,
 } from './shared.ts'
 
 // @ts-expect-error ?script&module query ensures output in ES module format and only import the script path
 import real_world_path from './real_world.ts?script&module'
 
 
-DEV: {log(Place_Name.Content+' loaded.')}
-
+DEV: {place_log(Place_Name.Content, 'loaded.')}
 
 function loadScriptInRealWorld(path: string): Promise<void> {
     return new Promise((resolve, reject) => {
@@ -60,7 +58,9 @@ function on_loaded() {
     */
 
     loadScriptInRealWorld(real_world_path)
-        .catch(err => error(`Real_World script (${real_world_path}) failed to load.`, err))
+        .catch(err => {
+            place_error(Place_Name.Content, `Real_World script (${real_world_path}) failed to load.`, err)
+        })
 }
 
 

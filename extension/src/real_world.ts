@@ -10,15 +10,15 @@
 */
 
 import * as detect from '@solid-devtools/shared/detect'
-import {log, warn} from '@solid-devtools/shared/utils'
 
 import {
     Place_Name, type DetectionState,
     window_post_message, window_on_message, window_post_message_obj,
+    place_log, place_warn,
 } from './shared.ts'
 
 
-DEV: {log(Place_Name.Detector_Real_World+' loaded.')}
+DEV: {place_log(Place_Name.Detector_Real_World, 'loaded.')}
 
 function main() {
 
@@ -31,9 +31,9 @@ function main() {
     detect.detectSolid().then(detected => {
         if (import.meta.env.DEV) {
             if (detected) {
-                log('Solid detected.')
+                place_log(Place_Name.Detector_Real_World, 'Solid detected.')
             } else {
-                warn('Solid NOT detected.')
+                place_warn(Place_Name.Detector_Real_World, 'Solid NOT detected.')
             }
         }
         if (detected && !detect_state.solid) {
@@ -44,7 +44,7 @@ function main() {
 
     detect.onSolidDevDetect(() => {
         if (import.meta.env.DEV) {
-            log('Solid_Dev_Mode detected.')
+            place_log(Place_Name.Detector_Real_World, 'Solid_Dev_Mode detected.')
         }
         detect_state.solid_dev = true
         detect_state.solid     = true
@@ -53,7 +53,7 @@ function main() {
 
     detect.onSolidDevtoolsDetect(() => {
         if (import.meta.env.DEV) {
-            log('Devtools_Client detected.')
+            place_log(Place_Name.Detector_Real_World, 'Devtools_Client detected.')
         }
         detect_state.setup = true
         update_detected()
@@ -147,10 +147,10 @@ function warn_on_version_mismatch(
     title:        string,
 ) {
     if (!actual_str) {
-        return warn(`No actual ${title} version found!`)
+        return place_warn(Place_Name.Detector_Real_World, `No actual ${title} version found!`)
     }
     if (!expected_str) {
-        return warn(`No expected ${title} version found!`)
+        return place_warn(Place_Name.Detector_Real_World, `No expected ${title} version found!`)
     }
 
     // warn if the matching adapter version is not the same minor version range as the actual adapter
@@ -158,13 +158,13 @@ function warn_on_version_mismatch(
     let [expected, expected_ok] = version_from_string(expected_str)
 
     if (!actual_ok) {
-        warn(`Actual version ${title}@${actual_str} cannot be parsed.`)
+        place_warn(Place_Name.Detector_Real_World, `Actual version ${title}@${actual_str} cannot be parsed.`)
     }
     if (!expected_ok) {
-        warn(`Expected version ${title}@${expected_str} cannot be parsed.`)
+        place_warn(Place_Name.Detector_Real_World, `Expected version ${title}@${expected_str} cannot be parsed.`)
     }
     if (!match_version_patch(actual, expected)) {
-        warn(`VERSION MISMATCH!
+        place_warn(Place_Name.Detector_Real_World, `VERSION MISMATCH!
 Current version:  ${title}@${actual_str}
 Expected version: ${title}@${expected_str}`)
     }

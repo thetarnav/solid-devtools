@@ -4,18 +4,18 @@
 
 import * as s        from 'solid-js'
 import * as web      from 'solid-js/web'
-import {error, log, warn} from '@solid-devtools/shared/utils'
 import * as frontend from '@solid-devtools/frontend'
 import * as debug    from '@solid-devtools/debugger/types'
 
 import {
     ConnectionName, Place_Name, port_on_message, port_post_message_obj,
+    place_log, place_error, place_warn,
     type Message, type Versions,
 } from './shared.ts'
 
 import '@solid-devtools/frontend/dist/styles.css'
 
-log(Place_Name.Panel+' loaded.')
+place_log(Place_Name.Panel, 'loaded.')
 
 
 function App() {
@@ -55,12 +55,12 @@ function App() {
         if (connecting) return
 
         connecting = true
-        log('Attempting to connect port...')
+        place_log(Place_Name.Panel, 'Attempting to connect port...')
 
         try {
             let new_port = chrome.runtime.connect({name: ConnectionName.Panel})
             setPort(new_port)
-            log('Port connected successfully')
+            place_log(Place_Name.Panel, 'Port connected successfully')
 
             // Flush queued messages
             for (let m of message_queue.splice(0, message_queue.length)) {
@@ -89,7 +89,7 @@ function App() {
                 }
             })
         } catch (err) {
-            error('Failed to connect port:', err)
+            place_error(Place_Name.Panel, 'Failed to connect port:', err)
         }
 
         connecting = false
@@ -116,7 +116,7 @@ function App() {
                 })()`,
                 (_, err?: chrome.devtools.inspectedWindow.EvaluationExceptionInfo) => {
                 if (err && (err.isError || err.isException)) {
-                    error(err.description)
+                    place_error(Place_Name.Panel, err.description)
                 }
             })
             break
@@ -125,7 +125,7 @@ function App() {
             /* Devtools -> Client */
             let curr_port = port()
             if (curr_port == null) {
-                warn('Port not available, message queued')
+                place_warn(Place_Name.Panel, 'Port not available, message queued')
                 message_queue.push(e)
                 connect_port()
                 return
@@ -134,7 +134,7 @@ function App() {
             try {
                 port_post_message_obj(curr_port, e)
             } catch (err) {
-                warn('Message failed to send:', err)
+                place_warn(Place_Name.Panel, 'Message failed to send:', err)
                 message_queue.push(e)
                 connect_port()
             }

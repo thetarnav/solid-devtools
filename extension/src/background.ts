@@ -6,17 +6,18 @@ It has to coordinate the communication between the different scripts based on th
 
 */
 
-import {assert, error, log} from '@solid-devtools/shared/utils'
+import {assert} from '@solid-devtools/shared/utils'
 
 import {
     Place_Name, ConnectionName, type Port,
     type DetectionState, type Versions, type Message,
     port_on_message, port_post_message, port_post_message_obj,
+    place_error, place_log,
     ICONS_BLUE, ICONS_GRAY,
 } from './shared.ts'
 
 
-log(Place_Name.Background+' loaded.')
+place_log(Place_Name.Background, 'loaded.')
 
 
 type Tab_Id = number & {__Tab_Id__: true}
@@ -98,7 +99,7 @@ function toggle_action_icon(tab_id: Tab_Id) {
 
 function on_connected(port: Port) {
 
-    DEV: {log('Port connected', port)}
+    DEV: {place_log(Place_Name.Background, 'Port connected', port)}
 
     switch (port.name) {
     case ConnectionName.Popup: {
@@ -163,7 +164,7 @@ function on_connected(port: Port) {
 
 function on_disconnected(port: Port) {
 
-    DEV: {log('Port disconnected', port)}
+    DEV: {place_log(Place_Name.Background, 'Port disconnected', port)}
 
     switch (port.name) {
     case ConnectionName.Popup: {
@@ -226,7 +227,7 @@ function on_disconnected(port: Port) {
 
 function on_message(port: Port, e: Message) {
 
-    DEV: {log('Message', e, 'from', port)}
+    DEV: {place_log(Place_Name.Background, 'Message', e, 'from', port)}
 
     switch (port.name) {
     case ConnectionName.Popup: {
@@ -291,7 +292,7 @@ function on_message(port: Port, e: Message) {
         if (content) {
             port_post_message_obj(content.port, e)
         } else {
-            error(`Cannot forward ${Place_Name.Panel} -> ${Place_Name.Content} - ${e.kind}:`, e.data)
+            place_error(Place_Name.Background, `Cannot forward ${Place_Name.Panel} -> ${Place_Name.Content} - ${e.kind}:`, e.data)
         }
 
         break

@@ -2,16 +2,16 @@
 
 import * as s from 'solid-js'
 import {render} from 'solid-js/web'
-import {log} from '@solid-devtools/shared/utils'
 
 import {
     ConnectionName, Place_Name, port_on_message,
-    type DetectionState, type Versions
+    place_log,
+    type DetectionState, type Versions,
 } from './shared.ts'
 
 import './popup.css'
 
-log(Place_Name.Popup+' loaded.')
+place_log(Place_Name.Popup, 'loaded.')
 
 // Create a connection to the background page
 const port = chrome.runtime.connect({name: ConnectionName.Popup})

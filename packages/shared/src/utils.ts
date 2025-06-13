@@ -19,6 +19,23 @@ export function msg<T, K extends keyof T>(kind: K, data: T[K]): UnionMember<T, K
     return {kind, data}
 }
 
+export const ANSI_RESET      = '\x1b[0m'
+export const ANSI_BOLD       = '\x1b[1m'
+export const ANSI_RED        = '\x1b[31m'
+export const ANSI_GREEN      = '\x1b[32m'
+export const ANSI_YELLOW     = '\x1b[33m'
+export const ANSI_BLUE       = '\x1b[34m'
+export const ANSI_MAGENTA    = '\x1b[35m'
+export const ANSI_CYAN       = '\x1b[36m'
+export const ANSI_GRAY       = '\x1b[90m'
+export const ANSI_BG_CYAN    = '\x1b[46m'
+export const ANSI_BG_RED     = '\x1b[41m'
+export const ANSI_BG_YELLOW  = '\x1b[43m'
+export const ANSI_BG_GREEN   = '\x1b[42m'
+export const ANSI_BG_MAGENTA = '\x1b[45m'
+export const ANSI_BG_BLUE    = '\x1b[44m'
+export const ANSI_BG_GRAY    = '\x1b[100m'
+
 export const LOG_LABEL_CYAN = `\x1b[1;30m\x1b[46msolid-devtools\x1b[0m`
 
 export function info<T>(data: T): T {
@@ -46,7 +63,7 @@ export function error(message: string, ...args: any[]): undefined {
 
 export function log_message(to: string, from: string, e: {kind: string, data: any}) {
     // eslint-disable-next-line no-console
-    console.log(`${LOG_LABEL_CYAN} \x1b[36m${to}\x1b[0m <- \x1b[36m${from}\x1b[0m: \x1b[35m${e.kind}\x1b[0m:`, e.data)
+    console.log(`${LOG_LABEL_CYAN} ${ANSI_CYAN}${to}${ANSI_RESET} <- ${ANSI_CYAN}${from}${ANSI_RESET}: ${ANSI_MAGENTA}${e.kind}${ANSI_RESET}:`, e.data)
 }
 
 export function formatTime(d: Date = new Date()): string {

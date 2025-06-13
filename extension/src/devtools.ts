@@ -7,14 +7,13 @@ It connects to the background script.
 
 */
 
-import {error, log} from '@solid-devtools/shared/utils'
-
 import {
-    Place_Name, ConnectionName, port_on_message, ICON_OUTLINE_32
+    Place_Name, ConnectionName, port_on_message, ICON_OUTLINE_32,
+    place_error, place_log,
 } from './shared.ts'
 
 
-log(Place_Name.Devtools+' loaded.')
+place_log(Place_Name.Devtools, 'loaded.')
 
 
 // Create a connection to the background page
@@ -34,7 +33,7 @@ port_on_message(port, e => {
     if (e.kind === 'Versions' && e.data && !panel_creating && !panel) {
         panel_creating = true
 
-        log('Debugger connected -> Creating Devtools_Panel...')
+        place_log(Place_Name.Devtools, 'Debugger connected -> Creating Devtools_Panel...')
 
         chrome.devtools.panels.create(
             'Solid',
@@ -45,9 +44,9 @@ port_on_message(port, e => {
                 panel = _panel
 
                 if (chrome.runtime.lastError) {
-                    error('Creating Devtools_Panel Failed', chrome.runtime.lastError)
+                    place_error(Place_Name.Devtools, 'Creating Devtools_Panel Failed', chrome.runtime.lastError)
                 } else {
-                    log('Devtools_Panel created.')
+                    place_log(Place_Name.Devtools, 'Devtools_Panel created.')
                 }
             },
         )
