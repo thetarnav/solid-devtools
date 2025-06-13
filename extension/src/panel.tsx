@@ -88,8 +88,8 @@ function App() {
                     setTimeout(connect_port, 100)
                 }
             })
-        } catch (_err) {
-            error('Failed to reconnect port:', _err)
+        } catch (err) {
+            error('Failed to connect port:', err)
         }
 
         connecting = false
