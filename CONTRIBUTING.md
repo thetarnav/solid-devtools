@@ -16,8 +16,6 @@ You should reinstall the dependencies and rebuild the packages whenever you pull
 
 The code is formatted with prettier. You can use it if you want, or not, it's up to you because the code get's formatted automatically by a github action. If you want to use it, you can run `pnpm format` to format the code.
 
-If you want to run the E2E tests, you need to install the dependencies by running `pnpm exec playwright install --with-deps chromium` _(or `npx playwright install --with-deps chromium`)_, then run `pnpm test:e2e`.
-
 ## Operating System
 
 I'm working on a linux machine right now, but everything should be wokking the same way regardless of OS. Please make an issue if it's not.
@@ -52,11 +50,7 @@ Important if you want to work on the chrome extension. _(The script may fail som
 
 #### `pnpm test:lint` — Lints code with eslint
 
-#### `pnpm test:e2e` - Runs all the E2E tests _(needs playwright deps installed)_
-
 #### `pnpm build-test` — Runs both the build and all the tests
-
-Watchout, `build-test` may freeze your computer a bit :)
 
 When you make a PR, the CI will run all of these commands, so you don't have to worry about it.
 
