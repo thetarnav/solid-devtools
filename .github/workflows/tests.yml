@@ -18,17 +18,14 @@ jobs:
 
       - uses: pnpm/action-setup@v4
 
-      - name: Setup Node.js 22
+      - name: Setup Node 22
         uses: actions/setup-node@v4
         with:
-          node-version: 22.x
+          node-version: 22
           cache: pnpm
 
       - name: Install dependencies
         run: pnpm install --no-frozen-lockfile --ignore-scripts
-
-      - name: Install Playwright browser and dependencies
-        run: pnpm exec playwright install --with-deps chromium
 
       - name: Run Build and Tests
         run: pnpm run build-test
