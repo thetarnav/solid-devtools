@@ -1,5 +1,4 @@
 import type {KbdKey} from '@solid-primitives/keyboard'
-import {isWindows} from '@solid-primitives/platform'
 import type {ToDyscriminatedUnion} from '@solid-devtools/shared/utils'
 import {type NodeID, type SourceLocation} from '../main/types.ts'
 
@@ -14,13 +13,13 @@ export type LocatorOptions = {
 }
 
 export type HighlightElementPayload = ToDyscriminatedUnion<{
-    node: {id: NodeID}
+    node:    {id: NodeID}
     element: {id: NodeID}
 }> | null
 
 // used by the transform
 export const WINDOW_PROJECTPATH_PROPERTY = '$sdt_projectPath'
-export const LOCATION_ATTRIBUTE_NAME = 'data-source-loc'
+export const LOCATION_ATTRIBUTE_NAME     = 'data-source-loc'
 
 export type LocationAttr = `${string}:${number}:${number}`
 
@@ -32,16 +31,15 @@ export type SourceCodeData = SourceLocation & {
 
 export type TargetURLFunction = (data: SourceCodeData) => string | void
 
-const LOC_ATTR_REGEX_WIN = /^((?:\\?[^\s][^/\\:\"\?\*<>\|]+)+):([0-9]+):([0-9]+)$/
-const LOC_ATTR_REGEX_UNIX =
-    /^((?:(?:\.\/|\.\.\/|\/)?(?:\.?\w+\/)*)(?:\.?\w+\.?\w+)):([0-9]+):([0-9]+)$/
-
-export const LOC_ATTR_REGEX = isWindows ? LOC_ATTR_REGEX_WIN : LOC_ATTR_REGEX_UNIX
+const LOC_ATTR_REGEX_WIN  = /^((?:\\?[^\s][^/\\:\"\?\*<>\|]+)+):([0-9]+):([0-9]+)$/
+const LOC_ATTR_REGEX_UNIX = /^((?:(?:\.\/|\.\.\/|\/)?(?:\.?\w+\/)*)(?:\.?\w+\.?\w+)):([0-9]+):([0-9]+)$/
 
 export function getLocationAttr(element: Element): LocationAttr | null {
     let attr = element.getAttribute(LOCATION_ATTRIBUTE_NAME)
-    if (!attr || !LOC_ATTR_REGEX.test(attr)) return null
-    return attr as LocationAttr
+    if (!attr) return null
+    let is_windows = /(win32|win64|windows|wince)/i.test(navigator.userAgent)
+    let regex = is_windows ? LOC_ATTR_REGEX_WIN : LOC_ATTR_REGEX_UNIX
+    return regex.test(attr) ? attr as LocationAttr : null
 }
 
 const targetIDEMap: Record<TargetIDE, (data: SourceCodeData) => string> = {

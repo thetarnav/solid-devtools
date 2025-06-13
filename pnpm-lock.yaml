@@ -121,9 +121,6 @@ importers:
       '@solid-primitives/keyboard':
         specifier: ^1.3.1
         version: 1.3.1(solid-js@1.9.7)
-      '@solid-primitives/platform':
-        specifier: ^0.2.1
-        version: 0.2.1(solid-js@1.9.7)
       '@solid-primitives/rootless':
         specifier: ^1.5.1
         version: 1.5.1(solid-js@1.9.7)
@@ -985,11 +982,6 @@ packages:
 
   '@solid-primitives/mouse@2.1.2':
     resolution: {integrity: sha512-ov4K3eQCybN0bN4ZzBA3mFGuj2AJmgP9kOJaGZtTtjJ6uvI6LYd8pfv+Tm6gb3BlaIlVurLMuOU30mapSaJjhA==}
-    peerDependencies:
-      solid-js: ^1.6.12
-
-  '@solid-primitives/platform@0.2.1':
-    resolution: {integrity: sha512-902jki7Q88/JNl4PIAg9h3lWFC3W/9y4OrpK9cmaYRobD3V5qyXAWTlM4aAKPfwpABhTFu9Ky07FPcfF9hWp+Q==}
     peerDependencies:
       solid-js: ^1.6.12
 
@@ -3018,10 +3010,6 @@ snapshots:
       '@solid-primitives/rootless': 1.5.1(solid-js@1.9.7)
       '@solid-primitives/static-store': 0.1.1(solid-js@1.9.7)
       '@solid-primitives/utils': 6.3.1(solid-js@1.9.7)
-      solid-js: 1.9.7
-
-  '@solid-primitives/platform@0.2.1(solid-js@1.9.7)':
-    dependencies:
       solid-js: 1.9.7
 
   '@solid-primitives/props@3.2.1(solid-js@1.9.7)':

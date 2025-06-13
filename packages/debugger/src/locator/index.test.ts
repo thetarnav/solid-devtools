@@ -1,36 +1,18 @@
-let mockIsWindows = true
+import * as v from 'vitest'
+import {parseLocationString} from './locator.ts'
 
-import {beforeEach, describe, expect, test, vi} from 'vitest'
+v.describe('locator attribute pasting', () => {
 
-vi.mock('@solid-primitives/platform', () => ({
-    get isWindows() {
-        return mockIsWindows
-    },
-}))
-
-const fetchFunction = async () => (await import('./locator.ts')).parseLocationString
-
-describe('locator attribute pasting', () => {
-    beforeEach(() => {
-        vi.resetModules()
-    })
-
-    test('windows', async () => {
-        mockIsWindows = true
-        const getLocationFromAttribute = await fetchFunction()
-
-        expect(getLocationFromAttribute(`Users\\user\\Desktop\\test\\test.tsx:1:0`)).toEqual({
+    v.test('windows', () => {
+        v.expect(parseLocationString(`Users\\user\\Desktop\\test\\test.tsx:1:0`)).toEqual({
             file: 'Users\\user\\Desktop\\test\\test.tsx',
             line: 1,
             column: 0,
         })
     })
 
-    test('unix', async () => {
-        mockIsWindows = false
-        const getLocationFromAttribute = await fetchFunction()
-
-        expect(getLocationFromAttribute(`/home/username/project/src/App.tsx:10:5`)).toEqual({
+    v.test('unix', () => {
+        v.expect(parseLocationString(`/home/username/project/src/App.tsx:10:5`)).toEqual({
             file: '/home/username/project/src/App.tsx',
             line: 10,
             column: 5,
