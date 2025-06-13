@@ -99,7 +99,7 @@ function toggle_action_icon(tab_id: Tab_Id) {
 
 function on_connected(port: Port) {
 
-    DEV: {place_log(Place_Name.Background, 'Port connected', port)}
+    place_log(Place_Name.Background, 'Port connected', port)
 
     switch (port.name) {
     case ConnectionName.Popup: {
@@ -164,7 +164,7 @@ function on_connected(port: Port) {
 
 function on_disconnected(port: Port) {
 
-    DEV: {place_log(Place_Name.Background, 'Port disconnected', port)}
+    place_log(Place_Name.Background, 'Port disconnected', port)
 
     switch (port.name) {
     case ConnectionName.Popup: {

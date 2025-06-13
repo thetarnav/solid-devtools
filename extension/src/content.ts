@@ -11,9 +11,10 @@ This script is injected into every page and is responsible for:
 
 import {
     Place_Name, ConnectionName,
-    port_on_message, port_post_message_obj, port_post_message,
+    port_on_message, port_post_message_obj, message,
     window_post_message_obj, window_on_message, window_post_message,
     place_error, place_log,
+    type Message,
 } from './shared.ts'
 
 // @ts-expect-error ?script&module query ensures output in ES module format and only import the script path
@@ -66,23 +67,55 @@ function on_loaded() {
 
 const extension_version = chrome.runtime.getManifest().version
 
-const port = chrome.runtime.connect({name: ConnectionName.Content})
-
+let bg_port: chrome.runtime.Port | null = null
 let devtools_opened = false
+let message_queue: Message[] = []
 
-/* From Background */
-port_on_message(port, e => {
-    // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
-    switch (e.kind) {
-    case 'DevtoolsOpened':
-        devtools_opened = e.data
-        window_post_message_obj(e)
-        break
-    default:
-        /* Background -> Client */
-        window_post_message_obj(e)
+let connecting = false
+function connect_port() {
+    if (connecting) return
+
+    connecting = true
+    DEV: {place_log(Place_Name.Content, 'Attempting to connect port...')}
+
+    try {
+        let new_port = chrome.runtime.connect({name: ConnectionName.Content})
+        bg_port = new_port
+        DEV: {place_log(Place_Name.Content, 'Port connected successfully')}
+
+        // Flush queued messages
+        for (let m of message_queue.splice(0, message_queue.length)) {
+            port_post_message_obj(new_port, m)
+        }
+
+        /* From Background */
+        port_on_message(new_port, e => {
+            // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
+            switch (e.kind) {
+            case 'DevtoolsOpened':
+                devtools_opened = e.data
+                window_post_message_obj(e)
+                break
+            default:
+                /* Background -> Client */
+                window_post_message_obj(e)
+            }
+        })
+
+        new_port.onDisconnect.addListener(() => {
+            if (bg_port === new_port) {
+                bg_port = null
+                setTimeout(connect_port, 100)
+            }
+        })
+    } catch (err) {
+        place_error(Place_Name.Content, 'Failed to connect port:', err)
     }
-})
+
+    connecting = false
+}
+
+connect_port()
 
 /* From Client / Detector_Real_World */
 window_on_message(e => {
@@ -97,12 +130,19 @@ window_on_message(e => {
             'color: #e38b1b',
         )
 
-        port_post_message(port, 'Versions', {
+        let versions_message = message('Versions', {
             client:          e.data.client,
             solid:           e.data.solid,
             extension:       extension_version,
             client_expected: import.meta.env.EXPECTED_CLIENT,
         })
+
+        if (bg_port) {
+            port_post_message_obj(bg_port, versions_message)
+        } else {
+            message_queue.push(versions_message)
+            connect_port()
+        }
 
         if (devtools_opened) {
             window_post_message('DevtoolsOpened', devtools_opened)
@@ -112,7 +152,11 @@ window_on_message(e => {
     }
     default:
         /* Client -> Background */
-        port_post_message_obj(port, e)
+        if (bg_port) {
+            port_post_message_obj(bg_port, e)
+        } else {
+            message_queue.push(e)
+            connect_port()
+        }
     }
 })
-

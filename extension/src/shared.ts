@@ -112,6 +112,11 @@ export function port_on_message(port: Port, cb: (e: Message) => void) {
     })
 }
 
+export function message<K extends keyof Channels>(
+    kind: K, data: Channels[K],
+): Message {
+    return {kind, data} as any
+}
 export function port_post_message<K extends keyof Channels>(
     port: Port, kind: K, data: Channels[K],
 ) {
