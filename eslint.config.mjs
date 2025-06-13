@@ -13,43 +13,43 @@ import nb_eslint       from '@nothing-but/eslint-plugin'
 @returns {string[]} */
 function gitignore_to_glob_patterns(gitignore) {
 
-	const patterns = []
+    const patterns = []
 
-	for (let pattern of gitignore.split('\n')) {
+    for (let pattern of gitignore.split('\n')) {
 
-		pattern = pattern.trim()
+        pattern = pattern.trim()
 
-		if (pattern === '' || pattern.startsWith('#')) {
-			continue
-		}
+        if (pattern === '' || pattern.startsWith('#')) {
+            continue
+        }
 
-		let negated = false
-		if (pattern[0] === '!') {
-			negated = true
-			pattern = pattern.slice(1)
-		}
+        let negated = false
+        if (pattern[0] === '!') {
+            negated = true
+            pattern = pattern.slice(1)
+        }
 
-		if (pattern[0] === '/') {
-			pattern = pattern.slice(1)
-		} else if (!pattern.startsWith('**/')) {
-			pattern = '**/'+pattern
-		}
+        if (pattern[0] === '/') {
+            pattern = pattern.slice(1)
+        } else if (!pattern.startsWith('**/')) {
+            pattern = '**/'+pattern
+        }
 
         if (negated) {
             pattern = '!'+pattern
         }
 
-		if (pattern.indexOf('.') > 0) {
+        if (pattern.indexOf('.') > 0) {
             patterns.push(pattern)
         } else {
-			patterns.push(pattern)
+            patterns.push(pattern)
             if (pattern.endsWith('/')) {
-    			patterns.push(pattern+'**/*')
+                patterns.push(pattern+'**/*')
             } else {
-    			patterns.push(pattern+'/**/*')
+                patterns.push(pattern+'/**/*')
             }
         }
-	}
+    }
 
     return patterns
 }
@@ -59,70 +59,70 @@ const git_ignored_paths = gitignore_to_glob_patterns(fs.readFileSync('.gitignore
 /** @type {import('eslint').Linter.Config[]} */
 export default [{
 
-	files: ['**/*.{js,mjs,jsx,ts,tsx}'],
+    files: ['**/*.{js,mjs,jsx,ts,tsx}'],
 
-	plugins: {
-		'@typescript-eslint': /** @type {*} */(ts_eslint),
-		'@no-only-tests':     no_only_tests,
-		'@eslint-comments':   eslint_comments,
-		'@nothing-but':       /** @type {*} */(nb_eslint),
-	},
+    plugins: {
+        '@typescript-eslint': /** @type {*} */(ts_eslint),
+        '@no-only-tests':     no_only_tests,
+        '@eslint-comments':   eslint_comments,
+        '@nothing-but':       /** @type {*} */(nb_eslint),
+    },
 
-	languageOptions: {
-		parser: ts_parser,
-		ecmaVersion: 5,
-		sourceType: 'module',
+    languageOptions: {
+        parser: ts_parser,
+        ecmaVersion: 5,
+        sourceType: 'module',
 
-		parserOptions: {
-			project: './tsconfig.json',
-			tsconfigRootDir: '.',
-		},
-	},
+        parserOptions: {
+            project: './tsconfig.json',
+            tsconfigRootDir: '.',
+        },
+    },
 
-	rules: {
-		/*
-		forgot to remove/implement
-		*/
-		'no-console'                       : 'warn',
-		'no-debugger'                      : 'warn',
-		// 'prefer-const'                     : 'warn',
-		'require-await'                    : 'warn',
-		'no-empty'                         : 'warn',
-		'@typescript-eslint/no-unused-vars': ['warn', {
-			'argsIgnorePattern'        : '^_',
-			'varsIgnorePattern'        : '^_',
-			'caughtErrorsIgnorePattern': '^_'
-		}],
-		'@typescript-eslint/no-unnecessary-boolean-literal-compare': 'warn',
-		'@typescript-eslint/no-unnecessary-condition'              : 'warn',
-		'@typescript-eslint/no-unnecessary-qualifier'              : 'warn',
-		'@typescript-eslint/no-unnecessary-type-arguments'         : 'warn',
-		'@typescript-eslint/no-unnecessary-type-assertion'         : 'warn',
-		'@typescript-eslint/no-unnecessary-type-constraint'        : 'warn',
-		'@typescript-eslint/no-useless-empty-export'               : 'warn',
-		'@typescript-eslint/no-empty-function'                     : 'warn',
-		'@typescript-eslint/no-unused-expressions'                 : ['warn', {
-			'allowShortCircuit': true,
-			'allowTernary'     : true,
-		}],
-		'@eslint-comments/no-unused-disable': 'warn',
+    rules: {
         /*
-		 prevent unexpected behavior
-		*/
-		'@typescript-eslint/no-empty-object-type'       : 'warn',
-		'@typescript-eslint/no-unsafe-function-type'    : 'warn',
-		'@typescript-eslint/no-wrapper-object-types'    : 'warn',
-		'@typescript-eslint/switch-exhaustiveness-check': 'warn',
-		'no-fallthrough'                                : ['warn', {'allowEmptyCase': true}],
-		  // '@nothing-but/no-ignored-return': 'warn',
-		  // '@nothing-but/no-return-to-void': 'warn',
+        forgot to remove/implement
+        */
+        'no-console'                       : 'warn',
+        'no-debugger'                      : 'warn',
+        // 'prefer-const'                     : 'warn',
+        'require-await'                    : 'warn',
+        'no-empty'                         : 'warn',
+        '@typescript-eslint/no-unused-vars': ['warn', {
+            'argsIgnorePattern'        : '^_',
+            'varsIgnorePattern'        : '^_',
+            'caughtErrorsIgnorePattern': '^_'
+        }],
+        '@typescript-eslint/no-unnecessary-boolean-literal-compare': 'warn',
+        '@typescript-eslint/no-unnecessary-condition'              : 'warn',
+        '@typescript-eslint/no-unnecessary-qualifier'              : 'warn',
+        '@typescript-eslint/no-unnecessary-type-arguments'         : 'warn',
+        '@typescript-eslint/no-unnecessary-type-assertion'         : 'warn',
+        '@typescript-eslint/no-unnecessary-type-constraint'        : 'warn',
+        '@typescript-eslint/no-useless-empty-export'               : 'warn',
+        '@typescript-eslint/no-empty-function'                     : 'warn',
+        '@typescript-eslint/no-unused-expressions'                 : ['warn', {
+            'allowShortCircuit': true,
+            'allowTernary'     : true,
+        }],
+        '@eslint-comments/no-unused-disable': 'warn',
         /*
-		 tests
-		*/
-		'@no-only-tests/no-only-tests': 'warn',
-	},
+         prevent unexpected behavior
+        */
+        '@typescript-eslint/no-empty-object-type'       : 'warn',
+        '@typescript-eslint/no-unsafe-function-type'    : 'warn',
+        '@typescript-eslint/no-wrapper-object-types'    : 'warn',
+        '@typescript-eslint/switch-exhaustiveness-check': 'warn',
+        'no-fallthrough'                                : ['warn', {'allowEmptyCase': true}],
+          // '@nothing-but/no-ignored-return': 'warn',
+          // '@nothing-but/no-return-to-void': 'warn',
+        /*
+         tests
+        */
+        '@no-only-tests/no-only-tests': 'warn',
+    },
 }, {
     // ignores need to be in a separate config for some reason
     // https://github.com/eslint/eslint/issues/17400
-	ignores: ['examples/**/*', ...git_ignored_paths],
+    ignores: ['examples/**/*', ...git_ignored_paths],
 }]
