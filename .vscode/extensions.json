@@ -1,6 +1,5 @@
 {
     "recommendations": [
-        "esbenp.prettier-vscode",
         "dbaeumer.vscode-eslint",
         "bashmish.es6-string-css",
         "antfu.unocss"
