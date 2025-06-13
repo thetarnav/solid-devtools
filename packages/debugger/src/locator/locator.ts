@@ -35,39 +35,36 @@ const LOC_ATTR_REGEX_WIN  = /^((?:\\?[^\s][^/\\:\"\?\*<>\|]+)+):([0-9]+):([0-9]+
 const LOC_ATTR_REGEX_UNIX = /^((?:(?:\.\/|\.\.\/|\/)?(?:\.?\w+\/)*)(?:\.?\w+\.?\w+)):([0-9]+):([0-9]+)$/
 
 export function getLocationAttr(element: Element): LocationAttr | null {
+
     let attr = element.getAttribute(LOCATION_ATTRIBUTE_NAME)
     if (!attr) return null
+
     let is_windows = /(win32|win64|windows|wince)/i.test(navigator.userAgent)
     let regex = is_windows ? LOC_ATTR_REGEX_WIN : LOC_ATTR_REGEX_UNIX
     return regex.test(attr) ? attr as LocationAttr : null
 }
 
-const targetIDEMap: Record<TargetIDE, (data: SourceCodeData) => string> = {
-    vscode: ({projectPath, file, line, column}) =>
-        `vscode://file/${projectPath}/${file}:${line}:${column}`,
-    'vscode-insiders': ({projectPath, file: filePath, line, column}) =>
-        `vscode-insiders://file/${projectPath}/${filePath}:${line}:${column}`,
-    atom: ({projectPath, file: filePath, line, column}) =>
-        `atom://core/open/file?filename=${projectPath}/${filePath}&line=${line}&column=${column}`,
-    webstorm: ({projectPath, file: filePath, line, column}) =>
-        `webstorm://open?file=${projectPath}/${filePath}&line=${line}&column=${column}`,
-}
-
 function getTargetURL(target: TargetIDE | TargetURLFunction, data: SourceCodeData): string | void {
+
     if (typeof target === 'function') return target(data)
-    return targetIDEMap[target](data)
+
+    let {projectPath, file, line, column} = data
+    switch (target) {
+    case 'vscode':          return `vscode://file/${projectPath}/${file}:${line}:${column}`
+    case 'vscode-insiders': return `vscode-insiders://file/${projectPath}/${file}:${line}:${column}`
+    case 'atom':            return `atom://core/open/file?filename=${projectPath}/${file}&line=${line}&column=${column}`
+    case 'webstorm':        return `webstorm://open?file=${projectPath}/${file}&line=${line}&column=${column}`
+    }
 }
 
 export const getProjectPath = (): string | undefined => (window as any)[WINDOW_PROJECTPATH_PROPERTY]
 
-export function getSourceCodeData(
-    location: SourceLocation,
-): SourceCodeData | undefined {
+export function getSourceCodeData(location: SourceLocation): SourceCodeData | undefined {
 
-    let projectPath: string | undefined = getProjectPath()
-    if (projectPath == null) return
+    let project_path = getProjectPath()
+    if (project_path == null) return
 
-    return {...location, projectPath}
+    return {...location, projectPath: project_path}
 }
 
 /**
