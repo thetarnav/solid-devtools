@@ -11,10 +11,10 @@ This script is injected into every page and is responsible for:
 
 import {
     Place_Name, ConnectionName,
-    port_on_message, port_post_message_obj, message,
+    port_on_message, port_post_message_obj, port_post_message,
     window_post_message_obj, window_on_message, window_post_message,
     place_error, place_log,
-    type Message,
+    type Message, type Versions,
 } from './shared.ts'
 
 // @ts-expect-error ?script&module query ensures output in ES module format and only import the script path
@@ -59,11 +59,15 @@ function on_loaded() {
 }
 
 
-let extension_version = chrome.runtime.getManifest().version
-
-let bg_port: chrome.runtime.Port | null = null
 let devtools_opened = false
+let bg_port: chrome.runtime.Port | null = null
 let message_queue: Message[] = []
+let versions: Versions = {
+    client:          null,
+    solid:           null,
+    extension:       chrome.runtime.getManifest().version,
+    client_expected: import.meta.env.EXPECTED_CLIENT,
+}
 
 let connecting = false
 function connect_port() {
@@ -76,6 +80,9 @@ function connect_port() {
         let new_port = chrome.runtime.connect({name: ConnectionName.Content})
         bg_port = new_port
         DEV: {place_log(Place_Name.Content, 'Port connected successfully')}
+
+        // Post versions to each background port
+        port_post_message(new_port, 'Versions', versions)
 
         // Flush queued messages
         for (let m of message_queue.splice(0, message_queue.length)) {
@@ -97,8 +104,11 @@ function connect_port() {
         })
 
         new_port.onDisconnect.addListener(() => {
+            DEV: {place_log(Place_Name.Content, 'Port disconnected...')}
+
             if (bg_port === new_port) {
                 bg_port = null
+                devtools_opened = false
                 setTimeout(connect_port, 100)
             }
         })
@@ -117,24 +127,12 @@ window_on_message(e => {
     switch (e.kind) {
     case 'Debugger_Connected': {
 
-        // eslint-disable-next-line no-console
-        console.log(
-            '🚧 %csolid-devtools%c is in early development! 🚧\nPlease report any bugs to https://github.com/thetarnav/solid-devtools/issues',
-            'color: #fff; background: rgba(181, 111, 22, 0.7); padding: 1px 4px;',
-            'color: #e38b1b',
-        )
-
-        let versions_message = message('Versions', {
-            client:          e.data.client,
-            solid:           e.data.solid,
-            extension:       extension_version,
-            client_expected: import.meta.env.EXPECTED_CLIENT,
-        })
+        versions.client = e.data.client
+        versions.solid  = e.data.solid
 
         if (bg_port) {
-            port_post_message_obj(bg_port, versions_message)
+            port_post_message(bg_port, 'Versions', versions)
         } else {
-            message_queue.push(versions_message)
             connect_port()
         }
 
