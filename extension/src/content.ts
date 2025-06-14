@@ -23,22 +23,6 @@ import real_world_path from './real_world.ts?script&module'
 
 DEV: {place_log(Place_Name.Content, 'loaded.')}
 
-function loadScriptInRealWorld(path: string): Promise<void> {
-    return new Promise((resolve, reject) => {
-
-        const script = document.createElement('script')
-        script.src  = chrome.runtime.getURL(path)
-        script.type = 'module'
-
-        script.addEventListener('error', err => reject(err))
-        script.addEventListener('load', () => resolve())
-
-        /* The script should execute as soon as possible */
-        const mount = (document.head as HTMLHeadElement | null) || document.documentElement
-        mount.appendChild(script)
-    })
-}
-
 
 /* Wait for the document to fully load before injecting any scripts */
 if (document.readyState === 'complete') {
@@ -58,14 +42,24 @@ function on_loaded() {
             ↳ 'Debugger_Connected' message
     */
 
-    loadScriptInRealWorld(real_world_path)
-        .catch(err => {
-            place_error(Place_Name.Content, `Real_World script (${real_world_path}) failed to load.`, err)
-        })
+    let script = document.createElement('script')
+    script.src  = chrome.runtime.getURL(real_world_path)
+    script.type = 'module'
+
+    script.addEventListener('error', err => {
+        place_error(Place_Name.Content, `real-world script (${real_world_path}) failed to load.`, err)
+    })
+    script.addEventListener('load', () => {
+        DEV: {place_log(Place_Name.Content, `real-world script (${real_world_path}) loaded successfully.`)}
+    })
+
+    /* The script should execute as soon as possible */
+    let mount = (document.head as HTMLHeadElement | null) || document.documentElement
+    mount.appendChild(script)
 }
 
 
-const extension_version = chrome.runtime.getManifest().version
+let extension_version = chrome.runtime.getManifest().version
 
 let bg_port: chrome.runtime.Port | null = null
 let devtools_opened = false
