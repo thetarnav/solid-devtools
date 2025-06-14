@@ -24,6 +24,18 @@ const empty_detection_state: Detection_State = {
 }
 const [detectionState, setDetectionState] = s.createSignal(empty_detection_state)
 
+type Connection_Status = {
+    [Place_Name.Content]:  boolean
+    [Place_Name.Devtools]: boolean
+    [Place_Name.Panel]:    boolean
+}
+const empty_connection_status: Connection_Status = {
+    [Place_Name.Content]:  false,
+    [Place_Name.Devtools]: false,
+    [Place_Name.Panel]:    false,
+}
+const [connectionStatus, setConnectionStatus] = s.createSignal(empty_connection_status)
+
 port_on_message(port, e => {
     // eslint-disable-next-line @typescript-eslint/switch-exhaustiveness-check
     switch (e.kind) {
@@ -33,24 +45,34 @@ port_on_message(port, e => {
     case 'Versions':
         setVersions(e.data)
         break
+    case 'Port_Connection_Status':
+        setConnectionStatus(prev => ({
+            ...prev,
+            [e.data.place]: e.data.state
+        }))
+        break
     }
 })
+
+function not_str(value: boolean): string {
+    return value ? '' : 'not'
+}
 
 const App: s.Component = () => {
     return <>
         <div>
-            <p data-detected={detectionState().solid}>
-                Solid {detectionState().solid ? 'detected' : 'not detected'}
+            <p data-status={detectionState().solid}>
+                Solid {not_str(detectionState().solid)} detected
             </p>
         </div>
         <div>
-            <p data-detected={detectionState().solid_dev}>
-                Solid Dev Mode {detectionState().solid_dev ? 'detected' : 'not detected'}
+            <p data-status={detectionState().solid_dev}>
+                Solid Dev Mode {not_str(detectionState().solid_dev)} detected
             </p>
         </div>
         <div>
-            <p data-detected={detectionState().setup}>
-                Debugger {detectionState().setup ? 'detected' : 'not detected'}
+            <p data-status={detectionState().setup}>
+                Debugger {not_str(detectionState().setup)} detected
             </p>
             <s.Show when={detectionState().solid_dev && !detectionState().setup}>
                 <div class="details">
@@ -68,6 +90,21 @@ const App: s.Component = () => {
                     </p>
                 </div>
             </s.Show>
+        </div>
+        <div>
+            <p data-status={connectionStatus()[Place_Name.Content]}>
+                Content Script {not_str(connectionStatus()[Place_Name.Content])} connected
+            </p>
+        </div>
+        <div>
+            <p data-status={connectionStatus()[Place_Name.Devtools]}>
+                Devtools {not_str(connectionStatus()[Place_Name.Devtools])} connected
+            </p>
+        </div>
+        <div>
+            <p data-status={connectionStatus()[Place_Name.Panel]}>
+                Panel {not_str(connectionStatus()[Place_Name.Panel])} connected
+            </p>
         </div>
         <s.Show when={versions()} keyed>
         {v => (

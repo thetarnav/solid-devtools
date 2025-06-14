@@ -80,6 +80,12 @@ export interface General_Channels {
     DevtoolsOpened: boolean
 
     ResetPanel: void
+
+    /** background -> popup: connection status for different places */
+    Port_Connection_Status: {
+        place: Place_Name
+        state: boolean
+    }
 }
 
 export type Channels = debug.InputChannels

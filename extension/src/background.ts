@@ -59,7 +59,7 @@ type Script_Content = {
     tab_id:    Tab_Id
     port:      Port
     detection: Detection_State | null
-    versions:  Versions       | null
+    versions:  Versions        | null
 }
 
 let popup: Script_Popup | undefined
@@ -97,6 +97,12 @@ function toggle_action_icon(tab_id: Tab_Id) {
     }
 }
 
+function send_connection_status_to_popup(place: Place_Name, state: boolean) {
+    if (popup) {
+        port_post_message(popup.port, 'Port_Connection_Status', {place, state})
+    }
+}
+
 function on_connected(port: Port) {
 
     place_log(Place_Name.Background, 'Port connected', port)
@@ -110,6 +116,14 @@ function on_connected(port: Port) {
             port_post_message(popup.port, 'Detected', content.detection)
             port_post_message(popup.port, 'Versions', content.versions)
         }
+
+        send_connection_status_to_popup(Place_Name.Content, content != null)
+
+        let devtools = script_devtools_map.get(active_tab_id)
+        send_connection_status_to_popup(Place_Name.Devtools, devtools != null)
+
+        let panel = script_panel_map.get(active_tab_id)
+        send_connection_status_to_popup(Place_Name.Panel, panel != null)
 
         break
     }
@@ -130,6 +144,10 @@ function on_connected(port: Port) {
             port_post_message(content.port, 'ResetState', undefined)
         }
 
+        if (tab_id === active_tab_id) {
+            send_connection_status_to_popup(Place_Name.Content, true)
+        }
+
         break
     }
     case Connection_Name.Devtools: {
@@ -141,6 +159,8 @@ function on_connected(port: Port) {
         if (content) {
             port_post_message(port, 'Versions', content.versions)
         }
+
+        send_connection_status_to_popup(Place_Name.Devtools, true)
 
         break
     }
@@ -156,6 +176,8 @@ function on_connected(port: Port) {
             port_post_message(content.port, 'DevtoolsOpened', true)
             port_post_message(content.port, 'ResetState', undefined)
         }
+
+        send_connection_status_to_popup(Place_Name.Panel, true)
 
         break
     }
@@ -200,6 +222,10 @@ function on_disconnected(port: Port) {
 
         toggle_action_icon(tab_id)
 
+        if (tab_id === active_tab_id) {
+            send_connection_status_to_popup(Place_Name.Content, false)
+        }
+
         break
     }
     case Connection_Name.Devtools: {
@@ -210,6 +236,8 @@ function on_disconnected(port: Port) {
             port_post_message(content.port, 'DevtoolsOpened', false)
         }
 
+        send_connection_status_to_popup(Place_Name.Devtools, false)
+
         break
     }
     case Connection_Name.Panel: {
@@ -219,6 +247,8 @@ function on_disconnected(port: Port) {
         if (content) {
             port_post_message(content.port, 'DevtoolsOpened', false)
         }
+
+        send_connection_status_to_popup(Place_Name.Panel, false)
 
         break
     }

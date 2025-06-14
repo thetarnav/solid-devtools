@@ -40,7 +40,7 @@ a:hover {
 p {
     margin: 0;
 }
-p[data-detected]::before {
+p[data-status]::before {
     content: '';
     display: inline-block;
     width: 0.5rem;
@@ -49,10 +49,10 @@ p[data-detected]::before {
     margin-right: 0.3rem;
     background-color: var(--disabled);
 }
-p[data-detected='false'] {
+p[data-status='false'] {
     color: var(--lighter-dark);
 }
-p[data-detected='true']::before {
+p[data-status='true']::before {
     background-color: var(--blue);
 }
 
