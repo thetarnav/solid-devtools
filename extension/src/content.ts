@@ -10,11 +10,11 @@ This script is injected into every page and is responsible for:
 */
 
 import {
-    Place_Name, ConnectionName,
+    Place_Name, Connection_Name,
     port_on_message, port_post_message_obj, port_post_message,
     window_post_message_obj, window_on_message, window_post_message,
     place_error, place_log,
-    type Message, type Versions, type DetectionState,
+    type Message, type Versions, type Detection_State,
 } from './shared.ts'
 
 // @ts-expect-error ?script&module query ensures output in ES module format and only import the script path
@@ -68,7 +68,7 @@ let versions: Versions = {
     extension:       chrome.runtime.getManifest().version,
     client_expected: import.meta.env.EXPECTED_CLIENT,
 }
-let detection: DetectionState | null = null
+let detection: Detection_State | null = null
 
 let connecting = false
 function connect_port() {
@@ -78,7 +78,7 @@ function connect_port() {
     DEV: {place_log(Place_Name.Content, 'Attempting to connect port...')}
 
     try {
-        let new_port = chrome.runtime.connect({name: ConnectionName.Content})
+        let new_port = chrome.runtime.connect({name: Connection_Name.Content})
         bg_port = new_port
         DEV: {place_log(Place_Name.Content, 'Port connected successfully')}
 

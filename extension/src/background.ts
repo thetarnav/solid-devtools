@@ -9,8 +9,8 @@ It has to coordinate the communication between the different scripts based on th
 import {assert} from '@solid-devtools/shared/utils'
 
 import {
-    Place_Name, ConnectionName, type Port,
-    type DetectionState, type Versions, type Message,
+    Place_Name, Connection_Name, type Port,
+    type Detection_State, type Versions, type Message,
     port_on_message, port_post_message, port_post_message_obj,
     place_error, place_log,
     ICONS_BLUE, ICONS_GRAY,
@@ -58,7 +58,7 @@ type Script_Devtools = {
 type Script_Content = {
     tab_id:    Tab_Id
     port:      Port
-    detection: DetectionState | null
+    detection: Detection_State | null
     versions:  Versions       | null
 }
 
@@ -102,7 +102,7 @@ function on_connected(port: Port) {
     place_log(Place_Name.Background, 'Port connected', port)
 
     switch (port.name) {
-    case ConnectionName.Popup: {
+    case Connection_Name.Popup: {
         popup = {port}
 
         let content = script_content_map.get(active_tab_id)
@@ -113,7 +113,7 @@ function on_connected(port: Port) {
 
         break
     }
-    case ConnectionName.Content: {
+    case Connection_Name.Content: {
         let tab_id = get_assert_tab_id(port, Place_Name.Content)
 
         let content: Script_Content = {
@@ -132,7 +132,7 @@ function on_connected(port: Port) {
 
         break
     }
-    case ConnectionName.Devtools: {
+    case Connection_Name.Devtools: {
 
         let devtools: Script_Devtools = {port, tab_id: active_tab_id}
         script_devtools_map.set(active_tab_id, devtools)
@@ -144,7 +144,7 @@ function on_connected(port: Port) {
 
         break
     }
-    case ConnectionName.Panel: {
+    case Connection_Name.Panel: {
 
         let panel: Script_Panel = {port, tab_id: active_tab_id}
         script_panel_map.set(active_tab_id, panel)
@@ -167,11 +167,11 @@ function on_disconnected(port: Port) {
     place_log(Place_Name.Background, 'Port disconnected', port)
 
     switch (port.name) {
-    case ConnectionName.Popup: {
+    case Connection_Name.Popup: {
         popup = undefined
         break
     }
-    case ConnectionName.Content: {
+    case Connection_Name.Content: {
         let tab_id = get_assert_tab_id(port, Place_Name.Content)
 
         let content = script_content_map.get(tab_id)!
@@ -202,7 +202,7 @@ function on_disconnected(port: Port) {
 
         break
     }
-    case ConnectionName.Devtools: {
+    case Connection_Name.Devtools: {
         script_devtools_map.delete(active_tab_id)
 
         let content = script_content_map.get(active_tab_id)
@@ -212,7 +212,7 @@ function on_disconnected(port: Port) {
 
         break
     }
-    case ConnectionName.Panel: {
+    case Connection_Name.Panel: {
         script_panel_map.delete(active_tab_id)
 
         let content = script_content_map.get(active_tab_id)
@@ -230,10 +230,10 @@ function on_message(port: Port, e: Message) {
     DEV: {place_log(Place_Name.Background, 'Message', e, 'from', port)}
 
     switch (port.name) {
-    case ConnectionName.Popup: {
+    case Connection_Name.Popup: {
         break
     }
-    case ConnectionName.Content: {
+    case Connection_Name.Content: {
         let tab_id = get_assert_tab_id(port, Place_Name.Content)
 
         let content = script_content_map.get(tab_id)
@@ -282,10 +282,10 @@ function on_message(port: Port, e: Message) {
 
         break
     }
-    case ConnectionName.Devtools: {
+    case Connection_Name.Devtools: {
         break
     }
-    case ConnectionName.Panel: {
+    case Connection_Name.Panel: {
 
         // Forward all messages to Content
         let content = script_content_map.get(active_tab_id)

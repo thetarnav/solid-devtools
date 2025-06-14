@@ -8,7 +8,7 @@ import * as frontend from '@solid-devtools/frontend'
 import * as debug    from '@solid-devtools/debugger/types'
 
 import {
-    ConnectionName, Place_Name, port_on_message, port_post_message_obj,
+    Connection_Name, Place_Name, port_on_message, port_post_message_obj,
     place_log, place_error, place_warn,
     type Message, type Versions,
 } from './shared.ts'
@@ -58,7 +58,7 @@ function App() {
         place_log(Place_Name.Panel, 'Attempting to connect port...')
 
         try {
-            let new_port = chrome.runtime.connect({name: ConnectionName.Panel})
+            let new_port = chrome.runtime.connect({name: Connection_Name.Panel})
             setPort(new_port)
             place_log(Place_Name.Panel, 'Port connected successfully')
 

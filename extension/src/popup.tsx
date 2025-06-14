@@ -4,9 +4,9 @@ import * as s from 'solid-js'
 import {render} from 'solid-js/web'
 
 import {
-    ConnectionName, Place_Name, port_on_message,
+    Connection_Name, Place_Name, port_on_message,
     place_log,
-    type DetectionState, type Versions,
+    type Detection_State, type Versions,
 } from './shared.ts'
 
 import './popup.css'
@@ -14,10 +14,10 @@ import './popup.css'
 place_log(Place_Name.Popup, 'loaded.')
 
 // Create a connection to the background page
-const port = chrome.runtime.connect({name: ConnectionName.Popup})
+const port = chrome.runtime.connect({name: Connection_Name.Popup})
 
 const [versions, setVersions] = s.createSignal<Versions | null>(null)
-const empty_detection_state: DetectionState = {
+const empty_detection_state: Detection_State = {
     solid:    false,
     solid_dev: false,
     setup: false,

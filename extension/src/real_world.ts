@@ -12,7 +12,7 @@
 import * as detect from '@solid-devtools/shared/detect'
 
 import {
-    Place_Name, type DetectionState,
+    Place_Name, type Detection_State,
     window_post_message, window_on_message, window_post_message_obj,
     place_log, place_warn,
 } from './shared.ts'
@@ -22,7 +22,7 @@ DEV: {place_log(Place_Name.Detector_Real_World, 'loaded.')}
 
 function main() {
 
-    const detect_state: DetectionState = {
+    const detect_state: Detection_State = {
         solid:     false,
         solid_dev: false,
         setup:     false,
@@ -63,7 +63,7 @@ function main() {
     function update_detected() {
 
         window_post_message('Detected', detect_state)
-        
+
         if (!debugger_attached && detect_state.setup) {
             debugger_attached = true
             attach_debugger()

@@ -46,14 +46,14 @@ export const enum Place_Name {
     Detector_Real_World = 'Detector_Real_World',
 }
 
-export const enum ConnectionName {
+export const enum Connection_Name {
     Content  = DEVTOOLS_ID_PREFIX+Place_Name.Content,
     Devtools = DEVTOOLS_ID_PREFIX+Place_Name.Devtools,
     Popup    = DEVTOOLS_ID_PREFIX+Place_Name.Popup,
     Panel    = DEVTOOLS_ID_PREFIX+Place_Name.Panel,
 }
 
-export type DetectionState = {
+export type Detection_State = {
     solid:     boolean
     solid_dev: boolean
     setup:     boolean
@@ -66,11 +66,10 @@ export type Versions = {
     extension:       string
 }
 
-export interface GeneralChannels {
+export interface General_Channels {
     // client -> content -> devtools.html
-    Detected: DetectionState | null
+    Detected: Detection_State | null
 
-    // the `string` payload is the main version
     Debugger_Connected: {
         solid:  string | null
         client: string | null
@@ -85,7 +84,7 @@ export interface GeneralChannels {
 
 export type Channels = debug.InputChannels
               & debug.OutputChannels
-              & GeneralChannels
+              & General_Channels
 
 export type Message = utils.Union<Channels>
 

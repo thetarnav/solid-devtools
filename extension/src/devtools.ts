@@ -8,7 +8,7 @@ It connects to the background script.
 */
 
 import {
-    Place_Name, ConnectionName, port_on_message, ICON_OUTLINE_32,
+    Place_Name, Connection_Name, port_on_message, ICON_OUTLINE_32,
     place_error, place_log,
 } from './shared.ts'
 
@@ -17,7 +17,7 @@ place_log(Place_Name.Devtools, 'loaded.')
 
 
 // Create a connection to the background page
-const port = chrome.runtime.connect({name: ConnectionName.Devtools})
+const port = chrome.runtime.connect({name: Connection_Name.Devtools})
 
 // Firefox requires absolute path
 const PATH_PREFIX = import.meta.env.BROWSER === 'firefox' ? '/' : ''
