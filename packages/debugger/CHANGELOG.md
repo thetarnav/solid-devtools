@@ -1,5 +1,13 @@
 # @solid-devtools/debugger
 
+## 0.27.1
+
+### Patch Changes
+
+- e8fe39e: Inline `isWindows` check to `getLocationAttr` and remove `"@solid-primitives/platform"` dependency.
+- Updated dependencies [add003f]
+  - @solid-devtools/shared@0.20.0
+
 ## 0.27.0
 
 ### Minor Changes

@@ -1,5 +1,20 @@
 # @solid-devtools/extension
 
+## 0.33.3
+
+### Patch Changes
+
+- 5e250b0: Display place connection status in popup
+- add003f: Improve logging by adding place names to all messages.
+- 4bc6abb: Reconnect to the port when disconnected in devtools panel. (#337)
+- 83fc768: Add reconnecting logic to content script (#337)
+- Updated dependencies [add003f]
+- Updated dependencies [e8fe39e]
+  - @solid-devtools/shared@0.20.0
+  - @solid-devtools/debugger@0.27.1
+  - @solid-devtools/frontend@0.15.2
+  - solid-devtools@0.34.1
+
 ## 0.33.2
 
 ### Patch Changes

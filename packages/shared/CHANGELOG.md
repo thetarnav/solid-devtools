@@ -1,5 +1,11 @@
 # solid-devtools-shared
 
+## 0.20.0
+
+### Minor Changes
+
+- add003f: Add some ANSI color constants.
+
 ## 0.19.1
 
 ### Patch Changes
