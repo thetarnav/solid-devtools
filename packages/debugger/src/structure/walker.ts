@@ -444,7 +444,7 @@ function mapOwner<TEl extends object>(
                             children_stack_arr[0]!.splice(children_stack_idx[0]!-1, 1)
                             children_stack_idx[0]! -= 1
                         }
-                        children_stack_len = 0
+                        children_stack_len = 1
 
                         // Skip remaining elements from the child
                         for (let skip_child_idx = child_idx + 1;;) {
