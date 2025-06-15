@@ -143,6 +143,8 @@ export type Rect = {
     height: number
 }
 
+export type ElementChildren<T extends object> = Iterable<T> & ArrayLike<T>
+
 /**
  * When using a custom solid renderer, you should provide a custom element interface.
  * By default the debugger assumes that rendered elements are DOM elements.
@@ -151,7 +153,7 @@ export type ElementInterface<T extends object> = {
     isElement:    (obj: object | T) => obj is T,
     getElementAt: (e: MouseEvent) => T | null,
     getName:      (el: T) => string | null,
-    getChildren:  (el: T) => Iterable<T>,
+    getChildren:  (el: T) => ElementChildren<T>,
     getParent:    (el: T) => T | null,
     getLocation:  (el: T) => SourceLocation | null,
     getRect:      (el: T) => Rect | null,
