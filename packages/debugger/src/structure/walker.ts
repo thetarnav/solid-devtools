@@ -214,9 +214,9 @@ const findComponent = <TEl extends object>(
 
 export
 type ComputationUpdateHandler = (
-    rootId:           NodeID,
-    owner:            Solid.Owner,
-    changedStructure: boolean,
+    rootId:            NodeID,
+    owner:             Solid.Owner,
+    changed_structure: boolean,
 ) => void
 
 export
@@ -244,7 +244,7 @@ function observeComputation<TEl extends object>(
     // copy values in case config gets mutated
     let {rootId, onUpdate: onComputationUpdate, mode} = config
 
-    const handler = () => {
+    let handler = () => {
         let is_leaf = !comp.owned || comp.owned.length === 0
         let changed_structure = was_leaf !== is_leaf || !is_leaf || mode === TreeWalkerMode.DOM
         was_leaf = is_leaf
