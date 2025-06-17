@@ -26,6 +26,14 @@
             ],
             "dependsOrder": "parallel",
             "problemMatcher": []
+        },
+        {
+            "label": "test:unit",
+            "detail": "Run unit tests",
+            "type": "shell",
+            "command": "pnpm run test:unit",
+            "isBackground": true,
+            "problemMatcher": [],
         }
     ]
 }
