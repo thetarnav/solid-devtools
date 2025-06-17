@@ -175,7 +175,7 @@ const App: s.Component = () => {
                 component='div'
                 style={{height: '1rem', 'margin-top': '1rem'}}
             >
-                <s.Show when={showEven()}>
+                <s.Show when={showEven()} fallback={<span>Count is very odd</span>}>
                 {s.createComponent(() => <>
                     <BoldWrapper/>
                 </>, {})}
