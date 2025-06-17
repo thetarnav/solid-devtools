@@ -391,7 +391,22 @@ function mapOwner<TEl extends object>(
 
     mapChildren(owner, last_comp_id, config, mapped.children)
     
-    // Map html elements in DOM mode
+    /*
+     |  Merge element tree and owner tree depth-first, using elements as positional hints
+     |  
+     |    Component A      +    <div>        ->     Component A
+     |    └─ Component B        ├─ <span>           └─ <div>
+     |                          └─ <p>                 ├─ Component B
+     |                                                 │  └─ <span>
+     |                                                 └─ <p>
+     |  1. Walk owner children first (depth-first)
+     |     - child elements are already part of children tree
+     |  2. For each element in resolved tree:
+     |     - If element matches current child owner → attach preceding children to element
+     |     - If element not seen → add as new element node
+     |     - Skip already processed elements
+     |  3. Use dual stacks to track position in both trees simultaneously
+    */
     if (config.mode === TreeWalkerMode.DOM) {
 
         // elements might already be resolved when mapping components
@@ -432,8 +447,8 @@ function mapOwner<TEl extends object>(
                 continue
 
             /*  Check each element and its children
-                - not seen -> add it to the owner
-                - a child of the current child -> add it to the owner
+                - not seen -> add element to the owner
+                - a child of the current child -> add child to the owner
                 - already seen -> skip it
             */
             while (stack_els_len > 0) {
