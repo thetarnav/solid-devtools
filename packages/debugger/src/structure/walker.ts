@@ -1,5 +1,5 @@
 import {untrackedCallback} from '@solid-devtools/shared/primitives'
-import {ObjectType, getSdtId} from '../main/id.ts'
+import {ObjectType, getSdtId, get_id_el} from '../main/id.ts'
 import {observeComputationUpdate} from '../main/observe.ts'
 import {
     type ElementChildren,
@@ -326,6 +326,13 @@ function mapChildren<TEl extends object>(
 
 let element_set = new Set<any>()
 
+const make_el_json = <TEl extends object>(el: TEl, eli: ElementInterface<TEl>): Mapped.Owner => ({
+    id:       get_id_el(el),
+    type:     NodeType.Element,
+    name:     eli.getName(el) ?? UNKNOWN,
+    children: [],
+})
+
 function mapOwner<TEl extends object>(
     owner:  Solid.Owner,
     parent: Mapped.Owner | null,
@@ -387,6 +394,7 @@ function mapOwner<TEl extends object>(
     
     // Map html elements in DOM mode
     if (config.mode === TreeWalkerMode.DOM) {
+
         // elements might already be resolved when mapping components
         resolved_els ??= resolveElements(owner.value, config.eli)
 
@@ -412,84 +420,77 @@ function mapOwner<TEl extends object>(
             children_stack_idx[children_stack_len-1]! += 1
 
             let child = children[child_idx]!
-            
-            if (child.type === NodeType.Element) {
 
-                // Don't go over added element children
-                // TODO: add children cap stack
-                if (children_stack_len-1 === 0) {
-                    continue
-                }
-                
-                while (elements_stack_len > 0) {
-            
-                    let elements = elements_stack_arr  [elements_stack_len-1]!
-                    let el_idx   = elements_stack_idx  [elements_stack_len-1]!
-                    let el_owner = elements_stack_owner[elements_stack_len-1]!
-
-                    if (el_idx >= elements.length) {
-                        elements_stack_len -= 1
-                        continue
-                    }
-
-                    elements_stack_idx[elements_stack_len-1]! += 1
-
-                    let el = elements[el_idx]!
-                    let el_id = getSdtId(el, ObjectType.Element)
-                    
-                    // Child has this element
-                    if (el_id === child.id) {
-                        if (elements_stack_len > 1) {
-                            el_owner.children.push(children_stack_arr[0]![children_stack_idx[0]!-1]!)
-                            children_stack_arr[0]!.splice(children_stack_idx[0]!-1, 1)
-                            children_stack_idx[0]! -= 1
-                        }
-                        children_stack_len = 1
-
-                        // Skip remaining elements from the child
-                        for (let skip_child_idx = child_idx + 1;;) {
-                            let el_idx = elements_stack_idx[elements_stack_len-1]!
-
-                            if (el_idx >= elements.length ||
-                                skip_child_idx >= children.length ||
-                                children[skip_child_idx]!.id !== getSdtId(elements[el_idx]!, ObjectType.Element)
-                            ) {
-                                break
-                            }
-
-                            elements_stack_idx[elements_stack_len-1]! += 1
-                            skip_child_idx += 1
-                        }
-
-                        break
-                    }
-
-                    if (element_set.has(el)) {
-                        continue
-                    }
-
-                    else {
-                        let el_json: Mapped.Owner = {
-                            id:       el_id,
-                            type:     NodeType.Element,
-                            name:     config.eli.getName(el) ?? UNKNOWN,
-                            children: [],
-                        }
-                        el_owner.children.push(el_json)
-                        element_set.add(el)
-
-                        elements_stack_arr  [elements_stack_len] = config.eli.getChildren(el)
-                        elements_stack_idx  [elements_stack_len] = 0
-                        elements_stack_owner[elements_stack_len] = el_json
-                        elements_stack_len += 1
-                    }
-                }
-
-            } else {
+            /* Other children are already in mapped children so will be skipped */
+            if (child.type !== NodeType.Element) {
                 children_stack_arr[children_stack_len] = child.children
                 children_stack_idx[children_stack_len] = 0
                 children_stack_len += 1
                 continue
+            }
+            
+            // Don't go over added element children
+            // TODO: add children cap stack
+            if (children_stack_len-1 === 0) {
+                continue
+            }
+            
+            while (elements_stack_len > 0) {
+        
+                let elements = elements_stack_arr  [elements_stack_len-1]!
+                let el_idx   = elements_stack_idx  [elements_stack_len-1]!
+                let el_owner = elements_stack_owner[elements_stack_len-1]!
+
+                if (el_idx >= elements.length) {
+                    elements_stack_len -= 1
+                    continue
+                }
+
+                elements_stack_idx[elements_stack_len-1]! += 1
+
+                let el = elements[el_idx]!
+                let el_id = get_id_el(el)
+                
+                // Child has this element
+                if (el_id === child.id) {
+                    /*
+                        Push child to the owner
+                        and previous ones that were not pushed yet
+                    */
+                    for (let i = 0; i < children_stack_idx[0]!; i++) {
+                        el_owner.children.push(children_stack_arr[0]![i]!)
+                    }
+                    children_stack_arr[0]!.splice(0, children_stack_idx[0])
+                    children_stack_idx[0] = 0
+                    children_stack_len = 1
+
+                    // Skip remaining elements from the child
+                    for (let ci = child_idx + 1; ci < children.length; ci++) {
+                        let ei = elements_stack_idx[elements_stack_len-1]!
+
+                        if (ei >= elements.length ||
+                            children[ci]!.id !== get_id_el(elements[ei]!)
+                        ) {
+                            break
+                        }
+
+                        elements_stack_idx[elements_stack_len-1]! += 1
+                    }
+
+                    break
+                }
+
+                /* Not seen yet */
+                if (!element_set.has(el)) {
+                    let el_json = make_el_json(el, config.eli)
+                    el_owner.children.push(el_json)
+                    element_set.add(el)
+
+                    elements_stack_arr  [elements_stack_len] = config.eli.getChildren(el)
+                    elements_stack_idx  [elements_stack_len] = 0
+                    elements_stack_owner[elements_stack_len] = el_json
+                    elements_stack_len += 1
+                }
             }
         }
 
@@ -508,16 +509,9 @@ function mapOwner<TEl extends object>(
 
             let el = elements[idx]!
 
-            if (element_set.has(el)) {
-                continue
-            }
+            if (element_set.has(el)) continue
 
-            let el_json: Mapped.Owner = {
-                id:       getSdtId(el, ObjectType.Element),
-                type:     NodeType.Element,
-                name:     config.eli.getName(el) ?? UNKNOWN,
-                children: [],
-            }
+            let el_json = make_el_json(el, config.eli)
             el_owner.children.push(el_json)
             element_set.add(el)
 
