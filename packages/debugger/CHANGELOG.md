@@ -1,5 +1,15 @@
 # @solid-devtools/debugger
 
+## 0.28.0
+
+### Minor Changes
+
+- ea6c1c2: Require `ElementInterface.getChildren` to return `ArrayLike<T>`. (76ab4096a2ad531ae015e35c2475b78f08ac45a7)
+
+### Patch Changes
+
+- fa0a2c8: Improve tree walking algorithm for mapping elements. (#348)
+
 ## 0.27.1
 
 ### Patch Changes
