@@ -114,10 +114,15 @@ const registerComponent = <TEl extends object>(
 export
 const registerElement = <TEl extends object>(
     r:            ComponentRegistry<TEl>,
-    component_id: NodeID,
+    component_id: NodeID | null,
     element_id:   NodeID,
     element:      TEl,
 ): void => {
+    // TODO: also allow registering elements without a component
+    if (component_id == null) {
+        return
+    }
+
     let component = r.components.get(component_id)
     if (component == null) return
 
@@ -310,22 +315,22 @@ export function gatherElementMap(
 }
 
 function mapChildren<TEl extends object>(
-    owner:     Solid.Owner,
-    owner_map: Mapped.Owner | null,
-    config:    TreeWalkerConfig<TEl>,
-    children:  Mapped.Owner[] = [],
+    owner:        Solid.Owner,
+    component_id: NodeID | null,
+    config:       TreeWalkerConfig<TEl>,
+    children:     Mapped.Owner[] = [],
 ): Mapped.Owner[] {
 
     for (let child of owner_each_child(owner)) {
         if (config.mode === TreeWalkerMode.Owners ||
             markOwnerType(child) === NodeType.Component
         ) {
-            unwrap_append(children, mapOwner(child, owner_map, config))
+            unwrap_append(children, mapOwner(child, component_id, config))
         } else {
             if (isSolidComputation(child)) {
                 observeComputation(child, owner, config)
             }
-            mapChildren(child, owner_map, config, children)
+            mapChildren(child, component_id, config, children)
         }
     }
 
@@ -334,12 +339,12 @@ function mapChildren<TEl extends object>(
 
 let els_seen = new Set<object>()
 
-const add_new_el_json = <TEl extends object>(
-    comp_id:   NodeID,
+function add_new_el_json<TEl extends object>(
     child_arr: Mapped.Owner[],
     el:        TEl,
+    comp_id:   NodeID | null,
     config:    TreeWalkerConfig<TEl>,
-): Mapped.Owner => {
+): Mapped.Owner {
     let el_json: Mapped.Owner = {
         id:       get_id_el(el),
         type:     NodeType.Element,
@@ -353,9 +358,10 @@ const add_new_el_json = <TEl extends object>(
 }
 
 function mapOwner<TEl extends object>(
-    owner:  Solid.Owner,
-    parent: Mapped.Owner | null,
-    config: TreeWalkerConfig<TEl>,
+    owner:        Solid.Owner,
+    /** last seen component id - for registering elements to components */
+    last_comp_id: NodeID | null,
+    config:       TreeWalkerConfig<TEl>,
 ): Mapped.Owner | undefined {
 
     let id   = getSdtId(owner, ObjectType.Owner)
@@ -386,7 +392,7 @@ function mapOwner<TEl extends object>(
             owner.owned.length === 1 &&
             markOwnerType(first_owned = owner.owned[0]!) === NodeType.Context
         ) {
-            return mapOwner(first_owned, parent, config)
+            return mapOwner(first_owned, last_comp_id, config)
         }
 
         // Register component to global map
@@ -400,6 +406,9 @@ function mapOwner<TEl extends object>(
             mapped.hmr = true
             owner = refresh
         }
+
+        /* This owner is now last seen component */
+        last_comp_id = id
     }
     // Computation
     else if (isSolidComputation(owner)) {
@@ -409,7 +418,7 @@ function mapOwner<TEl extends object>(
         }
     }
 
-    mapChildren(owner, mapped, config, mapped.children)
+    mapChildren(owner, last_comp_id, config, mapped.children)
     
     // Map html elements in DOM mode
     if (config.mode === TreeWalkerMode.DOM) {
@@ -497,7 +506,7 @@ function mapOwner<TEl extends object>(
                 if (!els_seen.has(el)) {
                     stack_els_arr[stack_els_len] = config.eli.getChildren(el)
                     stack_els_idx[stack_els_len] = 0
-                    stack_els_own[stack_els_len] = add_new_el_json(id, el_own.children, el, config)
+                    stack_els_own[stack_els_len] = add_new_el_json(el_own.children, el, last_comp_id, config)
                     stack_els_len += 1
                 }
             }
@@ -521,7 +530,7 @@ function mapOwner<TEl extends object>(
             if (!els_seen.has(el)) {
                 stack_els_arr[stack_els_len] = config.eli.getChildren(el)
                 stack_els_idx[stack_els_len] = 0
-                stack_els_own[stack_els_len] = add_new_el_json(id, el_own.children, el, config)
+                stack_els_own[stack_els_len] = add_new_el_json(el_own.children, el, last_comp_id, config)
                 stack_els_len += 1
             }
         }
