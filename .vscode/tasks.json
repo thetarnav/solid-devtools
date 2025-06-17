@@ -29,9 +29,9 @@
         },
         {
             "label": "test:unit",
-            "detail": "Run unit tests",
+            "detail": "Run unit tests in watch mode",
             "type": "shell",
-            "command": "pnpm run test:unit",
+            "command": "pnpm run test:unit --watch",
             "isBackground": true,
             "problemMatcher": [],
         }
