@@ -198,17 +198,14 @@ export const getValueItemId = <T extends ValueItemType>(
 export type ValueUpdateListener = (newValue: unknown, oldValue: unknown) => void
 
 export namespace Solid {
-    export type OwnerBase = import('solid-js').Owner
-    export type SourceMapValue = import('solid-js/types/reactive/signal.d.ts').SourceMapValue
-    export type Signal = import('solid-js/types/reactive/signal.d.ts').SignalState<unknown>
-    export type Computation = import('solid-js/types/reactive/signal.d.ts').Computation<unknown>
-    export type Memo = import('solid-js/types/reactive/signal.d.ts').Memo<unknown>
+    export type OwnerBase       = import('solid-js').Owner
+    export type SourceMapValue  = import('solid-js/types/reactive/signal.d.ts').SourceMapValue
+    export type Signal          = import('solid-js/types/reactive/signal.d.ts').SignalState<unknown>
+    export type Computation     = import('solid-js/types/reactive/signal.d.ts').Computation<unknown>
+    export type Memo            = import('solid-js/types/reactive/signal.d.ts').Memo<unknown>
     export type RootFunction<T> = import('solid-js/types/reactive/signal.d.ts').RootFunction<T>
-    export type EffectFunction =
-        import('solid-js/types/reactive/signal.d.ts').EffectFunction<unknown>
-    export type Component = import('solid-js/types/reactive/signal.d.ts').DevComponent<{
-        [key: string]: unknown
-    }>
+    export type EffectFunction  = import('solid-js/types/reactive/signal.d.ts').EffectFunction<unknown>
+    export type Component       = import('solid-js/types/reactive/signal.d.ts').DevComponent<{[key: string]: unknown}>
 
     export type CatchError = Omit<Computation, 'fn'> & {fn: undefined}
 
@@ -232,10 +229,10 @@ export namespace Solid {
     // STORE
     //
 
-    export type StoreNode = import('solid-js/store').StoreNode
-    export type NotWrappable = import('solid-js/store').NotWrappable
+    export type StoreNode         = import('solid-js/store').StoreNode
+    export type NotWrappable      = import('solid-js/store').NotWrappable
     export type OnStoreNodeUpdate = import('solid-js/store/types/store.d.ts').OnStoreNodeUpdate
-    export type Store = SourceMapValue & {value: StoreNode}
+    export type Store             = SourceMapValue & {value: StoreNode}
 }
 
 declare module 'solid-js/types/reactive/signal.d.ts' {
