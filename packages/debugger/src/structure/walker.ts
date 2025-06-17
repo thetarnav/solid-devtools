@@ -324,7 +324,7 @@ function mapChildren<TEl extends object>(
     return children
 }
 
-let els_seen = new Set<any>()
+let els_seen = new Set<object>()
 
 const make_el_json = <TEl extends object>(el: TEl, eli: ElementInterface<TEl>): Mapped.Owner => ({
     id:       get_id_el(el),
@@ -332,6 +332,16 @@ const make_el_json = <TEl extends object>(el: TEl, eli: ElementInterface<TEl>): 
     name:     eli.getName(el) ?? UNKNOWN,
     children: [],
 })
+const push_make_el_json = <TEl extends object>(
+    arr: Mapped.Owner[],
+    el:  TEl,
+    eli: ElementInterface<TEl>,
+): Mapped.Owner => {
+    let el_json = make_el_json(el, eli)
+    arr.push(el_json)
+    els_seen.add(el)
+    return el_json
+}
 
 function mapOwner<TEl extends object>(
     owner:  Solid.Owner,
@@ -408,7 +418,6 @@ function mapOwner<TEl extends object>(
         let stack_child_len = 1
 
         while (stack_child_len > 0) {
-            
             let child_arr = stack_child_arr[stack_child_len-1]!
             let child_idx = stack_child_idx[stack_child_len-1]!
 
@@ -430,13 +439,15 @@ function mapOwner<TEl extends object>(
             }
             
             // Don't go over added element children
-            // TODO: add children cap stack
-            if (stack_child_len-1 === 0) {
+            if (stack_child_len === 1)
                 continue
-            }
-            
+
+            /*  Check each element and its children
+                - not seen -> add it to the owner
+                - a child of the current child -> add it to the owner
+                - already seen -> skip it
+            */
             while (stack_els_len > 0) {
-        
                 let el_arr = stack_els_arr[stack_els_len-1]!
                 let el_idx = stack_els_idx[stack_els_len-1]!
                 let el_own = stack_els_own[stack_els_len-1]!
@@ -450,7 +461,7 @@ function mapOwner<TEl extends object>(
 
                 let el = el_arr[el_idx]!
                 
-                // Child has this element
+                /* Child has this element */
                 if (get_id_el(el) === child.id) {
                     /*
                         Push child to the owner
@@ -475,13 +486,9 @@ function mapOwner<TEl extends object>(
 
                 /* Not seen yet */
                 if (!els_seen.has(el)) {
-                    let el_json = make_el_json(el, config.eli)
-                    el_own.children.push(el_json)
-                    els_seen.add(el)
-
                     stack_els_arr[stack_els_len] = config.eli.getChildren(el)
                     stack_els_idx[stack_els_len] = 0
-                    stack_els_own[stack_els_len] = el_json
+                    stack_els_own[stack_els_len] = push_make_el_json(el_own.children, el, config.eli)
                     stack_els_len += 1
                 }
             }
@@ -502,16 +509,12 @@ function mapOwner<TEl extends object>(
 
             let el = el_arr[el_idx]!
 
-            if (els_seen.has(el)) continue
-
-            let el_json = make_el_json(el, config.eli)
-            el_own.children.push(el_json)
-            els_seen.add(el)
-
-            stack_els_arr[stack_els_len] = config.eli.getChildren(el)
-            stack_els_idx[stack_els_len] = 0
-            stack_els_own[stack_els_len] = el_json
-            stack_els_len += 1
+            if (!els_seen.has(el)) {
+                stack_els_arr[stack_els_len] = config.eli.getChildren(el)
+                stack_els_idx[stack_els_len] = 0
+                stack_els_own[stack_els_len] = push_make_el_json(el_own.children, el, config.eli)
+                stack_els_len += 1
+            }
         }
     }
 
