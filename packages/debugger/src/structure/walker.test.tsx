@@ -360,122 +360,175 @@ test.describe('TreeWalkerMode.DOM', () => {
 
         let registry = walker.makeComponentRegistry(eli)
 
-        const toTrigger: VoidFunction[] = []
-        const testComponents: Solid.Component[] = []
+        let to_trigger: (() => void)[] = []
+        let test_components: Solid.Component[] = []
+    
+        let el_header!: HTMLElement
+        let el_h1!:     HTMLHeadingElement
+    
+        let el_footer!: HTMLElement
+        let el_main!:   HTMLElement
+        let el_h2!:     HTMLHeadingElement
 
-        s.createRoot(dispose => {
-            const Wrapper = (props: {children: any}) => {
-                return <div>{props.children}</div>
-            }
-            const TestComponent = (props: {n: number}) => {
-                const [a, set] = s.createSignal(0)
-                s.createComputed(a)
-                toTrigger.push(() => set(1))
-                testComponents.push(setup.solid.getOwner()! as Solid.Component)
-                return s.createRoot(_ => (
-                    <div>{props.n === 0 ? 'end' : <TestComponent n={props.n - 1} />}</div>
-                ))
-            }
-            const Button = () => {
-                return <button>Click me</button>
-            }
-            const App = () => {
-                return (
-                    <>
-                        <Wrapper>
-                            <main>
-                                <TestComponent n={2} />
-                                <Button />
-                            </main>
-                        </Wrapper>
-                        <footer />
-                    </>
-                )
-            }
+        let el_button!: HTMLButtonElement
+        let el_span!:   HTMLSpanElement
+
+        let root!: Solid.Root
+
+        const Wrapper = (props: {children: any}) => {
+            return <div>{props.children}</div>
+        }
+        const TestComponent = (props: {n: number}) => {
+            const [a, set] = s.createSignal(0)
+            s.createComputed(a)
+            to_trigger.push(() => set(1))
+            test_components.push(setup.solid.getOwner()! as Solid.Component)
+            return s.createRoot(_ => (
+                <div>{props.n === 0 ? 'end' : <TestComponent n={props.n - 1} />}</div>
+            ))
+        }
+        const Button = () => {
+            return <button ref={el_button}>
+                <span ref={el_span}>Click me</span>
+            </button>
+        }
+    
+        const App = () => {
+            return (
+                <>
+                    <header ref={el_header}>
+                        <h1 ref={el_h1}>Test</h1>
+                    </header>
+                    <Wrapper>
+                        <main ref={el_main}>
+                            <h2 ref={el_h2}>Test</h2>
+                            <TestComponent n={2} />
+                            <Button />
+                        </main>
+                    </Wrapper>
+                    <footer ref={el_footer} />
+                </>
+            )
+        }
+
+        let dispose = s.createRoot(dispose => {
             s.createRenderEffect(() => <App />)
 
-            const owner = setup.solid.getOwner()! as Solid.Root
+            root = setup.solid.getOwner()! as Solid.Root
 
-            const computationUpdates: Parameters<walker.ComputationUpdateHandler>[] = []
+            return dispose
+        })
 
-            const tree = walker.walkSolidTree(owner, {
-                onUpdate: (...a) => computationUpdates.push(a),
-                rootId: $setSdtId(owner, '#ff'),
-                mode: TreeWalkerMode.DOM,
-                eli: eli,
-                registry: registry,
-            })
+        let updates: Parameters<walker.ComputationUpdateHandler>[] = []
 
-            test.expect(tree).toMatchObject({
-                type: NodeType.Root,
+        let tree = walker.walkSolidTree(root, {
+            onUpdate: (...a) => updates.push(a),
+            rootId:   $setSdtId(root, '#ff'),
+            mode:     TreeWalkerMode.DOM,
+            eli:      eli,
+            registry: registry,
+        })
+
+        /* Test structure */
+        test.expect(tree).toMatchObject({
+            type: NodeType.Root,
+            children: [{
+                type: NodeType.Component,
+                name: 'App',
                 children: [{
-                    type: NodeType.Component,
-                    name: 'App',
+                    type: NodeType.Element,
+                    name: 'header',
                     children: [{
-                        type: NodeType.Component,
-                        name: 'Wrapper',
+                        type: NodeType.Element,
+                        name: 'h1',
+                        children: [],
+                    }],
+                }, {
+                    type: NodeType.Component,
+                    name: 'Wrapper',
+                    children: [{
+                        type: NodeType.Element,
+                        name: 'div',
                         children: [{
                             type: NodeType.Element,
-                            name: 'div',
+                            name: 'main',
                             children: [{
                                 type: NodeType.Element,
-                                name: 'main',
+                                name: 'h2',
+                                children: [],
+                            }, {
+                                type: NodeType.Component,
+                                name: 'TestComponent',
                                 children: [{
-                                    type: NodeType.Component,
-                                    name: 'TestComponent',
+                                    type: NodeType.Element,
+                                    name: 'div',
                                     children: [{
-                                        type: NodeType.Element,
-                                        name: 'div',
+                                        type: NodeType.Component,
+                                        name: 'TestComponent',
                                         children: [{
-                                            type: NodeType.Component,
-                                            name: 'TestComponent',
+                                            type: NodeType.Element,
+                                            name: 'div',
                                             children: [{
-                                                type: NodeType.Element,
-                                                name: 'div',
+                                                type: NodeType.Component,
+                                                name: 'TestComponent',
                                                 children: [{
-                                                    type: NodeType.Component,
-                                                    name: 'TestComponent',
-                                                    children: [{
-                                                        type: NodeType.Element,
-                                                        name: 'div',
-                                                        children: [],
-                                                    }],
+                                                    type: NodeType.Element,
+                                                    name: 'div',
+                                                    children: [],
                                                 }],
                                             }],
                                         }],
                                     }],
-                                }, {
-                                    type: NodeType.Component,
-                                    name: 'Button',
+                                }],
+                            }, {
+                                type: NodeType.Component,
+                                name: 'Button',
+                                children: [{
+                                    type: NodeType.Element,
+                                    name: 'button',
                                     children: [{
                                         type: NodeType.Element,
-                                        name: 'button',
+                                        name: 'span',
                                         children: [],
                                     }],
                                 }],
                             }],
                         }],
-                    }, {
-                        type: NodeType.Element,
-                        name: 'footer',
-                        children: [],
                     }],
+                }, {
+                    type: NodeType.Element,
+                    name: 'footer',
+                    children: [],
                 }],
-            })
-
-            test.expect(computationUpdates.length).toBe(0)
-
-            toTrigger.forEach(t => t())
-
-            for (let i = 0; i < 3; i++) {
-                test.expect(computationUpdates[i]).toEqual([
-                    '#ff',
-                    testComponents[i],
-                    true,
-                ])
-            }
-
-            dispose()
+            }],
         })
+
+        /* Test finding components */
+        let res_header = walker.findComponent(registry, el_header)
+        let res_h1     = walker.findComponent(registry, el_h1)
+        let res_main   = walker.findComponent(registry, el_main)
+        let res_h2     = walker.findComponent(registry, el_h2)
+        let res_footer = walker.findComponent(registry, el_footer)
+        let res_button = walker.findComponent(registry, el_button)
+        let res_span   = walker.findComponent(registry, el_span)
+
+        test.expect(res_header).toHaveProperty('name', 'App')
+        test.expect(res_h1)    .toHaveProperty('name', 'App')
+        test.expect(res_main)  .toHaveProperty('name', 'Wrapper')
+        test.expect(res_h2)    .toHaveProperty('name', 'Wrapper')
+        test.expect(res_footer).toHaveProperty('name', 'App')
+        test.expect(res_button).toHaveProperty('name', 'Button')
+        test.expect(res_span)  .toHaveProperty('name', 'Button')
+
+        /* Test updates */
+        test.expect(updates.length).toBe(0)
+
+        for (let t of to_trigger) t()
+
+        for (let i = 0; i < 3; i++) {
+            test.expect(updates[i]).toEqual(['#ff', test_components[i], true])
+        }
+
+        dispose()
     })
 })
