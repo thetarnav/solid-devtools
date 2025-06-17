@@ -285,35 +285,6 @@ function pushResolvedElements<TEl extends object>(list: TEl[], value: unknown, e
     }
 }
 
-/**
- * Updates a map of Element to Component_Owner by traversing the owner tree
- * 
- * @param owner owner to start traversal from
- * @param eli   Element interface
- * @param map   Optional existing map to update
- * 
- * The elements are resolved shallowly,
- * so only top-level elements will be mapped to their components.
- */
-export function gatherElementMap(
-    owner: Solid.Owner,
-    map:   Map<Element, Solid.Component> = new Map(),
-    eli:   ElementInterface<Element>,
-): Map<Element, Solid.Component> {
-
-    if (markOwnerType(owner) === NodeType.Component) {
-        for (let el of resolveElements(owner.value, eli)) {
-            map.set(el, owner as Solid.Component)
-        }
-    }
-    
-    for (let child of owner_each_child(owner)) {
-        gatherElementMap(child, map, eli)
-    }
-    
-    return map
-}
-
 function mapChildren<TEl extends object>(
     owner:        Solid.Owner,
     component_id: NodeID | null,
