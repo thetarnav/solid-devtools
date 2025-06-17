@@ -324,7 +324,7 @@ function mapChildren<TEl extends object>(
     return children
 }
 
-let element_set = new Set<any>()
+let els_seen = new Set<any>()
 
 const make_el_json = <TEl extends object>(el: TEl, eli: ElementInterface<TEl>): Mapped.Owner => ({
     id:       get_id_el(el),
@@ -398,127 +398,120 @@ function mapOwner<TEl extends object>(
         // elements might already be resolved when mapping components
         resolved_els ??= resolveElements(owner.value, config.eli)
 
-        let elements_stack_arr = [resolved_els] as (ElementChildren<TEl>)[]
-        let elements_stack_idx = [0]
-        let elements_stack_owner = [mapped]
-        let elements_stack_len = 1
+        let stack_els_arr: ElementChildren<TEl>[] = [resolved_els]
+        let stack_els_idx = [0]
+        let stack_els_own = [mapped]
+        let stack_els_len = 1
 
-        let children_stack_arr = [mapped.children]
-        let children_stack_idx = [0]
-        let children_stack_len = 1
+        let stack_child_arr = [mapped.children]
+        let stack_child_idx = [0]
+        let stack_child_len = 1
 
-        while (children_stack_len > 0) {
+        while (stack_child_len > 0) {
             
-            let children  = children_stack_arr[children_stack_len-1]!
-            let child_idx = children_stack_idx[children_stack_len-1]!
+            let child_arr = stack_child_arr[stack_child_len-1]!
+            let child_idx = stack_child_idx[stack_child_len-1]!
 
-            if (child_idx >= children.length) {
-                children_stack_len -= 1
+            if (child_idx >= child_arr.length) {
+                stack_child_len -= 1
                 continue
             }
 
-            children_stack_idx[children_stack_len-1]! += 1
+            stack_child_idx[stack_child_len-1]! += 1
 
-            let child = children[child_idx]!
+            let child = child_arr[child_idx]!
 
             /* Other children are already in mapped children so will be skipped */
             if (child.type !== NodeType.Element) {
-                children_stack_arr[children_stack_len] = child.children
-                children_stack_idx[children_stack_len] = 0
-                children_stack_len += 1
+                stack_child_arr[stack_child_len] = child.children
+                stack_child_idx[stack_child_len] = 0
+                stack_child_len += 1
                 continue
             }
             
             // Don't go over added element children
             // TODO: add children cap stack
-            if (children_stack_len-1 === 0) {
+            if (stack_child_len-1 === 0) {
                 continue
             }
             
-            while (elements_stack_len > 0) {
+            while (stack_els_len > 0) {
         
-                let elements = elements_stack_arr  [elements_stack_len-1]!
-                let el_idx   = elements_stack_idx  [elements_stack_len-1]!
-                let el_owner = elements_stack_owner[elements_stack_len-1]!
+                let el_arr = stack_els_arr[stack_els_len-1]!
+                let el_idx = stack_els_idx[stack_els_len-1]!
+                let el_own = stack_els_own[stack_els_len-1]!
 
-                if (el_idx >= elements.length) {
-                    elements_stack_len -= 1
+                if (el_idx >= el_arr.length) {
+                    stack_els_len -= 1
                     continue
                 }
 
-                elements_stack_idx[elements_stack_len-1]! += 1
+                stack_els_idx[stack_els_len-1]! += 1
 
-                let el = elements[el_idx]!
-                let el_id = get_id_el(el)
+                let el = el_arr[el_idx]!
                 
                 // Child has this element
-                if (el_id === child.id) {
+                if (get_id_el(el) === child.id) {
                     /*
                         Push child to the owner
                         and previous ones that were not pushed yet
                     */
-                    for (let i = 0; i < children_stack_idx[0]!; i++) {
-                        el_owner.children.push(children_stack_arr[0]![i]!)
-                    }
-                    children_stack_arr[0]!.splice(0, children_stack_idx[0])
-                    children_stack_idx[0] = 0
-                    children_stack_len = 1
+                    el_own.children.push(...mapped.children.splice(0, stack_child_idx[0]))
+                    stack_child_idx[0] = 0
+                    stack_child_len = 1
 
                     // Skip remaining elements from the child
-                    for (let ci = child_idx + 1; ci < children.length; ci++) {
-                        let ei = elements_stack_idx[elements_stack_len-1]!
+                    for (let ci = child_idx + 1; ci < child_arr.length; ci++) {
+                        let ei = stack_els_idx[stack_els_len-1]!
 
-                        if (ei >= elements.length ||
-                            children[ci]!.id !== get_id_el(elements[ei]!)
-                        ) {
+                        if (ei >= el_arr.length || child_arr[ci]!.id !== get_id_el(el_arr[ei]!))
                             break
-                        }
 
-                        elements_stack_idx[elements_stack_len-1]! += 1
+                        stack_els_idx[stack_els_len-1]! += 1
                     }
 
                     break
                 }
 
                 /* Not seen yet */
-                if (!element_set.has(el)) {
+                if (!els_seen.has(el)) {
                     let el_json = make_el_json(el, config.eli)
-                    el_owner.children.push(el_json)
-                    element_set.add(el)
+                    el_own.children.push(el_json)
+                    els_seen.add(el)
 
-                    elements_stack_arr  [elements_stack_len] = config.eli.getChildren(el)
-                    elements_stack_idx  [elements_stack_len] = 0
-                    elements_stack_owner[elements_stack_len] = el_json
-                    elements_stack_len += 1
+                    stack_els_arr[stack_els_len] = config.eli.getChildren(el)
+                    stack_els_idx[stack_els_len] = 0
+                    stack_els_own[stack_els_len] = el_json
+                    stack_els_len += 1
                 }
             }
         }
 
         // append remaining elements to children
-        while (elements_stack_len > 0) {
-            let elements = elements_stack_arr  [elements_stack_len-1]!
-            let idx      = elements_stack_idx  [elements_stack_len-1]!
-            let el_owner = elements_stack_owner[elements_stack_len-1]!
+        while (stack_els_len > 0) {
+            let el_arr = stack_els_arr[stack_els_len-1]!
+            let el_idx = stack_els_idx[stack_els_len-1]!
+            let el_own = stack_els_own[stack_els_len-1]!
 
-            if (idx >= elements.length) {
-                elements_stack_len -= 1
+            if (el_idx >= el_arr.length) {
+                stack_els_len -= 1
                 continue
             }
 
-            elements_stack_idx[elements_stack_len-1]! += 1
+            stack_els_idx[stack_els_len-1]! += 1
 
-            let el = elements[idx]!
+            let el = el_arr[el_idx]!
 
-            if (element_set.has(el)) continue
+            if (els_seen.has(el)) continue
 
             let el_json = make_el_json(el, config.eli)
-            el_owner.children.push(el_json)
-            element_set.add(el)
+            el_own.children.push(el_json)
+            els_seen.add(el)
 
-            elements_stack_arr  [elements_stack_len] = config.eli.getChildren(el)
-            elements_stack_idx  [elements_stack_len] = 0
-            elements_stack_owner[elements_stack_len] = el_json
-            elements_stack_len += 1
+            stack_els_arr[stack_els_len] = config.eli.getChildren(el)
+            stack_els_idx[stack_els_len] = 0
+            stack_els_own[stack_els_len] = el_json
+            stack_els_len += 1
         }
     }
 
@@ -533,7 +526,7 @@ export const walkSolidTree = /*#__PURE__*/ untrackedCallback(function <TEl exten
     const r = mapOwner(owner, null, config)!
 
     if (config.mode === TreeWalkerMode.DOM) {
-        element_set.clear()
+        els_seen.clear()
     }
 
     return r
