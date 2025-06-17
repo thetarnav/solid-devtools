@@ -58,13 +58,14 @@ export function createStructure<TEl extends object>(props: {
     let shouldUpdateAllRoots = true
 
     const onComputationUpdate: walker.ComputationUpdateHandler = (
-        rootId, owner, changedStructure,
+        root_id, owner, changed_structure,
     ) => {
         // separate the callback from the computation
         queueMicrotask(() => {
             if (!props.enabled()) return
-            if (changedStructure) {
-                updateOwner(owner, rootId)
+            if (changed_structure) {
+                let owner_to_update = getClosestIncludedOwner(owner, treeWalkerMode) ?? owner
+                updateOwner(owner_to_update, root_id)
             }
             let id = getSdtId(owner, ObjectType.Owner)
             props.onNodeUpdate(id)

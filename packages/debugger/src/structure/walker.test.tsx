@@ -362,10 +362,10 @@ test.describe('TreeWalkerMode.DOM', () => {
 
         let to_trigger: (() => void)[] = []
         let test_components: Solid.Component[] = []
-    
+
         let el_header!: HTMLElement
         let el_h1!:     HTMLHeadingElement
-    
+
         let el_footer!: HTMLElement
         let el_main!:   HTMLElement
         let el_h2!:     HTMLHeadingElement
@@ -392,7 +392,7 @@ test.describe('TreeWalkerMode.DOM', () => {
                 <span ref={el_span}>Click me</span>
             </button>
         }
-    
+
         const App = () => {
             return (
                 <>

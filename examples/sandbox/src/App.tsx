@@ -163,69 +163,67 @@ const App: s.Component = () => {
 
     const [showBroken, setShowBroken] = s.createSignal(false)
 
-    return (
-        <>
-            {header()}
-            {objmemo().subheader}
-            <div>
-                <header>
-                    <Button onClick={() => setCount(p => ++p)} text={`Count: ${count()}`} />
-                    <Button onClick={() => setCount(p => ++p)} text={`Count: ${count()}`} />
-                </header>
-                <sweb.Dynamic
-                    component='div'
-                    style={{height: '1rem', 'margin-top': '1rem'}}
-                >
-                    <s.Show when={showEven()}>
-                    {s.createComponent(() => <>
-                        <BoldWrapper/>
-                    </>, {})}
-                    </s.Show>
-                </sweb.Dynamic>
-                {/* <button onClick={() => disposeApp()}>Dispose whole application</button>
-                <br /> */}
-                <button onClick={() => setShowBroken(p => !p)}>
-                    {showBroken() ? 'Hide' : 'Show'} broken component.
-                </button>
-                <s.ErrorBoundary
-                    fallback={(err, reset) => <>
-                        {err.toString()}
-                        <button
-                            onClick={() => {
-                                setShowBroken(false)
-                                reset()
-                            }}
-                        >
-                            Reset
-                        </button>
-                    </>}
-                >
-                    <s.Show when={showBroken()}>
-                        <Broken />
-                    </s.Show>
-                </s.ErrorBoundary>
-                <br />
-                <br />
-            </div>
-            <DynamicSpreadParent />
-            <button onClick={() => setRootCount(p => ++p)}>Update root count</button>
-            <button onClick={() => disposeOuterRoot()}>Dispose OUTSIDE_ROOT</button>
-            <Article />
-            <Todos title='Simple Todos Example' />
-            {s.untrack(() => {
-                const MARGIN = '24px'
-                return <>
-                    <div style={{margin: MARGIN}}>
-                        <CountingComponent />
-                    </div>
-                    <div style={{margin: MARGIN}}>
-                        <ThemeExample />
-                    </div>
-                </>
-            })}
-            <Recursive />
-        </>
-    )
+    return <>
+        {header()}
+        {objmemo().subheader}
+        <div>
+            <header>
+                <Button onClick={() => setCount(p => ++p)} text={`Count: ${count()}`} />
+                <Button onClick={() => setCount(p => ++p)} text={`Count: ${count()}`} />
+            </header>
+            <sweb.Dynamic
+                component='div'
+                style={{height: '1rem', 'margin-top': '1rem'}}
+            >
+                <s.Show when={showEven()} fallback={<span>Count is very odd</span>}>
+                {s.createComponent(() => <>
+                    <BoldWrapper/>
+                </>, {})}
+                </s.Show>
+            </sweb.Dynamic>
+            {/* <button onClick={() => disposeApp()}>Dispose whole application</button>
+            <br /> */}
+            <button onClick={() => setShowBroken(p => !p)}>
+                {showBroken() ? 'Hide' : 'Show'} broken component.
+            </button>
+            <s.ErrorBoundary
+                fallback={(err, reset) => <>
+                    {err.toString()}
+                    <button
+                        onClick={() => {
+                            setShowBroken(false)
+                            reset()
+                        }}
+                    >
+                        Reset
+                    </button>
+                </>}
+            >
+                <s.Show when={showBroken()}>
+                    <Broken />
+                </s.Show>
+            </s.ErrorBoundary>
+            <br />
+            <br />
+        </div>
+        <DynamicSpreadParent />
+        <button onClick={() => setRootCount(p => ++p)}>Update root count</button>
+        <button onClick={() => disposeOuterRoot()}>Dispose OUTSIDE_ROOT</button>
+        <Article />
+        <Todos title='Simple Todos Example' />
+        {s.untrack(() => {
+            const MARGIN = '24px'
+            return <>
+                <div style={{margin: MARGIN}}>
+                    <CountingComponent />
+                </div>
+                <div style={{margin: MARGIN}}>
+                    <ThemeExample />
+                </div>
+            </>
+        })}
+        <Recursive />
+    </>
 }
 
 const CountingComponent = () => {
