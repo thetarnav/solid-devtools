@@ -113,37 +113,41 @@ const registerComponent = <TEl extends object>(
 
 export
 const registerElement = <TEl extends object>(
-    r: ComponentRegistry<TEl>,
-    componentId: NodeID,
-    elementId: NodeID,
-    element: TEl,
+    r:            ComponentRegistry<TEl>,
+    component_id: NodeID,
+    element_id:   NodeID,
+    element:      TEl,
 ): void => {
-    let component = r.components.get(componentId)
-    if (!component) return
+    let component = r.components.get(component_id)
+    if (component == null) return
 
-    component.element_nodes.add(elementId)
-    r.element_nodes.set(elementId, {el: element as any as TEl, component})
+    component.element_nodes.add(element_id)
+    r.element_nodes.set(element_id, {el: element, component})
 }
 
 export
 const getComponent = <TEl extends object>(
-    r: ComponentRegistry<TEl>,
+    r:  ComponentRegistry<TEl>,
     id: NodeID,
 ): {name: string | undefined; id: NodeID; elements: TEl[]} | null => {
     // provided if might be of an element node (in DOM mode) or component node
     // both need to be checked
 
     let component = r.components.get(id)
-    if (component) return {
-        name: component.name,
-        elements: [...component.elements].map(el => el as any as TEl),
-        id
+    if (component != null) return {
+        name:     component.name,
+        elements: [...component.elements],
+        id:       id,
     }
 
-    let elData = r.element_nodes.get(id)
-    return elData
-        ? {name: elData.component.name, id: elData.component.id, elements: [elData.el]}
-        : null
+    let el_data = r.element_nodes.get(id)
+    if (el_data == null) return null
+
+    return {
+        name:     el_data.component.name,
+        id:       el_data.component.id,
+        elements: [el_data.el],
+    }
 }
 
 /**
@@ -156,11 +160,13 @@ const getComponent = <TEl extends object>(
 export
 const getComponentElement = <TEl extends object>(
     r: ComponentRegistry<TEl>,
-    elementId: NodeID,
+    element_id: NodeID,
 ): {name: string | undefined; id: NodeID; element: TEl} | undefined => {
-    let el_data = r.element_nodes.get(elementId)
-    if (el_data != null) {
-        return {name: el_data.component.name, id: el_data.component.id, element: el_data.el}
+    let el_data = r.element_nodes.get(element_id)
+    if (el_data != null) return {
+        name:    el_data.component.name,
+        id:      el_data.component.id,
+        element: el_data.el,
     }
 }
 
@@ -201,13 +207,15 @@ const findComponent = <TEl extends object>(
 }
 
 
-export type ComputationUpdateHandler = (
+export
+type ComputationUpdateHandler = (
     rootId:           NodeID,
     owner:            Solid.Owner,
     changedStructure: boolean,
 ) => void
 
-export type TreeWalkerConfig<TEl extends object> = {
+export
+type TreeWalkerConfig<TEl extends object> = {
     mode:     TreeWalkerMode
     rootId:   NodeID
     onUpdate: ComputationUpdateHandler
@@ -326,20 +334,21 @@ function mapChildren<TEl extends object>(
 
 let els_seen = new Set<object>()
 
-const make_el_json = <TEl extends object>(el: TEl, eli: ElementInterface<TEl>): Mapped.Owner => ({
-    id:       get_id_el(el),
-    type:     NodeType.Element,
-    name:     eli.getName(el) ?? UNKNOWN,
-    children: [],
-})
-const push_make_el_json = <TEl extends object>(
-    arr: Mapped.Owner[],
-    el:  TEl,
-    eli: ElementInterface<TEl>,
+const add_new_el_json = <TEl extends object>(
+    comp_id:   NodeID,
+    child_arr: Mapped.Owner[],
+    el:        TEl,
+    config:    TreeWalkerConfig<TEl>,
 ): Mapped.Owner => {
-    let el_json = make_el_json(el, eli)
-    arr.push(el_json)
+    let el_json: Mapped.Owner = {
+        id:       get_id_el(el),
+        type:     NodeType.Element,
+        name:     config.eli.getName(el) ?? UNKNOWN,
+        children: [],
+    }
+    child_arr.push(el_json)
     els_seen.add(el)
+    registerElement(config.registry, comp_id, el_json.id, el)
     return el_json
 }
 
@@ -488,7 +497,7 @@ function mapOwner<TEl extends object>(
                 if (!els_seen.has(el)) {
                     stack_els_arr[stack_els_len] = config.eli.getChildren(el)
                     stack_els_idx[stack_els_len] = 0
-                    stack_els_own[stack_els_len] = push_make_el_json(el_own.children, el, config.eli)
+                    stack_els_own[stack_els_len] = add_new_el_json(id, el_own.children, el, config)
                     stack_els_len += 1
                 }
             }
@@ -512,7 +521,7 @@ function mapOwner<TEl extends object>(
             if (!els_seen.has(el)) {
                 stack_els_arr[stack_els_len] = config.eli.getChildren(el)
                 stack_els_idx[stack_els_len] = 0
-                stack_els_own[stack_els_len] = push_make_el_json(el_own.children, el, config.eli)
+                stack_els_own[stack_els_len] = add_new_el_json(id, el_own.children, el, config)
                 stack_els_len += 1
             }
         }
@@ -521,16 +530,15 @@ function mapOwner<TEl extends object>(
     return mapped
 }
 
-export const walkSolidTree = /*#__PURE__*/ untrackedCallback(function <TEl extends object>(
+export
+const walkSolidTree = /*#__PURE__*/ untrackedCallback(function <TEl extends object>(
     owner:  Solid.Owner | Solid.Root,
     config: TreeWalkerConfig<TEl>,
 ): Mapped.Owner {
 
-    const r = mapOwner(owner, null, config)!
+    let r = mapOwner(owner, null, config)!
 
-    if (config.mode === TreeWalkerMode.DOM) {
-        els_seen.clear()
-    }
+    els_seen.clear()
 
     return r
 })
