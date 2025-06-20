@@ -16,7 +16,7 @@ export enum Value_Kind {
 }
 
 export type Value_Data = 
-    | {kind: Value_Kind.Observed_Getter; data: Observed_Prop_Data}
+    | {kind: Value_Kind.Observed_Getter; data: Observed_Getter}
     | {kind: Value_Kind.Value;           value: unknown}
     | {kind: Value_Kind.Value_Obj;       obj: {value?: unknown}}
 
@@ -42,10 +42,10 @@ export type Observed_Props = {
     props:                 Solid.Props
     on_prop_state_change?: On_Prop_State_Change | undefined
     on_value_update?:      On_Value_Update | undefined
-    observed_getters:      Record<string, Observed_Prop_Data>
+    observed_getters:      Record<string, Observed_Getter>
 }
 
-export type Observed_Prop_Data = {
+export type Observed_Getter = {
     v: unknown | typeof $NOT_SET
     n: number // number of listeners
 }
@@ -87,7 +87,7 @@ export function value_node_make_obj(obj: {value?: unknown}): Value_Node {
 export function value_node_make_value(value: unknown): Value_Node {
     return value_node_make({kind:  Value_Kind.Value, value})
 }
-export function value_node_make_observed_getter(data: Observed_Prop_Data): Value_Node {
+export function value_node_make_observed_getter(data: Observed_Getter): Value_Node {
     return value_node_make({kind: Value_Kind.Observed_Getter, data})
 }
 
@@ -123,7 +123,7 @@ export function observed_props_make(props: Solid.Props): Observed_Props {
         props:                props,
         on_prop_state_change: undefined,
         on_value_update:      undefined,
-        observed_getters:     {} as Record<string, Observed_Prop_Data>
+        observed_getters:     {} as Record<string, Observed_Getter>
     }
 }
 
@@ -132,32 +132,38 @@ export function observed_props_observe_prop(
     key: string,
     id: ValueItemID,
     get: () => unknown,
-): {data: Observed_Prop_Data; is_stale: boolean} {
+): Observed_Getter {
     if (observed.observed_getters[key]) {
-        let o = observed.observed_getters[key]
-        return {data: o, is_stale: o.n === 0}
+        return observed.observed_getters[key]
     }
 
-    let o: Observed_Prop_Data = (observed.observed_getters[key] = {v: $NOT_SET, n: 0})
+    let o: Observed_Getter = observed.observed_getters[key] = {v: $NOT_SET, n: 0}
 
     // monkey patch the getter to track when it is accessed and when it is no longer accessed.
     // and to track when the value changes.
     Object.defineProperty(observed.props, key, {
         get() {
             let value = get()
-            if (setup.solid.getListener()) {
-                utils.onCleanup(
-                    () => --o.n === 0 && observed.on_prop_state_change?.(key, PropGetterState.Stale),
-                )
+            let listener = setup.solid.getListener()
+            if (listener != null) {
+                utils.onOwnerCleanup(listener, () => {
+                    if (--o.n === 0) {
+                        observed.on_prop_state_change?.(key, PropGetterState.Stale)
+                    }
+                })
             }
-            ++o.n === 1 && observed.on_prop_state_change?.(key, PropGetterState.Live)
-            if (value !== o.v) observed.on_value_update?.(id)
-            return (o.v = value)
+            if (++o.n === 1) {
+                observed.on_prop_state_change?.(key, PropGetterState.Live)
+            }
+            if (value !== o.v) {
+                observed.on_value_update?.(id)
+            }
+            return o.v = value
         },
         enumerable: true,
     })
 
-    return {data: o, is_stale: true}
+    return o
 }
 
 function compare_proxy_prop_keys(
@@ -256,9 +262,8 @@ export function pre_observe_component_props(
 
     // Set up getters for all props to enable tracking
     for (let [key, desc] of Object.entries(Object.getOwnPropertyDescriptors(props))) {
-        if (desc.get) {
-            let id: ValueItemID = `prop:${key}`
-            observed_props_observe_prop(observed, key, id, desc.get)
+        if (desc.get != null) {
+            observed_props_observe_prop(observed, key, `prop:${key}`, desc.get)
         }
     }
 }
@@ -292,12 +297,12 @@ function map_props<TEl extends object>(
         for (let [key, desc] of Object.entries(Object.getOwnPropertyDescriptors(props))) {
             let id: ValueItemID = `prop:${key}`
             // GETTER
-            if (desc.get) {
-                let {data, is_stale} = observed_props_observe_prop(observed, key, id, desc.get)
-                ctx.value_map.set(id, value_node_make_observed_getter(data))
+            if (desc.get != null) {
+                let prop_data = observed_props_observe_prop(observed, key, id, desc.get)
+                ctx.value_map.set(id, value_node_make_observed_getter(prop_data))
                 record[key] = {
-                    getter: is_stale ? PropGetterState.Stale : PropGetterState.Live,
-                    value: data.v !== $NOT_SET ? encodeValue(data.v, false, ctx.config.eli) : null,
+                    getter: prop_data.n === 0 ? PropGetterState.Stale : PropGetterState.Live,
+                    value: prop_data.v !== $NOT_SET ? encodeValue(prop_data.v, false, ctx.config.eli) : null,
                 }
             }
             // VALUE
