@@ -9,10 +9,21 @@ import {UNOWNED_ROOT} from '../main/roots.ts'
 import {encodeValue} from './serialize.ts'
 import {type InspectorUpdateMap, PropGetterState} from './types.ts'
 
+export enum Value_Kind {
+    Observed_Getter,
+    Value,
+    Value_Obj,
+}
+
+export type Value_Data = 
+    | {kind: Value_Kind.Observed_Getter; data: Observed_Prop_Data}
+    | {kind: Value_Kind.Value;           value: unknown}
+    | {kind: Value_Kind.Value_Obj;       obj: {value?: unknown}}
+
 export type Value_Node = {
     tracked_stores: (() => void)[]
     selected:       boolean
-    get_value:      (() => unknown) | undefined
+    data:           Value_Data
 }
 
 export type Value_Node_Map = Map<ValueItemID, Value_Node>
@@ -31,7 +42,12 @@ export type Observed_Props = {
     props:                 Solid.Props
     on_prop_state_change?: On_Prop_State_Change | undefined
     on_value_update?:      On_Value_Update | undefined
-    observed_getters:      Record<string, {v: unknown | typeof $NOT_SET; n: number}>
+    observed_getters:      Record<string, Observed_Prop_Data>
+}
+
+export type Observed_Prop_Data = {
+    v: unknown | typeof $NOT_SET
+    n: number // number of listeners
 }
 
 export type Inspector_Context<TEl extends object> = {
@@ -50,13 +66,29 @@ export type Collect_Details_Config<TEl extends object> = {
 const $INSPECTOR = Symbol('inspector')
 const $NOT_SET   = Symbol('not-set')
 
+export function value_data_get_value(data: Value_Data): unknown {
+    switch (data.kind) {
+    case Value_Kind.Observed_Getter: return data.data.v
+    case Value_Kind.Value:           return data.value
+    case Value_Kind.Value_Obj:       return data.obj.value
+    }
+}
 
-export function value_node_make(get_value: (() => unknown) | undefined): Value_Node {
+export function value_node_make(data: Value_Data): Value_Node {
     return {
         tracked_stores: [],
         selected:       false,
-        get_value:      get_value,
+        data:           data,
     }
+}
+export function value_node_make_obj(obj: {value?: unknown}): Value_Node {
+    return value_node_make({kind: Value_Kind.Value_Obj, obj})
+}
+export function value_node_make_value(value: unknown): Value_Node {
+    return value_node_make({kind:  Value_Kind.Value, value})
+}
+export function value_node_make_observed_getter(data: Observed_Prop_Data): Value_Node {
+    return value_node_make({kind: Value_Kind.Observed_Getter, data})
 }
 
 export function value_node_add_store_observer(node: Value_Node, unsub: () => void): void {
@@ -91,7 +123,7 @@ export function observed_props_make(props: Solid.Props): Observed_Props {
         props:                props,
         on_prop_state_change: undefined,
         on_value_update:      undefined,
-        observed_getters:     {} as Record<string, {v: unknown | typeof $NOT_SET; n: number}>
+        observed_getters:     {} as Record<string, Observed_Prop_Data>
     }
 }
 
@@ -100,16 +132,13 @@ export function observed_props_observe_prop(
     key: string,
     id: ValueItemID,
     get: () => unknown,
-): {get_value: () => unknown | typeof $NOT_SET; is_stale: boolean} {
+): {data: Observed_Prop_Data; is_stale: boolean} {
     if (observed.observed_getters[key]) {
         let o = observed.observed_getters[key]
-        return {get_value: () => o.v, is_stale: o.n === 0}
+        return {data: o, is_stale: o.n === 0}
     }
 
-    let o: (typeof observed.observed_getters)[string] = (observed.observed_getters[key] = {
-        v: $NOT_SET,
-        n: 0,
-    })
+    let o: Observed_Prop_Data = (observed.observed_getters[key] = {v: $NOT_SET, n: 0})
 
     // monkey patch the getter to track when it is accessed and when it is no longer accessed.
     // and to track when the value changes.
@@ -128,7 +157,7 @@ export function observed_props_observe_prop(
         enumerable: true,
     })
 
-    return {get_value: () => o.v, is_stale: true}
+    return {data: o, is_stale: true}
 }
 
 function compare_proxy_prop_keys(
@@ -193,7 +222,7 @@ function map_source_value<TEl extends object>(
         return null
     }
 
-    ctx.value_map.set(`${ValueItemType.Signal}:${id}`, value_node_make(() => node_raw.value))
+    ctx.value_map.set(`${ValueItemType.Signal}:${id}`, value_node_make_obj(node_raw))
 
     if (node.kind === NodeType.Memo ||
         node.kind === NodeType.Signal
@@ -264,12 +293,11 @@ function map_props<TEl extends object>(
             let id: ValueItemID = `prop:${key}`
             // GETTER
             if (desc.get) {
-                let {get_value, is_stale} = observed_props_observe_prop(observed, key, id, desc.get)
-                ctx.value_map.set(id, value_node_make(get_value))
-                let last_value = get_value()
+                let {data, is_stale} = observed_props_observe_prop(observed, key, id, desc.get)
+                ctx.value_map.set(id, value_node_make_observed_getter(data))
                 record[key] = {
                     getter: is_stale ? PropGetterState.Stale : PropGetterState.Live,
-                    value: last_value !== $NOT_SET ? encodeValue(get_value(), false, ctx.config.eli) : null,
+                    value: data.v !== $NOT_SET ? encodeValue(data.v, false, ctx.config.eli) : null,
                 }
             }
             // VALUE
@@ -280,7 +308,7 @@ function map_props<TEl extends object>(
                 }
                 // non-object props cannot be inspected (won't ever change and aren't deep)
                 if (Array.isArray(desc.value) || misc.is_plain_object(desc.value)) {
-                    ctx.value_map.set(id, value_node_make(() => desc.value))
+                    ctx.value_map.set(id, value_node_make_value(desc.value))
                 }
             }
         }
@@ -389,7 +417,7 @@ export function collect_owner_details<TEl extends object>(
         }
     }
 
-    ctx.value_map.set(ValueItemType.Value, value_node_make(get_value))
+    ctx.value_map.set(ValueItemType.Value, value_node_make_obj(owner))
 
     return {
         details:           details,

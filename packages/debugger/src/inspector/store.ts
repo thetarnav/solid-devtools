@@ -48,7 +48,7 @@ setup.store.hooks.onStoreNodeUpdate = (node, property, value, prev) => {
     }
 }
 
-export function observeStoreNode(rootNode: Solid.StoreNode): VoidFunction {
+export function observeStoreNode(rootNode: Solid.StoreNode): () => void {
     // might still pass in a proxy
     rootNode = setup.store.unwrap(rootNode)
     const symbol = Symbol('inspect-store')

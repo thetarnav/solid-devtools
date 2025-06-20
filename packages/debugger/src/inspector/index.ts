@@ -37,7 +37,8 @@ export function createInspector(props: {
      For the extension for inspecting values through `inspect()`
     */
     function getValue(id: ValueItemID): unknown {
-        return valueMap.get(id)?.get_value?.()
+        let node = valueMap.get(id)
+        return node ? inspector.value_data_get_value(node.data) : undefined
     }
     window[GLOBAL_GET_VALUE] = getValue
 
@@ -56,11 +57,11 @@ export function createInspector(props: {
                 // Value Nodes (signals, props, and owner value)
                 for (const [id, toggleChange] of valueUpdates) {
                     const node = valueMap.get(id)
-                    if (!node || !node.get_value) continue
+                    if (!node) continue
                     // TODO shouldn't the previous stores be unsubscribed here? after update, they might no longer be here
                     const selected = inspector.value_node_is_selected(node)
                     const encoded = encodeValue(
-                        node.get_value(),
+                        inspector.value_data_get_value(node.data),
                         selected,
                         setup.eli,
                         selected &&
