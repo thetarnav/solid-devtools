@@ -335,7 +335,7 @@ export function collect_owner_details<TEl extends object>(
     let type       = utils.markOwnerType(owner)
     let owned      = owner.owned
     let source_map = owner.sourceMap
-    let get_value  = () => owner.value
+    let value_data: Value_Data = {kind: Value_Kind.Value_Obj, obj: owner}
 
     let details = {id, name: utils.getNodeName(owner), type, signals: []} as Mapped.OwnerDetails
 
@@ -351,7 +351,7 @@ export function collect_owner_details<TEl extends object>(
         */
         let symbols = Object.getOwnPropertySymbols(owner.context)
         let context_value = owner.context[symbols[symbols.length - 1]!]
-        get_value = () => context_value
+        value_data = {kind: Value_Kind.Value, value: context_value}
     }
 
     let check_proxy_props: ReturnType<typeof map_props>['check_proxy_props']
@@ -367,7 +367,7 @@ export function collect_owner_details<TEl extends object>(
 
                 source_map = refresh.sourceMap
                 owned      = refresh.owned
-                get_value  = () => refresh.value
+                value_data = {kind: Value_Kind.Value_Obj, obj: refresh}
 
                 details.hmr = true
             }
@@ -390,7 +390,7 @@ export function collect_owner_details<TEl extends object>(
             observeValueUpdate(owner, () => ctx.config.on_value_update(ValueItemType.Value), $INSPECTOR)
         }
 
-        details.value = encodeValue(get_value(), false, ctx.config.eli)
+        details.value = encodeValue(value_data_get_value(value_data), false, ctx.config.eli)
     }
 
     let on_signal_update = (signal_id: NodeID) =>
@@ -422,7 +422,7 @@ export function collect_owner_details<TEl extends object>(
         }
     }
 
-    ctx.value_map.set(ValueItemType.Value, value_node_make_obj(owner))
+    ctx.value_map.set(ValueItemType.Value, value_node_make(value_data))
 
     return {
         details:           details,
