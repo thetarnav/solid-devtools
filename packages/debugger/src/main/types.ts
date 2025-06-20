@@ -225,6 +225,8 @@ export namespace Solid {
 
     export type Owner = Root | Computation | CatchError
 
+    export type Props = {[key: string]: unknown}
+
     //
     // STORE
     //

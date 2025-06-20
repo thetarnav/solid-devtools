@@ -5,7 +5,7 @@ import * as test from 'vitest'
 import {getObjectById, getSdtId, ObjectType} from '../main/id.ts'
 import setup from '../main/setup.ts'
 import {dom_element_interface, type Mapped, NodeType, PropGetterState, type Solid, ValueType} from '../types.ts'
-import {collect_owner_details, value_node_map_get} from './inspector.ts'
+import {collect_owner_details} from './inspector.ts'
 
 const eli = dom_element_interface
 
@@ -77,9 +77,9 @@ test.describe('collect_owner_details', () => {
                 ],
             } satisfies Mapped.OwnerDetails)
 
-            test.expect(value_node_map_get(value_map, `signal:${getSdtId(customValue, ObjectType.CustomValue)}`)).toBeTruthy()
-            test.expect(value_node_map_get(value_map, `signal:${getSdtId(signalB, ObjectType.Signal)}`)).toBeTruthy()
-            test.expect(value_node_map_get(value_map, `signal:${getSdtId(innerMemo, ObjectType.Owner)}`)).toBeTruthy()
+            test.expect(value_map.get(`signal:${getSdtId(customValue, ObjectType.CustomValue)}`)).toBeTruthy()
+            test.expect(value_map.get(`signal:${getSdtId(signalB, ObjectType.Signal)}`)).toBeTruthy()
+            test.expect(value_map.get(`signal:${getSdtId(innerMemo, ObjectType.Owner)}`)).toBeTruthy()
 
             test.expect(getObjectById('#3', ObjectType.Element)).toBe(div)
 

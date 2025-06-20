@@ -15,6 +15,42 @@ export type Value_Node = {
     get_value:      (() => unknown) | undefined
 }
 
+export type Value_Node_Map = Map<ValueItemID, Value_Node>
+
+/** Prop becomes stale or live (is being currently listened to reactively or not) */
+export type On_Prop_State_Change = (key: string, state: PropGetterState) => void
+export type On_Value_Update = (id: ValueItemID) => void
+
+export type Observed_Props_Map = WeakMap<Solid.Props, Observed_Props>
+
+/**
+ * Manages observing getter properties.
+ * This is used to track when a prop is accessed and when it is no longer accessed. (STALE | LIVE)
+ */
+export type Observed_Props = {
+    props:                 Solid.Props
+    on_prop_state_change?: On_Prop_State_Change | undefined
+    on_value_update?:      On_Value_Update | undefined
+    observed_getters:      Record<string, {v: unknown | typeof $NOT_SET; n: number}>
+}
+
+export type Inspector_Context<TEl extends object> = {
+    value_map:            Value_Node_Map
+    config:               Collect_Details_Config<TEl>
+}
+
+export type Collect_Details_Config<TEl extends object> = {
+    on_prop_state_change: On_Prop_State_Change
+    on_value_update:      On_Value_Update
+    props_map:            Observed_Props_Map
+    eli:                  ElementInterface<TEl>
+}
+
+
+const $INSPECTOR = Symbol('inspector')
+const $NOT_SET   = Symbol('not-set')
+
+
 export function value_node_make(get_value: (() => unknown) | undefined): Value_Node {
     return {
         tracked_stores: [],
@@ -46,44 +82,11 @@ export function value_node_set_selected(node: Value_Node, selected: boolean): vo
     if (!selected) value_node_unsubscribe(node)
 }
 
-export type Value_Node_Map = Map<ValueItemID, Value_Node>
-
-export function value_node_map_make(): Value_Node_Map {
-    return new Map()
-}
-
-export function value_node_map_get(map: Value_Node_Map, id: ValueItemID): Value_Node | undefined {
-    return map.get(id)
-}
-
-export function value_node_map_add(map: Value_Node_Map, id: ValueItemID, get_value: (() => unknown) | undefined): void {
-    map.set(id, value_node_make(get_value))
-}
-
 export function value_node_map_reset(map: Value_Node_Map): void {
     for (let signal of map.values()) value_node_reset(signal)
 }
 
-/** Prop becomes stale or live (is being currently listened to reactively or not) */
-export type On_Prop_State_Change = (key: string, state: PropGetterState) => void
-export type On_Value_Update = (id: ValueItemID) => void
-
-export type Observed_Props_Map = WeakMap<Solid.Component['props'], Observed_Props>
-
-const $NOT_SET = Symbol('not-set')
-
-/**
- * Manages observing getter properties.
- * This is used to track when a prop is accessed and when it is no longer accessed. (STALE | LIVE)
- */
-export type Observed_Props = {
-    props:                 Solid.Component['props']
-    on_prop_state_change?: On_Prop_State_Change | undefined
-    on_value_update?:      On_Value_Update | undefined
-    observed_getters:      Record<string, {v: unknown | typeof $NOT_SET; n: number}>
-}
-
-export function observed_props_make(props: Solid.Component['props']): Observed_Props {
+export function observed_props_make(props: Solid.Props): Observed_Props {
     return {
         props:                props,
         on_prop_state_change: undefined,
@@ -170,21 +173,6 @@ export function clear_owner_observers(owner: Solid.Owner, observed_props_map: Ob
     }
 }
 
-type Inspector_Context<TEl extends object> = {
-    value_map:            Value_Node_Map
-    config:               Collect_Details_Config<TEl>
-}
-
-export
-type Collect_Details_Config<TEl extends object> = {
-    on_prop_state_change: On_Prop_State_Change
-    on_value_update:      On_Value_Update
-    props_map:            Observed_Props_Map
-    eli:                  ElementInterface<TEl>
-}
-
-const $INSPECTOR = Symbol('inspector')
-
 function map_source_value<TEl extends object>(
     node_raw: Solid.SourceMapValue | Solid.Computation,
     handler:  (nodeId: NodeID, value: unknown) => void,
@@ -205,7 +193,7 @@ function map_source_value<TEl extends object>(
         return null
     }
 
-    value_node_map_add(ctx.value_map, `${ValueItemType.Signal}:${id}`, () => node_raw.value)
+    ctx.value_map.set(`${ValueItemType.Signal}:${id}`, value_node_make(() => node_raw.value))
 
     if (node.kind === NodeType.Memo ||
         node.kind === NodeType.Signal
@@ -247,7 +235,7 @@ export function pre_observe_component_props(
 }
 
 function map_props<TEl extends object>(
-    props: Solid.Component['props'],
+    props: Solid.Props,
     ctx:   Inspector_Context<TEl>,
 ) {
     // proxy props need to be checked for changes in keys
@@ -277,7 +265,7 @@ function map_props<TEl extends object>(
             // GETTER
             if (desc.get) {
                 let {get_value, is_stale} = observed_props_observe_prop(observed, key, id, desc.get)
-                value_node_map_add(ctx.value_map, id, get_value)
+                ctx.value_map.set(id, value_node_make(get_value))
                 let last_value = get_value()
                 record[key] = {
                     getter: is_stale ? PropGetterState.Stale : PropGetterState.Live,
@@ -291,8 +279,9 @@ function map_props<TEl extends object>(
                     value: encodeValue(desc.value, false, ctx.config.eli),
                 }
                 // non-object props cannot be inspected (won't ever change and aren't deep)
-                if (Array.isArray(desc.value) || misc.is_plain_object(desc.value))
-                    value_node_map_add(ctx.value_map, id, () => desc.value)
+                if (Array.isArray(desc.value) || misc.is_plain_object(desc.value)) {
+                    ctx.value_map.set(id, value_node_make(() => desc.value))
+                }
             }
         }
     }
@@ -305,7 +294,7 @@ export function collect_owner_details<TEl extends object>(
     config: Collect_Details_Config<TEl>,
 ) {
     let ctx: Inspector_Context<TEl> = {
-        value_map: value_node_map_make(),
+        value_map: new Map(),
         config:    config,
     }
 
@@ -400,7 +389,7 @@ export function collect_owner_details<TEl extends object>(
         }
     }
 
-    value_node_map_add(ctx.value_map, ValueItemType.Value, get_value)
+    ctx.value_map.set(ValueItemType.Value, value_node_make(get_value))
 
     return {
         details:           details,

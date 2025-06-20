@@ -28,7 +28,7 @@ export function createInspector(props: {
 
     let lastDetails: Mapped.OwnerDetails | undefined
     let inspectedOwner: Solid.Owner | null
-    let valueMap = inspector.value_node_map_make()
+    let valueMap: inspector.Value_Node_Map = new Map()
     const propsMap: inspector.Observed_Props_Map = new WeakMap()
     /** compare props object with the previous one to see whats changed */
     let checkProxyProps: (() => InspectorUpdateMap['propKeys'] | null) | null
@@ -37,7 +37,7 @@ export function createInspector(props: {
      For the extension for inspecting values through `inspect()`
     */
     function getValue(id: ValueItemID): unknown {
-        return inspector.value_node_map_get(valueMap, id)?.get_value?.()
+        return valueMap.get(id)?.get_value?.()
     }
     window[GLOBAL_GET_VALUE] = getValue
 
@@ -55,7 +55,7 @@ export function createInspector(props: {
 
                 // Value Nodes (signals, props, and owner value)
                 for (const [id, toggleChange] of valueUpdates) {
-                    const node = inspector.value_node_map_get(valueMap, id)
+                    const node = valueMap.get(id)
                     if (!node || !node.get_value) continue
                     // TODO shouldn't the previous stores be unsubscribed here? after update, they might no longer be here
                     const selected = inspector.value_node_is_selected(node)
@@ -210,7 +210,7 @@ export function createInspector(props: {
     return {
         getLastDetails: () => lastDetails,
         toggleValueNode({id, selected}: ToggleInspectedValueData): void {
-            const node = inspector.value_node_map_get(valueMap, id)
+            const node = valueMap.get(id)
             if (!node) return warn('Could not find value node:', id)
             inspector.value_node_set_selected(node, selected)
             pushInspectToggle(id, selected)
