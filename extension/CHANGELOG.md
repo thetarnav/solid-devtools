@@ -1,5 +1,14 @@
 # @solid-devtools/extension
 
+## 0.33.5
+
+### Patch Changes
+
+- Updated dependencies [dddf24f]
+  - @solid-devtools/debugger@0.28.1
+  - @solid-devtools/frontend@0.15.4
+  - solid-devtools@0.34.3
+
 ## 0.33.4
 
 ### Patch Changes
