@@ -5,11 +5,11 @@ import * as test from 'vitest'
 import {getObjectById, getSdtId, ObjectType} from '../main/id.ts'
 import setup from '../main/setup.ts'
 import {dom_element_interface, type Mapped, NodeType, PropGetterState, type Solid, ValueType} from '../types.ts'
-import {collectOwnerDetails} from './inspector.ts'
+import {collect_owner_details, value_node_map_get} from './inspector.ts'
 
 const eli = dom_element_interface
 
-test.describe('collectOwnerDetails', () => {
+test.describe('collect_owner_details', () => {
     test.it('collects focused owner details', () => {
         s.createRoot(dispose => {
             const [source] = s.createSignal(0, {name: 'source'})
@@ -20,9 +20,9 @@ test.describe('collectOwnerDetails', () => {
             s.createComputed(() => {
 
                 const focused = s.createMemo(() => {
-                    
+
                     memo = setup.solid.getOwner()!
-                    
+
                     source()
 
                     s.DEV!.registerGraph({
@@ -43,10 +43,10 @@ test.describe('collectOwnerDetails', () => {
             const [customValue, signalB] = memo.sourceMap as [Solid.SourceMapValue, Solid.Signal]
             const [innerMemo] = memo.owned as [Solid.Memo, Solid.Computation]
 
-            const {details, valueMap} = collectOwnerDetails(memo, {
-                observedPropsMap:  new WeakMap(),
-                onPropStateChange: () => {/**/},
-                onValueUpdate:     () => {/**/},
+            const {details, value_map} = collect_owner_details(memo, {
+                props_map:  new WeakMap(),
+                on_prop_state_change: () => {/**/},
+                on_value_update:     () => {/**/},
                 eli:               eli,
             })
 
@@ -77,9 +77,9 @@ test.describe('collectOwnerDetails', () => {
                 ],
             } satisfies Mapped.OwnerDetails)
 
-            test.expect(valueMap.get(`signal:${getSdtId(customValue, ObjectType.CustomValue)}`)).toBeTruthy()
-            test.expect(valueMap.get(`signal:${getSdtId(signalB, ObjectType.Signal)}`)).toBeTruthy()
-            test.expect(valueMap.get(`signal:${getSdtId(innerMemo, ObjectType.Owner)}`)).toBeTruthy()
+            test.expect(value_node_map_get(value_map, `signal:${getSdtId(customValue, ObjectType.CustomValue)}`)).toBeTruthy()
+            test.expect(value_node_map_get(value_map, `signal:${getSdtId(signalB, ObjectType.Signal)}`)).toBeTruthy()
+            test.expect(value_node_map_get(value_map, `signal:${getSdtId(innerMemo, ObjectType.Owner)}`)).toBeTruthy()
 
             test.expect(getObjectById('#3', ObjectType.Element)).toBe(div)
 
@@ -107,10 +107,10 @@ test.describe('collectOwnerDetails', () => {
                 </TestComponent>
             ))
 
-            const {details} = collectOwnerDetails(owner, {
-                observedPropsMap:  new WeakMap(),
-                onPropStateChange: () => {/**/},
-                onValueUpdate:     () => {/**/},
+            const {details} = collect_owner_details(owner, {
+                props_map:  new WeakMap(),
+                on_prop_state_change: () => {/**/},
+                on_value_update:     () => {/**/},
                 eli:               eli,
             })
 
@@ -164,10 +164,10 @@ test.describe('collectOwnerDetails', () => {
                 return (el_ref = <Button {...props()} /> as any)
             })
 
-            const {details} = collectOwnerDetails(owner, {
-                observedPropsMap:  new WeakMap(),
-                onPropStateChange: () => {/**/},
-                onValueUpdate:     () => {/**/},
+            const {details} = collect_owner_details(owner, {
+                props_map:  new WeakMap(),
+                on_prop_state_change: () => {/**/},
+                on_value_update:     () => {/**/},
                 eli:               eli,
             })
 
@@ -207,10 +207,10 @@ test.describe('collectOwnerDetails', () => {
             })
 
             const onValueUpdate = test.vi.fn()
-            collectOwnerDetails(owner, {
-                observedPropsMap:  new WeakMap(),
-                onPropStateChange: () => {/**/},
-                onValueUpdate:     onValueUpdate,
+            collect_owner_details(owner, {
+                props_map:  new WeakMap(),
+                on_prop_state_change: () => {/**/},
+                on_value_update:     onValueUpdate,
                 eli:               eli,
             })
 
@@ -240,10 +240,10 @@ test.describe('collectOwnerDetails', () => {
             const [count1, count2] = owner.sourceMap as [Solid.Signal, Solid.Signal]
 
             const onValueUpdate = test.vi.fn()
-            collectOwnerDetails(owner, {
-                observedPropsMap:  new WeakMap(),
-                onPropStateChange: () => {/**/},
-                onValueUpdate:     onValueUpdate,
+            collect_owner_details(owner, {
+                props_map:  new WeakMap(),
+                on_prop_state_change: () => {/**/},
+                on_value_update:     onValueUpdate,
                 eli:               eli,
             })
 

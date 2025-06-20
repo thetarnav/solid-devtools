@@ -9,48 +9,66 @@ import {UNOWNED_ROOT} from '../main/roots.ts'
 import {encodeValue} from './serialize.ts'
 import {type InspectorUpdateMap, PropGetterState} from './types.ts'
 
-export class ValueNode {
-    private trackedStores: VoidFunction[] = []
-    private selected = false
-    constructor(public getValue: (() => unknown) | undefined) {}
-    addStoreObserver(unsub: VoidFunction) {
-        this.trackedStores.push(unsub)
-    }
-    private unsubscribe() {
-        for (const unsub of this.trackedStores) unsub()
-        this.trackedStores = []
-    }
-    reset() {
-        this.unsubscribe()
-        this.selected = false
-    }
-    isSelected() {
-        return this.selected
-    }
-    setSelected(selected: boolean) {
-        this.selected = selected
-        if (!selected) this.unsubscribe()
+export type Value_Node = {
+    tracked_stores: (() => void)[]
+    selected:       boolean
+    get_value:      (() => unknown) | undefined
+}
+
+export function value_node_make(get_value: (() => unknown) | undefined): Value_Node {
+    return {
+        tracked_stores: [],
+        selected:       false,
+        get_value:      get_value,
     }
 }
 
-export class ValueNodeMap {
-    private record = {} as Record<ValueItemID, ValueNode>
-    get(id: ValueItemID): ValueNode | undefined {
-        return this.record[id]
-    }
-    add(id: ValueItemID, getValue: (() => unknown) | undefined) {
-        this.record[id] = new ValueNode(getValue)
-    }
-    reset() {
-        for (const signal of Object.values(this.record)) signal.reset()
-    }
+export function value_node_add_store_observer(node: Value_Node, unsub: () => void): void {
+    node.tracked_stores.push(unsub)
+}
+
+function value_node_unsubscribe(node: Value_Node): void {
+    for (let unsub of node.tracked_stores) unsub()
+    node.tracked_stores = []
+}
+
+export function value_node_reset(node: Value_Node): void {
+    value_node_unsubscribe(node)
+    node.selected = false
+}
+
+export function value_node_is_selected(node: Value_Node): boolean {
+    return node.selected
+}
+
+export function value_node_set_selected(node: Value_Node, selected: boolean): void {
+    node.selected = selected
+    if (!selected) value_node_unsubscribe(node)
+}
+
+export type Value_Node_Map = Map<ValueItemID, Value_Node>
+
+export function value_node_map_make(): Value_Node_Map {
+    return new Map()
+}
+
+export function value_node_map_get(map: Value_Node_Map, id: ValueItemID): Value_Node | undefined {
+    return map.get(id)
+}
+
+export function value_node_map_add(map: Value_Node_Map, id: ValueItemID, get_value: (() => unknown) | undefined): void {
+    map.set(id, value_node_make(get_value))
+}
+
+export function value_node_map_reset(map: Value_Node_Map): void {
+    for (let signal of map.values()) value_node_reset(signal)
 }
 
 /** Prop becomes stale or live (is being currently listened to reactively or not) */
-export type OnPropStateChange = (key: string, state: PropGetterState) => void
-export type OnValueUpdate = (id: ValueItemID) => void
+export type On_Prop_State_Change = (key: string, state: PropGetterState) => void
+export type On_Value_Update = (id: ValueItemID) => void
 
-export type ObservedPropsMap = WeakMap<Solid.Component['props'], ObservedProps>
+export type Observed_Props_Map = WeakMap<Solid.Component['props'], Observed_Props>
 
 const $NOT_SET = Symbol('not-set')
 
@@ -58,70 +76,66 @@ const $NOT_SET = Symbol('not-set')
  * Manages observing getter properties.
  * This is used to track when a prop is accessed and when it is no longer accessed. (STALE | LIVE)
  */
-export class ObservedProps {
-    constructor(readonly props: Solid.Component['props']) {}
+export type Observed_Props = {
+    props:                 Solid.Component['props']
+    on_prop_state_change?: On_Prop_State_Change | undefined
+    on_value_update?:      On_Value_Update | undefined
+    observed_getters:      Record<string, {v: unknown | typeof $NOT_SET; n: number}>
+}
 
-    private onPropStateChange?: OnPropStateChange | undefined
-    private onValueUpdate?: OnValueUpdate | undefined
-    private observedGetters = {} as Record<string, {v: unknown | typeof $NOT_SET; n: number}>
-
-    observe(
-        onPropStateChange: OnPropStateChange,
-        onValueUpdate: OnValueUpdate,
-    ) {
-        this.onPropStateChange = onPropStateChange
-        this.onValueUpdate = onValueUpdate
-    }
-    unobserve() {
-        this.onPropStateChange = undefined
-        this.onValueUpdate = undefined
-    }
-
-    observeProp(
-        key: string,
-        id: ValueItemID,
-        get: () => unknown,
-    ): {getValue: () => unknown | typeof $NOT_SET; isStale: boolean} {
-        if (this.observedGetters[key]) {
-            const o = this.observedGetters[key]
-            return {getValue: () => o.v, isStale: o.n === 0}
-        }
-
-        const self = this
-        const o: (typeof this.observedGetters)[string] = (this.observedGetters[key] = {
-            v: $NOT_SET,
-            n: 0,
-        })
-
-        // monkey patch the getter to track when it is accessed and when it is no longer accessed.
-        // and to track when the value changes.
-        Object.defineProperty(this.props, key, {
-            get() {
-                const value = get()
-                if (setup.solid.getListener()) {
-                    utils.onCleanup(
-                        () => --o.n === 0 && self.onPropStateChange?.(key, PropGetterState.Stale),
-                    )
-                }
-                ++o.n === 1 && self.onPropStateChange?.(key, PropGetterState.Live)
-                if (value !== o.v) self.onValueUpdate?.(id)
-                return (o.v = value)
-            },
-            enumerable: true,
-        })
-
-        return {getValue: () => o.v, isStale: true}
+export function observed_props_make(props: Solid.Component['props']): Observed_Props {
+    return {
+        props:                props,
+        on_prop_state_change: undefined,
+        on_value_update:      undefined,
+        observed_getters:     {} as Record<string, {v: unknown | typeof $NOT_SET; n: number}>
     }
 }
 
-const compareProxyPropKeys = (
-    oldKeys: readonly string[],
-    newKeys: readonly string[],
-): InspectorUpdateMap['propKeys'] | null => {
-    const added = new Set(newKeys)
-    const removed: string[] = []
+export function observed_props_observe_prop(
+    observed: Observed_Props,
+    key: string,
+    id: ValueItemID,
+    get: () => unknown,
+): {get_value: () => unknown | typeof $NOT_SET; is_stale: boolean} {
+    if (observed.observed_getters[key]) {
+        let o = observed.observed_getters[key]
+        return {get_value: () => o.v, is_stale: o.n === 0}
+    }
+
+    let o: (typeof observed.observed_getters)[string] = (observed.observed_getters[key] = {
+        v: $NOT_SET,
+        n: 0,
+    })
+
+    // monkey patch the getter to track when it is accessed and when it is no longer accessed.
+    // and to track when the value changes.
+    Object.defineProperty(observed.props, key, {
+        get() {
+            let value = get()
+            if (setup.solid.getListener()) {
+                utils.onCleanup(
+                    () => --o.n === 0 && observed.on_prop_state_change?.(key, PropGetterState.Stale),
+                )
+            }
+            ++o.n === 1 && observed.on_prop_state_change?.(key, PropGetterState.Live)
+            if (value !== o.v) observed.on_value_update?.(id)
+            return (o.v = value)
+        },
+        enumerable: true,
+    })
+
+    return {get_value: () => o.v, is_stale: true}
+}
+
+function compare_proxy_prop_keys(
+    old_keys: readonly string[],
+    new_keys: readonly string[],
+): InspectorUpdateMap['propKeys'] | null {
+    let added = new Set(new_keys)
+    let removed: string[] = []
     let changed = false
-    for (const key of oldKeys) {
+    for (let key of old_keys) {
         if (added.has(key)) added.delete(key)
         else {
             changed = true
@@ -136,35 +150,45 @@ const compareProxyPropKeys = (
  * Clear all observers from inspected owner. (value updates, prop updates, etc.)
  * Used to clear observers when the inspected owner is switched.
  */
-export function clearOwnerObservers(owner: Solid.Owner, observedPropsMap: ObservedPropsMap): void {
+export function clear_owner_observers(owner: Solid.Owner, observed_props_map: Observed_Props_Map): void {
     if (utils.isSolidComputation(owner)) {
         removeValueUpdateObserver(owner, $INSPECTOR)
 
         if (utils.isSolidComponent(owner)) {
-            observedPropsMap.get(owner.props)?.unobserve()
+            let observed = observed_props_map.get(owner.props)
+            if (observed) {
+                observed.on_prop_state_change = undefined
+                observed.on_value_update      = undefined
+            }
         }
     }
-    if (owner.sourceMap) {
-        for (const node of Object.values(owner.sourceMap))
-            removeValueUpdateObserver(node, $INSPECTOR)
+    if (owner.sourceMap) for (let node of Object.values(owner.sourceMap)) {
+        removeValueUpdateObserver(node, $INSPECTOR)
     }
-    if (owner.owned) {
-        for (const node of owner.owned) removeValueUpdateObserver(node, $INSPECTOR)
+    if (owner.owned) for (let node of owner.owned) {
+        removeValueUpdateObserver(node, $INSPECTOR)
     }
 }
 
-// Globals set before collecting the owner details
-let ValueMap!: ValueNodeMap
-let OnValueUpdate: OnValueUpdate
-let OnPropStateChange: OnPropStateChange
-let PropsMap: ObservedPropsMap
+type Inspector_Context<TEl extends object> = {
+    value_map:            Value_Node_Map
+    config:               Collect_Details_Config<TEl>
+}
+
+export
+type Collect_Details_Config<TEl extends object> = {
+    on_prop_state_change: On_Prop_State_Change
+    on_value_update:      On_Value_Update
+    props_map:            Observed_Props_Map
+    eli:                  ElementInterface<TEl>
+}
 
 const $INSPECTOR = Symbol('inspector')
 
-function mapSourceValue<TEl extends object>(
+function map_source_value<TEl extends object>(
     node_raw: Solid.SourceMapValue | Solid.Computation,
     handler:  (nodeId: NodeID, value: unknown) => void,
-    eli:      ElementInterface<TEl>,
+    ctx:      Inspector_Context<TEl>,
 ): Mapped.SourceValue | null {
 
     let node = utils.getNode(node_raw)
@@ -181,7 +205,7 @@ function mapSourceValue<TEl extends object>(
         return null
     }
 
-    ValueMap.add(`${ValueItemType.Signal}:${id}`, () => node_raw.value)
+    value_node_map_add(ctx.value_map, `${ValueItemType.Signal}:${id}`, () => node_raw.value)
 
     if (node.kind === NodeType.Memo ||
         node.kind === NodeType.Signal
@@ -193,7 +217,7 @@ function mapSourceValue<TEl extends object>(
         type:  node.kind,
         name:  utils.getNodeName(node.data),
         id:    id,
-        value: encodeValue(value, false, eli),
+        value: encodeValue(value, false, ctx.config.eli),
     }
 }
 
@@ -201,35 +225,35 @@ function mapSourceValue<TEl extends object>(
  * Pre-observe component props without gathering data.
  * To get fresh values when the component is later inspected.
  */
-export function preObserveComponentProps(
+export function pre_observe_component_props(
     component: Solid.Component,
-    props_map: ObservedPropsMap,
+    props_map: Observed_Props_Map,
 ): void {
     let props = component.props
-    
+
     // Only observe static shape props (not proxy props)
     if (utils.is_solid_proxy(props)) return
-    
+
     let observed = props_map.get(props)
-    if (!observed) props_map.set(props, (observed = new ObservedProps(props)))
-    
+    if (!observed) props_map.set(props, (observed = observed_props_make(props)))
+
     // Set up getters for all props to enable tracking
     for (let [key, desc] of Object.entries(Object.getOwnPropertyDescriptors(props))) {
         if (desc.get) {
             let id: ValueItemID = `prop:${key}`
-            observed.observeProp(key, id, desc.get)
+            observed_props_observe_prop(observed, key, id, desc.get)
         }
     }
 }
 
-function mapProps<TEl extends object>(
+function map_props<TEl extends object>(
     props: Solid.Component['props'],
-    eli:   ElementInterface<TEl>,
+    ctx:   Inspector_Context<TEl>,
 ) {
     // proxy props need to be checked for changes in keys
     let is_proxy = utils.is_solid_proxy(props)
-    let checkProxyProps: (() => ReturnType<typeof compareProxyPropKeys>) | undefined
-    
+    let check_proxy_props: (() => ReturnType<typeof compare_proxy_prop_keys>) | undefined
+
     let record: Mapped.Props['record'] = {}
 
     // PROXY PROPS
@@ -238,84 +262,77 @@ function mapProps<TEl extends object>(
 
         for (let key of keys) record[key] = {getter: PropGetterState.Stale, value: null}
 
-        checkProxyProps = () => compareProxyPropKeys(keys, (keys = Object.keys(props)))
+        check_proxy_props = () => compare_proxy_prop_keys(keys, (keys = Object.keys(props)))
     }
     // STATIC SHAPE
     else {
-        let observed = PropsMap.get(props)
-        if (!observed) PropsMap.set(props, (observed = new ObservedProps(props)))
+        let observed = ctx.config.props_map.get(props)
+        if (!observed) ctx.config.props_map.set(props, (observed = observed_props_make(props)))
 
-        observed.observe(OnPropStateChange, OnValueUpdate)
+        observed.on_prop_state_change = ctx.config.on_prop_state_change
+        observed.on_value_update      = ctx.config.on_value_update
 
         for (let [key, desc] of Object.entries(Object.getOwnPropertyDescriptors(props))) {
             let id: ValueItemID = `prop:${key}`
             // GETTER
             if (desc.get) {
-                let {getValue, isStale} = observed.observeProp(key, id, desc.get)
-                ValueMap.add(id, getValue)
-                let lastValue = getValue()
+                let {get_value, is_stale} = observed_props_observe_prop(observed, key, id, desc.get)
+                value_node_map_add(ctx.value_map, id, get_value)
+                let last_value = get_value()
                 record[key] = {
-                    getter: isStale ? PropGetterState.Stale : PropGetterState.Live,
-                    value: lastValue !== $NOT_SET ? encodeValue(getValue(), false, eli) : null,
+                    getter: is_stale ? PropGetterState.Stale : PropGetterState.Live,
+                    value: last_value !== $NOT_SET ? encodeValue(get_value(), false, ctx.config.eli) : null,
                 }
             }
             // VALUE
             else {
                 record[key] = {
                     getter: false,
-                    value: encodeValue(desc.value, false, eli),
+                    value: encodeValue(desc.value, false, ctx.config.eli),
                 }
                 // non-object props cannot be inspected (won't ever change and aren't deep)
                 if (Array.isArray(desc.value) || misc.is_plain_object(desc.value))
-                    ValueMap.add(id, () => desc.value)
+                    value_node_map_add(ctx.value_map, id, () => desc.value)
             }
         }
     }
 
-    return {props: {proxy: is_proxy, record}, checkProxyProps}
+    return {props: {proxy: is_proxy, record}, check_proxy_props}
 }
 
-export type CollectDetailsConfig<TEl extends object> = {
-    onPropStateChange: OnPropStateChange
-    onValueUpdate:     OnValueUpdate
-    observedPropsMap:  ObservedPropsMap
-    eli:               ElementInterface<TEl>,
-}
-
-export function collectOwnerDetails<TEl extends object>(
+export function collect_owner_details<TEl extends object>(
     owner:  Solid.Owner,
-    config: CollectDetailsConfig<TEl>,
+    config: Collect_Details_Config<TEl>,
 ) {
+    let ctx: Inspector_Context<TEl> = {
+        value_map: value_node_map_make(),
+        config:    config,
+    }
 
-    const {onValueUpdate, eli} = config
+    let id         = getSdtId(owner, ObjectType.Owner)
+    let type       = utils.markOwnerType(owner)
+    let owned      = owner.owned
+    let source_map = owner.sourceMap
+    let get_value  = () => owner.value
 
-    // Set globals
-    ValueMap          = new ValueNodeMap()
-    OnValueUpdate     = onValueUpdate
-    OnPropStateChange = config.onPropStateChange
-    PropsMap          = config.observedPropsMap
-
-    const id = getSdtId(owner, ObjectType.Owner)
-    const type = utils.markOwnerType(owner)
-    let {sourceMap, owned} = owner
-    let getValue = () => owner.value
-
-    const details = {id, name: utils.getNodeName(owner), type, signals: []} as Mapped.OwnerDetails
+    let details = {id, name: utils.getNodeName(owner), type, signals: []} as Mapped.OwnerDetails
 
     // handle context node specially
     if (type === NodeType.Context) {
-        sourceMap = undefined
-        owned = null
-        const symbols = Object.getOwnPropertySymbols(owner.context)
+
+        source_map = undefined
+        owned      = null
+
         /*
-         since 1.8 context keys from parent are cloned to child context
-         the last key should be the added value
+        since 1.8 context keys from parent are cloned to child context
+        the last key should be the added value
         */
-        const context_value = owner.context[symbols[symbols.length - 1]!]
-        getValue = () => context_value
+        let symbols = Object.getOwnPropertySymbols(owner.context)
+        let context_value = owner.context[symbols[symbols.length - 1]!]
+        get_value = () => context_value
     }
 
-    let checkProxyProps: ReturnType<typeof mapProps>['checkProxyProps']
+    let check_proxy_props: ReturnType<typeof map_props>['check_proxy_props']
 
     if (utils.isSolidComputation(owner)) {
 
@@ -323,17 +340,17 @@ export function collectOwnerDetails<TEl extends object>(
         if (utils.isSolidComponent(owner)) {
 
             // marge component with refresh memo
-            const refresh = utils.getComponentRefreshNode(owner)
+            let refresh = utils.getComponentRefreshNode(owner)
             if (refresh) {
 
-                sourceMap = refresh.sourceMap
-                owned     = refresh.owned
-                getValue  = () => refresh.value
+                source_map = refresh.sourceMap
+                owned      = refresh.owned
+                get_value  = () => refresh.value
 
                 details.hmr = true
             }
 
-            ;({checkProxyProps, props: details.props} = mapProps(owner.props, eli))
+            ;({check_proxy_props, props: details.props} = map_props(owner.props, ctx))
 
             let location: string | SourceLocation | undefined
             if ((
@@ -348,24 +365,24 @@ export function collectOwnerDetails<TEl extends object>(
                 details.location = location
             }
         } else {
-            observeValueUpdate(owner, () => onValueUpdate(ValueItemType.Value), $INSPECTOR)
+            observeValueUpdate(owner, () => ctx.config.on_value_update(ValueItemType.Value), $INSPECTOR)
         }
 
-        details.value = encodeValue(getValue(), false, eli)
+        details.value = encodeValue(get_value(), false, ctx.config.eli)
     }
 
-    const onSignalUpdate = (signalId: NodeID) =>
-        onValueUpdate(`${ValueItemType.Signal}:${signalId}`)
+    let on_signal_update = (signal_id: NodeID) =>
+        ctx.config.on_value_update(`${ValueItemType.Signal}:${signal_id}`)
 
     // map signals
-    if (sourceMap) for (let signal of sourceMap) {
-        let mapped = mapSourceValue(signal, onSignalUpdate, eli)
+    if (source_map) for (let signal of source_map) {
+        let mapped = map_source_value(signal, on_signal_update, ctx)
         if (mapped) details.signals.push(mapped)
     }
 
     // map memos
     if (owned) for (let node of owned) {
-        let mapped = mapSourceValue(node, onSignalUpdate, eli)
+        let mapped = map_source_value(node, on_signal_update, ctx)
         if (mapped) details.signals.push(mapped)
     }
 
@@ -375,24 +392,19 @@ export function collectOwnerDetails<TEl extends object>(
 
             let signal = signal_ref.deref()
             if (signal == null) continue
-    
-            let mapped = mapSourceValue(signal, onSignalUpdate, eli)
+
+            let mapped = map_source_value(signal, on_signal_update, ctx)
             if (mapped == null) continue
-            
+
             details.signals.push(mapped)
         }
     }
 
-    ValueMap.add(ValueItemType.Value, getValue)
+    value_node_map_add(ctx.value_map, ValueItemType.Value, get_value)
 
-    const result = {
-        details,
-        valueMap: ValueMap,
-        checkProxyProps,
+    return {
+        details:           details,
+        value_map:         ctx.value_map,
+        check_proxy_props: check_proxy_props,
     }
-
-    // clear globals
-    ValueMap = OnValueUpdate = OnPropStateChange = PropsMap = undefined!
-
-    return result
 }

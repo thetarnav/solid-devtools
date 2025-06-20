@@ -28,8 +28,8 @@ export function createInspector(props: {
 
     let lastDetails: Mapped.OwnerDetails | undefined
     let inspectedOwner: Solid.Owner | null
-    let valueMap = new inspector.ValueNodeMap()
-    const propsMap: inspector.ObservedPropsMap = new WeakMap()
+    let valueMap = inspector.value_node_map_make()
+    const propsMap: inspector.Observed_Props_Map = new WeakMap()
     /** compare props object with the previous one to see whats changed */
     let checkProxyProps: (() => InspectorUpdateMap['propKeys'] | null) | null
 
@@ -37,7 +37,7 @@ export function createInspector(props: {
      For the extension for inspecting values through `inspect()`
     */
     function getValue(id: ValueItemID): unknown {
-        return valueMap.get(id)?.getValue?.()
+        return inspector.value_node_map_get(valueMap, id)?.get_value?.()
     }
     window[GLOBAL_GET_VALUE] = getValue
 
@@ -55,16 +55,16 @@ export function createInspector(props: {
 
                 // Value Nodes (signals, props, and owner value)
                 for (const [id, toggleChange] of valueUpdates) {
-                    const node = valueMap.get(id)
-                    if (!node || !node.getValue) continue
+                    const node = inspector.value_node_map_get(valueMap, id)
+                    if (!node || !node.get_value) continue
                     // TODO shouldn't the previous stores be unsubscribed here? after update, they might no longer be here
-                    const selected = node.isSelected()
+                    const selected = inspector.value_node_is_selected(node)
                     const encoded = encodeValue(
-                        node.getValue(),
+                        node.get_value(),
                         selected,
                         setup.eli,
                         selected &&
-                            (storeNode => node.addStoreObserver(store.observeStoreNode(storeNode))),
+                            (storeNode => inspector.value_node_add_store_observer(node, store.observeStoreNode(storeNode))),
                     )
                     batchedUpdates.push([
                         toggleChange === null ? 'value' : 'inspectToggle',
@@ -153,25 +153,25 @@ export function createInspector(props: {
     function inspectOwnerId(id: NodeID | null): void {
 
         const owner = id && getObjectById(id, ObjectType.Owner)
-        if (inspectedOwner) inspector.clearOwnerObservers(inspectedOwner, propsMap)
+        if (inspectedOwner) inspector.clear_owner_observers(inspectedOwner, propsMap)
         inspectedOwner = owner
 
-        valueMap.reset()
+        inspector.value_node_map_reset(valueMap)
         clearUpdates()
 
         if (owner) {
-            const result = inspector.collectOwnerDetails(owner, {
-                onValueUpdate:     pushValueUpdate,
-                onPropStateChange: pushPropState,
-                observedPropsMap:  propsMap,
+            const result = inspector.collect_owner_details(owner, {
+                on_value_update:     pushValueUpdate,
+                on_prop_state_change: pushPropState,
+                props_map:  propsMap,
                 eli:               setup.eli,
             })
 
             props.emit(msg('InspectedNodeDetails', result.details))
 
-            valueMap        = result.valueMap
+            valueMap        = result.value_map
             lastDetails     = result.details
-            checkProxyProps = result.checkProxyProps || null
+            checkProxyProps = result.check_proxy_props || null
         } else {
             lastDetails     = undefined
             checkProxyProps = null
@@ -210,9 +210,9 @@ export function createInspector(props: {
     return {
         getLastDetails: () => lastDetails,
         toggleValueNode({id, selected}: ToggleInspectedValueData): void {
-            const node = valueMap.get(id)
+            const node = inspector.value_node_map_get(valueMap, id)
             if (!node) return warn('Could not find value node:', id)
-            node.setSelected(selected)
+            inspector.value_node_set_selected(node, selected)
             pushInspectToggle(id, selected)
         },
         consoleLogValue(value_id: ValueItemID): void {
@@ -220,7 +220,7 @@ export function createInspector(props: {
             console.log(getValue(value_id))
         },
         preObserveComponent(component: Solid.Component): void {
-            inspector.preObserveComponentProps(component, propsMap)
+            inspector.pre_observe_component_props(component, propsMap)
         }
     }
 }
