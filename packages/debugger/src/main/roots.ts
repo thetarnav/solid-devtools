@@ -144,24 +144,6 @@ export function attachDebugger(owner = setup.solid.getOwner()): void {
     }
 }
 
-export function initRoots() {
-
-    /* Attach the UNOWNED Root */
-    attachDebugger(UNOWNED_ROOT)
-
-    /* Get owners created before debugger loaded */
-    for (const e of setup.get_created_owners()) {
-        attachDebugger(e)
-    }
-    
-    /* Listen to new created owners */
-    setup.solid.hooks.afterCreateOwner = function (owner) {
-        if (isSolidRoot(owner)) {
-            attachDebugger(owner)
-        }
-    }
-}
-
 /**
  * Finds the top-level root owner of a given owner.
  */

@@ -7,9 +7,9 @@ import {type InspectedState, type Mapped, type NodeID, type OutputEmit, type Sol
 import {onOwnerDispose} from '../main/utils.ts'
 import setup from '../main/setup.ts'
 import {UNOWNED_ROOT} from '../main/roots.ts'
-import {type ObservedPropsMap, ValueNodeMap, clearOwnerObservers, collectOwnerDetails} from './inspector.ts'
+import * as inspector from './inspector.ts'
 import {encodeValue} from './serialize.ts'
-import {type StoreNodeProperty, type StoreUpdateData, observeStoreNode, setOnStoreNodeUpdate} from './store.ts'
+import * as store from './store.ts'
 import {GLOBAL_GET_VALUE, type InspectorUpdate, type InspectorUpdateMap, PropGetterState} from './types.ts'
 
 export * from './types.ts'
@@ -25,11 +25,11 @@ export function createInspector(props: {
     resetInspectedNode: VoidFunction
     emit:               OutputEmit
 }) {
-    
+
     let lastDetails: Mapped.OwnerDetails | undefined
     let inspectedOwner: Solid.Owner | null
-    let valueMap = new ValueNodeMap()
-    const propsMap: ObservedPropsMap = new WeakMap()
+    let valueMap = new inspector.ValueNodeMap()
+    const propsMap: inspector.ObservedPropsMap = new WeakMap()
     /** compare props object with the previous one to see whats changed */
     let checkProxyProps: (() => InspectorUpdateMap['propKeys'] | null) | null
 
@@ -46,7 +46,7 @@ export function createInspector(props: {
     const {pushPropState, pushValueUpdate, pushInspectToggle, triggerPropsCheck, clearUpdates} =
         (() => {
             const valueUpdates = new Map<ValueItemID, boolean | null>()
-            let storeUpdates: [storeProperty: StoreNodeProperty, data: StoreUpdateData][] = []
+            let storeUpdates: [storeProperty: store.StoreNodeProperty, data: store.StoreUpdateData][] = []
             let checkProps = false
             let propStates: InspectorUpdateMap['propState'] = {}
 
@@ -64,7 +64,7 @@ export function createInspector(props: {
                         selected,
                         setup.eli,
                         selected &&
-                            (storeNode => node.addStoreObserver(observeStoreNode(storeNode))),
+                            (storeNode => node.addStoreObserver(store.observeStoreNode(storeNode))),
                     )
                     batchedUpdates.push([
                         toggleChange === null ? 'value' : 'inspectToggle',
@@ -109,7 +109,7 @@ export function createInspector(props: {
 
             // Subscribe to any store updates
             // observed stores are managed by the store.ts module (only stores in selected values get observed)
-            setOnStoreNodeUpdate((...payload) => {
+            store.setOnStoreNodeUpdate((...payload) => {
                 storeUpdates.push(payload)
                 flush()
             })
@@ -148,27 +148,27 @@ export function createInspector(props: {
 
     let clearPrevDisposeListener: VoidFunction | undefined
 
-    
+
 
     function inspectOwnerId(id: NodeID | null): void {
-    
+
         const owner = id && getObjectById(id, ObjectType.Owner)
-        if (inspectedOwner) clearOwnerObservers(inspectedOwner, propsMap)
+        if (inspectedOwner) inspector.clearOwnerObservers(inspectedOwner, propsMap)
         inspectedOwner = owner
-    
+
         valueMap.reset()
         clearUpdates()
-    
+
         if (owner) {
-            const result = collectOwnerDetails(owner, {
+            const result = inspector.collectOwnerDetails(owner, {
                 onValueUpdate:     pushValueUpdate,
                 onPropStateChange: pushPropState,
                 observedPropsMap:  propsMap,
                 eli:               setup.eli,
             })
-    
+
             props.emit(msg('InspectedNodeDetails', result.details))
-    
+
             valueMap        = result.valueMap
             lastDetails     = result.details
             checkProxyProps = result.checkProxyProps || null
@@ -176,17 +176,16 @@ export function createInspector(props: {
             lastDetails     = undefined
             checkProxyProps = null
         }
-    
+
         clearPrevDisposeListener?.()
         clearPrevDisposeListener = owner
             ? onOwnerDispose(owner, props.resetInspectedNode)
             : undefined
     }
 
-    const inspectedOwnerId = s.createMemo(
-        () => props.enabled()
-            ? props.inspectedState().ownerId
-            : null
+    const inspectedOwnerId = s.createMemo(() => props.enabled()
+        ? props.inspectedState().ownerId
+        : null
     )
     s.createEffect(() => {
         let id = inspectedOwnerId()
@@ -219,6 +218,9 @@ export function createInspector(props: {
         consoleLogValue(value_id: ValueItemID): void {
             // eslint-disable-next-line no-console
             console.log(getValue(value_id))
+        },
+        preObserveComponent(component: Solid.Component): void {
+            inspector.preObserveComponentProps(component, propsMap)
         }
     }
 }

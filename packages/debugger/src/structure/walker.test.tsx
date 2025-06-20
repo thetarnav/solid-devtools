@@ -6,10 +6,11 @@ import {$setSdtId} from '../main/id.ts'
 import {dom_element_interface, NodeType, TreeWalkerMode, type Mapped, type Solid} from '../main/types.ts'
 import * as walker from './walker.ts'
 import setup from '../main/setup.ts'
-import {initRoots} from '../main/roots.ts'
+import {attachDebugger, UNOWNED_ROOT} from '../main/roots.ts'
 
 test.beforeAll(() => {
-    initRoots()
+    attachDebugger(UNOWNED_ROOT)
+    setup.solid.hooks.afterCreateOwner = attachDebugger
 })
 
 let eli = dom_element_interface

@@ -8,7 +8,6 @@ import {createLocator} from '../locator/index.ts'
 import {createStructure} from '../structure/index.ts'
 import * as walker from '../structure/walker.ts'
 import {getObjectById, getSdtId, ObjectType} from './id.ts'
-import {initRoots} from './roots.ts'
 import setup from './setup.ts'
 import {
     DebuggerModule,
@@ -19,27 +18,28 @@ import {
     type NodeID,
     type OutputListener,
     type OutputMessage,
+    type Solid,
 } from './types.ts'
+import { attachDebugger, UNOWNED_ROOT } from './roots.ts'
+import { isSolidComponent, isSolidRoot } from './utils.ts'
 
 function createDebugger() {
     assert(globalThis.SolidDevtools$$, 'solid-devtools is not setup')
 
-    initRoots()
-
     const _output_listeners: OutputListener[] = []
-    
+
     function listen(listener: OutputListener): (() => void) {
         _output_listeners.push(listener)
         return () => mutate_remove(_output_listeners, listener)
     }
-    
+
     function emitOutput(e: OutputMessage) {
-    
+
         DEV: {log_message('Client', 'Debugger', e)}
-    
+
         for (let fn of _output_listeners) fn(e)
     }
-    
+
     //
     // Debugger Enabled
     //
@@ -49,7 +49,7 @@ function createDebugger() {
         dgraph:   false,
         locatorKeyPressSignal: (): boolean => false,
     })
-    
+
     // The debugger can be enabled by devtools or by the locator
     const debuggerEnabled = s.createMemo(
         () => modules.debugger || modules.locatorKeyPressSignal()
@@ -61,16 +61,16 @@ function createDebugger() {
     const locatorEnabled = s.createMemo(
         () => (modules.locatorKeyPressSignal() || modules.locator) && debuggerEnabled(),
     )
-    
+
     s.createEffect(defer(debuggerEnabled, enabled => {
         emitOutput(msg('DebuggerEnabled', enabled))
     }))
-    
+
     //
     // Current Open VIEW (currently not used)
     //
     let currentView: DevtoolsMainView = DEFAULT_MAIN_VIEW
-    
+
     //
     // Enabled Modules
     //
@@ -87,27 +87,27 @@ function createDebugger() {
                 break
         }
     }
-    
+
     //
     // Inspected Node
     //
-    
+
     // Current inspected node is shared between modules
     const [inspectedState, setInspectedState] = s.createSignal<InspectedState>(
         INSPECTED_STATE_NULL,
         {equals: false},
     )
-    
+
     s.createEffect(() => {
         emitOutput(msg('InspectedState', inspectedState()))
     })
-    
+
     function getTreeWalkerOwnerId(ownerId: NodeID | null): NodeID | null {
         const owner = ownerId && getObjectById(ownerId, ObjectType.Owner)
         const treeWalkerOwner = owner && structure.getClosestIncludedOwner(owner)
         return treeWalkerOwner ? getSdtId(treeWalkerOwner, ObjectType.Owner) : null
     }
-    
+
     function setInspectedNode(data: InputChannels['InspectNode']): void {
         if (data == null) {
             setInspectedState(INSPECTED_STATE_NULL)
@@ -118,19 +118,19 @@ function createDebugger() {
             setInspectedState({ownerId, signalId, treeWalkerOwnerId})
         }
     }
-    
+
     s.createComputed(defer(debuggerEnabled, enabled => {
         if (!enabled) setInspectedState(INSPECTED_STATE_NULL)
     }))
-    
+
     // Computation and signal updates
     let node_updates_ids: NodeID[] = []
     let node_updates_timeout = null as null | Timeout
-    
+
     function pushNodeUpdate(id: NodeID) {
-        
+
         node_updates_ids.push(id)
-        
+
         if (node_updates_timeout == null) {
             node_updates_timeout = setTimeout(() => {
                 emitOutput(msg('NodeUpdates', node_updates_ids))
@@ -141,7 +141,7 @@ function createDebugger() {
     }
 
     let component_registry = walker.makeComponentRegistry(setup.eli)
-    
+
     //
     // Structure:
     //
@@ -158,7 +158,7 @@ function createDebugger() {
         enabled: debuggerEnabled,
         component_registry: component_registry,
     })
-    
+
     //
     // Inspected Owner details:
     //
@@ -168,7 +168,7 @@ function createDebugger() {
         resetInspectedNode: () => setInspectedState(INSPECTED_STATE_NULL),
         emit:               emitOutput,
     })
-    
+
     //
     // Dependency Graph
     //
@@ -178,7 +178,7 @@ function createDebugger() {
         inspectedState: inspectedState,
         emit:           emitOutput,
     })
-    
+
     //
     // Locator
     //
@@ -197,22 +197,43 @@ function createDebugger() {
         emit: emitOutput,
         component_registry: component_registry,
     })
-    
+
     // Opens the source code of the inspected component
     function openInspectedNodeLocation() {
         const details = inspector.getLastDetails()
         details?.location && locator.openElementSourceCode(details.location)
     }
-    
+
     // send the state of the client locator mode
     s.createEffect(defer(modules.locatorKeyPressSignal, state => {
         emitOutput(msg('LocatorModeChange', state))
     }))
-    
+
+
+    /* Attach the UNOWNED Root */
+    attachDebugger(UNOWNED_ROOT)
+
+    /* Get owners created before debugger loaded */
+    for (const e of setup.get_created_owners()) {
+        handleCreatedOwner(e)
+    }
+
+    /* Listen to new created owners */
+    setup.solid.hooks.afterCreateOwner = handleCreatedOwner
+
+    function handleCreatedOwner(owner: Solid.Owner) {
+        if (isSolidRoot(owner)) {
+            attachDebugger(owner)
+        } else if (isSolidComponent(owner)) {
+            inspector.preObserveComponent(owner)
+        }
+    }
+
+
     function emitInput(e: InputMessage) {
-    
+
         DEV: {log_message('Debugger', 'Client', e)}
-    
+
         switch (e.kind) {
         case 'ResetState': {
             // reset all the internal state

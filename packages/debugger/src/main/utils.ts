@@ -27,6 +27,9 @@ export function* owner_each_child(o: Solid.Owner): ArrayIterator<Solid.Owner> {
     yield* unwrap_each(o.sdtSubRoots)
 }
 
+export let is_solid_proxy = (value: unknown): value is {[setup.solid.$PROXY]: unknown} =>
+    typeof value === 'object' && value !== null && setup.solid.$PROXY in value
+
 export const isSolidOwner = (o: Solid.SourceMapValue | Solid.Owner | Solid.Store | Solid.Signal): o is Solid.Owner =>
     'owned' in o
 
@@ -46,10 +49,7 @@ export const isStoreNode = (o: object): o is Solid.StoreNode =>
     setup.store.$NODE in o
 
 export const isSolidStore = (o: Solid.Owner | Solid.SourceMapValue | Solid.Store): o is Solid.Store =>
-    !('observers' in o) &&
-    typeof o.value === 'object' &&
-    o.value != null &&
-    setup.solid.$PROXY in o.value
+    !('observers' in o) && is_solid_proxy(o.value)
 
 export const isSolidSignal = (o: Solid.SourceMapValue): o is Solid.Signal =>
     'value' in o &&
