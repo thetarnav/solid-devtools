@@ -1,5 +1,11 @@
 # @solid-devtools/debugger
 
+## 0.28.1
+
+### Patch Changes
+
+- dddf24f: Pre-observe all components props, to sometimes get actual values when inspected.
+
 ## 0.28.0
 
 ### Minor Changes
