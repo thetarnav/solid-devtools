@@ -1,5 +1,11 @@
 # solid-devtools
 
+## 0.34.4
+
+### Patch Changes
+
+- d8263e1: Add vite 7 to supported dependencies.
+
 ## 0.34.3
 
 ### Patch Changes
