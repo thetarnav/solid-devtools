@@ -1,6 +1,6 @@
 {
     "name": "@solid-devtools/extension",
-    "version": "0.33.5",
+    "version": "0.33.6",
     "private": true,
     "license": "MIT",
     "author": "Damian Tarnawski <gthetarnav@gmail.com>",
