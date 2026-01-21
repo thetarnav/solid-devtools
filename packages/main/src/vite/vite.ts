@@ -67,7 +67,6 @@ export const devtoolsPlugin = (_options: DevtoolsPluginOptions = {}): vite.Plugi
             }
             : null
 
-    let is_dev = false
     let project_root = process.cwd()
 
     return {
@@ -75,14 +74,16 @@ export const devtoolsPlugin = (_options: DevtoolsPluginOptions = {}): vite.Plugi
         enforce: 'pre',
         configResolved(config) {
             project_root = config.root
-            is_dev = config.command === 'serve' && config.mode !== 'production'
+        },
+        apply(config, env) {
+            return env.command === 'serve' && env.mode !== 'production'
         },
         resolveId(id) {
-            if (is_dev && id === DevtoolsModule.Main) return DevtoolsModule.Main
+            if (id === DevtoolsModule.Main) return DevtoolsModule.Main
         },
         load(id) {
             // Inject runtime debugger script
-            if (!is_dev || id !== DevtoolsModule.Main) return
+            if (id !== DevtoolsModule.Main) return
 
             let code = `import "${DevtoolsModule.Setup}";`
 
@@ -96,7 +97,7 @@ export const devtoolsPlugin = (_options: DevtoolsPluginOptions = {}): vite.Plugi
         async transform(source, id, transformOptions) {
 
             // production and server should be disabled
-            if (transformOptions?.ssr || !is_dev) return
+            if (transformOptions?.ssr) return
 
             const extname = get_extname(id)
 
