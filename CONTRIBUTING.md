@@ -6,7 +6,7 @@ The following document is a _(work in progress)_ guide for contributing to Solid
 
 ## Tooling
 
-[`pnpm`](https://pnpm.io/ and [`eslint`](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint) — that's it.
+[`pnpm`](https://pnpm.io/) and [`eslint`](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint) — that's it.
 
 This project uses [pnpm](https://pnpm.io/) for package management. If you don't have it installed, you can install it with `npm install -g pnpm`.
 
