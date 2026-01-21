@@ -1,5 +1,11 @@
 # solid-devtools
 
+## 0.34.5
+
+### Patch Changes
+
+- 2aa06c4: Use `apply` to conditionally disable the vite plugin.
+
 ## 0.34.4
 
 ### Patch Changes
