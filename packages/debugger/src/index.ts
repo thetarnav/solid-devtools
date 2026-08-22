@@ -21,3 +21,8 @@ export {
     onOwnerCleanup,
     onParentCleanup,
 } from './main/utils.ts'
+export {
+    createTrackedSignal,
+    type TrackedSignalOptions,
+    type StormDetails,
+} from './createTrackedSignal.ts'
